@@ -7,9 +7,6 @@
         <mxCell id="gakmWbEmdRFJfrg-qk_C-8" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
           <mxGeometry x="500" y="470" width="370" height="800" as="geometry" />
         </mxCell>
-        <mxCell id="gakmWbEmdRFJfrg-qk_C-1" value="SQLite&lt;div&gt;Database&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="610" y="1030" width="180" height="180" as="geometry" />
-        </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-4" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;DATABASE&lt;/h1&gt;&lt;div&gt;CONTAINER&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="520" y="490" width="150" height="80" as="geometry" />
         </mxCell>
@@ -30,6 +27,18 @@
         </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-14" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;NGINX&lt;/h1&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Handles all connections to front and backend.&amp;nbsp; Possibly use it only for connections to front-end if front-ed communicates directly with database/backend.&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="520" y="320" width="540" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="gakmWbEmdRFJfrg-qk_C-19" value="Remote Players" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="660" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gakmWbEmdRFJfrg-qk_C-20" value="Server-Side Pong" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="750" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gakmWbEmdRFJfrg-qk_C-21" value="Live Chat" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="950" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="gakmWbEmdRFJfrg-qk_C-22" value="SQLite&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Database&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="535" y="1170" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
