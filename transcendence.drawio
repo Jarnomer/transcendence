@@ -38,7 +38,7 @@
           <mxGeometry x="300" y="880" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-23" value="User Information" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
-          <mxGeometry x="1800" y="600" width="140" height="180" as="geometry" />
+          <mxGeometry x="1800" y="600" width="140" height="210" as="geometry" />
         </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-24" value="Display Name" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
           <mxGeometry y="30" width="140" height="30" as="geometry" />
@@ -46,7 +46,7 @@
         <mxCell id="gakmWbEmdRFJfrg-qk_C-25" value="Avatar Image" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
           <mxGeometry y="60" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="gakmWbEmdRFJfrg-qk_C-26" value="&lt;div&gt;Friendlist&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
+        <mxCell id="gakmWbEmdRFJfrg-qk_C-26" value="&lt;div&gt;Friend List&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
           <mxGeometry y="90" width="140" height="30" as="geometry" />
         </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-45" value="&lt;div&gt;Is logged in or not (bool)&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
@@ -54,6 +54,9 @@
         </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-46" value="&lt;div&gt;Stats (wins, losses etc.)&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
           <mxGeometry y="150" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="gakmWbEmdRFJfrg-qk_C-47" value="&lt;div&gt;Match History&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" vertex="1" parent="gakmWbEmdRFJfrg-qk_C-23">
+          <mxGeometry y="180" width="140" height="30" as="geometry" />
         </mxCell>
         <mxCell id="gakmWbEmdRFJfrg-qk_C-31" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;AI Opponent&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="1360" y="740" width="200" height="60" as="geometry" />
