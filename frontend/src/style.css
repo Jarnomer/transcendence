@@ -1,0 +1,59 @@
+  /* Tailwind's utility classes */
+  @import "tailwindcss";
+
+  @font-face {
+	font-family: "kotak";
+	src: url("./assets/fonts/kotak.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+  
+  @font-face {
+	font-family: "cube";
+	src: url("./assets/fonts/Cube.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
+  @font-face {
+	font-family: "collision";
+	src: url("./assets/fonts/Collision.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
+  @font-face {
+	font-family: "pursue";
+	src: url("./assets/fonts/Pursue.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
+  @font-face {
+	font-family: "slice";
+	src: url("./assets/fonts/slice.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
+  @font-face {
+	font-family: "dayger";
+	src: url("./assets/fonts/Dayger.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
+  @font-face {
+	font-family: "shinyBlocks";
+	src: url("./assets/fonts/ShinyBlocks.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
+.logo {
+	font-family: "dayger", serif;
+  }
+
+@theme {
+
+}
