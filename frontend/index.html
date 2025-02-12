@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pong Game</title>
   <script defer src="src/game.js"></script>
-  <link href="src/output.css" rel="stylesheet">
+  <link href="src/style.css" rel="stylesheet">
 </head>
 <body class="flex flex-col items-center h-screen bg-slate-300 gap-2 p-10">
   <div class="header">
@@ -13,7 +13,7 @@
   </div>
   <div id="player-scores" class="w-[600px] flex justify-between gap-2">
     <div class="player-scores player-1 h-[100px] w-full flex items-center border border-black overflow-hidden gap-5">
-      <div class="w-[100px] h-[100px]">
+      <div class="w-[100px] h-[100px] border-1 border-black">
         <img src="./src/assets/images/player1.jpg" alt="player 1 profile picture" class="w-full h-full object-cover">
       </div>
       <p>player 1</p>
@@ -22,7 +22,7 @@
     <div class="player-scores-player-2 h-[100px] w-full flex items-center border border-black justify-end overflow-hidden gap-5">
       <h2 id="player-2-score" class="font-bold text-4xl">0</h2>
       <p>player 2</p>
-      <div class="w-[100px] h-[100px]">
+      <div class="w-[100px] h-[100px] border-1 border-black">
         <img src="./src/assets/images/player2.png" alt="player 2 profile picture" class="w-full h-full object-cover">
       </div>
     </div>
