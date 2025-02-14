@@ -122,9 +122,10 @@ function draw(gameState: GameState) {
   const { ctx, canvas, leftPaddle, rightPaddle, ball, paddleWidth, paddleHeight, ballSize, countdownInProgress, countdown } = gameState;
   if (!ctx) return;
 
+  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() || "white";
   ctx.clearRect(0, 0, canvas!.width, canvas!.height);
 
-  ctx.fillStyle = "white";
+  ctx.fillStyle = primaryColor;
   ctx.fillRect(0, leftPaddle.y, paddleWidth, paddleHeight);
   ctx.fillRect(canvas!.width - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
   ctx.fillRect(ball.x, ball.y, ballSize, ballSize);

@@ -1,20 +1,33 @@
 const appDiv = document.getElementById("app")!;
 const btnLogin = document.getElementById("btn-login")!;
-const btnRegister = document.getElementById("btn-register")!;
 const btnLogout = document.getElementById("btn-logout")!;
+const headerIcons = document.getElementById("header-icons")!;
+
+console.log("hey")
 //import game loop from game.ts
 import { gameLoop, initGame } from "./game";
 
 // API Base URL (Change if needed)
 const API_URL = "/api/auth";
 
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("loaded")
+  renderPage("login");
+});
+
+
 // Function to switch between pages
-function renderPage(page: "login" | "register" | "game") {
+function renderPage(page: "game" |  "login" | "register" ) {
+  if (page === "login" || page === "register")
+    headerIcons.style.display = "none";
+  else
+    headerIcons.style.display = "flex";
   if (page === "login") {
     renderLoginPage();
   } else if (page === "register") {
     renderRegisterPage();
   } else {
+    console.log("render game")
     renderGamePage();
   }
 }
@@ -22,13 +35,26 @@ function renderPage(page: "login" | "register" | "game") {
 // Render the Login Page
 function renderLoginPage() {
   appDiv.innerHTML = `
-    <h2 class="text-3xl font-bold">Login</h2>
-    <form id="login-form">
+    <div id="login-modal" class="h-100 w-75 glass-box text-primary text-center p-5 gap-5">
+    <h2 class="text-3xl font-bold mb-2">Login</h2>
+    <form id="login-form" class="bg-red flex flex-col gap-2">
       <input type="text" id="login-username" placeholder="Username" class="border p-2" required />
       <input type="password" id="login-password" placeholder="Password" class="border p-2" required />
-      <button type="submit" class="bg-green-500 text-white p-2">Login</button>
+      <button type="submit" class="glass-box p-2">Login</button>
     </form>
+    <div class="mt-10">
+      <p>Dont have an account?</p>
+      <button id="btn-register" class="glass-box p-2 my-2 w-full">Register</button>
+      <button id="play-as-guest" class="glass-box p-2 w-full">Play as a guest</button>
+    </div>
+    </div>
   `;
+
+  const btnRegister = document.getElementById("btn-register")!;
+  const btnGuestLogin = document.getElementById("play-as-guest")!;
+
+  btnRegister.addEventListener("click", () => renderPage("register"));
+  btnGuestLogin.addEventListener("click", () => renderPage("game"));
 
   document.getElementById("login-form")!.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -45,7 +71,7 @@ function renderLoginPage() {
 
       if (data.token) {
         localStorage.setItem("token", data.token); // Save token
-        toggleAuthButtons(true); // Show logout button
+        // toggleAuthButtons(true); // Show logout button
         renderGamePage(); // Redirect to game page
       } else {
         alert("Login failed!");
@@ -55,6 +81,8 @@ function renderLoginPage() {
     }
   });
 }
+
+function renderHeader() {}
 
 // Render the Register Page
 function renderRegisterPage() {
@@ -102,23 +130,23 @@ async function gameConnect() {
 // Render the Game Page
 function renderGamePage() {
   appDiv.innerHTML = `
-    <div id="player-scores" class="w-[800px] flex justify-between gap-2">
-    <div class="player-scores player-1 h-[100px] w-full flex items-center border border-black overflow-hidden gap-5">
-      <div class="w-[100px] h-[100px] border-1 border-black">
+  <div id="player-scores" class="w-[800px] flex justify-between gap-2 text-primary">
+    <div class="player-scores player-1 h-[100px] w-full flex items-center glass-box overflow-hidden gap-5">
+      <div class="w-[100px] h-[100px] border-1 glass-box">
         <img src="./src/assets/images/player1.jpg" alt="player 1 profile picture" class="w-full h-full object-cover">
       </div>
       <p>player 1</p>
       <h2 id="player-1-score" class="font-bold text-4xl">0</h2>
     </div>
-    <div class="player-scores-player-2 h-[100px] w-full flex items-center border border-black justify-end overflow-hidden gap-5">
+    <div class="player-scores-player-2 h-[100px] w-full flex items-center glass-box justify-end overflow-hidden gap-5">
       <h2 id="player-2-score" class="font-bold text-4xl">0</h2>
       <p>player 2</p>
-      <div class="w-[100px] h-[100px] border-1 border-black">
+      <div class="w-[100px] h-[100px] glass-box">
         <img src="./src/assets/images/player2.png" alt="player 2 profile picture" class="w-full h-full object-cover">
       </div>
     </div>
   </div>
-    <canvas id="gameCanvas" class="border-1 border-white bg-black" width="800" height="400"></canvas>
+    <canvas id="gameCanvas" class="mt-2 glass-box" width="800" height="400"></canvas>
   `;
   // Game Logic
   gameConnect();
@@ -132,28 +160,19 @@ function renderGamePage() {
 // Logout Function
 function logout() {
   localStorage.removeItem("token");
-  toggleAuthButtons(false); // Show login/register buttons
   renderLoginPage();
 }
 
-// Toggle Auth Buttons
-function toggleAuthButtons(isLoggedIn: boolean) {
-  btnLogin.classList.toggle("hidden", isLoggedIn);
-  btnRegister.classList.toggle("hidden", isLoggedIn);
-  btnLogout.classList.toggle("hidden", !isLoggedIn);
-}
+
 
 // Set event listeners for buttons
 btnLogin.addEventListener("click", () => renderPage("login"));
-btnRegister.addEventListener("click", () => renderPage("register"));
 btnLogout.addEventListener("click", logout);
 
 // Check if the user is already logged in
 const token = localStorage.getItem("token");
 if (token) {
-  toggleAuthButtons(true);
   renderGamePage();
 } else {
-  toggleAuthButtons(false);
   renderLoginPage();
 }
