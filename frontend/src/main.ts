@@ -2,6 +2,8 @@ const appDiv = document.getElementById("app")!;
 const btnLogin = document.getElementById("btn-login")!;
 const btnRegister = document.getElementById("btn-register")!;
 const btnLogout = document.getElementById("btn-logout")!;
+//import game loop from game.ts
+import { gameLoop, initGame } from "./game";
 
 // API Base URL (Change if needed)
 const API_URL = "/api/auth";
@@ -84,25 +86,47 @@ function renderRegisterPage() {
     }
   });
 }
-
+async function gameConnect() {
+  try {
+    const res = await fetch("/api/pong", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    const data = await res.json();
+    console.log(data);
+  } catch (err) {
+    console.error(err);
+  }
+}
 // Render the Game Page
 function renderGamePage() {
   appDiv.innerHTML = `
-    <h2 class="text-3xl font-bold">Pong Game</h2>
-    <canvas id="gameCanvas" class="border-4 border-white bg-black" width="800" height="400"></canvas>
+    <div id="player-scores" class="w-[800px] flex justify-between gap-2">
+    <div class="player-scores player-1 h-[100px] w-full flex items-center border border-black overflow-hidden gap-5">
+      <div class="w-[100px] h-[100px] border-1 border-black">
+        <img src="./src/assets/images/player1.jpg" alt="player 1 profile picture" class="w-full h-full object-cover">
+      </div>
+      <p>player 1</p>
+      <h2 id="player-1-score" class="font-bold text-4xl">0</h2>
+    </div>
+    <div class="player-scores-player-2 h-[100px] w-full flex items-center border border-black justify-end overflow-hidden gap-5">
+      <h2 id="player-2-score" class="font-bold text-4xl">0</h2>
+      <p>player 2</p>
+      <div class="w-[100px] h-[100px] border-1 border-black">
+        <img src="./src/assets/images/player2.png" alt="player 2 profile picture" class="w-full h-full object-cover">
+      </div>
+    </div>
+  </div>
+    <canvas id="gameCanvas" class="border-1 border-white bg-black" width="800" height="400"></canvas>
   `;
-
+  // Game Logic
+  gameConnect();
   // Example: Draw a simple ball
-  const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(400, 200, 10, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  setTimeout(() => {
+    initGame();
+    gameLoop();
+  }, 100);
 }
 
 // Logout Function
