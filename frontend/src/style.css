@@ -137,3 +137,51 @@ body {
 	margin: 0;
 	line-height: normal;
 }
+
+
+@keyframes tvCollapse {
+    0% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+    50% {
+        clip-path: inset(40% 0 40% 0);
+        opacity: 0.8;
+    }
+    100% {
+        clip-path: inset(50% 0 50% 0);
+        opacity: 0;
+    }
+}
+
+@keyframes tvExpand {
+    0% {
+        clip-path: inset(50% 0 50% 0);
+        opacity: 0;
+    }
+    50% {
+        clip-path: inset(40% 0 40% 0);
+        opacity: 0.8;
+    }
+    100% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+}
+
+.modal {
+    opacity: 0;
+    clip-path: inset(50% 0 50% 0);
+}
+
+.opening {
+    animation: tvExpand 0.2s ease-in-out forwards;
+}
+
+.closing {
+    animation: tvCollapse 0.2s ease-in-out forwards;
+}
+
+.clipped-img {
+	clip-path: path("M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z");
+  }

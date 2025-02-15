@@ -8,7 +8,28 @@ const appDiv = document.getElementById("app")!;
 const btnLogout = document.getElementById("btn-logout")!;
 const headerIcons = document.getElementById("header-icons")!;
 
+console.log(btnLogout)
 btnLogout.addEventListener("click", logout);
+
+
+export function animatePageChange(page: "game" | "login" | "register") {
+  // Start closing animation
+  const appDiv = document.getElementById("app")!;
+  appDiv.classList.add("closing");
+
+  setTimeout(() => {
+    // Remove closing, update content, and start opening animation
+    appDiv.classList.remove("closing");
+    renderPage(page);
+    appDiv.classList.add("opening");
+
+    setTimeout(() => {
+      // Remove opening class after animation completes
+      appDiv.classList.remove("opening");
+    }, 200);
+
+  }, 200); // Wait for closing animation to finish before changing content
+}
 
 
 
@@ -25,21 +46,24 @@ export function renderPage(page: "game" | "login" | "register") {
   }
 }
 
+
+
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("username");
   btnLogout.classList.add("hidden");
-  renderPage("login");
+  animatePageChange("login");
 }
 
 function renderLoginPage() {
-  appDiv.appendChild(openLoginModal());
+  const loginWindow = openLoginModal();
+  appDiv.appendChild(loginWindow);
   
   const btnRegister = document.getElementById("btn-register")!;
   const btnGuestLogin = document.getElementById("play-as-guest")!;
   
-  btnRegister.addEventListener("click", () => renderPage("register"));
-  btnGuestLogin.addEventListener("click", () => renderPage("game"));
+  btnRegister.addEventListener("click", () => animatePageChange("register"));
+  btnGuestLogin.addEventListener("click", () => animatePageChange("game"));
 
   document.getElementById("login-form")!.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -53,7 +77,13 @@ function renderLoginPage() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("username", data.username);
         btnLogout.classList.remove("hidden");
-        renderPage("game");
+        setTimeout(() => {
+          loginWindow.classList.add("closing");
+          setTimeout(() => {
+              loginWindow.remove();
+              renderPage("game");
+          }, 400);
+      }, 500); // Simulating a small delay
       } else {
         alert("Login failed!");
       }
@@ -65,6 +95,9 @@ function renderLoginPage() {
 
 function renderRegisterPage() {
   appDiv.appendChild(openRegisterModal());
+
+  const backButton = document.getElementById("back-to-login")!;
+  backButton.addEventListener("click", () => animatePageChange("login"))
 
   document.getElementById("register-form")!.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -98,8 +131,9 @@ function renderGamePage() {
   <div id="player-scores" class="w-[800px] flex justify-between gap-2 text-primary">
 
     <div class="player-scores player-1 h-[100px] w-full flex items-center glass-box overflow-hidden gap-5">
-      <div class="w-[100px] h-[100px] border-1 glass-box">
-        <img src="./src/assets/images/player1.jpg" alt="player 1 profile picture" class="w-full h-full object-cover">
+      <div class="relative w-[100px] h-[100px] border-1 glass-box">
+      <img src="./src/assets/images/player1.jpg" alt="player 1 profile picture" class="w-full absolute top-0 left-0 opacity-80 h-full object-cover">
+      <img src="./src/assets/images/scanlines.gif" alt="player 1 profile picture" class="w-full opacity-20 h-full object-cover">
       </div>
         <h2 class="font-bold text-3xl">${localStorage.getItem("username") || "Quest"}</h2>
         <h2 id="player-1-score" class="font-bold text-4xl">0</h2>
@@ -109,11 +143,11 @@ function renderGamePage() {
       <h2 id="player-2-score" class="font-bold text-4xl">0</h2>
       <h2 class="font-bold text-3xl">player 2</h2>
       <div class="w-[100px] h-[100px] glass-box">
-        <img src="./src/assets/images/player2.png" alt="player 2 profile picture" class="w-full h-full object-cover">
+        <img src="./src/assets/images/player2.png" alt="player 2 profile picture" class="w-full h-full opacity-80 object-cover">
       </div>
     </div>
   </div>
-    <canvas id="gameCanvas" class="mt-2 glass-box" width="800" height="400"></canvas>
+    <canvas id="gameCanvas" class="opening mt-2 glass-box" width="800" height="400"></canvas>
   `;
   gameConnect();
   setTimeout(() => {
