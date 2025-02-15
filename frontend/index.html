@@ -8,10 +8,10 @@
   <script defer type="module" src="src/main.js"></script>
   <link href="src/style.css" rel="stylesheet">
 </head>
-<body class="flex flex-col items-center h-screen bg-radial from-secondary to-purple-900 gap-2 p-2">
-  <header id="header" class="header flex gap-10 items-center">
+<body class="flex flex-col items-center min-h-screen w-screen overflow-hidden bg-secondary gap-2 p-2">
+  <header id="header" class="header relative w-screen flex gap-10 p-2 justify-center">
 	  <h1 class="logo text-5xl text-primary">Super Pong 3D</h1>
-    <div id="header-icons" class="flex gap-3">
+    <div id="header-icons" class="flex gap-3 items-center">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="size-6 stroke-primary">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
       </svg>
@@ -26,35 +26,16 @@
         <span id="btn-logout" class="text-primary cursor-pointer hidden">Log Out</span>
       </div>
     </div>
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] sm:w-[1000px] md:w-[1200px] lg:w-[1438px]">
+      <svg class="w-full stroke-primary" viewBox="0 0 1438 83" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.5 56H481L506.5 81.5H929.5L955 56H1438" stroke-width="2"/>
+      </svg>
+    </div>
+    
   </header>
-  <div id="app"></div>
+  <div id="app" class="mt-2"></div>
 </body>
 </html>
 
 
 
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pong Game</title>
-  <script defer src="src/main.ts" type="module"></script>
-  <link href="src/style.css" rel="stylesheet">
-</head>
-<body class="flex flex-col items-center h-screen bg-slate-300 gap-2 p-10">
-  <div class="header">
-    <h1 class="logo text-7xl">Super Pong 3D</h1>
-  </div>
-  
-
-  <nav class="mb-4">
-    <button id="btn-login" class="p-2 bg-green-500 text-white rounded">Login</button>
-    <button id="btn-register" class="p-2 bg-blue-500 text-white rounded">Register</button>
-    <button id="btn-logout" class="p-2 bg-red-500 text-white rounded hidden">Logout</button>
-  </nav>
-
-
-  <div id="app"></div>
-</body>
-</html> -->
