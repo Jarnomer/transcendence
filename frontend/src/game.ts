@@ -1,115 +1,174 @@
-const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d");
+type Paddle = {
+  y: number;
+  dy: number;
+};
 
-canvas.width = 600;
-canvas.height = 400;
+type Ball = {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+};
 
-const paddleWidth = 10, paddleHeight = 80;
-const ballSize = 10;
-let paddleSpeed = 6;  // Increased paddle speed for better gameplay
-let ballSpeed = 2;    // Increased ball speed to make it faster
+type GameState = {
+  canvas: HTMLCanvasElement | null;
+  ctx: CanvasRenderingContext2D | null;
+  paddleWidth: number;
+  paddleHeight: number;
+  ballSize: number;
+  paddleSpeed: number;
+  ballSpeed: number;
+  leftPaddle: Paddle;
+  rightPaddle: Paddle;
+  ball: Ball;
+  leftScore: number;
+  rightScore: number;
+  countdown: number;
+  countdownInProgress: boolean;
+};
 
-let ball = { x: canvas.width / 2, y: canvas.height / 2, dx: ballSpeed, dy: ballSpeed };
-let leftPaddle = { y: canvas.height / 2 - paddleHeight / 2, dy: 0 };
-let rightPaddle = { y: canvas.height / 2 - paddleHeight / paddleHeight, dy: 0 };
+let gameState: GameState;
 
-let countdown = 3;
-let countdownInProgress = false;
-
-let leftScore = 0;
-let rightScore = 0;
-
-// Handle player movement
-document.addEventListener("keydown", (e) => {
-  if (e.key === "w") leftPaddle.dy = -paddleSpeed;
-  if (e.key === "s") leftPaddle.dy = paddleSpeed;
-  if (e.key === "ArrowUp") rightPaddle.dy = -paddleSpeed;
-  if (e.key === "ArrowDown") rightPaddle.dy = paddleSpeed;
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "w" || e.key === "s") leftPaddle.dy = 0;
-  if (e.key === "ArrowUp" || e.key === "ArrowDown") rightPaddle.dy = 0;
-});
-
-function update() {
-  if (countdownInProgress) return;
-
-  leftPaddle.y += leftPaddle.dy;
-  rightPaddle.y += rightPaddle.dy;
-
-  leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
-  rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
-
-  ball.x += ball.dx;
-  ball.y += ball.dy;
-
-  if (ball.y <= 0 || ball.y + ballSize >= canvas.height) ball.dy *= -1;
-
-  if (
-    (ball.x <= paddleWidth && ball.y >= leftPaddle.y && ball.y <= leftPaddle.y + paddleHeight) ||
-    (ball.x + ballSize >= canvas.width - paddleWidth && ball.y >= rightPaddle.y && ball.y <= rightPaddle.y + paddleHeight)
-  ) {
-    ball.dx *= -1;
+export function initGame() {
+  const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+  if (!canvas) {
+    console.error("Canvas not found!");
+    return;
   }
 
-  if (ball.x < 0) {
-    rightScore++;  // Right player scores
-    startCountdown();
-  } else if (ball.x > canvas.width) {
-    leftScore++;  // Left player scores
-    startCountdown();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    console.error("Canvas context is null!");
+    return;
   }
 
-  // Update scores in the new DOM structure
-  const player1ScoreElem = document.getElementById("player-1-score");
-  const player2ScoreElem = document.getElementById("player-2-score");
+  canvas.width = 800;
+  canvas.height = 400;
 
-  if (player1ScoreElem && player2ScoreElem) {
-    player1ScoreElem.textContent = leftScore.toString();
-    player2ScoreElem.textContent = rightScore.toString();
-  }
+  gameState = {
+    canvas,
+    ctx,
+    paddleWidth: 10,
+    paddleHeight: 80,
+    ballSize: 10,
+    paddleSpeed: 6,  
+    ballSpeed: 2,   
+
+    leftPaddle: { y: canvas.height / 2 - 40, dy: 0 },
+    rightPaddle: { y: canvas.height / 2 - 40, dy: 0 },
+    
+    ball: { x: canvas.width / 2, y: canvas.height / 2, dx: 2, dy: 2 },
+    
+    leftScore: 0,
+    rightScore: 0,
+    countdown: 3,
+    countdownInProgress: false,
+  };
+
+  console.log("Game initialized successfully.");
+  gameLoop();
 }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Handle player movement
+document.addEventListener("keydown", (e) => handleKeyPress(e, true));
+document.addEventListener("keyup", (e) => handleKeyPress(e, false));
 
-  ctx.fillStyle = "white";
+function handleKeyPress(event: KeyboardEvent, isKeyDown: boolean) {
+  if (!gameState) return;
+  
+  const speed = isKeyDown ? gameState.paddleSpeed : 0;
+  if (event.key === "w") gameState.leftPaddle.dy = -speed;
+  if (event.key === "s") gameState.leftPaddle.dy = speed;
+  if (event.key === "ArrowUp") gameState.rightPaddle.dy = -speed;
+  if (event.key === "ArrowDown") gameState.rightPaddle.dy = speed;
+}
+
+function update(gameState: GameState) {
+  if (gameState.countdownInProgress) return;
+
+  gameState.leftPaddle.y = Math.max(0, Math.min(gameState.canvas!.height - gameState.paddleHeight, gameState.leftPaddle.y + gameState.leftPaddle.dy));
+  gameState.rightPaddle.y = Math.max(0, Math.min(gameState.canvas!.height - gameState.paddleHeight, gameState.rightPaddle.y + gameState.rightPaddle.dy));
+
+  gameState.ball.x += gameState.ball.dx;
+  gameState.ball.y += gameState.ball.dy;
+
+  if (gameState.ball.y <= 0 || gameState.ball.y + gameState.ballSize >= gameState.canvas!.height) {
+    gameState.ball.dy *= -1;
+  }
+
+  if (
+    (gameState.ball.x <= gameState.paddleWidth &&
+      gameState.ball.y >= gameState.leftPaddle.y &&
+      gameState.ball.y <= gameState.leftPaddle.y + gameState.paddleHeight) ||
+    (gameState.ball.x + gameState.ballSize >= gameState.canvas!.width - gameState.paddleWidth &&
+      gameState.ball.y >= gameState.rightPaddle.y &&
+      gameState.ball.y <= gameState.rightPaddle.y + gameState.paddleHeight)
+  ) {
+    gameState.ball.dx *= -1;
+  }
+
+  if (gameState.ball.x < 0) {
+    gameState.rightScore++;
+    startCountdown(gameState);
+  } else if (gameState.ball.x > gameState.canvas!.width) {
+    gameState.leftScore++;
+    startCountdown(gameState);
+  }
+
+  updateScoreUI(gameState);
+}
+
+function draw(gameState: GameState) {
+  const { ctx, canvas, leftPaddle, rightPaddle, ball, paddleWidth, paddleHeight, ballSize, countdownInProgress, countdown } = gameState;
+  if (!ctx) return;
+
+  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() || "white";
+  ctx.clearRect(0, 0, canvas!.width, canvas!.height);
+
+  ctx.fillStyle = primaryColor;
   ctx.fillRect(0, leftPaddle.y, paddleWidth, paddleHeight);
-  ctx.fillRect(canvas.width - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
+  ctx.fillRect(canvas!.width - paddleWidth, rightPaddle.y, paddleWidth, paddleHeight);
   ctx.fillRect(ball.x, ball.y, ballSize, ballSize);
 
-  // Draw countdown if in progress
   if (countdownInProgress) {
     ctx.font = "48px Arial";
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(countdown.toString(), canvas.width / 2, canvas.height / 2);
+    ctx.fillText(countdown.toString(), canvas!.width / 2, canvas!.height / 2);
   }
 }
 
-function startCountdown() {
-  countdownInProgress = true;
+function updateScoreUI(gameState: GameState) {
+  document.getElementById("player-1-score")!.textContent = gameState.leftScore.toString();
+  document.getElementById("player-2-score")!.textContent = gameState.rightScore.toString();
+}
+
+function startCountdown(gameState: GameState) {
+  gameState.countdownInProgress = true;
+  gameState.countdown = 3;
+
   let countdownInterval = setInterval(() => {
-    countdown--;
-    if (countdown <= 0) {
+    gameState.countdown--;
+    if (gameState.countdown <= 0) {
       clearInterval(countdownInterval);
-      resetBall();
+      resetBall(gameState);
     }
   }, 1000);
 }
 
-function resetBall() {
-  ball = { x: canvas.width / 2, y: canvas.height / 2, dx: ballSpeed, dy: ballSpeed };
-  countdown = 3;
-  countdownInProgress = false;
+function resetBall(gameState: GameState) {
+  gameState.ball = { x: gameState.canvas!.width / 2, y: gameState.canvas!.height / 2, dx: gameState.ballSpeed, dy: gameState.ballSpeed };
+  gameState.countdown = 3;
+  gameState.countdownInProgress = false;
 }
 
-function gameLoop() {
-  update();
-  draw();
+export function gameLoop() {
+  if (!gameState.ctx) {
+    console.error("Game loop stopped: No context found.");
+    return;
+  }
+  update(gameState);
+  draw(gameState);
   requestAnimationFrame(gameLoop);
 }
-
-gameLoop();

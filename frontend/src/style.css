@@ -1,6 +1,34 @@
   /* Tailwind's utility classes */
   @import "tailwindcss";
 
+
+  @theme {
+	--font-display: "Satoshi", "sans-serif";
+	--breakpoint-3xl: 1920px;
+	--color-primary: oklch(88.3% 0.1288 203.73);
+	--color-secondary: oklch(13.51% 0.0749 266.57);
+
+	--gradient-cyberpunk-dark: linear-gradient(
+		to bottom, 
+		oklch(13.51% 0.0749 266.57),  /* Dark Blue */
+		oklch(16% 0.08 270),          /* Slightly Lighter Blue */
+		oklch(12% 0.07 260)           /* Deep Purple-Blue */
+	);
+	
+	--ease-fluid: cubic-bezier(0.3, 0, 0, 1);
+	--ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+	/* ... */
+  }
+
+  @layer components {
+	.glass-box {
+	  @apply border-1 bg-primary/15 border-primary shadow-[0_0_3px] shadow-primary/80 inset-shadow-[0_0_3px] inset-shadow-primary/80;
+	}
+  }
+
+  
+  
+
   @font-face {
 	font-family: "kotak";
 	src: url("./assets/fonts/kotak.ttf") format("truetype");
