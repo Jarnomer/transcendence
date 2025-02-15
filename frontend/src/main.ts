@@ -1,5 +1,7 @@
 // main.ts
 import { login, register, fetchPongData } from "./api";
+// main.ts
+import { login, register, fetchPongData } from "./api";
 import { gameLoop, initGame } from "./game";
 import { openLoginModal } from "./components/modals/loginModal";
 import { openRegisterModal } from "./components/modals/registerModal";
