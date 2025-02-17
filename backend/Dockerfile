@@ -12,6 +12,6 @@ COPY  . /app/.
 #RUN chown -R appuser:appuser /app/
 #USER appuser
 
-RUN pnpm install --recursive
+RUN pnpm install --no-frozen-lockfile
 
 CMD ["pnpm", "run", "dev", "--", "--host"]
