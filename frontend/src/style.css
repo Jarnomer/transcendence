@@ -1,5 +1,43 @@
   /* Tailwind's utility classes */
+  @import url("https://fonts.googleapis.com/css?family=Barlow|Tomorrow:400,700&display=swap");
+
   @import "tailwindcss";
+
+
+
+
+  @theme {
+	/* --font-display: "Satoshi", "sans-serif"; */
+	--font-*: initial;
+	--font-display: "Tomorrow", "sans-serif";
+	--breakpoint-3xl: 1920px;
+
+
+	/* --color-primary: oklch(88.3% 0.1288 203.73); */
+	--color-primary: oklch(65.28% 0.1966 20.69);
+	--color-secondary: oklch(8% 0% 0);
+	--font-primary: "Tomorrow", "sans-serif";
+
+	--gradient-cyberpunk-dark: linear-gradient(
+		to bottom, 
+		oklch(13.51% 0.0749 266.57),  /* Dark Blue */
+		oklch(16% 0.08 270),          /* Slightly Lighter Blue */
+		oklch(12% 0.07 260)           /* Deep Purple-Blue */
+	);
+
+	--ease-fluid: cubic-bezier(0.3, 0, 0, 1);
+	--ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+	/* ... */
+  }
+
+  @layer components {
+	.glass-box {
+	  @apply border-1 bg-primary/15 border-primary shadow-[0_0_3px] shadow-primary/80 inset-shadow-[0_0_3px] inset-shadow-primary/80;
+	}
+
+
+	  }
+	  
 
   @font-face {
 	font-family: "kotak";
@@ -50,10 +88,100 @@
 	font-style: normal;
   }
 
+  @font-face {
+	font-family: "Tomorrow";
+	src: url("https://fonts.googleapis.com/css?family=Barlow|Tomorrow:400,700&display=swap");
+	font-weight: normal;
+	font-style: normal;
+  }
+
 .logo {
 	font-family: "dayger", serif;
   }
 
-@theme {
 
+  html {
+	font-family: var(--font-primary);
+	font-size: 1rem;
+	text-transform: uppercase;
+  }
+
+  * {
+		text-transform: uppercase;
+  }
+
+
+  /* Napin perusstyylit */
+.button {
+	transition: all 0.3s ease-in-out;  /* Pehmeä siirtymä */
+	cursor: pointer; /* Käyttäjän ei tarvitse arvailla, että se on klikattavissa */
+  }
+  
+  .stroke-primary {
+	stroke: oklch(65.28% 0.1966 20.69); /* Lähtöväri */
+  }
+  
+  /* Hover-efekti */
+  .button:hover .stroke-primary {
+	stroke: #FF0000;  /* Vaihda väriä hoverilla, voit käyttää esimerkiksi kirkasta punaista */
+  }
+  
+  .button:hover {
+	fill: oklch(60% 0.15 10); /* Lisää hieman tummempaa täyttöä */
+	transform: scale(1.01); /* Tee napista hieman suurempi hover-tilassa */
+	box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* Lisää hehkuva varjo */
+  }
+  
+
+body {
+	margin: 0;
+	line-height: normal;
 }
+
+
+@keyframes tvCollapse {
+    0% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+    50% {
+        clip-path: inset(40% 0 40% 0);
+        opacity: 0.8;
+    }
+    100% {
+        clip-path: inset(50% 0 50% 0);
+        opacity: 0;
+    }
+}
+
+@keyframes tvExpand {
+    0% {
+        clip-path: inset(50% 0 50% 0);
+        opacity: 0;
+    }
+    50% {
+        clip-path: inset(40% 0 40% 0);
+        opacity: 0.8;
+    }
+    100% {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+}
+
+.modal {
+    opacity: 0;
+    clip-path: inset(50% 0 50% 0);
+}
+
+.opening {
+    animation: tvExpand 0.2s ease-in-out forwards;
+}
+
+.closing {
+    animation: tvCollapse 0.2s ease-in-out forwards;
+}
+
+.clipped-img {
+	clip-path: path("M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z");
+  }
