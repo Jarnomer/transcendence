@@ -1,13 +1,18 @@
-const PongGame = require("./gameLogic");
+import PongGame from "./gameLogic";
+import { WebSocket } from "ws"; // Ensure you have the correct WebSocket type
 
 class GameManager {
+  private games: Record<string, PongGame>;
+  private clients: Record<string, Set<WebSocket>>;
+  private intervals: Record<string, NodeJS.Timeout>;
+
   constructor() {
-    this.games = {}; // Store multiple games
-    this.clients = {}; // Store WebSocket clients
-    this.intervals = {}; // Store game loops
+    this.games = {};
+    this.clients = {};
+    this.intervals = {};
   }
 
-  createGame(gameId) {
+  createGame(gameId: string): void {
     this.games[gameId] = new PongGame();
     this.clients[gameId] = new Set();
 
@@ -17,7 +22,7 @@ class GameManager {
     }, 1000 / 60);
   }
 
-  addClient(gameId, ws) {
+  addClient(gameId: string, ws: WebSocket): void {
     if (!this.clients[gameId]) this.clients[gameId] = new Set();
     this.clients[gameId].add(ws);
 
@@ -29,32 +34,32 @@ class GameManager {
     });
   }
 
-  updateGame(gameId) {
+  updateGame(gameId: string): void {
     if (!this.games[gameId]) return;
 
     const updatedState = this.games[gameId].updateGameStatus({}); // No player input, just physics updates
     this.broadcast(gameId, { type: "update", state: updatedState });
   }
 
-  handlePlayerMove(gameId, player, move) {
-    if (!this.games[gameId]) return null;
+  handlePlayerMove(gameId: string, player: string, move: any): void {
+    if (!this.games[gameId]) return;
 
-    const commands = {};
+    const commands: Record<string, any> = {};
     commands[player] = move;
 
     this.games[gameId].updateGameStatus(commands);
   }
 
-  broadcast(gameId, message) {
+  broadcast(gameId: string, message: object): void {
     if (!this.clients[gameId]) return;
     for (const client of this.clients[gameId]) {
-      if (client.readyState === 1) {
+      if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(message));
       }
     }
   }
 
-  endGame(gameId) {
+  endGame(gameId: string): void {
     if (this.intervals[gameId]) {
       clearInterval(this.intervals[gameId]);
       delete this.intervals[gameId];
@@ -64,4 +69,5 @@ class GameManager {
   }
 }
 
-module.exports = GameManager;
+export default GameManager;
+
