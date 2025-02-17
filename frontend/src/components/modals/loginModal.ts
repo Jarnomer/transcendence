@@ -5,7 +5,7 @@ import { createSVGModal } from "../wrappers/modalWrapper";
 export function openLoginModal(): HTMLElement {
   const loginContent = `
     <div class="text-center">
-      <h1 class="text-3xl mb-2">Login</h1>
+      <h1 class="text-3xl mb-2 font-heading font-bold">Login</h1>
       <form id="login-form" class="flex flex-col gap-2">
         <input type="text" id="login-username" placeholder="Username" class="border p-2" required />
         <input type="password" id="login-password" placeholder="Password" class="border p-2" required />
@@ -35,17 +35,14 @@ export function openLoginModal(): HTMLElement {
     id: "play-as-guest",
   });
 
-  // Create a temporary container to hold modal content
   const modalContent = document.createElement("div");
   modalContent.innerHTML = loginContent;
 
-  // Append loginButton to the form
   const loginForm = modalContent.querySelector("#login-form");
   if (loginForm) {
     loginForm.appendChild(loginButton);
   }
 
-  // Append other buttons to the #login-options div
   const loginOptionsDiv = modalContent.querySelector("#login-options");
   if (loginOptionsDiv) {
     loginOptionsDiv.appendChild(registerButton);
@@ -53,8 +50,5 @@ export function openLoginModal(): HTMLElement {
   }
 
 
-
-
-  // Return the modal with buttons appended
   return createSVGModal(modalContent.innerHTML);
 }

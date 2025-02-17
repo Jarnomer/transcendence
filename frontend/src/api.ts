@@ -1,6 +1,18 @@
 
 const API_URL = "/api/auth";
 
+export async function gameConnect() {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const data = await fetchPongData(token);
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
 export async function login(username: string, password: string) {
   try {
     const res = await fetch(`${API_URL}/login`, {

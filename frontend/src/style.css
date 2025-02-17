@@ -1,10 +1,17 @@
   /* Tailwind's utility classes */
   @import url("https://fonts.googleapis.com/css?family=Barlow|Tomorrow:400,700&display=swap");
 
+  @import url('https://fonts.googleapis.com/css2?family=Teko:wght@300..700&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Teko:wght@300..700&display=swap');
+
   @import "tailwindcss";
 
 
-
+/* * {
+	margin:0;
+	padding:0;
+} */
 
   @theme {
 	/* --font-display: "Satoshi", "sans-serif"; */
@@ -16,7 +23,10 @@
 	/* --color-primary: oklch(88.3% 0.1288 203.73); */
 	--color-primary: oklch(65.28% 0.1966 20.69);
 	--color-secondary: oklch(8% 0% 0);
-	--font-primary: "Tomorrow", "sans-serif";
+	--color-creators-secondary: oklch(45.9% 0.0227 21.99);
+	/* --font-primary: "Tomorrow", "sans-serif"; */
+	--font-primary: "JetBrains Mono", "italic";
+	--font-heading: "Teko", "normal";
 
 	--gradient-cyberpunk-dark: linear-gradient(
 		to bottom, 
@@ -39,54 +49,12 @@
 	  }
 	  
 
-  @font-face {
-	font-family: "kotak";
-	src: url("./assets/fonts/kotak.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
-  
-  @font-face {
-	font-family: "cube";
-	src: url("./assets/fonts/Cube.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
+	  @layer utilities {
+		.aspect-448-577 {
+		  aspect-ratio: 448 / 577;
+		}
+	  }
 
-  @font-face {
-	font-family: "collision";
-	src: url("./assets/fonts/Collision.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
-
-  @font-face {
-	font-family: "pursue";
-	src: url("./assets/fonts/Pursue.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
-
-  @font-face {
-	font-family: "slice";
-	src: url("./assets/fonts/slice.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
-
-  @font-face {
-	font-family: "dayger";
-	src: url("./assets/fonts/Dayger.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
-
-  @font-face {
-	font-family: "shinyBlocks";
-	src: url("./assets/fonts/ShinyBlocks.ttf") format("truetype");
-	font-weight: normal;
-	font-style: normal;
-  }
 
   @font-face {
 	font-family: "Tomorrow";
@@ -95,8 +63,15 @@
 	font-style: normal;
   }
 
+  @font-face {
+	font-family: "ASIX-FOUNDER";
+	src: url("./assets/fonts/ASIX-FOUNDER-Italic.otf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+  }
+
 .logo {
-	font-family: "dayger", serif;
+	font-family: "ASIX-FOUNDER", serif;
   }
 
 
@@ -175,13 +150,44 @@ body {
 }
 
 .opening {
-    animation: tvExpand 0.2s ease-in-out forwards;
+    animation: tvExpand 0.2s ease-in forwards;
 }
 
 .closing {
     animation: tvCollapse 0.2s ease-in-out forwards;
 }
 
-.clipped-img {
-	clip-path: path("M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z");
+
+  
+/* 
+  <style>
+  .clipped-image {
+	position: absolute;
+	object-fit: cover;
   }
+</style> */
+
+.aspect-ratio-wrapper {
+	position: relative;
+	height: 100%; /* Make the width flexible, this will be controlled dynamically */
+	padding-bottom: 1.2878%; /* Aspect ratio: height / width = 577 / 448 */
+	/* The padding-bottom creates the correct aspect ratio (height:width ratio) */
+  }
+
+
+
+  .clipped {
+	clip-path: path("M74.3067 25L37 61.5368V447H375.559L411 412.29V25H74.3067Z");
+  }
+
+
+path {
+	stroke: 2px;
+}
+
+
+  
+.game-mode-modal:hover {
+		scale: 1.01;
+}
+  

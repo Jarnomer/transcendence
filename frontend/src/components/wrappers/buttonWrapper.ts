@@ -6,14 +6,14 @@ type ButtonOptions = {
   
   export function createSVGButton(label: string, { id = '', type = 'button', className = ''}: ButtonOptions = {}) {
 	const button = document.createElement("button");
-	button.className = `relative w-[202px] h-[40px] flex items-center justify-center ${className}`;
+	button.className = `glitch relative w-[202px] h-[40px] flex items-center justify-center ${className}`;
 	button.id = id;
 	button.type = type;
   
 	const svg = `
-	<svg class="absolute top-0 left-0 w-full h-full" viewBox="0 0 202 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+	<svg class="absolute top-0 left-0 w-full h-full" viewBox="0 0 202 40"  fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
   		<rect width="202" height="40" fill="transparent"/>
-  		<path d="M185.664 39.5H0.5V0.5H201.5V26.7605L185.664 39.5Z" class="stroke-primary"/>
+  		<path d="M185.664 39.5H0.5V0.5H201.5V26.7605L185.664 39.5Z" stroke="currentColor"/>
 	</svg>
 	`;
   
