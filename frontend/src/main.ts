@@ -1,5 +1,5 @@
 // main.ts
-import { login, register, fetchPongData } from "./api";
+import { login, register, connectWebSocket } from "./api";
 import { gameLoop, initGame } from "./game";
 import { openLoginModal } from "./components/modals/loginModal";
 import { openRegisterModal } from "./components/modals/registerModal";
@@ -74,6 +74,7 @@ function renderLoginPage() {
 
       if (data.token) {
         localStorage.setItem("token", data.token);
+        console.log("token",data.token);
         localStorage.setItem("username", data.username);
         btnLogout.classList.remove("hidden");
         setTimeout(() => {
@@ -113,12 +114,17 @@ function renderRegisterPage() {
   });
 }
 
-async function gameConnect() {
+
+
+async function gameConnect(ws: WebSocket, gameState: any) {
   const token = localStorage.getItem("token");
   if (token) {
     try {
-      const data = await fetchPongData(token);
-      console.log(data);
+    await connectWebSocket(ws, gameState, token);
+      setTimeout(() => {
+        initGame(gameState);
+        requestAnimationFrame((timestamp) => gameLoop(ws, gameState, timestamp));
+      }, 100);
     } catch (err) {
       console.error(err);
     }
@@ -148,11 +154,13 @@ function renderGamePage() {
   </div>
     <canvas id="gameCanvas" class="opening mt-2 glass-box" width="800" height="400"></canvas>
   `;
-  gameConnect();
-  setTimeout(() => {
-    initGame();
-    gameLoop();
-  }, 100);
+  let gameState: any = {};
+  let ws: WebSocket;
+  const token = localStorage.getItem("token");
+  ws = new WebSocket(
+    `wss://${window.location.host}/ws/remote/game/?gameId=1`
+  );
+  gameConnect(ws, gameState);
 }
 
 
