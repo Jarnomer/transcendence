@@ -1,7 +1,35 @@
 import { eventBus } from "./events";
+import { initGame, gameLoop } from "./game";
 
 
 const API_URL = "/api/auth";
+
+/* export async function gameConnect() {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const data = await fetchPongData(token);
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+} */
+
+export  async function gameConnect(ws: WebSocket, gameState: any) {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+      await connectWebSocket(ws, gameState, token);
+        setTimeout(() => {
+          initGame(gameState);
+          requestAnimationFrame((timestamp) => gameLoop(ws, gameState, timestamp));
+        }, 100);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }
 
 export async function login(username: string, password: string) {
   try {

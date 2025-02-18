@@ -1,6 +1,6 @@
 import { createSVGButton } from "../wrappers/buttonWrapper";
 import { createSVGModal } from "../wrappers/modalWrapper";
-import { animatePageChange} from "../../main";
+import { animatePageChange } from "../../renderPage";
 
 export function openRegisterModal(): HTMLElement {
   const modalInnerHtml = `
@@ -18,7 +18,6 @@ export function openRegisterModal(): HTMLElement {
   		</form>
   `;
 
-  // Create buttons
   const registerButton = createSVGButton("Login", {
     id: "login-btn",
     type: "submit"
@@ -28,13 +27,11 @@ export function openRegisterModal(): HTMLElement {
   const modalContent = document.createElement("div");
   modalContent.innerHTML = modalInnerHtml;
 
-  // Append loginButton to the form
   const registerForm = modalContent.querySelector("#register-form");
   if (registerForm) {
     registerForm.appendChild(registerButton);
   }
 
-  // Return the modal with buttons appended
   return createSVGModal(modalContent.innerHTML);
 }
 
