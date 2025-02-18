@@ -7,10 +7,11 @@
   <script defer type="module" src="src/main.js"></script>
   <link href="src/style.css" rel="stylesheet">
 </head>
-<body class="flex flex-col items-center min-h-screen w-screen text-primary bg-secondary gap-2 p-2">
+<body class="flex flex-col relative items-center min-h-screen w-screen text-primary bg-secondary gap-2 p-2">
+
   <header id="header" class="header relative w-screen flex justify-center items-center p-2 pb-7">
     <h1 class="logo text-3xl text-primary absolute">Super Pong 3D</h1>
-    <div id="header-icons" class="flex gap-3 items-center ml-auto">
+    <div id="header-icons" class="flex gap-3 pb-2 items-center ml-auto">
       <button id="nav-home-button">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -40,28 +41,36 @@
   </header>
   
   
-  <div id="app" class="mt-2 relative flex-grow text-primary"></div>
-
-
+<div id="navigation-container" class="w-full">
+  <button id="button-go-back" class="absolute top-20 hidden left-10">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+  </button>
+</div>
 
     
+  <div id="app" class="mt-2 relative overflow-hidden flex-grow text-primary"></div>
+  
 
-  <svg width="0" height="0">
-    <defs>
-      <clipPath id="image-mask">
-        <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
-      </clipPath>
-    </defs>
-  </svg>
+
+  
+<svg width="0" height="0">
+  <defs>
+    <clipPath id="image-mask">
+      <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
+    </clipPath>
+  </defs>
+</svg>
+
     <footer class="h-15 w-screen flex items-center justify-center text-primary border-primary border-t-1 text-center">
     <div id="footer-links" class="flex gap-5">
       <p>about</p>
       <p id="link-creators">creators</p>
       <a href="https://github.com/jarnomer/transcendence/" target="_blank">github</a>
     </div>
-  </footer>
+  </footer> 
 </body>
 </html>
-
 
 
