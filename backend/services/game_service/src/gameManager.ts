@@ -18,7 +18,7 @@ export class GameManager {
 
     this.intervals[gameId] = setInterval(() => {
       this.updateGame(gameId);
-    }, 1000/30);
+    }, 1000/60);
   }
 
   addClient(gameId: string, connection: any): void {
@@ -61,7 +61,7 @@ export class GameManager {
 
   broadcast(gameId: string, message: object): void {
     if (!this.clients[gameId]) return;
-    console.log("Broadcasting message:", message);
+    // console.log("Broadcasting message:", message);
     for (const connection of this.clients[gameId]) {
       if (connection.readyState === connection.OPEN) {
         connection.send(JSON.stringify(message));

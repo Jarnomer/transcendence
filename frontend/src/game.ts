@@ -67,39 +67,27 @@ export function initGame(gameState: GameState) {
   Object.assign(gameState, gameStateInit);
 }
 
-let lastKeyPressTime = 0;  // Store the last key press timestamp
-const keyPressInterval = .500; // Minimum interval between key presses (in seconds)
+const keysPressed: Record<string, boolean> = {};
 
-function handleKeyPressWithDynamicThrottle(ws: WebSocket, e: KeyboardEvent, isPressed: boolean, gameState: GameState, deltaTime: number) {
-  const currentTime = Date.now(); // Convert to seconds for deltaTime comparison
+document.addEventListener("keydown", (e) => {
+  keysPressed[e.key] = true;
+});
 
-  // Calculate the time difference between key press updates (based on deltaTime)
-  if (currentTime - lastKeyPressTime >= keyPressInterval * deltaTime) {
-    // Update the game state (player movement or other changes)
-    handleKeyPress(ws, e, isPressed, gameState); // This is your existing key press handler
+document.addEventListener("keyup", (e) => {
+  keysPressed[e.key] = false;
+});
 
-    // Update the last key press time to control the rate of updates
-    lastKeyPressTime = currentTime;
-  }
-}
-
-
-function handleKeyPress(ws: WebSocket, event: KeyboardEvent, isKeyDown: boolean, gameState: GameState) {
-  if (!gameState) return;
-  if (ws && ws.readyState === WebSocket.OPEN && isKeyDown) {
-    console.log("Key pressed:", event.key);
-    if (event.key === "w") ws.send(JSON.stringify({ type: "move",playerId: "player1", move: "up" }));
-    if (event.key === "s") ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "down" }));
-    if (event.key === "ArrowUp") ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "up" }));
-    if (event.key === "ArrowDown") ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "down" }));
-  }
-}
-
-function update(gameState: GameState, deltaTime: number) {
+function update(gameState: GameState, ws: WebSocket) {
   if (gameState.countdownInProgress) return;
-    // Example: update the ball's position based on its velocity and deltaTime
-  updateScoreUI(gameState);
+
+  if (ws.readyState === WebSocket.OPEN) {
+    if (keysPressed["w"]) ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "up" }));
+    if (keysPressed["s"]) ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "down" }));
+    if (keysPressed["ArrowUp"]) ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "up" }));
+    if (keysPressed["ArrowDown"]) ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "down" }));
+  }
 }
+
 
 function draw(gameState: GameState) {
   const { ctx, canvas, players, ball, paddleWidth, paddleHeight, ballSize, countdownInProgress, countdown } = gameState;
@@ -126,28 +114,7 @@ function updateScoreUI(gameState: GameState) {
   document.getElementById("player-2-score")!.textContent = gameState.players["player2"].score.toString();
 }
 
-/* function startCountdown(gameState: GameState) {
-  gameState.countdownInProgress = true;
-  gameState.countdown = 3;
-
-  let countdownInterval = setInterval(() => {
-    gameState.countdown--;
-    if (gameState.countdown <= 0) {
-      clearInterval(countdownInterval);
-      resetBall(gameState);
-    }
-  }, 1000);
-} */
-
-/* function resetBall(gameState: GameState) {
-  gameState.ball = { x: gameState.canvas!.width / 2, y: gameState.canvas!.height / 2, dx: gameState.ballSpeed, dy: gameState.ballSpeed };
-  gameState.countdown = 3;
-  gameState.countdownInProgress = false;
-} */
-
-
 eventBus.on("gameUpdate", draw);
-
 
 let lastTime = 0; // Store the last timestamp to calculate deltaTime
 
@@ -156,12 +123,12 @@ export function gameLoop(ws: WebSocket, gameState: GameState, timestamp: number)
     console.error("Game loop stopped: No context found.");
     return;
   }
-  const deltaTime = timestamp - lastTime; // Convert to seconds
+
+  const deltaTime = (timestamp - lastTime) / 1000; // Convert to seconds
   lastTime = timestamp; // Update lastTime for the next frame
-  // Handle player movement
-  document.addEventListener("keydown", (e) => handleKeyPressWithDynamicThrottle(ws, e, true, gameState, deltaTime));
-  document.addEventListener("keyup", (e) => handleKeyPressWithDynamicThrottle(ws, e, false, gameState, deltaTime));
-  update(gameState, deltaTime);
+
+  update(gameState, ws); // Now update sends movement events properly
   draw(gameState);
+
   requestAnimationFrame((newTimestamp) => gameLoop(ws, gameState, newTimestamp));
 }

@@ -16,11 +16,14 @@ export interface Player {
     private height: number = 400;
     private paddleHeight: number = 80;
     private paddleWidth: number = 10;
-    private ballSize: number = 10;
-    private speed: number = 2;
+    private paddleSpeed: number = 8;
+    private ballSize: number = 6;
+    private ballSpeed: number = 5;
     
     private players: Record<string, Player>;
     private ball: Ball;
+
+    private updateInterval: NodeJS.Timeout | null = null;
   
     constructor() {
       this.players = {
@@ -30,49 +33,41 @@ export interface Player {
       this.ball = {
           x: this.width / 2,
           y: this.height / 2,
-          dx: this.speed * (Math.random() > 0.5 ? 1 : -1),
-          dy: this.speed * (Math.random() > 0.5 ? 1 : -1),
+          dx: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
+          dy: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
         };
+      this.startGameLoop();
     }
   
     private resetBall(): void {
       this.ball = {
         x: this.width / 2,
         y: this.height / 2,
-        dx: this.speed * (Math.random() > 0.5 ? 1 : -1),
-        dy: this.speed * (Math.random() > 0.5 ? 1 : -1),
+        dx: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
+        dy: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
       };
     }
+
+    startGameLoop(): void {
+      if (this.updateInterval) return; // Prevent multiple intervals
   
-    updateGameStatus(moves: Record<string, "up" | "down">): object {
-      // Handle player movement
-      console.log("Moves:", moves);
-      Object.keys(moves).forEach((playerId) => {
-        if (!this.players[playerId]) return;
-        console.log("Player ID:", playerId);
-        if (moves[playerId] === "up") {
-          this.players[playerId].y = Math.max(0, this.players[playerId].y - this.speed);
-        } else if (moves[playerId] === "down") {
-          this.players[playerId].y = Math.min(
-            this.height - this.paddleHeight,
-            this.players[playerId].y + this.speed
-          );
-        }
-      });
+      this.updateInterval = setInterval(() => {
+        this.updateBall();
+      }, 1000 / 60); // 60 FPS fixed update rate
+    }
   
-      // Update ball position
+    private updateBall(): void {
       this.ball.x += this.ball.dx;
       this.ball.y += this.ball.dy;
+
+      console.log("Ball position:", this.ball.x, this.ball.y); // Debugging
   
-      // Ball collision with top and bottom walls
       if (this.ball.y <= 0 || this.ball.y + this.ballSize >= this.height) {
         this.ball.dy *= -1;
       }
   
-      // Ball collision with paddles
       this.checkPaddleCollision();
   
-      // Ball out of bounds (scoring)
       if (this.ball.x <= 0) {
         this.players.player2.score++;
         this.resetBall();
@@ -80,6 +75,21 @@ export interface Player {
         this.players.player1.score++;
         this.resetBall();
       }
+    }
+  
+    updateGameStatus(moves: Record<string, "up" | "down">): object {
+      Object.keys(moves).forEach((playerId) => {
+        if (!this.players[playerId]) return;
+        if (moves[playerId] === "up") {
+          this.players[playerId].y = Math.max(0, this.players[playerId].y - this.paddleSpeed);
+        } else if (moves[playerId] === "down") {
+          this.players[playerId].y = Math.min(
+            this.height - this.paddleHeight,
+            this.players[playerId].y + this.paddleSpeed
+          );
+        }
+      });
+      
       return { players: this.players, ball: this.ball };
     }
   
@@ -104,4 +114,3 @@ export interface Player {
       }
     }
   }
-  
