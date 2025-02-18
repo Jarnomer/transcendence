@@ -3,83 +3,118 @@ import { createGameModeModal } from "./components/wrappers/gameModeWrapper";
 import { goToPage } from "./navigation";
 
 
-
 export function renderHomePage() {
 	const appDiv = document.getElementById("app")!;
-
+  
 	appDiv.innerHTML = `
-	<h2 class="w-full text-center">welcome</h2>
-	<div id="home-container" class="h-full w-80% relative grid grid-cols-1 gap-4 px-3 sm:grid-cols-2 md:grid-cols-3 border-primary pt-1">
-	</div>`;
-
+	  <h2 class="w-full text-2xl mb-5 text-center">Welcome, ${localStorage.getItem("username") || "stranger"}</h2>
+	  <div id="home-container" class="h-full w-80% relative grid grid-cols-1 gap-4 px-3 sm:grid-cols-2 md:grid-cols-3 border-primary pt-1">
+	  </div>`;
+  
 	const homeContainer = document.getElementById("home-container")!;
-
-	const singlePlayerModal = gameModeModalSinglePlayer()!;
+  
+	const singlePlayerModal = gameModeModalSinglePlayer();
 	homeContainer.appendChild(singlePlayerModal);
 	homeContainer.appendChild(gameModeModalMultiPlayer());
 	homeContainer.appendChild(gameModeModalTournament());
-
+  
 	singlePlayerModal.addEventListener("click", () => goToPage("game"));
-}
+  }
+  
 
 
-function gameModeModalSinglePlayer() {
+
+  function gameModeModalSinglePlayer() {
+	const appDiv = document.getElementById("app")!;
+  
+	const modal = document.createElement("div");
+	modal.id = "singlePlayer-modal";
+	modal.className = "game-mode-modal relative inline-block w-fit h-fit text-primary transition-transform group";
+	
+	// Modal content
 	const modalContent = document.createElement("div");
 	modalContent.innerHTML = `
-	<div class="w-full h-full flex flex-col items-center text-center gap-5">
-  		<h2 class="font-heading text-bold text-3xl">Single player</h2>
-			<div class="w-[80%] border img-container">
-				<img src="src/assets/images/multiPlayer.png" class="object-cover w-full h-full" />
-			</div>
-  			<p>Play against AI opponent</p>
-	</div>
-    `;
-
-	const modal = createGameModeModal(modalContent.innerHTML);
-
-
+	  <div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
+		<h2 class="font-heading text-bold text-4xl">Single Player</h2>
+	  </div>
+	`;
+	
+	// Hover info text
+	const hoverInfo = "Play against an AI opponent.";
+	
+	// Hover info container positioned below the modal
+	const hoverInfoContainer = document.createElement("div");
+	hoverInfoContainer.className = "hover-info-wrapper max-w-full absolute top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300";
+	hoverInfoContainer.innerHTML = `
+	  <div class="hover-info-content p-4 text-white text-sm rounded-lg shadow-lg">
+		${hoverInfo}
+	  </div>
+	`;
+	
+	// Append the modal content and hover info container
+	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/singlePlayer_bw.png"));
+	modal.appendChild(hoverInfoContainer);
+  
 	return modal;
-}
+  }
+  
+  
+  
+
 
 
 function gameModeModalMultiPlayer() {
 	const appDiv = document.getElementById("app")!;
 
+	const modal = document.createElement("div");
+	modal.id = "1v1-modal"
+	modal.className = "game-mode-modal relative inline-block w-fit h-fit text-primary transition-transform";
 	
+	const hoverInfo = "Organize a tournament between your friends and enemies";
+
 	const modalContent = document.createElement("div");
 	modalContent.innerHTML = `
-		<div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
-			<h2 class="font-heading text-bold text-3xl">1 VS 1</h2>
-	
-			<div class="w-[80%] border">
-				<img src="src/assets/images/multiPlayer.png" class="object-cover w-full h-full" />
-			</div>
-			<p>Play against another player, locally or online</p>
-		</div>
+	  <div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
+		<h2 class="font-heading text-bold text-3xl">1v1</h2>
+		<div class="hover-info-wrapper max-w-full display-none left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+			<div class="hover-info-content p-4 text-white text-sm rounded-lg shadow-lg">
+				${hoverInfo}
+	  		</div>
+		</div
+	  </div>
 	`;
 
-
-	const modal = createGameModeModal(modalContent.innerHTML);
+  
+	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/1v1_bw.png"));
 	return modal;
-}
+  }
 
-function gameModeModalTournament() {
+
+
+
+  function gameModeModalTournament() {
 	const appDiv = document.getElementById("app")!;
 
+	const modal = document.createElement("div");
+	modal.id = "tournament-modal"
+	modal.className = "game-mode-modal relative inline-block w-fit h-fit text-primary transition-transform";
 	
+
+	const hoverInfo = "Organize a tournament between your friends and enemies";
+
 	const modalContent = document.createElement("div");
 	modalContent.innerHTML = `
-
-
-	<div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
+	  <div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
 		<h2 class="font-heading text-bold text-3xl">Tournament</h2>
-		<div class="w-[80%] border">
-			<img src="src/assets/images/multiPlayer.png" class="object-cover w-full h-full" style="clip-path="url(#image-mask)"/>
-		</div>
-		</p>Organize a tournament between your friends, or enemies<p>
-	</div>
+		<div class="hover-info-wrapper max-w-full absolute top-full left-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+			<div class="hover-info-content p-4 text-white text-sm rounded-lg shadow-lg">
+				${hoverInfo}
+	  		</div>
+		</div
+	  </div>
 	`;
 
-	const modal = createGameModeModal(modalContent.innerHTML);
+	
+	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/trophy_bw.png"));
 	return modal;
-}
+  }

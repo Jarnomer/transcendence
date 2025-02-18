@@ -188,6 +188,28 @@ path {
 
   
 .game-mode-modal:hover {
-		scale: 1.01;
+		scale: 1.005;
 }
+.hover-info-wrapper {
+	position: absolute;
+	top: 100%; /* Place it right below the modal */
+	left: 50%;
+	transform: translateX(-50%);
+	width: max-content; /* Adjust based on content */
+	opacity: 0;
+}
+
+.game-mode-modal:hover .hover-info-wrapper {
+	opacity: 1;
+	transition: opacity 0.5s ease-in 0.5s;
+  }
+  
+  .hover-info-content {
+	padding: 10px;
+	background-color: rgba(0, 0, 0, 0.7);
+	color: white;
+	border-radius: 8px;
+	text-align: center;
+	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  }
   
