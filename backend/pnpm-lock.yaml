@@ -8,6 +8,55 @@ importers:
 
   .: {}
 
+  services/game_service:
+    dependencies:
+      '@fastify/jwt':
+        specifier: ^9.0.4
+        version: 9.0.4
+      '@fastify/sensible':
+        specifier: ^6.0.3
+        version: 6.0.3
+      '@fastify/websocket':
+        specifier: ^11.0.2
+        version: 11.0.2
+      bcrypt:
+        specifier: ^5.1.1
+        version: 5.1.1(encoding@0.1.13)
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
+      fastify:
+        specifier: ^5.2.1
+        version: 5.2.1
+      fastify-plugin:
+        specifier: ^5.0.1
+        version: 5.0.1
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.0.0
+      sqlite:
+        specifier: ^5.1.1
+        version: 5.1.1
+      sqlite3:
+        specifier: ^5.1.7
+        version: 5.1.7
+    devDependencies:
+      '@types/bcrypt':
+        specifier: ^5.0.2
+        version: 5.0.2
+      '@types/dotenv':
+        specifier: ^6.1.1
+        version: 6.1.1
+      '@types/ws':
+        specifier: ^8.5.14
+        version: 8.5.14
+      ts-node-dev:
+        specifier: ^2.0.0
+        version: 2.0.0(@types/node@22.13.4)(typescript@5.7.3)
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
   services/main_server:
     dependencies:
       '@fastify/jwt':

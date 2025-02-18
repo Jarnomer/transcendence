@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import GameManager from "../services/remoteServices";
+import { GameManager } from '@my-backend/game_service';
 import '@fastify/websocket';
 
 declare module 'fastify' {
