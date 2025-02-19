@@ -11,9 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add event listeners and init page
   initPage();
   // Render a page
-
-
-
+  // goToPage("game"); // skip login page
   const token = localStorage.getItem("token");
   if (token) {
     btnLogout.classList.remove("hidden");

@@ -9,8 +9,11 @@ services:
       - "${BACKEND_PORT}"
     volumes:
       - ./backend:/app  # Mount backend source code
-      - /app/node_modules  # Prevent overriding node_modules
       - ./data:/app/data  # Mount data directory
+      - /app/node_modules  # Prevent overriding node_modules
+      - /app/services/main_server/node_modules  # Prevent overriding node_modules
+      - /app/services/user_service/node_modules  # Prevent overriding node_modules
+      - /app/services/remote_service/node_modules  # Prevent overriding node_modules
 
   frontend:
     build: ./frontend
@@ -24,12 +27,12 @@ services:
       - ./frontend:/app  # Mount frontend source code
       - /app/node_modules  # Prevent overriding node_modules
 
+
   nginx:
     build: ./nginx
     image: nginx:latest
     container_name: nginx
     ports: 
-      - "80:80"
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf

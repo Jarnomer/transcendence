@@ -66,11 +66,13 @@ const appDiv = document.getElementById("app")!;
 	</div>
 	  <canvas id="gameCanvas" class="opening mt-2 glass-box" width="800" height="400"></canvas>
 	`;
-	gameConnect();
-	setTimeout(() => {
-	  initGame();
-	  gameLoop();
-	}, 100);
+	let gameState: any = {};
+	let ws: WebSocket;
+	const token = localStorage.getItem("token");
+	ws = new WebSocket(
+	  `wss://${window.location.host}/ws/remote/game/?gameId=1`
+	);
+	gameConnect(ws, gameState);
   }
 
 

@@ -1,0 +1,1 @@
+export {GameManager} from './gameManager';
