@@ -25,11 +25,12 @@ export async function settingsModal(): Promise<void> {
 		
 		<label>Choose a color:</label>
 		<div id="colorPickerContainer" class="mt-3 gap-0">
-  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#ff0000" style="background-color: #ff0000;"></button>
-  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#00ff00" style="background-color: #00ff00;"></button>
-  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#0000ff" style="background-color: #0000ff;"></button>
-  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#ffff00" style="background-color: #ffff00;"></button>
+  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#76f7fd" style="background-color: #76f7fd;"></button>
+  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#d6ec6f" style="background-color: #d6ec6f;"></button>
+  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#61d27e" style="background-color: #61d27e;"></button>
+  			<button class="color-option border-black border-2 w-8 h-8 mx-0" data-color="#ea355a" style="background-color: #ea355a;"></button>
 		</div>
+	
     </div>
   `;
   

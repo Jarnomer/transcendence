@@ -3,23 +3,26 @@ import { goToPage } from "../navigation";
 import { login } from "../api";
 
 
-export function renderLoginPage() {
-	const appDiv = document.getElementById("app")!;
+export function renderLoginPage() : HTMLDivElement {
 	const btnLogout = document.getElementById("btn-logout")!;
+
+	const loginPage = document.createElement("div");
+	loginPage.className = "w-full h-full";
+	loginPage.id = "login-page";
 	
 	const loginWindow = openLoginModal();
-	appDiv.appendChild(loginWindow);
+	loginPage.appendChild(loginWindow);
 	
-	const btnRegister = document.getElementById("btn-register")!;
-	const btnGuestLogin = document.getElementById("play-as-guest")!;
+	const btnRegister = loginPage.querySelector("#btn-register")!;
+	const btnGuestLogin = loginPage.querySelector("#play-as-guest")!;
 	
 	btnRegister.addEventListener("click", () => goToPage("register"));
-	btnGuestLogin.addEventListener("click", () => goToPage("game"));
+	btnGuestLogin.addEventListener("click", () => goToPage("home"));
   
-	document.getElementById("login-form")!.addEventListener("submit", async (e) => {
+	loginPage.querySelector("#login-form")!.addEventListener("submit", async (e) => {
 	  e.preventDefault();
-	  const username = (document.getElementById("login-username") as HTMLInputElement).value;
-	  const password = (document.getElementById("login-password") as HTMLInputElement).value;
+	  const username = (loginPage.querySelector("#login-username") as HTMLInputElement).value;
+	  const password = (loginPage.querySelector("#login-password") as HTMLInputElement).value;
 	  
 	  try {
 		const data = await login(username, password);
@@ -28,13 +31,7 @@ export function renderLoginPage() {
 		  localStorage.setItem("token", data.token);
 		  localStorage.setItem("username", data.username);
 		  btnLogout.classList.remove("hidden");
-		  setTimeout(() => {
-			loginWindow.classList.add("closing");
-			setTimeout(() => {
-				loginWindow.remove();
-				goToPage("home");
-			}, 400);
-		}, 500);
+		  goToPage("home");
 		} else {
 		  alert("Login failed!");
 		}
@@ -42,4 +39,6 @@ export function renderLoginPage() {
 		alert("Login failed!");
 	  }
 	});
+
+	return loginPage;
   }
