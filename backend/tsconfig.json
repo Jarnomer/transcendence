@@ -8,8 +8,10 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "outDir": "dist",
-    "rootDir": "src"
+    "baseUrl": ".",
+    "paths": {
+      "@my-backend/*": ["services/*/src"]
+    } 
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["services/**/*"],
 }

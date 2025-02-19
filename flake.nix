@@ -20,12 +20,12 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            nodejs_23
+            nodejs_22
             sqlite
           ];
           shellHook = ''
             echo "Launching development shell..."
-            echo "Using node version: `${pkgs.nodejs_23}/bin/node -v`"
+            echo "Using node version: `${pkgs.nodejs_22}/bin/node -v`"
             if [ ! -d "node_modules" ]; then
               if [ ! -f "package.json" ]; then
                 echo "Initializing package.json..."
