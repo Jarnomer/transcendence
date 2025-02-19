@@ -20,26 +20,74 @@ window.addEventListener("DOMContentLoaded", () => {
         // Automatically creates a default camera and light
         scene.createDefaultCameraOrLight(true, false, true);
 
+        // Table attributes
+        const tableWidth = 8, tableHeight = 0.2, tableDepth = 6;
+
         // Create the table
         const table = BABYLON.MeshBuilder.CreateBox("table", {
-            width: 8, height: 0.3, depth: 5
+            width: tableWidth, height: tableHeight, depth: tableDepth
         }, scene);
         table.position.y = -0.25; // Lower it slightly so it appears centered
 
-        // Paddles' attributes
+        // Paddle attributes
         const paddleWidth = 1, paddleHeight = 0.2, paddleDepth = 0.3;
 
-        const leftPaddle = BABYLON.MeshBuilder.CreateBox("leftPaddle", {
-            width: paddleWidth, height: paddleHeight, depth: paddleDepth
-        }, scene);
-        leftPaddle.position.set(-3.5, 0.2, 0); // Position on the left
-        leftPaddle.rotation.y = Math.PI / 2; // Rotate 90 degrees
+        const createPaddle = (name: string, xPosition: number) => {
+            const paddle = BABYLON.MeshBuilder.CreateBox(name, {
+                width: paddleWidth, height: paddleHeight, depth: paddleDepth
+            }, scene);
+            paddle.position.set(xPosition, 0.2, 0);
+            paddle.rotation.y = Math.PI / 2;
 
-        const rightPaddle = BABYLON.MeshBuilder.CreateBox("rightPaddle", {
-            width: paddleWidth, height: paddleHeight, depth: paddleDepth
-        }, scene);
-        rightPaddle.position.set(3.5, 0.2, 0); // Position on the right
-        rightPaddle.rotation.y = Math.PI / 2; // Rotate 90 degrees
+            // Make paddle transparent
+            const transparentMaterial = new BABYLON.StandardMaterial(`${name}Mat`, scene);
+            transparentMaterial.alpha = 0.3; // Adjust transparency level
+            paddle.material = transparentMaterial;
+
+            // Enable edges rendering for neon effect
+            paddle.enableEdgesRendering();
+            paddle.edgesWidth = 4.0; // Thickness of neon effect
+            paddle.edgesColor = new BABYLON.Color4(0, 1, 0, 1); // Neon green color
+
+            return paddle;
+        };
+
+        const leftPaddle = createPaddle("leftPaddle", -3.5);
+        const rightPaddle = createPaddle("rightPaddle", 3.5);
+
+        // Create sphere (ball) at the center of the table
+        const ball = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: 0.3 }, scene);
+        ball.position.set(0, 0.2, 0);
+
+        // Create bars at the edges of the table
+        const barHeight = 0.5, barDepth = 0.3;
+        const createBar = (name: string, zPosition: number) => {
+            const bar = BABYLON.MeshBuilder.CreateBox(name, { width: 8, height: barHeight, depth: barDepth }, scene);
+            bar.position.set(0, 0, zPosition);
+            return bar;
+        };
+
+        const topBar = createBar("topBar", -3);
+        const bottomBar = createBar("bottomBar", 3);
+
+        // Paddle movement
+        const paddleSpeed = 0.2;
+        window.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "w":
+                    leftPaddle.position.z -= paddleSpeed;
+                    break;
+                case "s":
+                    leftPaddle.position.z += paddleSpeed;
+                    break;
+                case "ArrowUp":
+                    rightPaddle.position.z -= paddleSpeed;
+                    break;
+                case "ArrowDown":
+                    rightPaddle.position.z += paddleSpeed;
+                    break;
+            }
+        });
 
         return scene;
     };
