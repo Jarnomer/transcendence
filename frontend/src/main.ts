@@ -11,16 +11,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Add event listeners and init page
   initPage();
   // Render a page
-  goToPage("game");
+  // goToPage("game"); // skip login page
   const token = localStorage.getItem("token");
-//   if (token) {
-//     btnLogout.classList.remove("hidden");
-//     setPreviousPage("home");
-//     goToPage("home");
-//   } else {
-//     setPreviousPage("login");
-//     goToPage("login");
-// }
+  if (token) {
+    btnLogout.classList.remove("hidden");
+    setPreviousPage("home");
+    goToPage("home");
+  } else {
+    setPreviousPage("login");
+    goToPage("login");
+}
 
 });
 
