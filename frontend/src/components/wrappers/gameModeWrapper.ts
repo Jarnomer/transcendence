@@ -9,6 +9,7 @@ export function createGameModeModal(content: string, imageUrl: string) {
 
       <path class="creator-img-container stroke-2 fill-primary" d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" stroke="currentColor"/>
       <!-- Use a div to apply clip-path inside foreignObject -->
+      <g>
       <foreignObject width="100%" height="100%">
       <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%; height:100%;">
       <img src="${imageUrl}" 
@@ -16,6 +17,7 @@ export function createGameModeModal(content: string, imageUrl: string) {
       <div style="position:absolute; inset:0; background-color:currentColor; mix-blend-mode:color; clip-path: url(#image-mask); -webkit-clip-path: url(#image-mask);"></div>
       </div>
       </foreignObject>
+      </g>
     </svg>
   `;
 

@@ -41,44 +41,7 @@ const appDiv = document.getElementById("app")!;
   }
 
 
-  export   function renderLoginPage() {
-    const loginWindow = openLoginModal();
-	const btnLogout = document.getElementById("btn-logout")!;
-    appDiv.appendChild(loginWindow);
-    
-    const btnRegister = document.getElementById("btn-register")!;
-    const btnGuestLogin = document.getElementById("play-as-guest")!;
-    
-    btnRegister.addEventListener("click", () => goToPage("register"));
-    btnGuestLogin.addEventListener("click", () => goToPage("game"));
-  
-    document.getElementById("login-form")!.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const username = (document.getElementById("login-username") as HTMLInputElement).value;
-      const password = (document.getElementById("login-password") as HTMLInputElement).value;
-      
-      try {
-        const data = await login(username, password);
-  
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("username", data.username);
-          btnLogout.classList.remove("hidden");
-          setTimeout(() => {
-            loginWindow.classList.add("closing");
-            setTimeout(() => {
-                loginWindow.remove();
-                goToPage("home");
-            }, 400);
-        }, 500);
-        } else {
-          alert("Login failed!");
-        }
-      } catch (err) {
-        alert("Login failed!");
-      }
-    });
-  }
+
 
   export function renderGamePage() {
 	appDiv.innerHTML = `
@@ -113,26 +76,7 @@ const appDiv = document.getElementById("app")!;
   }
 
 
-  export function renderRegisterPage() {
-	appDiv.appendChild(openRegisterModal());
-  
-	const backButton = document.getElementById("back-to-login")!;
-	backButton.addEventListener("click", () => goToPage("login"))
-  
-	document.getElementById("register-form")!.addEventListener("submit", async (e) => {
-	  e.preventDefault();
-	  const username = (document.getElementById("reg-username") as HTMLInputElement).value;
-	  const password = (document.getElementById("reg-password") as HTMLInputElement).value;
-  
-	  try {
-		const data = await register(username, password);
-		alert(data.message || "Registered successfully!");
-		goToPage("login");
-	  } catch (err) {
-		alert("Registration failed!");
-	  }
-	});
-  }
+
 
 
 

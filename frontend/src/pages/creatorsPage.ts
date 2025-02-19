@@ -1,166 +1,43 @@
 import { goBack } from "../navigation";
+import { createCreatorCard } from "../components/wrappers/creatorCardWrapper";
 
-export function renderCreatorsPage()
+
+
+
+export function renderCreatorsPage() : HTMLDivElement
 {
 
-	const appDiv = document.getElementById("app")!;
-	appDiv.classList.add("text-primary");
-	console.log("rendering creators page");
-
-	appDiv.innerHTML = `
-
-
-
-	<h1 class="w-full text-center font-heading text-3xl">Site created by:</h1>
-<div id="creators-container" class="relative grid grid-cols-1 gap-4 pt-2 px-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 border-primary text-primary h-full w-80% pt-1">
+  const creators = [
+    { imagePath: "./src/assets/svg/olli_halftone.svg", name: "Olli", role: "Front-End" },
+    { imagePath: "./src/assets/svg/janrau_halftone.svg", name: "Janrau", role: "Back-End / User Management" },
+    { imagePath: "./src/assets/svg/lassi_halftone.svg", name: "Lanrau", role: "Back-End / AI Opponent" },
+    { imagePath: "./src/assets/svg/jarno_halftone.svg", name: "Jarno", role: "3D / Microservices" },
   
+  ];
 
-<div class="svg-wrapper relative aspect-448-577">
-  <svg id="creator" class="w-full text-blue m-0 z-10 text-primary" viewBox="0 0 448 577" fill="black" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Define the clip path to match your shape -->
-      <clipPath id="image-mask">
-        <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
-      </clipPath>
-    </defs>
+	const appDiv = document.getElementById("app")!;
+  const creatorsPage = document.createElement("div")!;
+  creatorsPage.id = "creators-page";
+  creatorsPage.innerHTML =  `<h1 class="w-full text-center font-heading text-3xl">Site created by:</h1>`;
 
-    <!-- Background path -->
-    <path d="M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z" stroke="currentColor" stroke-width="3" class=" fill-primary" fill-opacity="0.2"/>
+  const creatorsContainer = document.createElement("div")!;
+  creatorsContainer.id = "creators-container";
+  creatorsContainer.className = "relative grid grid-cols-1 gap-4 pt-2 px-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 border-primary text-primary h-full w-80% pt-1"
+  
+  
+  
+  creators.forEach(creator => {
+    creatorsContainer.appendChild(createCreatorCard(creator));
+  });
+  
+  creatorsPage.appendChild(creatorsContainer);
 
-    <!-- Shape outline -->
-    <path class="creator-img-container stroke-2 fill-primary" d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" stroke="currentColor"/>
-    <!-- Embed External SVG with Clipping -->
-    <image href="./src/assets/svg/olli_halftone.svg" x="26" y="17" width="400" height="400" clip-path="url(#image-mask)" />
-  </svg>
+  return creatorsPage;
 
-  <!-- Content below the SVG -->
-  <div class="absolute bottom-8 w-full  text-center">
-    <h2>Olli</h2>
-    <p>front end</p>
-  </div>
-</div>
-
-
-
-<div class="svg-wrapper relative aspect-448-577">
-  <svg id="creator" class="w-full text-blue m-0 z-10 text-primary" viewBox="0 0 448 577" fill="black" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Define the clip path to match your shape -->
-      <clipPath id="image-mask">
-        <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
-      </clipPath>
-    </defs>
-
-    <!-- Background path -->
-    <path d="M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z" stroke="currentColor" stroke-width="3" class=" fill-primary" fill-opacity="0.2"/>
-
-    <!-- Shape outline -->
-    <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" class="fill-primary" />
-
-    <!-- Embed External SVG with Clipping -->
-    <image href="./src/assets/svg/janrau_halftone.svg" x="26" y="17" width="400" height="400" clip-path="url(#image-mask)" />
-  </svg>
-
-  <!-- Content below the SVG -->
-  <div class="absolute bottom-8 w-full text-center">
-    <h2>Janarau</h2>
-    <p>back end / user management</p>
-  </div>
-</div>
-
-
-
-<div class="svg-wrapper relative aspect-448-577">
-  <svg id="creator" class="w-full text-blue m-0 z-10 text-primary" viewBox="0 0 448 577" fill="black" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Define the clip path to match your shape -->
-      <clipPath id="image-mask">
-        <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
-      </clipPath>
-    </defs>
-
-    <!-- Background path -->
-    <path d="M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z" stroke="currentColor" stroke-width="3" class=" fill-primary" fill-opacity="0.2"/>
-
-    <!-- Shape outline -->
-    <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" class="fill-primary" />
-
-    <!-- Embed External SVG with Clipping -->
-    <image href="./src/assets/svg/lassi_halftone.svg" x="26" y="17" width="400" height="400" clip-path="url(#image-mask)" />
-  </svg>
-
-  <!-- Content below the SVG -->
-  <div class="absolute bottom-8 w-full text-center">
-    <h2>Lassi</h2>
-    <p>Back End / AI Opponent</p>
-  </div>
-</div>
-
-
-
-
-<div class="svg-wrapper relative aspect-448-577">
-  <svg id="creator" class="w-full text-blue m-0 z-10 text-primary" viewBox="0 0 448 577" fill="black" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <!-- Define the clip path to match your shape -->
-      <clipPath id="image-mask">
-        <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
-      </clipPath>
-    </defs>
-
-    <!-- Background path -->
-    <path d="M43.0948 1L1 48.7056V552H383.01L423 506.68V1H43.0948Z" stroke="currentColor" stroke-width="3" class=" fill-primary" fill-opacity="0.2"/>
-
-    <!-- Shape outline -->
-    <path  d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" fill-opacity="0.80" stroke="currentColor"  class="fill-primary text-primary stroke-2  creator-img-container" />
-
-    <!-- Embed External SVG with Clipping -->
-    <image href="./src/assets/svg/jarno_halftone.svg" x="26" y="17" width="400" height="400" clip-path="url(#image-mask)" />
-  </svg>
-
-  <!-- Content below the SVG -->
-  <div class="absolute bottom-8 w-full text-center">
-    <h2>Jarno</h2>
-    <p>3D / Microservices</p>
-  </div>
-</div>
-
-	</div>`
-	;
-
-
-// document.getElementById("close-creators-page")?.addEventListener("click", () => {
-// 	console.log("close creators clicked")
-// 	goBack();
-// })
-
-
-// Select the path element
-// Select the path element and cast it as an SVGPathElement
-const pathElement = document.getElementById("myPath") as SVGPathElement | null;
-
-if (pathElement) {
-  const bbox = pathElement.getBBox(); // Get bounding box of the path
-  console.log("Width:", bbox.width);
-  console.log("Height:", bbox.height);
-  console.log("X:", bbox.x);
-  console.log("Y:", bbox.y);
 }
 
-const divElement = document.getElementById("image-container") as HTMLElement | null;
 
-if (divElement) {
-  const rect = divElement.getBoundingClientRect();
-  console.log("Div Bounding Box:", rect);
-}
 
-const svgElement = document.getElementById("asd");
-
-if (svgElement) {
-  const rect = svgElement.getBoundingClientRect();
-  console.log("SVG Size in Pixels:", rect.width, rect.height);
-}
-}
 
 
 // <img src="./src/assets/images/player1.jpg" alt="Profile Picture" class="profile-image w-full h-full object-cover" />

@@ -1,4 +1,5 @@
 import { goToPage } from "./navigation";
+import { login } from "./api";
 
 export function logout() {
 	const btnLogout = document.getElementById("btn-logout")!;
@@ -7,3 +8,4 @@ export function logout() {
 	btnLogout.classList.add("hidden");
 	goToPage("login");
   }
+
