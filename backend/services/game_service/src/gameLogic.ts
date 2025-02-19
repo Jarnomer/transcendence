@@ -17,8 +17,8 @@ export interface Player {
     private paddleHeight: number = 80;
     private paddleWidth: number = 10;
     private paddleSpeed: number = 8;
-    private ballSize: number = 6;
-    private ballSpeed: number = 5;
+    private ballSize: number = 10;
+    private ballSpeed: number = 7;
     
     private players: Record<string, Player>;
     private ball: Ball;
@@ -30,23 +30,22 @@ export interface Player {
         player1: { id: "player1", y: this.height / 2 - this.paddleHeight / 2, score: 0 },
         player2: { id: "player2", y: this.height / 2 - this.paddleHeight / 2, score: 0 },
       };
-      this.ball = {
-          x: this.width / 2,
-          y: this.height / 2,
-          dx: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
-          dy: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
-        };
+      this.resetBall();
       this.startGameLoop();
     }
   
     private resetBall(): void {
+      const angle = (Math.random() * Math.PI) / 3 - Math.PI / 6; // Random starting angle between -30° and 30°
+      const direction = Math.random() > 0.5 ? 1 : -1; // Randomly choose left or right
+    
       this.ball = {
         x: this.width / 2,
         y: this.height / 2,
-        dx: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
-        dy: this.ballSpeed * (Math.random() > 0.5 ? 1 : -1),
+        dx: direction * this.ballSpeed * Math.cos(angle),
+        dy: this.ballSpeed * Math.sin(angle),
       };
     }
+    
 
     startGameLoop(): void {
       if (this.updateInterval) return; // Prevent multiple intervals
@@ -60,8 +59,6 @@ export interface Player {
       this.ball.x += this.ball.dx;
       this.ball.y += this.ball.dy;
 
-      console.log("Ball position:", this.ball.x, this.ball.y); // Debugging
-  
       if (this.ball.y <= 0 || this.ball.y + this.ballSize >= this.height) {
         this.ball.dy *= -1;
       }
@@ -96,21 +93,40 @@ export interface Player {
     private checkPaddleCollision(): void {
       const leftPaddle = this.players.player1;
       const rightPaddle = this.players.player2;
-  
+      const maxBounceAngle = Math.PI / 4; // 45-degree max deflection
+    
+      // Left Paddle Collision
       if (
         this.ball.x <= this.paddleWidth &&
-        this.ball.y >= leftPaddle.y &&
+        this.ball.y + this.ballSize >= leftPaddle.y &&
         this.ball.y <= leftPaddle.y + this.paddleHeight
       ) {
-        this.ball.dx *= -1;
+        const relativeIntersectY = (this.ball.y + this.ballSize / 2) - (leftPaddle.y + this.paddleHeight / 2);
+        const normalizedIntersectY = relativeIntersectY / (this.paddleHeight / 2);
+        const bounceAngle = normalizedIntersectY * maxBounceAngle;
+        
+        // Ensures dx and dy combined maintain the total ball speed
+        this.ball.dy = this.ballSpeed * Math.sin(bounceAngle);
+        this.ball.dx = this.ballSpeed * Math.cos(bounceAngle);
+        
+        if (this.ball.dx < 0) this.ball.dx *= -1; // Ensure it moves right
       }
-  
+    
+      // Right Paddle Collision
       if (
         this.ball.x + this.ballSize >= this.width - this.paddleWidth &&
-        this.ball.y >= rightPaddle.y &&
+        this.ball.y + this.ballSize >= rightPaddle.y &&
         this.ball.y <= rightPaddle.y + this.paddleHeight
       ) {
-        this.ball.dx *= -1;
+        const relativeIntersectY = (this.ball.y + this.ballSize / 2) - (rightPaddle.y + this.paddleHeight / 2);
+        const normalizedIntersectY = relativeIntersectY / (this.paddleHeight / 2);
+        const bounceAngle = normalizedIntersectY * maxBounceAngle;
+        
+        // Ensures dx and dy combined maintain the total ball speed
+        this.ball.dy = this.ballSpeed * Math.sin(bounceAngle);
+        this.ball.dx = this.ballSpeed * Math.cos(bounceAngle);
+        
+        if (this.ball.dx > 0) this.ball.dx *= -1; // Ensure it moves left
       }
     }
   }
