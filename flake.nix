@@ -36,7 +36,7 @@
                 babylonjs babylonjs-gui sqlite3 \
                 fastify > /dev/null 2>&1
             else
-              echo "All packages installed!"
+              echo "All dependencies installed!"
             fi
             echo "Creating containers..."
             make all > /dev/null 2>&1
