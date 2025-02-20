@@ -1,57 +1,110 @@
-import { goToPage } from "../navigation";
 
+import { createGameModeModal } from "../components/wrappers/gameModeWrapper";
+import { goToPage } from "../navigation";
 import { gameModeState } from "../gameModeState";
 
 export function singlePlayerMenu() : HTMLDivElement {
-  const menu = document.createElement("div")!;
-  menu.id = "single-player-menu";
-  menu.className = "h-full w-full";
-  menu.innerHTML = `
-  <div class="h-[400px] flex justify-center">
-	<img id="difficulty-image" src="src/assets/images/robot_medium.png" class="object-contain" />
-  </div>
-  <div class="difficulty-selector">
-    <label for="difficulty" class="difficulty-label">Choose Difficulty:</label>
-    <input type="range" id="difficulty" name="difficulty"
-      min="1" max="3" value="2" step="1"
-      class="w-full h-1 bg-[var(--color-primary)] appearance-none cursor-pointer
-             [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:bg-[var(--color-primary)]
-             [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-[var(--color-primary)] 
-             [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none 
-             [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:duration-200
-             [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-[var(--color-primary)] 
-             [&::-moz-range-thumb]:rounded-full" />
-    <span id="difficulty-value">Medium</span>
-	<button id="play-button" class="border-primary border-2 py-2 mt-4 px-4">Play</button>
-  </div>
-`;
+	const homePage = document.createElement("div");
 
-// Type assertion for HTMLInputElement
-const slider = menu.querySelector('#difficulty') as HTMLInputElement;
-const difficultyText = menu.querySelector('#difficulty-value')!;
-const difficultyImage = menu.querySelector('#difficulty-image') as HTMLImageElement;
+	homePage.className = "w-full h-full";
+	homePage.id = "home-page";
+  
+	homePage.innerHTML = `
+	  <h2 class="w-full text-2xl mb-5 text-center">Choose difficulty:</h2>
+	  <div id="home-container" class="h-full w-80% relative grid grid-cols-1 gap-4 px-3 sm:grid-cols-2 md:grid-cols-3 border-primary pt-1">
+	  </div>`;
+  
+	const homeContainer = homePage.querySelector("#home-container")!;
+  
 
-// Difficulty levels and corresponding images
-const difficultyLevels = ["Easy", "Medium", "Hard"];
-const difficultyImages = [
-  "src/assets/images/robot_easy.png",
-  "src/assets/images/robot_medium.png",
-  "src/assets/images/robot_hard_4.png"
-];
-
-// Update difficulty text and image on slider change
-slider.addEventListener('input', function() {
-  const value = +slider.value; // Convert string to number
-  difficultyText.textContent = difficultyLevels[value - 1]; // Update text
-  difficultyImage.src = difficultyImages[value - 1]; // Update image
-});
+	homeContainer.appendChild(gameModeModalEasy());
+	homeContainer.appendChild(gameModeModalNormal());
+  homeContainer.appendChild(gameModeModalBrutal());
 
 
-const playButton = menu.querySelector('#play-button') as HTMLButtonElement;
-playButton.addEventListener("click", () => {
-  gameModeState.setGameMode("ai");
-  goToPage("game");
-})
+	return homePage;
+  }
+  
 
-return menu
-}
+
+
+  function gameModeModalEasy() : HTMLDivElement {
+  
+	const modal = document.createElement("div");
+	modal.id = "local-match-modal";
+	modal.className = "game-mode-modal relative inline-block w-fit h-fit text-primary transition-transform group";
+	
+	// Modal content
+	const modalContent = document.createElement("div");
+	modalContent.innerHTML = `
+    
+	  <div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
+		<h2 class="font-heading text-bold text-4xl">Easy</h2>
+	  </div>
+	`;
+	
+
+	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/ai_easy.png"));
+  
+	modal.addEventListener("click", () => 
+		{
+			gameModeState.setGameMode("ai");
+			goToPage("game");
+		})
+	return modal;
+  }
+  
+  
+  function gameModeModalNormal() : HTMLDivElement {
+  
+    const modal = document.createElement("div");
+    modal.id = "local-match-modal";
+    modal.className = "game-mode-modal relative inline-block w-fit h-fit text-primary transition-transform group";
+    
+    // Modal content
+    const modalContent = document.createElement("div");
+    modalContent.innerHTML = `
+      
+      <div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
+      <h2 class="font-heading text-bold text-4xl">Normal</h2>
+      </div>
+    `;
+    
+  
+    modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/ai.png"));
+    
+    modal.addEventListener("click", () => 
+      {
+        gameModeState.setGameMode("ai");
+        goToPage("game");
+      })
+    return modal;
+    }
+
+
+
+    function gameModeModalBrutal() : HTMLDivElement {
+  
+      const modal = document.createElement("div");
+      modal.id = "local-match-modal";
+      modal.className = "game-mode-modal relative inline-block w-fit h-fit text-primary transition-transform group";
+      
+      // Modal content
+      const modalContent = document.createElement("div");
+      modalContent.innerHTML = `
+        
+        <div id="multiplayer-modal-container" class="w-full h-full flex flex-col items-center text-center gap-5">
+        <h2 class="font-heading text-bold text-4xl">Brutal</h2>
+        </div>
+      `;
+      
+    
+      modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/ai_hard.png"));
+      
+      modal.addEventListener("click", () => 
+        {
+          gameModeState.setGameMode("ai");
+          goToPage("game");
+        })
+      return modal;
+      }

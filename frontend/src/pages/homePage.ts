@@ -55,7 +55,7 @@ export function renderHomePage() : HTMLDivElement {
 	`;
 	
 	// Append the modal content and hover info container
-	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/singlePlayer_bw.png"));
+	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/ai_3.png"));
 	modal.appendChild(hoverInfoContainer);
   
 	modal.addEventListener("click", () => goToPage("singlePlayerMenu"));
