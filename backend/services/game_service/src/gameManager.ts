@@ -1,5 +1,6 @@
 import PongGame from "./gameLogic";
 import '@fastify/websocket';
+import { getAIMove } from "./AIController";
 
 export class GameManager {
   private games: Record<string, PongGame>;
@@ -45,11 +46,32 @@ export class GameManager {
     });
   }
 
+  // updateGame(gameId: string): void {
+  //   if (!this.games[gameId]) return;
+  //   const updatedState = this.games[gameId].updateGameStatus({});
+  //   this.broadcast(gameId, { type: "update", state: updatedState });
+  // }
+
+  // Hacky AI implementation, the real function is commented out above
   updateGame(gameId: string): void {
     if (!this.games[gameId]) return;
-    const updatedState = this.games[gameId].updateGameStatus({});
+
+    const game = this.games[gameId];
+
+    // Get game state
+    const ball = game["ball"];  // Access private ball
+    const aiPaddle = game["players"]["player2"]; // Access private player2 (AI)
+
+    // Get AI move
+    const aiMove = getAIMove(ball, aiPaddle, game["height"], game["paddleHeight"]);
+
+    // Update game with AI move
+    const updatedState = game.updateGameStatus({ player2: aiMove });
+
+    // Broadcast updated state to clients
     this.broadcast(gameId, { type: "update", state: updatedState });
   }
+
 
   handlePlayerMove(gameId: string, playerId: string, move: any): void {
     if (!this.games[gameId]) return;
