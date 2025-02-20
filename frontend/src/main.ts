@@ -32,6 +32,7 @@ function initPage() {
   const settingsButton = document.getElementById("nav-settings-button")!;
   const homeButton = document.getElementById("nav-home-button")!;
   const btnGoBack = document.getElementById("button-go-back")!;
+  const btnProfile = document.getElementById("nav-profile-button")!;
 
   btnLogout.addEventListener("click", () => logout());
   
@@ -53,6 +54,8 @@ function initPage() {
     console.log("nav home clicked")
     goToPage("home");
   })
+
+  btnProfile.addEventListener("click", () => goToPage("profile"))
 
 }
 

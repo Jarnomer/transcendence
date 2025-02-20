@@ -18,7 +18,7 @@ export function openRegisterModal(): HTMLElement {
   		</form>
   `;
 
-  const registerButton = createSVGButton("Login", {
+  const registerButton = createSVGButton("Register", {
     id: "login-btn",
     type: "submit"
   });

@@ -3,29 +3,32 @@ import { createGameModeModal } from "../components/wrappers/gameModeWrapper";
 import { goToPage } from "../navigation";
 
 
-export function renderHomePage() {
-	const appDiv = document.getElementById("app")!;
+export function renderHomePage() : HTMLDivElement {
+	const homePage = document.createElement("div");
+
+	homePage.className = "w-full h-full";
+	homePage.id = "home-page";
   
-	appDiv.innerHTML = `
+	homePage.innerHTML = `
 	  <h2 class="w-full text-2xl mb-5 text-center">Welcome, ${localStorage.getItem("username") || "stranger"}</h2>
 	  <div id="home-container" class="h-full w-80% relative grid grid-cols-1 gap-4 px-3 sm:grid-cols-2 md:grid-cols-3 border-primary pt-1">
 	  </div>`;
   
-	const homeContainer = document.getElementById("home-container")!;
+	const homeContainer = homePage.querySelector("#home-container")!;
   
 	const singlePlayerModal = gameModeModalSinglePlayer();
 	homeContainer.appendChild(singlePlayerModal);
 	homeContainer.appendChild(gameModeModalMultiPlayer());
 	homeContainer.appendChild(gameModeModalTournament());
   
-	singlePlayerModal.addEventListener("click", () => goToPage("game"));
+
+	return homePage;
   }
   
 
 
 
-  function gameModeModalSinglePlayer() {
-	const appDiv = document.getElementById("app")!;
+  function gameModeModalSinglePlayer() : HTMLDivElement {
   
 	const modal = document.createElement("div");
 	modal.id = "singlePlayer-modal";
@@ -55,6 +58,7 @@ export function renderHomePage() {
 	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/singlePlayer_bw.png"));
 	modal.appendChild(hoverInfoContainer);
   
+	modal.addEventListener("click", () => goToPage("singlePlayerMenu"))
 	return modal;
   }
   
@@ -63,8 +67,7 @@ export function renderHomePage() {
 
 
 
-function gameModeModalMultiPlayer() {
-	const appDiv = document.getElementById("app")!;
+function gameModeModalMultiPlayer() : HTMLDivElement {
 
 	const modal = document.createElement("div");
 	modal.id = "1v1-modal"
@@ -92,8 +95,7 @@ function gameModeModalMultiPlayer() {
 
 
 
-  function gameModeModalTournament() {
-	const appDiv = document.getElementById("app")!;
+  function gameModeModalTournament() : HTMLDivElement {
 
 	const modal = document.createElement("div");
 	modal.id = "tournament-modal"

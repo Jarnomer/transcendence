@@ -2,11 +2,6 @@ export function createSVGModal(content: string) {
     const modal = document.createElement("div");
     modal.className = "relative inline-block w-fit h-fit text-primary transition-transform";
 
-
-//     <svg class="w-[1438px] text-primary" viewBox="0 0 1438 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-//     <path d="M0.5 2H481L506.5 27.5H929.5L955 2H1438" stroke="currentColor" class="stroke-2" />
-//   </svg>
-    // SVG Background
     const svg = `
     <svg class="w-full max-w-[300px] h-auto text-primary" viewBox="0 0 549 814" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
         <g filter="url(#filter0_d_1_197)">
