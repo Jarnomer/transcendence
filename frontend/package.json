@@ -15,6 +15,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
     "tailwindcss": "^4.0.6",
-    "babylonjs": "^7.49.0"
+    "babylonjs": "^7.49.0",
+    "babylonjs-gui": "^7.49.0"
   }
 }

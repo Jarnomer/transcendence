@@ -18,3 +18,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Other Files
+*.txt
+*.pdf

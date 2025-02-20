@@ -33,7 +33,8 @@
               fi
               echo "Installing dependencies..."
               npm i -D typescript vite tailwindcss \
-                babylonjs sqlite3 fastify > /dev/null 2>&1
+                babylonjs babylonjs-gui sqlite3 \
+                fastify > /dev/null 2>&1
             else
               echo "All packages installed!"
             fi
