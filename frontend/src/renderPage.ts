@@ -5,6 +5,8 @@ import { openRegisterModal } from "./components/modals/registerModal";
 import { register } from "./api";
 import { login } from "./api";
 import { goToPage } from "./navigation";
+import { playerScoreWrapper } from "./components/wrappers/playerScoreWrapper";
+import { gameModeState } from "./gameModeState";
 
 
 const appDiv = document.getElementById("app")!;
@@ -44,7 +46,7 @@ const appDiv = document.getElementById("app")!;
 
 
   export function renderGamePage() {
-	appDiv.innerHTML = `
+	appDiv.innerHTML += `
 	<div id="player-scores" class="w-[800px] flex justify-between gap-2 text-primary">
   
 	  <div class="player-scores player-1 h-[100px] w-full flex items-center glass-box overflow-hidden gap-5">
@@ -66,6 +68,9 @@ const appDiv = document.getElementById("app")!;
 	</div>
 	  <canvas id="gameCanvas" class="opening mt-2 glass-box" width="800" height="400"></canvas>
 	`;
+	console.log("game mode set to : ", gameModeState.getGameMode());
+
+	// CHECK GAMEMODESTATE.TS.
 	let gameState: any = {};
 	let ws: WebSocket;
 	const token = localStorage.getItem("token");

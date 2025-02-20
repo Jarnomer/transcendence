@@ -6,9 +6,11 @@ import { renderLoginPage } from "./pages/loginPage";
 import { renderRegisterPage } from "./pages/registerPage";
 import { renderProfilePage } from "./pages/profilePage";
 import { singlePlayerMenu } from "./pages/singlePlayerMenu";
+import { render1v1Menu } from "./pages/1v1MenuPage";
 
 
-const pages = ["login", "game", "register", "creators", "home", "profile", "singlePlayerMenu"] as const;
+
+const pages = ["login", "game", "register", "creators", "home", "profile", "singlePlayerMenu", "pvpmenu"] as const;
 
 type PageName = typeof pages[number];
 
@@ -44,6 +46,7 @@ const pageRenderers: Record<PageName, () => HTMLElement | void> = {
     home: renderHomePage,
     profile: renderProfilePage,
     singlePlayerMenu: singlePlayerMenu,
+    pvpmenu: render1v1Menu,
     game: () => {
         renderGamePage(); // This function doesn't return an element
     }
