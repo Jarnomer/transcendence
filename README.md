@@ -7,15 +7,6 @@
 | Olli         | Front-end Framework | Live Chat         | ------           |
 | Jarno        | 3D Graphics         | Microservices     | ------           |
 
-| Major Modules       | Details                                        |
-|---------------------|------------------------------------------------|
-| Backend Framework   |  Have to use `Fastify` with `Node.js`          |
-
-| Minor Modules       | Details                                        |
-|---------------------|------------------------------------------------|
-| Front-end Framework |  Have to use `Tailwind CSS` with `Typescript`  |
-| Backend Database    |  Have to use `SQLite`                          |
-
 ### Legend
 | Icon | Description  |
 |------|--------------|
