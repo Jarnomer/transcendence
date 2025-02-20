@@ -1,25 +1,28 @@
 export interface Player {
-    id: string;
-    y: number;
-    score: number;
-  }
-  
-export interface Ball {
-  x: number;
+  id: string;
   y: number;
-  dx: number;
-  dy: number;
+  score: number;
 }
-  
+
+export interface Ball {
+x: number;
+y: number;
+dx: number;
+dy: number;
+}
+
 export default class PongGame {
   private width: number = 800;
   private height: number = 400;
   private paddleHeight: number = 80;
   private paddleWidth: number = 10;
-  private paddleSpeed: number = 8;
+  private paddleSpeed: number = 10;
   private ballSize: number = 10;
   private ballSpeed: number = 7;
-  
+  private ballSpeedMultiplier: number = 1;
+  private maxBallSpeedMultiplier: number = 2.5;
+  private speedIncreaseFactor: number = 1.05; // 5% speed increase on each paddle hit
+
   private players: Record<string, Player>;
   private ball: Ball;
 
@@ -35,9 +38,10 @@ export default class PongGame {
   }
 
   private resetBall(): void {
+    this.ballSpeedMultiplier = 1;
     const angle = (Math.random() * Math.PI) / 3 - Math.PI / 6; // Random starting angle between -30° and 30°
     const direction = Math.random() > 0.5 ? 1 : -1; // Randomly choose left or right
-  
+
     this.ball = {
       x: this.width / 2,
       y: this.height / 2,
@@ -45,7 +49,7 @@ export default class PongGame {
       dy: this.ballSpeed * Math.sin(angle),
     };
   }
-  
+
 
   startGameLoop(): void {
     if (this.updateInterval) return; // Prevent multiple intervals
@@ -59,7 +63,15 @@ export default class PongGame {
     this.ball.x += this.ball.dx;
     this.ball.y += this.ball.dy;
 
-    if (this.ball.y <= 0 || this.ball.y + this.ballSize >= this.height) {
+    // Top wall collision
+    if (this.ball.y <= 0) {
+      this.ball.y = 0; // Prevent going inside the wall
+      this.ball.dy *= -1;
+    }
+
+    // Bottom wall collision
+    if (this.ball.y + this.ballSize >= this.height) {
+      this.ball.y = this.height - this.ballSize; // Prevent going inside the wall
       this.ball.dy *= -1;
     }
 
@@ -93,38 +105,46 @@ export default class PongGame {
   private checkPaddleCollision(): void {
     const leftPaddle = this.players.player1;
     const rightPaddle = this.players.player2;
-  
+
     // Left Paddle Collision
     if (
       this.ball.x <= this.paddleWidth &&
       this.ball.y + this.ballSize >= leftPaddle.y &&
       this.ball.y <= leftPaddle.y + this.paddleHeight
     ) {
-      this.handlePaddleCollision(leftPaddle.y);
+      this.ball.x = this.paddleWidth; // Prevent ball from getting stuck inside paddle
+      this.handlePaddleCollision(leftPaddle.y, true);
     }
-  
+
     // Right Paddle Collision
     if (
       this.ball.x + this.ballSize >= this.width - this.paddleWidth &&
       this.ball.y + this.ballSize >= rightPaddle.y &&
       this.ball.y <= rightPaddle.y + this.paddleHeight
     ) {
-      this.handlePaddleCollision(rightPaddle.y);
+      this.ball.x = this.width - this.paddleWidth - this.ballSize; // Prevent ball from getting stuck inside paddle
+      this.handlePaddleCollision(rightPaddle.y, false);
     }
   }
 
-  private handlePaddleCollision(paddleY: number): void {
+  private handlePaddleCollision(paddleY: number, isLeftPaddle: boolean): void {
     const maxBounceAngle = Math.PI / 4; // 45-degree max deflection
     const relativeIntersectY = (this.ball.y + this.ballSize / 2) - (paddleY + this.paddleHeight / 2);
     const normalizedIntersectY = relativeIntersectY / (this.paddleHeight / 2);
     const bounceAngle = normalizedIntersectY * maxBounceAngle;
+
+    // Increase speed multiplier
+    this.ballSpeedMultiplier = Math.min(
+      this.ballSpeedMultiplier * this.speedIncreaseFactor, 
+      this.maxBallSpeedMultiplier
+    );
+    const newSpeed = this.ballSpeed * this.ballSpeedMultiplier;
+
+    // Ensure dx is positive after hitting left paddle, negative after hitting right paddle
+    const direction = isLeftPaddle ? 1 : -1;
       
     // Ensures dx and dy combined maintain the total ball speed
-    this.ball.dy = this.ballSpeed * Math.sin(bounceAngle);
-    if (this.ball.dx < 0) {
-      this.ball.dx = this.ballSpeed * Math.cos(bounceAngle);
-    } else {
-      this.ball.dx = -this.ballSpeed * Math.cos(bounceAngle);
-    }
+    this.ball.dx = direction * newSpeed * Math.cos(bounceAngle);
+    this.ball.dy = newSpeed * Math.sin(bounceAngle);
   }
 }
