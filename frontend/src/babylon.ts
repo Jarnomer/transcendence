@@ -35,7 +35,7 @@ class PongGame {
     private readonly PADDLE_HEIGHT: number = 3;
     private readonly PADDLE_DEPTH: number = 0.5;
     private readonly BALL_SIZE: number = 0.5;
-    private readonly BALL_SPEED: number = 0.2;
+    private readonly BALL_SPEED: number = 0.1;
     private readonly PADDLE_SPEED: number = 0.3;
     private readonly EDGE_HEIGHT: number = 0.5;
     private readonly MAX_SCORE: number = 5;
@@ -71,14 +71,11 @@ class PongGame {
 
     private createScene(): void {
         // Create camera
-        this.camera = new BABYLON.ArcRotateCamera(
-            'camera',
+        this.camera = new BABYLON.ArcRotateCamera('camera',
             Math.PI / 2,  // Alpha (rotation around Y axis)
             0,            // Beta (rotation around X axis)
             25,           // Radius (distance from target)
-            new BABYLON.Vector3(0, 0, 0),
-            this.scene
-        );
+            new BABYLON.Vector3(0, 0, 0), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
         this.camera.attachControl(this.canvas, true);
 
@@ -89,31 +86,30 @@ class PongGame {
         this.camera.upperAlphaLimit = Math.PI / 2;
 
         // Create light
-        this.light = new BABYLON.HemisphericLight(
-            'light',
-            new BABYLON.Vector3(0, 1, 0),
-            this.scene
-        );
+        this.light = new BABYLON.HemisphericLight('light',
+            new BABYLON.Vector3(0, 1, 0), this.scene);
         this.light.intensity = 0.7;
 
         // Create table
-        this.table = BABYLON.MeshBuilder.CreateBox(
-            'table',
-            { width: this.TABLE_WIDTH, height: 0.1, depth: this.TABLE_HEIGHT },
-            this.scene
-        );
+        this.table = BABYLON.MeshBuilder.CreateBox('table', {
+            width: this.TABLE_WIDTH, height: 0.1, depth: this.TABLE_HEIGHT
+        }, this.scene);
+
         const tableMaterial = new BABYLON.StandardMaterial('tableMaterial', this.scene);
         tableMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.2);
         this.table.material = tableMaterial;
 
-        // Create edges (top and bottom)
-        const topEdge = BABYLON.MeshBuilder.CreateBox(
-            'topEdge',
-            { width: this.TABLE_WIDTH, height: this.EDGE_HEIGHT, depth: 0.5 },
-            this.scene
-        );
+        // Create top edge
+        const topEdge = BABYLON.MeshBuilder.CreateBox('topEdge', {
+            width: this.TABLE_WIDTH, height: this.EDGE_HEIGHT, depth: 0.5
+        }, this.scene);
         topEdge.position.z = this.TABLE_HEIGHT / 2;
 
+        const edgeTopMaterial = new BABYLON.StandardMaterial('edgeMaterial', this.scene);
+        edgeTopMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+        topEdge.material = edgeTopMaterial;
+
+        // Create bottom edge
         const bottomEdge = BABYLON.MeshBuilder.CreateBox(
             'bottomEdge',
             { width: this.TABLE_WIDTH, height: this.EDGE_HEIGHT, depth: 0.5 },
@@ -121,40 +117,34 @@ class PongGame {
         );
         bottomEdge.position.z = -this.TABLE_HEIGHT / 2;
 
-        const edgeMaterial = new BABYLON.StandardMaterial('edgeMaterial', this.scene);
-        edgeMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
-        topEdge.material = edgeMaterial;
-        bottomEdge.material = edgeMaterial;
+        const edgeBottomMaterial = new BABYLON.StandardMaterial('edgeMaterial', this.scene);
+        edgeBottomMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+        bottomEdge.material = edgeBottomMaterial;
 
-        // Create left and right paddles
-        this.leftPaddle = BABYLON.MeshBuilder.CreateBox(
-            'leftPaddle',
-            { width: this.PADDLE_WIDTH, height: this.PADDLE_DEPTH, depth: this.PADDLE_HEIGHT },
-            this.scene
-        );
+        // Create left paddle
+        this.leftPaddle = BABYLON.MeshBuilder.CreateBox('leftPaddle', {
+            width: this.PADDLE_WIDTH, height: this.PADDLE_DEPTH, depth: this.PADDLE_HEIGHT
+        }, this.scene);
         this.leftPaddle.position.x = -this.TABLE_WIDTH / 2 + 1;
-
-        this.rightPaddle = BABYLON.MeshBuilder.CreateBox(
-            'rightPaddle',
-            { width: this.PADDLE_WIDTH, height: this.PADDLE_DEPTH, depth: this.PADDLE_HEIGHT },
-            this.scene
-        );
-        this.rightPaddle.position.x = this.TABLE_WIDTH / 2 - 1;
 
         const leftPaddleMaterial = new BABYLON.StandardMaterial('leftPaddleMaterial', this.scene);
         leftPaddleMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1);
         this.leftPaddle.material = leftPaddleMaterial;
+
+        // Create right paddle
+        this.rightPaddle = BABYLON.MeshBuilder.CreateBox('rightPaddle', {
+            width: this.PADDLE_WIDTH, height: this.PADDLE_DEPTH, depth: this.PADDLE_HEIGHT
+        }, this.scene);
+        this.rightPaddle.position.x = this.TABLE_WIDTH / 2 - 1;
 
         const rightPaddleMaterial = new BABYLON.StandardMaterial('rightPaddleMaterial', this.scene);
         rightPaddleMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
         this.rightPaddle.material = rightPaddleMaterial;
 
         // Create ball
-        this.ball = BABYLON.MeshBuilder.CreateSphere(
-            'ball',
-            { diameter: this.BALL_SIZE },
-            this.scene
-        );
+        this.ball = BABYLON.MeshBuilder.CreateSphere('ball', {
+            diameter: this.BALL_SIZE
+        }, this.scene);
 
         const ballMaterial = new BABYLON.StandardMaterial('ballMaterial', this.scene);
         ballMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
@@ -206,37 +196,33 @@ class PongGame {
             }
         });
 
-        // Update paddle positions based on key presses
+        // Update paddle positions on key press
         this.scene.registerBeforeRender(() => {
             if (this.gameState !== 'playing') return;
 
-            // Left paddle controls (W and S)
+            // Left paddle controls
             if (keyMap['w'] || keyMap['W']) {
-                this.leftPaddle.position.z += this.PADDLE_SPEED;
-                // Clamp position
+                this.leftPaddle.position.z += this.PADDLE_SPEED; // Clamp position
                 if (this.leftPaddle.position.z + this.PADDLE_HEIGHT / 2 > this.TABLE_HEIGHT / 2) {
                     this.leftPaddle.position.z = this.TABLE_HEIGHT / 2 - this.PADDLE_HEIGHT / 2;
                 }
             }
             if (keyMap['s'] || keyMap['S']) {
-                this.leftPaddle.position.z -= this.PADDLE_SPEED;
-                // Clamp position
+                this.leftPaddle.position.z -= this.PADDLE_SPEED; // Clamp position
                 if (this.leftPaddle.position.z - this.PADDLE_HEIGHT / 2 < -this.TABLE_HEIGHT / 2) {
                     this.leftPaddle.position.z = -this.TABLE_HEIGHT / 2 + this.PADDLE_HEIGHT / 2;
                 }
             }
 
-            // Right paddle controls (Up and Down arrows)
+            // Right paddle controls
             if (keyMap['ArrowUp']) {
-                this.rightPaddle.position.z += this.PADDLE_SPEED;
-                // Clamp position
+                this.rightPaddle.position.z += this.PADDLE_SPEED; // Clamp position
                 if (this.rightPaddle.position.z + this.PADDLE_HEIGHT / 2 > this.TABLE_HEIGHT / 2) {
                     this.rightPaddle.position.z = this.TABLE_HEIGHT / 2 - this.PADDLE_HEIGHT / 2;
                 }
             }
             if (keyMap['ArrowDown']) {
-                this.rightPaddle.position.z -= this.PADDLE_SPEED;
-                // Clamp position
+                this.rightPaddle.position.z -= this.PADDLE_SPEED; // Clamp position
                 if (this.rightPaddle.position.z - this.PADDLE_HEIGHT / 2 < -this.TABLE_HEIGHT / 2) {
                     this.rightPaddle.position.z = -this.TABLE_HEIGHT / 2 + this.PADDLE_HEIGHT / 2;
                 }
@@ -251,8 +237,7 @@ class PongGame {
         // Randomize ball direction
         const angle = Math.random() * Math.PI * 2;
         this.ballVelocity = new BABYLON.Vector3(
-            Math.cos(angle) * this.BALL_SPEED,
-            0,
+            Math.cos(angle) * this.BALL_SPEED, 0,
             Math.sin(angle) * this.BALL_SPEED
         );
 
