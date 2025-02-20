@@ -23,7 +23,7 @@
 | ❌   | Undone       |
 | ⌛️   | In Progress  |
 
-## 🏆 Major Module : User Management
+## 🏆 Major Module [1/5] : User Management
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -36,7 +36,7 @@
 | User profiles display stats, such as wins and losses.                  |   ❌   |
 | Each user has a Match History including 1v1 games, dates, and relevant details, accessible to logged-in users. |   ❌   |
 
-## 🏆 Major Module : Server-Side Pong
+## 🏆 Major Module [2/5] : Server-Side Pong
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -46,14 +46,14 @@
 | Ensure that the server-side Pong game is responsive, providing an engaging and enjoyable gaming experience. |   ❌   |
 | Integrate the server-side Pong game with the web application, allowing users to play the game directly on the website. |   ❌   |
 
-## 🏆 Major Module : Remote players
+## 🏆 Major Module [3/5] : Remote players
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
 | It should be possible for two players to play remotely. Each player is located on a separated computer, accessing the same website and playing the same Pong game. |   ❌   |
 | Consider network issues, such as unexpected disconnections or lag. You must offer the best user experience possible. |   ⚠️   |
 
-## 🏆 Major Module : AI opponent
+## 🏆 Major Module [4/5] : AI opponent
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -65,7 +65,7 @@
 | You will need to explain in detail how your AI works during your evaluation. Creating an AI that does nothing is strictly prohibited; it must have the capability to win occasionally. |   ⚠️   |
 | The AI must utilize power-ups if you have chosen to implement the Game customization options module. |   ⚠️   |
 
-## 🏆 Major Module : Live Chat
+## 🏆 Major Module [5/5] : Live Chat
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -75,7 +75,7 @@
 | The tournament system should be able to notify users about the next game. |   ❌   |
 | The user should be able to access other players’ profiles through the chat interface. |   ❌   |
 
-## 🏆 Major Module : Advanced 3D Graphics
+## 🏆 Major Module [6/5] : Advanced 3D Graphics
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -83,7 +83,7 @@
 | Immersive Gameplay: The incorporation of advanced 3D techniques enhances the overall gameplay experience by providing users with a visually engaging and captivating Pong game. |   ❌   |
 | Technology Integration: The chosen technology for this module is Babylon.js. These tools will be used to create the 3D graphics, ensuring compatibility and optimal performance. |   ❌   |
 
-## 🏆 Major Module : Microservices
+## 🏆 Major Module [7/5] : Microservices
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
