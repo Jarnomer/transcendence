@@ -45,6 +45,7 @@ export class GameManager {
     });
   }
 
+  // Gonna hack AI opponent here
   updateGame(gameId: string): void {
     if (!this.games[gameId]) return;
     const updatedState = this.games[gameId].updateGameStatus({});
