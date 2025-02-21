@@ -15,5 +15,5 @@ COPY nginx.conf /etc/nginx/nginx.conf
 RUN chown -R nginxuser:nginxgroup /var/cache/nginx /var/run /etc/nginx /usr/share/nginx/html 
 USER nginxuser
 
-EXPOSE 443
+EXPOSE 8443
 CMD ["nginx", "-g", "daemon off;"]
