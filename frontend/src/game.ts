@@ -15,7 +15,7 @@ type Ball = {
   dy: number;
 };
 
-type GameState = {
+export type GameState = {
   canvas: HTMLCanvasElement | null;
   ctx: CanvasRenderingContext2D | null;
   paddleWidth: number;
@@ -31,7 +31,6 @@ type GameState = {
 
 export function initGame(gameState: GameState) {
   const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
-  new GameGraphics('renderCanvas');
   if (!canvas) {
     console.error("Canvas not found!");
     return;
@@ -67,6 +66,7 @@ export function initGame(gameState: GameState) {
   };
   console.log("Game initialized successfully.");
   Object.assign(gameState, gameStateInit);
+  new GameGraphics(canvas, gameState);
 }
 
 const keysPressed: Record<string, boolean> = {};

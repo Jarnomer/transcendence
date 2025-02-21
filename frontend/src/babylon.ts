@@ -1,5 +1,6 @@
 import * as BABYLON from 'babylonjs';
-// import * as GUI from 'babylonjs-gui';
+import * as GUI from 'babylonjs-gui';
+import { GameState } from './game';
 
 export class GameGraphics {
     // Game elements
@@ -11,8 +12,6 @@ export class GameGraphics {
     private camera: BABYLON.ArcRotateCamera;
     private light: BABYLON.HemisphericLight;
     private table: BABYLON.Mesh;
-    private leftEdge: BABYLON.Mesh;
-    private rightEdge: BABYLON.Mesh;
     private leftPaddle: BABYLON.Mesh;
     private rightPaddle: BABYLON.Mesh;
     private ball: BABYLON.Mesh;
@@ -24,14 +23,11 @@ export class GameGraphics {
     private readonly PADDLE_HEIGHT: number = 3;
     private readonly PADDLE_DEPTH: number = 0.5;
     private readonly BALL_SIZE: number = 0.5;
-    private readonly BALL_SPEED: number = 0.1;
-    private readonly PADDLE_SPEED: number = 0.3;
     private readonly EDGE_HEIGHT: number = 0.5;
-    private readonly MAX_SCORE: number = 5;
 
-    constructor(canvasId: string) {
+    constructor(canvas : HTMLCanvasElement, gameState: GameState) {
         // Initialize canvas and engine
-        this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+        this.canvas = canvas;
         this.engine = new BABYLON.Engine(this.canvas, true);
 
         // Create scene
@@ -132,8 +128,3 @@ export class GameGraphics {
         this.ball.material = ballMaterial;
     }
 }
-
-// Initialize the game
-// window.addEventListener('DOMContentLoaded', () => {
-//     new GameGraphics('renderCanvas');
-// });
