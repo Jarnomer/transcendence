@@ -1,5 +1,6 @@
 
 import { eventBus } from "./events";
+import { GameGraphics } from "./babylon";
 
 type Player = {
   id: string;
@@ -30,6 +31,7 @@ type GameState = {
 
 export function initGame(gameState: GameState) {
   const canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
+  new GameGraphics('renderCanvas');
   if (!canvas) {
     console.error("Canvas not found!");
     return;
