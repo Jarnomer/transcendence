@@ -20,3 +20,6 @@ dist-ssr
 *.sw?
 
 **data.db
+# Other Files
+*.txt
+*.pdf

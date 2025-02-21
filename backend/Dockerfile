@@ -6,7 +6,7 @@ RUN npm install -g pnpm@latest-10
 # Set CI to true to disable interactive prompts
 ENV CI=true
 
-COPY  . /app/.
+COPY . /app
 
 #RUN useradd -m appuser
 #RUN chown -R appuser:appuser /app/

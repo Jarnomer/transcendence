@@ -10,7 +10,7 @@ export function renderHomePage() : HTMLDivElement {
 	homePage.id = "home-page";
   
 	homePage.innerHTML = `
-	  <h2 class="w-full text-2xl mb-5 text-center">Welcome, ${localStorage.getItem("username") || "stranger"}</h2>
+	  <h2 class="w-full text-2xl mb-5 text-center">Welcome</h2>
 	  <div id="home-container" class="h-full w-80% relative grid grid-cols-1 gap-4 px-3 sm:grid-cols-2 md:grid-cols-3 border-primary pt-1">
 	  </div>`;
   
@@ -55,10 +55,10 @@ export function renderHomePage() : HTMLDivElement {
 	`;
 	
 	// Append the modal content and hover info container
-	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/singlePlayer_bw.png"));
+	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/ai_3.png"));
 	modal.appendChild(hoverInfoContainer);
   
-	modal.addEventListener("click", () => goToPage("singlePlayerMenu"))
+	modal.addEventListener("click", () => goToPage("singlePlayerMenu"));
 	return modal;
   }
   
@@ -87,7 +87,7 @@ function gameModeModalMultiPlayer() : HTMLDivElement {
 	  </div>
 	`;
 
-  
+	modal.addEventListener("click", () => goToPage("pvpmenu"));
 	modal.appendChild(createGameModeModal(modalContent.innerHTML, "src/assets/images/1v1_bw.png"));
 	return modal;
   }
