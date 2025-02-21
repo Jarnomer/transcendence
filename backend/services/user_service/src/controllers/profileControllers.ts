@@ -44,6 +44,7 @@ export class ProfileController {
       email: string;
       password: string;
       username: string;
+      display_name: string;
       avatar_url: string;
       online_status: boolean;
       wins: number;

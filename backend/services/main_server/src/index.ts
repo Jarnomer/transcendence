@@ -12,6 +12,7 @@ import sensible from '@fastify/sensible';
 // Import custom routes
 import userService from '@my-backend/user_service/';  // Everything from user-service is now available
 import remoteService from '@my-backend/remote_service/';
+import matchMakingService from '@my-backend/matchmaking_service/';
 
 // Create Fastify instance
 const app = fastify({
@@ -42,8 +43,10 @@ const start = async () => {
     // Initialize database
     app.register(databasePlugin);
     // Register routes
-    app.register(userService, {prefix: '/api'}); // Register user routes inside the plugin
-    app.register(remoteService, {prefix: '/ws/remote'}); // Register remote routes inside the plugin
+    app.register(userService, { prefix: '/api' }); // Register user routes inside the plugin
+    app.register(matchMakingService, { prefix: '/api' }); // Register matchmaking routes inside the plugin
+    app.register(remoteService, { prefix: '/ws/remote' }); // Register remote routes inside the plugin
+    
 
     await app.listen({ port: Number(process.env.PORT) || 8000, host: '0.0.0.0' });
     app.log.info(`Server is running on port ${process.env.PORT || 8000}`);
