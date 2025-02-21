@@ -11,7 +11,6 @@ import sensible from '@fastify/sensible';
 
 // Import custom routes
 import userService from '@my-backend/user_service/';  // Everything from user-service is now available
-
 import remoteService from '@my-backend/remote_service/';
 
 // Create Fastify instance
@@ -35,6 +34,7 @@ const start = async () => {
     app.register(fastifyJwt, {
       secret: process.env.JWT_SECRET || 'defaultsecret'
     });
+
     // Register authentication of JWT
     app.register(authPlugin);
     // Register error handler
@@ -42,7 +42,7 @@ const start = async () => {
     // Initialize database
     app.register(databasePlugin);
     // Register routes
-    app.register(userService, {prefix: '/api/auth'}); // Register user routes inside the plugin
+    app.register(userService, {prefix: '/api'}); // Register user routes inside the plugin
     app.register(remoteService, {prefix: '/ws/remote'}); // Register remote routes inside the plugin
 
     await app.listen({ port: Number(process.env.PORT) || 8000, host: '0.0.0.0' });

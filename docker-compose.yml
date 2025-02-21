@@ -9,7 +9,6 @@ services:
       - "${BACKEND_PORT}"
     volumes:
       - ./backend:/app  # Mount backend source code
-      - ./data:/app/data  # Mount data directory
       - /app/node_modules  # Prevent overriding node_modules
       - /app/services/main_server/node_modules  # Prevent overriding node_modules
       - /app/services/user_service/node_modules  # Prevent overriding node_modules
