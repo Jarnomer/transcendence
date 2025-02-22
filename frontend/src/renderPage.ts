@@ -74,7 +74,7 @@ const appDiv = document.getElementById("app")!;
 	let ws: WebSocket;
 	const token = localStorage.getItem("token");
 	ws = new WebSocket(
-	  `wss://${window.location.host}/ws/remote/game/?gameId=1`
+	  `wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`
 	);
 	gameConnect(ws, gameState);
   }

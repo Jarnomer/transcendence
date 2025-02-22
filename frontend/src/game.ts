@@ -50,7 +50,7 @@ export function initGame(gameState: GameState) {
     paddleWidth: 10,
     paddleHeight: 80,
     ballSize: 10,
-    paddleSpeed: 6,  
+    paddleSpeed: 6,
     ballSpeed: 2,   
 
     players: {
