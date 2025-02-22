@@ -1,7 +1,6 @@
 import { eventBus } from "./events";
 import { initGame, gameLoop } from "./game";
 
-
 const API_URL = "/api/auth";
 
 /* export async function gameConnect() {
@@ -16,20 +15,20 @@ const API_URL = "/api/auth";
   }
 } */
 
-export  async function gameConnect(ws: WebSocket, gameState: any) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
+export async function gameConnect(ws: WebSocket, gameState: any) {
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
       await connectWebSocket(ws, gameState, token);
-        setTimeout(() => {
-          initGame(gameState);
-          requestAnimationFrame((timestamp) => gameLoop(ws, gameState, timestamp));
-        }, 100);
-      } catch (err) {
-        console.error(err);
-      }
+      setTimeout(() => {
+        initGame(gameState);
+        requestAnimationFrame(() => gameLoop(gameState, ws));
+      }, 100);
+    } catch (err) {
+      console.error(err);
     }
   }
+}
 
 export async function login(username: string, password: string) {
   try {
@@ -86,12 +85,11 @@ export async function connectWebSocket(ws: WebSocket, gameState: any, token: str
         players: { ...gameState.players, ...data.state.players }, // Merge players
         ball: { ...gameState.ball, ...data.state.ball }, // Merge ball state
       };
-  
+
       Object.assign(gameState, newGameState);
       //eventBus.emit("gameUpdate", data);
     }
   };
-  
 
   ws.onerror = (error) => {
     console.error("WebSocket error:", error);
@@ -99,9 +97,7 @@ export async function connectWebSocket(ws: WebSocket, gameState: any, token: str
 
   ws.onclose = (event) => {
     console.log("WebSocket Disconnected", event);
-
-    if (event.code !== 1000) {
-      // 1000 means normal closure
+    if (event.code !== 1000) { // 1000 means normal closure
       alert("You have been disconnected! Logging out...");
     }
   };

@@ -8,45 +8,38 @@ import { goToPage } from "./navigation";
 import { playerScoreWrapper } from "./components/wrappers/playerScoreWrapper";
 import { gameModeState } from "./gameModeState";
 
-
 const appDiv = document.getElementById("app")!;
 
+export function animatePageChange(callback: () => void) {
+  const appDiv = document.getElementById("app")!;
+  appDiv.classList.add("closing");
 
-  export function animatePageChange(callback: () => void) {
-	const appDiv = document.getElementById("app")!;
-	appDiv.classList.add("closing");
-  
-	setTimeout(() => {
-	  appDiv.classList.remove("closing");
-	  callback(); // Render the new page
-	  appDiv.classList.add("opening");
-  
-	  setTimeout(() => {
-		appDiv.classList.remove("opening");
-	  }, 200);
-	}, 200);
+  setTimeout(() => {
+    appDiv.classList.remove("closing");
+    callback(); // Render the new page
+    appDiv.classList.add("opening");
+
+    setTimeout(() => {
+      appDiv.classList.remove("opening");
+    }, 200);
+  }, 200);
+}
+
+export function updateHeaderIconsVisibility() {
+  const headerIcons = document.getElementById("header-icons");
+  const token = localStorage.getItem("token");
+
+  if (!headerIcons) return;
+
+  if (!token) {
+    headerIcons.style.display = "none";
+  } else {
+    headerIcons.style.display = "flex";
   }
-  
+}
 
-
-  export function updateHeaderIconsVisibility() {
-	const headerIcons = document.getElementById("header-icons");
-	const token = localStorage.getItem("token");
-  
-	if (!headerIcons) return;
-  
-	if (!token) {
-	  headerIcons.style.display = "none";
-	} else {
-	  headerIcons.style.display = "flex";
-	}
-  }
-
-
-
-
-  export function renderGamePage() {
-	appDiv.innerHTML += `
+export function renderGamePage() {
+  appDiv.innerHTML += `
 	<div id="player-scores" class="w-[800px] flex justify-between gap-2 text-primary">
   
 	  <div class="player-scores player-1 h-[100px] w-full flex items-center glass-box overflow-hidden gap-5">
@@ -67,36 +60,22 @@ const appDiv = document.getElementById("app")!;
 	</div>
 	  <canvas id="gameCanvas" class="opening mt-2 glass-box" width="800" height="400"></canvas>
 	`;
-	console.log("game mode set to : ", gameModeState.getGameMode());
+  console.log("game mode set to : ", gameModeState.getGameMode());
 
-	// CHECK GAMEMODESTATE.TS.
-	let gameState: any = {};
-	let ws: WebSocket;
-	const token = localStorage.getItem("token");
-	ws = new WebSocket(
-	  `wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`
-	);
-	gameConnect(ws, gameState);
-  }
+  // CHECK GAMEMODESTATE.TS.
+  let gameState: any = {};
+  let ws: WebSocket;
+  const token = localStorage.getItem("token");
+  ws = new WebSocket(`wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`);
+  gameConnect(ws, gameState);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-  //   export function renderPage(page: "game" | "login" | "register" | "creators" | "home") {
+//   export function renderPage(page: "game" | "login" | "register" | "creators" | "home") {
 
 // 	if (page === getPreviousPage())
 // 		return;
 // 	const appDiv = document.getElementById("app")!;
-	
+
 // 	setPreviousPage(appDiv.getAttribute("data-current-page") as typeof page || null);
 // 	appDiv.setAttribute("data-current-page", page);
 
@@ -121,7 +100,6 @@ const appDiv = document.getElementById("app")!;
 //       renderHomePage();
 //     }
 //     else {
-      
 //       renderGamePage();
 //     }
 //   }
