@@ -38,7 +38,11 @@ export async function login(username: string, password: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    return await res.json();
+
+    const data = await res.json();
+    if (data.token)
+      localStorage.setItem("token", data.token);
+    return data
   } catch (err) {
     throw new Error("Login failed!");
   }

@@ -2,7 +2,9 @@ type ButtonOptions = {
 	id?: string;
 	type?: "button" | "submit" | "reset";
 	className?: string;
+	onClick?: () => void; 
   };
+  
   
   export function createSVGButton(label: string, { id = '', type = 'button', className = ''}: ButtonOptions = {}) {
 	const button = document.createElement("button");

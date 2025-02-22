@@ -284,3 +284,41 @@ path {
 	font-size: 16px;
 	font-weight: bold;
   }
+
+
+  #settings-modal {
+	position: fixed; /* Ensures it's positioned relative to the viewport */
+	top: 50%; /* Centering it vertically */
+	left: 50%; /* Centering it horizontally */
+	transform: translate(-50%, -50%); /* Adjusting it to be exactly in the center */
+	width: 80%; /* Adjust width as needed */
+	max-width: 600px; /* You can limit the max width */
+	min-width: 300px; /* You can set a minimum width */
+	border-radius: 8px; /* Rounded corners */
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow around the modal */
+	padding: 20px; /* Padding inside the modal */
+	z-index: 1000; /* Ensures it's above other content */
+  }
+
+  
+  
+  #settings-modal-content {
+	margin: 20px 0; /* Margin for content */
+  }
+  
+  .modal-container {
+	position: fixed; /* Ensures it's positioned relative to the viewport */
+	transform: translate(10%); /* Adjusting it to be exactly in the center */
+	top: 100px;
+	left: 50%
+  }
+
+  #auth-modal {
+	position: fixed; /* Ensures it's positioned relative to the viewport */
+	top: 50%; /* Centering it vertically */
+	left: 50%; /* Centering it horizontally */
+	transform: translate(-50%, -50%);
+	z-index: 1000; /* Ensures it's above other content */ 
+  }
+
+

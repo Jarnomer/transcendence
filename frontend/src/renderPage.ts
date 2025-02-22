@@ -13,7 +13,7 @@ const appDiv = document.getElementById("app")!;
 
 
   export function animatePageChange(callback: () => void) {
-	const appDiv = document.getElementById("app")!;
+	const appDiv = document.getElementById("app-container")!;
 	appDiv.classList.add("closing");
   
 	setTimeout(() => {
