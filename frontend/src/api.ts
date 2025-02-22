@@ -15,18 +15,11 @@ const API_URL = "/api/auth";
   }
 } */
 
-<<<<<<< HEAD
-export async function gameConnect(ws: WebSocket, gameState: any) {
-  const token = localStorage.getItem("token");
-  if (token) {
-    try {
-=======
 export  async function gameConnect(ws: WebSocket, gameState: any) {
     const token = localStorage.getItem("token");
     console.log("trying to connect the game with the token: ", token)
     if (token) {
       try {
->>>>>>> 3de4169bf449b73230d4594fb89ed458d41e3181
       await connectWebSocket(ws, gameState, token);
       setTimeout(() => {
         initGame(gameState);
