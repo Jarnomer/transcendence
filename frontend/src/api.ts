@@ -18,6 +18,7 @@ const API_URL = "/api/auth";
 
 export  async function gameConnect(ws: WebSocket, gameState: any) {
     const token = localStorage.getItem("token");
+    console.log("trying to connect the game with the token: ", token)
     if (token) {
       try {
       await connectWebSocket(ws, gameState, token);

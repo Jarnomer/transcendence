@@ -9,8 +9,8 @@ export const Game: React.FC = () => {
 
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [gameState, setGameState] = useState<any>({});
+//   const [ws, setWs] = useState<WebSocket | null>(null);
+//   const [gameState, setGameState] = useState<any>({});
 
   useEffect(() => {
 	console.log("Location state:", location.state); // Add this to check the state passed
@@ -21,19 +21,17 @@ export const Game: React.FC = () => {
   }, [location]);
 
   useEffect(() => {
-    console.log("Connecting to game...");
-    console.log("gameMode:", mode);
-    console.log("difficulty:", difficulty);
 
     let gameState: any = {};
     const token = localStorage.getItem("token");
-	console.log("token: ", token)
     if (token) {
-		console.log(token)
-      const socket = new WebSocket(`wss://${window.location.host}/ws/remote/game/?gameId=1`);
-      setWs(socket);
-	  console.log("connecting game")
-      gameConnect(socket, gameState);
+	  let gameState: any = {};
+	  let ws: WebSocket;
+	  const token = localStorage.getItem("token");
+	  ws = new WebSocket(
+		`wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`
+	  );
+	  gameConnect(ws, gameState);
     }
   }, []);
 
