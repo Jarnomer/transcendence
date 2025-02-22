@@ -46,10 +46,6 @@ const App: React.FC = () => {
 		}
 	}, []);
 
-
-	// useEffect(() => {
-	// 	animatePageChange();
-	//   }, [location]);
   
   
 	return (
