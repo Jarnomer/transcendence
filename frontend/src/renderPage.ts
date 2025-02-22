@@ -14,27 +14,19 @@ export function animatePageChange(callback: () => void) {
   const appDiv = document.getElementById("app")!;
   appDiv.classList.add("closing");
 
-  setTimeout(() => {
-    appDiv.classList.remove("closing");
-    callback(); // Render the new page
-    appDiv.classList.add("opening");
-
-    setTimeout(() => {
-      appDiv.classList.remove("opening");
-    }, 200);
-  }, 200);
-}
-
-export function updateHeaderIconsVisibility() {
-  const headerIcons = document.getElementById("header-icons");
-  const token = localStorage.getItem("token");
-
-  if (!headerIcons) return;
-
-  if (!token) {
-    headerIcons.style.display = "none";
-  } else {
-    headerIcons.style.display = "flex";
+  export function animatePageChange(callback: () => void) {
+	const appDiv = document.getElementById("app-container")!;
+	appDiv.classList.add("closing");
+  
+	setTimeout(() => {
+	  appDiv.classList.remove("closing");
+	  callback(); // Render the new page
+	  appDiv.classList.add("opening");
+  
+	  setTimeout(() => {
+		appDiv.classList.remove("opening");
+	  }, 200);
+	}, 200);
   }
 }
 
