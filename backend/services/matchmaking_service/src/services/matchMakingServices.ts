@@ -33,4 +33,16 @@ export class MatchMakingService {
       return ({status: 'error', message: 'Error matching user'});
     }
   }
+
+  async cancelById(user_id: string) {
+    const user = await this.matchMakingModel.getActiveUser(user_id);
+    if (!user) {
+      return null;
+    }
+    return this.matchMakingModel.deleteUserById(user.id);
+  }
+
+  async result(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
+    return this.matchMakingModel.updatePongMatch(game_id, winner_id, player1_score, player2_score);
+  }
 }

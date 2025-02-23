@@ -15,11 +15,10 @@
   "description": "",
   "dependencies": {
     "@fastify/jwt": "^9.0.4",
-    "@fastify/sensible": "^6.0.3",
+    "@my-backend/game_service": "workspace:*",
+    "@my-backend/matchmaking_service": "workspace:*",
     "@my-backend/remote_service": "workspace:*",
     "@my-backend/user_service": "workspace:*",
-    "@my-backend/matchmaking_service": "workspace:*",
-    "@my-backend/game_service": "workspace:*",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",

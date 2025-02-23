@@ -9,6 +9,6 @@ export async function matchMakingRoutes(fastify: FastifyInstance) {
 
   fastify.get("/status/:user_id", matchMakingController.getStatusById.bind(matchMakingController));
   fastify.post("/join", matchMakingController.join.bind(matchMakingController));
-  //fastify.delete("/cancel/:user_id", matchMakingController.cancelById.bind(matchMakingController));
-  //fastify.post("/result", matchMakingController.result.bind(matchMakingController));
+  fastify.delete("/cancel/:user_id", matchMakingController.cancelById.bind(matchMakingController));
+  fastify.post("/result", matchMakingController.result.bind(matchMakingController));
 }

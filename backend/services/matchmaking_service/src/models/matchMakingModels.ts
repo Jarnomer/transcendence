@@ -35,4 +35,12 @@ export class MatchMakingModel {
   async insertPongMatch(user_id: string, waiting_user_id: string) {
     return this.db.run(`INSERT INTO pong_matches (player1_id, player2_id) VALUES (?, ?)`, [user_id, waiting_user_id]);
   }
+
+  async updatePongMatch(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
+    return this.db.run(`UPDATE pong_matches SET winner_id = ?, player1_score = ?, player2_score = ? WHERE id = ?`, [winner_id, player1_score, player2_score, game_id]);
+  }
+
+  async deleteUserById(user_id: string) {
+    return this.db.run(`DELETE FROM matchmaking_queue WHERE user_id = ?`, [user_id]);
+  }
 }
