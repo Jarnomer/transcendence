@@ -90,11 +90,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ websocket }) => {
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       // Update paddle and ball positions
+
+      console.log(data)
       if (data.type === 'update') {
-        player1Ref.current.mesh.position.y = data.players.player1.y;
-        player2Ref.current.mesh.position.y = data.players.player2.y;
-        ballRef.current.mesh.position.x += data.Ball.dx;
-        ballRef.current.mesh.position.y += data.ball.dy;
+        player1Ref.current.mesh.position.y = data.state.players.player1.y;
+        player2Ref.current.mesh.position.y = data.state.players.player2.y;
+        ballRef.current.mesh.position.x += data.state.ball.dx;
+        ballRef.current.mesh.position.y += data.state.ball.dy;
       }
     };
 

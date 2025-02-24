@@ -5,7 +5,7 @@ import { Header } from './components/Header.tsx';
 import { Footer } from './components/Footer.tsx';
 import { GameMenu } from './pages/GameMenu.tsx';
 import { CreatorsPage } from "./pages/CreatorsPage.tsx"
-import { Game } from "./pages/Game.tsx";
+import { GamePage } from "./pages/GamePage.tsx";
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
 
@@ -31,6 +31,9 @@ export function animatePageChange() {
 	  }, 400);
 	}, 200);
   }
+
+
+  
 
 
 const App: React.FC = () => {
@@ -61,7 +64,7 @@ const App: React.FC = () => {
 			  <Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 			  <Route path="/login" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 			  <Route path="/gameMenu" element={<GameMenu />} />
-			  <Route path="/game" element={<Game />} />
+			  <Route path="/game" element={<GamePage />} />
 			  <Route path="/creators" element={<CreatorsPage />} />
 			</Routes>
 		{/* Conditionally render the modals */}

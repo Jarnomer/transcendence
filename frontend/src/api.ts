@@ -1,5 +1,5 @@
 import { eventBus } from "./events";
-import { initGame, gameLoop } from "./game";
+import { initGame, gameLoop } from "./game_utils";
 
 const API_URL = "/api/auth";
 
@@ -15,21 +15,23 @@ const API_URL = "/api/auth";
   }
 } */
 
-export  async function gameConnect(ws: WebSocket, gameState: any) {
-    const token = localStorage.getItem("token");
-    console.log("trying to connect the game with the token: ", token)
-    if (token) {
-      try {
-      await connectWebSocket(ws, gameState, token);
-      setTimeout(() => {
-        initGame(gameState);
-        requestAnimationFrame(() => gameLoop(gameState, ws));
-      }, 100);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-}
+// export  async function gameConnect(ws: WebSocket, gameState: any) {
+//     const token = localStorage.getItem("token");
+//     console.log("trying to connect the game with the token: ", token)
+//     if (token) {
+//       try {
+//       await connectWebSocket(ws, gameState, token);
+//       setTimeout(() => {
+//         initGame(gameState);
+//         requestAnimationFrame(() => gameLoop(gameState, ws));
+//       }, 100);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   }
+// }
+
+
 
 export async function login(username: string, password: string) {
   try {
