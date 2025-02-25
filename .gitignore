@@ -19,7 +19,9 @@ dist-ssr
 *.sln
 *.sw?
 
-**data.db
+# Database
+*.db
+
 # Other Files
 *.txt
 *.pdf

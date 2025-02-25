@@ -20,19 +20,15 @@ export const GamePage: React.FC = () => {
   }, [location]);
 
   function connectGame() {
-    setLoading(true);
     const token = localStorage.getItem("token");
-
+    console.log("Token:", token);
+    setLoading(true);
     if (token) {
-      const newWs = new WebSocket(
-        `wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`
-      );
-
+      const wsUrl = `wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`;
+      const newWs = new WebSocket(wsUrl);
       newWs.onopen = () => setLoading(false);
       newWs.onerror = () => setLoading(false);
-      
       setWs(newWs);
-      // gameConnect(newWs, setGameState); // Pass state setter function if needed
     } else {
       setLoading(false);
     }

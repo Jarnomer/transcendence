@@ -19,6 +19,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ websocket }) => {
   const ballRef = useRef({ mesh: null, x: 0, y: 0 });
 
   useEffect(() => {
+    
     if (!canvasRef.current || !websocket) return;
 
     const canvas = canvasRef.current;
@@ -86,7 +87,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ websocket }) => {
   // Handle position changes
   useEffect(() => {
     if (!websocket) return;
-
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       // Update paddle and ball positions
