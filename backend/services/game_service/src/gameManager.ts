@@ -1,21 +1,24 @@
 import PongGame from "./gameLogic";
 import '@fastify/websocket';
-import { getAIMove } from "./AIController";
+import { AIController } from "./AIController";
 
 export class GameManager {
   private games: Record<string, PongGame>;
   private clients: Record<string, Set<any>>; // Store WebSocket connections from Fastify
   private intervals: Record<string, NodeJS.Timeout>;
+  private aiControllers: Record<string, AIController>;
 
   constructor() {
     this.games = {};
     this.clients = {};
     this.intervals = {};
+    this.aiControllers = {};
   }
 
   createGame(gameId: string): void {
     this.games[gameId] = new PongGame();
     this.clients[gameId] = new Set();
+    this.aiControllers[gameId] = new AIController();
 
     this.intervals[gameId] = setInterval(() => {
       this.updateGame(gameId);
@@ -57,13 +60,19 @@ export class GameManager {
     if (!this.games[gameId]) return;
 
     const game = this.games[gameId];
+    const aiController = this.aiControllers[gameId];
 
-    // Get game state
-    const ball = game["ball"];  // Access private ball
-    const aiPaddle = game["players"]["player2"]; // Access private player2 (AI)
+    // AI should only update its plan once per second
+    if (aiController.shouldUpdate()) {
+      const ball = game["ball"];
+      const aiPaddle = game["players"]["player2"];
+      const paddleSpeed = game["paddleSpeed"]; // AI needs this to plan its moves
 
-    // Get AI move
-    const aiMove = getAIMove(ball, aiPaddle, game["height"], game["paddleHeight"]);
+      aiController.updateAIState(ball, aiPaddle, game["height"], game["paddleHeight"], paddleSpeed);
+    }
+
+    // Get AI move for this frame
+    const aiMove = aiController.getNextMove();
 
     // Update game with AI move
     const updatedState = game.updateGameStatus({ player2: aiMove });
@@ -98,6 +107,7 @@ export class GameManager {
     }
     delete this.games[gameId];
     delete this.clients[gameId];
+    delete this.aiControllers[gameId];
   }
     
     isGameExists(gameId: string): boolean {
