@@ -59,12 +59,12 @@ const App: React.FC = () => {
 		<div id="app-container" className="flex flex-col relative items-center min-h-screen w-screen text-primary bg-background gap-2 p-2">
 		  <Header /> 
 		  {/* <GoBackButton /> */}
-		  <div id="app-content" className="mt-2 relative overflow-hidden flex-grow relative justify-center items-center">
+		  <div id="app-content" className="mt-2 overflow-hidden flex-grow relative justify-center items-center">
 			<Routes>
 			  <Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
-			  <Route path="/login" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
-			  <Route path="/gameMenu" element={<GameMenu />} />
-			  <Route path="/game" element={<GamePage />} />
+			  <Route path="/login" element={ <LoginPage />} />
+			  <Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
+			  <Route path="/game" element={isLoggedIn ? <GamePage /> : <LoginPage />} />
 			  <Route path="/creators" element={<CreatorsPage />} />
 			</Routes>
 		{/* Conditionally render the modals */}
