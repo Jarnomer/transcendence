@@ -41,14 +41,20 @@ export async function login(username: string, password: string) {
       body: JSON.stringify({ username, password }),
     });
 
+    if (!res.ok) {
+      throw new Error(`Login failed! Status: ${res.status}`);
+    }
+
     const data = await res.json();
-    if (data.token)
+    if (data.token) {
       localStorage.setItem("token", data.token);
-    return data
+    }
+    return data;
   } catch (err) {
-    throw new Error("Login failed!");
+    throw err; // This will be caught in your try-catch block in LoginPage
   }
 }
+
 
 export async function register(username: string, password: string) {
   try {
@@ -57,9 +63,13 @@ export async function register(username: string, password: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
+
+    if (!res.ok) {
+      throw new Error(`Registeration failed! Status: ${res.status}`);
+    }
     return await res.json();
   } catch (err) {
-    throw new Error("Registration failed!");
+    throw err;
   }
 }
 
