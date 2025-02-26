@@ -53,8 +53,7 @@ export const LoginPage: React.FC = () => {
   
 
   return (
-	<div className="w-full h-full flex justify-center items-center">
-
+	<div className="w-full min-h-screen flex justify-center">
       <SVGModal>
 		<div className="text-center">
       <h1 className="text-3xl mb-2 font-heading font-bold">
@@ -87,6 +86,7 @@ export const LoginPage: React.FC = () => {
       </div>
     </div>
 	  </SVGModal>
-	</div>
+
+		</div>
   )
 };

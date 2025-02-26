@@ -26,7 +26,7 @@ export const HeaderNav: React.FC = () => {
   };
   
   return (
-    <div className="flex gap-3 pb-2 items-center ml-auto mr-10 text-primary">
+    <div className="flex gap-3 pb-2 items-center ml-auto text-primary">
       <NavIconButton id="nav-home-button" icon="home" onClick={() => navigate("/gameMenu")} />
       <NavIconButton id="nav-profile-button" icon="user" onClick={handleProfileClick} />
       <NavIconButton id="nav-chat-button" icon="chat" onClick={() => navigate("/chat")} />
