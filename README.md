@@ -37,11 +37,11 @@
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| Develop server-side logic for the Pong game to handle gameplay, ball movement, scoring, and player interactions. |   ❌   |
-| Create an API that exposes the necessary resources and endpoints to interact with the Pong game, allowing partial usage of the game via the Command-Line Interface (CLI) and web interface. |   ❌   |
-| Design and implement the API endpoints to support game initialization, player controls, and game state updates. |   ❌   |
-| Ensure that the server-side Pong game is responsive, providing an engaging and enjoyable gaming experience. |   ❌   |
-| Integrate the server-side Pong game with the web application, allowing users to play the game directly on the website. |   ❌   |
+| Develop server-side logic for the Pong game to handle gameplay, ball movement, scoring, and player interactions. |   ✅   |
+| Create an API that exposes the necessary resources and endpoints to interact with the Pong game, allowing partial usage of the game via the Command-Line Interface (CLI) and web interface. |   ⌛️   |
+| Design and implement the API endpoints to support game initialization, player controls, and game state updates. |   ⌛️   |
+| Ensure that the server-side Pong game is responsive, providing an engaging and enjoyable gaming experience. |   ⌛️   |
+| Integrate the server-side Pong game with the web application, allowing users to play the game directly on the website. |   ⌛️   |
 
 ## 🏆 Major Module [4/5] : Remote players
 
@@ -54,11 +54,11 @@
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| Develop an AI opponent that provides a challenging and engaging gameplay experience for users. |   ❌   |
-| The AI must replicate human behavior, which means that in your AI imple- mentation, you must simulate keyboard input. The constraint here is that the AI can only refresh its view of the game once per second, requiring it to anticipate bounces and other actions. |   ❌   |
-| Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves. |   ❌   |
-| Explore alternative algorithms and techniques to create an effective AI player without relying on A*. |   ❌   |
-| Ensure that the AI adapts to different gameplay scenarios and user interactions. |   ❌   |
+| Develop an AI opponent that provides a challenging and engaging gameplay experience for users. |   ⌛️   |
+| The AI must replicate human behavior, which means that in your AI imple- mentation, you must simulate keyboard input. The constraint here is that the AI can only refresh its view of the game once per second, requiring it to anticipate bounces and other actions. |   ✅   |
+| Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves. |   ⌛️   |
+| Explore alternative algorithms and techniques to create an effective AI player without relying on A*. |   ✅   |
+| Ensure that the AI adapts to different gameplay scenarios and user interactions. |   ⌛️   |
 | You will need to explain in detail how your AI works during your evaluation. Creating an AI that does nothing is strictly prohibited; it must have the capability to win occasionally. |   ⚠️   |
 | The AI must utilize power-ups if you have chosen to implement the Game customization options module. |   ⚠️   |
 

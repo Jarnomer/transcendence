@@ -20,27 +20,37 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (isRegistering) {
-        await register(username, password);
-        await login(username, password);
-        setIsLoggedIn(true);
-        navigate("/gameMenu");
-      } else {
-        await login(username, password);
-        setIsLoggedIn(true);
-        navigate("/gameMenu");
-      }
-    } catch (error: any) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+	e.preventDefault();
+	setLoading(true);
+	setError(null);
+  
+	try {
+	  // IF THE USER IS REGISTERING, REGISTER THE USER FIRST
+	  if (isRegistering) {
+		try {
+		  await register(username, password);
+		} catch (error: any) {
+		  alert("Registration failed!");
+		  setLoading(false);
+		  return;
+		}
+	  }
+  
+	  // THEN LOG IN THE USER
+	  try {
+		await login(username, password);
+		setIsLoggedIn(true);
+		navigate("/gameMenu");
+	  } catch (error: any) {
+		alert("Login failed!");
+		setLoading(false);
+		return;
+	  }
+	} finally {
+	  setLoading(false);
+	}
   };
+  
 
   return (
 	<div className="w-full h-full flex justify-center items-center">

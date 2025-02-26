@@ -1,52 +1,62 @@
-import { eventBus } from "./events";
-import { initGame, gameLoop } from "./game";
-
+import axios from "axios";
 const API_URL = "/api/auth";
 
-/* export async function gameConnect() {
-  const token = localStorage.getItem("token");
-  if (token) {
-    try {
-      const data = await fetchPongData(token);
-      console.log(data);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-} */
+export const api = axios.create({
+  baseURL: "/api", // Adjust the base URL according to your backend
+  headers: {
+    "Content-Type": "application/json",
+  },
+ //withCredentials: true, // Ensures cookies (like refresh tokens) are sent
+});
 
-export  async function gameConnect(ws: WebSocket, gameState: any) {
-    const token = localStorage.getItem("token");
-    console.log("trying to connect the game with the token: ", token)
-    if (token) {
-      try {
-      await connectWebSocket(ws, gameState, token);
-      setTimeout(() => {
-        initGame(gameState);
-        requestAnimationFrame(() => gameLoop(gameState, ws));
-      }, 100);
-    } catch (err) {
-      console.error(err);
-    }
+// Request Interceptor: Attach access token to requests
+api.interceptors.request.use(async (config) => {
+  let token = localStorage.getItem("token");
+
+  if (!token) {
+    token = await refreshToken();
+  }
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+}, (error) => Promise.reject(error));
+
+// Function to Refresh Token
+export async function refreshToken(): Promise<string | null> {
+  try {
+    const response = await api.get("/auth/refresh"); // Backend refresh route
+    const newToken = response.data.accessToken;
+    localStorage.setItem("token", newToken);
+    return newToken;
+  } catch (error) {
+    console.error("Failed to refresh token:", error);
+    localStorage.removeItem("token");
+    window.location.href = "/login"; // Redirect to login page
+    return null;
   }
 }
 
 export async function login(username: string, password: string) {
   try {
-    const res = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    if (data.token)
-      localStorage.setItem("token", data.token);
-    console.log(data.token);
-    return data
+    console.log("Logging in...");
+    const res = await api.post("/auth/login", { username, password });
+    if (res.status !== 200) {
+      throw new Error(`Login failed! Status: ${res.status}`);
+    }
+
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+    }
+    return res.data;
   } catch (err) {
-    throw new Error("Login failed!");
+    console.error("Login failed:", err);
+    throw err; // This will be caught in your try-catch block in LoginPage
   }
 }
+
 
 export async function register(username: string, password: string) {
   try {
@@ -55,11 +65,13 @@ export async function register(username: string, password: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    const data = await res.json();
-    console.log(data);
-    return data;
+
+    if (!res.ok) {
+      throw new Error(`Registeration failed! Status: ${res.status}`);
+    }
+    return await res.json();
   } catch (err) {
-    throw new Error("Registration failed!");
+    throw err;
   }
 }
 
@@ -109,3 +121,5 @@ export async function connectWebSocket(ws: WebSocket, gameState: any, token: str
     }
   };
 };
+
+
