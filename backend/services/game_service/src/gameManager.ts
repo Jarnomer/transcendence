@@ -18,7 +18,7 @@ export class GameManager {
   createGame(gameId: string): void {
     this.games[gameId] = new PongGame();
     this.clients[gameId] = new Set();
-    this.aiControllers[gameId] = new AIController();
+    this.aiControllers[gameId] = new AIController("easy");
 
     this.intervals[gameId] = setInterval(() => {
       this.updateGame(gameId);
