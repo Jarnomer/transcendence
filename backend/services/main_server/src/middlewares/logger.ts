@@ -14,6 +14,12 @@ async function loggerPlugin(fastify: FastifyInstance) {
     }
     );
 
+    fastify.addHook("onSend", (request: FastifyRequest, reply: FastifyReply, payload, done) => {
+        request.log.info({ payload }, "Sending response");
+        done();
+    }
+    );
+
     fastify.addHook("onError", (request: FastifyRequest, reply: FastifyReply, error: Error, done) => {
         request.log.error({ message: error.message }, "Error occurred");
         done();

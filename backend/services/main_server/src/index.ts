@@ -5,6 +5,7 @@ dotenv.config();
 // Import Fastify and its JWT plugin
 import fastify from 'fastify';
 import fastifyJwt from '@fastify/jwt';
+import cookie from '@fastify/cookie';
 import authPlugin from "./middlewares/auth";
 import databasePlugin from './db';
 import loggerPlugin from './middlewares/logger';
@@ -20,7 +21,7 @@ import adminRoutes from './routes/adminRoutes';
 // Create Fastify instance
 const app = fastify({
   logger: {
-    level: "info",
+    level: "trace",
     transport: {
       target: "pino-pretty",
       options: {
@@ -39,9 +40,21 @@ const start = async () => {
   try {
     // Register fastify-jwt plugin with secret from env variables
     app.register(fastifyJwt, {
-      secret: process.env.JWT_SECRET || 'defaultsecret'
+      secret: process.env.JWT_SECRET || 'defaultsecret',
+      cookie: {
+        cookieName: "refreshToken", // Name of the cookie storing refresh token
+        signed: false, // We are not signing cookies separately
+      },
     });
-    
+     app.register(cookie,{ // Register fastify-cookie plugin
+          parseOptions: {
+            httpOnly: true, // Prevent JavaScript access (security best practice)
+            sameSite: "strict", // Restrict cross-site access
+            secure: true, // Only send over HTTPS
+            path: "/api/auth/refresh", // Available for all routes
+          },
+        }
+      );
 
     // register error handler
     app.register(errorHandlerPlugin);

@@ -8,10 +8,10 @@ export class MatchMakingController {
     this.matchMakingService = matchMakingService;
   }
 
-  async getStatusById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
-    console.info("Getting user", user_id);
-    const user = await this.matchMakingService.getStatusById(user_id);
+  async getStatusByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
+    request.log.trace(`Getting user ${userID}`);
+    const user = await this.matchMakingService.getStatusByID(userID);
     if (!user) {
       errorHandler.handleNotFoundError("User not found");
     }
@@ -19,16 +19,16 @@ export class MatchMakingController {
   }
 
   async join(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.body as { user_id: string };
-    console.info("Joining user", user_id);
-    const user = await this.matchMakingService.join(user_id);
+    const { userID } = request.body as { userID: string };
+    request.log.trace(`Joining user ${userID}`);
+    const user = await this.matchMakingService.join(userID);
     reply.code(200).send(user);
   }
 
-  async cancelById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
-    console.info("Cancelling user", user_id);
-    const user = await this.matchMakingService.cancelById(user_id);
+  async cancelByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
+    request.log.trace(`Canceling user ${userID}`);
+    const user = await this.matchMakingService.cancelByID(userID);
     if (!user) {
       errorHandler.handleNotFoundError("User not found");
     }
@@ -36,9 +36,9 @@ export class MatchMakingController {
   }
 
   async result(request: FastifyRequest, reply: FastifyReply) {
-    const { game_id, winner_id, player1_score, player2_score } = request.body as { game_id: string, winner_id: string, player1_score: number, player2_score: number };
-    console.info("Updating result", game_id);
-      const result = await this.matchMakingService.result(game_id, winner_id, player1_score, player2_score);
-      reply.code(200).send(result);
+    const { gameID, winnerID, player1Score, player2Score } = request.body as { gameID: string, winnerID: string, player1Score: number, player2Score: number };
+    request.log.trace(`Updating result for game ${gameID}`);
+    const result = await this.matchMakingService.result(gameID, winnerID, player1Score, player2Score);
+    reply.code(200).send(result);
   }
 }

@@ -22,15 +22,15 @@ async function authHttp(request: FastifyRequest, reply: FastifyReply) {
   const token = request.headers["authorization"]?.split(" ")[1];
   if (!token) {
     errorHandler.handleNotAuthorizedError("No token provided for http");
-    await request.jwtVerify(); // Fastify JWT verification
   }
+  await request.jwtVerify(); // Fastify JWT verification
 }
 
-  async function authWebsocket(fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      const { token } = request.query as { token: string };
-      if (!token) {
-        errorHandler.handleNotAuthorizedError("No token provided for websocket");
-      await fastify.jwt.verify(token); // Fastify JWT verification
-    }
+async function authWebsocket(fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const { token } = request.query as { token: string };
+  if (!token) {
+    errorHandler.handleNotAuthorizedError("No token provided for websocket");
   }
-  export default fp(authPlugin);
+  await fastify.jwt.verify(token); // Fastify JWT verification
+}
+export default fp(authPlugin);

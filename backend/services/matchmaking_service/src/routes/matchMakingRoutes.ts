@@ -7,8 +7,8 @@ export async function matchMakingRoutes(fastify: FastifyInstance) {
   const matchMakingService = new MatchMakingService(fastify.db);
   const matchMakingController = new MatchMakingController(matchMakingService);
 
-  fastify.get("/status/:user_id", matchMakingController.getStatusById.bind(matchMakingController));
+  fastify.get("/status/:userID", matchMakingController.getStatusByID.bind(matchMakingController));
   fastify.post("/join", matchMakingController.join.bind(matchMakingController));
-  fastify.delete("/cancel/:user_id", matchMakingController.cancelById.bind(matchMakingController));
+  fastify.delete("/cancel/:userID", matchMakingController.cancelByID.bind(matchMakingController));
   fastify.post("/result", matchMakingController.result.bind(matchMakingController));
 }

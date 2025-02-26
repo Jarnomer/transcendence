@@ -1,10 +1,15 @@
-
-import { eventBus } from "./events";
+import {
+  Engine, Scene,
+  MeshBuilder, StandardMaterial,
+  FreeCamera, HemisphericLight,
+  Color3, Vector3
+} from 'babylonjs';
 
 type Player = {
   id: string;
   y: number;
   score: number;
+  mesh?: any;
 };
 
 type Ball = {
@@ -12,11 +17,13 @@ type Ball = {
   y: number;
   dx: number;
   dy: number;
+  mesh?: any;
 };
 
-type GameState = {
+export type GameState = {
   canvas: HTMLCanvasElement | null;
-  ctx: CanvasRenderingContext2D | null;
+  engine?: Engine;
+  scene?: Scene;
   paddleWidth: number;
   paddleHeight: number;
   ballSize: number;
@@ -35,36 +42,80 @@ export function initGame(gameState: GameState) {
     return;
   }
 
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    console.error("Canvas context is null!");
-    return;
-  }
-
   canvas.width = 800;
   canvas.height = 400;
 
+  const engine = new Engine(canvas, true);
+  const scene = new Scene(engine);
+  const camera = new FreeCamera("camera", new Vector3(0, 5, -10), scene);
+  const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
+  const paddleMaterial = new StandardMaterial("paddleMat", scene);
+
   const gameStateInit = {
     canvas,
-    ctx,
-    paddleWidth: 10,
-    paddleHeight: 80,
-    ballSize: 10,
-    paddleSpeed: 6,  
-    ballSpeed: 2,   
+    engine,
+    scene,
+
+    paddleWidth: 0.5,
+    paddleHeight: 2,
+    ballSize: 0.5,
+    paddleSpeed: 0.1,
+    ballSpeed: 0.05,
 
     players: {
-      player1: { id: "player1", y: canvas.height / 2 - 40, score: 0 },
-      player2: { id: "player2", y: canvas.height / 2 - 40, score: 0 },
+      player1: {
+        id: "player1",
+        y: 0,
+        score: 0,
+        mesh: MeshBuilder.CreateBox("paddle1", {
+          height: 2, width: 0.5, depth: 0.5
+        }, scene)
+      },
+      player2: {
+        id: "player2",
+        y: 0,
+        score: 0,
+        mesh: MeshBuilder.CreateBox("paddle2", {
+          height: 2, width: 0.5, depth: 0.5
+        }, scene)
+      }
     },
 
-    ball: { x: canvas.width / 2, y: canvas.height / 2, dx: 2, dy: 2 },
-    
+    ball: {
+      x: 0,
+      y: 0,
+      dx: 0.05,
+      dy: 0.05,
+      mesh: MeshBuilder.CreateSphere("ball", {
+        diameter: 0.5
+      }, scene)
+    },
+
     countdown: 3,
     countdownInProgress: false,
   };
-  console.log("Game initialized successfully.");
+
+  camera.setTarget(Vector3.Zero());
+  camera.attachControl(canvas, true);
+  light.intensity = 0.7;
+  paddleMaterial.diffuseColor = Color3.White();
+  gameStateInit.players.player1.mesh.position.x = -4;
+  gameStateInit.players.player2.mesh.position.x = 4;
+  gameStateInit.players.player1.mesh.material = paddleMaterial;
+  gameStateInit.players.player2.mesh.material = paddleMaterial;
+  gameStateInit.ball.mesh.material = paddleMaterial;
+
   Object.assign(gameState, gameStateInit);
+
+  engine.runRenderLoop(() => {
+    scene.render();
+  });
+
+  window.addEventListener("resize", () => {
+    engine.resize();
+  });
+
+  console.log("Game initialized successfully.");
 }
 
 const keysPressed: Record<string, boolean> = {};
@@ -77,58 +128,37 @@ document.addEventListener("keyup", (e) => {
   keysPressed[e.key] = false;
 });
 
-function update(gameState: GameState, ws: WebSocket) {
+function updateScene(gameState: GameState, ws: WebSocket) {
   if (gameState.countdownInProgress) return;
 
+  gameState.ball.mesh.position.x += gameState.ball.dx;
+  gameState.ball.mesh.position.y += gameState.ball.dy;
+
   if (ws.readyState === WebSocket.OPEN) {
-    if (keysPressed["w"]) ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "up" }));
-    if (keysPressed["s"]) ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "down" }));
-    if (keysPressed["ArrowUp"]) ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "up" }));
-    if (keysPressed["ArrowDown"]) ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "down" }));
+    if (keysPressed["w"]) {
+      gameState.players.player1.mesh.position.y += gameState.paddleSpeed;
+      ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "up" }));
+    }
+    if (keysPressed["s"]) {
+      gameState.players.player1.mesh.position.y -= gameState.paddleSpeed;
+      ws.send(JSON.stringify({ type: "move", playerId: "player1", move: "down" }));
+    }
+    if (keysPressed["ArrowUp"]) {
+      gameState.players.player2.mesh.position.y += gameState.paddleSpeed;
+      ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "up" }));
+    }
+    if (keysPressed["ArrowDown"]) {
+      gameState.players.player2.mesh.position.y -= gameState.paddleSpeed;
+      ws.send(JSON.stringify({ type: "move", playerId: "player2", move: "down" }));
+    }
   }
 }
 
-
-function draw(gameState: GameState) {
-  const { ctx, canvas, players, ball, paddleWidth, paddleHeight, ballSize, countdownInProgress, countdown } = gameState;
-  if (!ctx) return;
-  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue("--color-primary").trim() || "white";
-  ctx.clearRect(0, 0, canvas!.width, canvas!.height);
-
-  ctx.fillStyle = primaryColor;
-  ctx.fillRect(0, players["player1"].y, paddleWidth, paddleHeight);
-  ctx.fillRect(canvas!.width - paddleWidth, players["player2"].y, paddleWidth, paddleHeight);
-  ctx.fillRect(ball.x, ball.y, ballSize, ballSize);
-
-  if (countdownInProgress) {
-    ctx.font = "48px Arial";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(countdown.toString(), canvas!.width / 2, canvas!.height / 2);
-  }
-}
-
-function updateScoreUI(gameState: GameState) {
-  document.getElementById("player-1-score")!.textContent = gameState.players["player1"].score.toString();
-  document.getElementById("player-2-score")!.textContent = gameState.players["player2"].score.toString();
-}
-
-eventBus.on("gameUpdate", draw);
-
-let lastTime = 0; // Store the last timestamp to calculate deltaTime
-
-export function gameLoop(ws: WebSocket, gameState: GameState, timestamp: number) {
-  if (!gameState.ctx) {
-    console.error("Game loop stopped: No context found.");
+export function gameLoop(gameState: GameState, ws: WebSocket) {
+  if (!gameState.scene || !gameState.engine) {
+    console.error("Game loop stopped: No scene or engine found.");
     return;
   }
-
-  const deltaTime = (timestamp - lastTime) / 1000; // Convert to seconds
-  lastTime = timestamp; // Update lastTime for the next frame
-
-  update(gameState, ws); // Now update sends movement events properly
-  draw(gameState);
-
-  requestAnimationFrame((newTimestamp) => gameLoop(ws, gameState, newTimestamp));
+  updateScene(gameState, ws);
+  requestAnimationFrame(() => gameLoop(gameState, ws));
 }

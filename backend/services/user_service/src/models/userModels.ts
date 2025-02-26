@@ -1,4 +1,5 @@
 import { Database } from "sqlite";
+import {v4 as uuidv4} from 'uuid';
 
 export class UserModel {
   private db: Database;
@@ -8,10 +9,23 @@ export class UserModel {
   }
 
   async createUser(username: string, password: string) {
-    return this.db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, [username, password]);
+    const newUserId = uuidv4();
+    return await this.db.run(
+      `INSERT INTO users (id, username, password) VALUES (?, ?, ?)`,
+      [newUserId, username, password]
+    );
+
   }
 
   async findUser(username: string) {
-    return this.db.get(`SELECT * FROM users WHERE username = ?`, [username]);
+    return await this.db.get(`SELECT * FROM users WHERE username = ?`, [username]);
+  }
+
+  async saveRefreshToken(username: string, refreshToken: string) {
+    return await this.db.run(`UPDATE users SET refresh_token = ? WHERE username = ?`, [refreshToken, username]);
+  }
+
+  async deleteRefreshToken(username: string) {
+    return await this.db.run(`UPDATE users SET refresh_token = NULL WHERE username = ?`, [username]);
   }
 }

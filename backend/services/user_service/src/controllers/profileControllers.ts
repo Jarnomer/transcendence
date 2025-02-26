@@ -14,10 +14,10 @@ export class ProfileController {
   }
 
   // Register user
-  async getUserById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
-    console.info("Getting user", user_id);
-    const user = await this.profileService.getUserById(user_id);
+  async getUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
+    request.log.trace(`Getting user ${userID}`);
+    const user = await this.profileService.getUserByID(userID);
     if (!user) {
       errorHandler.handleBadRequestError("User not found");
     }
@@ -25,39 +25,39 @@ export class ProfileController {
   }
 
   async getAllUsers(request: FastifyRequest, reply: FastifyReply) {
-    console.info("Getting all users");
+    request.log.trace(`Getting all users`);
     const users = await this.profileService.getAllUsers();
     reply.code(200).send(users);
   }
 
-  async updateUserById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+  async updateUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
     const updates = request.body as Partial<{
       email: string;
       password: string;
       username: string;
-      display_name: string;
-      avatar_url: string;
-      online_status: boolean;
+      displayName: string;
+      avatarURL: string;
+      onlineStatus: boolean;
       wins: number;
       losses: number;
     }>;
-    console.info("Updating user", user_id);
+    request.log.trace(`Updating user ${userID}`);
     if (!Object.keys(updates).length) {
       errorHandler.handleBadRequestError("No updates provided");
     }
-    console.info("updates", updates);
-    const user = await this.profileService.updateUserById(user_id, updates);
+    request.log.trace(`Updates`, updates);
+    const user = await this.profileService.updateUserByID(userID, updates);
     if (!user) {
       errorHandler.handleNotFoundError("User not found");
     }
     reply.code(200).send({ user, message: "User updated successfully" });
   }
 
-  async deleteUserById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
-    console.info("Deleting user", user_id);
-    const user = await this.profileService.deleteUserById(user_id);
+  async deleteUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
+    request.log.trace(`Deleting user ${userID}`);
+    const user = await this.profileService.deleteUserByID(userID);
     if (!user) {
       errorHandler.handleNotFoundError("User not found");
     }
@@ -65,9 +65,9 @@ export class ProfileController {
   }
 
   async uploadAvatar(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { userID } = request.params as { userID: string };
     const avatar = await request.file();
-    console.info("Uploading avatar for user", user_id);
+    request.log.trace(`Uploading avatar for user ${userID}`);
     if (!avatar) {
       errorHandler.handleBadRequestError("No avatar provided");
       return;
@@ -77,16 +77,15 @@ export class ProfileController {
     if (!fs.existsSync(UPLOAD_DIR)) {
       fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
-
-    console.info("avatar name", avatar.filename);
+    request.log.trace(`avatar name ${avatar.filename}`);
     const fileExtension = path.extname(avatar.filename);
-    const fileName = `user${user_id}_${Date.now()}${fileExtension}`;
+    const fileName = `user${userID}_${Date.now()}${fileExtension}`;
 
     const avatarPath = path.join(UPLOAD_DIR, fileName);
     await pipeline(avatar.file, fs.createWriteStream(avatarPath));
 
-    const avatar_url = `api/uploads/${avatar.filename}`;
-    const user = await this.profileService.updateUserById(user_id, { avatar_url });
+    const avatarURL = `api/uploads/${avatar.filename}`;
+    const user = await this.profileService.updateUserByID(userID, { avatarURL });
     if (!user) {
       errorHandler.handleNotFoundError("User not found");
     }

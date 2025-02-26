@@ -6,3 +6,19 @@ declare module 'fastify' {
     db: Database;
   }
 }
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    user: {
+      id: string;
+      username: string;
+    };
+  }
+}
+
+declare module 'fastify' {
+  interface JwtPayload {
+    id: string;
+    username: string;
+  } 
+}
