@@ -8,27 +8,28 @@ export class ProfileService {
     this.profileModel = new ProfileModel(db);
   }
 
-  async getUserById(user_id: string) {
-    return this.profileModel.getUserById(user_id);
+  async getUserByID(userID: string) {
+    return await this.profileModel.getUserByID(userID);
   }
 
   async getAllUsers() {
-    return this.profileModel.getAllUsers();
+    return await this.profileModel.getAllUsers();
   }
 
-  async updateUserById(user_id: string, updates: Partial<{
+  async updateUserByID(userID: string, updates: Partial<{
     email: string;
     password: string;
     username: string;
-    avatar_url: string;
-    online_status: boolean;
+    displayName: string;
+    avatarURL: string;
+    onlineStatus: boolean;
     wins: number;
     losses: number;
   }>) {
-    return this.profileModel.updateUserById(user_id, updates);
+    return await this.profileModel.updateUserByID(userID, updates);
   }
 
-  async deleteUserById(user_id: string) {
-    return this.profileModel.deleteUserById(user_id);
+  async deleteUserByID(userID: string) {
+    return await this.profileModel.deleteUserByID(userID);
   }
 }

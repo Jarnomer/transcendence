@@ -1,10 +1,10 @@
 import fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import '@fastify/jwt';
 import { ProfileService } from "../services/profileServices";
-import '@fastify/sensible';
 import fs from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
+import { errorHandler } from '@my-backend/main_server/src/middlewares/errorHandler';
 
 export class ProfileController {
   private profileService: ProfileService;
@@ -14,106 +14,81 @@ export class ProfileController {
   }
 
   // Register user
-  async getUserById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
-    try {
-      const user = await this.profileService.getUserById(user_id);
-      if (!user) {
-        return reply.notFound("User not found");
-      }
-      reply.code(200).send(user);
-    } catch (error: any) {
-      reply.log.error(error);
-      return reply.internalServerError("Failed to get user");
+  async getUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
+    request.log.trace(`Getting user ${userID}`);
+    const user = await this.profileService.getUserByID(userID);
+    if (!user) {
+      errorHandler.handleBadRequestError("User not found");
     }
+    reply.code(200).send(user);
   }
 
   async getAllUsers(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const users = await this.profileService.getAllUsers();
-      reply.code(200).send(users);
-    } catch (error: any) {
-      reply.log.error(error);
-      return reply.internalServerError("Failed to get users");
-    }
+    request.log.trace(`Getting all users`);
+    const users = await this.profileService.getAllUsers();
+    reply.code(200).send(users);
   }
 
-  async updateUserById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+  async updateUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
     const updates = request.body as Partial<{
       email: string;
       password: string;
       username: string;
-      avatar_url: string;
-      online_status: boolean;
+      displayName: string;
+      avatarURL: string;
+      onlineStatus: boolean;
       wins: number;
       losses: number;
     }>;
-
-    try {
-      if (!Object.keys(updates).length) {
-        return reply.badRequest("No updates provided");
-      }
-      console.log("updates", updates);
-
-      const user = await this.profileService.updateUserById(user_id, updates);
-      if (!user) {
-        return reply.notFound("User not found");
-      }
-      reply.code(200).send({ user, message: "User updated successfully" });
-    } catch (error: any) {
-      reply.log.error(error);
-      return reply.internalServerError("Failed to update user");
+    request.log.trace(`Updating user ${userID}`);
+    if (!Object.keys(updates).length) {
+      errorHandler.handleBadRequestError("No updates provided");
     }
+    request.log.trace(`Updates`, updates);
+    const user = await this.profileService.updateUserByID(userID, updates);
+    if (!user) {
+      errorHandler.handleNotFoundError("User not found");
+    }
+    reply.code(200).send({ user, message: "User updated successfully" });
   }
 
-  async deleteUserById(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
-
-    try {
-      const user = await this.profileService.deleteUserById(user_id);
-      if (!user) {
-        return reply.notFound("User not found");
-      }
-      reply.code(200).send({ message: "User deleted successfully" });
-    } catch (error: any) {
-      reply.log.error(error);
-      return reply.internalServerError("Failed to delete user");
+  async deleteUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { userID } = request.params as { userID: string };
+    request.log.trace(`Deleting user ${userID}`);
+    const user = await this.profileService.deleteUserByID(userID);
+    if (!user) {
+      errorHandler.handleNotFoundError("User not found");
     }
+    reply.code(200).send({ message: "User deleted successfully" });
   }
 
   async uploadAvatar(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { userID } = request.params as { userID: string };
     const avatar = await request.file();
-
-    try {
-      if (!avatar) {
-        return reply.badRequest("No avatar provided");
-      }
-
-      const UPLOAD_DIR = path.resolve(process.env.UPLOAD_PATH || "./uploads");
-      console.log("path", UPLOAD_DIR);
-      // Ensure directory exists
-      if (!fs.existsSync(UPLOAD_DIR)) {
-        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-      }
-
-      console.log("avatar name", avatar.filename);
-      const fileExtension = path.extname(avatar.filename);
-      const fileName = `user${user_id}_${Date.now()}${fileExtension}`;
-
-      const avatarPath = path.join(UPLOAD_DIR, fileName);
-      await pipeline(avatar.file, fs.createWriteStream(avatarPath));
-
-      const avatar_url = `uploads/${avatar.filename}`;
-      const user = await this.profileService.updateUserById(user_id, { avatar_url });
-      if (!user) {
-        return reply.notFound("User not found");
-      }
-      reply.code(200).send({ user, message: "Avatar uploaded successfully" });
-    } catch (error: any) {
-      reply.log.error(error);
-      return reply.internalServerError("Failed to upload avatar");
+    request.log.trace(`Uploading avatar for user ${userID}`);
+    if (!avatar) {
+      errorHandler.handleBadRequestError("No avatar provided");
+      return;
     }
+
+    const UPLOAD_DIR = path.normalize(process.env.UPLOAD_PATH || "./uploads");
+    if (!fs.existsSync(UPLOAD_DIR)) {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    }
+    request.log.trace(`avatar name ${avatar.filename}`);
+    const fileExtension = path.extname(avatar.filename);
+    const fileName = `user${userID}_${Date.now()}${fileExtension}`;
+
+    const avatarPath = path.join(UPLOAD_DIR, fileName);
+    await pipeline(avatar.file, fs.createWriteStream(avatarPath));
+
+    const avatarURL = `api/uploads/${avatar.filename}`;
+    const user = await this.profileService.updateUserByID(userID, { avatarURL });
+    if (!user) {
+      errorHandler.handleNotFoundError("User not found");
+    }
+    reply.code(200).send({ user, message: "Avatar uploaded successfully" });
   }
 }
