@@ -13,6 +13,7 @@ export class UserController {
 
   // Register user
   async register(request: FastifyRequest, reply: FastifyReply) {
+    
     const { username, password } = request.body as { username: string; password: string };
     try {
       // Check if user already exists
@@ -34,6 +35,7 @@ export class UserController {
   // Login user
   async login(request: FastifyRequest, reply: FastifyReply) {
     const { username, password } = request.body as { username: string; password: string };
+    console.log(request.body);
     try {
       const user = await this.userService.findUser(username);
       reply.log.info(user);

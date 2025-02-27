@@ -16,4 +16,5 @@ RUN chown -R nginxuser:nginxgroup /var/cache/nginx /var/run /etc/nginx /usr/shar
 USER nginxuser
 
 EXPOSE 8443
+
 CMD ["nginx", "-g", "daemon off;"]

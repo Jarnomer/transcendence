@@ -1,79 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pong Game</title>
-  <script defer type="module" src="src/main.js"></script>
-  <link href="src/style.css" rel="stylesheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pong Game</title>
+    <script type="module" src="/src/main.tsx"></script>
+    <link href="src/style.css" rel="stylesheet" />
+  </head>
 
-</head>
-<body class="flex flex-col relative items-center min-h-screen w-screen text-primary bg-background gap-2 p-2">
+  <body>
 
-  <header id="header" class="header relative w-screen flex justify-center items-center p-2 pb-7">
-    <h1 class="logo text-3xl text-primary absolute">Super Pong 3D</h1>
-    <div id="header-icons" class="flex gap-3 pb-2 items-center ml-auto">
-      <button id="nav-home-button">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-        </svg>      
-      </button>
-      <button id="nav-profile-button">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="size-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-        </svg>
-      </button>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-      </svg>
-      <button id="nav-settings-button" class="bg-transparent">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-        </svg>
-      </button>
-      <div id="auth">
-        <span id="btn-logout" class="text-primary z-10 cursor-pointer hidden">Log Out</span>
-      </div>
-    </div>
-    <div class="absolute bottom-0 p-0 mt-5 left-1/2 -translate-x-1/2 w-[900px] sm:w-[1000px] md:w-[1200px] lg:w-[1438px]">
-      <svg class="w-[1438px] text-primary" viewBox="0 0 1438 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0.5 2H481L506.5 27.5H929.5L955 2H1438" stroke="currentColor" class="stroke-2" />
-      </svg>
-    </div>
-  </header>
-  
-  
-<div id="navigation-container" class="w-full">
-  <button id="button-go-back" class="absolute top-20 hidden left-10">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-    </svg>
-  </button>
-</div>
+  <div id="root" ></div>
 
 
-  <div id="app" class="mt-2 relative overflow-hidden flex-grow text-primary"></div>
-  
 
 
-  
-<svg width="0" height="0">
-  <defs>
-    <clipPath id="image-mask">
-      <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
-    </clipPath>
-  </defs>
-</svg>
+    <svg width="0" height="0">
+      <defs>
+        <clipPath id="image-mask">
+          <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
+        </clipPath>
+      </defs>
+    </svg> 
 
-    <footer class="h-15 w-screen flex items-center justify-center text-primary border-primary border-t-1 text-center">
-    <div id="footer-links" class="flex gap-5">
-      <p>about</p>
-      <p id="link-creators">creators</p>
-      <a href="https://github.com/jarnomer/transcendence/" target="_blank">github</a>
-    </div>
-  </footer> 
-</body>
+    <!-- Babylon.js 3D Scene -->
+    <!-- <canvas id="renderCanvas" class="w-[8000px] h-[600px] border border-primary"></canvas> -->
+
+    
+    
+  </body>
 </html>
-
-
