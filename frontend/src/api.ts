@@ -86,36 +86,36 @@ export async function fetchPongData(token: string) {
   }
 }
 
-export async function connectWebSocket(ws: WebSocket, gameState: any, token: string) {
-  console.log("Connecting to WebSocket...");
-  console.log("token:", token);
+// export async function connectWebSocket(ws: WebSocket, gameState: any, token: string) {
+//   console.log("Connecting to WebSocket...");
+//   console.log("token:", token);
 
-  ws.onopen = () => {
-    console.log("WebSocket connected");
-  };
+//   ws.onopen = () => {
+//     console.log("WebSocket connected");
+//   };
 
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data && data.type === "update") {
-      const newGameState = {
-        ...gameState, // Keep existing properties
-        players: { ...gameState.players, ...data.state.players }, // Merge players
-        ball: { ...gameState.ball, ...data.state.ball }, // Merge ball state
-      };
+//   ws.onmessage = (event) => {
+//     const data = JSON.parse(event.data);
+//     if (data && data.type === "update") {
+//       const newGameState = {
+//         ...gameState, // Keep existing properties
+//         players: { ...gameState.players, ...data.state.players }, // Merge players
+//         ball: { ...gameState.ball, ...data.state.ball }, // Merge ball state
+//       };
 
-      Object.assign(gameState, newGameState);
-      //eventBus.emit("gameUpdate", data);
-    }
-  };
+//       Object.assign(gameState, newGameState);
+//       //eventBus.emit("gameUpdate", data);
+//     }
+//   };
 
-  ws.onerror = (error) => {
-    console.error("WebSocket error:", error);
-  };
+//   ws.onerror = (error) => {
+//     console.error("WebSocket error:", error);
+//   };
 
-  ws.onclose = (event) => {
-    console.log("WebSocket Disconnected", event);
-    if (event.code !== 1000) { // 1000 means normal closure
-      alert("You have been disconnected! Logging out...");
-    }
-  };
-};
+//   ws.onclose = (event) => {
+//     console.log("WebSocket Disconnected", event);
+//     if (event.code !== 1000) { // 1000 means normal closure
+//       alert("You have been disconnected! Logging out...");
+//     }
+//   };
+// };
