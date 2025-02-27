@@ -58,7 +58,6 @@ export class GameManager {
   // }
 
   // Hacky AI implementation, the real function is commented out above
-  // Gonna hack AI opponent here
   updateGame(gameId: string): void {
     if (!this.games[gameId]) return;
 
