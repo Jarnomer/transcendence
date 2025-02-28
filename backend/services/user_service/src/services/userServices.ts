@@ -20,7 +20,7 @@ export class UserService {
     return await this.userModel.saveRefreshToken(username, refreshToken);
   }
 
-  async deleteRefreshToken(username: string) {
-    return await this.userModel.deleteRefreshToken(username);
+  async deleteRefreshToken(user_id: string) {
+    return await this.userModel.deleteRefreshToken(user_id);
   }
 }

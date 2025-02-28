@@ -8,43 +8,63 @@ export class MatchMakingModel {
     this.db = db;
   }
 
-  async getStatusByID(userID: string) {
-    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE user_id = ? ORDER BY joined_at DESC LIMIT 1`, [userID]);
+  async runTransaction(callback: (db: Database) => Promise<any>) {
+    try {
+      await this.db.run("BEGIN TRANSACTION"); // Start transaction
+      const result = await callback(this.db); // Run the transaction logic
+      await this.db.run("COMMIT"); // Commit transaction if successful
+      return result;
+    } catch (error) {
+      await this.db.run("ROLLBACK"); // Rollback transaction on error
+      throw error; // Rethrow error for handling
+    }
   }
 
-  async getActiveUser(userID: string) {
+  async getQueueStatusByID(user_id: string) {
+    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE user_id = ? ORDER BY joined_at DESC LIMIT 1`, [user_id]);
+  }
+
+  async getActiveUser(user_id: string) {
     return await this.db.get("SELECT * FROM matchmaking_queue WHERE user_id = ? AND status IN ('waiting', 'matched', 'playing')",
-    [userID]);
+    [user_id]);
   }
 
-  async getWaitingUser(userID: string) {
-    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE status = 'waiting' AND user_id != ? LIMIT 1`, [userID]);
+  async getWaitingUser(user_id: string) {
+    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE status = 'waiting' AND user_id != ? LIMIT 1`, [user_id]);
   }
 
-  async insertWaitingQueue(userID: string) {
+  async getGameByUserID(user_id: string, waiting_user_id: string) {
+    return await this.db.get(
+      `SELECT * FROM pong_matches WHERE (player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)`,
+      [user_id, waiting_user_id, waiting_user_id, user_id]
+    );
+  }
+
+  async insertWaitingQueue(user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO matchmaking_queue (id, user_id, status) VALUES (?, ?, 'waiting')`, [id, userID]);
+    return await this.db.run(`INSERT INTO matchmaking_queue (id, user_id, status) VALUES (?, ?, 'waiting')`, [id, user_id]);
   }
 
-  async insertMatchedQueue(userID: string, waitingUserUserID: string) {
+  async insertMatchedQueue(user_id: string, waiting_user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO matchmaking_queue (id, user_id, matched_with, status) VALUES (?, ?, ?, 'matched')`, [id, userID, waitingUserUserID]);
+    return await this.db.run(`INSERT INTO matchmaking_queue (id, user_id, matched_with, status) VALUES (?, ?, ?, 'matched')`, [id, user_id, waiting_user_id]);
   }
 
-  async updateQueue(userID: string, waitingUserID: string) {
-    return await this.db.run(`UPDATE matchmaking_queue SET status = 'matched'   , matched_with = ? WHERE id = ?`, [userID, waitingUserID]);
+  async updateQueue(user_id: string, waiting_user_id: string) {
+    return await this.db.run(`UPDATE matchmaking_queue SET status = 'matched'   , matched_with = ? WHERE id = ?`, [user_id, waiting_user_id]);
   }
 
-  async insertPongMatch(userID: string, waitingUserID: string) {
+  async insertPongMatch(user_id: string, waiting_user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO pong_matches (id, player1_id, player2_id) VALUES (?, ?, ?)`, [id, userID, waitingUserID]);
+    return await this.db.run(`INSERT INTO pong_matches (id, player1_id, player2_id) VALUES (?, ?, ?) RETURNING *`, [id, user_id, waiting_user_id]);
   }
 
-  async updatePongMatch(gameID: string, winnerID: string, player1Score: number, player2Score: number) {
-    return await this.db.run(`UPDATE pong_matches SET winner_id = ?, player1_score = ?, player2_score = ? WHERE id = ?`, [winnerID, player1Score, player2Score, gameID]);
+  async updatePongMatch(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
+    return await this.db.run(`UPDATE pong_matches SET winner_id = ?, player1_score = ?, player2_score = ? WHERE id = ?`, [winner_id, player1_score, player2_score, game_id]);
   }
 
-  async deleteUserById(userID: string) {
-    return await this.db.run(`DELETE FROM matchmaking_queue WHERE user_id = ?`, [userID]);
+  async deleteUserById(user_id: string) {
+    return await this.db.run(`DELETE FROM matchmaking_queue WHERE user_id = ?`, [user_id]);
   }
+
 }

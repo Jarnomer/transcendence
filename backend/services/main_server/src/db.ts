@@ -26,3 +26,4 @@ export default fp(async function databasePlugin(fastify: FastifyInstance) {
   fastify.decorate("db", db); // Now all routes have access to `fastify.db`
 });
 
+

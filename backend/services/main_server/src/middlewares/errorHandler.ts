@@ -30,6 +30,9 @@ class ErrorHandler {
         if (error instanceof ServiceError) {
             return reply.status(error.statusCode).send({ error: error.message });
         }
+        if (error.code === "FAST_JWT_EXPIRED") {
+            return reply.status(401).send({ error: "TOKEN_EXPIRED" });
+        }
         return reply.status(500).send({ error: "An unexpected error occurred" });
     }
 

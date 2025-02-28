@@ -32,9 +32,7 @@
                 npm init -y
               fi
               echo "Installing dependencies..."
-              npm i -D typescript vite tailwindcss \
-                babylonjs babylonjs-gui sqlite3 \
-                fastify > /dev/null 2>&1
+              npm install > /dev/null 2>&1
             else
               echo "All dependencies installed!"
             fi

@@ -25,7 +25,7 @@ export class UserModel {
     return await this.db.run(`UPDATE users SET refresh_token = ? WHERE username = ?`, [refreshToken, username]);
   }
 
-  async deleteRefreshToken(username: string) {
-    return await this.db.run(`UPDATE users SET refresh_token = NULL WHERE username = ?`, [username]);
+  async deleteRefreshToken(user_id: string) {
+    return await this.db.run(`UPDATE users SET refresh_token = NULL WHERE id = ?`, [user_id]);
   }
 }

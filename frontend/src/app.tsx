@@ -8,75 +8,128 @@ import { CreatorsPage } from "./pages/CreatorsPage.tsx"
 import { GamePage } from "./pages/GamePage.tsx";
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
-
+import { api } from './api';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { GoBackButton } from './components/GoBackButton.tsx';
 
 export const IsLoggedInContext = React.createContext<{
 	isLoggedIn: boolean;
 	setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-  } | undefined>(undefined);
+	logout: () => void;
+} | undefined>(undefined);
 
 
 export function animatePageChange() {
-	const appDiv = document.getElementById("app-content")!;
+	const appDiv = document.getElementById("root")!;
 	appDiv.classList.add("closing");
-  
+
 	setTimeout(() => {
-	  appDiv.classList.remove("closing");
-	  appDiv.classList.add("opening");
-  
-	  setTimeout(() => {
-		appDiv.classList.remove("opening");
-	  }, 400);
+		appDiv.classList.remove("closing");
+		appDiv.classList.add("opening");
+
+		setTimeout(() => {
+			appDiv.classList.remove("opening");
+		}, 400);
 	}, 200);
-  }
-
-
-  
-
+}
 
 const App: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false); // Modal state
-  
-	useEffect(() => {
-	  const token = localStorage.getItem("token");
-	  if (token) {
-		  setIsLoggedIn(true);
-		} else {
+	const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
+
+
+	// authentication check to backend database preventing unauthorized tokens
+	async function checkAuth() {
+		console.log("Checking auth");
+		const token = localStorage.getItem("token");
+		if (!token) {
+			setIsLoggedIn(false);
+			return;
+		}
+		try {
+			const res = await api.get<ValidateResponse>("/auth/validate"); // Backend should return 200 if valid
+			localStorage.setItem("userID", res.data.user.id);
+			localStorage.setItem("username", res.data.user.username);
+			console.log(res.data);
+			setIsLoggedIn(true);
+		} catch (error) {
+			console.error("Token validation failed:", error);
+			localStorage.removeItem("token");
+			localStorage.removeItem("userID");
 			setIsLoggedIn(false);
 		}
-	}, []);
+	}
 
-  
-  
+	const logout = async () => {
+		try {
+			await api.post("/auth/logout" , {user_id : localStorage.getItem("userID")});
+		} catch (error) {
+			console.error("Logout failed:", error);
+		} finally {
+			localStorage.removeItem("token");
+			localStorage.removeItem("userID");
+			localStorage.removeItem("username");
+			setIsLoggedIn(false);
+			window.location.href = "/login"; // Redirect to login page
+		}
+	};
+
+	useEffect(() => {
+		console.log("animating")
+		animatePageChange();
+		checkAuth();
+	}, [location]);
+
+
+	// DISABLE THE ARROW KEYS FROM SCROLLING THE PAGE WHEN GAME IS RUNNING
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (isGameRunning) {
+				if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+					event.preventDefault();
+				}
+			}
+		};
+		window.addEventListener("keydown", handleKeyDown);
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [isGameRunning]);
+
 	return (
-	<ModalProvider>
-	<IsLoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+		<ModalProvider>
+			<IsLoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn, logout }}>
 
-	  <Router>
-		<div id="app-container" className="flex flex-col relative items-center min-h-screen w-screen text-primary bg-background gap-2 p-2">
-		  <Header /> 
-		  {/* <GoBackButton /> */}
-		  <div id="app-content" className="mt-2 overflow-hidden flex-grow relative justify-center items-center">
-			<Routes>
-			  <Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
-			  <Route path="/login" element={ <LoginPage />} />
-			  <Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
-			  <Route path="/game" element={isLoggedIn ? <GamePage /> : <LoginPage />} />
-			  <Route path="/creators" element={<CreatorsPage />} />
-			</Routes>
-		{/* Conditionally render the modals */}
-		{<SettingsModal />}
-		{<AuthModal />}
-		  </div>
-		  <Footer />
-		</div>
-	  </Router>
-	</IsLoggedInContext.Provider>
-	</ModalProvider>
+				<Router>
+					<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
+						<Header isGameRunning={isGameRunning} />
+						{/* <GoBackButton /> */}
+						<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
+							<Routes>
+								<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
+								<Route path="/login" element={<LoginPage />} />
+								<Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
+								<Route path="/game" element={isLoggedIn ? <GamePage setIsGameRunning={setIsGameRunning} /> : <LoginPage />} />
+								<Route path="/creators" element={<CreatorsPage />} />
+							</Routes>
+							{/* Conditionally render the modals */}
+							{<SettingsModal />}
+							{<AuthModal />}
+						</div>
+						{!isGameRunning ? <Footer /> : null}
+					</div>
+				</Router>
+			</IsLoggedInContext.Provider>
+		</ModalProvider>
 	);
-  };
-  
-  export default App;
+};
+
+export default App;
+
+interface ValidateResponse {
+	user: {
+		username: string;
+		id: string;
+	}
+}

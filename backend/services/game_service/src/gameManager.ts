@@ -12,7 +12,7 @@ export class GameManager {
     this.intervals = {};
   }
 
-  createGame(gameId: string): void {
+  createGame(gameId: string, mode: string, difficulty: string): void {
     this.games[gameId] = new PongGame();
     this.clients[gameId] = new Set();
 

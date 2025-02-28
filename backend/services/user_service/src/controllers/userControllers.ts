@@ -41,16 +41,13 @@ export class UserController {
     request.log.trace("Setting refresh token in cookie");
     await this.userService.saveRefreshToken(user.username, refreshToken);
     reply.setCookie("refreshToken", refreshToken, { path: "/api/auth/refresh", httpOnly: true, sameSite: "strict", secure: true });
-    reply.send({ accessToken });
+    reply.send({ token: accessToken });
   }
 
   async logout(request: FastifyRequest, reply: FastifyReply) {
-    const refreshToken = request.cookies.refreshToken;
-    if (!refreshToken) {
-      errorHandler.handleNotAuthorizedError("No refresh token provided");
-    }
-    await this.userService.deleteRefreshToken(request.user.username);
-    request.log.trace(`Logging out user ${request.user.username}`);
+    const { user_id} = request.body as { user_id: string };
+    await this.userService.deleteRefreshToken(user_id);
+    request.log.trace(`Logging out user ${user_id}`);
     reply.clearCookie("refreshToken", { path: "/api/auth/refresh", httpOnly: true, sameSite: "strict", secure: true });
     reply.send({ message: "User logged out successfully." });
   }
@@ -73,7 +70,7 @@ export class UserController {
     }
     request.log.trace(`Signing JWT for user ${decoded.username}`);
     const accessToken = await reply.jwtSign({ id: decoded.id, username: decoded.username }, { expiresIn: "1h" });
-    reply.send({ accessToken });
+    reply.send({ token: accessToken });
   }
 
   async validate(request: FastifyRequest, reply: FastifyReply) {
