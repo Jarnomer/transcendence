@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import GameCanvas from '../components/GameCanvas';
 import useGameControls from '../hooks/useGameControls';
 // import { useWebSocket } from '../hooks/useWebSocket';
@@ -6,6 +7,9 @@ import useGameControls from '../hooks/useGameControls';
 // Create connection to websocket
 const useWebSocket = (url: string) => {
   const ws = useRef<WebSocket | null>(null);
+
+  const location = useLocation();
+  const { mode, difficulty } = location.state || {};
 
   useEffect(() => {
     ws.current = new WebSocket(url);
