@@ -1,11 +1,12 @@
-import { Ball, Player } from "./gameLogic";
+import { Ball, Player } from "./PongGame";
 
 export class AIController {
   private plannedMoves: ("up" | "down" | null)[] = [];
   private lastUpdateTime: number = 0;
-  private difficulty: "easy" | "medium" | "hard";
+  private difficulty: string;
 
-  constructor(difficulty: "easy" | "medium" | "hard") {
+  // difficulty: easy, medium, brutal
+  constructor(difficulty: string) {
   this.difficulty = difficulty;
   }
 
@@ -70,7 +71,7 @@ export class AIController {
       errorFactor = 0.4;
     } else if (this.difficulty === "medium") {
       errorFactor = 0.2;
-    } else if (this.difficulty === "hard") {
+    } else if (this.difficulty === "brutal") {
       errorFactor = 0.05;
     }
 
