@@ -3,8 +3,8 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 /**
  * Interface for establishing WebSocket connections
  * @param url - The WebSocket server URL to connect to
- * @param options - Configuration options for the connection
- * @returns Object: WebSocket reference, status, utility methods
+ * @param onMessage - Callback function for receiving messages
+ * @returns Object: WebSocket ref, status and utility methods
  */
 
 // Constants defined outside the hook
@@ -27,7 +27,7 @@ export const useWebSocket = (
   const reconnectTimerRef = useRef<number | null>(null);
   const [lastMessage, setLastMessage] = useState<any>(null);
 
-  type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+  type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
 
   // Establishes connection, handles setting up and reconnection logic
@@ -72,6 +72,7 @@ export const useWebSocket = (
 
         reconnectAttempt.current += 1;
         console.log('Attempting to reconnect...');
+        setConnectionStatus('reconnecting');
 
         // Clear any existing reconnection timer
         if (reconnectTimerRef.current) {
@@ -116,7 +117,7 @@ export const useWebSocket = (
       return true;
     }
     console.error("WebSocket not connected");
-    return false;
+    return false; // Return false on error
   }, []);
 
   // Function to manually disconnect WebSocket

@@ -1,13 +1,19 @@
 import React, { useRef, useEffect } from 'react';
-import { Engine, Scene, FreeCamera, HemisphericLight,
-  MeshBuilder, StandardMaterial, Color3, Vector3 } from 'babylonjs';
+import {
+  Engine, Scene, FreeCamera, HemisphericLight,
+  MeshBuilder, StandardMaterial, Color3, Vector3
+} from 'babylonjs';
+import { GameState } from '../../../shared/types';
 
 interface GameCanvasProps {
-  gameState: { 
-    players: Record<string, { id: string; y: number; score: number }>;
-    ball: { x: number; y: number; dx: number; dy: number };
-  };
+  gameState: GameState;
 }
+
+// Fixed values for now, change to dynamic later
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 400;
+const SCALE_FACTOR = 20;
+const FIX_POSITION = 2;
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
 
@@ -79,8 +85,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
     // Add event listener for resize
     window.addEventListener("resize", handleResize);
 
-    // Cleanup
-    return () => {
+    return () => { // Cleanup
       window.removeEventListener("resize", handleResize);
       engine.dispose();
       scene.dispose();
@@ -89,13 +94,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
 
   // Handle position changes
   useEffect(() => {
-    if (!gameState) return;
+    if (!canvasRef.current || !gameState) return;
 
-    // Fixed values for now, change to dynamic later
-    const CANVAS_WIDTH = 800;
-    const CANVAS_HEIGHT = 400;
-    const SCALE_FACTOR = 20;
-    const FIX_POSITION = 2;
+    const player1 = gameState.players.player1;
+    const player2 = gameState.players.player2;
+    const ball = gameState.ball;
 
     // Convert player y-coordinates (from top-left to center-origin)
     // For ball, similar conversions, but x-coordinate needs no negation
@@ -103,10 +106,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
     // 2. Negate the result (because y increases upward in Babylon)
     // 3. Scale down by dividing and shift down based on paddle size
 
-    const player1Y = -((gameState.players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const player2Y = -((gameState.players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const ballY = -((gameState.ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
-    const ballX = (gameState.ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
+    const player1Y = -((player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    const player2Y = -((player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
+    const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
 
     player1Ref.current.mesh.position.y = player1Y;
     player2Ref.current.mesh.position.y = player2Y;

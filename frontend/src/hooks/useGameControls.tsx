@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
 /**
- * Interface to track which keys are currently being pressed during gameplay
+ * Interface for hooking game controls during gameplay
+ * @param wsRef - The WebSocket reference for connection
  */
 
 const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
@@ -11,7 +12,7 @@ const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
   useEffect(() => {
     // Handle key press events
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Prevent default actions for game control keys to prevent scrolling
+      // Prevent default actions for game control keys (prevent scrolling)
       if (['w', 's', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
         e.preventDefault();
       }
@@ -34,14 +35,13 @@ const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
-    // Cleanup
-    return () => {
+    return () => { // Cleanup
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
   }, []); // Runs only once on mount
 
-  // Control loop using fixed interval timer for consistent movement
+  // Control loop with fixed interval timer
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -69,10 +69,9 @@ const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
           }));
         }
       }
-    }, 16); // 16ms = ~60fps | 33ms = ~30fps | 8ms = ~120fps
+    }, 1000 / 60); // 60fps
 
-    // Cleanup
-    return () => {
+    return () => { // Cleanup
       clearInterval(intervalId);
     };
   }, [keysPressed, wsRef]);
