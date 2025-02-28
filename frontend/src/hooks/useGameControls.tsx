@@ -18,8 +18,8 @@ const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
       }
 
       setKeysPressed(prev => {
-        // Only update state if the key wasn't already pressed
         if (!prev[e.key]) {
+          // If key wasn't already pressed
           return { ...prev, [e.key]: true };
         }
         return prev;
