@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
  * Interface for establishing WebSocket connections
  * @param url - The WebSocket server URL to connect to
  * @param onMessage - Callback function for receiving messages
- * @returns Object: WebSocket ref, status and utility methods
+ * @returns WebSocket reference, status and utility methods
  */
 
 // Constants defined outside the hook
