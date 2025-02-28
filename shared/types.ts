@@ -21,6 +21,8 @@ export interface GameState {
   timeStamp?: number;
 }
 
+// types from below are not uset 
+
 export interface GameUpdateMessage {
   type: 'game_update';
   state: Partial<GameState>;
