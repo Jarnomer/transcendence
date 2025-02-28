@@ -1,15 +1,4 @@
-export interface Player {
-  id: string;
-  y: number;
-  score: number;
-}
-
-export interface Ball {
-x: number;
-y: number;
-dx: number;
-dy: number;
-}
+import { Player, Ball } from "../../../../shared/types";
 
 export default class PongGame {
   private width: number = 800;

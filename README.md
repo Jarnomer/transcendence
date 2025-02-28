@@ -14,13 +14,13 @@
 | ❌   | Undone       |
 | ⌛️   | In Progress  |
 
-## 🏆 Major module [1/5] : Backend framework
+## 🏆 Major module [1/7] : Backend framework
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
 | In this major module, you are required to use a specific web framework for backend development: `Fastify` with `Node.js`. |   ❌   |
 
-## 🏆 Major Module [2/5] : User Management
+## 🏆 Major Module [2/7] : User Management
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -33,7 +33,7 @@
 | User profiles display stats, such as wins and losses.                  |   ❌   |
 | Each user has a Match History including 1v1 games, dates, and relevant details, accessible to logged-in users. |   ❌   |
 
-## 🏆 Major Module [3/5] : Server-Side Pong
+## 🏆 Major Module [3/7] : Server-Side Pong
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -43,14 +43,14 @@
 | Ensure that the server-side Pong game is responsive, providing an engaging and enjoyable gaming experience. |   ⌛️   |
 | Integrate the server-side Pong game with the web application, allowing users to play the game directly on the website. |   ⌛️   |
 
-## 🏆 Major Module [4/5] : Remote players
+## 🏆 Major Module [4/7] : Remote players
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
 | It should be possible for two players to play remotely. Each player is located on a separated computer, accessing the same website and playing the same Pong game. |   ❌   |
 | Consider network issues, such as unexpected disconnections or lag. You must offer the best user experience possible. |   ⚠️   |
 
-## 🏆 Major Module [5/5] : AI opponent
+## 🏆 Major Module [5/7] : AI opponent
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -62,7 +62,7 @@
 | You will need to explain in detail how your AI works during your evaluation. Creating an AI that does nothing is strictly prohibited; it must have the capability to win occasionally. |   ⚠️   |
 | The AI must utilize power-ups if you have chosen to implement the Game customization options module. |   ⚠️   |
 
-## 🏆 Major Module [6/5] : Live Chat
+## 🏆 Major Module [6/7] : Live Chat
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -72,7 +72,7 @@
 | The tournament system should be able to notify users about the next game. |   ❌   |
 | The user should be able to access other players’ profiles through the chat interface. |   ❌   |
 
-## 🏆 Major Module [7/5] : Advanced 3D Graphics
+## 🏆 Major Module [7/7] : Advanced 3D Graphics
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -80,7 +80,7 @@
 | Immersive Gameplay: The incorporation of advanced 3D techniques enhances the overall gameplay experience by providing users with a visually engaging and captivating Pong game. |   ❌   |
 | Technology Integration: The chosen technology for this module is Babylon.js. These tools will be used to create the 3D graphics, ensuring compatibility and optimal performance. |   ❌   |
 
-## 🏆 Major Module [8/5] : Microservices
+## 🏆 Major Module [8/7] : Microservices
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -89,26 +89,26 @@
 | Implement communication mechanisms between microservices, such as REST-ful APIs or message queues, to facilitate data exchange and coordination. |   ❌   |
 | Ensure that each microservice is responsible for a single, well-defined task or business capability, promoting maintainability and scalability. |   ❌   |
 
-## 🏅 Minor Module [8.5/5] : Front-end framework
+## 🏅 Minor Module [8.5/7] : Front-end framework
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
 | Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. |   ❌   |
 
-## 🏅 Minor Module [9/5] : Backend database
+## 🏅 Minor Module [9/7] : Backend database
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
 | The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. |   ❌   |
 
-## 🏅 Minor Module [9.5/5] : Device Support
+## 🏅 Minor Module [9.5/7] : Device Support
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
 | Ensure the website is responsive, adapting to different screen sizes and orientations, providing a consistent user experience on desktops, laptops, tablets, and smartphones. |   ❌   |
 | Ensure that users can easily navigate and interact with the website using different input methods, such as touchscreens, keyboards, and mice, depending on the device they are using. |   ❌   |
 
-## 🏅 Minor Module [10/5] : Browser Compatibility
+## 🏅 Minor Module [10/7] : Browser Compatibility
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
@@ -117,7 +117,7 @@
 | Address any compatibility issues or rendering discrepancies that may arise in the added web browser. |   ❌   |
 | Ensure a consistent user experience across all supported browsers, maintaining usability and functionality. |   ❌   |
 
-## 🏅 Minor Module [10.5/5] : Multiple language support
+## 🏅 Minor Module [10.5/7] : Multiple language support
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|

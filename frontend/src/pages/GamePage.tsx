@@ -1,92 +1,128 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom";
-import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
-import GameCanvas from '../components/GameCanvas'; // Ensure this is imported
-import { enterQueue, getGameID, getQueueStatus } from '../api'
+import React, { useState, useEffect, useRef } from 'react';
+import GameCanvas from '../components/GameCanvas';
+import useGameControls from '../hooks/useGameControls';
+// import { useWebSocket } from '../hooks/useWebSocket';
 
-
-interface GamePageProps {
-  setIsGameRunning: (isRunning: boolean) => void;
-}
-
-export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
-  const location = useLocation();
-  const { mode, difficulty } = location.state || {};
-
-  const [player1Score, setPlayer1Score] = useState(0);
-  const [player2Score, setPlayer2Score] = useState(0);
-  const [gameState, setGameState] = useState<any>({});
-  const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState("");
-  const [ws, setWs] = useState<WebSocket | null>(null);
+// Create connection to websocket
+const useWebSocket = (url: string) => {
+  const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (location.state) {
-      console.log("Mode:", mode, "Difficulty:", difficulty);
-    }
-  }, [location]);
+    ws.current = new WebSocket(url);
 
-  useEffect(() => {
-    const userId = localStorage.getItem("userID");
-    if (userId) {
-      setUserId(userId);
-    }
-    enterQueue().then((status) => {
-      console.log("Queue status:", status);
-    }
-    );
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const status = await getQueueStatus();
-      if (status === "matched") {
-        const data = await getGameID();
-        console.log("Matched! Connecting to WebSocket...", data.game_id);
-        connectGame(data.game_id);
-        clearInterval(interval); // Stop polling when matched
-      }
-    }, 2000); // Run every 2 seconds
+    ws.current.onopen = () => console.log("WebSocket connected");
+    ws.current.onclose = () => console.log("WebSocket disconnected");
+    ws.current.onerror = (error) => console.error("WebSocket error:", error);
 
     return () => {
-      clearInterval(interval)
-      if (ws) ws.close();
-      setIsGameRunning(false)
-    }; // Cleanup on unmount
-  }, [userId]); // Re-run if userId changes
+      ws.current?.close();
+    };
+  }, [url]);
 
-  function connectGame(game_id: string) {
-    if (!game_id)
-      return;
-    setLoading(true);
-    const token = localStorage.getItem("token");
+  return ws;
+};
 
-    if (token) {
-      const newWs = new WebSocket(
-        `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${game_id}&mode=${mode}&difficulty=${difficulty}`
-      );
+export const GamePage: React.FC = () => {
+  const [gameState, setGameState] = useState<any>({
+    players: {
+      player1: { id: "player1", y: 0, score: 0 },
+      player2: { id: "player2", y: 0, score: 0 }
+    },
+    ball: { x: 0, y: 0, dx: 0, dy: 0 }
+  });
 
-      newWs.onopen = () => setLoading(false);
-      newWs.onerror = () => setLoading(false);
+  // Websocket connection
+  const token = localStorage.getItem("token");
+  const url = `wss://${window.location.host}/ws/remote/game/?token=${token}`;
+  const ws = useWebSocket(url);
 
-      setWs(newWs);
-      setIsGameRunning(true);
-      // gameConnect(newWs, setGameState); // Pass state setter function if needed
-    } else {
-      setLoading(false);
-    }
-  }
+  useGameControls(ws); // Hook game controls
+
+  // Import information from backend into gameState
+  useEffect(() => {
+    if (!ws.current) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "update") {
+        // merge data into prev with spread operator
+        setGameState((prev) => ({
+          ...prev,
+          players: {
+            ...prev.players,
+            ...data.state.players,
+          },
+          ball: {
+            ...prev.ball,
+            ...data.state.ball,
+          },
+        }));
+      }
+    };
+
+    // Event listener for reading messages
+    ws.current.addEventListener("message", handleMessage);
+
+    // Cleanup
+    return () => {
+      ws.current?.removeEventListener("message", handleMessage);
+    };
+  }, [ws]); // Runs whenever websocket changes
 
   return (
-    <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
-      <div className="h-[10%]">
-        <PlayerScoreBoard player1Score={player1Score} player2Score={player2Score} />
-      </div>
-
-      <div className="w-full h-full overflow-hidden border-2 border-primary">
-        {!loading && ws ? <GameCanvas websocket={ws} /> : <p>Loading...</p>}
-
-      </div>
+    <div>
+      <GameCanvas gameState={gameState} />
     </div>
   );
 };
+
+// import React, { useState } from 'react';
+// import { useWebSocket } from '../hooks/useWebSocket';
+// import useGameControls from '../hooks/useGameControls';
+// import GameCanvas from '../components/GameCanvas';
+// import { GameState } from '../../../shared/types';
+
+// export const GamePage: React.FC = () => {
+//   const [gameState, setGameState] = useState<GameState>({
+//     players: {
+//       player1: { id: "player1", y: 0, score: 0 },
+//       player2: { id: "player2", y: 0, score: 0 }
+//     },
+//     ball: { x: 0, y: 0, dx: 0, dy: 0 }
+//   });
+
+//   // Custom message handler for game updates
+//   const handleMessage = (data: any) => {
+//     if (data.type === "game_update") {
+//       setGameState((prev) => ({
+//         // Merge prev data with new state
+//         ...prev,
+//         players: {
+//           ...prev.players,
+//           ...data.state.players,
+//         },
+//         ball: {
+//           ...prev.ball,
+//           ...data.state.ball,
+//         },
+//       }));
+//     }
+//   };
+
+//   // Get authentication token from localStorage
+//   const token = localStorage.getItem("token");
+//   const url = `wss://${window.location.host}/ws/remote/game/?token=${token}`;
+
+//   // Establish WebSocket connection
+//   const { ws } = useWebSocket(url, handleMessage);
+
+//   useGameControls(ws); // Setup game controls
+
+//   return ( // returned game page component
+//     <div>
+//       <GameCanvas gameState={gameState} />
+//     </div>
+//   );
+// };
+
+// export default GamePage;
