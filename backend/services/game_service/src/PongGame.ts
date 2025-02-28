@@ -26,6 +26,12 @@ export default class PongGame {
     this.startGameLoop();
   }
 
+  getBall() { return this.ball; }
+  getPlayer(playerId: string) { return this.players[playerId]; }
+  getPaddleSpeed() { return this.paddleSpeed; }
+  getHeight() { return this.height; }
+  getPaddleHeight() { return this.paddleHeight; }
+
   private resetBall(): void {
     this.ballSpeedMultiplier = 1;
     const angle = (Math.random() * Math.PI) / 3 - Math.PI / 6; // Random starting angle between -30° and 30°
@@ -75,7 +81,7 @@ export default class PongGame {
     }
   }
 
-  updateGameStatus(moves: Record<string, "up" | "down">): object {
+  updateGameStatus(moves: Record<string, "up" | "down" | null >): object {
     Object.keys(moves).forEach((playerId) => {
       if (!this.players[playerId]) return;
       if (moves[playerId] === "up") {

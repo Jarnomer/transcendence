@@ -7,5 +7,4 @@ export default defineConfig({
     tailwindcss(),
     react()
   ],
-
 })

@@ -8,7 +8,7 @@ interface PlayerScoreBoardProps {
 
 export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ player1Score, player2Score }) => {
   return (
-    <div id="player-scores" className="w-[800px] flex justify-between gap-2 text-primary">
+    <div id="player-scores" className="w-full h-full flex justify-between gap-2 text-primary mb-2">
       <PlayerCard
         name={localStorage.getItem("username") || "Quest"}
         score={player1Score}

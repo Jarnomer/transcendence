@@ -1,56 +1,115 @@
-import { eventBus } from "./events";
-import { initGame, gameLoop } from "./game_utils";
-
+import axios from 'axios';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 const API_URL = "/api/auth";
 
-/* export async function gameConnect() {
-  const token = localStorage.getItem("token");
-  if (token) {
-    try {
-      const data = await fetchPongData(token);
-      console.log(data);
-    } catch (err) {
-      console.error(err);
+interface LoginResponse {
+  token: string;
+}
+
+interface RegisterResponse {
+  message: string;
+}
+
+interface TokenDecoded {
+  id: string;
+  username: string;
+}
+
+interface QueueResponse {
+  status: string;
+  message: string;
+}
+
+interface GameIDResponse {
+  game_id: string;
+}
+
+
+export const api = axios.create({
+  baseURL: "/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true, // Ensures cookies (like refresh tokens) are sent
+});
+
+// ✅ Attach token dynamically using an interceptor
+api.interceptors.request.use(
+  (config) => {
+    if (!config.headers)
+      throw new Error("Request config is undefined");
+    const token = localStorage.getItem("token"); // Always fetch latest token
+    if (token ) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response, // Pass through successful responses
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Only handle 401 errors
+    if (error.response?.status === 401) {
+      const errorMessage = error.response.data?.error;
+      console.error("Request failed with 401:", errorMessage);
+
+      // If token expired, attempt refresh
+      if (errorMessage === "TOKEN_EXPIRED" && !originalRequest._retry) {
+        originalRequest._retry = true; // Prevent infinite loop
+
+        const newToken = await refreshToken();
+        if (newToken) {
+          api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          console.log("Retrying original request with new token...");
+          return api(originalRequest); // Retry failed request
+        }
+      }
+    }
+    return Promise.reject(error); // Forward other errors
   }
-} */
-
-// export  async function gameConnect(ws: WebSocket, gameState: any) {
-//     const token = localStorage.getItem("token");
-//     console.log("trying to connect the game with the token: ", token)
-//     if (token) {
-//       try {
-//       await connectWebSocket(ws, gameState, token);
-//       setTimeout(() => {
-//         initGame(gameState);
-//         requestAnimationFrame(() => gameLoop(gameState, ws));
-//       }, 100);
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   }
-// }
+);
 
 
+// Function to Refresh Token
+export async function refreshToken(): Promise<string | null> {
+  try {
+    const response = await api.get<LoginResponse>('/auth/refresh'); // Backend refresh route
+    const newToken = response.data.token;
+    localStorage.setItem("token", newToken);
+    return newToken;
+  } catch (error) {
+    console.error("Failed to refresh token:", error);
+    localStorage.removeItem("token");
+    window.location.href = "/login"; // Redirect to login page
+    return null;
+  }
+}
 
 export async function login(username: string, password: string) {
   try {
-    const res = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!res.ok) {
+    console.log("Logging in...");
+    const res = await api.post<LoginResponse>('/auth/login', { username, password });
+    if (res.status !== 200) {
       throw new Error(`Login failed! Status: ${res.status}`);
     }
 
-    const data = await res.json();
-    if (data.token) {
-      localStorage.setItem("token", data.token);
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+      console.log("token", res.data.token);
+      console.log("get token", localStorage.getItem("token"));
+      const user = jwtDecode<TokenDecoded>(res.data.token);
+      console.log("decoded", user);
+      localStorage.setItem("userID", user.id)
+      localStorage.setItem("username", user.username);
     }
-    return data;
+    return res.data;
   } catch (err) {
+    console.error("Login failed:", err);
     throw err; // This will be caught in your try-catch block in LoginPage
   }
 }
@@ -58,64 +117,74 @@ export async function login(username: string, password: string) {
 
 export async function register(username: string, password: string) {
   try {
-    const res = await fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+    const res = await api.post<RegisterResponse>("/auth/register", {
+      username,
+      password
     });
-
-    if (!res.ok) {
+    if (res.status !== 201) {
       throw new Error(`Registeration failed! Status: ${res.status}`);
     }
-    return await res.json();
+    console.log(res.data);
+    return res.data;
   } catch (err) {
     throw err;
   }
 }
 
-export async function fetchPongData(token: string) {
+export async function enterQueue() {
   try {
-    const res = await fetch("/api/pong", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return await res.json();
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}`);
+    console.log(res.data);
+    return res.data.status;
   } catch (err) {
-    throw new Error("Failed to fetch Pong data!");
+    console.error("Failed to join game:", err);
+    throw err;
   }
 }
 
-// export async function connectWebSocket(ws: WebSocket, gameState: any, token: string) {
-//   console.log("Connecting to WebSocket...");
-//   console.log("token:", token);
+export async function getQueueStatus() {
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get<QueueResponse>(`/matchmaking/status/${userID}`);
+    console.log(res.data);
+    return res.data.status;
+  } catch (err) {
+    console.error("Failed to get game status:", err);
+    throw err;
+  }
+}
 
-//   ws.onopen = () => {
-//     console.log("WebSocket connected");
-//   };
+export async function getGameID() {
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get<GameIDResponse>(`/matchmaking/getGameID/${userID}`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get game ID:", err);
+    throw err;
+  }
+}
 
-//   ws.onmessage = (event) => {
-//     const data = JSON.parse(event.data);
-//     if (data && data.type === "update") {
-//       const newGameState = {
-//         ...gameState, // Keep existing properties
-//         players: { ...gameState.players, ...data.state.players }, // Merge players
-//         ball: { ...gameState.ball, ...data.state.ball }, // Merge ball state
-//       };
-
-//       Object.assign(gameState, newGameState);
-//       //eventBus.emit("gameUpdate", data);
+//
+// function isTokenExpired(token: string): boolean {
+//   try {
+//     const decoded = jwtDecode<JwtPayload>(token);
+//     if (!decoded || !decoded.exp || typeof decoded.exp !== "number") {
+//       return true;
 //     }
-//   };
-
-//   ws.onerror = (error) => {
-//     console.error("WebSocket error:", error);
-//   };
-
-//   ws.onclose = (event) => {
-//     console.log("WebSocket Disconnected", event);
-//     if (event.code !== 1000) { // 1000 means normal closure
-//       alert("You have been disconnected! Logging out...");
-//     }
-//   };
-// };
+//     return decoded.exp * 1000 < Date.now(); // Convert expiration time to milliseconds
+//   } catch (e) {
+//     return true; // Treat invalid tokens as expired
+//   }
+// }

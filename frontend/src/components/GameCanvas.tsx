@@ -46,6 +46,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
     const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
     light.intensity = 0.7;
 
+    
+
     // Setup material
     const paddleMaterial = new StandardMaterial("paddleMat", scene);
     paddleMaterial.diffuseColor = Color3.White();
@@ -118,7 +120,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
 
   }, [gameState]); // Runs whenever gameState changes
 
-  return <canvas ref={canvasRef} className="game-canvas" style={{ width: '800px', height: '400px' }} />;
+  return <canvas ref={canvasRef} className="game-canvas" style={{ width: '100%', height: '100%' }} />;
 };
 
 export default GameCanvas;

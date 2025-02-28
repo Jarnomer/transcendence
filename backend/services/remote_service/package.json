@@ -14,8 +14,8 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
+    "@my-backend/main_server": "workspace:*",
     "@fastify/jwt": "^9.0.4",
-    "@fastify/sensible": "^6.0.3",
     "@fastify/websocket": "^11.0.2",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",

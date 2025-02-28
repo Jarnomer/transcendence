@@ -3,12 +3,6 @@ import { RemoteController } from '../controllers/remoteControllers';
 import { GameManager } from '@my-backend/game_service';
 import '@fastify/websocket';
 
-declare module 'fastify' {
-    interface FastifyInstance {
-      authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-    }
-  }
-
 export async function remoteRoutes(fastify: FastifyInstance) {
   // Here we assume fastify.db has been decorated on the instance.
   const gameManager = new GameManager();

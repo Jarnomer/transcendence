@@ -2,11 +2,6 @@ import fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { GameManager } from '@my-backend/game_service';
 import '@fastify/websocket';
 
-declare module 'fastify' {
-  interface FastifyRequest {
-    user: { id: number; username: string }; // Adjust based on your JWT payload structure
-  }
-}
 
 export class RemoteController {
   private gameManager: GameManager;
@@ -16,14 +11,14 @@ export class RemoteController {
   }
 
   async play(socket: any, request: FastifyRequest) {
-    const { gameId } = request.params as { gameId: string };
-    console.log(`Client connected to game ${gameId}`);
+    const { game_id, mode, difficulty } = request.query as { game_id: string, mode: string, difficulty: string };
+    request.log.trace(`Client connected to game ${game_id}`);
 
-    if (!this.gameManager.isGameExists(gameId)) {
-      this.gameManager.createGame(gameId);
+    if (!this.gameManager.isGameExists(game_id)) {
+     await this.gameManager.createGame(game_id, mode, difficulty);
     }
 
-    this.gameManager.addClient(gameId, socket);
+    await this.gameManager.addClient(game_id, socket);
   }
 }
 
