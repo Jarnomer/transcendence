@@ -1,20 +1,24 @@
 import PongGame from "./gameLogic";
 import '@fastify/websocket';
+import { AIController } from "./AIController";
 
 export class GameManager {
   private games: Record<string, PongGame>;
   private clients: Record<string, Set<any>>; // Store WebSocket connections from Fastify
   private intervals: Record<string, NodeJS.Timeout>;
+  private aiControllers: Record<string, AIController>;
 
   constructor() {
     this.games = {};
     this.clients = {};
     this.intervals = {};
+    this.aiControllers = {};
   }
 
   createGame(gameId: string, mode: string, difficulty: string): void {
     this.games[gameId] = new PongGame();
     this.clients[gameId] = new Set();
+    this.aiControllers[gameId] = new AIController("easy");
 
     this.intervals[gameId] = setInterval(() => {
       this.updateGame(gameId);
@@ -48,9 +52,29 @@ export class GameManager {
   // Gonna hack AI opponent here
   updateGame(gameId: string): void {
     if (!this.games[gameId]) return;
-    const updatedState = this.games[gameId].updateGameStatus({});
+
+    const game = this.games[gameId];
+    const aiController = this.aiControllers[gameId];
+
+    // AI should only update its plan once per second
+    if (aiController.shouldUpdate()) {
+      const ball = game["ball"];
+      const aiPaddle = game["players"]["player2"];
+      const paddleSpeed = game["paddleSpeed"]; // AI needs this to plan its moves
+
+      aiController.updateAIState(ball, aiPaddle, game["height"], game["paddleHeight"], paddleSpeed);
+    }
+
+    // Get AI move for this frame
+    const aiMove = aiController.getNextMove();
+
+    // Update game with AI move
+    const updatedState = game.updateGameStatus({ player2: aiMove });
+
+    // Broadcast updated state to clients
     this.broadcast(gameId, { type: "update", state: updatedState });
   }
+
 
   handlePlayerMove(gameId: string, playerId: string, move: any): void {
     if (!this.games[gameId]) return;
@@ -77,6 +101,7 @@ export class GameManager {
     }
     delete this.games[gameId];
     delete this.clients[gameId];
+    delete this.aiControllers[gameId];
   }
     
     isGameExists(gameId: string): boolean {

@@ -86,7 +86,7 @@ export default class PongGame {
     }
   }
 
-  updateGameStatus(moves: Record<string, "up" | "down">): object {
+  updateGameStatus(moves: Record<string, "up" | "down" | null >): object {
     Object.keys(moves).forEach((playerId) => {
       if (!this.players[playerId]) return;
       if (moves[playerId] === "up") {
