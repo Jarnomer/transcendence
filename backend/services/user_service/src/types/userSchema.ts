@@ -1,4 +1,4 @@
-export const profileSchemas = {
+export const userSchemas = {
     getUserByID: {
         params: {
             type: "object",

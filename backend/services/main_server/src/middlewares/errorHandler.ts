@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
-import { ServiceError, NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError } from "./errors";
+import { ServiceError } from "./errors";
 
 class ErrorHandler {
     private static instance: ErrorHandler;
@@ -33,44 +33,11 @@ class ErrorHandler {
         if (error.code === "FAST_JWT_EXPIRED") {
             return reply.status(401).send({ error: "TOKEN_EXPIRED" });
         }
+        if (error.code === "SQLITE_CONSTRAINT") {
+            return reply.status(400).send({ error: `Database constraint violation ${ error.message }` });
+    }
         return reply.status(500).send({ error: "An unexpected error occurred" });
     }
-
-    // ✅ Handle database errors in services
-    public handleDatabaseError(error: any) {
-        console.error("Database Error:", error);
-        throw new DatabaseError("A database error occurred.");
-    }
-
-    // ✅ Handle validation errors in services
-    public handleBadRequestError(error: any) {
-        console.error("Bad Request Error:", error);
-        throw new BadRequestError("Invalid input");
-    }
-
-    // ✅ Handle not found errors in services
-    public handleNotFoundError(error: any) {
-        console.error("Not Found Error:", error);
-        throw new NotFoundError("Resource not found");
-    }
-
-    public handleNotAuthorizedError(error: any) {
-        console.error("Not Authorized Error:", error);
-        throw new NotAuthorizedError("Not authorized");
-    }
-
-    public handleInternalServerError(error: any) {
-        console.error("Internal Server Error:", error);
-        throw new InternalServerError("Internal server error");
-    }
-
-    // ✅ Handle unknown errors in services
-    public handleUnknownError(error: any) {
-        console.error("Unknown Error:", error);
-        throw new ServiceError("An unexpected error occurred");
-    }
-
-
 }
 
 // ✅ Export Singleton Instance

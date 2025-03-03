@@ -37,5 +37,5 @@ class InternalServerError extends ServiceError {
   }
 }
   
-  export { ServiceError, NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError };
+export { ServiceError, NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError };
   
