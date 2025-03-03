@@ -14,7 +14,6 @@ interface GamePageProps {
 export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
-
   const [gameState, setGameState] = useState<GameState>({
     players: {
       player1: { id: "player1", y: 0, score: 0 },
@@ -94,9 +93,11 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
 
   // Build WebSocket URL when gameId is available
   const wsUrl = useMemo(() => {
+    console.log("Game ID:", gameId);
     if (!gameId) return null;
 
     const token = localStorage.getItem("token");
+    console.log("Token:", token);
     return `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
   }, [gameId, mode, difficulty]);
 
