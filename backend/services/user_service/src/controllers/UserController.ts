@@ -1,0 +1,131 @@
+import fastify, { FastifyRequest, FastifyReply } from 'fastify';
+import '@fastify/jwt';
+import { UserService } from "../services/UserService";
+import fs from 'fs';
+import path from 'path';
+import { pipeline } from 'stream/promises';
+import { NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError } from '@my-backend/main_server/src/middlewares/errors';
+
+export class UserController {
+  private userService: UserService;
+
+  constructor(userService: UserService) {
+    this.userService = userService;
+  }
+
+  /**
+   *  Fetch user by ID
+   * @param request get: user_id as path parameter
+   * @param reply 200 OK user : User object
+   * @throws NotFoundError if user not found
+   */
+  async getUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.params as { user_id: string };
+    request.log.trace(`Getting user ${user_id}`);
+    const user = await this.userService.getUserByID(user_id);
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    reply.code(200).send(user);
+  }
+
+  /**
+   * Fetch all users
+   * @param request get
+   * @param reply 200 OK users : Array of User objects
+   * @throws NotFoundError if no users found
+   */
+  async getAllUsers(request: FastifyRequest, reply: FastifyReply) {
+    request.log.trace(`Getting all users`);
+    const users = await this.userService.getAllUsers();
+    if (users.length === 0) {
+      throw new NotFoundError("No users found");
+    }
+    reply.code(200).send(users);
+  }
+
+  /**
+   * Update user by ID with provided updates as request body
+   * @param request put: user_id as path parameter, updates as request body
+   * @param reply 200 OK user : Updated User object
+   * @throws NotFoundError if user not found
+   * @throws BadRequestError if no updates provided
+   */
+  async updateUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.params as { user_id: string };
+    const updates = request.body as Partial<{
+      email: string;
+      password: string;
+      username: string;
+      display_name: string;
+      avatar_url: string;
+      online_status: boolean;
+      wins: number;
+      losses: number;
+    }>;
+    request.log.trace(`Updating user ${user_id}`);
+    if (!Object.keys(updates).length) {
+      throw new BadRequestError("No updates provided");
+    }
+    request.log.trace(`Updates`, updates);
+    const user = await this.userService.updateUserByID(user_id, updates);
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    const updatedUser = await this.userService.getUserByID(user_id);
+    reply.code(200).send(updatedUser);
+  }
+
+  /**
+   * Delete user by ID
+   * @param request delete: user_id as path parameter
+   * @param reply 204 OK message : User deleted successfully
+   * @throws NotFoundError if user not found
+   */
+  async deleteUserByID(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.params as { user_id: string };
+    request.log.trace(`Deleting user ${user_id}`);
+    const user = await this.userService.deleteUserByID(user_id);
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    reply.code(204).send(user.changes);
+  }
+
+  /**
+   *  Upload avatar for user by ID
+   *  Avatar is saved in uploads directory
+   *  Avatar URL is saved in user object
+   * @param request post: user_id as path parameter, avatar as form-data
+   * @param reply 200 OK user : Updated User object
+   * @throws NotFoundError if user not found
+   * @throws BadRequestError if no avatar provided
+   */
+  async uploadAvatar(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.params as { user_id: string };
+    const avatar = await request.file();
+    request.log.trace(`Uploading avatar for user ${user_id}`);
+    if (!avatar) {
+      throw new BadRequestError("No avatar provided");
+    }
+
+    const UPLOAD_DIR = path.normalize(process.env.UPLOAD_PATH || "./uploads");
+    if (!fs.existsSync(UPLOAD_DIR)) {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+    }
+    request.log.trace(`avatar name ${avatar.filename}`);
+    const fileExtension = path.extname(avatar.filename);
+    const fileName = `user${user_id}_${Date.now()}${fileExtension}`;
+
+    const avatarPath = path.join(UPLOAD_DIR, fileName);
+    await pipeline(avatar.file, fs.createWriteStream(avatarPath));
+
+    const avatarURL = `api/uploads/${avatar.filename}`;
+    const user = await this.userService.updateUserByID(user_id, { avatar_url: avatarURL });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    const updatedUser = await this.userService.getUserByID(user_id);
+    reply.code(200).send(updatedUser);
+  }
+}

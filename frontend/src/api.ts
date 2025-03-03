@@ -22,6 +22,7 @@ interface QueueResponse {
 
 interface GameIDResponse {
   game_id: string;
+  status: string;
 }
 
 
@@ -168,10 +169,25 @@ export async function getGameID() {
       throw new Error("User ID not found");
     }
     const res = await api.get<GameIDResponse>(`/matchmaking/getGameID/${userID}`);
-    console.log(res.data);
+    console.log(res);
     return res.data;
   } catch (err) {
     console.error("Failed to get game ID:", err);
+    throw err;
+  }
+}
+
+export async function singlePlayer(difficulty: string) {
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get<GameIDResponse>(`/matchmaking/singlePlayer/${userID}?difficulty=${difficulty}`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error("Failed to join single player game:", err);
     throw err;
   }
 }

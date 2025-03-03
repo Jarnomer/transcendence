@@ -20,7 +20,7 @@ export class MatchMakingModel {
     }
   }
 
-  async getQueueStatusByID(user_id: string) {
+  async getStatusQueue(user_id: string) {
     return await this.db.get(`SELECT * FROM matchmaking_queue WHERE user_id = ? ORDER BY joined_at DESC LIMIT 1`, [user_id]);
   }
 
@@ -35,35 +35,39 @@ export class MatchMakingModel {
 
   async getGameByUserID(user_id: string, waiting_user_id: string) {
     return await this.db.get(
-      `SELECT * FROM pong_matches WHERE (player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)`,
+      `SELECT * FROM games WHERE (player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)`,
       [user_id, waiting_user_id, waiting_user_id, user_id]
     );
   }
 
-  async insertWaitingQueue(user_id: string) {
+  async createWaitingQueue(user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO matchmaking_queue (id, user_id, status) VALUES (?, ?, 'waiting')`, [id, user_id]);
+    return await this.db.run(`INSERT INTO matchmaking_queue (matchmaking_queue_id, user_id, status) VALUES (?, ?, 'waiting')`, [id, user_id]);
   }
 
-  async insertMatchedQueue(user_id: string, waiting_user_id: string) {
+  async createMatchedQueue(user_id: string, waiting_user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO matchmaking_queue (id, user_id, matched_with, status) VALUES (?, ?, ?, 'matched')`, [id, user_id, waiting_user_id]);
+    return await this.db.run(`INSERT INTO matchmaking_queue (matchmaking_queue_id, user_id, matched_with, status) VALUES (?, ?, ?, 'matched')`, [id, user_id, waiting_user_id]);
   }
 
   async updateQueue(user_id: string, waiting_user_id: string) {
-    return await this.db.run(`UPDATE matchmaking_queue SET status = 'matched'   , matched_with = ? WHERE id = ?`, [user_id, waiting_user_id]);
+    return await this.db.run(`UPDATE matchmaking_queue SET status = 'matched' , matched_with = ? WHERE user_id = ?`, [user_id, waiting_user_id]);
   }
 
-  async insertPongMatch(user_id: string, waiting_user_id: string) {
+  async createGame(user_id: string, waiting_user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO pong_matches (id, player1_id, player2_id) VALUES (?, ?, ?) RETURNING *`, [id, user_id, waiting_user_id]);
+    return await this.db.run(`INSERT INTO games (game_id, player1_id, player2_id) VALUES (?, ?, ?) RETURNING *`, [id, user_id, waiting_user_id]);
   }
 
-  async updatePongMatch(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
-    return await this.db.run(`UPDATE pong_matches SET winner_id = ?, player1_score = ?, player2_score = ? WHERE id = ?`, [winner_id, player1_score, player2_score, game_id]);
+  async getOngoingGame(user_id: string, waiting_user_id: string) {
+    return await this.db.get(`SELECT * FROM games WHERE (player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?) AND match_status = 'ongoing'`, [user_id, waiting_user_id, waiting_user_id, user_id]);
   }
 
-  async deleteUserById(user_id: string) {
+  async updateGame(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
+    return await this.db.run(`UPDATE games SET winner_id = ?, player1_score = ?, player2_score = ? AND match_status = 'completed' WHERE game_id = ?`, [winner_id, player1_score, player2_score, game_id]);
+  }
+
+  async deleteQueueByUserID(user_id: string) {
     return await this.db.run(`DELETE FROM matchmaking_queue WHERE user_id = ?`, [user_id]);
   }
 

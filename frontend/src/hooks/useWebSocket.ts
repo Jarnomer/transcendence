@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
  * Interface for establishing WebSocket connections
  * @param url - The WebSocket server URL to connect to
  * @param onMessage - Callback function for receiving messages
- * @returns Object: WebSocket ref, status and utility methods
+ * @returns WebSocket reference, status and utility methods
  */
 
 // Constants defined outside the hook
@@ -17,14 +17,14 @@ export interface WebSocketMessage {
 }
 
 export const useWebSocket = (
-  url: string,
+  url: string | null,
   // Callback function that gets called whenever a
   // message is received from the WebSocket server
   onMessage: (data: any) => void = () => {}
 ) => {
   const ws = useRef<WebSocket | null>(null);
   const reconnectAttempt = useRef(0);
-  const reconnectTimerRef = useRef<number | null>(null);
+  const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [lastMessage, setLastMessage] = useState<any>(null);
 
   type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
