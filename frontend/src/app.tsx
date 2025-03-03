@@ -11,6 +11,8 @@ import { AuthModal } from './components/modals/authModal.tsx';
 import { api } from './api';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { GoBackButton } from './components/GoBackButton.tsx';
+import { ProfilePage } from './pages/ProfilePage.tsx';
+import { useAnimatedNavigate } from './animatedNavigate.tsx';
 
 export const IsLoggedInContext = React.createContext<{
 	isLoggedIn: boolean;
@@ -19,19 +21,19 @@ export const IsLoggedInContext = React.createContext<{
 } | undefined>(undefined);
 
 
-export function animatePageChange() {
-	const appDiv = document.getElementById("root")!;
-	appDiv.classList.add("closing");
+// export function animatePageChange() {
+// 	const appDiv = document.getElementById("root")!;
+// 	appDiv.classList.add("closing");
 
-	setTimeout(() => {
-		appDiv.classList.remove("closing");
-		appDiv.classList.add("opening");
+// 	setTimeout(() => {
+// 		appDiv.classList.remove("closing");
+// 		appDiv.classList.add("opening");
 
-		setTimeout(() => {
-			appDiv.classList.remove("opening");
-		}, 400);
-	}, 200);
-}
+// 		setTimeout(() => {
+// 			appDiv.classList.remove("opening");
+// 		}, 400);
+// 	}, 200);
+// }
 
 const App: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -71,13 +73,11 @@ const App: React.FC = () => {
 			localStorage.removeItem("userID");
 			localStorage.removeItem("username");
 			setIsLoggedIn(false);
-			window.location.href = "/login"; // Redirect to login page
+			animatedNavigate("/");
 		}
 	};
 
 	useEffect(() => {
-		console.log("animating")
-		animatePageChange();
 		checkAuth();
 	}, [location]);
 
@@ -112,6 +112,7 @@ const App: React.FC = () => {
 								<Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 								<Route path="/game" element={isLoggedIn ? <GamePage setIsGameRunning={setIsGameRunning} /> : <LoginPage />} />
 								<Route path="/creators" element={<CreatorsPage />} />
+								<Route path="/profile" element={<ProfilePage />} />
 							</Routes>
 							{/* Conditionally render the modals */}
 							{<SettingsModal />}

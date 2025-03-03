@@ -6,10 +6,12 @@ import { ClippedButton } from "../components/wrappers/clippedButton.tsx";
 import { SVGModal } from "../components/wrappers/svgModal";
 import { IsLoggedInContext } from '../app.tsx';
 import { useContext } from "react";
+import { useAnimatedNavigate } from "../animatedNavigate";
 
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const animatedNavigate = useAnimatedNavigate();
   const location = useLocation();
   const { isLoggedIn, setIsLoggedIn } = useContext(IsLoggedInContext);
 
@@ -40,7 +42,7 @@ export const LoginPage: React.FC = () => {
 	  try {
 		await login(username, password);
 		setIsLoggedIn(true);
-		navigate("/gameMenu");
+		animatedNavigate("/gameMenu");
 	  } catch (error: any) {
 		alert("Login failed!");
 		setLoading(false);
@@ -53,8 +55,9 @@ export const LoginPage: React.FC = () => {
   
 
   return (
-	<div className="w-full min-h-screen flex justify-center">
-      <SVGModal>
+	<div className="w-full min-h-screen flex justify-center p-10">
+    <div className="w-[300px]">
+    <SVGModal>
 		<div className="text-center">
       <h1 className="text-3xl mb-2 font-heading font-bold">
         {isRegistering ? "Register" : "Login"}
@@ -86,6 +89,8 @@ export const LoginPage: React.FC = () => {
       </div>
     </div>
 	  </SVGModal>
+
+    </div>
 
 		</div>
   )
