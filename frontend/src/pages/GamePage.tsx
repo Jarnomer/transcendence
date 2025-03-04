@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useWebSocket } from '../hooks/useWebSocket';
 import useGameControls from '../hooks/useGameControls';
-import GameCanvas from '../components/GameCanvas';
 import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
+import GameCanvas from '../components/GameCanvas';
 import { GameState } from '../../../shared/types';
 import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../api';
 
@@ -12,13 +12,15 @@ interface GamePageProps {
 }
 
 export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
-  // Initialize game state to default values
+  // Initialize game state with default values
   const [gameState, setGameState] = useState<GameState>({
     players: {
       player1: { id: "player1", y: 0, score: 0 },
       player2: { id: "player2", y: 0, score: 0 }
     },
-    ball: { x: 0, y: 0, dx: 0, dy: 0 }
+    ball: { x: 0, y: 0, dx: 0, dy: 0 },
+    gameStatus: 'loading',
+    timeStamp: Date.now()
   });
 
   // Queue and connection state
@@ -37,11 +39,11 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
     console.log("Mode:", mode, "Difficulty:", difficulty);
   }, [mode, difficulty]);
 
-  // Initialize game - get userId and handle single-/multiplayer modes
+  // Initialize game - get userId and handle singleplayer/multiplayer modes
   useEffect(() => {
     const storedUserId = localStorage.getItem("userID");
     console.log("userId:", storedUserId);
-    
+
     if (storedUserId) {
       setUserId(storedUserId);
     }
@@ -118,6 +120,16 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
           ...prev.ball,
           ...data.state.ball,
         },
+        // Update gameStatus and timeStamp if they exist in the update
+        gameStatus: data.state.gameStatus || prev.gameStatus,
+        timeStamp: data.state.timeStamp || Date.now(),
+      }));
+    } else if (data.type === "status") {
+      // Handle explicit game status updates
+      setGameState((prev) => ({
+        ...prev,
+        gameStatus: data.status,
+        timeStamp: Date.now(),
       }));
     }
   }, []);
@@ -130,42 +142,119 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
     console.log("Token:", token);
     const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
     setWsUrl(url);
+
+    // Update game status to waiting when we have a gameId
+    setGameState(prev => ({
+      ...prev,
+      gameStatus: 'waiting',
+      timeStamp: Date.now()
+    }));
   }, [gameId, mode, difficulty]);
 
-  // Establish WebSocket connection
-  const { ws, connectionStatus } = useWebSocket(wsUrl, handleMessage);
-  
-  // Update loading state based on connection status
+  // Destructure more utilities from the hook
+  const {
+    ws,
+    connectionStatus,
+    sendMessage,
+    lastMessage,
+    disconnect,
+    reconnect
+  } = useWebSocket(wsUrl, handleMessage);
+
+  // Update loading state based on connection status and game status
   useEffect(() => {
     if (connectionStatus === 'connected') {
       setLoading(false);
       if (setIsGameRunning) {
         setIsGameRunning(true);
+        setGameState(prev => ({
+          ...prev,
+          gameStatus: 'playing'
+        }));
+      }
+
+      // When connection is established but game isn't playing yet
+      if (gameState.gameStatus === 'loading') {
+        setGameState(prev => ({
+          ...prev,
+          gameStatus: 'waiting'
+        }));
       }
     } else if (connectionStatus === 'error') {
       setLoading(false);
     }
-  }, [connectionStatus, setIsGameRunning]);
+  }, [connectionStatus, setIsGameRunning, gameState.gameStatus]);
 
-  useGameControls(ws); // Setup game controls
+  // Setup game controls with the WebSocket ref
+  useGameControls(ws);
+
+  // Debug last message received (useful during development)
+  useEffect(() => {
+    if (lastMessage) {
+      console.log('Last WebSocket message:', lastMessage);
+    }
+  }, [lastMessage]);
+
+  // Add manual reconnection handler
+  const handleReconnect = useCallback(() => {
+    reconnect();
+  }, [reconnect]);
+
+  // Add cleanup function on component unmount
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [disconnect]);
+
+  // Function to get status message based on gameStatus
+  const getStatusMessage = () => {
+    if (loading) {
+      return mode === 'singleplayer' ? "Starting game..." : "Waiting for opponent...";
+    }
+
+    if (connectionStatus !== 'connected') {
+      return `Connection: ${connectionStatus}`;
+    }
+
+    switch (gameState.gameStatus) {
+      case 'waiting':
+        return "Waiting for game to start...";
+      case 'paused':
+        return "Game paused";
+      case 'finished':
+        return "Game over!";
+      default:
+        return "";
+    }
+  };
+
+  // Add pause/resume game functionality
+  const togglePause = useCallback(() => {
+    if (gameState.gameStatus) {
+      if (gameState.gameStatus === 'playing') {
+        sendMessage({ type: 'pause', payload: {} });
+      } else if (gameState.gameStatus === 'paused') {
+        sendMessage({ type: 'resume', payload: {} });
+      }
+    }
+  }, [sendMessage, gameState.gameStatus]);
 
   return (
     <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
-      <div className="h-[10%]">
+      <div className="h-[10%] flex justify-between items-center">
         <PlayerScoreBoard gameState={gameState} />
       </div>
+
       <div className="w-full h-full overflow-hidden border-2 border-primary">
-        {!loading && connectionStatus === 'connected' ? (
+        {(!loading && connectionStatus === 'connected' && gameState.gameStatus !== 'finished') ? (
           <>
-            <p className="text-xs text-gray-500">Connection: {connectionStatus}</p>
+            <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {gameState.gameStatus}</p>
             <GameCanvas gameState={gameState} />
           </>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p>{loading ? 
-              (mode === 'singleplayer' ? "Starting game..." : "Waiting for opponent...") 
-              : `Connection: ${connectionStatus}`}
-            </p>
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <p>{getStatusMessage()}</p>
           </div>
         )}
       </div>
