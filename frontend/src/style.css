@@ -10,17 +10,7 @@
 
 
 
-  [data-theme="light"] {
-	--color-primary: black;
-	--color-secondary: oklch(8% 0% 0);
-	--color-background: black;
-  }
-  
-  [data-theme="dark"] {
-	--color-primary: #ea355a;
-	--color-secondary: oklch(8% 0% 0);
-	--color-background: black;
-  }
+
 
   @theme {
 
@@ -41,15 +31,25 @@
   
 	  --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
 	  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+
+
+
+	  /* --animate-wiggle: wiggle 1s ease-in-out infinite;
+
+	  @keyframes wiggle {
+		0%,
+		100% {
+		  transform: rotate(-3deg);
+		}
+		50% {
+		  transform: rotate(3deg);
+		}
+	  } */
+
+
+
 	  }
 	  
-	  
-	  [data-theme="light"] {
-		--color-primary: oklch(88.3% 0.1288 203.73);
-		--color-secondary: oklch(100% 0% 1);
-		--color-creators-secondary: oklch(85% 0.05 220);
-		--color-background: white;
-	  }
 
 
   @layer components {
@@ -98,27 +98,7 @@
   }
 
 
-  /* Napin perusstyylit */
-.button {
-	transition: all 0.3s ease-in-out;  /* Pehmeä siirtymä */
-	cursor: pointer; /* Käyttäjän ei tarvitse arvailla, että se on klikattavissa */
-  }
-  
-  .stroke-primary {
-	stroke: oklch(65.28% 0.1966 20.69); /* Lähtöväri */
-  }
-  
-  /* Hover-efekti */
-  .button:hover .stroke-primary {
-	stroke: #FF0000;  /* Vaihda väriä hoverilla, voit käyttää esimerkiksi kirkasta punaista */
-  }
-  
-  .button:hover {
-	fill: oklch(60% 0.15 10); /* Lisää hieman tummempaa täyttöä */
-	transform: scale(1.01); /* Tee napista hieman suurempi hover-tilassa */
-	box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); /* Lisää hehkuva varjo */
-  }
-  
+
 
 body {
 	margin: 0;
@@ -322,3 +302,244 @@ path {
   }
 
 
+
+ 
+.button {
+	transition: all 0.3s ease-in-out; 
+	cursor: pointer; 
+  }
+  
+  .stroke-primary {
+	stroke: oklch(65.28% 0.1966 20.69);
+  }
+  
+  /* Hover-efekti */
+  .button:hover .stroke-primary {
+	stroke: #FF0000; 
+  }
+  
+  .button:hover {
+	fill: oklch(60% 0.15 10); 
+	transform: scale(1.01); 
+	box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
+
+/* 
+
+button,
+button::after {
+  padding: 16px 20px;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: 3px;
+  line-height: 1;
+  box-shadow: 6px 0px 0px #00e6f6;
+  outline: transparent;
+  position: relative;
+  display: inline-block;
+}
+
+
+button::after {
+  --slice-0: inset(50% 50% 50% 50%);
+  --slice-1: inset(80% -6px 0 0);
+  --slice-2: inset(50% -6px 30% 0);
+  --slice-3: inset(10% -6px 85% 0);
+  --slice-4: inset(40% -6px 43% 0);
+  --slice-5: inset(80% -6px 5% 0);
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 3%, #00e6f6 3%, #00e6f6 5%, #ff013c 5%);
+  clip-path: var(--slice-0);
+  z-index: -1;
+}
+
+
+button:hover::after {
+  animation: glitch 1s steps(2, end) infinite;
+}
+
+@keyframes glitch {
+  0% {
+    clip-path: var(--slice-1);
+    transform: translate(-20px, -10px);
+  }
+  10% {
+    clip-path: var(--slice-3);
+    transform: translate(10px, 10px);
+  }
+  20% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 10px);
+  }
+  30% {
+    clip-path: var(--slice-3);
+    transform: translate(0px, 5px);
+  }
+  40% {
+    clip-path: var(--slice-2);
+    transform: translate(-5px, 0px);
+  }
+  50% {
+    clip-path: var(--slice-3);
+    transform: translate(5px, 0px);
+  }
+  60% {
+    clip-path: var(--slice-4);
+    transform: translate(5px, 10px);
+  }
+  70% {
+    clip-path: var(--slice-2);
+    transform: translate(-10px, 10px);
+  }
+  80% {
+    clip-path: var(--slice-5);
+    transform: translate(20px, -10px);
+  }
+  90% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 0px);
+  }
+  100% {
+    clip-path: var(--slice-1);
+    transform: translate(0);
+  }
+}
+
+
+.icon-size {
+  width: 30px;
+  height: 30px;
+  transition: transform 0.3s ease;
+}
+
+button:hover .icon-size {
+  transform: scale(1.1);
+} */
+
+
+
+
+/* From Uiverse.io by 00Kubi */ 
+.glow-container {
+	position: relative;
+	width: 190px;
+	height: 254px;
+	transition: 200ms;
+  }
+
+  
+  /* #card {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 20px;
+	transition: 700ms;
+	background: linear-gradient(45deg, #1a1a1a, #262626);
+	border: 2px solid rgba(255, 255, 255, 0.1);
+	overflow: hidden;
+	box-shadow:
+	  0 0 20px rgba(0, 0, 0, 0.3),
+	  inset 0 0 20px rgba(0, 0, 0, 0.2);
+  } */
+ 
+  
+  .cyber-lines span {
+	position: absolute;
+	background: linear-gradient(
+	  90deg,
+	  transparent,
+	  rgba(92, 103, 255, 0.2),
+	  transparent
+	);
+  }
+  
+  .cyber-lines span:nth-child(1) {
+	top: 20%;
+	left: 0;
+	width: 100%;
+	height: 1px;
+	transform: scaleX(0);
+	transform-origin: left;
+	animation: lineGrow 3s linear infinite;
+  }
+  
+  .cyber-lines span:nth-child(2) {
+	top: 40%;
+	right: 0;
+	width: 100%;
+	height: 1px;
+	transform: scaleX(0);
+	transform-origin: right;
+	animation: lineGrow 3s linear infinite 1s;
+  }
+  
+  .cyber-lines span:nth-child(3) {
+	top: 60%;
+	left: 0;
+	width: 100%;
+	height: 1px;
+	transform: scaleX(0);
+	transform-origin: left;
+	animation: lineGrow 3s linear infinite 2s;
+  }
+  
+  .cyber-lines span:nth-child(4) {
+	top: 80%;
+	right: 0;
+	width: 100%;
+	height: 1px;
+	transform: scaleX(0);
+	transform-origin: right;
+	animation: lineGrow 3s linear infinite 1.5s;
+  }
+  
+  .scan-line {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+	  to bottom,
+	  transparent,
+	  rgba(234, 53, 90, 0.15), /* Adjusted to match #ea355a */
+	  transparent
+	);
+	transform: translateY(-100%);
+	animation: scanMove 2s linear infinite;
+  }
+  
+  @keyframes lineGrow {
+	0% {
+	  transform: scaleX(0);
+	  opacity: 0;
+	}
+	50% {
+	  transform: scaleX(1);
+	  opacity: 1;
+	}
+	100% {
+	  transform: scaleX(0);
+	  opacity: 0;
+	}
+  }
+  
+  @keyframes scanMove {
+	0% {
+	  transform: translateY(-100%);
+	}
+	100% {
+	  transform: translateY(100%);
+	}
+  }
+  
+  
+  
+  
+  
