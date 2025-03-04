@@ -6,6 +6,7 @@ export const SVGModal: React.FC<{ children: React.ReactNode }> = ({ children }) 
 	return (
 		<>
 	<div className="p-0 m-0 relative inline-block overflow-hidden  text-primary">
+	<BackgroundGlow></BackgroundGlow>
       <div className="w-full h-full flex flex-col p-0 m-0 items-center text-center gap-5">
         <div className="relative w-full text-blue p-0 m-0  text-primary">
 	  <div className="svg-card-wrapper w-full relative text-primary text-center">
@@ -47,7 +48,7 @@ export const SVGModal: React.FC<{ children: React.ReactNode }> = ({ children }) 
 		<div className="content absolute top-0 left-0 w-full h-full flex flex-col gap-10 items-center p-5">
 		  {children}
 		</div>
-		<BackgroundGlow></BackgroundGlow>
+		
 	  </div>
 	  </div>
 	  </div>

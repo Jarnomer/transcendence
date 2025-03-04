@@ -301,6 +301,29 @@ path {
 	z-index: 1000; /* Ensures it's above other content */ 
   }
 
+
+
+ 
+.button {
+	transition: all 0.3s ease-in-out; 
+	cursor: pointer; 
+  }
+  
+  .stroke-primary {
+	stroke: oklch(65.28% 0.1966 20.69);
+  }
+  
+  /* Hover-efekti */
+  .button:hover .stroke-primary {
+	stroke: #FF0000; 
+  }
+  
+  .button:hover {
+	fill: oklch(60% 0.15 10); 
+	transform: scale(1.01); 
+	box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
+
 /* 
 
 button,
