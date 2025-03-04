@@ -1,46 +1,107 @@
-import React, { useState, useEffect } from "react";
-import axios from 'axios';
-import {api} from	"../api.ts";
-import { LeaderBoard } from "../components/LeaderBoard.tsx";
+import React from "react";
+import {api} from "../api.ts"
 
 async function getUserData() {
-
-	
 	try {
-		const userID = localStorage.getItem("userID");
-		if (!userID) {
-		  throw new Error("User ID not found");
-		}
-		const res = await api.get(`/user/${userID}`);
-		if (res.status !== 200) {
-			throw new Error(`Fetching user data failed! Status: ${res.status}`);
-		}
-		console.log("res: ", res);
-		return res.data;
-	  } catch (err) {
-		console.error("Failed to get user data:", err);
-		throw err;
+	  const userID = localStorage.getItem("userID");
+	  if (!userID) {
+		throw new Error("User ID not found");
 	  }
-}
+	  const res = await api.get(`/user/${userID}`);
+	  if (res.status !== 200) {
+		throw new Error(res.status);
+	  }
+	  console.log("res: ", res);
+	  return res.data;
+	} catch (err) {
+	  console.error("Failed to get user data:", err);
+	  throw err;
+	}
+  }
 
 
+const dummyUser = {
 
+  displayName: localStorage.getItem("username"),
+  username: localStorage.getItem("username"),
+  avatarURL: "./src/assets/images/default_pfp.png",
+  onlineStatus: true,
+  wins: 24,
+  losses: 10,
+  friends: [
+    { id: 1, name: "PlayerOne", avatar: "https://via.placeholder.com/50" },
+    { id: 2, name: "ShadowNinja", avatar: "https://via.placeholder.com/50" },
+    { id: 3, name: "CyberKnight", avatar: "https://via.placeholder.com/50" },
+  ],
+  matchHistory: [
+    { id: 1, opponent: "ShadowNinja", result: "Win" },
+    { id: 2, opponent: "PlayerOne", result: "Loss" },
+    { id: 3, opponent: "CyberKnight", result: "Win" },
+  ],
+};
 
 export const ProfilePage: React.FC = () => {
 
 	const user = getUserData();
-	return (
-		<div className="w-full h-full p-10 text-center">
-		<h1 className="font-bold text-2xl">Lorem Ipsum</h1>
-		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur dignissim magna quis est lacinia, et vestibulum elit egestas. In consequat turpis vitae massa rhoncus sagittis. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Integer sit amet velit sed odio eleifend molestie id non dui. Fusce facilisis nulla sapien, nec euismod arcu lacinia ac. Etiam posuere risus odio, quis pulvinar dui pharetra et. Praesent consequat odio justo, vel cursus lacus varius fringilla. Nam eu sodales purus. Fusce pharetra fermentum fermentum. Cras sed porta mi.
+	console.log(user)
 
-Morbi at accumsan neque, in vestibulum lacus. Nulla magna libero, tincidunt quis dui eu, aliquet porttitor urna. Proin sit amet porttitor urna, nec convallis turpis. Suspendisse volutpat facilisis eros, eget laoreet purus ultrices id. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In semper dapibus odio, in mattis augue suscipit vitae. Curabitur scelerisque, sem fringilla accumsan facilisis, massa arcu porttitor nisi, quis vehicula leo quam ut metus. Donec cursus lectus non elit tempor, id fermentum lacus scelerisque. Morbi ac cursus sem. Sed viverra dolor massa. Integer id quam magna. Proin feugiat nulla non turpis commodo mattis.
+  return (
+    <div className="w-full h-full flex flex-col items-center p-6 text-center">
+      {/* Profile Header */}
+      <div className="w-full max-w-md p-6">
+        <div className="flex flex-col items-center gap-4">
+		<div className="rounded-full relative w-[150px] h-[150px] border-2 boder-primary">
+          <img className="object-cover rounded-full" src={dummyUser.avatarURL} />
 
-Integer iaculis commodo turpis, quis rutrum eros ultrices in. Fusce egestas odio in neque lacinia fermentum. Donec ullamcorper efficitur purus ac feugiat. Aenean sed congue ligula. Suspendisse lobortis, dui et suscipit hendrerit, nunc mi facilisis urna, id fermentum nunc ligula quis ipsum. In vel dolor mattis, lobortis justo a, scelerisque ipsum. Vestibulum malesuada quam in ex dictum, eu rutrum ex efficitur. Aliquam mauris tortor, facilisis at ex in, ornare condimentum diam. Morbi dignissim lobortis efficitur. Nullam vel dui pretium, bibendum justo eu, suscipit libero. Cras vulputate felis vel pulvinar congue. Curabitur mauris mauris, fringilla vel dui eu, porta fermentum nibh. Integer et ultrices risus. Ut fermentum enim id vestibulum blandit.
+		  <svg className="size-9 absolute right-0 bottom-0" xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
+  				<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+			</svg>
 
-Sed malesuada maximus auctor. Nam sed interdum purus. Vivamus ex eros, bibendum a dignissim nec, tempus sit amet nisi. In turpis arcu, congue non accumsan vel, luctus vel erat. Nullam at faucibus tortor. Etiam congue ante arcu, at tristique purus sagittis sit amet. Cras quis facilisis mi.
-
-Nunc maximus lorem non pretium fermentum. Integer ultrices cursus odio, eget feugiat libero maximus et. Nulla at interdum ipsum, in semper elit. In id lacus lobortis, posuere leo ut, dapibus erat. Duis lobortis turpis lorem, ac efficitur sem venenatis in. Etiam pharetra metus accumsan lorem ullamcorper commodo. Duis vel eleifend enim. Nunc nec augue ac est tincidunt semper vitae vitae sapien. Sed pulvinar nunc metus, vel lobortis lorem ultricies id. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Duis porta lobortis neque, sit amet semper neque bibendum dictum. Donec sagittis quis risus eget aliquam. Sed non faucibus ligula, sit amet vehicula arcu. Quisque eget rutrum urna, dapibus elementum metus. Donec vel libero ut lectus tincidunt molestie. Fusce dapibus tellus euismod, condimentum magna id, molestie massa.</p>
 		</div>
-	)
-}
+          <h2 className="text-xl font-semibold">{dummyUser.displayName}</h2>
+          <p className="text-gray-400">@{dummyUser.username}</p>
+          <span
+            className={`text-sm font-medium ${dummyUser.onlineStatus ? "text-green-500" : "text-red-500"}`}
+          >
+            {dummyUser.onlineStatus ? "Online" : "Offline"}
+          </span>
+          <div className="flex gap-4 mt-4">
+            <button >Edit Profile</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="mt-6 flex gap-6 text-lg">
+        <span className="font-semibold">Wins: {dummyUser.wins}</span>
+        <span className="font-semibold">Losses: {dummyUser.losses}</span>
+      </div>
+
+      {/* Friends List */}
+      <div className="w-full max-w-md mt-6 p-4 glass-box">
+        <h3 className="text-lg font-semibold">Friends</h3>
+        <div className="flex flex-col gap-2 mt-2">
+          {dummyUser.friends.map((friend) => (
+            <div key={friend.id} className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-400" />
+              <span className="text-md font-medium">{friend.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Match History */}
+      <div className="w-full max-w-md mt-6 p-4 glass-box">
+        <h3 className="text-lg font-semibold">Match History</h3>
+        <div className="flex flex-col gap-2 mt-2">
+          {dummyUser.matchHistory.map((match) => (
+            <div key={match.id} className="flex justify-between">
+              <span>{match.opponent}</span>
+              <span className={match.result === "Win" ? "text-green-500" : "text-red-500"}>{match.result}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

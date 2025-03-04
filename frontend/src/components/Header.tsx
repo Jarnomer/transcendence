@@ -10,7 +10,7 @@ interface HeaderProps {
   export const Header: React.FC<HeaderProps> = ({isGameRunning}) => {
 
   return (
-	  <header className={`header relative w-full flex justify-center items-center p-2 ${!isGameRunning ? 'pb-7' : ''}`}>
+	  <header className={`header z-10 relative w-full bg-black flex justify-center items-center p-2 ${!isGameRunning ? 'pb-7' : ''}`}>
 	
       
 	{!isGameRunning ? <h1 className="logo text-lg sm:text-lg md:text-xl lg:text-3xl text-primary md:absolute">Super Pong 3D</h1>: null}
