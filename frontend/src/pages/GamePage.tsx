@@ -12,7 +12,11 @@ interface GamePageProps {
 }
 
 export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
-  // Initialize game state with default values
+  // Debug mode toggle, enables console logs and debug UI elements
+  // Can be toggled via keyboard shortcut (Alt+Q) during gameplay
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(false);
+
+  // Game state containing player and ball info as well as game status
   const [gameState, setGameState] = useState<GameState>({
     players: {
       player1: { id: "player1", y: 0, score: 0 },
@@ -23,54 +27,120 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
     timeStamp: Date.now()
   });
 
-  // Queue and connection state
+  // Queue and connection management state
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [wsUrl, setWsUrl] = useState<string | null>(null);
+
+  // Reference to store the interval for queue polling
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get mode and difficulty from router
+  // Get game mode and difficulty settings from router
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
 
+  // Allows toggling debug mode with Alt+Q
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'q') {
+        setIsDebugMode(prev => !prev);
+        console.log('Debug mode:', !isDebugMode);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isDebugMode]);
+
   // Log mode and difficulty when they change
   useEffect(() => {
-    console.log("Mode:", mode, "Difficulty:", difficulty);
-  }, [mode, difficulty]);
+    if (isDebugMode) {
+      console.log("Mode:", mode, "Difficulty:", difficulty);
+    }
+  }, [mode, difficulty, isDebugMode]);
 
-  // Initialize game - get userId and handle singleplayer/multiplayer modes
+  // OnMessage handler to processes incoming messages from the server 
+  const handleMessage = useCallback((data: any) => {
+    if (isDebugMode) {
+      console.log('WebSocket message received:', data);
+    }
+
+    if (data.type === "update") {
+      setGameState((prev) => ({
+        // Merge previous state with new state data
+        ...prev,
+        players: {
+          ...prev.players,
+          ...data.state.players,
+        },
+        ball: {
+          ...prev.ball,
+          ...data.state.ball,
+        },
+      }));
+    } else if (data.type === "status") {
+      setGameState((prev) => ({
+        ...prev,
+        gameStatus: data.status,
+        timeStamp: Date.now(),
+      }));
+    }
+  }, [isDebugMode]);
+
+  // Initialize WebSocket connection with all available utilities
+  const {
+    ws,
+    connectionStatus,
+    sendMessage,
+    lastMessage,
+    disconnect,
+    reconnect
+  } = useWebSocket(wsUrl, handleMessage);
+
+  // Initialize game, retrieve user ID and set up game based on mode
   useEffect(() => {
+    console.log("fuk my dik");
     const storedUserId = localStorage.getItem("userID");
-    console.log("userId:", storedUserId);
+    if (isDebugMode) {
+      console.log("userId:", storedUserId);
+    }
 
     if (storedUserId) {
       setUserId(storedUserId);
     }
 
     if (mode === 'singleplayer') {
+      // For singleplayer, create a game immediately with AI opponent
       singlePlayer(difficulty).then((data) => {
-        console.log("Single player game ID:", data.game_id);
+        if (isDebugMode) {
+          console.log("Single player game ID:", data.game_id);
+        }
         if (data.status === 'created') {
           setGameId(data.game_id);
         }
       });
     } else {
+      // For multiplayer, enter the matchmaking queue
       enterQueue().then((status) => {
-        console.log("Queue status:", status);
+        if (isDebugMode) {
+          console.log("Queue status:", status);
+        }
       });
     }
 
-    return () => {
-      // Cleanup
+    return () => { // Cleanup 
       if (setIsGameRunning) {
         setIsGameRunning(false);
       }
     };
-  }, [mode, difficulty, setIsGameRunning]);
+  }, [mode, difficulty, setIsGameRunning, isDebugMode]);
 
   // Poll for queue status in multiplayer mode
   useEffect(() => {
+    // Only start polling in multiplayer mode when we have a user ID
     if (!userId || mode === 'singleplayer') return;
 
     // Clear any existing interval before setting a new one
@@ -78,12 +148,15 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
       clearInterval(intervalRef.current);
     }
 
+    // Set up polling interval
     intervalRef.current = setInterval(async () => {
       try {
         const status = await getQueueStatus();
         if (status === "matched") {
           const data = await getGameID();
-          console.log("Matched! Game ID:", data.game_id);
+          if (isDebugMode) {
+            console.log("Matched! Game ID:", data.game_id);
+          }
           setGameId(data.game_id);
 
           // Stop polling when matched
@@ -97,117 +170,89 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
       }
     }, 2000);
 
-    // Cleanup: clear interval on unmount
+    // Clear interval on unmount or when dependencies change
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [userId, mode]);
+  }, [userId, mode, isDebugMode]);
 
-  // OnMessage handler for game updates
-  const handleMessage = useCallback((data: any) => {
-    if (data.type === "update") {
-      setGameState((prev) => ({
-        // Merge prev data with new state
-        ...prev,
-        players: {
-          ...prev.players,
-          ...data.state.players,
-        },
-        ball: {
-          ...prev.ball,
-          ...data.state.ball,
-        },
-        // Update gameStatus and timeStamp if they exist in the update
-        gameStatus: data.state.gameStatus || prev.gameStatus,
-        timeStamp: data.state.timeStamp || Date.now(),
-      }));
-    } else if (data.type === "status") {
-      // Handle explicit game status updates
-      setGameState((prev) => ({
-        ...prev,
-        gameStatus: data.status,
-        timeStamp: Date.now(),
-      }));
-    }
-  }, []);
-
-  // Set WebSocket URL when gameId is available
+  // Set up WebSocket URL when gameId is available
   useEffect(() => {
     if (!gameId) return;
 
     const token = localStorage.getItem("token");
-    console.log("Token:", token);
+    if (isDebugMode) {
+      console.log("Token:", token);
+    }
+
+    // Construct WebSocket URL with all necessary parameters
     const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
     setWsUrl(url);
 
-    // Update game status to waiting when we have a gameId
-    setGameState(prev => ({
-      ...prev,
-      gameStatus: 'waiting',
-      timeStamp: Date.now()
-    }));
-  }, [gameId, mode, difficulty]);
-
-  // Destructure more utilities from the hook
-  const {
-    ws,
-    connectionStatus,
-    sendMessage,
-    lastMessage,
-    disconnect,
-    reconnect
-  } = useWebSocket(wsUrl, handleMessage);
+    // Update game status to waiting only in multiplayer mode
+    // In singleplayer, transition directly to 'playing' when connected
+    if (mode !== 'singleplayer') {
+      setGameState(prev => ({
+        ...prev,
+        gameStatus: 'waiting',
+        timeStamp: Date.now()
+      }));
+    }
+  }, [gameId, mode, difficulty, isDebugMode]);
 
   // Update loading state based on connection status and game status
   useEffect(() => {
     if (connectionStatus === 'connected') {
       setLoading(false);
+
       if (setIsGameRunning) {
         setIsGameRunning(true);
+      }
+
+      // When connection is established but game isn't playing yet
+      if (gameState.gameStatus === 'loading' || gameState.gameStatus === 'waiting') {
         setGameState(prev => ({
           ...prev,
           gameStatus: 'playing'
         }));
       }
-
-      // When connection is established but game isn't playing yet
-      if (gameState.gameStatus === 'loading') {
-        setGameState(prev => ({
-          ...prev,
-          gameStatus: 'waiting'
-        }));
-      }
     } else if (connectionStatus === 'error') {
       setLoading(false);
     }
-  }, [connectionStatus, setIsGameRunning, gameState.gameStatus]);
 
-  // Setup game controls with the WebSocket ref
-  useGameControls(ws);
+    if (isDebugMode) {
+      console.log('Connection status changed:', connectionStatus);
+    }
+  }, [connectionStatus, setIsGameRunning, gameState.gameStatus, isDebugMode]);
 
-  // Debug last message received (useful during development)
+  useGameControls(ws); // Set up game controls
+
+  // Debug logging of last received message
   useEffect(() => {
-    if (lastMessage) {
+    if (isDebugMode && lastMessage) {
       console.log('Last WebSocket message:', lastMessage);
     }
-  }, [lastMessage]);
+  }, [lastMessage, isDebugMode]);
 
-  // Add manual reconnection handler
-  const handleReconnect = useCallback(() => {
-    reconnect();
-  }, [reconnect]);
-
-  // Add cleanup function on component unmount
+  // Clean WebSocket connection on component unmount
   useEffect(() => {
     return () => {
       disconnect();
     };
   }, [disconnect]);
 
-  // Function to get status message based on gameStatus
+  // Reconnection handler to use when connection is lost, unused atm
+  const handleReconnect = useCallback(() => {
+    if (isDebugMode) {
+      console.log('Attempting to reconnect...');
+    }
+    reconnect();
+  }, [reconnect, isDebugMode]);
+
+  // Returns appropriate status message based on current game state
   const getStatusMessage = () => {
     if (loading) {
       return mode === 'singleplayer' ? "Starting game..." : "Waiting for opponent...";
@@ -229,17 +274,24 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
     }
   };
 
-  // Add pause/resume game functionality
+  // Pause/Resume toggle handler to send message to server, unused atm
   const togglePause = useCallback(() => {
     if (gameState.gameStatus) {
       if (gameState.gameStatus === 'playing') {
+        if (isDebugMode) {
+          console.log('Sending pause request');
+        }
         sendMessage({ type: 'pause', payload: {} });
       } else if (gameState.gameStatus === 'paused') {
+        if (isDebugMode) {
+          console.log('Sending resume request');
+        }
         sendMessage({ type: 'resume', payload: {} });
       }
     }
-  }, [sendMessage, gameState.gameStatus]);
+  }, [sendMessage, gameState.gameStatus, isDebugMode]);
 
+  // render component
   return (
     <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
       <div className="h-[10%] flex justify-between items-center">
