@@ -83,7 +83,6 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
           const data = await getGameID();
           console.log("Matched! Game ID:", data.game_id);
           setGameId(data.game_id);
-
           // Stop polling when matched
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -125,7 +124,6 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
   // Set WebSocket URL when gameId is available
   useEffect(() => {
     if (!gameId) return;
-
     const token = localStorage.getItem("token");
     console.log("Token:", token);
     const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
