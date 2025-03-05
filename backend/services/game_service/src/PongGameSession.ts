@@ -1,65 +1,86 @@
 import PongGame from "./PongGame";
 import { AIController } from "./AIController";
+import { GameState } from "../../../../shared/types";
 
 export class PongGameSession {
   private gameId: string;
   private game: PongGame;
   private mode: string;
-  private difficulty: string;
-  private clients: Set<any>;
+  private clients: Map<string, any>;
   private aiController: AIController | null;
-  private interval: NodeJS.Timeout | null;
   private onEndCallback: () => void;
+  private previousGameStatus: GameState["gameStatus"] | null = null;
 
   constructor(gameId: string, mode: string, difficulty: string, onEndCallback: () => void) {
     this.gameId = gameId;
     this.mode = mode;
-    this.difficulty = difficulty;
-    this.clients = new Set();
-    this.game = new PongGame();
-    this.interval = null;
+    this.clients = new Map();  // Now maps playerId -> connection
     this.onEndCallback = onEndCallback;
 
-    this.aiController = (mode === "singleplayer") ? new AIController(difficulty) : null;
+    this.game = new PongGame();
+    this.previousGameStatus = this.game.getGameState().gameStatus;
+
+    this.aiController = (mode === "singleplayer") ? new AIController(difficulty, this.game.getHeight()) : null;
   }
 
-  startGameLoop(): void {
-    this.interval = setInterval(() => this.updateGame(), 1000 / 60);
+  getClientCount(): number {
+    return this.clients.size;
   }
 
-  stopGameLoop(): void {
-    if (this.interval) {
-        clearInterval(this.interval);
-    }
+  addClient(playerId: string, connection: any): void {
+    this.clients.set(playerId, connection);
+
+    connection.on("message", (message: string) => this.handleMessage(playerId, message));
+    connection.on("close", () => this.removeClient(playerId));
+
+    // Automatically start when correct number of players connected
+    this.checkAndStartGame();
   }
 
-  addClient(connection: any): void {
-    this.clients.add(connection);
-
-    connection.on("message", (message: string) => this.handleMessage(message));
-    connection.on("close", () => this.removeClient(connection));
-  }
-
-  removeClient(connection: any): void {
-    this.clients.delete(connection);
+  removeClient(playerId: string): void {
+    this.clients.delete(playerId);
     if (this.clients.size === 0) {
       this.endGame();
+    } else {
+      this.broadcast({ type: "status", status: "waiting" });
     }
   }
 
-  handleMessage(message: string): void {
+  private checkAndStartGame(): void {
+    if (
+      (this.mode === "singleplayer" && this.clients.size === 1) ||
+      (this.mode !== "singleplayer" && this.clients.size === 2)
+    ) {
+      this.game.startCountdown();
+      this.broadcast({ type: "status", status: "countdown" });
+    } else {
+      this.broadcast({ type: "status", status: "waiting" });
+    }
+  }
+
+  handleMessage(playerId: string, message: string): void {
     try {
       const data = JSON.parse(message);
+
       if (data.type === "move") {
-        this.handlePlayerMove(data.playerId, data.move);
+        this.handlePlayerMove(playerId, data.move);
       }
     } catch (error) {
       console.error("Invalid WebSocket message:", error);
     }
   }
 
-  handlePlayerMove(playerId: string, move: any): void {
-    const updatedState = this.game.updateGameStatus({ [playerId]: move });
+  handlePlayerMove(playerId: string, move: "up" | "down" | null): void {
+    const moves: Record<string, "up" | "down" | null> = { player1: null, player2: null };
+
+    if (this.mode === "singleplayer") {
+      if (playerId === "player1") moves.player1 = move;
+    } else {
+      if (playerId === "player1") moves.player1 = move;
+      if (playerId === "player2") moves.player2 = move;
+    }
+
+    const updatedState = this.game.updateGameState(moves);
     this.broadcast({ type: "update", state: updatedState });
   }
 
@@ -67,36 +88,47 @@ export class PongGameSession {
     if (this.aiController) {
       this.handleAIMove();
     }
-    const updatedState = this.game.updateGameStatus({});
+
+    const updatedState = this.game.updateGameState({});
     this.broadcast({ type: "update", state: updatedState });
-  }
 
-  private handleAIMove(): void {
-    if (!this.aiController) return;
+    // Broadcast if game status (countdown, playing, finished, etc.) changed
+    if (updatedState.gameStatus !== this.previousGameStatus) {
+      this.broadcast({ type: "status", status: updatedState.gameStatus });
+      this.previousGameStatus = updatedState.gameStatus;
 
-    const ball = this.game.getBall();
-    const aiPaddle = this.game.getPlayer("player2");
-    const paddleSpeed = this.game.getPaddleSpeed();
-
-    if (this.aiController.shouldUpdate(ball.dx)) {
-      this.aiController.updateAIState(ball, aiPaddle, this.game.getHeight(), this.game.getPaddleHeight(), paddleSpeed);
+      if (updatedState.gameStatus === "finished") {
+        this.endGame();
+      }
     }
-
-    const aiMove = this.aiController.getNextMove();
-    this.game.updateGameStatus({ player2: aiMove });
   }
-
+  
   private broadcast(message: object): void {
-    for (const connection of this.clients) {
+    for (const connection of this.clients.values()) {
       if (connection.readyState === connection.OPEN) {
         connection.send(JSON.stringify(message));
       }
     }
   }
-
-  private endGame(): void {
-    this.stopGameLoop();
+  
+  endGame(): void {
+    this.game.stopGame();
     this.onEndCallback();
+  }
+
+  private handleAIMove(): void {
+    if (!this.aiController) return;
+  
+    const ball = this.game.getGameState().ball;
+    const aiPaddle = this.game.getGameState().players.player2;
+    const paddleSpeed = this.game.getPaddleSpeed();
+  
+    if (this.aiController.shouldUpdate(ball.dx)) {
+      this.aiController.updateAIState(ball, aiPaddle, this.game.getHeight(), this.game.getPaddleHeight(), paddleSpeed);
+    }
+  
+    const aiMove = this.aiController.getNextMove();
+    this.game.updateGameState({ player2: aiMove });
   }
 }
 

@@ -11,7 +11,7 @@ export class GameManager {
   createGame(gameId: string, mode: string, difficulty: string): void {
     console.log(`Creating game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
     this.sessions[gameId] = new PongGameSession(gameId, mode, difficulty, () => this.endGame(gameId));
-    this.sessions[gameId].startGameLoop();
+    // this.sessions[gameId].startGame();
   }
 
   addClient(gameId: string, connection: any): void {
@@ -20,11 +20,15 @@ export class GameManager {
       connection.close();
       return;
     }
-    this.sessions[gameId].addClient(connection);
+    if (this.sessions[gameId].getClientCount() === 1) {
+    this.sessions[gameId].addClient("player2", connection);
+    } else {
+    this.sessions[gameId].addClient("player1", connection);
+    }
   }
 
   endGame(gameId: string): void {
-    this.sessions[gameId]?.stopGameLoop();
+    this.sessions[gameId]?.endGame();
     delete this.sessions[gameId];
   }
 

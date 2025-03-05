@@ -6,10 +6,12 @@ export class AIController {
   private lastUpdateTime: number = 0;
   private difficulty: string;
   private lastBallDx: number = 0;
+  private gameHeight: number = 0;
 
   // difficulty: easy, normal, brutal
-  constructor(difficulty: string) {
+  constructor(difficulty: string, gameHeight: number) {
   this.difficulty = difficulty;
+  this.gameHeight = gameHeight;
   }
 
   updateAIState(ball: Ball, aiPaddle: Player, gameHeight: number, paddleHeight: number, paddleSpeed: number): void {
@@ -56,23 +58,22 @@ export class AIController {
     let predictedDy = ball.dy;
     let predictedDx = ball.dx;
 
-    while (predictedX < 800) {
+    while (predictedX < this.gameHeight * 2) {
       predictedY += predictedDy;
       predictedX += predictedDx;
       if (predictedX < 0) {
         predictedDx = -predictedDx;
         predictedX += 2 * predictedDx;
       }
-      if (predictedY < 0 || predictedY > 400) {
+      if (predictedY < 0 || predictedY > this.gameHeight) {
         predictedDy = -predictedDy;
         predictedY += 2 * predictedDy;
       }
     }
 
-    if (ball.dx < 0 && predictedY < 100) {
-      predictedY = 100;
-    } else if (ball.dx < 0 && predictedY > 300) {
-      predictedY = 300;
+    // move back to middle if ball is moving away
+    if (ball.dx < 0) {
+      predictedY = this.gameHeight / 2;
     }
 
     return predictedY;
