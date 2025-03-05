@@ -45,7 +45,7 @@ export class PongGameSession {
     if (this.clients.size === 0) {
       this.endGame();
     } else {
-      this.broadcast({ type: "status", status: "waiting" });
+      this.broadcast({ type: "status", state: "waiting" });
     }
   }
 
@@ -55,10 +55,10 @@ export class PongGameSession {
       (this.mode !== "singleplayer" && this.clients.size === 2)
     ) {
       this.game.startCountdown();
-      this.broadcast({ type: "status", status: "countdown" });
+      this.broadcast({ type: "status", state: "countdown" });
       this.startGameLoop();
     } else {
-      this.broadcast({ type: "status", status: "waiting" });
+      this.broadcast({ type: "status", state: "waiting" });
     }
   }
 
@@ -103,7 +103,7 @@ export class PongGameSession {
 
     // Broadcast if game status (countdown, playing, finished, etc.) changed
     if (updatedState.gameStatus !== this.previousGameStatus) {
-      this.broadcast({ type: "status", status: updatedState.gameStatus });
+      this.broadcast({ type: "status", state: updatedState.gameStatus });
       this.previousGameStatus = updatedState.gameStatus;
 
       if (updatedState.gameStatus === "finished") {
@@ -125,7 +125,7 @@ export class PongGameSession {
     this.isGameFinished = true;  // Mark game as finished to prevent further calls
     
     this.game.stopGame();
-    this.broadcast({ type: "status", status: "finished" });
+    this.broadcast({ type: "status", state: "finished" });
     this.onEndCallback();
   }
 

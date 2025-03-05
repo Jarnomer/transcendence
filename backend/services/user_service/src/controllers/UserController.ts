@@ -120,7 +120,7 @@ export class UserController {
     const avatarPath = path.join(UPLOAD_DIR, fileName);
     await pipeline(avatar.file, fs.createWriteStream(avatarPath));
 
-    const avatarURL = `api/uploads/${avatar.filename}`;
+    const avatarURL = `uploads/${fileName}`;
     const user = await this.userService.updateUserByID(user_id, { avatar_url: avatarURL });
     if (!user) {
       throw new NotFoundError("User not found");

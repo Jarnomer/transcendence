@@ -1,11 +1,13 @@
-import { GameState } from '../../../shared/types';
+import { GameState, GameStatus } from '../../../shared/types';
+import { Game } from '../pages/Game';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 
 
 type WebSocketState = {
     connectionStatus: ConnectionStatus;
-    messages: GameState;
+    gameStatus: GameStatus;
+    gameState: GameState;
 };
 
 type WebSocketAction =
@@ -13,7 +15,8 @@ type WebSocketAction =
     | { type: "DISCONNECTED" }
     | { type: "RECONNECTING" }
     | { type: "ERROR" }
-    | { type: "MESSAGE_RECEIVED"; payload: any };
+    | { type: "GAME_UPDATE"; payload: GameState }
+    | { type: "GAME_STATUS"; payload: GameStatus };
 
 function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSocketState {
     switch (action.type) {
@@ -25,18 +28,21 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
             return { ...state, connectionStatus: "disconnected" };
         case "ERROR":
             return { ...state, connectionStatus: "error" };
-        case "MESSAGE_RECEIVED":
+        case "GAME_UPDATE":
             return {
-                ...state, messages: {
+                ...state, gameState: {
                     players: {
-                        ...state.messages.players,
+                        ...state.gameState.players,
                         ...action.payload.players,
                     },
                     ball: {
-                        ...state.messages.ball,
+                        ...state.gameState.ball,
                         ...action.payload.ball,
                     },
-            } };
+                }
+            };
+        case "GAME_STATUS":
+            return { ...state, gameStatus: action.payload };
         default:
             return state;
     }

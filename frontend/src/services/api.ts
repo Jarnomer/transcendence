@@ -40,7 +40,7 @@ api.interceptors.request.use(
     if (!config.headers)
       throw new Error("Request config is undefined");
     const token = localStorage.getItem("token"); // Always fetch latest token
-    if (token ) {
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -194,21 +194,40 @@ export async function singlePlayer(difficulty: string) {
 
 
 export async function getUserData() {
-	try {
-	  const userID = localStorage.getItem("userID");
-	  if (!userID) {
-		throw new Error("User ID not found");
-	  }
-	  const res = await api.get(`/user/${userID}`);
-	  if (res.status !== 200) {
-		  throw new Error(`Error ${res.status}: Failed to fetch user data`);
-	  }
-	  return res.data;
-	} catch (err) {
-	  console.error("Failed to get user data:", err);
-	  throw err;
-	}
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get(`/user/${userID}`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user data`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get user data:", err);
+    throw err;
   }
+}
+
+export async function getUserImage() {
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get(`/user/avatar/${userID}`,
+      { responseType: "blob" }, // Important for binary data
+    );
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user image`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get user image:", err);
+    throw err;
+  }
+}
 
 //
 // function isTokenExpired(token: string): boolean {

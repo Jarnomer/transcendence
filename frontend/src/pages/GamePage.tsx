@@ -11,7 +11,7 @@ import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../services
 export const GamePage: React.FC = () => {
   // Debug mode toggle, enables console logs and debug UI elements
   // Can be toggled via keyboard shortcut (Alt+Q) during gameplay
-  const {setUrl, messages, sendMessage, connectionStatus, ws} = useWebSocketContext();
+  const {setUrl, gameState, gameStatus, connectionStatus} = useWebSocketContext();
 
   // Queue and connection management state
   // const [loading, setLoading] = useState(true);
@@ -24,8 +24,6 @@ export const GamePage: React.FC = () => {
   // Get game mode and difficulty settings from router
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
-
-
 
   // Log mode and difficulty when they change
   useEffect(() => {
@@ -129,7 +127,7 @@ export const GamePage: React.FC = () => {
   //   }
   // }, [connectionStatus, gameState.gameStatus, isDebugMode]);
 
-  useGameControls(ws); // Set up game controls
+  useGameControls(); // Set up game controls
 
   // // Debug logging of last received message
   // useEffect(() => {
@@ -150,24 +148,11 @@ export const GamePage: React.FC = () => {
     }
 
     if (mode === '1v1') {
-      return "Waiting for opponent...";
+      return `Game Status: ${gameStatus}`;
     }
 
     if (connectionStatus !== 'connected') {
       return `Connection: ${connectionStatus}`;
-    }
-
-    switch (messages?.gameStatus) {
-      case 'loading':
-        return "Loading game...";
-      case 'waiting':
-        return "Waiting for game to start...";
-      case 'paused':
-        return "Game paused";
-      case 'finished':
-        return "Game over!";
-      default:
-        return "";
     }
   };
 
@@ -192,13 +177,13 @@ export const GamePage: React.FC = () => {
   return (
     <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
       <div className="h-[10%] flex justify-between items-center">
-        <PlayerScoreBoard gameState={messages} />
+        <PlayerScoreBoard gameState={gameState} />
       </div>
       <div className="w-full h-full overflow-hidden border-2 border-primary">
-        {(connectionStatus === 'connected' && messages.gameStatus !== 'finished') ? (
+        {(connectionStatus === 'connected' && gameState.gameStatus !== 'finished') ? (
           <>
-            <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {messages.gameStatus}</p>
-            <GameCanvas gameState={messages} />
+            <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {gameStatus}</p>
+            <GameCanvas gameState={gameState} />
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4">

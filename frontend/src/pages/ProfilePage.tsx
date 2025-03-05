@@ -11,10 +11,13 @@ export const ProfilePage: React.FC = () => {
 
   async function fetchData() {
     const fetchedUser = await getUserData();
+    console.log(fetchedUser);
     if (fetchedUser) {
       setUser(fetchedUser);
     }
   }
+
+
 
   useEffect(() => {
     setLoading(true);
