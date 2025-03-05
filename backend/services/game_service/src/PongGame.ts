@@ -51,6 +51,11 @@ export default class PongGame {
     };
   }
 
+  private resetPaddles(): void {
+    this.gameState.players.player1.y = this.height / 2 - this.paddleHeight / 2;
+    this.gameState.players.player2.y = this.height / 2 - this.paddleHeight / 2;
+  }
+
   startCountdown(): void {
     this.setGameStatus("countdown");
     setTimeout(() => {
@@ -78,9 +83,6 @@ export default class PongGame {
     this.updatePaddlePosition("player1", playerMoves.player1 ?? null);
     this.updatePaddlePosition("player2", playerMoves.player2 ?? null);
 
-    // Update ball position and handle collisions
-    this.updateBall();
-
     // Return the updated state (deep copy for safety)
     return this.getGameState();
   }
@@ -103,7 +105,15 @@ export default class PongGame {
     ball.x += ball.dx;
     ball.y += ball.dy;
 
-    if (ball.y <= 0 || ball.y + this.ballSize >= this.height) {
+    // Top wall collision
+    if (ball.y <= 0) {
+      ball.y = 0; // Prevent going inside the wall
+      ball.dy *= -1;
+    }
+
+    // Bottom wall collision
+    if (ball.y + this.ballSize >= this.height) {
+      ball.y = this.height - this.ballSize; // Prevent going inside the wall
       ball.dy *= -1;
     }
 
@@ -115,12 +125,16 @@ export default class PongGame {
         this.stopGame();
       }
       this.resetBall();
+      this.resetPaddles();
+      this.startCountdown();
     } else if (ball.x + this.ballSize >= this.width) {
       players.player1.score++;
       if (players.player1.score >= this.MAX_SCORE) {
         this.stopGame();
       }
       this.resetBall();
+      this.resetPaddles();
+      this.startCountdown();
     }
   }
 

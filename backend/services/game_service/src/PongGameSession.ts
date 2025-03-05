@@ -10,6 +10,8 @@ export class PongGameSession {
   private aiController: AIController | null;
   private onEndCallback: () => void;
   private previousGameStatus: GameState["gameStatus"] | null = null;
+  private interval: NodeJS.Timeout | null = null;
+  private isGameFinished: boolean = false;
 
   constructor(gameId: string, mode: string, difficulty: string, onEndCallback: () => void) {
     this.gameId = gameId;
@@ -19,6 +21,7 @@ export class PongGameSession {
 
     this.game = new PongGame();
     this.previousGameStatus = this.game.getGameState().gameStatus;
+    this.interval = null;
 
     this.aiController = (mode === "singleplayer") ? new AIController(difficulty, this.game.getHeight()) : null;
   }
@@ -53,9 +56,15 @@ export class PongGameSession {
     ) {
       this.game.startCountdown();
       this.broadcast({ type: "status", status: "countdown" });
+      this.startGameLoop();
     } else {
       this.broadcast({ type: "status", status: "waiting" });
     }
+  }
+
+  private startGameLoop(): void {
+    this.updateGame();
+    this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }
 
   handleMessage(playerId: string, message: string): void {
@@ -112,7 +121,11 @@ export class PongGameSession {
   }
   
   endGame(): void {
+    if (this.isGameFinished) return; // Prevent recursive calls
+    this.isGameFinished = true;  // Mark game as finished to prevent further calls
+    
     this.game.stopGame();
+    this.broadcast({ type: "status", status: "finished" });
     this.onEndCallback();
   }
 
