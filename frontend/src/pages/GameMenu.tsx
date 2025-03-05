@@ -131,6 +131,19 @@ export const GameMenu: React.FC = () => {
   return (
     <div id="home-container" className="flex flex-wrap justify-center gap-4 px-3 items-center p-10">
       {renderMenu()}
+      {/* <div className="container noselect">
+  			<div className="canvas">
+    			<div id="card">
+      				<div className="card-content">
+                <h1>adad</h1>
+        				<div className="cyber-lines">
+          					<span></span><span></span><span></span><span></span>  
+        				<div className="scan-line"></div>
+						</div>
+      				</div>
+    			</div>
+  			</div>
+		</div> */}
     </div>
   );
 };

@@ -13,6 +13,8 @@ import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { GoBackButton } from './components/GoBackButton.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { useAnimatedNavigate } from './animatedNavigate.tsx';
+import { BackgroundGlow } from './components/BackgroundGlow.tsx';
+import { ChatPage } from './pages/ChatPage.tsx';
 
 export const IsLoggedInContext = React.createContext<{
 	isLoggedIn: boolean;
@@ -39,6 +41,7 @@ const App: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false); // Modal state
 	const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
+
 
 
 	// authentication check to backend database preventing unauthorized tokens
@@ -106,13 +109,15 @@ const App: React.FC = () => {
 						<Header isGameRunning={isGameRunning} />
 						{/* <GoBackButton /> */}
 						<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
+							{/* <BackgroundGlow /> */}
 							<Routes>
 								<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 								<Route path="/login" element={<LoginPage />} />
 								<Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 								<Route path="/game" element={isLoggedIn ? <GamePage setIsGameRunning={setIsGameRunning} /> : <LoginPage />} />
 								<Route path="/creators" element={<CreatorsPage />} />
-								<Route path="/profile" element={<ProfilePage />} />
+								<Route path="/profile" element={isLoggedIn ? <ProfilePage /> : <LoginPage />} />
+								<Route path="/chat" element={isLoggedIn ? <ChatPage /> : <LoginPage />} />
 							</Routes>
 							{/* Conditionally render the modals */}
 							{<SettingsModal />}

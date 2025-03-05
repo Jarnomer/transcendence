@@ -1,4 +1,5 @@
 import React from "react";
+import { BackgroundGlow } from "../BackgroundGlow";
 
 interface GameMenuCardProps {
   content: string;
@@ -12,7 +13,7 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
 
 	
     <div
-      className="game-mode-modal p-0 m-0 relative inline-block  text-primary"
+      className="game-mode-modal p-0 m-0 relative inline-block  text-primary overflow-hidden"
       onClick={onClick}
     >
       <div className="w-full h-full flex flex-col p-0 m-0 items-center text-center gap-5">
@@ -70,6 +71,7 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
           {hoverInfo}
         </div>
       </div>
+      <BackgroundGlow></BackgroundGlow>
     </div>
   );
 };
