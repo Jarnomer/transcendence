@@ -8,7 +8,7 @@ import { CreatorsPage } from "./pages/CreatorsPage.tsx"
 import { GamePage } from "./pages/GamePage.tsx";
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
-import { api } from './api';
+import { api } from './services/api.ts';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { GoBackButton } from './components/GoBackButton.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
@@ -68,7 +68,7 @@ const App: React.FC = () => {
 
 	const logout = async () => {
 		try {
-			await api.post("/auth/logout" , {user_id : localStorage.getItem("userID")});
+			await api.post("/auth/logout", { user_id: localStorage.getItem("userID") });
 		} catch (error) {
 			console.error("Logout failed:", error);
 		} finally {

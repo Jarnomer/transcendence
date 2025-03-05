@@ -1,23 +1,23 @@
 import React from "react";
-import {api} from "../api.ts"
+import { api } from "../services/api.ts"
 
 async function getUserData() {
-	try {
-	  const userID = localStorage.getItem("userID");
-	  if (!userID) {
-		throw new Error("User ID not found");
-	  }
-	  const res = await api.get(`/user/${userID}`);
-	  if (res.status !== 200) {
-		throw new Error(res.status);
-	  }
-	  console.log("res: ", res);
-	  return res.data;
-	} catch (err) {
-	  console.error("Failed to get user data:", err);
-	  throw err;
-	}
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get(`/user/${userID}`);
+    if (res.status !== 200) {
+      throw new Error(res.status);
+    }
+    console.log("res: ", res);
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get user data:", err);
+    throw err;
   }
+}
 
 
 const dummyUser = {
@@ -42,22 +42,22 @@ const dummyUser = {
 
 export const ProfilePage: React.FC = () => {
 
-	const user = getUserData();
-	console.log(user)
+  const user = getUserData();
+  console.log(user)
 
   return (
     <div className="w-full h-full flex flex-col items-center p-6 text-center">
       {/* Profile Header */}
       <div className="w-full max-w-md p-6">
         <div className="flex flex-col items-center gap-4">
-		<div className="rounded-full relative w-[150px] h-[150px] border-2 boder-primary">
-          <img className="object-cover rounded-full" src={dummyUser.avatarURL} />
+          <div className="rounded-full relative w-[150px] h-[150px] border-2 boder-primary">
+            <img className="object-cover rounded-full" src={dummyUser.avatarURL} />
 
-		  <svg className="size-9 absolute right-0 bottom-0" xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
-  				<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-			</svg>
+            <svg className="size-9 absolute right-0 bottom-0" xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
 
-		</div>
+          </div>
           <h2 className="text-xl font-semibold">{dummyUser.displayName}</h2>
           <p className="text-gray-400">@{dummyUser.username}</p>
           <span

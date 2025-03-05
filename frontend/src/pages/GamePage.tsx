@@ -5,7 +5,7 @@ import useGameControls from '../hooks/useGameControls';
 import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
 import GameCanvas from '../components/GameCanvas';
 import { GameState } from '../../../shared/types';
-import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../api';
+import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../services/api';
 
 interface GamePageProps {
   setIsGameRunning?: (isRunning: boolean) => void;
