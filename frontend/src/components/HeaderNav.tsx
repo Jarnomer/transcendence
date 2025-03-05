@@ -44,7 +44,6 @@ export const HeaderNav: React.FC = () => {
         <button onClick={() => {
           logout();
           setIsLoggedIn(false);
-          animatedNavigate("/");  // Redirect to home page after logout
         }}>Log Out</button>
       ) : null}
     </div>

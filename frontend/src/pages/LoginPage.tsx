@@ -55,7 +55,7 @@ export const LoginPage: React.FC = () => {
   
 
   return (
-	<div className="w-full min-h-screen flex justify-center p-10">
+	<div className="w-full h-full flex justify-center p-10">
     <div className="w-[300px]">
     <SVGModal>
 		<div className="text-center">

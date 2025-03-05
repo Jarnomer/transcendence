@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage.tsx";
 import { Header } from './components/Header.tsx';
 import { Footer } from './components/Footer.tsx';
@@ -76,7 +76,8 @@ const App: React.FC = () => {
 			localStorage.removeItem("userID");
 			localStorage.removeItem("username");
 			setIsLoggedIn(false);
-			animatedNavigate("/");
+			console.log("logged out");
+			window.location.href = "/login";
 		}
 	};
 
@@ -107,9 +108,7 @@ const App: React.FC = () => {
 				<Router>
 					<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
 						<Header isGameRunning={isGameRunning} />
-						{/* <GoBackButton /> */}
 						<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
-							{/* <BackgroundGlow /> */}
 							<Routes>
 								<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 								<Route path="/login" element={<LoginPage />} />
