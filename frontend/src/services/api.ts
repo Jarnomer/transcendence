@@ -102,11 +102,10 @@ export async function login(username: string, password: string) {
     if (res.data.token) {
       localStorage.setItem("token", res.data.token);
       console.log("token", res.data.token);
-      console.log("get token", localStorage.getItem("token"));
       const user = jwtDecode<TokenDecoded>(res.data.token);
-      console.log("decoded", user);
       localStorage.setItem("userID", user.id)
       localStorage.setItem("username", user.username);
+      await api.patch(`/user/${user.id}`, { status: 'online' });
     }
     return res.data;
   } catch (err) {

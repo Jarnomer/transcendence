@@ -70,6 +70,7 @@ const App: React.FC = () => {
 	const logout = async () => {
 		try {
 			await api.post("/auth/logout", { user_id: localStorage.getItem("userID") });
+			await api.patch(`/user/${localStorage.getItem("userID")}`, { status: 'offline' });
 		} catch (error) {
 			console.error("Logout failed:", error);
 		} finally {
@@ -89,21 +90,6 @@ const App: React.FC = () => {
 		}
 	}, [location]);
 
-
-	// DISABLE THE ARROW KEYS FROM SCROLLING THE PAGE WHEN GAME IS RUNNING
-	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (isGameRunning) {
-				if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-					event.preventDefault();
-				}
-			}
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [isGameRunning]);
 
 	return (
 		<ModalProvider>

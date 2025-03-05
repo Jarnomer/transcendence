@@ -17,8 +17,6 @@ export const ProfilePage: React.FC = () => {
     }
   }
 
-
-
   useEffect(() => {
     setLoading(true);
     fetchData();
@@ -52,8 +50,9 @@ export const ProfilePage: React.FC = () => {
         throw new Error("Failed to upload avatar");
       }
 
+      setUser(res.data);
       // FETCH THE UPDATED USERDATA AFTER AVATAR UPLOAD
-      await fetchData();
+      //await fetchData();
 
     } catch (error) {
       console.error(error);
@@ -102,8 +101,8 @@ export const ProfilePage: React.FC = () => {
           </div>
           <h2 className="text-xl font-semibold">{user.displayName}</h2>
           <p className="text-gray-400">@{localStorage.getItem("username")}</p>
-          <span className={`text-sm font-medium ${user.onlineStatus ? "text-green-500" : "text-red-500"}`}>
-            {user.onlineStatus ? "Online" : "Offline"}
+          <span className={`text-sm font-medium ${user.status ? "text-green-500" : "text-red-500"}`}>
+            {user.status ? "Online" : "Offline"}
           </span>
           <div className="flex gap-4 mt-4">
             <button>Edit Profile</button>
