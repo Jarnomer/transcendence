@@ -51,10 +51,11 @@ export class MatchMakingController {
     const { user_id } = request.params as { user_id: string };
     request.log.trace(`Joining user ${user_id}`);
     const queue = await this.matchMakingService.enterQueue(user_id);
-    if (!queue) {
+    if (!queue || queue.status === 'waiting') {
       reply.code(200).send({ status: 'waiting' });
     }
-    reply.code(200).send({ status: queue.status });
+    request.log.trace(`status: ${queue.status}`);
+    reply.code(200).send({ game_id: queue.game_id });
   }
 
   /**

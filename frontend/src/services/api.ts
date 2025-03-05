@@ -140,7 +140,7 @@ export async function enterQueue() {
     }
     const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}`);
     console.log(res.data);
-    return res.data.status;
+    return res.data;
   } catch (err) {
     console.error("Failed to join game:", err);
     throw err;
@@ -191,6 +191,24 @@ export async function singlePlayer(difficulty: string) {
     throw err;
   }
 }
+
+
+export async function getUserData() {
+	try {
+	  const userID = localStorage.getItem("userID");
+	  if (!userID) {
+		throw new Error("User ID not found");
+	  }
+	  const res = await api.get(`/user/${userID}`);
+	  if (res.status !== 200) {
+		  throw new Error(`Error ${res.status}: Failed to fetch user data`);
+	  }
+	  return res.data;
+	} catch (err) {
+	  console.error("Failed to get user data:", err);
+	  throw err;
+	}
+  }
 
 //
 // function isTokenExpired(token: string): boolean {

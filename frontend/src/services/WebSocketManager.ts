@@ -31,10 +31,12 @@ class WebSocketManager {
     this.ws.onopen = () => {
       console.log("WebSocket connected:", this.url);
       this.reconnectAttempts = 0;
+      this.notifyHandlers("open", null);
     };
 
     this.ws.onclose = (event) => {
       console.log("WebSocket disconnected:", this.url, event.code, event.reason);
+      this.notifyHandlers("close", event);
       if (!event.wasClean && this.reconnectAttempts < WebSocketManager.MAX_RECONNECT_ATTEMPTS) {
         this.scheduleReconnect();
       }
@@ -42,12 +44,17 @@ class WebSocketManager {
 
     this.ws.onerror = (error) => {
       console.error("WebSocket error:", this.url, error);
+      this.notifyHandlers("error", error);
     };
 
     this.ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        this.notifyHandlers(data);
+        if (data.type && data.state) {
+          this.notifyHandlers(data.type, data.state);
+        } else {
+          console.warn("Received invalid WebSocket message:", data);
+        }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
@@ -65,6 +72,10 @@ class WebSocketManager {
     this.reconnectTimer = setTimeout(() => {
       this.connect();
     }, WebSocketManager.RECONNECT_INTERVAL);
+  }
+
+  getSocket() {
+    return this.ws;
   }
 
   sendMessage(message: any) {
@@ -98,9 +109,9 @@ class WebSocketManager {
     }
   }
 
-  private notifyHandlers(data: any) {
-    if (data.type && this.eventHandlers[data.type]) {
-      this.eventHandlers[data.type].forEach((callback) => callback(data.payload));
+  private notifyHandlers(eventType: string, data: any) {
+    if (this.eventHandlers[eventType]) {
+      this.eventHandlers[eventType].forEach((callback) => callback(data));
     }
   }
 }

@@ -95,7 +95,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='mes
 CREATE TABLE  IF NOT EXISTS matchmaking_queue (
   matchmaking_queue_id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
-  status TEXT DEFAULT 'waiting',       -- 'waiting', 'matched', 'playing'
+  status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
   matched_with TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL, -- NULL if not matched
   joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );

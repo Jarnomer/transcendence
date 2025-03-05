@@ -55,40 +55,40 @@ export const LoginPage: React.FC = () => {
 
 
   return (
-    <div className="w-full min-h-screen flex justify-center p-10">
-      <div className="w-[300px]">
-        <SVGModal>
-          <div className="text-center">
-            <h1 className="text-3xl mb-2 font-heading font-bold">
-              {isRegistering ? "Register" : "Login"}
-            </h1>
-            {error && <p className="text-red-500">{error}</p>}
-            <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Username"
-                className="border p-2"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="border p-2"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <ClippedButton label={isRegistering ? "Register" : "Login"} type="submit" />
-            </form>
-            <div className="text-center flex flex-col gap-2 mt-4">
-              <p>{isRegistering ? "Already have an account?" : "Don't have an account?"}</p>
-              <ClippedButton label={isRegistering ? "Go to Login" : "Register"} onClick={() => setIsRegistering(!isRegistering)} />
-              {!isRegistering && <ClippedButton label="Play as a guest" />}
-            </div>
-          </div>
-        </SVGModal>
+	<div className="w-full h-full flex justify-center p-10">
+    <div className="w-[300px]">
+    <SVGModal>
+		<div className="text-center">
+      <h1 className="text-3xl mb-2 font-heading font-bold">
+        {isRegistering ? "Register" : "Login"}
+      </h1>
+      {error && <p className="text-red-500">{error}</p>}
+      <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Username"
+          className="border p-2"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="border p-2"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <ClippedButton label={isRegistering ? "Register" : "Login"} type="submit" />
+      </form>
+      <div className="text-center flex flex-col gap-2 mt-4">
+        <p>{isRegistering ? "Already have an account?" : "Don't have an account?"}</p>
+        <ClippedButton label={isRegistering ? "Go to Login" : "Register"} onClick={() => setIsRegistering(!isRegistering)} />
+        {!isRegistering && <ClippedButton label="Play as a guest" />}
+      </div>
+    </div>
+	  </SVGModal>
 
       </div>
 
