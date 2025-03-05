@@ -78,7 +78,7 @@ export class PongGameSession {
     const aiPaddle = this.game.getPlayer("player2");
     const paddleSpeed = this.game.getPaddleSpeed();
 
-    if (this.aiController.shouldUpdate()) {
+    if (this.aiController.shouldUpdate(ball.dx)) {
       this.aiController.updateAIState(ball, aiPaddle, this.game.getHeight(), this.game.getPaddleHeight(), paddleSpeed);
     }
 
