@@ -36,6 +36,7 @@ export class PongGameSession {
 
   addClient(playerId: string, connection: any): void {
     this.clients.set(playerId, connection);
+    this.game.addPlayer(playerId);
 
     connection.on(
         'message', (message: string) => this.handleMessage(playerId, message));
@@ -87,11 +88,14 @@ export class PongGameSession {
     const moves:
         Record<string, 'up'|'down'|null> = {player1: null, player2: null};
 
+    const player1Id = this.game.getPlayerId(1);
+    const player2Id = this.game.getPlayerId(2);
+
     if (this.mode === 'singleplayer') {
-      if (playerId === 'player1') moves.player1 = move;
+      if (playerId === player1Id) moves.player1 = move;
     } else {
-      if (playerId === 'player1') moves.player1 = move;
-      if (playerId === 'player2') moves.player2 = move;
+      if (playerId === player1Id) moves.player1 = move;
+      if (playerId === player2Id) moves.player2 = move;
     }
 
     const updatedState = this.game.updateGameState(moves);
