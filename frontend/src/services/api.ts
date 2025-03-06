@@ -194,19 +194,33 @@ export async function singlePlayer(difficulty: string) {
 }
 
 
-export async function getUserData() {
+export async function getUserData(userId: string) {
   try {
-    const userID = localStorage.getItem("userID");
-    if (!userID) {
-      throw new Error("User ID not found");
+    if (!userId) {
+      throw new Error("User ID not provided");
     }
-    const res = await api.get(`/user/${userID}`);
+    const res = await api.get(`/user/${userId}`);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
     return res.data;
   } catch (err) {
     console.error("Failed to get user data:", err);
+    throw err;
+  }
+}
+
+
+export async function getUsers() {
+  try {
+
+    const res = await api.get(`/user/all`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user data`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get user list:", err);
     throw err;
   }
 }

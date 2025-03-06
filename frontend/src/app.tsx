@@ -6,6 +6,7 @@ import { Footer } from './components/Footer.tsx';
 import { GameMenu } from './pages/GameMenu.tsx';
 import { CreatorsPage } from "./pages/CreatorsPage.tsx"
 import { GamePage } from "./pages/GamePage.tsx";
+import { HomePage } from './pages/HomePage.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
 import { api } from './services/api.ts';
@@ -98,17 +99,17 @@ const App: React.FC = () => {
 	return (
 		<ModalProvider>
 			<IsLoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn, logout }}>
-					
 						<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
 						<Header />
 							<div id="app-content" className="mt-2 flex flex-grow flex-col w-full min-h-full justify-center items-center">
 								<Routes>
 									<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 									<Route path="/login" element={<LoginPage />} />
+									<Route path="/home" element={isLoggedIn ? <HomePage /> : <LoginPage />} />
 									<Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 									<Route path="/game" element={isLoggedIn ? <GamePage /> : <LoginPage />} />
 									<Route path="/creators" element={<CreatorsPage />} />
-									<Route path="/profile" element={isLoggedIn ? <ProfilePage /> : <LoginPage />} />
+									<Route path="/profile/:userId"  element={isLoggedIn ? <ProfilePage /> : <LoginPage />} />
 									<Route path="/chat" element={isLoggedIn ? <ChatPage /> : <LoginPage />} />
 								</Routes>
 								{/* Conditionally render the modals */}

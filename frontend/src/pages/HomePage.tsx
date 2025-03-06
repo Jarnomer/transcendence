@@ -1,22 +1,63 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
 import { getUsers } from "../services/api";
+import { useAnimatedNavigate } from "../animatedNavigate";
+import { useNavigate } from "react-router-dom";
+import { NavIconButton } from "../components/NavIconButton";
 
 
 export const HomePage: React.FC = () => {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
 
-	return (
-		<>
-			<h1>Lorem Ipsum</h1>
-			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur dignissim magna quis est lacinia, et vestibulum elit egestas. In consequat turpis vitae massa rhoncus sagittis. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Integer sit amet velit sed odio eleifend molestie id non dui. Fusce facilisis nulla sapien, nec euismod arcu lacinia ac. Etiam posuere risus odio, quis pulvinar dui pharetra et. Praesent consequat odio justo, vel cursus lacus varius fringilla. Nam eu sodales purus. Fusce pharetra fermentum fermentum. Cras sed porta mi.
+  async function fetchData() {
+    setLoading(true);
+    const fetchedUsers = await getUsers();
+    if (fetchedUsers) {
+      setUsers(fetchedUsers);
+	  console.log(fetchedUsers)
+    }
+    setLoading(false);
+  }
 
-				Morbi at accumsan neque, in vestibulum lacus. Nulla magna libero, tincidunt quis dui eu, aliquet porttitor urna. Proin sit amet porttitor urna, nec convallis turpis. Suspendisse volutpat facilisis eros, eget laoreet purus ultrices id. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In semper dapibus odio, in mattis augue suscipit vitae. Curabitur scelerisque, sem fringilla accumsan facilisis, massa arcu porttitor nisi, quis vehicula leo quam ut metus. Donec cursus lectus non elit tempor, id fermentum lacus scelerisque. Morbi ac cursus sem. Sed viverra dolor massa. Integer id quam magna. Proin feugiat nulla non turpis commodo mattis.
+  useEffect(() => {
 
-				Integer iaculis commodo turpis, quis rutrum eros ultrices in. Fusce egestas odio in neque lacinia fermentum. Donec ullamcorper efficitur purus ac feugiat. Aenean sed congue ligula. Suspendisse lobortis, dui et suscipit hendrerit, nunc mi facilisis urna, id fermentum nunc ligula quis ipsum. In vel dolor mattis, lobortis justo a, scelerisque ipsum. Vestibulum malesuada quam in ex dictum, eu rutrum ex efficitur. Aliquam mauris tortor, facilisis at ex in, ornare condimentum diam. Morbi dignissim lobortis efficitur. Nullam vel dui pretium, bibendum justo eu, suscipit libero. Cras vulputate felis vel pulvinar congue. Curabitur mauris mauris, fringilla vel dui eu, porta fermentum nibh. Integer et ultrices risus. Ut fermentum enim id vestibulum blandit.
+    fetchData();
+  }, []);
 
-				Sed malesuada maximus auctor. Nam sed interdum purus. Vivamus ex eros, bibendum a dignissim nec, tempus sit amet nisi. In turpis arcu, congue non accumsan vel, luctus vel erat. Nullam at faucibus tortor. Etiam congue ante arcu, at tristique purus sagittis sit amet. Cras quis facilisis mi.
+  const handleAddFriendClick = (event) => {
+	// Stop the click event from bubbling up and triggering the navigate function
+	event.stopPropagation();
+  
+	// Add your logic for adding a friend here
+	console.log('Add friend clicked');
+  };
 
-				Nunc maximus lorem non pretium fermentum. Integer ultrices cursus odio, eget feugiat libero maximus et. Nulla at interdum ipsum, in semper elit. In id lacus lobortis, posuere leo ut, dapibus erat. Duis lobortis turpis lorem, ac efficitur sem venenatis in. Etiam pharetra metus accumsan lorem ullamcorper commodo. Duis vel eleifend enim. Nunc nec augue ac est tincidunt semper vitae vitae sapien. Sed pulvinar nunc metus, vel lobortis lorem ultricies id. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Duis porta lobortis neque, sit amet semper neque bibendum dictum. Donec sagittis quis risus eget aliquam. Sed non faucibus ligula, sit amet vehicula arcu. Quisque eget rutrum urna, dapibus elementum metus. Donec vel libero ut lectus tincidunt molestie. Fusce dapibus tellus euismod, condimentum magna id, molestie massa.</p>
-		</>
-	)
-}
+  return (
+    <>
+      <h1 className="border-b border-primary">Users</h1>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <ul>
+          {users.map((user, index) => (
+            <li key={index} className="my-2" onClick={() => navigate(`/profile/${user.user_id}`)}>
+			<div className="flex items-center justify-center gap-5">
+				<div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary">
+            		<img className="object-cover rounded-full w-full h-full" src={user.avatar_url} />
+				</div>
+              	<p>{user.display_name || "N/A"} <br /></p>
+				  <span className={`text-xs font-medium ${user.status === "online" ? "text-green-500" : "text-gray-500"}`}>
+            		{user.status === "online" ? "Online" : "Offline"}
+          		</span>
+				  <NavIconButton id="add-friend" icon="addFriend" onClick={(event)=> handleAddFriendClick(event)} />
+				<></>
+			</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+};

@@ -42,7 +42,7 @@ export const LoginPage: React.FC = () => {
       try {
         await login(username, password);
         setIsLoggedIn(true);
-        animatedNavigate(`/profile/${localStorage.getItem("userID")}`);
+        animatedNavigate("/gameMenu");
       } catch (error: any) {
         alert("Login failed!");
         setLoading(false);
@@ -52,8 +52,7 @@ export const LoginPage: React.FC = () => {
       setLoading(false);
     }
   };
-
-
+  
   return (
 	<div className="w-full h-full flex justify-center p-10">
     <div className="w-[300px]">
