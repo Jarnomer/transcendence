@@ -192,6 +192,24 @@ export async function singlePlayer(difficulty: string) {
   }
 }
 
+
+export async function getUserData() {
+	try {
+	  const userID = localStorage.getItem("userID");
+	  if (!userID) {
+		throw new Error("User ID not found");
+	  }
+	  const res = await api.get(`/user/${userID}`);
+	  if (res.status !== 200) {
+		  throw new Error(`Error ${res.status}: Failed to fetch user data`);
+	  }
+	  return res.data;
+	} catch (err) {
+	  console.error("Failed to get user data:", err);
+	  throw err;
+	}
+  }
+
 //
 // function isTokenExpired(token: string): boolean {
 //   try {
