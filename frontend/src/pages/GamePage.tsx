@@ -1,23 +1,21 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import useGameControls from '../hooks/useGameControls';
+
 import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
 import GameCanvas from '../components/GameCanvas';
+
 import { useWebSocketContext } from '../services/WebSocketContext';
-import { GameState } from '../../../shared/types';
-import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../services/api';
-import { submitResult } from '../services/api';
+import useGameControls from '../hooks/useGameControls';
 
+import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
 
+import { GameState, GameStatus, GameEvent } from '../../../shared/gameTypes';
 
 export const GamePage: React.FC = () => {
-  // Debug mode toggle, enables console logs and debug UI elements
-  // Can be toggled via keyboard shortcut (Alt+Q) during gameplay
   const { setUrl, gameState, gameStatus, connectionStatus , dispatch} = useWebSocketContext();
   const navigate = useNavigate();
 
   // Queue and connection management state
-  // const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
 
@@ -30,11 +28,10 @@ export const GamePage: React.FC = () => {
 
   // Log mode and difficulty when they change
   useEffect(() => {
-    console.log("Mode:", mode, "Difficulty:", difficulty);
+    console.log("Mode:", mode, "Difficulty:", difficulty, "Status:", 1, "Event:", 1);
   }, [mode, difficulty]);
 
-
-  // Initialize game, retrieve user ID and set up game based on mode
+  // Retrieve user ID and set up game based on mode
   useEffect(() => {
     if (mode === 'singleplayer' || difficulty === 'local') {
       // For singleplayer, create a game immediately with AI opponent
@@ -50,7 +47,6 @@ export const GamePage: React.FC = () => {
         console.log("Queue status:", status);
       });
     }
-
   }, [mode, difficulty]);
 
   // Poll for queue status in multiplayer mode
@@ -84,7 +80,7 @@ export const GamePage: React.FC = () => {
       } catch (error) {
         console.error("Error checking queue:", error);
       }
-    }, 2000);
+    }, 2000); // Poll every 2 seconds
 
     // Clear interval on unmount or when dependencies change
     return () => {
@@ -94,9 +90,6 @@ export const GamePage: React.FC = () => {
       }
     };
   }, [userId, mode, gameId]);
-
-
-
 
   // Set up WebSocket URL when gameId is available
   useEffect(() => {
@@ -109,28 +102,8 @@ export const GamePage: React.FC = () => {
 
   }, [gameId, mode, difficulty, gameId]);
 
-  // // Update loading state based on connection status and game status
-  // useEffect(() => {
-  //   if (connectionStatus === 'connected') {
-  //     setLoading(false);
-
-  //     // When connection is established but game isn't playing yet
-  //     if (gameState.gameStatus === 'loading' || gameState.gameStatus === 'waiting') {
-  //       setGameState(prev => ({
-  //         ...prev,
-  //         gameStatus: 'playing'
-  //       }));
-  //     }
-  //   } else if (connectionStatus === 'error') {
-  //     setLoading(false);
-  //   }
-
-  //   if (isDebugMode) {
-  //     console.log('Connection status changed:', connectionStatus);
-  //   }
-  // }, [connectionStatus, gameState.gameStatus, isDebugMode]);
-
   useGameControls(); // Set up game controls
+
   useEffect(() => {
     if (gameStatus === "finished" && gameId) {
       console.log("Game Over");
@@ -145,19 +118,8 @@ export const GamePage: React.FC = () => {
     }
   }, [gameStatus, gameId]);
 
-  // // Debug logging of last received message
-  // useEffect(() => {
-  //   if ( messages) {
-  //     console.log('Last WebSocket message:', messages);
-  //   }
-  // }, [messages]);
-
-  // Returns appropriate status message based on current game state
+  // Returns status message based on current game state
   const getStatusMessage = () => {
-    // console.log("loading", loading);
-    // if (loading) {
-    // return mode === 'singleplayer' ? "Starting game..." : "Waiting for opponent...";
-    // }
     if (connectionStatus !== 'connected') {
       return `Connection: ${connectionStatus}`;
     }
@@ -171,22 +133,8 @@ export const GamePage: React.FC = () => {
     }
   };
 
-  // // Pause/Resume toggle handler to send message to server, unused atm
-  // const togglePause = useCallback(() => {
-  //   if (gameState.gameStatus) {
-  //     if (gameState.gameStatus === 'playing') {
-  //       if (isDebugMode) {
-  //         console.log('Sending pause request');
-  //       }
-  //       sendMessage({ type: 'pause', payload: {} });
-  //     } else if (gameState.gameStatus === 'paused') {
-  //       if (isDebugMode) {
-  //         console.log('Sending resume request');
-  //       }
-  //       sendMessage({ type: 'resume', payload: {} });
-  //     }
-  //   }
-  // }, [sendMessage, gameState.gameStatus, isDebugMode]);
+  // TODO: Reconnection handler 
+  // TODO: Pause - Resume
 
   // render component
   return (

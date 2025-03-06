@@ -1,8 +1,8 @@
-import { Player, Ball } from "../../../../shared/types";
+import {Ball, Player} from '../../../../shared/gameTypes';
 
 
 export class AIController {
-  private plannedMoves: ("up" | "down" | null)[] = [];
+  private plannedMoves: ('up'|'down'|null)[] = [];
   private lastUpdateTime: number = 0;
   private difficulty: string;
   private lastBallDx: number = 0;
@@ -10,11 +10,13 @@ export class AIController {
 
   // difficulty: easy, normal, brutal
   constructor(difficulty: string, gameHeight: number) {
-  this.difficulty = difficulty;
-  this.gameHeight = gameHeight;
+    this.difficulty = difficulty;
+    this.gameHeight = gameHeight;
   }
 
-  updateAIState(ball: Ball, aiPaddle: Player, gameHeight: number, paddleHeight: number, paddleSpeed: number): void {
+  updateAIState(
+      ball: Ball, aiPaddle: Player, gameHeight: number, paddleHeight: number,
+      paddleSpeed: number): void {
     this.plannedMoves = [];
     const aiCenter = aiPaddle.y + paddleHeight / 2;
     const framesPerSecond = 60;
@@ -30,7 +32,7 @@ export class AIController {
 
     for (let i = 0; i < frameCount; i++) {
       if (i < requiredFrames) {
-        this.plannedMoves.push(aiCenter < predictedBallY ? "down" : "up");
+        this.plannedMoves.push(aiCenter < predictedBallY ? 'down' : 'up');
       } else {
         this.plannedMoves.push(null);
       }
@@ -40,13 +42,14 @@ export class AIController {
     this.lastBallDx = ball.dx;
   }
 
-  getNextMove(): "up" | "down" | null {
-    return this.plannedMoves.length > 0 ? this.plannedMoves.shift() || null : null;
+  getNextMove(): 'up'|'down'|null {
+    return this.plannedMoves.length > 0 ? this.plannedMoves.shift() || null :
+                                          null;
   }
 
   shouldUpdate(ballDx: number): boolean {
     // Brutal AI updates as soon as the player hits the ball
-    if (this.difficulty === "brutal" && this.lastBallDx < 0 && ballDx > 0) {
+    if (this.difficulty === 'brutal' && this.lastBallDx < 0 && ballDx > 0) {
       return true;
     }
     return Date.now() - this.lastUpdateTime >= 1000;
@@ -81,12 +84,12 @@ export class AIController {
 
   private applyError(predictedY: number, aiCenter: number): number {
     let errorFactor = 0;
-    
-    if (this.difficulty === "easy") {
+
+    if (this.difficulty === 'easy') {
       errorFactor = 0.4;
-    } else if (this.difficulty === "normal") {
+    } else if (this.difficulty === 'normal') {
       errorFactor = 0.2;
-    } else if (this.difficulty === "brutal") {
+    } else if (this.difficulty === 'brutal') {
       errorFactor = 0;
     }
 
