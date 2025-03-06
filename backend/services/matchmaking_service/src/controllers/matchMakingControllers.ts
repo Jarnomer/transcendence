@@ -51,10 +51,11 @@ export class MatchMakingController {
     const { user_id } = request.params as { user_id: string };
     request.log.trace(`Joining user ${user_id}`);
     const queue = await this.matchMakingService.enterQueue(user_id);
-    if (!queue) {
+    if (!queue || queue.status === 'waiting') {
       reply.code(200).send({ status: 'waiting' });
     }
-    reply.code(200).send({ status: queue.status });
+    request.log.trace(`status: ${queue.status}`);
+    reply.code(200).send({ game_id: queue.game_id });
   }
 
   /**
@@ -99,9 +100,9 @@ export class MatchMakingController {
    * @throws DatabaseError if game not updated
    */
   async resultGame(request: FastifyRequest, reply: FastifyReply) {
-    const { game_id, winner_id, player1_score, player2_score } = request.body as { game_id: string, winner_id: string, player1_score: number, player2_score: number };
+    const { game_id, winner_id,loser_id, player1_score, player2_score } = request.body as { game_id: string, winner_id: string,loser_id:string, player1_score: number, player2_score: number };
     request.log.trace(`Updating result for game ${game_id}`);
-    const result = await this.matchMakingService.resultGame(game_id, winner_id, player1_score, player2_score);
+    const result = await this.matchMakingService.resultGame(game_id, winner_id,loser_id, player1_score, player2_score);
     reply.code(200).send({ status: 'completed' });
   }
 }

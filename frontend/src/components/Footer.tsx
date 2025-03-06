@@ -1,9 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAnimatedNavigate } from "../animatedNavigate";
 
 
 export const Footer: React.FC = () => {
 	const navigate = useNavigate();
+  const animatedNavigate = useAnimatedNavigate();
 
 	return (
 		<footer
@@ -11,7 +13,7 @@ export const Footer: React.FC = () => {
     >
       <div id="footer-links" className="flex gap-5">
         <p>about</p>
-        <p id="link-creators" onClick={() => navigate("creators")}>creators</p>
+        <p id="link-creators" onClick={() => animatedNavigate("creators")}>creators</p>
         <a href="https://github.com/jarnomer/transcendence/" target="_blank"
           >github</a>
       </div>

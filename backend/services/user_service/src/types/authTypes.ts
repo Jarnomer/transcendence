@@ -16,7 +16,7 @@ export const RegisterSchema = Type.Object({
 
 
 export const RefreshSchema = Type.Object({
-  refresh_token: Type.String({ description: "JWT stored in cookie" }),
+  cookie: Type.String({ description: "JWT stored in cookie" }),
 });
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage.tsx";
 import { Header } from './components/Header.tsx';
 import { Footer } from './components/Footer.tsx';
@@ -8,9 +8,14 @@ import { CreatorsPage } from "./pages/CreatorsPage.tsx"
 import { GamePage } from "./pages/GamePage.tsx";
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
-import { api } from './api';
+import { api } from './services/api.ts';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { GoBackButton } from './components/GoBackButton.tsx';
+import { ProfilePage } from './pages/ProfilePage.tsx';
+import { useAnimatedNavigate } from './animatedNavigate.tsx';
+import { BackgroundGlow } from './components/BackgroundGlow.tsx';
+import { ChatPage } from './pages/ChatPage.tsx';
+import { WebSocketProvider } from './services/WebSocketContext.tsx';
 
 export const IsLoggedInContext = React.createContext<{
 	isLoggedIn: boolean;
@@ -19,24 +24,25 @@ export const IsLoggedInContext = React.createContext<{
 } | undefined>(undefined);
 
 
-export function animatePageChange() {
-	const appDiv = document.getElementById("root")!;
-	appDiv.classList.add("closing");
+// export function animatePageChange() {
+// 	const appDiv = document.getElementById("root")!;
+// 	appDiv.classList.add("closing");
 
-	setTimeout(() => {
-		appDiv.classList.remove("closing");
-		appDiv.classList.add("opening");
+// 	setTimeout(() => {
+// 		appDiv.classList.remove("closing");
+// 		appDiv.classList.add("opening");
 
-		setTimeout(() => {
-			appDiv.classList.remove("opening");
-		}, 400);
-	}, 200);
-}
+// 		setTimeout(() => {
+// 			appDiv.classList.remove("opening");
+// 		}, 400);
+// 	}, 200);
+// }
 
 const App: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false); // Modal state
 	const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
+
 
 
 	// authentication check to backend database preventing unauthorized tokens
@@ -63,7 +69,8 @@ const App: React.FC = () => {
 
 	const logout = async () => {
 		try {
-			await api.post("/auth/logout" , {user_id : localStorage.getItem("userID")});
+			await api.post("/auth/logout", { user_id: localStorage.getItem("userID") });
+			await api.patch(`/user/${localStorage.getItem("userID")}`, { status: 'offline' });
 		} catch (error) {
 			console.error("Logout failed:", error);
 		} finally {
@@ -71,55 +78,44 @@ const App: React.FC = () => {
 			localStorage.removeItem("userID");
 			localStorage.removeItem("username");
 			setIsLoggedIn(false);
-			window.location.href = "/login"; // Redirect to login page
+			console.log("logged out");
+			window.location.href = "/login";
 		}
 	};
 
 	useEffect(() => {
-		console.log("animating")
-		animatePageChange();
 		checkAuth();
+		return () => {
+			console.log("Cleanup");
+		}
 	}, [location]);
 
-
-	// DISABLE THE ARROW KEYS FROM SCROLLING THE PAGE WHEN GAME IS RUNNING
-	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (isGameRunning) {
-				if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
-					event.preventDefault();
-				}
-			}
-		};
-		window.addEventListener("keydown", handleKeyDown);
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [isGameRunning]);
 
 	return (
 		<ModalProvider>
 			<IsLoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn, logout }}>
-
-				<Router>
-					<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
-						<Header isGameRunning={isGameRunning} />
-						{/* <GoBackButton /> */}
-						<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
-							<Routes>
-								<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
-								<Route path="/login" element={<LoginPage />} />
-								<Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
-								<Route path="/game" element={isLoggedIn ? <GamePage setIsGameRunning={setIsGameRunning} /> : <LoginPage />} />
-								<Route path="/creators" element={<CreatorsPage />} />
-							</Routes>
-							{/* Conditionally render the modals */}
-							{<SettingsModal />}
-							{<AuthModal />}
+				<WebSocketProvider>
+					<Router>
+						<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
+							<Header isGameRunning={isGameRunning} />
+							<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
+								<Routes>
+									<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
+									<Route path="/login" element={<LoginPage />} />
+									<Route path="/gameMenu" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
+									<Route path="/game" element={isLoggedIn ? <GamePage /> : <LoginPage />} />
+									<Route path="/creators" element={<CreatorsPage />} />
+									<Route path="/profile" element={isLoggedIn ? <ProfilePage /> : <LoginPage />} />
+									<Route path="/chat" element={isLoggedIn ? <ChatPage /> : <LoginPage />} />
+								</Routes>
+								{/* Conditionally render the modals */}
+								{<SettingsModal />}
+								{<AuthModal />}
+							</div>
+							{!isGameRunning ? <Footer /> : null}
 						</div>
-						{!isGameRunning ? <Footer /> : null}
-					</div>
-				</Router>
+					</Router>
+				</WebSocketProvider>
 			</IsLoggedInContext.Provider>
 		</ModalProvider>
 	);

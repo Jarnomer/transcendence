@@ -17,9 +17,13 @@ export interface GameState {
     player2: Player;
   };
   ball: Ball;
-  gameStatus?: 'waiting' | 'playing' | 'paused' | 'finished';
+  gameStatus?: 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
   timeStamp?: number;
 }
+
+export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
+
+// types from below are not used yet
 
 export interface GameUpdateMessage {
   type: 'game_update';
@@ -41,7 +45,7 @@ export interface PlayerActionMessage {
 
 export interface GameEventMessage {
   type: 'game_event';
-  event: 'game_goal' | 'game_start' | 'game_end' | 'player_joined' | 'player_left';
+  event: 'game_paused' | 'game_goal' | 'game_start' | 'game_end' | 'player_joined' | 'player_left';
   data?: any;
 }
 

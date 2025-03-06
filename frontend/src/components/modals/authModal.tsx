@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { login, register } from "../../api";
+import { login, register } from "../../services/api.ts";
 import { ClippedButton } from "../wrappers/clippedButton";
 import { SVGModal } from "../wrappers/svgModal";
 import { IsLoggedInContext } from '../../app.tsx';
@@ -82,6 +82,6 @@ export const AuthModal: React.FC = () => {
   return (
     <ModalWrapper>
       <SVGModal>{modalContent}</SVGModal>
-      </ModalWrapper>
+    </ModalWrapper>
   )
 };

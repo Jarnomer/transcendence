@@ -1,36 +1,43 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useWebSocket } from '../hooks/useWebSocket';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import useGameControls from '../hooks/useGameControls';
+import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
 import GameCanvas from '../components/GameCanvas';
+import { useWebSocketContext } from '../services/WebSocketContext';
 import { GameState } from '../../../shared/types';
-import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../api';
+import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../services/api';
+import { submitResult } from '../services/api';
+
+
 
 export const GamePage: React.FC = () => {
-  const [gameState, setGameState] = useState<GameState>({
-    players: {
-      player1: { id: "player1", y: 0, score: 0 },
-      player2: { id: "player2", y: 0, score: 0 }
-    },
-    ball: { x: 0, y: 0, dx: 0, dy: 0 }
-  });
+  // Debug mode toggle, enables console logs and debug UI elements
+  // Can be toggled via keyboard shortcut (Alt+Q) during gameplay
+  const { setUrl, gameState, gameStatus, connectionStatus , dispatch} = useWebSocketContext();
+  const navigate = useNavigate();
+
+  // Queue and connection management state
+  // const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null); // Store interval ID
-  const [wsUrl, setWsUrl] = useState<string | null>(null);
 
+  // Reference to store the interval for queue polling
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Get game mode and difficulty settings from router
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
 
-
+  // Log mode and difficulty when they change
   useEffect(() => {
-    const userId = localStorage.getItem("userID");
-    console.log("mode:", mode, "difficulty:", difficulty, "userId:", userId);
-    if (userId) {
-      setUserId(userId);
-    }
+    console.log("Mode:", mode, "Difficulty:", difficulty);
+  }, [mode, difficulty]);
+
+
+  // Initialize game, retrieve user ID and set up game based on mode
+  useEffect(() => {
     if (mode === 'singleplayer') {
+      // For singleplayer, create a game immediately with AI opponent
       singlePlayer(difficulty).then((data) => {
         console.log("Single player game ID:", data.game_id);
         if (data.status === 'created') {
@@ -38,23 +45,29 @@ export const GamePage: React.FC = () => {
         }
       });
     } else {
+      // For multiplayer, enter the matchmaking queue
       enterQueue().then((status) => {
         console.log("Queue status:", status);
-      }
-      );
+      });
     }
-  }, []);
 
+  }, [mode, difficulty]);
+
+  // Poll for queue status in multiplayer mode
   useEffect(() => {
+    // Only start polling in multiplayer mode when we have a user ID
+    const userId = localStorage.getItem("userID");
+    setUserId(userId);
     console.log("User ID:", userId);
     console.log("Mode:", mode);
-    if (!userId && mode === 'singleplayer') return;
+    if (!userId || mode === 'singleplayer') return;
 
     // Clear any existing interval before setting a new one
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
+    // Set up polling interval
     intervalRef.current = setInterval(async () => {
       try {
         const status = await getQueueStatus();
@@ -62,7 +75,6 @@ export const GamePage: React.FC = () => {
           const data = await getGameID();
           console.log("Matched! Game ID:", data.game_id);
           setGameId(data.game_id);
-
           // Stop polling when matched
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -74,67 +86,126 @@ export const GamePage: React.FC = () => {
       }
     }, 2000);
 
-    // Cleanup: clear interval on unmount
+    // Clear interval on unmount or when dependencies change
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, []);
+  }, [userId, mode, gameId]);
 
-  // OnMessage handler for game updates, 
-  // Using callback to keep function reference
-  const handleMessage = useCallback((data: any) => {
-    if (data.type === "update") {
-      setGameState((prev) => ({
-        // Merge prev data with new state
-        ...prev,
-        players: {
-          ...prev.players,
-          ...data.state.players,
-        },
-        ball: {
-          ...prev.ball,
-          ...data.state.ball,
-        },
-      }));
-    }
-  }, []);
 
+
+
+  // Set up WebSocket URL when gameId is available
   useEffect(() => {
     if (!gameId) return;
-
-    // Get authentication token from localStorage
-    // Using memo to keep object reference
     const token = localStorage.getItem("token");
+
+    // Construct WebSocket URL with all necessary parameters
     const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
-    setWsUrl(url);
-  }, [gameId, mode, difficulty]);
+    setUrl(url);
 
-  const { ws } = useWebSocket(wsUrl, handleMessage);
-  useGameControls(ws); // Setup game controls
-  // // Get authentication token from localStorage
-  // // Using memo to keep object reference
-  // const token = useMemo(() =>
-  //   localStorage.getItem("token"),
-  //   []
-  // );
+  }, [gameId, mode, difficulty, gameId]);
 
-  // // Generate the URL for WebSocket to connect to
-  // const url = useMemo(() =>
-  //   `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`,
-  //   [gameId, mode, difficulty, token]
-  // );
+  // // Update loading state based on connection status and game status
+  // useEffect(() => {
+  //   if (connectionStatus === 'connected') {
+  //     setLoading(false);
 
-  // // Establish WebSocket connection
-  // const { ws } = useWebSocket(url, handleMessage);
+  //     // When connection is established but game isn't playing yet
+  //     if (gameState.gameStatus === 'loading' || gameState.gameStatus === 'waiting') {
+  //       setGameState(prev => ({
+  //         ...prev,
+  //         gameStatus: 'playing'
+  //       }));
+  //     }
+  //   } else if (connectionStatus === 'error') {
+  //     setLoading(false);
+  //   }
 
-  // useGameControls(ws); // Setup game controls
+  //   if (isDebugMode) {
+  //     console.log('Connection status changed:', connectionStatus);
+  //   }
+  // }, [connectionStatus, gameState.gameStatus, isDebugMode]);
 
-  return ( // returned game page component
-    <div>
-      <GameCanvas gameState={gameState} />
+  useGameControls(); // Set up game controls
+  useEffect(() => {
+    if (gameStatus === "finished" && gameId) {
+      console.log("Game Over");
+      const winnerId = gameState.players.player1.score > gameState.players.player2.score ? gameState.players.player1.id : gameState.players.player2.id;
+      const loserId = gameState.players.player1.score < gameState.players.player2.score ? gameState.players.player1.id : gameState.players.player2.id;
+      console.log("Scores:", gameState.players.player1.score, gameState.players.player2.score);
+      submitResult(gameId, winnerId,loserId, gameState.players.player1.score, gameState.players.player2.score).then((data) => {
+        console.log("Result submitted:", data);
+        dispatch({ type: 'GAME_RESET' });
+        navigate('/gameMenu');
+      });
+    }
+  }, [gameStatus, gameId]);
+
+  // // Debug logging of last received message
+  // useEffect(() => {
+  //   if ( messages) {
+  //     console.log('Last WebSocket message:', messages);
+  //   }
+  // }, [messages]);
+
+  // Returns appropriate status message based on current game state
+  const getStatusMessage = () => {
+    // console.log("loading", loading);
+    // if (loading) {
+    // return mode === 'singleplayer' ? "Starting game..." : "Waiting for opponent...";
+    // }
+    if (connectionStatus !== 'connected') {
+      return `Connection: ${connectionStatus}`;
+    }
+
+    if (mode === 'singleplayer') {
+      return "Starting game...";
+    }
+
+    if (mode === '1v1') {
+      return `Game Status: ${gameStatus}`;
+    }
+  };
+
+  // // Pause/Resume toggle handler to send message to server, unused atm
+  // const togglePause = useCallback(() => {
+  //   if (gameState.gameStatus) {
+  //     if (gameState.gameStatus === 'playing') {
+  //       if (isDebugMode) {
+  //         console.log('Sending pause request');
+  //       }
+  //       sendMessage({ type: 'pause', payload: {} });
+  //     } else if (gameState.gameStatus === 'paused') {
+  //       if (isDebugMode) {
+  //         console.log('Sending resume request');
+  //       }
+  //       sendMessage({ type: 'resume', payload: {} });
+  //     }
+  //   }
+  // }, [sendMessage, gameState.gameStatus, isDebugMode]);
+
+  // render component
+  return (
+    <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
+      <div className="h-[10%] flex justify-between items-center">
+        <PlayerScoreBoard gameState={gameState} />
+      </div>
+      <div className="w-full h-full overflow-hidden border-2 border-primary">
+        {(connectionStatus === 'connected' && gameState.gameStatus !== 'finished') ? (
+          <>
+            <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {gameStatus}</p>
+            <GameCanvas gameState={gameState} />
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <p>{getStatusMessage()}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

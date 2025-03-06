@@ -1,9 +1,9 @@
 import React from "react";
-import { HomeIcon, UserIcon, ChatBubbleLeftIcon, CogIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, UserIcon, ChatBubbleLeftIcon, CogIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 interface NavIconButtonProps {
   id: string;
-  icon: "home" | "user" | "chat" | "settings";
+  icon: "home" | "user" | "chat" | "settings" | "arrowLeft";
   onClick: () => void;
 }
 
@@ -13,6 +13,7 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick 
     user: <UserIcon className="size-6" />,
     chat: <ChatBubbleLeftIcon className="size-6" />,
     settings: <CogIcon className="size-6" />,
+    arrowLeft: <ArrowLeftIcon className="w-8 h-8" />
   };
 
   return (
