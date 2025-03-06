@@ -15,13 +15,10 @@ import {CountDown} from "../components/CountDown"
 import ClipLoader from "react-spinners/ClipLoader";
 
 export const GamePage: React.FC = () => {
-  // Debug mode toggle, enables console logs and debug UI elements
-  // Can be toggled via keyboard shortcut (Alt+Q) during gameplay
   const { setUrl, gameState, gameStatus, connectionStatus , dispatch} = useWebSocketContext();
   const navigate = useNavigate();
 
   // Queue and connection management state
-  // const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
 
@@ -139,30 +136,8 @@ export const GamePage: React.FC = () => {
     }
   };
 
-  // // TODO: Reconnection handler to use when connection is lost
-  // const handleReconnect = useCallback(() => {
-  //   if (isDebugMode) {
-  //     console.log('Attempting to reconnect...');
-  //   }
-  //   reconnect();
-  // }, [reconnect]);
-
-  // // TODO: Pause - Resume toggle handler to send message to server
-  // const togglePause = useCallback(() => {
-  //   if (gameState.gameStatus) {
-  //     if (gameState.gameStatus === 'playing') {
-  //       if (isDebugMode) {
-  //         console.log('Sending pause request');
-  //       }
-  //       sendMessage({ type: 'pause', payload: {} });
-  //     } else if (gameState.gameStatus === 'paused') {
-  //       if (isDebugMode) {
-  //         console.log('Sending resume request');
-  //       }
-  //       sendMessage({ type: 'resume', payload: {} });
-  //     }
-  //   }
-  // }, [sendMessage, gameState.gameStatus]);
+  // TODO: Reconnection handler 
+  // TODO: Pause - Resume
 
   // render component
 
