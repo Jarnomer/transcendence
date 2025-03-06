@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useMemo, useCallback, useState, createContext, useContext, useRef} from "react";
 import WebSocketManager from "./WebSocketManager";
 import webSocketReducer from "./WebSocketReducer";
-import { GameState, GameStatus } from '../../../shared/types';
+import { GameState, GameStatus } from '../../../shared/gameTypes';
 
 const WebSocketContext = createContext<any>(null);
 
@@ -45,7 +45,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       type: "GAME_UPDATE", payload: {
         players: data.players || {},
         ball: data.ball || {},
-        timeStamp: data.timeStamp || state.gameState.timeStamp
       }
     });
     const handleGameStatus = (status: GameStatus) => dispatch({ type: "GAME_STATUS", payload: status  });
@@ -54,8 +53,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     wsManager.addEventListener("close", handleClose);
     wsManager.addEventListener("error", handleError);
     wsManager.addEventListener("reconnecting", handleReconnecting);
-    wsManager.addEventListener("update", handleGameUpdate);
-    wsManager.addEventListener("status", handleGameStatus);
+    wsManager.addEventListener("game_state", handleGameUpdate);
+    wsManager.addEventListener("game_status", handleGameStatus);
 
     return () => {
       if (!wsManager) {
@@ -66,8 +65,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       wsManager.removeEventListener("close", handleClose);
       wsManager.removeEventListener("error", handleError);
       wsManager.removeEventListener("reconnecting", handleReconnecting);
-      wsManager.removeEventListener("update", handleGameUpdate);
-      wsManager.removeEventListener("status", handleGameStatus);
+      wsManager.removeEventListener("game_state", handleGameUpdate);
+      wsManager.removeEventListener("game_status", handleGameStatus);
     };
   }, [wsManager]);
 

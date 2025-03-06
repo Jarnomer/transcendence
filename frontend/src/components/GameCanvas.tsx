@@ -1,11 +1,13 @@
 import React, { useRef, useEffect } from 'react';
+
 import {
   Engine, Scene, FreeCamera, HemisphericLight,
   MeshBuilder, StandardMaterial,
   Color3, Color4, Vector3
 } from 'babylonjs';
-import { GameState } from '../../../shared/types';
+
 import { parseColor } from '../utils/colorConvertor';
+import { GameState } from '../../../shared/gameTypes';
 
 interface GameCanvasProps {
   gameState: GameState;

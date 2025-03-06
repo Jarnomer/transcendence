@@ -7,9 +7,9 @@ import GameCanvas from '../components/GameCanvas';
 import { useWebSocketContext } from '../services/WebSocketContext';
 import useGameControls from '../hooks/useGameControls';
 
-import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../services/api';
-import { GameState } from '../../../shared/types';
-import { submitResult } from '../services/api';
+import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
+
+import { GameState } from '../../../shared/gameTypes';
 
 export const GamePage: React.FC = () => {
   // Debug mode toggle, enables console logs and debug UI elements
