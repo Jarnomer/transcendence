@@ -79,7 +79,7 @@ export const setupPlayerInputHandler = (
           // Send updated state back to client(s)
           socket.send(JSON.stringify({
             type: 'game_update',
-            ...result
+            result: result
           }));
         }
       }
