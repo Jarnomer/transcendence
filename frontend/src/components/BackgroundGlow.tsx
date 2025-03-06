@@ -4,7 +4,7 @@ import React from "react";
 export const BackgroundGlow: React.FC = () => {
 
 	return (
-		<div className="">
+		<div className="parent">
 		<div className="">
 		  <div id="">
 				<div className="">

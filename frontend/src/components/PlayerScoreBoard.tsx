@@ -1,6 +1,7 @@
 import React from "react";
 import PlayerCard from "./PlayerScoreCard";
 import { GameState } from "../../../shared/gameTypes";
+import { useWebSocketContext } from "../services/WebSocketContext";
 
 interface PlayerScoreBoardProps {
   gameState: GameState;

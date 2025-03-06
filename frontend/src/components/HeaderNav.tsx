@@ -31,7 +31,7 @@ export const HeaderNav: React.FC = () => {
   };
   
   return (
-    <div className="flex gap-3 pb-2 items-center ml-auto text-primary">
+    <div className="flex gap-3 items-center">
       <NavIconButton id="nav-home-button" icon="home" onClick={() => animatedNavigate("/gameMenu")} />
       <NavIconButton id="nav-profile-button" icon="user" onClick={() => animatedNavigate("/profile")} />
       <NavIconButton id="nav-chat-button" icon="chat" onClick={() => animatedNavigate("/chat")} />

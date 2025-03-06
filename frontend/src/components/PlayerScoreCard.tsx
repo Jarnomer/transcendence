@@ -1,4 +1,8 @@
 import React from "react";
+import { useEffect, useState } from "react";
+import { useWebSocketContext } from "../services/WebSocketContext";
+import { getUserData } from "../services/api";
+
 
 interface PlayerCardProps {
   name: string;
@@ -7,6 +11,12 @@ interface PlayerCardProps {
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ name, score, imageSrc }) => {
+  
+
+  useEffect(() => {
+
+  }, []);
+  
   return (
     <div className="player-scores w-full flex items-center glass-box overflow-hidden gap-5">
       <div className="relative w-[30px] sm:w-[50px] md:w-[70px] lg:w-[100px] h-[30px] sm:h-[50px] md:h-[70px] lg:h-[100px]  border-1 glass-box">

@@ -71,6 +71,7 @@ export const ProfilePage: React.FC = () => {
     return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
   }
 
+  console.log("user avatar url: ", user.avatar_url)
   return (
     <div className="w-full h-full flex flex-col items-center p-6 text-center">
       {/* Profile Header */}
@@ -78,7 +79,7 @@ export const ProfilePage: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="rounded-full relative w-[150px] h-[150px] border-2 border-primary">
             {/* Profile Picture */}
-            <img className="object-cover rounded-full w-full h-full" src={user.avatar_url} alt="Profile" />
+            <img className="object-cover rounded-full w-full h-full" src={user.avatar_url} />
 
             {/* Hidden File Input */}
             <input

@@ -10,6 +10,9 @@ import useGameControls from '../hooks/useGameControls';
 import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
 
 import { GameState } from '../../../shared/gameTypes';
+import {CountDown} from "../components/CountDown"
+
+import ClipLoader from "react-spinners/ClipLoader";
 
 export const GamePage: React.FC = () => {
   // Debug mode toggle, enables console logs and debug UI elements
@@ -162,23 +165,37 @@ export const GamePage: React.FC = () => {
   // }, [sendMessage, gameState.gameStatus]);
 
   // render component
+
+
+
+
+
   return (
-    <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
-      <div className="h-[10%] flex justify-between items-center">
-        <PlayerScoreBoard gameState={gameState} />
-      </div>
-      <div className="w-full h-full overflow-hidden border-2 border-primary">
-        {(connectionStatus === 'connected' && gameState.gameStatus !== 'finished') ? (
+    <div id="game-page" className="h-full w-full p-10 pt-0 flex flex-col overflow-hidden">
+      {(connectionStatus === 'connected' && gameState.gameStatus !== 'finished') ? (
           <>
-            <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {gameStatus}</p>
-            <GameCanvas gameState={gameState} />
+          <div className="h-[10%] flex justify-between items-center">
+            <PlayerScoreBoard gameState={gameState} />
+            </div>
+            <div className="w-full h-full relative overflow-hidden border-2 border-primary">
+              {/* RENDER COUNTDOWN CONDITIONALLY */}
+              {gameStatus === 'countdown' && <CountDown />}
+
+              <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {gameStatus}</p>
+              <GameCanvas gameState={gameState} />
+            </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <p>{getStatusMessage()}</p>
+            <ClipLoader
+              color={"primary"}
+              size={50}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
           </div>
         )}
-      </div>
     </div>
   );
 };

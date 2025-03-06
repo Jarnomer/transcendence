@@ -15,7 +15,7 @@ import { ProfilePage } from './pages/ProfilePage.tsx';
 import { useAnimatedNavigate } from './animatedNavigate.tsx';
 import { BackgroundGlow } from './components/BackgroundGlow.tsx';
 import { ChatPage } from './pages/ChatPage.tsx';
-import { WebSocketProvider } from './services/WebSocketContext.tsx';
+import { useWebSocketContext } from './services/WebSocketContext.tsx';
 
 export const IsLoggedInContext = React.createContext<{
 	isLoggedIn: boolean;
@@ -42,6 +42,10 @@ const App: React.FC = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 	const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false); // Modal state
 	const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
+	const { gameStatus, gameState } = useWebSocketContext();
+	const location = useLocation();
+	console.log("game status: ", gameStatus)
+	console.log("game state: ", gameState)
 
 
 
@@ -94,11 +98,10 @@ const App: React.FC = () => {
 	return (
 		<ModalProvider>
 			<IsLoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn, logout }}>
-				<WebSocketProvider>
-					<Router>
+					
 						<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
-							<Header isGameRunning={isGameRunning} />
-							<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
+						<Header />
+							<div id="app-content" className="mt-2 flex flex-grow flex-col w-full min-h-full justify-center items-center">
 								<Routes>
 									<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 									<Route path="/login" element={<LoginPage />} />
@@ -112,10 +115,8 @@ const App: React.FC = () => {
 								{<SettingsModal />}
 								{<AuthModal />}
 							</div>
-							{!isGameRunning ? <Footer /> : null}
+							{location.pathname !== "/game" ? <Footer /> : null}
 						</div>
-					</Router>
-				</WebSocketProvider>
 			</IsLoggedInContext.Provider>
 		</ModalProvider>
 	);
