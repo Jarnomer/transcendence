@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { login, register } from "../api";
+import { login, register } from "../services/api.ts";
 import { ClippedButton } from "../components/wrappers/clippedButton.tsx";
 import { SVGModal } from "../components/wrappers/svgModal";
 import { IsLoggedInContext } from '../app.tsx';
@@ -22,37 +22,37 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-	e.preventDefault();
-	setLoading(true);
-	setError(null);
-  
-	try {
-	  // IF THE USER IS REGISTERING, REGISTER THE USER FIRST
-	  if (isRegistering) {
-		try {
-		  await register(username, password);
-		} catch (error: any) {
-		  alert("Registration failed!");
-		  setLoading(false);
-		  return;
-		}
-	  }
-  
-	  // THEN LOG IN THE USER
-	  try {
-		await login(username, password);
-		setIsLoggedIn(true);
-		animatedNavigate("/gameMenu");
-	  } catch (error: any) {
-		alert("Login failed!");
-		setLoading(false);
-		return;
-	  }
-	} finally {
-	  setLoading(false);
-	}
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      // IF THE USER IS REGISTERING, REGISTER THE USER FIRST
+      if (isRegistering) {
+        try {
+          await register(username, password);
+        } catch (error: any) {
+          alert("Registration failed!");
+          setLoading(false);
+          return;
+        }
+      }
+
+      // THEN LOG IN THE USER
+      try {
+        await login(username, password);
+        setIsLoggedIn(true);
+        animatedNavigate("/gameMenu");
+      } catch (error: any) {
+        alert("Login failed!");
+        setLoading(false);
+        return;
+      }
+    } finally {
+      setLoading(false);
+    }
   };
-  
+
 
   return (
 	<div className="w-full h-full flex justify-center p-10">
@@ -90,8 +90,8 @@ export const LoginPage: React.FC = () => {
     </div>
 	  </SVGModal>
 
-    </div>
+      </div>
 
-		</div>
+    </div>
   )
 };

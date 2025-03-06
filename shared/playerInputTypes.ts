@@ -44,7 +44,7 @@ export interface PlayerInputMessage {
     }
   });
   
-  // Utility function to create a pause input message
+  // Utility function to create a pause input message (for future use)
   export const createPauseInputMessage = (playerId: string): PlayerInputMessage => ({
     type: 'player_input',
     action: 'pause',

@@ -35,14 +35,12 @@ export class UserService {
   }
 
   async updateUserByID(user_id: string, updates: Partial<{
-    email: string;
-    password: string;
-    username: string;
     display_name: string;
+    first_name: string;
+    last_name: string;
+    bio: string;
     avatar_url: string;
-    online_status: boolean;
-    wins: number;
-    losses: number;
+    status: string;
   }>) {
     const res = await this.userModel.updateUserByID(user_id, updates);
     if (res.changes === 0) {

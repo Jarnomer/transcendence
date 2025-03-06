@@ -21,6 +21,8 @@ export interface GameState {
   timeStamp?: number;
 }
 
+export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
+
 // types from below are not used yet
 
 export interface GameUpdateMessage {

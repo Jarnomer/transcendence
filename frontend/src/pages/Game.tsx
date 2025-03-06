@@ -1,36 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom"; 
+import { useLocation } from "react-router-dom";
 import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
-import { gameConnect } from "../api"; 
+import { gameConnect } from "../services/api";
 
 export const Game: React.FC = () => {
-  const location = useLocation(); 
-  const { mode, difficulty } = location.state || {}; 
+  const location = useLocation();
+  const { mode, difficulty } = location.state || {};
 
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
-//   const [ws, setWs] = useState<WebSocket | null>(null);
-//   const [gameState, setGameState] = useState<any>({});
+  //   const [ws, setWs] = useState<WebSocket | null>(null);
+  //   const [gameState, setGameState] = useState<any>({});
 
   useEffect(() => {
-	console.log("Location state:", location.state); // Add this to check the state passed
-	if (location.state) {
-	  const { mode, difficulty } = location.state;
-	  console.log("Mode:", mode, "Difficulty:", difficulty);
-	}
+    console.log("Location state:", location.state); // Add this to check the state passed
+    if (location.state) {
+      const { mode, difficulty } = location.state;
+      console.log("Mode:", mode, "Difficulty:", difficulty);
+    }
   }, [location]);
 
   useEffect(() => {
 
     const token = localStorage.getItem("token");
     if (token) {
-	  let gameState: any = {};
-	  let ws: WebSocket;
-	  const token = localStorage.getItem("token");
-	  ws = new WebSocket(
-		`wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`
-	  );
-	  gameConnect(ws, gameState);
+      let gameState: any = {};
+      let ws: WebSocket;
+      const token = localStorage.getItem("token");
+      ws = new WebSocket(
+        `wss://${window.location.host}/ws/remote/game/?token=${token}&gameId=1`
+      );
+      gameConnect(ws, gameState);
     }
   }, []);
 

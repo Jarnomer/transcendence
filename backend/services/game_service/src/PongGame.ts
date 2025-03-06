@@ -17,7 +17,7 @@ export default class PongGame {
   private gameState: GameState;
   private updateInterval: NodeJS.Timeout | null = null;
   
-  private readonly MAX_SCORE: number = 10;
+  private readonly MAX_SCORE: number = 5;
 
   constructor() {
     this.gameState = {
@@ -123,18 +123,20 @@ export default class PongGame {
       players.player2.score++;
       if (players.player2.score >= this.MAX_SCORE) {
         this.stopGame();
+      } else {
+        this.resetBall();
+        this.resetPaddles();
+        this.startCountdown();
       }
-      this.resetBall();
-      this.resetPaddles();
-      this.startCountdown();
     } else if (ball.x + this.ballSize >= this.width) {
       players.player1.score++;
       if (players.player1.score >= this.MAX_SCORE) {
         this.stopGame();
+      } else {
+        this.resetBall();
+        this.resetPaddles();
+        this.startCountdown();
       }
-      this.resetBall();
-      this.resetPaddles();
-      this.startCountdown();
     }
   }
 

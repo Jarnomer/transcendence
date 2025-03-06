@@ -54,20 +54,18 @@ export class UserController {
   async updateUserByID(request: FastifyRequest, reply: FastifyReply) {
     const { user_id } = request.params as { user_id: string };
     const updates = request.body as Partial<{
-      email: string;
-      password: string;
-      username: string;
       display_name: string;
+      first_name: string;
+      last_name: string;
+      bio: string;
       avatar_url: string;
-      online_status: boolean;
-      wins: number;
-      losses: number;
+      status: string;
     }>;
     request.log.trace(`Updating user ${user_id}`);
     if (!Object.keys(updates).length) {
       throw new BadRequestError("No updates provided");
     }
-    request.log.trace(`Updates`, updates);
+    request.log.trace(`Updates ${updates.status}`);
     const user = await this.userService.updateUserByID(user_id, updates);
     if (!user) {
       throw new NotFoundError("User not found");
@@ -120,7 +118,7 @@ export class UserController {
     const avatarPath = path.join(UPLOAD_DIR, fileName);
     await pipeline(avatar.file, fs.createWriteStream(avatarPath));
 
-    const avatarURL = `api/uploads/${avatar.filename}`;
+    const avatarURL = `uploads/${fileName}`;
     const user = await this.userService.updateUserByID(user_id, { avatar_url: avatarURL });
     if (!user) {
       throw new NotFoundError("User not found");
