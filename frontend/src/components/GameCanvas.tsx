@@ -3,7 +3,7 @@ import {
   Engine, Scene, FreeCamera, HemisphericLight,
   MeshBuilder, StandardMaterial, Color3, Vector3
 } from 'babylonjs';
-import { GameState } from '../../../shared/types';
+import { GameState } from '../../../shared/gameTypes';
 
 interface GameCanvasProps {
   gameState: GameState;

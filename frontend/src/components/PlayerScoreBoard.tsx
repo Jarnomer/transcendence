@@ -1,6 +1,6 @@
 import React from "react";
 import PlayerCard from "./PlayerScoreCard";
-import { GameState } from "../../../shared/types";
+import { GameState } from "../../../shared/gameTypes";
 
 interface PlayerScoreBoardProps {
   gameState: GameState;

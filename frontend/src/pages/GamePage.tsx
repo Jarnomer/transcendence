@@ -4,7 +4,7 @@ import useGameControls from '../hooks/useGameControls';
 import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
 import GameCanvas from '../components/GameCanvas';
 import { useWebSocketContext } from '../services/WebSocketContext';
-import { GameState } from '../../../shared/types';
+import { GameState } from '../../../shared/gameTypes';
 import { enterQueue, getQueueStatus, getGameID, singlePlayer } from '../services/api';
 import { submitResult } from '../services/api';
 
