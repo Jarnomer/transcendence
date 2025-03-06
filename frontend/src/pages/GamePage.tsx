@@ -36,7 +36,7 @@ export const GamePage: React.FC = () => {
 
   // Initialize game, retrieve user ID and set up game based on mode
   useEffect(() => {
-    if (mode === 'singleplayer') {
+    if (mode === 'singleplayer' || difficulty === 'local') {
       // For singleplayer, create a game immediately with AI opponent
       singlePlayer(difficulty).then((data) => {
         console.log("Single player game ID:", data.game_id);
@@ -60,7 +60,7 @@ export const GamePage: React.FC = () => {
     setUserId(userId);
     console.log("User ID:", userId);
     console.log("Mode:", mode);
-    if (!userId || mode === 'singleplayer') return;
+    if (!userId || mode === 'singleplayer' || difficulty === 'local') return;
 
     // Clear any existing interval before setting a new one
     if (intervalRef.current) {
