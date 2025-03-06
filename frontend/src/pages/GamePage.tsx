@@ -244,14 +244,6 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
     };
   }, [disconnect]);
 
-  // Reconnection handler to use when connection is lost, unused atm
-  const handleReconnect = useCallback(() => {
-    if (isDebugMode) {
-      console.log('Attempting to reconnect...');
-    }
-    reconnect();
-  }, [reconnect, isDebugMode]);
-
   // Returns appropriate status message based on current game state
   const getStatusMessage = () => {
     if (loading) {
@@ -274,22 +266,30 @@ export const GamePage: React.FC<GamePageProps> = ({ setIsGameRunning }) => {
     }
   };
 
-  // Pause/Resume toggle handler to send message to server, unused atm
-  const togglePause = useCallback(() => {
-    if (gameState.gameStatus) {
-      if (gameState.gameStatus === 'playing') {
-        if (isDebugMode) {
-          console.log('Sending pause request');
-        }
-        sendMessage({ type: 'pause', payload: {} });
-      } else if (gameState.gameStatus === 'paused') {
-        if (isDebugMode) {
-          console.log('Sending resume request');
-        }
-        sendMessage({ type: 'resume', payload: {} });
-      }
-    }
-  }, [sendMessage, gameState.gameStatus, isDebugMode]);
+  // // TODO: Reconnection handler to use when connection is lost
+  // const handleReconnect = useCallback(() => {
+  //   if (isDebugMode) {
+  //     console.log('Attempting to reconnect...');
+  //   }
+  //   reconnect();
+  // }, [reconnect]);
+
+  // // TODO: Pause - Resume toggle handler to send message to server
+  // const togglePause = useCallback(() => {
+  //   if (gameState.gameStatus) {
+  //     if (gameState.gameStatus === 'playing') {
+  //       if (isDebugMode) {
+  //         console.log('Sending pause request');
+  //       }
+  //       sendMessage({ type: 'pause', payload: {} });
+  //     } else if (gameState.gameStatus === 'paused') {
+  //       if (isDebugMode) {
+  //         console.log('Sending resume request');
+  //       }
+  //       sendMessage({ type: 'resume', payload: {} });
+  //     }
+  //   }
+  // }, [sendMessage, gameState.gameStatus]);
 
   // render component
   return (
