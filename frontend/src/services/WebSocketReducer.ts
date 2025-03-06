@@ -10,12 +10,26 @@ type WebSocketState = {
     gameState: GameState;
 };
 
+export const initialState = {
+  connectionStatus: "connecting",
+  gameStatus: "waiting",
+  gameState: {
+    players: {
+      player1: { id: "player1", y: 0, score: 0 },
+      player2: { id: "player2", y: 0, score: 0 }
+    },
+    ball: { x: 0, y: 0, dx: 0, dy: 0 },
+    timeStamp: Date.now()
+  }
+};
+
 type WebSocketAction =
     | { type: "CONNECTED" }
     | { type: "DISCONNECTED" }
     | { type: "RECONNECTING" }
     | { type: "ERROR" }
     | { type: "GAME_UPDATE"; payload: GameState }
+    | { type: "GAME_RESET" }
     | { type: "GAME_STATUS"; payload: GameStatus };
 
 function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSocketState {
@@ -43,6 +57,20 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
             };
         case "GAME_STATUS":
             return { ...state, gameStatus: action.payload };
+        case "GAME_RESET":
+            console.log("Game reset");
+            return {
+                ...state, connectionStatus: "connecting",
+                gameStatus: "waiting",
+                gameState: {
+                    players: {
+                        player1: { id: "player1", y: 0, score: 0 },
+                        player2: { id: "player2", y: 0, score: 0 }
+                    },
+                    ball: { x: 0, y: 0, dx: 0, dy: 0 },
+                    timeStamp: Date.now()
+                }
+            };
         default:
             return state;
     }

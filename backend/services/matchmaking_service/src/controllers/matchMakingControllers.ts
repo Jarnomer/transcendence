@@ -100,9 +100,9 @@ export class MatchMakingController {
    * @throws DatabaseError if game not updated
    */
   async resultGame(request: FastifyRequest, reply: FastifyReply) {
-    const { game_id, winner_id, player1_score, player2_score } = request.body as { game_id: string, winner_id: string, player1_score: number, player2_score: number };
+    const { game_id, winner_id,loser_id, player1_score, player2_score } = request.body as { game_id: string, winner_id: string,loser_id:string, player1_score: number, player2_score: number };
     request.log.trace(`Updating result for game ${game_id}`);
-    const result = await this.matchMakingService.resultGame(game_id, winner_id, player1_score, player2_score);
+    const result = await this.matchMakingService.resultGame(game_id, winner_id,loser_id, player1_score, player2_score);
     reply.code(200).send({ status: 'completed' });
   }
 }

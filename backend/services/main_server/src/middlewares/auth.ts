@@ -4,7 +4,7 @@ import { NotAuthorizedError } from "./errors";
 
 async function authPlugin(fastify: FastifyInstance) {
   fastify.addHook("onRequest", async (request: FastifyRequest, reply: FastifyReply) => {
-    const publicRoutes = ["/api/auth/register", "/api/auth/login", "/api/auth/logout"];
+    const publicRoutes = ["/api/auth/register", "/api/auth/login", "/api/auth/logout", "/api/auth/refresh"];
     if (publicRoutes.includes(request.url)) {
       return; // Skip authentication
     }

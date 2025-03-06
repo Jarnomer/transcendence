@@ -78,7 +78,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   }, [wsManager]);
 
   return (
-    <WebSocketContext.Provider value={{ ...state, sendMessage, setUrl, ws }}>
+    <WebSocketContext.Provider value={{ ...state, sendMessage, setUrl, ws, dispatch }}>
       {children}
     </WebSocketContext.Provider>
   );

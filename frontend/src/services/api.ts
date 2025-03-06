@@ -79,7 +79,9 @@ api.interceptors.response.use(
 // Function to Refresh Token
 export async function refreshToken(): Promise<string | null> {
   try {
-    const response = await api.get<LoginResponse>('/auth/refresh'); // Backend refresh route
+    const response = await api.get<LoginResponse>('/auth/refresh',
+      { withCredentials: true } // Important for cookies
+    ); // Backend refresh route
     const newToken = response.data.token;
     localStorage.setItem("token", newToken);
     return newToken;
@@ -224,6 +226,19 @@ export async function getUserImage() {
     return res.data;
   } catch (err) {
     console.error("Failed to get user image:", err);
+    throw err;
+  }
+}
+
+export async function submitResult( game_id: string, winner_id: string, loser_id: string, player1_score: number, player2_score: number ) {
+  try {
+    const res = await api.post(`/matchmaking/result`, { game_id, winner_id, loser_id, player1_score, player2_score });
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to submit result`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to submit result:", err);
     throw err;
   }
 }

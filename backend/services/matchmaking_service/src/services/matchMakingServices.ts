@@ -15,6 +15,7 @@ export class MatchMakingService {
   async singlePlayer(user_id: string, difficulty: string) {
     return await this.matchMakingModel.runTransaction(async () => {
       const existingGame = await this.matchMakingModel.getOngoingGame(user_id, difficulty);
+      console.log(existingGame);
       if (existingGame) {
         throw new BadRequestError('Game already exists');
       }
@@ -92,8 +93,9 @@ export class MatchMakingService {
     return res;
   }
 
-  async resultGame(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
-    const res = await this.matchMakingModel.updateGame(game_id, winner_id, player1_score, player2_score);
+  async resultGame(game_id: string, winner_id: string, loser_id: string, player1_score: number, player2_score: number) {
+    console.log(game_id, winner_id, loser_id, player1_score, player2_score);
+    const res = await this.matchMakingModel.updateGame(game_id, winner_id, loser_id, player1_score, player2_score);
     if (res.changes === 0) {
       throw new BadRequestError('Game not updated');
     }

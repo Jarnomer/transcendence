@@ -30,7 +30,7 @@ class ErrorHandler {
         if (error instanceof ServiceError) {
             return reply.status(error.statusCode).send({ error: error.message });
         }
-        if (error.code === "FAST_JWT_EXPIRED") {
+        if (error.code === "FAST_JWT_EXPIRED" || error.statusCode === 401) {
             return reply.status(401).send({ error: "TOKEN_EXPIRED" });
         }
         if (error.code === "SQLITE_CONSTRAINT") {

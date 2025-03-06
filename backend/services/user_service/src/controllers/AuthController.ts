@@ -86,18 +86,18 @@ export class AuthController {
    * @throws NotAuthorizedError if invalid refresh token
    */
   async refresh(fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-    const { refreshToken } = request.cookies;
-    if (!refreshToken) {
+    const { refresh_token } = request.cookies;
+    if (!refresh_token) {
       throw new NotAuthorizedError("No refresh token provided");
     }
     request.log.trace("Verifying refresh token");
-    const decoded = await fastify.jwt.verify<JwtPayload>(refreshToken);
+    const decoded = await fastify.jwt.verify<JwtPayload>(refresh_token);
     request.log.trace(`Finding user ${decoded.username}`);
     const user = await this.authService.getAuth(decoded.username);
     if (!user) {
       throw new NotAuthorizedError("User not found");
     }
-    if (user.refresh_token !== refreshToken) {
+    if (user.refresh_token !== refresh_token) {
       throw new NotAuthorizedError("Invalid refresh token");
     }
     request.log.trace(`Signing JWT for user ${decoded.username}`);
