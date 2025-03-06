@@ -107,8 +107,11 @@ const App: React.FC = () => {
 
 				<Router>
 					<div id="app-container" className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}>
+						{/* RADIAL CIRCLE ON THE BACKGROUND */}
+						{/* <div id="radial-bg" className="absolute inset-0 w-full h-full opacity-20 bg-[radial-gradient(circle_at_30%_20%,_theme(colors.primary)_5%,_rgba(0,0,0,0)_80%)]"></div> */}
+
 						<Header isGameRunning={isGameRunning} />
-						<div id="app-content" className="mt-2 flex flex-col w-full min-h-full justify-center items-center">
+						<div id="app-content" className="mt-2 flex flex-col flex-grow w-full min-h-full justify-center items-center">
 							<Routes>
 								<Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
 								<Route path="/login" element={<LoginPage />} />
