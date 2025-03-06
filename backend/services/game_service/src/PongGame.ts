@@ -19,26 +19,33 @@ export default class PongGame {
   private gameStatus: GameStatus;
   private updateInterval: NodeJS.Timeout|null = null;
 
+  private player1Id: string|null = null;
+  private player2Id: string|null = null;
+
   private readonly MAX_SCORE: number = 5;
 
   constructor() {
     this.gameState = {
       players: {
-        player1: {
-          id: 'player1',
-          y: this.height / 2 - this.paddleHeight / 2,
-          score: 0
-        },
-        player2: {
-          id: 'player2',
-          y: this.height / 2 - this.paddleHeight / 2,
-          score: 0
-        }
+        player1: {id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0},
+        player2: {id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0}
       },
       ball: {x: 0, y: 0, dx: 0, dy: 0},
     };
     this.gameStatus = 'loading';
     this.resetBall();
+  }
+
+  addPlayer(playerId: string): void {
+    if (!this.player1Id) {
+      this.player1Id = playerId;
+      this.gameState.players.player1.id = playerId;
+    } else if (!this.player2Id) {
+      this.player2Id = playerId;
+      this.gameState.players.player2.id = playerId;
+    } else {
+      throw new Error('Cannot add more than 2 players');
+    }
   }
 
   getGameStatus(): GameStatus {
@@ -55,6 +62,14 @@ export default class PongGame {
   }
   getPaddleHeight() {
     return this.paddleHeight;
+  }
+
+  getPlayerId(player: number): string|null {
+    if (player === 1) {
+      return this.player1Id;
+    } else {
+      return this.player2Id;
+    }
   }
 
   private resetBall(): void {
