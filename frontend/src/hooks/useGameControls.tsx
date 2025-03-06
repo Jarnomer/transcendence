@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useWebSocketContext } from '../services/WebSocketContext';
 
 /**
  * Interface for hooking game controls during gameplay
  * @param wsRef - The WebSocket reference for connection
  */
 
-const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
+const useGameControls = () => {
   // Track which keys are currently being pressed during gameplay
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
+  const { sendMessage } = useWebSocketContext();
+
 
   useEffect(() => {
     // Handle key press events
@@ -44,37 +47,27 @@ const useGameControls = (wsRef: React.RefObject<WebSocket | null>) => {
   // Control loop with fixed interval timer
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        if (keysPressed["w"]) {
-          wsRef.current.send(JSON.stringify({
-            type: "move", playerId: "player1", move: "up"
-          }));
-        }
+      if (keysPressed["w"]) {
+        sendMessage({ type: "move", playerId: "player1", move: "up" });
+      }
 
-        if (keysPressed["s"]) {
-          wsRef.current.send(JSON.stringify({
-            type: "move", playerId: "player1", move: "down"
-          }));
-        }
+      if (keysPressed["s"]) {
+        sendMessage({ type: "move", playerId: "player1", move: "down" });
+      }
 
-        if (keysPressed["ArrowUp"]) {
-          wsRef.current.send(JSON.stringify({
-            type: "move", playerId: "player2", move: "up"
-          }));
-        }
+      if (keysPressed["ArrowUp"]) {
+        sendMessage({ type: "move", playerId: "player2", move: "up" });
+      }
 
-        if (keysPressed["ArrowDown"]) {
-          wsRef.current.send(JSON.stringify({
-            type: "move", playerId: "player2", move: "down"
-          }));
-        }
+      if (keysPressed["ArrowDown"]) {
+        sendMessage({ type: "move", playerId: "player2", move: "down" });
       }
     }, 1000 / 60); // 60fps
 
     return () => { // Cleanup
       clearInterval(intervalId);
     };
-  }, [keysPressed, wsRef]);
+  }, [keysPressed]);
 
   return keysPressed;
 };

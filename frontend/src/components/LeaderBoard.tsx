@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getUsers } from "../api";
+import { getUsers } from "../services/api";
 
 export const LeaderBoard: React.FC = () => {
   const [users, setUsers] = useState<{ username: string; wins: number; losses: number }[]>([]);

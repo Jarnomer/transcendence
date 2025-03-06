@@ -26,7 +26,7 @@ export class MatchMakingModel {
 
   async getActiveUser(user_id: string) {
     return await this.db.get("SELECT * FROM matchmaking_queue WHERE user_id = ? AND status IN ('waiting', 'matched', 'playing')",
-    [user_id]);
+      [user_id]);
   }
 
   async getWaitingUser(user_id: string) {
@@ -35,7 +35,7 @@ export class MatchMakingModel {
 
   async getGameByUserID(user_id: string, waiting_user_id: string) {
     return await this.db.get(
-      `SELECT * FROM games WHERE (player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)`,
+      `SELECT * FROM games WHERE ((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)) AND status = 'ongoing'`,
       [user_id, waiting_user_id, waiting_user_id, user_id]
     );
   }
@@ -60,11 +60,11 @@ export class MatchMakingModel {
   }
 
   async getOngoingGame(user_id: string, waiting_user_id: string) {
-    return await this.db.get(`SELECT * FROM games WHERE (player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?) AND match_status = 'ongoing'`, [user_id, waiting_user_id, waiting_user_id, user_id]);
+    return await this.db.get(`SELECT * FROM games WHERE ((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)) AND status = 'ongoing'`, [user_id, waiting_user_id, waiting_user_id, user_id]);
   }
 
-  async updateGame(game_id: string, winner_id: string, player1_score: number, player2_score: number) {
-    return await this.db.run(`UPDATE games SET winner_id = ?, player1_score = ?, player2_score = ? AND match_status = 'completed' WHERE game_id = ?`, [winner_id, player1_score, player2_score, game_id]);
+  async updateGame(game_id: string, winner_id: string, loser_id: string, player1_score: number, player2_score: number) {
+    return await this.db.run(`UPDATE games SET winner_id = ?,loser_id=?, player1_score = ?, player2_score = ?, status = 'completed' WHERE game_id = ?`, [winner_id, loser_id, player1_score, player2_score, game_id]);
   }
 
   async deleteQueueByUserID(user_id: string) {

@@ -46,7 +46,7 @@ CREATE TABLE  IF NOT EXISTS friend_requests (
   friend_request_id TEXT PRIMARY KEY,
   sender_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   receiver_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-  status TEXT DEFAULT 'pending',  -- 'pending', 'accepted', 'rejected'
+  status TEXT CHECK(status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 
@@ -95,7 +95,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='mes
 CREATE TABLE  IF NOT EXISTS matchmaking_queue (
   matchmaking_queue_id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
-  status TEXT DEFAULT 'waiting',       -- 'waiting', 'matched', 'playing'
+  status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
   matched_with TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL, -- NULL if not matched
   joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
@@ -106,8 +106,9 @@ CREATE TABLE  IF NOT EXISTS games (
   player2_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   player1_score INTEGER DEFAULT 0,
   player2_score INTEGER DEFAULT 0,
-  match_status TEXT DEFAULT 'ongoing',  -- 'ongoing', 'completed'
+  status TEXT CHECK(status IN ('ongoing', 'completed')) DEFAULT 'ongoing',
   winner_id TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL,
+  loser_id TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL,
   start_time DATETIME DEFAULT (CURRENT_TIMESTAMP),
   end_time DATETIME
 );
@@ -116,7 +117,7 @@ CREATE TABLE  IF NOT EXISTS games (
 --trigger to update user stats when a game is completed
 CREATE TRIGGER IF NOT EXISTS update_user_stats
 AFTER UPDATE ON games
-WHEN NEW.match_status = 'completed'
+WHEN NEW.status = 'completed'
 BEGIN
     UPDATE user_stats
     SET wins = wins + 1
@@ -172,7 +173,7 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS delete_matchmaking_queue_on_game_end
 AFTER UPDATE ON games
-WHEN NEW.match_status = 'completed'
+WHEN NEW.status = 'completed'
 BEGIN
   DELETE FROM matchmaking_queue
   WHERE user_id = NEW.player1_id OR user_id = NEW.player2_id;

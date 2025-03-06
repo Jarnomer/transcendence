@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { api, getUserData } from "../api.ts";
+import { api, getUserData } from "../services/api.ts";
 
 
 
@@ -10,54 +10,56 @@ export const ProfilePage: React.FC = () => {
 
 
   async function fetchData() {
-	  const fetchedUser = await getUserData();
-	  if (fetchedUser) {
-		  setUser(fetchedUser);
-		}
-	}
-	
-	useEffect(() => {
-		setLoading(true);
-		fetchData();
-		setLoading(false);
+    const fetchedUser = await getUserData();
+    console.log(fetchedUser);
+    if (fetchedUser) {
+      setUser(fetchedUser);
+    }
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData();
+    setLoading(false);
   }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-	const file = event.target.files?.[0];
-	if (!file) return;
-  
-	const userID = localStorage.getItem("userID");
-	if (!userID) {
-	  console.error("User ID not found");
-	  return;
-	}
-  
-	const formData = new FormData();
-	formData.append("avatar", file);
-  
-	console.log("uploading avatar")
-	setLoading(true);
-	try {
-	  const res = await api.post(`user/avatar/${userID}`, formData, {
-		headers: {
-		  "Content-Type": "multipart/form-data",
-		},
-	  });
-	  if (res.status != 200) {
-		throw new Error("Failed to upload avatar");
-	  }
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-	  // FETCH THE UPDATED USERDATA AFTER AVATAR UPLOAD
-	  await fetchData();
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      console.error("User ID not found");
+      return;
+    }
 
-	} catch (error) {
-	  console.error(error);
-	}
-	setLoading(false);
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    console.log("uploading avatar")
+    setLoading(true);
+    try {
+      const res = await api.post(`user/avatar/${userID}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (res.status != 200) {
+        throw new Error("Failed to upload avatar");
+      }
+
+      setUser(res.data);
+      // FETCH THE UPDATED USERDATA AFTER AVATAR UPLOAD
+      //await fetchData();
+
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
   };
-  
+
 
 
 
@@ -74,10 +76,10 @@ export const ProfilePage: React.FC = () => {
       {/* Profile Header */}
       <div className="w-full max-w-md p-6">
         <div className="flex flex-col items-center gap-4">
-		<div className="rounded-full relative w-[150px] h-[150px] border-2 border-primary">
+          <div className="rounded-full relative w-[150px] h-[150px] border-2 border-primary">
             {/* Profile Picture */}
             <img className="object-cover rounded-full w-full h-full" src={user.avatar_url} alt="Profile" />
-            
+
             {/* Hidden File Input */}
             <input
               type="file"
@@ -99,8 +101,8 @@ export const ProfilePage: React.FC = () => {
           </div>
           <h2 className="text-xl font-semibold">{user.displayName}</h2>
           <p className="text-gray-400">@{localStorage.getItem("username")}</p>
-          <span className={`text-sm font-medium ${user.onlineStatus ? "text-green-500" : "text-red-500"}`}>
-            {user.onlineStatus ? "Online" : "Offline"}
+          <span className={`text-sm font-medium ${user.status ? "text-green-500" : "text-red-500"}`}>
+            {user.status ? "Online" : "Offline"}
           </span>
           <div className="flex gap-4 mt-4">
             <button>Edit Profile</button>

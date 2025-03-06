@@ -40,7 +40,7 @@ api.interceptors.request.use(
     if (!config.headers)
       throw new Error("Request config is undefined");
     const token = localStorage.getItem("token"); // Always fetch latest token
-    if (token ) {
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -79,7 +79,9 @@ api.interceptors.response.use(
 // Function to Refresh Token
 export async function refreshToken(): Promise<string | null> {
   try {
-    const response = await api.get<LoginResponse>('/auth/refresh'); // Backend refresh route
+    const response = await api.get<LoginResponse>('/auth/refresh',
+      { withCredentials: true } // Important for cookies
+    ); // Backend refresh route
     const newToken = response.data.token;
     localStorage.setItem("token", newToken);
     return newToken;
@@ -102,11 +104,10 @@ export async function login(username: string, password: string) {
     if (res.data.token) {
       localStorage.setItem("token", res.data.token);
       console.log("token", res.data.token);
-      console.log("get token", localStorage.getItem("token"));
       const user = jwtDecode<TokenDecoded>(res.data.token);
-      console.log("decoded", user);
       localStorage.setItem("userID", user.id)
       localStorage.setItem("username", user.username);
+      await api.patch(`/user/${user.id}`, { status: 'online' });
     }
     return res.data;
   } catch (err) {
@@ -140,7 +141,7 @@ export async function enterQueue() {
     }
     const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}`);
     console.log(res.data);
-    return res.data.status;
+    return res.data;
   } catch (err) {
     console.error("Failed to join game:", err);
     throw err;
@@ -194,21 +195,53 @@ export async function singlePlayer(difficulty: string) {
 
 
 export async function getUserData() {
-	try {
-	  const userID = localStorage.getItem("userID");
-	  if (!userID) {
-		throw new Error("User ID not found");
-	  }
-	  const res = await api.get(`/user/${userID}`);
-	  if (res.status !== 200) {
-		  throw new Error(`Error ${res.status}: Failed to fetch user data`);
-	  }
-	  return res.data;
-	} catch (err) {
-	  console.error("Failed to get user data:", err);
-	  throw err;
-	}
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get(`/user/${userID}`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user data`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get user data:", err);
+    throw err;
   }
+}
+
+export async function getUserImage() {
+  try {
+    const userID = localStorage.getItem("userID");
+    if (!userID) {
+      throw new Error("User ID not found");
+    }
+    const res = await api.get(`/user/avatar/${userID}`,
+      { responseType: "blob" }, // Important for binary data
+    );
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user image`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to get user image:", err);
+    throw err;
+  }
+}
+
+export async function submitResult( game_id: string, winner_id: string, loser_id: string, player1_score: number, player2_score: number ) {
+  try {
+    const res = await api.post(`/matchmaking/result`, { game_id, winner_id, loser_id, player1_score, player2_score });
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to submit result`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error("Failed to submit result:", err);
+    throw err;
+  }
+}
 
 //
 // function isTokenExpired(token: string): boolean {
