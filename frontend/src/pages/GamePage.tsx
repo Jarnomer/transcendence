@@ -152,7 +152,7 @@ export const GamePage: React.FC = () => {
           <div className="h-[10%] flex justify-between items-center">
             <PlayerScoreBoard gameState={gameState} />
             </div>
-            <div className="w-full h-full relative overflow-hidden border-2 border-primary">
+            <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
               {/* RENDER COUNTDOWN CONDITIONALLY */}
               {gameStatus === 'countdown' && <CountDown />}
 
