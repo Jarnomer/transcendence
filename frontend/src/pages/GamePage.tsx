@@ -18,6 +18,7 @@ export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
   const navigate = useNavigate();
 
+  console.log(gameStatus)
   // Queue and connection management state
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
@@ -107,6 +108,10 @@ export const GamePage: React.FC = () => {
   useGameControls(); // Set up game controls
 
   useEffect(() => {
+    if (gameStatus === 'waiting') {
+      console.log("sending player ready message")
+      dispatch({ type: 'PLAYER_READY' });
+    }
     if (gameStatus === 'finished' && gameId) {
       console.log('Game Over');
       const winnerId =
@@ -161,7 +166,7 @@ export const GamePage: React.FC = () => {
           </div>
           <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
-            {gameStatus === 'countdown' && <CountDown />}
+            <CountDown gameStatus={gameStatus}/>
 
             <p className="text-xs text-gray-500">
               Connection: {connectionStatus} | Game: {gameStatus}

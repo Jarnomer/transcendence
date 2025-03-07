@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { GameStatus } from '../../../shared/gameTypes';
 
-export const CountDown: React.FC = () => {
+interface CountDownProps {
+  gameStatus: GameStatus;
+}
+
+export const CountDown: React.FC<CountDownProps> = ( {gameStatus} ) => {
   const [count, setCount] = useState<number>(3); // Start countdown from 3
   const [animate, setAnimate] = useState<boolean>(true);
 
