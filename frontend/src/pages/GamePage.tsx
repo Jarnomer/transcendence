@@ -36,7 +36,7 @@ export const GamePage: React.FC = () => {
 
   // Log mode and difficulty when they change
   useEffect(() => {
-    console.log('Mode:', mode, 'Difficulty:', difficulty, 'Status:', 1, 'Event:', 1);
+    console.log('Mode:', mode, '| Difficulty:', difficulty, '| Status:', gameStatus);
   }, [mode, difficulty]);
 
   // Retrieve user ID and set up game based on mode
