@@ -38,12 +38,13 @@ export class PongGameSession {
     this.clients.set(playerId, connection);
     this.game.addPlayer(playerId);
 
+    // remove these when implementing player ready in frontend
+    this.game.setReadyState(playerId, true);  // DELETE
+    this.checkAndStartGame();                 // DELETE
+
     connection.on(
         'message', (message: string) => this.handleMessage(playerId, message));
     connection.on('close', () => this.removeClient(playerId));
-
-    // Automatically start when correct number of players connected
-    this.checkAndStartGame();
   }
 
   removeClient(playerId: string): void {
@@ -55,10 +56,12 @@ export class PongGameSession {
     }
   }
 
+  private areAllPlayersConnected(): boolean {
+    return this.mode === 'singleplayer' || this.clients.size === 2;
+  }
+
   private checkAndStartGame(): void {
-    if ((this.mode === 'singleplayer' ||
-         this.mode === 'local' && this.clients.size === 1) ||
-        (this.mode !== 'singleplayer' && this.clients.size === 2)) {
+    if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
       this.game.startCountdown();
       this.broadcast({type: 'game_status', state: 'countdown'});
       this.startGameLoop();
@@ -78,6 +81,9 @@ export class PongGameSession {
 
       if (data.type === 'move') {
         this.handlePlayerMove(playerId, data.move);
+      } else if (data.type === 'player_ready') {
+        this.game.setReadyState(playerId, data.state);
+        this.checkAndStartGame();
       }
     } catch (error) {
       console.error('Invalid WebSocket message:', error);
@@ -103,6 +109,13 @@ export class PongGameSession {
   }
 
   updateGame(): void {
+    // remove this when implementing player ready in frontend
+    if (this.areAllPlayersConnected() &&            // DELETE
+        this.game.getGameStatus() === 'waiting') {  // DELETE
+      this.game.setReadyState('player1', true);     // DELETE
+      this.game.setReadyState('player2', true);     // DELETE
+    }
+
     if (this.aiController) {
       this.handleAIMove();
     }

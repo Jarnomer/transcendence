@@ -22,6 +22,8 @@ export default class PongGame {
   private player1Id: string|null = null;
   private player2Id: string|null = null;
 
+  private readyState = new Map<string, boolean>();
+
   private readonly MAX_SCORE: number = 5;
 
   constructor() {
@@ -40,12 +42,29 @@ export default class PongGame {
     if (!this.player1Id) {
       this.player1Id = playerId;
       this.gameState.players.player1.id = playerId;
+      this.setReadyState('player1', false);
     } else if (!this.player2Id) {
       this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
+      this.setReadyState('player2', false);
     } else {
       throw new Error('Cannot add more than 2 players');
     }
+  }
+
+  setReadyState(playerId: string, state: boolean): void {
+    if (playerId === this.player1Id) {
+      this.readyState.set('player1', state);
+    } else if (playerId === this.player2Id) {
+      this.readyState.set('player2', state);
+    }
+    if (this.areAllPlayersReady()) {
+      this.startCountdown();
+    }
+  }
+
+  areAllPlayersReady(): boolean {
+    return Array.from(this.readyState.values()).every((val) => val);
   }
 
   getGameStatus(): GameStatus {
@@ -93,7 +112,15 @@ export default class PongGame {
   }
 
   startCountdown(): void {
+    if (!this.areAllPlayersReady()) {
+      console.warn('Cannot start countdown — not all players are ready.');
+      return;
+    }
+
     this.setGameStatus('countdown');
+    this.resetBall();
+    this.resetPaddles();
+
     setTimeout(() => {
       this.setGameStatus('playing');
       this.startGameLoop();
@@ -165,18 +192,14 @@ export default class PongGame {
       if (players.player2.score >= this.MAX_SCORE) {
         this.stopGame();
       } else {
-        this.resetBall();
-        this.resetPaddles();
-        this.startCountdown();
+        this.setGameStatus('waiting');
       }
     } else if (ball.x + this.ballSize >= this.width) {
       players.player1.score++;
       if (players.player1.score >= this.MAX_SCORE) {
         this.stopGame();
       } else {
-        this.resetBall();
-        this.resetPaddles();
-        this.startCountdown();
+        this.setGameStatus('waiting');
       }
     }
   }
