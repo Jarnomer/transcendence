@@ -17,7 +17,6 @@ clean: down
 
 fclean: clean
 	@$(DOCKER_COMPOSE) down -v --rmi all
-	$(RM) node_modules
 
 ps:
 	@$(DOCKER_COMPOSE) ps
