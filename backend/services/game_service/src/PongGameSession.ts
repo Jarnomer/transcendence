@@ -57,7 +57,8 @@ export class PongGameSession {
   }
 
   private areAllPlayersConnected(): boolean {
-    return this.mode === 'singleplayer' || this.clients.size === 2;
+    return this.mode === 'singleplayer' || this.mode === 'local' ||
+        this.clients.size === 2;
   }
 
   private checkAndStartGame(): void {
