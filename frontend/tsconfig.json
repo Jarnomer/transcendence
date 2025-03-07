@@ -33,5 +33,5 @@
       "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["src"] // Files to include in compilation
+  "include": ["src/**/*", "../shared/**/*"]
 }

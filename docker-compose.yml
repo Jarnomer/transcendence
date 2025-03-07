@@ -6,15 +6,15 @@ services:
     env_file:
       - .env
     ports:
-      - "${BACKEND_PORT}"
+      - '${BACKEND_PORT}'
     volumes:
-      - ./backend:/app  # Mount backend source code
-      - /app/node_modules  # Prevent overriding node_modules
-      - /app/services/main_server/node_modules  # Prevent overriding node_modules
-      - /app/services/user_service/node_modules  # Prevent overriding node_modules
-      - /app/services/remote_service/node_modules  # Prevent overriding node_modules
+      - ./backend:/app # Mount backend source code
+      - /app/node_modules # Prevent overriding node_modules
+      - ./shared:/app/shared # Add support for path alliases
+      - /app/services/main_server/node_modules # Prevent overriding node_modules
+      - /app/services/user_service/node_modules # Prevent overriding node_modules
+      - /app/services/remote_service/node_modules # Prevent overriding node_modules
       - uploads:/app/database/uploads
-
 
   frontend:
     build: ./frontend
@@ -23,22 +23,21 @@ services:
     env_file:
       - .env
     ports:
-      - "${FRONTEND_PORT}"  # Vite default port
+      - '${FRONTEND_PORT}' # Vite default port
     volumes:
-      - ./frontend:/app  # Mount frontend source code
-      - /app/node_modules  # Prevent overriding node_modules
-
+      - ./frontend:/app # Mount frontend source code
+      - /app/node_modules # Prevent overriding node_modules
+      - ./shared:/app/shared # Add support for path alliases
 
   nginx:
     build: ./nginx
     image: nginx:pong
     container_name: nginx
-    ports: 
-      - "8443:8443"
+    ports:
+      - '8443:8443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - uploads:/app/database/uploads
-
     depends_on:
       - frontend
       - backend

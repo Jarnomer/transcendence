@@ -1,33 +1,31 @@
-import {GameState, GameStatus} from '../../../../shared/gameTypes';
-
-import {AIController} from './AIController';
 import PongGame from './PongGame';
+import { AIController } from './AIController';
+import { handlePlayerInputMessage } from './handlers/playerInputHandler';
+import { isPlayerInputMessage } from '@shared/messages';
+import { GameStatus } from '@shared/types';
 
 export class PongGameSession {
   private gameId: string;
   private game: PongGame;
   private mode: string;
   private clients: Map<string, any>;
-  private aiController: AIController|null;
+  private aiController: AIController | null;
   private onEndCallback: () => void;
   private previousGameStatus: GameStatus;
-  private interval: NodeJS.Timeout|null = null;
+  private interval: NodeJS.Timeout | null = null;
   private isGameFinished: boolean = false;
 
-  constructor(
-      gameId: string, mode: string, difficulty: string,
-      onEndCallback: () => void) {
+  constructor(gameId: string, mode: string, difficulty: string, onEndCallback: () => void) {
     this.gameId = gameId;
     this.mode = mode;
-    this.clients = new Map();  // Now maps playerId -> connection
+    this.clients = new Map(); // Now maps playerId -> connection
     this.onEndCallback = onEndCallback;
 
     this.game = new PongGame();
     this.previousGameStatus = this.game.getGameStatus();
 
-    this.aiController = (mode === 'singleplayer') ?
-        new AIController(difficulty, this.game.getHeight()) :
-        null;
+    this.aiController =
+      mode === 'singleplayer' ? new AIController(difficulty, this.game.getHeight()) : null;
   }
 
   getClientCount(): number {
@@ -37,8 +35,7 @@ export class PongGameSession {
   addClient(playerId: string, connection: any): void {
     this.clients.set(playerId, connection);
 
-    connection.on(
-        'message', (message: string) => this.handleMessage(playerId, message));
+    connection.on('message', (message: string) => this.handleMessage(playerId, message));
     connection.on('close', () => this.removeClient(playerId));
 
     // Automatically start when correct number of players connected
@@ -50,19 +47,21 @@ export class PongGameSession {
     if (this.clients.size === 0) {
       this.endGame();
     } else {
-      this.broadcast({type: 'game_status', state: 'waiting'});
+      this.broadcast({ type: 'game_status', state: 'waiting' });
     }
   }
 
   private checkAndStartGame(): void {
-    if ((this.mode === 'singleplayer' ||
-         this.mode === 'local' && this.clients.size === 1) ||
-        (this.mode !== 'singleplayer' && this.clients.size === 2)) {
+    if (
+      this.mode === 'singleplayer' ||
+      (this.mode === 'local' && this.clients.size === 1) ||
+      (this.mode !== 'singleplayer' && this.clients.size === 2)
+    ) {
       this.game.startCountdown();
-      this.broadcast({type: 'game_status', state: 'countdown'});
+      this.broadcast({ type: 'game_status', state: 'countdown' });
       this.startGameLoop();
     } else {
-      this.broadcast({type: 'game_status', state: 'waiting'});
+      this.broadcast({ type: 'game_status', state: 'waiting' });
     }
   }
 
@@ -75,7 +74,11 @@ export class PongGameSession {
     try {
       const data = JSON.parse(message);
 
-      if (data.type === 'move') {
+      // Use the standardized player input handler for new message format
+      if (isPlayerInputMessage(data)) {
+        handlePlayerInputMessage(this, data);
+      } else if (data.type === 'move') {
+        // Legacy support for old format
         this.handlePlayerMove(playerId, data.move);
       }
     } catch (error) {
@@ -83,19 +86,31 @@ export class PongGameSession {
     }
   }
 
-  handlePlayerMove(playerId: string, move: 'up'|'down'|null): void {
-    const moves:
-        Record<string, 'up'|'down'|null> = {player1: null, player2: null};
+  handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
+    const moves: Record<string, 'up' | 'down' | null> = {
+      player1: null,
+      player2: null,
+    };
 
     if (this.mode === 'singleplayer') {
       if (playerId === 'player1') moves.player1 = move;
     } else {
-      if (playerId === 'player1') moves.player1 = move;
-      if (playerId === 'player2') moves.player2 = move;
+      // For multiplayer modes, map the actual user ID to the correct player position
+      if (
+        playerId === 'player1' ||
+        (this.clients.has(playerId) && Array.from(this.clients.keys())[0] === playerId)
+      ) {
+        moves.player1 = move;
+      } else if (
+        playerId === 'player2' ||
+        (this.clients.has(playerId) && Array.from(this.clients.keys())[1] === playerId)
+      ) {
+        moves.player2 = move;
+      }
     }
 
     const updatedState = this.game.updateGameState(moves);
-    this.broadcast({type: 'game_state', state: updatedState});
+    this.broadcast({ type: 'game_state', state: updatedState });
   }
 
   updateGame(): void {
@@ -104,12 +119,12 @@ export class PongGameSession {
     }
 
     const updatedState = this.game.updateGameState({});
-    this.broadcast({type: 'game_state', state: updatedState});
+    this.broadcast({ type: 'game_state', state: updatedState });
 
     // Broadcast if game status (countdown, playing, finished, etc.) changed
     const updatedGameStatus = this.game.getGameStatus();
     if (updatedGameStatus !== this.previousGameStatus) {
-      this.broadcast({type: 'game_status', state: updatedGameStatus});
+      this.broadcast({ type: 'game_status', state: updatedGameStatus });
       this.previousGameStatus = updatedGameStatus;
 
       if (updatedGameStatus === 'finished') {
@@ -127,12 +142,11 @@ export class PongGameSession {
   }
 
   endGame(): void {
-    if (this.isGameFinished) return;  // Prevent recursive calls
-    this.isGameFinished =
-        true;  // Mark game as finished to prevent further calls
+    if (this.isGameFinished) return; // Prevent recursive calls
+    this.isGameFinished = true; // Mark game as finished to prevent further calls
 
     this.game.stopGame();
-    this.broadcast({type: 'game_status', state: 'finished'});
+    this.broadcast({ type: 'game_status', state: 'finished' });
     this.onEndCallback();
   }
 
@@ -145,12 +159,16 @@ export class PongGameSession {
 
     if (this.aiController.shouldUpdate(ball.dx)) {
       this.aiController.updateAIState(
-          ball, aiPaddle, this.game.getHeight(), this.game.getPaddleHeight(),
-          paddleSpeed);
+        ball,
+        aiPaddle,
+        this.game.getHeight(),
+        this.game.getPaddleHeight(),
+        paddleSpeed
+      );
     }
 
     const aiMove = this.aiController.getNextMove();
-    this.game.updateGameState({player2: aiMove});
+    this.game.updateGameState({ player2: aiMove });
   }
 }
 

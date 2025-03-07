@@ -10,8 +10,9 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@my-backend/*": ["services/*/src"]
+      "@my-backend/*": ["services/*/src"],
+      "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["services/**/*"]
+  "include": ["services/**/*", "../shared/**/*"]
 }

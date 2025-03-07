@@ -6,14 +6,16 @@ dotenv.config();
 import fastify from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
-import authPlugin from "./middlewares/auth";
+import authPlugin from './middlewares/auth';
 import databasePlugin from './db';
 import loggerPlugin from './middlewares/logger';
 import errorHandlerPlugin from './middlewares/errorHandler';
 
+// Import alias support
+import 'module-alias/register';
 
 // Import custom routes
-import userService from '@my-backend/user_service/';  // Everything from user-service is now available
+import userService from '@my-backend/user_service/'; // Everything from user-service is now available
 import remoteService from '@my-backend/remote_service/';
 import matchMakingService from '@my-backend/matchmaking_service/';
 import adminRoutes from './routes/adminRoutes';
@@ -21,20 +23,19 @@ import adminRoutes from './routes/adminRoutes';
 // Create Fastify instance
 const app = fastify({
   logger: {
-    level: "trace",
+    level: 'trace',
     transport: {
-      target: "pino-pretty",
+      target: 'pino-pretty',
       options: {
         colorize: true,
-        translateTime: "HH:MM:ss",
-        ignore: "pid,hostname,v,reqId",
+        translateTime: 'HH:MM:ss',
+        ignore: 'pid,hostname,v,reqId',
         singleLine: true,
-        destination: process.env.LOG_PATH
+        destination: process.env.LOG_PATH,
       },
     },
-  }
+  },
 });
-
 
 const start = async () => {
   try {
@@ -42,19 +43,19 @@ const start = async () => {
     app.register(fastifyJwt, {
       secret: process.env.JWT_SECRET || 'defaultsecret',
       cookie: {
-        cookieName: "refreshToken", // Name of the cookie storing refresh token
+        cookieName: 'refreshToken', // Name of the cookie storing refresh token
         signed: false, // We are not signing cookies separately
       },
     });
-     app.register(cookie,{ // Register fastify-cookie plugin
-          parseOptions: {
-            httpOnly: true, // Prevent JavaScript access (security best practice)
-            sameSite: "strict", // Restrict cross-site access
-            secure: true, // Only send over HTTPS
-            path: "/api/auth/refresh", // Available for all routes
-          },
-        }
-      );
+    app.register(cookie, {
+      // Register fastify-cookie plugin
+      parseOptions: {
+        httpOnly: true, // Prevent JavaScript access (security best practice)
+        sameSite: 'strict', // Restrict cross-site access
+        secure: true, // Only send over HTTPS
+        path: '/api/auth/refresh', // Available for all routes
+      },
+    });
 
     // register error handler
     app.register(errorHandlerPlugin);
@@ -69,7 +70,6 @@ const start = async () => {
     app.register(userService, { prefix: '/api' }); // Register user routes inside the plugin
     app.register(matchMakingService, { prefix: '/api' }); // Register matchmaking routes inside the plugin
     app.register(remoteService, { prefix: '/ws/remote' }); // Register remote routes inside the plugin
-
 
     await app.listen({ port: Number(process.env.PORT) || 8000, host: '0.0.0.0' });
     app.log.info(`Server is running on port ${process.env.PORT || 8000}`);

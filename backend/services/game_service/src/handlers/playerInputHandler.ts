@@ -1,5 +1,5 @@
 import { PongGameSession } from '../PongGameSession';
-import { PlayerInputMessage } from '../../../../../frontend/src/messages/playerInputMessages';
+import { PlayerInputMessage } from '@shared/messages';
 
 export const handlePlayerInputMessage = (
   gameSession: PongGameSession,
@@ -16,7 +16,7 @@ export const handlePlayerInputMessage = (
       }
       break;
 
-    // Add other handlers here
+    // Add other handlers here and function below
 
     default:
       console.warn(`Unknown player input action: ${message.action}`);
