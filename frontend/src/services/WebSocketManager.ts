@@ -25,26 +25,26 @@ class WebSocketManager {
       this.ws.close();
     }
 
-    console.log("Connecting to WebSocket:", this.url);
+    console.log('Connecting to WebSocket:', this.url);
     this.ws = new WebSocket(this.url);
 
     this.ws.onopen = () => {
-      console.log("WebSocket connected:", this.url);
+      console.log('WebSocket connected:', this.url);
       this.reconnectAttempts = 0;
-      this.notifyHandlers("open", null);
+      this.notifyHandlers('open', null);
     };
 
     this.ws.onclose = (event) => {
-      console.log("WebSocket disconnected:", this.url, event.code, event.reason);
-      this.notifyHandlers("close", event);
+      console.log('WebSocket disconnected:', this.url, event.code, event.reason);
+      this.notifyHandlers('close', event);
       if (!event.wasClean && this.reconnectAttempts < WebSocketManager.MAX_RECONNECT_ATTEMPTS) {
         this.scheduleReconnect();
       }
     };
 
     this.ws.onerror = (error) => {
-      console.error("WebSocket error:", this.url, error);
-      this.notifyHandlers("error", error);
+      console.error('WebSocket error:', this.url, error);
+      this.notifyHandlers('error', error);
     };
 
     this.ws.onmessage = (event) => {
@@ -53,17 +53,19 @@ class WebSocketManager {
         if (data.type && data.state) {
           this.notifyHandlers(data.type, data.state);
         } else {
-          console.warn("Received invalid WebSocket message:", data);
+          console.warn('Received invalid WebSocket message:', data);
         }
       } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
+        console.error('Error parsing WebSocket message:', error);
       }
     };
   }
 
   private scheduleReconnect() {
     this.reconnectAttempts++;
-    console.log(`Reconnecting attempt ${this.reconnectAttempts}/${WebSocketManager.MAX_RECONNECT_ATTEMPTS}`);
+    console.log(
+      `Reconnecting attempt ${this.reconnectAttempts}/${WebSocketManager.MAX_RECONNECT_ATTEMPTS}`,
+    );
 
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -82,7 +84,7 @@ class WebSocketManager {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn("WebSocket not connected, message not sent:", message);
+      console.warn('WebSocket not connected, message not sent:', message);
     }
   }
 

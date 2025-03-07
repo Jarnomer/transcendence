@@ -1,17 +1,17 @@
-import React from "react";
+import React from 'react';
 
 type ButtonOptions = {
   id?: string;
-  type?: "button" | "submit" | "reset";
+  type?: 'button' | 'submit' | 'reset';
   className?: string;
-  onClick?: () => void; 
+  onClick?: () => void;
 };
 
 export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
   label,
-  id = "",
-  type = "button",
-  className = "",
+  id = '',
+  type = 'button',
+  className = '',
   onClick,
 }) => {
   return (
@@ -32,7 +32,7 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
         <rect width="202" height="40" fill="transparent" />
         <path d="M185.664 39.5H0.5V0.5H201.5V26.7605L185.664 39.5Z" stroke="currentColor" />
       </svg>
-      
+
       {/* Text inside the button */}
       <span className="relative  text-primary z-10">{label}</span>
     </button>

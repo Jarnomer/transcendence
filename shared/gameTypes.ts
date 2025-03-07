@@ -12,12 +12,10 @@ export interface Ball {
 }
 
 export interface GameState {
-  players: {player1: Player; player2: Player;};
+  players: { player1: Player; player2: Player; };
   ball: Ball;
 }
 
-export type GameStatus =
-    'loading'|'waiting'|'countdown'|'playing'|'paused'|'finished';
+export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
-export type GameEvent = 'game_paused'|'game_goal'|'game_start'|'game_end'|
-    'player_joined'|'player_left';
+export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';

@@ -11,7 +11,6 @@ const useGameControls = () => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
 
-
   useEffect(() => {
     // Handle key press events
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -20,7 +19,7 @@ const useGameControls = () => {
         e.preventDefault();
       }
 
-      setKeysPressed(prev => {
+      setKeysPressed((prev) => {
         if (!prev[e.key]) {
           // If key wasn't already pressed
           return { ...prev, [e.key]: true };
@@ -31,40 +30,42 @@ const useGameControls = () => {
 
     // Handle key release events
     const handleKeyUp = (e: KeyboardEvent) => {
-      setKeysPressed(prev => ({ ...prev, [e.key]: false }));
+      setKeysPressed((prev) => ({ ...prev, [e.key]: false }));
     };
 
     // Event listeners for key presses
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
-    return () => { // Cleanup
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+    return () => {
+      // Cleanup
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, []); // Runs only once on mount
 
   // Control loop with fixed interval timer
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (keysPressed["w"]) {
-        sendMessage({ type: "move", playerId: "player1", move: "up" });
+      if (keysPressed['w']) {
+        sendMessage({ type: 'move', playerId: 'player1', move: 'up' });
       }
 
-      if (keysPressed["s"]) {
-        sendMessage({ type: "move", playerId: "player1", move: "down" });
+      if (keysPressed['s']) {
+        sendMessage({ type: 'move', playerId: 'player1', move: 'down' });
       }
 
-      if (keysPressed["ArrowUp"]) {
-        sendMessage({ type: "move", playerId: "player2", move: "up" });
+      if (keysPressed['ArrowUp']) {
+        sendMessage({ type: 'move', playerId: 'player2', move: 'up' });
       }
 
-      if (keysPressed["ArrowDown"]) {
-        sendMessage({ type: "move", playerId: "player2", move: "down" });
+      if (keysPressed['ArrowDown']) {
+        sendMessage({ type: 'move', playerId: 'player2', move: 'down' });
       }
     }, 1000 / 60); // 60fps
 
-    return () => { // Cleanup
+    return () => {
+      // Cleanup
       clearInterval(intervalId);
     };
   }, [keysPressed]);

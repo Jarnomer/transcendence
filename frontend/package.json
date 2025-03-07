@@ -6,13 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write './src/**/*.{ts,tsx,js,css,scss,md}'"
   },
   "devDependencies": {
     "@types/node": "^22.13.8",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "babylonjs": "^7.50.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.5.3",
     "typescript": "~5.7.2",
     "vite": "^6.1.0"
   },
@@ -26,9 +29,11 @@
     "babylonjs": "^7.49.0",
     "babylonjs-gui": "^7.49.0",
     "jwt-decode": "^4.0.0",
+    "node-vibrant": "^4.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
+    "react-spinners": "^0.15.0",
     "tailwindcss": "^4.0.6"
   }
 }
