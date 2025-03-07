@@ -11,7 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "@my-backend/*": ["services/*/src"]
-    } 
+    }
   },
-  "include": ["services/**/*"],
+  "include": ["services/**/*"]
 }
