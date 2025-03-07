@@ -4,7 +4,7 @@ import { Color3 } from 'babylonjs';
 export function parseColor(colorValue: string): Color3 {
   // Handle named colors with a simple map
   const namedColors: Record<string, Color3> = {
-    'black': new Color3(0, 0, 0),
+    black: new Color3(0, 0, 0),
     // Add more named colors as needed
   };
 
@@ -48,7 +48,7 @@ export function parseColor(colorValue: string): Color3 {
 
 /**
  * Converts OKLCH color values to a Babylon.js Color3 (RGB).
- * 
+ *
  * OKLCH is a perceptually uniform color space:
  * - L: Lightness (0-100%)
  * - C: Chroma (saturation/colorfulness)
@@ -72,13 +72,13 @@ export function oklchToColor3(colorValue: string): Color3 {
   // Convert from OKLCH to OKLAB
   // OKLAB is an intermediate perceptually uniform color space
   const L = lightness;
-  const A = chroma * Math.cos(hue * Math.PI / 180); // Convert hue
-  const B = chroma * Math.sin(hue * Math.PI / 180); // Convert chroma
+  const A = chroma * Math.cos((hue * Math.PI) / 180); // Convert hue
+  const B = chroma * Math.sin((hue * Math.PI) / 180); // Convert chroma
 
   // First, convert to an intermediate color space (LMS)
   const l = L + 0.3963377774 * A + 0.2158037573 * B;
   const m = L - 0.1055613458 * A - 0.0638541728 * B;
-  const s = L - 0.0894841775 * A - 1.2914855480 * B;
+  const s = L - 0.0894841775 * A - 1.291485548 * B;
 
   // Then, apply nonlinear transformation (cube function)
   const lCubed = l * l * l;
@@ -88,7 +88,7 @@ export function oklchToColor3(colorValue: string): Color3 {
   // Finally, convert to linear RGB
   let r = +4.0767416621 * lCubed - 3.3077115913 * mCubed + 0.2309699292 * sCubed;
   let g = -1.2684380046 * lCubed + 2.6097574011 * mCubed - 0.3413193965 * sCubed;
-  let b = -0.0041960863 * lCubed - 0.7034186147 * mCubed + 1.7076147010 * sCubed;
+  let b = -0.0041960863 * lCubed - 0.7034186147 * mCubed + 1.707614701 * sCubed;
 
   // Apply gamma correction and clamp values
   r = Math.max(0, Math.min(1, r));

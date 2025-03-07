@@ -13,19 +13,17 @@ export const CountDown: React.FC = () => {
   }, []);
 
   useEffect(() => {
-      setAnimate(true);
-      setTimeout(() => setAnimate(false), 600);
+    setAnimate(true);
+    setTimeout(() => setAnimate(false), 600);
   }, [count]);
-
-
 
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <p
         className={`text-6xl relative font-bold text-white bg-black/10 
         ${count > 0 ? 'animate-ping' : ''}
-        ${animate ? "": ""}`}
-          data-score={count}
+        ${animate ? '' : ''}`}
+        data-score={count}
       >
         {count > 0 ? count : 'GO!'}
       </p>

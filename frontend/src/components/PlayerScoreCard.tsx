@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 interface PlayerCardProps {
   name: string;
@@ -11,14 +11,14 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ name, score, imageSrc, p
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-      setAnimate(true);
-      setTimeout(() => setAnimate(false), 300);
+    setAnimate(true);
+    setTimeout(() => setAnimate(false), 300);
   }, [score]);
 
   return (
     <div
       className={`player-scores w-full flex items-center glass-box overflow-hidden ${
-        player_num === 2 ? "flex-row-reverse" : ""
+        player_num === 2 ? 'flex-row-reverse' : ''
       }`}
     >
       {/* PLAYER AVATAR */}
@@ -32,18 +32,18 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ name, score, imageSrc, p
 
       {/* PLAYER NAME AND SCORE, MIRROR CONTENT IF PLAYER = PLAYER_2 */}
       <div
-          className={`flex relative w-full h-full px-5 items-center ${
-          player_num === 2 ? "flex-row-reverse" : ""
+        className={`flex relative w-full h-full px-5 items-center ${
+          player_num === 2 ? 'flex-row-reverse' : ''
         } justify-between`}
-        >
-      <h2 className="font-bold text-sm md:text-xl">{name}</h2>
-      <h2
-        className={`score font-bold text-xl md:text-3xl lg:text-6xl ${animate ? "glitch-active flicker text-white/90" : "text-primary"}`}
-        data-score={score}
       >
-        {score}
-      </h2>
-    </div>
+        <h2 className="font-bold text-sm md:text-xl">{name}</h2>
+        <h2
+          className={`score font-bold text-xl md:text-3xl lg:text-6xl ${animate ? 'glitch-active flicker text-white/90' : 'text-primary'}`}
+          data-score={score}
+        >
+          {score}
+        </h2>
+      </div>
     </div>
   );
 };

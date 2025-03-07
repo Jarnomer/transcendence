@@ -1,9 +1,15 @@
 import React, { useRef, useEffect } from 'react';
 
 import {
-  Engine, Scene, FreeCamera, HemisphericLight,
-  MeshBuilder, StandardMaterial,
-  Color3, Color4, Vector3
+  Engine,
+  Scene,
+  FreeCamera,
+  HemisphericLight,
+  MeshBuilder,
+  StandardMaterial,
+  Color3,
+  Color4,
+  Vector3,
 } from 'babylonjs';
 
 import { parseColor } from '../utils/colorConvertor';
@@ -64,51 +70,75 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const { primaryColor, secondaryColor, backgroundColor } = getThemeColors(theme);
 
     // Set scene background color
-    scene.clearColor = new Color4(
-      backgroundColor.r,
-      backgroundColor.g,
-      backgroundColor.b,
-      1
-    );
+    scene.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
 
     engineRef.current = engine;
     sceneRef.current = scene;
 
     // Setup camera
-    const camera = new FreeCamera("camera", new Vector3(0, 0, -24), scene);
+    const camera = new FreeCamera('camera', new Vector3(0, 0, -24), scene);
     camera.setTarget(Vector3.Zero());
     camera.detachControl();
 
     // Setup light
-    const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
+    const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
     light.intensity = 0.7;
 
     // Setup materials with your theme colors
-    const player1Material = new StandardMaterial("player1Mat", scene);
+    const player1Material = new StandardMaterial('player1Mat', scene);
     player1Material.diffuseColor = primaryColor;
-    player1Material.emissiveColor = new Color3(primaryColor.r * 0.5, primaryColor.g * 0.5, primaryColor.b * 0.5);
-    
-    const player2Material = new StandardMaterial("player2Mat", scene);
+    player1Material.emissiveColor = new Color3(
+      primaryColor.r * 0.5,
+      primaryColor.g * 0.5,
+      primaryColor.b * 0.5,
+    );
+
+    const player2Material = new StandardMaterial('player2Mat', scene);
     player2Material.diffuseColor = primaryColor;
-    player2Material.emissiveColor = new Color3(primaryColor.r * 0.5, primaryColor.g * 0.5, primaryColor.b * 0.5);
-    
-    const ballMaterial = new StandardMaterial("ballMat", scene);
+    player2Material.emissiveColor = new Color3(
+      primaryColor.r * 0.5,
+      primaryColor.g * 0.5,
+      primaryColor.b * 0.5,
+    );
+
+    const ballMaterial = new StandardMaterial('ballMat', scene);
     ballMaterial.diffuseColor = primaryColor;
-    ballMaterial.emissiveColor = new Color3(primaryColor.r * 0.7, primaryColor.g * 0.7, primaryColor.b * 0.7);
+    ballMaterial.emissiveColor = new Color3(
+      primaryColor.r * 0.7,
+      primaryColor.g * 0.7,
+      primaryColor.b * 0.7,
+    );
     ballMaterial.specularPower = 64;
 
     // Create paddles
-    player1Ref.current.mesh = MeshBuilder.CreateBox("paddle1", {
-      height: 4, width: 0.5, depth: 0.5
-    }, scene);
-    player2Ref.current.mesh = MeshBuilder.CreateBox("paddle2", {
-      height: 4, width: 0.5, depth: 0.5,
-    }, scene);
+    player1Ref.current.mesh = MeshBuilder.CreateBox(
+      'paddle1',
+      {
+        height: 4,
+        width: 0.5,
+        depth: 0.5,
+      },
+      scene,
+    );
+    player2Ref.current.mesh = MeshBuilder.CreateBox(
+      'paddle2',
+      {
+        height: 4,
+        width: 0.5,
+        depth: 0.5,
+      },
+      scene,
+    );
 
     // Create ball
-    ballRef.current.mesh = MeshBuilder.CreateSphere("ball", {
-      diameter: 0.8, segments: 16
-    }, scene);
+    ballRef.current.mesh = MeshBuilder.CreateSphere(
+      'ball',
+      {
+        diameter: 0.8,
+        segments: 16,
+      },
+      scene,
+    );
 
     // Position paddles
     player1Ref.current.mesh.position.x = -20;
@@ -130,10 +160,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     };
 
     // Add event listener for resize
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
-    return () => { // Cleanup
-      window.removeEventListener("resize", handleResize);
+    return () => {
+      // Cleanup
+      window.removeEventListener('resize', handleResize);
       engine.dispose();
       scene.dispose();
     };
@@ -141,32 +172,54 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
   // Apply theme change without recreating the scene
   useEffect(() => {
-    if (!sceneRef.current || !player1Ref.current.mesh || !player2Ref.current.mesh || !ballRef.current.mesh) return;
+    if (
+      !sceneRef.current ||
+      !player1Ref.current.mesh ||
+      !player2Ref.current.mesh ||
+      !ballRef.current.mesh
+    )
+      return;
 
     const { primaryColor, secondaryColor, backgroundColor } = getThemeColors(theme);
 
     // Update scene background
-    sceneRef.current.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
+    sceneRef.current.clearColor = new Color4(
+      backgroundColor.r,
+      backgroundColor.g,
+      backgroundColor.b,
+      1,
+    );
 
     // Update material colors
     if (player1Ref.current.mesh.material) {
       const material = player1Ref.current.mesh.material as StandardMaterial;
       material.diffuseColor = primaryColor;
-      material.emissiveColor = new Color3(primaryColor.r * 0.5, primaryColor.g * 0.5, primaryColor.b * 0.5);
+      material.emissiveColor = new Color3(
+        primaryColor.r * 0.5,
+        primaryColor.g * 0.5,
+        primaryColor.b * 0.5,
+      );
     }
 
     if (player2Ref.current.mesh.material) {
       const material = player2Ref.current.mesh.material as StandardMaterial;
       material.diffuseColor = primaryColor;
-      material.emissiveColor = new Color3(primaryColor.r * 0.5, primaryColor.g * 0.5, primaryColor.b * 0.5);
+      material.emissiveColor = new Color3(
+        primaryColor.r * 0.5,
+        primaryColor.g * 0.5,
+        primaryColor.b * 0.5,
+      );
     }
 
     if (ballRef.current.mesh.material) {
       const material = ballRef.current.mesh.material as StandardMaterial;
       material.diffuseColor = primaryColor;
-      material.emissiveColor = new Color3(primaryColor.r * 0.7, primaryColor.g * 0.7, primaryColor.b * 0.7);
+      material.emissiveColor = new Color3(
+        primaryColor.r * 0.7,
+        primaryColor.g * 0.7,
+        primaryColor.b * 0.7,
+      );
     }
-
   }, [theme]);
 
   // Handle position changes
@@ -187,7 +240,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     player2Ref.current.mesh.position.y = player2Y;
     ballRef.current.mesh.position.x = ballX;
     ballRef.current.mesh.position.y = ballY;
-
   }, [gameState]); // Runs whenever gameState changes
 
   // render component

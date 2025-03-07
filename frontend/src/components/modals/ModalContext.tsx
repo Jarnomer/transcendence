@@ -1,8 +1,7 @@
 // ModalContext.tsx
 import React, { createContext, useState, ReactNode, useContext } from 'react';
-import { SettingsModal } from "./SettingsModal";
+import { SettingsModal } from './SettingsModal';
 import { AuthModal } from './authModal';
-
 
 type ModalContextType = {
   isModalOpen: (modalName: string) => boolean;
@@ -15,7 +14,7 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 export const useModal = () => {
   const context = useContext(ModalContext);
   if (!context) {
-    throw new Error("useModal must be used within a ModalProvider");
+    throw new Error('useModal must be used within a ModalProvider');
   }
   return context;
 };
