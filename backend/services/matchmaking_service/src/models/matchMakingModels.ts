@@ -20,6 +20,23 @@ export class MatchMakingModel {
     }
   }
 
+  async getQueues(page: number, pageSize: number){
+    const offset = (page - 1) * pageSize;
+
+    const users = await this.db.all(
+      "SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      [pageSize, offset]
+    );
+
+    return users;
+  };
+
+  async getTotalQueues (){
+    const total = await this.db.get("SELECT COUNT(*) as total FROM users");
+    return total.total;
+  }
+
+
   async getStatusQueue(user_id: string) {
     return await this.db.get(`SELECT * FROM matchmaking_queue WHERE user_id = ? ORDER BY joined_at DESC LIMIT 1`, [user_id]);
   }

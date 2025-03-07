@@ -7,6 +7,7 @@ export async function matchMakingRoutes(fastify: FastifyInstance) {
   const matchMakingService = new MatchMakingService(fastify.db);
   const matchMakingController = new MatchMakingController(matchMakingService);
 
+  fastify.get("/all", matchMakingController.getQueues.bind(matchMakingController));
   fastify.get("/status/:user_id", matchMakingController.getStatusQueue.bind(matchMakingController));
   fastify.get("/enterQueue/:user_id", matchMakingController.enterQueue.bind(matchMakingController));
   fastify.get("/singlePlayer/:user_id", matchMakingController.singlePlayer.bind(matchMakingController));
