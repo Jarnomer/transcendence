@@ -19,26 +19,52 @@ export default class PongGame {
   private gameStatus: GameStatus;
   private updateInterval: NodeJS.Timeout|null = null;
 
+  private player1Id: string|null = null;
+  private player2Id: string|null = null;
+
+  private readyState = new Map<string, boolean>();
+
   private readonly MAX_SCORE: number = 5;
 
   constructor() {
     this.gameState = {
       players: {
-        player1: {
-          id: 'player1',
-          y: this.height / 2 - this.paddleHeight / 2,
-          score: 0
-        },
-        player2: {
-          id: 'player2',
-          y: this.height / 2 - this.paddleHeight / 2,
-          score: 0
-        }
+        player1: {id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0},
+        player2: {id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0}
       },
       ball: {x: 0, y: 0, dx: 0, dy: 0},
     };
     this.gameStatus = 'loading';
     this.resetBall();
+  }
+
+  addPlayer(playerId: string): void {
+    if (!this.player1Id) {
+      this.player1Id = playerId;
+      this.gameState.players.player1.id = playerId;
+      this.setReadyState('player1', false);
+    } else if (!this.player2Id) {
+      this.player2Id = playerId;
+      this.gameState.players.player2.id = playerId;
+      this.setReadyState('player2', false);
+    } else {
+      throw new Error('Cannot add more than 2 players');
+    }
+  }
+
+  setReadyState(playerId: string, state: boolean): void {
+    if (playerId === this.player1Id) {
+      this.readyState.set('player1', state);
+    } else if (playerId === this.player2Id) {
+      this.readyState.set('player2', state);
+    }
+    if (this.areAllPlayersReady()) {
+      this.startCountdown();
+    }
+  }
+
+  areAllPlayersReady(): boolean {
+    return Array.from(this.readyState.values()).every((val) => val);
   }
 
   getGameStatus(): GameStatus {
@@ -55,6 +81,14 @@ export default class PongGame {
   }
   getPaddleHeight() {
     return this.paddleHeight;
+  }
+
+  getPlayerId(player: number): string|null {
+    if (player === 1) {
+      return this.player1Id;
+    } else {
+      return this.player2Id;
+    }
   }
 
   private resetBall(): void {
@@ -78,7 +112,15 @@ export default class PongGame {
   }
 
   startCountdown(): void {
+    if (!this.areAllPlayersReady()) {
+      console.warn('Cannot start countdown — not all players are ready.');
+      return;
+    }
+
     this.setGameStatus('countdown');
+    this.resetBall();
+    this.resetPaddles();
+
     setTimeout(() => {
       this.setGameStatus('playing');
       this.startGameLoop();
@@ -150,18 +192,14 @@ export default class PongGame {
       if (players.player2.score >= this.MAX_SCORE) {
         this.stopGame();
       } else {
-        this.resetBall();
-        this.resetPaddles();
-        this.startCountdown();
+        this.setGameStatus('waiting');
       }
     } else if (ball.x + this.ballSize >= this.width) {
       players.player1.score++;
       if (players.player1.score >= this.MAX_SCORE) {
         this.stopGame();
       } else {
-        this.resetBall();
-        this.resetPaddles();
-        this.startCountdown();
+        this.setGameStatus('waiting');
       }
     }
   }

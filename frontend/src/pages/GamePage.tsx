@@ -23,6 +23,11 @@ export const GamePage: React.FC = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
 
+  const playerScores = useRef({
+    player1Score: gameState.players.player1?.score || 0,
+    player2Score: gameState.players.player2?.score || 0,
+  });
+
   // Reference to store the interval for queue polling
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -162,7 +167,7 @@ export const GamePage: React.FC = () => {
       {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' ? (
         <>
           <div className="h-[10%] flex justify-between items-center">
-            <PlayerScoreBoard gameState={gameState} />
+            <PlayerScoreBoard gameState={gameState} playerScores={playerScores} />
           </div>
           <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
