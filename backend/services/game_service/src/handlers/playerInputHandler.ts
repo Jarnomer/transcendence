@@ -16,7 +16,7 @@ export const handlePlayerInputMessage = (
       }
       break;
 
-    // Add other handlers here and function below
+    // Add other handlers here and create a function below
 
     default:
       console.warn(`Unknown player input action: ${message.action}`);

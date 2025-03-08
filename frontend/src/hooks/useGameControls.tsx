@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useWebSocketContext } from '../services/WebSocketContext';
-import { createMoveInputMessage } from "@shared/messages";
+import { createMoveInputMessage } from '@shared/messages';
 
 interface UseGameControlsProps {
   localPlayerId?: string;
   remotePlayerId?: string;
 }
 
-const useGameControls = ({ 
-  localPlayerId = "player1", 
-  remotePlayerId = "player2" 
+const useGameControls = ({
+  localPlayerId = 'player1',
+  remotePlayerId = 'player2',
 }: UseGameControlsProps = {}) => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
 
   useEffect(() => {
-
-    console.log("localPlayerId:", localPlayerId, "| remotePlayerId:", remotePlayerId);
+    console.log('localPlayerId:', localPlayerId, '| remotePlayerId:', remotePlayerId);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent default actions during gameplay
@@ -24,7 +23,7 @@ const useGameControls = ({
         e.preventDefault();
       }
 
-      setKeysPressed(prev => {
+      setKeysPressed((prev) => {
         if (!prev[e.key]) {
           // If key wasn't already pressed
           return { ...prev, [e.key]: true };
@@ -34,35 +33,35 @@ const useGameControls = ({
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      setKeysPressed(prev => ({ ...prev, [e.key]: false }));
+      setKeysPressed((prev) => ({ ...prev, [e.key]: false }));
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
 
   // Control loop with fixed interval timer
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (keysPressed["w"]) {
-        sendMessage(createMoveInputMessage(localPlayerId, "up"));
+      if (keysPressed['w']) {
+        sendMessage(createMoveInputMessage(localPlayerId, 'up'));
       }
 
-      if (keysPressed["s"]) {
-        sendMessage(createMoveInputMessage(localPlayerId, "down"));
+      if (keysPressed['s']) {
+        sendMessage(createMoveInputMessage(localPlayerId, 'down'));
       }
 
-      if (remotePlayerId && keysPressed["ArrowUp"]) {
-        sendMessage(createMoveInputMessage(remotePlayerId, "up"));
+      if (remotePlayerId && keysPressed['ArrowUp']) {
+        sendMessage(createMoveInputMessage(remotePlayerId, 'up'));
       }
 
-      if (remotePlayerId && keysPressed["ArrowDown"]) {
-        sendMessage(createMoveInputMessage(remotePlayerId, "down"));
+      if (remotePlayerId && keysPressed['ArrowDown']) {
+        sendMessage(createMoveInputMessage(remotePlayerId, 'down'));
       }
     }, 1000 / 60); // 60fps
 

@@ -73,13 +73,8 @@ export class PongGameSession {
   handleMessage(playerId: string, message: string): void {
     try {
       const data = JSON.parse(message);
-
-      // Use the standardized player input handler for new message format
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
-      } else if (data.type === 'move') {
-        // Legacy support for old format
-        this.handlePlayerMove(playerId, data.move);
       }
     } catch (error) {
       console.error('Invalid WebSocket message:', error);
@@ -121,7 +116,7 @@ export class PongGameSession {
     const updatedState = this.game.updateGameState({});
     this.broadcast({ type: 'game_state', state: updatedState });
 
-    // Broadcast if game status (countdown, playing, finished, etc.) changed
+    // Broadcast game status (countdown, playing, finished, ...) changes
     const updatedGameStatus = this.game.getGameStatus();
     if (updatedGameStatus !== this.previousGameStatus) {
       this.broadcast({ type: 'game_status', state: updatedGameStatus });
@@ -143,7 +138,9 @@ export class PongGameSession {
 
   endGame(): void {
     if (this.isGameFinished) return; // Prevent recursive calls
-    this.isGameFinished = true; // Mark game as finished to prevent further calls
+
+    // Mark game as finished to prevent further calls
+    this.isGameFinished = true;
 
     this.game.stopGame();
     this.broadcast({ type: 'game_status', state: 'finished' });

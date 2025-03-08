@@ -16,7 +16,6 @@ export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
   const navigate = useNavigate();
 
-  // Queue and connection management state
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
@@ -27,27 +26,23 @@ export const GamePage: React.FC = () => {
     player2Score: gameState.players.player2?.score || 0,
   });
 
-  // Reference to store the interval for queue polling
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Get game mode and difficulty settings from router
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Log mode and difficulty when they change
   useEffect(() => {
     console.log('Mode:', mode, '| Difficulty:', difficulty, '| Status:', gameStatus);
-  }, [mode, difficulty]);
+  }, [mode, difficulty, gameStatus]);
 
-  // Retrieve user ID and set up game based on mode
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userID");
+    // Retrieve user ID and set up game based on mode
+    const storedUserId = localStorage.getItem('userID');
     setUserId(storedUserId);
-    
     if (mode === 'singleplayer') {
       // For singleplayer, create a game with AI opponent
       singlePlayer(difficulty).then((data) => {
-        console.log("Single player game ID:", data.game_id);
+        console.log('Single player game ID:', data.game_id);
         if (data.status === 'created') {
           setGameId(data.game_id);
         }
@@ -55,46 +50,43 @@ export const GamePage: React.FC = () => {
     } else {
       // For multiplayer, enter the matchmaking queue
       enterQueue().then((status) => {
-        console.log("Queue status:", status);
+        console.log('Queue status:', status);
       });
     }
   }, [mode, difficulty]);
 
-  // Determine player IDs based on game state and mode
   useEffect(() => {
+    // Set player IDs based on game state and mode
     if (mode === 'singleplayer') {
-      setLocalPlayerId(userId || 'player1');
-      setRemotePlayerId(null); // AI opponent, no remote player
+      setLocalPlayerId('player1');
+      setRemotePlayerId(null);
     } else if (mode === 'local') {
       setLocalPlayerId('player1');
-      setRemotePlayerId('player2'); // Local two-player mode
+      setRemotePlayerId('player2');
     } else if (gameState && gameState.players) {
       // Online multiplayer - determine which player the user is
       const isPlayer1 = userId === gameState.players.player1.id;
       setLocalPlayerId(isPlayer1 ? 'player1' : 'player2');
-      setRemotePlayerId(null); // In online mode, we only control our own paddle
+      // In online game, we only control our own paddle
+      setRemotePlayerId(null);
     }
   }, [mode, gameState, userId]);
 
-  // Poll for queue status in multiplayer mode
   useEffect(() => {
-    // Only start polling in multiplayer mode when we have a user ID
-    console.log("User ID:", userId);
-    console.log("Mode:", mode);
+    // Only start multiplayer polling when we have a user ID
+    console.log('User ID:', userId, 'Mode:', mode);
     if (!userId || mode === 'singleplayer') return;
 
-    // Clear any existing interval before setting a new one
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
-    // Set up polling interval
     intervalRef.current = setInterval(async () => {
       try {
         const status = await getQueueStatus();
-        if (status === "matched") {
+        if (status === 'matched') {
           const data = await getGameID();
-          console.log("Matched! Game ID:", data.game_id);
+          console.log('Matched! Game ID:', data.game_id);
           setGameId(data.game_id);
           // Stop polling when matched
           if (intervalRef.current) {
@@ -103,11 +95,10 @@ export const GamePage: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error("Error checking queue:", error);
+        console.error('Error checking queue:', error);
       }
     }, 2000); // Poll every 2 seconds
 
-    // Clear interval on unmount or when dependencies change
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -116,20 +107,28 @@ export const GamePage: React.FC = () => {
     };
   }, [userId, mode, gameId]);
 
-  // Set up WebSocket URL when gameId is available
   useEffect(() => {
     if (!gameId) return;
-    const token = localStorage.getItem("token");
 
-    // Construct WebSocket URL with all necessary parameters
-    const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
+    // Set up WebSocket URL when gameId is available
+    const token = localStorage.getItem('token');
+    const baseUrl = `wss://${window.location.host}/ws/remote/game/`;
+
+    const params = new URLSearchParams();
+    params.append('token', token || '');
+    params.append('game_id', gameId);
+    params.append('mode', mode || '');
+    params.append('difficulty', difficulty || '');
+
+    const url = `${baseUrl}?${params.toString()}`;
+
     setUrl(url);
-  }, [gameId, mode, difficulty]);
+  }, [gameId, mode, difficulty, setUrl]);
 
-  // Set up game controls with determined player IDs
-  useGameControls({ 
-    localPlayerId: localPlayerId || 'player1', 
-    remotePlayerId
+  useGameControls({
+    // Set up game controls with player IDs
+    localPlayerId: localPlayerId || 'player1',
+    remotePlayerId,
   });
 
   useEffect(() => {
@@ -149,7 +148,7 @@ export const GamePage: React.FC = () => {
         winnerId,
         loserId,
         gameState.players.player1.score,
-        gameState.players.player2.score,
+        gameState.players.player2.score
       ).then((data) => {
         console.log('Result submitted:', data);
         dispatch({ type: 'GAME_RESET' });
@@ -158,7 +157,6 @@ export const GamePage: React.FC = () => {
     }
   }, [gameStatus, gameId]);
 
-  // Returns status message based on current game state
   const getStatusMessage = () => {
     if (connectionStatus !== 'connected') {
       return `Connection: ${connectionStatus}`;
@@ -175,8 +173,6 @@ export const GamePage: React.FC = () => {
 
   // TODO: Reconnection handler
   // TODO: Pause - Resume
-
-  // render component
 
   return (
     <div id="game-page" className="h-full w-full p-10 pt-0 flex flex-col overflow-hidden">
