@@ -1,5 +1,5 @@
 import fastify, { FastifyRequest, FastifyReply } from 'fastify';
-import { MatchMakingService } from "../services/matchMakingServices";
+import { MatchMakingService } from '../services/matchMakingServices';
 import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 export class MatchMakingController {
   private matchMakingService: MatchMakingService;
@@ -34,7 +34,7 @@ export class MatchMakingController {
     request.log.trace(`Getting user ${user_id}`);
     const queue = await this.matchMakingService.getStatusQueue(user_id);
     if (!queue) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
     reply.code(200).send({ status: queue.status });
   }
@@ -70,7 +70,7 @@ export class MatchMakingController {
     request.log.trace(`Getting game for user ${user_id}`);
     const game = await this.matchMakingService.getGameID(user_id);
     if (!game) {
-      throw new NotFoundError("Game not found");
+      throw new NotFoundError('Game not found');
     }
     reply.code(200).send({ game_id: game.game_id });
   }
@@ -87,9 +87,9 @@ export class MatchMakingController {
     request.log.trace(`Canceling user ${user_id}`);
     const user = await this.matchMakingService.cancelQueue(user_id);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
-    reply.code(200).send({status: 'canceled'});
+    reply.code(200).send({ status: 'canceled' });
   }
 
   /**
@@ -100,9 +100,30 @@ export class MatchMakingController {
    * @throws DatabaseError if game not updated
    */
   async resultGame(request: FastifyRequest, reply: FastifyReply) {
-    const { game_id, winner_id,loser_id, player1_score, player2_score } = request.body as { game_id: string, winner_id: string,loser_id:string, player1_score: number, player2_score: number };
+    const { game_id, winner_id, loser_id, player1_score, player2_score } = request.body as {
+      game_id: string;
+      winner_id: string;
+      loser_id: string;
+      player1_score: number;
+      player2_score: number;
+    };
     request.log.trace(`Updating result for game ${game_id}`);
-    const result = await this.matchMakingService.resultGame(game_id, winner_id,loser_id, player1_score, player2_score);
+    const result = await this.matchMakingService.resultGame(
+      game_id,
+      winner_id,
+      loser_id,
+      player1_score,
+      player2_score
+    );
     reply.code(200).send({ status: 'completed' });
   }
+
+  // async localGame(request: FastifyRequest, reply: FastifyReply) {
+  //   const { user_id } = request.params as { user_id: string };
+  //   request.log.trace(`Creating local game for user ${user_id}`);
+
+  //   // Create a game immediately without waiting for a match
+  //   const game = await this.matchMakingService.createLocalGame(user_id);
+  //   reply.code(200).send({ status: 'created', game_id: game.game_id });
+  // }
 }
