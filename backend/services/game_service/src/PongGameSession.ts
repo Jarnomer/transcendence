@@ -34,12 +34,14 @@ export class PongGameSession {
 
   addClient(playerId: string, connection: any): void {
     this.clients.set(playerId, connection);
+    this.game.addPlayer(playerId);
+
+    // remove these when implementing player ready in frontend
+    this.game.setReadyState(playerId, true); // DELETE
+    this.checkAndStartGame(); // DELETE
 
     connection.on('message', (message: string) => this.handleMessage(playerId, message));
     connection.on('close', () => this.removeClient(playerId));
-
-    // Automatically start when correct number of players connected
-    this.checkAndStartGame();
   }
 
   removeClient(playerId: string): void {
@@ -51,12 +53,12 @@ export class PongGameSession {
     }
   }
 
+  private areAllPlayersConnected(): boolean {
+    return this.mode === 'singleplayer' || this.mode === 'local' || this.clients.size === 2;
+  }
+
   private checkAndStartGame(): void {
-    if (
-      this.mode === 'singleplayer' ||
-      (this.mode === 'local' && this.clients.size === 1) ||
-      (this.mode !== 'singleplayer' && this.clients.size === 2)
-    ) {
+    if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
       this.game.startCountdown();
       this.broadcast({ type: 'game_status', state: 'countdown' });
       this.startGameLoop();
@@ -76,6 +78,12 @@ export class PongGameSession {
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
       }
+      // if (data.type === 'move') {
+      //   this.handlePlayerMove(playerId, data.move);
+      // } else if (data.type === 'player_ready') {
+      //   this.game.setReadyState(playerId, data.state);
+      //   this.checkAndStartGame();
+      // }
     } catch (error) {
       console.error('Invalid WebSocket message:', error);
     }
@@ -108,7 +116,34 @@ export class PongGameSession {
     this.broadcast({ type: 'game_state', state: updatedState });
   }
 
+  // handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
+  //   const moves: Record<string, 'up' | 'down' | null> = { player1: null, player2: null };
+
+  //   const player1Id = this.game.getPlayerId(1);
+  //   const player2Id = this.game.getPlayerId(2);
+
+  //   if (this.mode === 'singleplayer') {
+  //     if (playerId === player1Id) moves.player1 = move;
+  //   } else {
+  //     if (playerId === player1Id) moves.player1 = move;
+  //     if (playerId === player2Id) moves.player2 = move;
+  //   }
+
+  //   const updatedState = this.game.updateGameState(moves);
+  //   this.broadcast({ type: 'game_state', state: updatedState });
+  // }
+
   updateGame(): void {
+    // remove this when implementing player ready in frontend
+    if (
+      this.areAllPlayersConnected() && // DELETE
+      this.game.getGameStatus() === 'waiting'
+    ) {
+      // DELETE
+      this.game.setReadyState('player1', true); // DELETE
+      this.game.setReadyState('player2', true); // DELETE
+    }
+
     if (this.aiController) {
       this.handleAIMove();
     }

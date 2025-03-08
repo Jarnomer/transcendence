@@ -1,5 +1,6 @@
-import PongGameSession from "./PongGameSession";
 import '@fastify/websocket';
+
+import PongGameSession from './PongGameSession';
 
 export class GameManager {
   private sessions: Record<string, PongGameSession>;
@@ -10,7 +11,9 @@ export class GameManager {
 
   createGame(gameId: string, mode: string, difficulty: string): void {
     console.log(`Creating game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
-    this.sessions[gameId] = new PongGameSession(gameId, mode, difficulty, () => this.endGame(gameId));
+    this.sessions[gameId] = new PongGameSession(gameId, mode, difficulty, () =>
+      this.endGame(gameId)
+    );
     // this.sessions[gameId].startGame();
   }
 
@@ -21,9 +24,9 @@ export class GameManager {
       return;
     }
     if (this.sessions[gameId].getClientCount() === 1) {
-    this.sessions[gameId].addClient("player2", connection);
+      this.sessions[gameId].addClient('foo', connection);
     } else {
-    this.sessions[gameId].addClient("player1", connection);
+      this.sessions[gameId].addClient('bar', connection);
     }
   }
 
