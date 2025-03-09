@@ -71,8 +71,9 @@ const start = async () => {
     app.register(matchMakingService, { prefix: '/api' }); // Register matchmaking routes inside the plugin
     app.register(remoteService, { prefix: '/ws/remote' }); // Register remote routes inside the plugin
 
-    await app.listen({ port: Number(process.env.PORT) || 8000, host: '0.0.0.0' });
-    app.log.info(`Server is running on port ${process.env.PORT || 8000}`);
+    await app.listen({ port: Number(process.env.BACKEND_PORT) || 8000, host: '0.0.0.0' });
+    app.log.info(`Server running on port ${process.env.BACKEND_PORT || 8000}`);
+    console.log(`Server running on port ${process.env.BACKEND_PORT || 8000}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

@@ -21,24 +21,17 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             nodejs_22
-            sqlite
+            nodePackages.pnpm
           ];
           shellHook = ''
-            echo "Launching development shell..."
-            echo "Using node version: `${pkgs.nodejs_22}/bin/node -v`"
-            if [ ! -d "node_modules" ]; then
-              if [ ! -f "package.json" ]; then
-                echo "Initializing package.json..."
-                npm init -y
-              fi
-              echo "Installing dependencies..."
-              npm install > /dev/null 2>&1
-            else
-              echo "All dependencies installed!"
+            echo "Transcendence dev shell loaded!"
+            if [ ! -f pnpm-lock.yaml ]; then
+              echo "Initializing pnpm..."
+              pnpm install --no-frozen-lockfile
             fi
             echo "Creating containers..."
             make all > /dev/null 2>&1
-            trap 'make clean' EXIT
+            trap 'make fclean' EXIT
           '';
         };
       }

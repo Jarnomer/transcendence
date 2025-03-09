@@ -1,17 +1,15 @@
-# Logs
-logs
-*.log*
-
-./backend/database/uploads/
-
-node_modules
+# Build output
+build
 dist
 dist-ssr
-*.local
 
-# Editor directories and files
+# Dependencies
+node_modules
+
+# Editor artifacts
 .vscode/*
 !.vscode/extensions.json
+*.local
 .idea
 .direnv
 .DS_Store
@@ -22,10 +20,15 @@ dist-ssr
 *.sw?
 
 # Database
+backend/database/uploads/*
+!backend/database/uploads/default_avatar.png
 *.db
 
-# Other Files
+# Logs
+logs
+*.log*
+
+# File extesions
 *.txt
 *.pdf
 *.bak
-

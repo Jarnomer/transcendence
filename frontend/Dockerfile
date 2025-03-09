@@ -1,13 +1,17 @@
 FROM node:22-slim
 
-#RUN apt-get update && apt-get install -y passwd
 WORKDIR /app
-COPY . /app
 
-#RUN useradd -m appuser
-#RUN chown -R appuser:appuser /app/
-#USER appuser
+RUN npm install -g pnpm@latest-10
 
-RUN npm install
+ENV CI=true
 
-CMD ["npm", "run", "dev", "--", "--host"]
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
+COPY frontend/package.json ./frontend/
+COPY shared ./shared/
+
+RUN pnpm install --frozen-lockfile
+
+COPY frontend ./frontend/
+
+CMD ["pnpm", "run", "dev:frontend", "--", "--host"]

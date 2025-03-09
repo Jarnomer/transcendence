@@ -1,4 +1,18 @@
 {
+  "name": "transcendence",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pong Web App",
+  "scripts": {
+    "dev": "pnpm -r run dev",
+    "dev:frontend": "pnpm --filter frontend run dev",
+    "dev:backend": "pnpm --filter backend run dev",
+    "build": "pnpm -r run build",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,html}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,html}\"",
+    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --fix",
+    "lint:check": "eslint \"**/*.{ts,tsx,js,jsx}\""
+  },
   "devDependencies": {
     "prettier": "^3.2.5",
     "eslint": "^8.57.0",
@@ -9,10 +23,10 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0"
   },
-  "scripts": {
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,html}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,html}\"",
-    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --fix",
-    "lint:check": "eslint \"**/*.{ts,tsx,js,jsx}\""
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt",
+      "sqlite3"
+    ]
   }
 }
