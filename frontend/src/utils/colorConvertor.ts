@@ -86,8 +86,10 @@ export function oklchToColor3(colorValue: string): Color3 {
   const sCubed = s * s * s;
 
   // Finally, convert to linear RGB
-  let r = +4.0767416621 * lCubed - 3.3077115913 * mCubed + 0.2309699292 * sCubed;
-  let g = -1.2684380046 * lCubed + 2.6097574011 * mCubed - 0.3413193965 * sCubed;
+  let r =
+    +4.0767416621 * lCubed - 3.3077115913 * mCubed + 0.2309699292 * sCubed;
+  let g =
+    -1.2684380046 * lCubed + 2.6097574011 * mCubed - 0.3413193965 * sCubed;
   let b = -0.0041960863 * lCubed - 0.7034186147 * mCubed + 1.707614701 * sCubed;
 
   // Apply gamma correction and clamp values

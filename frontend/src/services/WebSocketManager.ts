@@ -64,7 +64,7 @@ class WebSocketManager {
   private scheduleReconnect() {
     this.reconnectAttempts++;
     console.log(
-      `Reconnecting attempt ${this.reconnectAttempts}/${WebSocketManager.MAX_RECONNECT_ATTEMPTS}`,
+      `Reconnecting attempt ${this.reconnectAttempts}/${WebSocketManager.MAX_RECONNECT_ATTEMPTS}`
     );
 
     if (this.reconnectTimer) {

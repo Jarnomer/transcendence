@@ -6,12 +6,12 @@ import { useWebSocketContext } from '../services/WebSocketContext';
  * @param wsRef - The WebSocket reference for connection
  */
 
-const useGameControls = (difficulty : string) => {
+const useGameControls = (difficulty: string) => {
   // Track which keys are currently being pressed during gameplay
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
-  const [playerId1, setPlayerId1] = useState<string | null>("player1");
-  const [playerId2, setPlayerId2] = useState<string | null>("player2");
+  const [playerId1, setPlayerId1] = useState<string | null>('player1');
+  const [playerId2, setPlayerId2] = useState<string | null>('player2');
 
   useEffect(() => {
     // Handle key press events
@@ -49,8 +49,8 @@ const useGameControls = (difficulty : string) => {
   // Control loop with fixed interval timer
   useEffect(() => {
     if (difficulty !== 'local') {
-      setPlayerId1(localStorage.getItem("UserID"));
-      setPlayerId2(localStorage.getItem("UserID"));
+      setPlayerId1(localStorage.getItem('UserID'));
+      setPlayerId2(localStorage.getItem('UserID'));
     }
     const intervalId = setInterval(() => {
       if (keysPressed['w']) {

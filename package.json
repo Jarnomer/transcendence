@@ -1,36 +1,32 @@
 {
-  "name": "transendence",
+  "name": "transcendence",
+  "private": true,
   "version": "1.0.0",
-  "description": "transendence",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Jarnomer/transcendence.git"
+  "description": "Pong Web App",
+  "scripts": {
+    "dev": "pnpm -r run dev",
+    "dev:frontend": "pnpm --filter frontend run dev",
+    "dev:backend": "pnpm --filter backend run dev",
+    "build": "pnpm -r run build",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,html}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,html}\"",
+    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --fix",
+    "lint:check": "eslint \"**/*.{ts,tsx,js,jsx}\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Jarnomer/transcendence/issues"
-  },
-  "homepage": "https://github.com/Jarnomer/transcendence#readme",
   "devDependencies": {
-    "@heroicons/react": "^2.2.0",
-    "@tailwindcss/vite": "^4.0.6",
-    "@types/react-router-dom": "^5.3.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "babylonjs": "^7.50.0",
-    "babylonjs-gui": "^7.50.0",
-    "fastify": "^5.2.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.2.0",
-    "sqlite3": "^5.1.7",
-    "tailwindcss": "^4.0.8",
-    "typescript": "^5.7.3",
-    "vite": "^6.2.0"
+    "prettier": "^3.2.5",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0"
   },
-  "dependencies": {
-    "react-spinners": "^0.15.0"
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt",
+      "sqlite3"
+    ]
   }
 }

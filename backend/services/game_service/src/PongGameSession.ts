@@ -1,6 +1,6 @@
-import {GameState, GameStatus} from '../../../../shared/gameTypes';
+import { GameState, GameStatus } from '../../../../shared/gameTypes';
 
-import {AIController} from './AIController';
+import { AIController } from './AIController';
 import PongGame from './PongGame';
 
 export class PongGameSession {
@@ -8,26 +8,23 @@ export class PongGameSession {
   private game: PongGame;
   private mode: string;
   private clients: Map<string, any>;
-  private aiController: AIController|null;
+  private aiController: AIController | null;
   private onEndCallback: () => void;
   private previousGameStatus: GameStatus;
-  private interval: NodeJS.Timeout|null = null;
+  private interval: NodeJS.Timeout | null = null;
   private isGameFinished: boolean = false;
 
-  constructor(
-      gameId: string, mode: string, difficulty: string,
-      onEndCallback: () => void) {
+  constructor(gameId: string, mode: string, difficulty: string, onEndCallback: () => void) {
     this.gameId = gameId;
     this.mode = mode;
-    this.clients = new Map();  // Now maps playerId -> connection
+    this.clients = new Map(); // Now maps playerId -> connection
     this.onEndCallback = onEndCallback;
 
     this.game = new PongGame();
     this.previousGameStatus = this.game.getGameStatus();
 
-    this.aiController = (mode === 'singleplayer') ?
-        new AIController(difficulty, this.game.getHeight()) :
-        null;
+    this.aiController =
+      mode === 'singleplayer' ? new AIController(difficulty, this.game.getHeight()) : null;
   }
 
   getClientCount(): number {
@@ -38,8 +35,7 @@ export class PongGameSession {
     this.clients.set(playerId, connection);
     this.game.addPlayer(playerId);
 
-    connection.on(
-        'message', (message: string) => this.handleMessage(playerId, message));
+    connection.on('message', (message: string) => this.handleMessage(playerId, message));
     connection.on('close', () => this.removeClient(playerId));
 
     // Automatically start when correct number of players connected
@@ -51,19 +47,21 @@ export class PongGameSession {
     if (this.clients.size === 0) {
       this.endGame();
     } else {
-      this.broadcast({type: 'game_status', state: 'waiting'});
+      this.broadcast({ type: 'game_status', state: 'waiting' });
     }
   }
 
   private checkAndStartGame(): void {
-    if ((this.mode === 'singleplayer' ||
-         this.mode === 'local' && this.clients.size === 1) ||
-        (this.mode !== 'singleplayer' && this.clients.size === 2)) {
+    if (
+      this.mode === 'singleplayer' ||
+      (this.mode === 'local' && this.clients.size === 1) ||
+      (this.mode !== 'singleplayer' && this.clients.size === 2)
+    ) {
       this.game.startCountdown();
-      this.broadcast({type: 'game_status', state: 'countdown'});
+      this.broadcast({ type: 'game_status', state: 'countdown' });
       this.startGameLoop();
     } else {
-      this.broadcast({type: 'game_status', state: 'waiting'});
+      this.broadcast({ type: 'game_status', state: 'waiting' });
     }
   }
 
@@ -84,9 +82,8 @@ export class PongGameSession {
     }
   }
 
-  handlePlayerMove(playerId: string, move: 'up'|'down'|null): void {
-    const moves:
-        Record<string, 'up'|'down'|null> = {player1: null, player2: null};
+  handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
+    const moves: Record<string, 'up' | 'down' | null> = { player1: null, player2: null };
 
     const player1Id = this.game.getPlayerId(1);
     const player2Id = this.game.getPlayerId(2);
@@ -99,7 +96,7 @@ export class PongGameSession {
     }
 
     const updatedState = this.game.updateGameState(moves);
-    this.broadcast({type: 'game_state', state: updatedState});
+    this.broadcast({ type: 'game_state', state: updatedState });
   }
 
   updateGame(): void {
@@ -108,12 +105,12 @@ export class PongGameSession {
     }
 
     const updatedState = this.game.updateGameState({});
-    this.broadcast({type: 'game_state', state: updatedState});
+    this.broadcast({ type: 'game_state', state: updatedState });
 
     // Broadcast if game status (countdown, playing, finished, etc.) changed
     const updatedGameStatus = this.game.getGameStatus();
     if (updatedGameStatus !== this.previousGameStatus) {
-      this.broadcast({type: 'game_status', state: updatedGameStatus});
+      this.broadcast({ type: 'game_status', state: updatedGameStatus });
       this.previousGameStatus = updatedGameStatus;
 
       if (updatedGameStatus === 'finished') {
@@ -131,12 +128,11 @@ export class PongGameSession {
   }
 
   endGame(): void {
-    if (this.isGameFinished) return;  // Prevent recursive calls
-    this.isGameFinished =
-        true;  // Mark game as finished to prevent further calls
+    if (this.isGameFinished) return; // Prevent recursive calls
+    this.isGameFinished = true; // Mark game as finished to prevent further calls
 
     this.game.stopGame();
-    this.broadcast({type: 'game_status', state: 'finished'});
+    this.broadcast({ type: 'game_status', state: 'finished' });
     this.onEndCallback();
   }
 
@@ -149,12 +145,16 @@ export class PongGameSession {
 
     if (this.aiController.shouldUpdate(ball.dx)) {
       this.aiController.updateAIState(
-          ball, aiPaddle, this.game.getHeight(), this.game.getPaddleHeight(),
-          paddleSpeed);
+        ball,
+        aiPaddle,
+        this.game.getHeight(),
+        this.game.getPaddleHeight(),
+        paddleSpeed
+      );
     }
 
     const aiMove = this.aiController.getNextMove();
-    this.game.updateGameState({player2: aiMove});
+    this.game.updateGameState({ player2: aiMove });
   }
 }
 

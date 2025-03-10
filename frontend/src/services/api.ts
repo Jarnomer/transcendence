@@ -43,7 +43,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
@@ -70,7 +70,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error); // Forward other errors
-  },
+  }
 );
 
 // Function to Refresh Token
@@ -78,7 +78,7 @@ export async function refreshToken(): Promise<string | null> {
   try {
     const response = await api.get<LoginResponse>(
       '/auth/refresh',
-      { withCredentials: true }, // Important for cookies
+      { withCredentials: true } // Important for cookies
     ); // Backend refresh route
     const newToken = response.data.token;
     localStorage.setItem('token', newToken);
@@ -117,19 +117,15 @@ export async function login(username: string, password: string) {
 }
 
 export async function register(username: string, password: string) {
-  try {
-    const res = await api.post<RegisterResponse>('/auth/register', {
-      username,
-      password,
-    });
-    if (res.status !== 201) {
-      throw new Error(`Registeration failed! Status: ${res.status}`);
-    }
-    console.log(res.data);
-    return res.data;
-  } catch (err) {
-    throw err;
+  const res = await api.post<RegisterResponse>('/auth/register', {
+    username,
+    password,
+  });
+  if (res.status !== 201) {
+    throw new Error(`Registeration failed! Status: ${res.status}`);
   }
+  console.log(res.data);
+  return res.data;
 }
 
 export async function enterQueue() {
@@ -184,7 +180,7 @@ export async function singlePlayer(difficulty: string) {
       throw new Error('User ID not found');
     }
     const res = await api.get<GameIDResponse>(
-      `/matchmaking/singlePlayer/${userID}?difficulty=${difficulty}`,
+      `/matchmaking/singlePlayer/${userID}?difficulty=${difficulty}`
     );
     console.log(res.data);
     return res.data;
@@ -232,7 +228,7 @@ export async function getUserImage() {
     }
     const res = await api.get(
       `/user/avatar/${userID}`,
-      { responseType: 'blob' }, // Important for binary data
+      { responseType: 'blob' } // Important for binary data
     );
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user image`);
@@ -249,7 +245,7 @@ export async function submitResult(
   winner_id: string,
   loser_id: string,
   player1_score: number,
-  player2_score: number,
+  player2_score: number
 ) {
   try {
     const res = await api.post(`/matchmaking/result`, {

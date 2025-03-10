@@ -9,7 +9,6 @@ import useGameControls from '../hooks/useGameControls';
 
 import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
 
-import { GameState } from '../../../shared/gameTypes';
 import { CountDown } from '../components/CountDown';
 
 import ClipLoader from 'react-spinners/ClipLoader';
@@ -62,8 +61,8 @@ export const GamePage: React.FC = () => {
     // Only start polling in multiplayer mode when we have a user ID
     const userId = localStorage.getItem('userID');
     setUserId(userId);
-    console.log("User ID:", userId);
-    console.log("Mode:", mode);
+    console.log('User ID:', userId);
+    console.log('Mode:', mode);
     if (!userId || mode === 'singleplayer' || difficulty === 'local') return;
 
     // Clear any existing interval before setting a new one
@@ -116,19 +115,27 @@ export const GamePage: React.FC = () => {
       console.log('Game Over');
       const winnerId =
         gameState.players.player1.score > gameState.players.player2.score
-          ? (gameState.players.player1.id ? gameState.players.player1.id : difficulty) 
-          : (gameState.players.player2.id ? gameState.players.player2.id : difficulty);
+          ? gameState.players.player1.id
+            ? gameState.players.player1.id
+            : difficulty
+          : gameState.players.player2.id
+            ? gameState.players.player2.id
+            : difficulty;
       const loserId =
         gameState.players.player1.score < gameState.players.player2.score
-          ? (gameState.players.player1.id ? gameState.players.player1.id : difficulty)
-          : (gameState.players.player2.id ? gameState.players.player2.id : difficulty);
-      
+          ? gameState.players.player1.id
+            ? gameState.players.player1.id
+            : difficulty
+          : gameState.players.player2.id
+            ? gameState.players.player2.id
+            : difficulty;
+
       submitResult(
         gameId,
         winnerId,
         loserId,
         gameState.players.player1.score,
-        gameState.players.player2.score,
+        gameState.players.player2.score
       ).then((data) => {
         console.log('Result submitted:', data);
         dispatch({ type: 'GAME_RESET' });

@@ -20,10 +20,10 @@ import { WebSocketProvider } from './services/WebSocketContext.tsx';
 
 export const IsLoggedInContext = React.createContext<
   | {
-    isLoggedIn: boolean;
-    setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-    logout: () => void;
-  }
+      isLoggedIn: boolean;
+      setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+      logout: () => void;
+    }
   | undefined
 >(undefined);
 

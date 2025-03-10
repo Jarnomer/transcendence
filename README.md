@@ -18,20 +18,20 @@
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| In this major module, you are required to use a specific web framework for backend development: `Fastify` with `Node.js`. |   ❌   |
+| In this major module, you are required to use a specific web framework for backend development: `Fastify` with `Node.js`. |   ✅   |
 
 ## 🏆 Major Module [2/7] : User Management
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| Users can securely subscribe to the website.                           |   ❌   |
-| Registered users can securely log in.                                  |   ❌   |
-| Users can select a unique display name to participate in tournaments.  |   ❌   |
-| Users can update their information.                                    |   ❌   |
-| Users can upload an avatar, with a default option if none is provided. |   ❌   |
-| Users can add others as friends and view their online status.          |   ❌   |
-| User profiles display stats, such as wins and losses.                  |   ❌   |
-| Each user has a Match History including 1v1 games, dates, and relevant details, accessible to logged-in users. |   ❌   |
+| Users can securely subscribe to the website.                           |   ✅   |
+| Registered users can securely log in.                                  |   ✅   |
+| Users can select a unique display name to participate in tournaments.  |   ✅   |
+| Users can update their information.                                    |   ✅   |
+| Users can upload an avatar, with a default option if none is provided. |   ✅   |
+| Users can add others as friends and view their online status.          |   ⌛️   |
+| User profiles display stats, such as wins and losses.                  |   ⌛️   |
+| Each user has a Match History including 1v1 games, dates, and relevant details, accessible to logged-in users. |   ⌛️   |
 
 ## 🏆 Major Module [3/7] : Server-Side Pong
 
@@ -76,9 +76,9 @@
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| Advanced 3D Graphics: The primary goal of this module is to implement advanced 3D graphics techniques to elevate the visual quality of the Pong game. By utilizing Babylon.js , the goal is to create stunning visual effects that immerse players in the gaming environment. |   ❌   |
-| Immersive Gameplay: The incorporation of advanced 3D techniques enhances the overall gameplay experience by providing users with a visually engaging and captivating Pong game. |   ❌   |
-| Technology Integration: The chosen technology for this module is Babylon.js. These tools will be used to create the 3D graphics, ensuring compatibility and optimal performance. |   ❌   |
+| Advanced 3D Graphics: The primary goal of this module is to implement advanced 3D graphics techniques to elevate the visual quality of the Pong game. By utilizing Babylon.js , the goal is to create stunning visual effects that immerse players in the gaming environment. |   ⌛️   |
+| Immersive Gameplay: The incorporation of advanced 3D techniques enhances the overall gameplay experience by providing users with a visually engaging and captivating Pong game. |   ⌛️   |
+| Technology Integration: The chosen technology for this module is Babylon.js. These tools will be used to create the 3D graphics, ensuring compatibility and optimal performance. |   ✅   |
 
 ## 🏆 Major Module [8/7] : Microservices
 
@@ -93,13 +93,13 @@
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. |   ❌   |
+| Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. |   ✅   |
 
 ## 🏅 Minor Module [9/7] : Backend database
 
 | Task                                                                   | Status |
 |------------------------------------------------------------------------|--------|
-| The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. |   ❌   |
+| The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. |   ✅   |
 
 ## 🏅 Minor Module [9.5/7] : Device Support
 

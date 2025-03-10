@@ -1,5 +1,3 @@
-// THIS IS STILL KEPT HERE UNTIL @SHARED/TYPES IS FULLY INTEGRATED
-
 export interface Player {
   id: string;
   y: number;

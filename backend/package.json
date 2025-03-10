@@ -9,14 +9,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "bcrypt",
-      "sqlite3"
-    ]
-  },
-  "workspaces": [
-    "services/*"
-  ]
+  "license": "ISC"
 }

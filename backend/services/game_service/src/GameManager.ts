@@ -10,10 +10,10 @@ export class GameManager {
   }
 
   createGame(gameId: string, mode: string, difficulty: string): void {
-    console.log(`Creating game ${gameId} with mode: "${
-        mode}" and difficulty: "${difficulty}"`);
-    this.sessions[gameId] = new PongGameSession(
-        gameId, mode, difficulty, () => this.endGame(gameId));
+    console.log(`Creating game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
+    this.sessions[gameId] = new PongGameSession(gameId, mode, difficulty, () =>
+      this.endGame(gameId)
+    );
     // this.sessions[gameId].startGame();
   }
 

@@ -8,9 +8,10 @@ import {
   useContext,
   useRef,
 } from 'react';
+
 import WebSocketManager from './WebSocketManager';
 import webSocketReducer from './WebSocketReducer';
-import { GameState, GameStatus } from '../../../shared/gameTypes';
+import { GameState, GameStatus } from '@shared/types';
 
 const WebSocketContext = createContext<any>(null);
 
@@ -84,7 +85,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         wsManager.sendMessage(message);
       }
     },
-    [wsManager],
+    [wsManager]
   );
 
   return (

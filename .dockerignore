@@ -1,0 +1,20 @@
+# Common build artifacts
+**/node_modules
+**/dist
+**/build
+**/.git
+**/.vscode
+**/.idea
+**/*.log
+**/.DS_Store
+
+# Backend specific
+backend/logs/*.log
+backend/database/data.db
+backend/database/uploads/*
+!backend/database/uploads/default_avatar.png
+
+# Frontend specific
+frontend/node_modules
+frontend/build
+frontend/dist

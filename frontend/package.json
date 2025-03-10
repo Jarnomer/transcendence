@@ -1,13 +1,12 @@
 {
-  "name": "transcendence_frontend",
+  "name": "frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "format": "prettier --write './src/**/*.{ts,tsx,js,css,scss,md}'"
+    "preview": "vite preview"
   },
   "devDependencies": {
     "@types/node": "^22.13.8",
@@ -26,8 +25,8 @@
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.3.4",
     "axios": "^1.8.1",
-    "babylonjs": "^7.49.0",
-    "babylonjs-gui": "^7.49.0",
+    "babylonjs": "^7.50.0",
+    "babylonjs-gui": "^7.50.0",
     "jwt-decode": "^4.0.0",
     "node-vibrant": "^4.0.3",
     "react": "^19.0.0",

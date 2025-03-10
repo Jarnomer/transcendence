@@ -90,7 +90,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     player1Material.emissiveColor = new Color3(
       primaryColor.r * 0.5,
       primaryColor.g * 0.5,
-      primaryColor.b * 0.5,
+      primaryColor.b * 0.5
     );
 
     const player2Material = new StandardMaterial('player2Mat', scene);
@@ -98,7 +98,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     player2Material.emissiveColor = new Color3(
       primaryColor.r * 0.5,
       primaryColor.g * 0.5,
-      primaryColor.b * 0.5,
+      primaryColor.b * 0.5
     );
 
     const ballMaterial = new StandardMaterial('ballMat', scene);
@@ -106,7 +106,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballMaterial.emissiveColor = new Color3(
       primaryColor.r * 0.7,
       primaryColor.g * 0.7,
-      primaryColor.b * 0.7,
+      primaryColor.b * 0.7
     );
     ballMaterial.specularPower = 64;
 
@@ -118,7 +118,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         width: 0.5,
         depth: 0.5,
       },
-      scene,
+      scene
     );
     player2Ref.current.mesh = MeshBuilder.CreateBox(
       'paddle2',
@@ -127,7 +127,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         width: 0.5,
         depth: 0.5,
       },
-      scene,
+      scene
     );
 
     // Create ball
@@ -137,7 +137,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         diameter: 0.8,
         segments: 16,
       },
-      scene,
+      scene
     );
 
     // Position paddles
@@ -187,7 +187,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       backgroundColor.r,
       backgroundColor.g,
       backgroundColor.b,
-      1,
+      1
     );
 
     // Update material colors
@@ -197,7 +197,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
         primaryColor.g * 0.5,
-        primaryColor.b * 0.5,
+        primaryColor.b * 0.5
       );
     }
 
@@ -207,7 +207,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
         primaryColor.g * 0.5,
-        primaryColor.b * 0.5,
+        primaryColor.b * 0.5
       );
     }
 
@@ -217,7 +217,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       material.emissiveColor = new Color3(
         primaryColor.r * 0.7,
         primaryColor.g * 0.7,
-        primaryColor.b * 0.7,
+        primaryColor.b * 0.7
       );
     }
   }, [theme]);

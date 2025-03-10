@@ -65,14 +65,17 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     if (!userId) return;
-    getUserData(userId).then((data) => {
-      console.log('User dataaaa: ', user)
-      setUser(data);
-    }).catch((error) => {
-      console.error('Failed to fetch user data: ', error);
-    }).finally(() => {
-      setLoading(false)
-    });
+    getUserData(userId)
+      .then((data) => {
+        console.log('User dataaaa: ', user);
+        setUser(data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch user data: ', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -175,22 +178,25 @@ export const ProfilePage: React.FC = () => {
 
   const handleAcceptFriendClick = (event, sender_id: string) => {
     event.stopPropagation();
-    acceptFriendRequest(sender_id).then(() => {
-      console.log('Friend request accepted');
-    }).catch((error) => {
-      console.error('Failed to accept friend request: ', error)
-    });
-  }
+    acceptFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request accepted');
+      })
+      .catch((error) => {
+        console.error('Failed to accept friend request: ', error);
+      });
+  };
 
   const handleRejectFriendClick = (event, sender_id: string) => {
     event.stopPropagation();
-    rejectFriendRequest(sender_id).then(() => {
-      console.log('Friend request rejected');
-    }
-    ).catch((error) => {
-      console.error('Failed to reject friend request: ', error)
-    });
-  }
+    rejectFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request rejected');
+      })
+      .catch((error) => {
+        console.error('Failed to reject friend request: ', error);
+      });
+  };
 
   if (loading) {
     return <div className="text-center mt-10 text-lg">Loading...</div>;
@@ -348,38 +354,43 @@ export const ProfilePage: React.FC = () => {
               <h3 className="text-lg font-semibold">Friend Request</h3>
               <div className="flex flex-col gap-2 mt-2">
                 {user.friend_requests && user.friend_requests.length > 0 ? (
-                  user.friend_requests.filter(friend => friend.status === 'pending').map((friend: any) => (
-                    <div key={friend.user_id} className="flex items-center gap-3">
-                      <img
-                        className=" w-10 h-10 rounded-full"
-                        src={`https://localhost:8443/${friend.avatar_url}`}
-                        alt={friend.display_name}
-                      />
-                      <span className={`text-md font-medium ${friend.status === 'pending' ? 'text-red-500' : 'text-green-500'}`}>
-                      {friend.display_name}</span>
-                      {friend.status === 'pending' && (
-                        <>
-                          <NavIconButton
-                            id="accept-friend"
-                            icon="checkCircle"
-                            onClick={(event) => handleAcceptFriendClick(event, friend.user_id)}
-                          />
-                          <NavIconButton
-                            id="reject-friend"
-                            icon="xCircle"
-                            onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
-                          />
-                        </>
-                      )}
-                    </div>
-                  ))
+                  user.friend_requests
+                    .filter((friend) => friend.status === 'pending')
+                    .map((friend: any) => (
+                      <div key={friend.user_id} className="flex items-center gap-3">
+                        <img
+                          className=" w-10 h-10 rounded-full"
+                          src={`https://localhost:8443/${friend.avatar_url}`}
+                          alt={friend.display_name}
+                        />
+                        <span
+                          className={`text-md font-medium ${friend.status === 'pending' ? 'text-red-500' : 'text-green-500'}`}
+                        >
+                          {friend.display_name}
+                        </span>
+                        {friend.status === 'pending' && (
+                          <>
+                            <NavIconButton
+                              id="accept-friend"
+                              icon="checkCircle"
+                              onClick={(event) => handleAcceptFriendClick(event, friend.user_id)}
+                            />
+                            <NavIconButton
+                              id="reject-friend"
+                              icon="xCircle"
+                              onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
+                            />
+                          </>
+                        )}
+                      </div>
+                    ))
                 ) : (
                   <p className="text-gray-400">No friend request yet</p>
                 )}
-                </div>
-                <h3 className="text-lg font-semibold">Friends</h3>
+              </div>
+              <h3 className="text-lg font-semibold">Friends</h3>
 
-                <div className="flex flex-col gap-2 mt-2">
+              <div className="flex flex-col gap-2 mt-2">
                 {user.friends && user.friends.length > 0 ? (
                   user.friends.map((friend: any) => (
                     <div key={friend.user_id} className="flex items-center gap-3">
@@ -388,8 +399,9 @@ export const ProfilePage: React.FC = () => {
                         src={`https://localhost:8443/${friend.avatar_url}`}
                         alt={friend.display_name}
                       />
-                      <span className='text-md font-medium text-green-500'>
-                      {friend.display_name}</span>
+                      <span className="text-md font-medium text-green-500">
+                        {friend.display_name}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -397,7 +409,6 @@ export const ProfilePage: React.FC = () => {
                 )}
               </div>
             </div>
-            
 
             {/* Match History */}
             <div className="w-full min-h-full max-w-md p-4 glass-box">
@@ -411,14 +422,34 @@ export const ProfilePage: React.FC = () => {
                 {user.games && user.games.length > 0 ? (
                   user.games.map((game: any) => (
                     <div key={game.game_id} className="flex items-center gap-3">
-                      <span className={game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'}>
+                      <span
+                        className={
+                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
+                        }
+                      >
                         {game.winner.user_id === user.user_id ? 'Victory' : 'Defeat'}
                       </span>
-                      <span className={game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'}>
-                        {game.winner.user_id === user.user_id ? (!game.loser.display_name ? game.loser.user_id : game.loser.display_name) : (!game.winner.display_name ? game.winner.user_id : game.winner.display_name)}
+                      <span
+                        className={
+                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
+                        }
+                      >
+                        {game.winner.user_id === user.user_id
+                          ? !game.loser.display_name
+                            ? game.loser.user_id
+                            : game.loser.display_name
+                          : !game.winner.display_name
+                            ? game.winner.user_id
+                            : game.winner.display_name}
                       </span>
-                      <span className={game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'}>
-                        {game.winner.user_id === user.user_id ? `${game.winner.score} - ${game.loser.score}` : `${game.loser.score} - ${game.winner.score}`}
+                      <span
+                        className={
+                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
+                        }
+                      >
+                        {game.winner.user_id === user.user_id
+                          ? `${game.winner.score} - ${game.loser.score}`
+                          : `${game.loser.score} - ${game.winner.score}`}
                       </span>
                       <span className="text-gray-500">{game.started_at}</span>
                     </div>
@@ -429,8 +460,7 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
-        )
-        }
+        )}
       </div>
     </>
   );

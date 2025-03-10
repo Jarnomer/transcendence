@@ -1,1 +1,3 @@
-export {GameManager} from './GameManager';
+import 'module-alias/register';
+
+export * from './GameManager';
