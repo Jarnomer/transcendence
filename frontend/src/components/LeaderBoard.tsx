@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { getUsers } from "../services/api";
+import React, { useState, useEffect } from 'react';
+import { getUsers } from '../services/api';
 
 export const LeaderBoard: React.FC = () => {
   const [users, setUsers] = useState<{ username: string; wins: number; losses: number }[]>([]);
@@ -17,7 +17,7 @@ export const LeaderBoard: React.FC = () => {
 
         setUsers(sortedUsers);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error('Error fetching users:', error);
       }
     }
 

@@ -1,8 +1,5 @@
 // OLD TS FILE. THESE FUNCTIONS ARE NOT CURRENTLY IN USE
 
-
-
-
 // import {
 //   Engine, Scene,
 //   MeshBuilder, StandardMaterial,

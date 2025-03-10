@@ -1,11 +1,11 @@
-import React, { useState, useContext } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { login, register } from "../../services/api.ts";
-import { ClippedButton } from "../wrappers/clippedButton";
-import { SVGModal } from "../wrappers/svgModal";
+import React, { useState, useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { login, register } from '../../services/api.ts';
+import { ClippedButton } from '../wrappers/clippedButton';
+import { SVGModal } from '../wrappers/svgModal';
 import { IsLoggedInContext } from '../../app.tsx';
 import { useModal } from './ModalContext';
-import { ModalWrapper } from "../wrappers/ModalWrapper.tsx";
+import { ModalWrapper } from '../wrappers/ModalWrapper.tsx';
 
 export const AuthModal: React.FC = () => {
   const navigate = useNavigate();
@@ -13,14 +13,14 @@ export const AuthModal: React.FC = () => {
   const { isLoggedIn, setIsLoggedIn } = useContext(IsLoggedInContext);
 
   const [isRegistering, setIsRegistering] = useState(false);
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const { isModalOpen, closeModal } = useModal();
 
-  if (!isModalOpen("authModal")) return null; // Don't render unless it's needed
+  if (!isModalOpen('authModal')) return null; // Don't render unless it's needed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +32,11 @@ export const AuthModal: React.FC = () => {
         await register(username, password);
         await login(username, password);
         setIsLoggedIn(true);
-        navigate("/gameMenu");
+        navigate('/gameMenu');
       } else {
         await login(username, password);
         setIsLoggedIn(true);
-        navigate("/gameMenu");
+        navigate('/gameMenu');
       }
     } catch (error: any) {
       setError(error.message);
@@ -48,7 +48,7 @@ export const AuthModal: React.FC = () => {
   const modalContent = (
     <div className="text-center">
       <h1 className="text-3xl mb-2 font-heading font-bold">
-        {isRegistering ? "Register" : "Login"}
+        {isRegistering ? 'Register' : 'Login'}
       </h1>
       {error && <p className="text-red-500">{error}</p>}
       <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
@@ -68,20 +68,22 @@ export const AuthModal: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <ClippedButton label={isRegistering ? "Register" : "Login"} type="submit" />
+        <ClippedButton label={isRegistering ? 'Register' : 'Login'} type="submit" />
       </form>
       <div className="text-center flex flex-col gap-2 mt-4">
-        <p>{isRegistering ? "Already have an account?" : "Don't have an account?"}</p>
-        <ClippedButton label={isRegistering ? "Go to Login" : "Register"} onClick={() => setIsRegistering(!isRegistering)} />
+        <p>{isRegistering ? 'Already have an account?' : "Don't have an account?"}</p>
+        <ClippedButton
+          label={isRegistering ? 'Go to Login' : 'Register'}
+          onClick={() => setIsRegistering(!isRegistering)}
+        />
         {!isRegistering && <ClippedButton label="Play as a guest" />}
       </div>
     </div>
   );
 
-
   return (
     <ModalWrapper>
       <SVGModal>{modalContent}</SVGModal>
     </ModalWrapper>
-  )
+  );
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 // Defining types for CreatorCard
 interface CreatorCardProps {
@@ -53,14 +53,20 @@ const CreatorCard: React.FC<CreatorCardProps> = ({ imagePath, name, role }) => {
   );
 };
 
-
-
-export const CreatorsPage: React.FC = () =>{
+export const CreatorsPage: React.FC = () => {
   const creators = [
-    { imagePath: "./src/assets/svg/olli_halftone.svg", name: "Olli", role: "Front-End" },
-    { imagePath: "./src/assets/svg/janrau_halftone.svg", name: "Janrau", role: "Back-End / User Management" },
-    { imagePath: "./src/assets/svg/lassi_halftone.svg", name: "Lassi", role: "Back-End / AI Opponent" },
-    { imagePath: "./src/assets/svg/jarno_halftone.svg", name: "Jarno", role: "3D / Microservices" },
+    { imagePath: './src/assets/svg/olli_halftone.svg', name: 'Olli', role: 'Front-End' },
+    {
+      imagePath: './src/assets/svg/janrau_halftone.svg',
+      name: 'Janrau',
+      role: 'Back-End / User Management',
+    },
+    {
+      imagePath: './src/assets/svg/lassi_halftone.svg',
+      name: 'Lassi',
+      role: 'Back-End / AI Opponent',
+    },
+    { imagePath: './src/assets/svg/jarno_halftone.svg', name: 'Jarno', role: '3D / Microservices' },
   ];
 
   return (
@@ -78,5 +84,3 @@ export const CreatorsPage: React.FC = () =>{
     </div>
   );
 };
-
-

@@ -30,8 +30,7 @@ export class MatchMakingService {
       if (existingGame) {
         throw new BadRequestError('Game already exists');
       }
-      await this.matchMakingModel.createGame(user_id, difficulty);
-      const game = await this.matchMakingModel.getGameByUserID(user_id, difficulty);
+      const game = await this.matchMakingModel.createGame(user_id, difficulty);
       if (!game) {
         throw new DatabaseError('Game not create');
       }
@@ -59,6 +58,9 @@ export class MatchMakingService {
       throw new NotFoundError('User not found in games');
     }
     const game = await this.matchMakingModel.getGameByUserID(user_id, user.matched_with);
+    if (!game) {
+      throw new NotFoundError('Game not found');
+    }
     return game;
   }
 
@@ -80,8 +82,7 @@ export class MatchMakingService {
       //await this.matchMakingModel.deleteQueueByUserID(waitingUser.user_id); // Remove waiting user from queue
       await this.matchMakingModel.updateQueue(user_id, waitingUser.user_id); // updates waiting user status to matched with user
       await this.matchMakingModel.createMatchedQueue(user_id, waitingUser.user_id); // insert user status as matched with waiting user
-      await this.matchMakingModel.createGame(user_id, waitingUser.user_id); // Create a new game
-      const game = await this.matchMakingModel.getGameByUserID(user_id, waitingUser.user_id);
+      const game = await this.matchMakingModel.createGame(user_id, waitingUser.user_id); // Create a new game
       if (!game) {
         throw new DatabaseError('Game not created');
       }
@@ -107,8 +108,8 @@ export class MatchMakingService {
   async resultGame(game_id: string, winner_id: string, loser_id: string, player1_score: number, player2_score: number) {
     console.log(game_id, winner_id, loser_id, player1_score, player2_score);
     const res = await this.matchMakingModel.updateGame(game_id, winner_id, loser_id, player1_score, player2_score);
-    if (res.changes === 0) {
-      throw new BadRequestError('Game not updated');
+    if (!res) {
+      throw new BadRequestError('Could not submit result');
     }
     return res;
   }

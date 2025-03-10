@@ -9,15 +9,23 @@ import useGameControls from '../hooks/useGameControls';
 
 import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
 
-import { GameState, GameStatus, GameEvent } from '../../../shared/gameTypes';
+import { GameState } from '../../../shared/gameTypes';
+import { CountDown } from '../components/CountDown';
+
+import ClipLoader from 'react-spinners/ClipLoader';
 
 export const GamePage: React.FC = () => {
-  const { setUrl, gameState, gameStatus, connectionStatus , dispatch} = useWebSocketContext();
+  const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
   const navigate = useNavigate();
 
   // Queue and connection management state
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
+
+  const playerScores = useRef({
+    player1Score: gameState.players.player1?.score || 0,
+    player2Score: gameState.players.player2?.score || 0,
+  });
 
   // Reference to store the interval for queue polling
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -28,7 +36,7 @@ export const GamePage: React.FC = () => {
 
   // Log mode and difficulty when they change
   useEffect(() => {
-    console.log("Mode:", mode, "Difficulty:", difficulty, "Status:", 1, "Event:", 1);
+    console.log('Mode:', mode, 'Difficulty:', difficulty, 'Status:', 1, 'Event:', 1);
   }, [mode, difficulty]);
 
   // Retrieve user ID and set up game based on mode
@@ -36,7 +44,7 @@ export const GamePage: React.FC = () => {
     if (mode === 'singleplayer' || difficulty === 'local') {
       // For singleplayer, create a game immediately with AI opponent
       singlePlayer(difficulty).then((data) => {
-        console.log("Single player game ID:", data.game_id);
+        console.log('Single player game ID:', data.game_id);
         if (data.status === 'created') {
           setGameId(data.game_id);
         }
@@ -44,7 +52,7 @@ export const GamePage: React.FC = () => {
     } else {
       // For multiplayer, enter the matchmaking queue
       enterQueue().then((status) => {
-        console.log("Queue status:", status);
+        console.log('Queue status:', status);
       });
     }
   }, [mode, difficulty]);
@@ -52,7 +60,7 @@ export const GamePage: React.FC = () => {
   // Poll for queue status in multiplayer mode
   useEffect(() => {
     // Only start polling in multiplayer mode when we have a user ID
-    const userId = localStorage.getItem("userID");
+    const userId = localStorage.getItem('userID');
     setUserId(userId);
     console.log("User ID:", userId);
     console.log("Mode:", mode);
@@ -67,9 +75,9 @@ export const GamePage: React.FC = () => {
     intervalRef.current = setInterval(async () => {
       try {
         const status = await getQueueStatus();
-        if (status === "matched") {
+        if (status === 'matched') {
           const data = await getGameID();
-          console.log("Matched! Game ID:", data.game_id);
+          console.log('Matched! Game ID:', data.game_id);
           setGameId(data.game_id);
           // Stop polling when matched
           if (intervalRef.current) {
@@ -78,7 +86,7 @@ export const GamePage: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error("Error checking queue:", error);
+        console.error('Error checking queue:', error);
       }
     }, 2000); // Poll every 2 seconds
 
@@ -89,29 +97,40 @@ export const GamePage: React.FC = () => {
         intervalRef.current = null;
       }
     };
-  }, [userId, mode, gameId]);
+  }, [userId, mode]);
 
   // Set up WebSocket URL when gameId is available
   useEffect(() => {
     if (!gameId) return;
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
 
     // Construct WebSocket URL with all necessary parameters
-    const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}`;
+    const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}&user_id=${userId}`;
     setUrl(url);
+  }, [gameId, mode, difficulty]);
 
-  }, [gameId, mode, difficulty, gameId]);
-
-  useGameControls(); // Set up game controls
+  useGameControls(difficulty); // Set up game controls
 
   useEffect(() => {
-    if (gameStatus === "finished" && gameId) {
-      console.log("Game Over");
-      const winnerId = gameState.players.player1.score > gameState.players.player2.score ? gameState.players.player1.id : gameState.players.player2.id;
-      const loserId = gameState.players.player1.score < gameState.players.player2.score ? gameState.players.player1.id : gameState.players.player2.id;
-      console.log("Scores:", gameState.players.player1.score, gameState.players.player2.score);
-      submitResult(gameId, winnerId,loserId, gameState.players.player1.score, gameState.players.player2.score).then((data) => {
-        console.log("Result submitted:", data);
+    if (gameStatus === 'finished' && gameId) {
+      console.log('Game Over');
+      const winnerId =
+        gameState.players.player1.score > gameState.players.player2.score
+          ? (gameState.players.player1.id ? gameState.players.player1.id : difficulty) 
+          : (gameState.players.player2.id ? gameState.players.player2.id : difficulty);
+      const loserId =
+        gameState.players.player1.score < gameState.players.player2.score
+          ? (gameState.players.player1.id ? gameState.players.player1.id : difficulty)
+          : (gameState.players.player2.id ? gameState.players.player2.id : difficulty);
+      
+      submitResult(
+        gameId,
+        winnerId,
+        loserId,
+        gameState.players.player1.score,
+        gameState.players.player2.score,
+      ).then((data) => {
+        console.log('Result submitted:', data);
         dispatch({ type: 'GAME_RESET' });
         navigate('/gameMenu');
       });
@@ -125,7 +144,7 @@ export const GamePage: React.FC = () => {
     }
 
     if (mode === 'singleplayer') {
-      return "Starting game...";
+      return 'Starting game...';
     }
 
     if (mode === '1v1') {
@@ -133,27 +152,39 @@ export const GamePage: React.FC = () => {
     }
   };
 
-  // TODO: Reconnection handler 
+  // TODO: Reconnection handler
   // TODO: Pause - Resume
 
   // render component
+
   return (
-    <div id="game-page" className="h-[50%] w-[80%] flex flex-col overflow-hidden">
-      <div className="h-[10%] flex justify-between items-center">
-        <PlayerScoreBoard gameState={gameState} />
-      </div>
-      <div className="w-full h-full overflow-hidden border-2 border-primary">
-        {(connectionStatus === 'connected' && gameState.gameStatus !== 'finished') ? (
-          <>
-            <p className="text-xs text-gray-500">Connection: {connectionStatus} | Game: {gameStatus}</p>
-            <GameCanvas gameState={gameState} />
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <p>{getStatusMessage()}</p>
+    <div id="game-page" className="h-full w-full p-10 pt-0 flex flex-col overflow-hidden">
+      {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' ? (
+        <>
+          <div className="h-[10%] flex justify-between items-center">
+            <PlayerScoreBoard gameState={gameState} playerScores={playerScores} />
           </div>
-        )}
-      </div>
+          <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
+            {/* RENDER COUNTDOWN CONDITIONALLY */}
+            {gameStatus === 'countdown' && <CountDown />}
+
+            <p className="text-xs text-gray-500">
+              Connection: {connectionStatus} | Game: {gameStatus}
+            </p>
+            <GameCanvas gameState={gameState} />
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full gap-4">
+          <p>{getStatusMessage()}</p>
+          <ClipLoader
+            color={'primary'}
+            size={50}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+        </div>
+      )}
     </div>
   );
 };

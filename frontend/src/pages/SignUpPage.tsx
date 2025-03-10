@@ -41,7 +41,7 @@ export const LoginPage: React.FC = () => {
       try {
         await login(username, password);
         setIsLoggedIn(true);
-        animatedNavigate(`/profile/${localStorage.getItem('userID')}`);
+        animatedNavigate('/gameMenu');
       } catch (error: any) {
         alert('Login failed!');
         setLoading(false);

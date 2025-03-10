@@ -20,7 +20,7 @@ export class MatchMakingModel {
     }
   }
 
-  async getQueues(page: number, pageSize: number){
+  async getQueues(page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
 
     const users = await this.db.all(
@@ -31,14 +31,15 @@ export class MatchMakingModel {
     return users;
   };
 
-  async getTotalQueues (){
+  async getTotalQueues() {
     const total = await this.db.get("SELECT COUNT(*) as total FROM users");
     return total.total;
   }
 
 
   async getStatusQueue(user_id: string) {
-    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE user_id = ? ORDER BY joined_at DESC LIMIT 1`, [user_id]);
+    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE user_id = ? ORDER BY joined_at DESC LIMIT 1`,
+      [user_id]);
   }
 
   async getActiveUser(user_id: string) {
@@ -47,7 +48,8 @@ export class MatchMakingModel {
   }
 
   async getWaitingUser(user_id: string) {
-    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE status = 'waiting' AND user_id != ? LIMIT 1`, [user_id]);
+    return await this.db.get(`SELECT * FROM matchmaking_queue WHERE status = 'waiting' AND user_id != ? LIMIT 1`,
+      [user_id]);
   }
 
   async getGameByUserID(user_id: string, waiting_user_id: string) {
@@ -59,29 +61,35 @@ export class MatchMakingModel {
 
   async createWaitingQueue(user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO matchmaking_queue (matchmaking_queue_id, user_id, status) VALUES (?, ?, 'waiting')`, [id, user_id]);
+    return await this.db.get(`INSERT INTO matchmaking_queue (matchmaking_queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,
+      [id, user_id]);
   }
 
   async createMatchedQueue(user_id: string, waiting_user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO matchmaking_queue (matchmaking_queue_id, user_id, matched_with, status) VALUES (?, ?, ?, 'matched')`, [id, user_id, waiting_user_id]);
+    return await this.db.get(`INSERT INTO matchmaking_queue (matchmaking_queue_id, user_id, matched_with, status) VALUES (?, ?, ?, 'matched') RETURNING *`,
+      [id, user_id, waiting_user_id]);
   }
 
   async updateQueue(user_id: string, waiting_user_id: string) {
-    return await this.db.run(`UPDATE matchmaking_queue SET status = 'matched' , matched_with = ? WHERE user_id = ?`, [user_id, waiting_user_id]);
+    return await this.db.get(`UPDATE matchmaking_queue SET status = 'matched' , matched_with = ? WHERE user_id = ? RETURNING *`,
+      [user_id, waiting_user_id]);
   }
 
   async createGame(user_id: string, waiting_user_id: string) {
     const id = uuidv4();
-    return await this.db.run(`INSERT INTO games (game_id, player1_id, player2_id) VALUES (?, ?, ?) RETURNING *`, [id, user_id, waiting_user_id]);
+    return await this.db.get(`INSERT INTO games (game_id, player1_id, player2_id) VALUES (?, ?, ?) RETURNING *`,
+      [id, user_id, waiting_user_id]);
   }
 
   async getOngoingGame(user_id: string, waiting_user_id: string) {
-    return await this.db.get(`SELECT * FROM games WHERE ((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)) AND status = 'ongoing'`, [user_id, waiting_user_id, waiting_user_id, user_id]);
+    return await this.db.get(`SELECT * FROM games WHERE ((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)) AND status = 'ongoing'`,
+      [user_id, waiting_user_id, waiting_user_id, user_id]);
   }
 
   async updateGame(game_id: string, winner_id: string, loser_id: string, player1_score: number, player2_score: number) {
-    return await this.db.run(`UPDATE games SET winner_id = ?,loser_id=?, player1_score = ?, player2_score = ?, status = 'completed' WHERE game_id = ?`, [winner_id, loser_id, player1_score, player2_score, game_id]);
+    return await this.db.get(`UPDATE games SET winner_id = ?,loser_id=?, player1_score = ?, player2_score = ?, status = 'completed' WHERE game_id = ? RETURNING *`,
+      [winner_id, loser_id, player1_score, player2_score, game_id]);
   }
 
   async deleteQueueByUserID(user_id: string) {

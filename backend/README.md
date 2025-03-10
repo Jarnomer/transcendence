@@ -6,6 +6,11 @@ A brief description of the API and example responses.
 
 https://localhost.com:8000/api
 
+## Notes/feature
+- jwt authentication refresh and access
+- type safe with typebox
+- 
+
 ## User Endpoints
 
 ### 1. Get a list of Pokémon, given limit and offset

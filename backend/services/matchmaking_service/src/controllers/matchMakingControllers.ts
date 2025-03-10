@@ -15,9 +15,9 @@ export class MatchMakingController {
    */
   async getQueues(request: FastifyRequest, reply: FastifyReply) {
     const { page, pageSize } = request.query as { page: number, pageSize: number };
-    request.log.trace(`Getting all users`);
+    request.log.trace(`Getting all users in queue`);
     const users = await this.matchMakingService.getQueues(page, pageSize);
-    reply.code(200).send({ users });
+    reply.code(200).send(users);
   }
 
   /**
@@ -67,7 +67,8 @@ export class MatchMakingController {
       reply.code(200).send({ status: 'waiting' });
     }
     request.log.trace(`status: ${queue.status}`);
-    reply.code(200).send({ game_id: queue.game_id });
+    console.log(queue);
+    reply.code(200).send({ status: queue.status });
   }
 
   /**

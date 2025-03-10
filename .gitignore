@@ -2,6 +2,8 @@
 logs
 *.log*
 
+./backend/database/uploads/
+
 node_modules
 dist
 dist-ssr
@@ -27,3 +29,4 @@ dist-ssr
 *.txt
 *.pdf
 *.bak
+
