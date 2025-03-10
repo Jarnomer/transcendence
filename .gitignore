@@ -8,8 +8,8 @@ node_modules
 
 # Editor artifacts
 .vscode/*
-!.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/settings.json
 *.local
 .idea
 .direnv
