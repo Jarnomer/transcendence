@@ -1,14 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
+
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import { CountDown, PlayerScoreBoard } from '@components';
-import GameCanvas from '../components/GameCanvas';
 
 import { useWebSocketContext } from '@services';
-import useGameControls from '../hooks/useGameControls';
 
-import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '../services/api';
+import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '@services/api';
+
+import GameCanvas from '../components/GameCanvas';
+import useGameControls from '../hooks/useGameControls';
 
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
