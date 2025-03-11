@@ -65,6 +65,7 @@ export class PongGameSession {
   }
 
   handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
+    if (this.game.getGameStatus() !== 'playing' || !this.areAllPlayersConnected()) return;
     const moves: Record<string, 'up' | 'down' | null> = {
       player1: null,
       player2: null,
