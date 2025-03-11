@@ -1,8 +1,8 @@
+import { getUserData } from '@services/api';
+import { GameState } from '@shared/types';
 import React, { useEffect, useRef } from 'react';
-import PlayerCard from './PlayerScoreCard';
-import { GameState } from '../../../shared/gameTypes';
-import { getUserData } from '../services/api';
 import { useLocation } from 'react-router-dom';
+import PlayerCard from './PlayerScoreCard';
 
 interface Player {
   name: string;

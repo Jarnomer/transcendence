@@ -90,7 +90,7 @@ export class PongGameSession {
     };
 
     if (this.mode === 'singleplayer') {
-      // Singleplayer - control both 'player1' and 'player2'
+      // Singleplayer - both key sets control the paddle
       if (playerId === 'player1' || playerId === 'player2') {
         moves.player1 = move;
       }
@@ -105,7 +105,7 @@ export class PongGameSession {
       const clientIds = Array.from(this.clients.keys());
 
       if (this.clients.size === 1) {
-        // Online mode (1vs1) - control both 'player1' and 'player2'
+        // Online mode (1vs1) - both key sets control the paddle
         const thisClientId = clientIds[0];
         const isPlayer1 = thisClientId === this.game.getPlayerId(1);
         if (isPlayer1) {
@@ -114,7 +114,7 @@ export class PongGameSession {
           moves.player2 = move;
         }
       } else {
-        // Multiplayer mode - Handle standard movements with multiple clients
+        // Multiplayer mode - Handle standard key sets with multiple clients
         if (
           playerId === 'player1' ||
           (this.clients.has(playerId) && Array.from(this.clients.keys())[0] === playerId)
@@ -132,6 +132,23 @@ export class PongGameSession {
     const updatedState = this.game.updateGameState(moves);
     this.broadcast({ type: 'game_state', state: updatedState });
   }
+
+  // handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
+  //   const moves: Record<string, 'up' | 'down' | null> = { player1: null, player2: null };
+
+  //   const player1Id = this.game.getPlayerId(1);
+  //   const player2Id = this.game.getPlayerId(2);
+
+  //   if (this.mode === 'singleplayer') {
+  //     if (playerId === player1Id) moves.player1 = move;
+  //   } else {
+  //     if (playerId === player1Id) moves.player1 = move;
+  //     if (playerId === player2Id) moves.player2 = move;
+  //   }
+
+  //   const updatedState = this.game.updateGameState(moves);
+  //   this.broadcast({ type: 'game_state', state: updatedState });
+  // }
 
   updateGame(): void {
     // remove this when implementing player ready in frontend

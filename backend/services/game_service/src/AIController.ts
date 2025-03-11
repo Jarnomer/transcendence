@@ -1,8 +1,7 @@
-import {Ball, Player} from '../../../../shared/gameTypes';
-
+import { Ball, Player } from '@shared/types';
 
 export class AIController {
-  private plannedMoves: ('up'|'down'|null)[] = [];
+  private plannedMoves: ('up' | 'down' | null)[] = [];
   private lastUpdateTime: number = 0;
   private difficulty: string;
   private lastBallDx: number = 0;
@@ -15,8 +14,12 @@ export class AIController {
   }
 
   updateAIState(
-      ball: Ball, aiPaddle: Player, gameHeight: number, paddleHeight: number,
-      paddleSpeed: number): void {
+    ball: Ball,
+    aiPaddle: Player,
+    gameHeight: number,
+    paddleHeight: number,
+    paddleSpeed: number
+  ): void {
     this.plannedMoves = [];
     const aiCenter = aiPaddle.y + paddleHeight / 2;
     const framesPerSecond = 60;
@@ -42,9 +45,8 @@ export class AIController {
     this.lastBallDx = ball.dx;
   }
 
-  getNextMove(): 'up'|'down'|null {
-    return this.plannedMoves.length > 0 ? this.plannedMoves.shift() || null :
-                                          null;
+  getNextMove(): 'up' | 'down' | null {
+    return this.plannedMoves.length > 0 ? this.plannedMoves.shift() || null : null;
   }
 
   shouldUpdate(ballDx: number): boolean {

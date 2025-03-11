@@ -1,36 +1,36 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    /* JavaScript Support */
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "skipLibCheck": true,
+    /* Frontend-specific options */
     "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "useDefineForClassFields": true,
 
-    /* Bundler mode */
+    /* Bundler mode for frontend */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    /* Path Resolution */
+    /* Frontend path aliases */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
+      "@components": ["./src/components"],
       "@components/*": ["./src/components/*"],
+      "@services": ["./src/services"],
       "@services/*": ["./src/services/*"],
+      "@hooks": ["./src/hooks"],
       "@hooks/*": ["./src/hooks/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@shared/*": ["../shared/*"]
+      "@shared": ["../shared"],
+      "@shared/*": ["../shared/*"],
+      "@utils": ["../shared/utils"],
+      "@utils/*": ["../shared/utils/*"],
+      "@types": ["../shared/types"],
+      "@types/*": ["../shared/types/*"],
+      "@messages": ["../shared/messages"],
+      "@messages/*": ["../shared/messages/*"],
     }
   },
   "include": ["src/**/*", "../shared/**/*"]

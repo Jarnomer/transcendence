@@ -13,7 +13,7 @@ import {
 } from 'babylonjs';
 
 import { GameState } from '@shared/types';
-import { parseColor } from '../utils/colorConvertor';
+import { parseColor } from '@shared/utils';
 
 interface GameCanvasProps {
   gameState: GameState;

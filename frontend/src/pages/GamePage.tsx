@@ -2,12 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader';
 
-import { CountDown } from '../components/CountDown';
+import { CountDown, PlayerScoreBoard } from '@components';
 import GameCanvas from '../components/GameCanvas';
-import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
 
+import { useWebSocketContext } from '@services';
 import useGameControls from '../hooks/useGameControls';
-import { useWebSocketContext } from '../services/WebSocketContext';
 
 import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '../services/api';
 
@@ -55,6 +54,8 @@ export const GamePage: React.FC = () => {
   }, [mode, difficulty]);
 
   useEffect(() => {
+    if (!gameState) return;
+
     // Set player IDs based on game state and mode
     if (mode === 'singleplayer') {
       setLocalPlayerId('player1');
@@ -63,10 +64,10 @@ export const GamePage: React.FC = () => {
       setLocalPlayerId('player1'); // Account holder uses W/S
       setRemotePlayerId('player2'); // Guest uses arrow keys
     } else if (gameState && gameState.players) {
-      // Online mode - determine which player the local user is
+      // Online mode (1vs1) - determine the local user
       const isPlayer1 = userId === gameState.players.player1.id;
       const playerRole = isPlayer1 ? 'player1' : 'player2';
-      // Online mode - both key sets control player paddle
+      // Multiplayer - both key sets control player paddle
       setLocalPlayerId(playerRole);
       setRemotePlayerId(playerRole);
     }

@@ -20,5 +20,6 @@ RUN pnpm install --frozen-lockfile
 
 COPY backend ./backend/
 COPY shared ./shared/
+COPY tsconfig.json ./
 
 CMD ["pnpm", "run", "dev:backend"]
