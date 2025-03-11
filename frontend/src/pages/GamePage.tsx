@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ClipLoader from 'react-spinners/ClipLoader';
 
-import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
-import GameCanvas from '../components/GameCanvas';
 import { CountDown } from '../components/CountDown';
+import GameCanvas from '../components/GameCanvas';
+import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
 
-import { useWebSocketContext } from '../services/WebSocketContext';
 import useGameControls from '../hooks/useGameControls';
+import { useWebSocketContext } from '../services/WebSocketContext';
 
-import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
-import { GameState, GameStatus, GameEvent } from '@shared/gameTypes';
+import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '../services/api';
 
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
@@ -59,16 +58,17 @@ export const GamePage: React.FC = () => {
     // Set player IDs based on game state and mode
     if (mode === 'singleplayer') {
       setLocalPlayerId('player1');
-      setRemotePlayerId(null);
+      setRemotePlayerId('player1');
     } else if (mode === 'local') {
-      setLocalPlayerId('player1');
-      setRemotePlayerId('player2');
+      setLocalPlayerId('player1'); // Account holder uses W/S
+      setRemotePlayerId('player2'); // Guest uses arrow keys
     } else if (gameState && gameState.players) {
-      // Online multiplayer - determine which player the user is
+      // Online mode - determine which player the local user is
       const isPlayer1 = userId === gameState.players.player1.id;
-      setLocalPlayerId(isPlayer1 ? 'player1' : 'player2');
-      // In online game, we only control our own paddle
-      setRemotePlayerId(null);
+      const playerRole = isPlayer1 ? 'player1' : 'player2';
+      // Online mode - both key sets control player paddle
+      setLocalPlayerId(playerRole);
+      setRemotePlayerId(playerRole);
     }
   }, [mode, gameState, userId]);
 

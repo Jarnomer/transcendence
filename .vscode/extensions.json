@@ -1,7 +1,35 @@
 {
+<<<<<<< HEAD
+  "recommendations": [
+    // Linting and formatting
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "EditorConfig.EditorConfig",
+
+    // Typescript
+    "ms-vscode.vscode-typescript-next",
+
+    // React
+    "dsznajder.es7-react-js-snippets",
+
+    // Intellisense
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense",
+
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",
+    "styled-components.vscode-styled-components",
+
+    // Utility
+    "yoavbls.pretty-ts-errors",
+    "mikestead.dotenv",
+  ]
+}
+=======
     "recommendations": [
       "dbaeumer.vscode-eslint",
       "esbenp.prettier-vscode",
       "editorconfig.editorconfig"
     ]
   }
+>>>>>>> d7b27e670f2de63763472decc85fc1add7ae87f4
