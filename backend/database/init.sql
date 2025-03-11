@@ -43,18 +43,18 @@ CREATE TABLE   IF NOT EXISTS notifications (
 );
 
 CREATE TABLE  IF NOT EXISTS friend_requests (
-  friend_request_id TEXT PRIMARY KEY,
   sender_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   receiver_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   status TEXT CHECK(status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
-  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (sender_id, receiver_id)
 );
 
 CREATE TABLE  IF NOT EXISTS friends (
-  user1_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-  user2_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  friend_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-  PRIMARY KEY (user1_id, user2_id) 
+  PRIMARY KEY (user_id, friend_id)
 );
 
 -- creates a table for rooms where users can chat
@@ -90,7 +90,6 @@ CREATE TABLE  IF NOT EXISTS message_reactions (
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='messages', content_rowid='id');
-
 
 CREATE TABLE  IF NOT EXISTS matchmaking_queue (
   matchmaking_queue_id TEXT PRIMARY KEY,
@@ -177,4 +176,25 @@ WHEN NEW.status = 'completed'
 BEGIN
   DELETE FROM matchmaking_queue
   WHERE user_id = NEW.player1_id OR user_id = NEW.player2_id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS update_queue_status_on_games_created
+AFTER INSERT ON games
+BEGIN
+  UPDATE matchmaking_queue
+  SET status = 'playing'
+  WHERE user_id = (NEW.player1_id OR user_id = NEW.player2_id) AND status = 'matched'; 
+END;
+
+--friend request trigger
+
+--trigger for inserting friend when friend request accepted
+CREATE TRIGGER IF NOT EXISTS insert_friend_on_friend_request_accepted
+AFTER UPDATE ON friend_requests
+WHEN NEW.status = 'accepted'
+BEGIN
+  INSERT INTO friends(user_id, friend_id)
+  VALUES (NEW.sender_id, NEW.receiver_id);
+  INSERT INTO friends(user_id, friend_id)
+  VALUES (NEW.receiver_id, NEW.sender_id);
 END;

@@ -41,6 +41,7 @@ export default class PongGame {
 
   addPlayer(playerId: string): void {
     if (!this.player1Id) {
+      console.log('Adding player1:', playerId);
       this.player1Id = playerId;
       this.gameState.players.player1.id = playerId;
       this.readyState.set('player1', false);
@@ -54,13 +55,20 @@ export default class PongGame {
   }
 
   setReadyState(playerId: string, state: boolean): void {
+    console.log('Setting ready state:', playerId, state);
+    console.log('player id', this.player1Id, this.player2Id);
     if (playerId === this.player1Id) {
+      console.log('Setting player1 ready state:', state);
       this.readyState.set('player1', state);
     } else if (playerId === this.player2Id) {
+      console.log('Setting player2 ready state:', state);
       this.readyState.set('player2', state);
     }
     if (this.areAllPlayersReady()) {
+      console.log('All players are ready!');
       this.startCountdown();
+    } else {
+      console.log('Not all players are ready');
     }
   }
 
@@ -119,7 +127,7 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
-
+    console.log('Starting countdown...');
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
@@ -133,7 +141,6 @@ export default class PongGame {
   startGameLoop(): void {
     // Prevent multiple intervals
     if (this.updateInterval) return;
-
     this.updateInterval = setInterval(() => {
       if (this.gameStatus === 'playing') {
         this.updateBall();

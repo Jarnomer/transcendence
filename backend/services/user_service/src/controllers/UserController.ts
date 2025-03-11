@@ -30,6 +30,24 @@ export class UserController {
   }
 
   /**
+   * Fetch user data by ID
+   * @param request get: user_id as path parameter
+   * @param reply 200 OK user_data : User data object
+   * @throws NotFoundError if user data not found
+   */
+
+  async getUserData(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.params as { user_id: string };
+    request.log.trace(`Getting user data ${user_id}`);
+    const userData = await this.userService.getUserData(user_id);
+    if (!userData) {
+      throw new NotFoundError("User data not found");
+    }
+    reply.code(200).send(userData);
+  }
+
+
+  /**
    * Fetch all users
    * @param request get
    * @param reply 200 OK users : Array of User objects
@@ -70,8 +88,7 @@ export class UserController {
     if (!user) {
       throw new NotFoundError("User not found");
     }
-    const updatedUser = await this.userService.getUserByID(user_id);
-    reply.code(200).send(updatedUser);
+    reply.code(200).send(user);
   }
 
   /**
@@ -106,7 +123,6 @@ export class UserController {
     if (!avatar) {
       throw new BadRequestError("No avatar provided");
     }
-
     const UPLOAD_DIR = path.normalize(process.env.UPLOAD_PATH || "./uploads");
     if (!fs.existsSync(UPLOAD_DIR)) {
       fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -123,7 +139,7 @@ export class UserController {
     if (!user) {
       throw new NotFoundError("User not found");
     }
-    const updatedUser = await this.userService.getUserByID(user_id);
-    reply.code(200).send(updatedUser);
+    reply.code(200).send(user);
   }
+
 }

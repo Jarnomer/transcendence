@@ -64,51 +64,68 @@ export class PongGameSession {
     }
   }
 
+  // handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
+  //   if (this.game.getGameStatus() !== 'playing' || !this.areAllPlayersConnected()) return;
+  //   const moves: Record<string, 'up' | 'down' | null> = {
+  //     player1: null,
+  //     player2: null,
+  //   };
+
+  //   if (this.mode === 'singleplayer') {
+  //     // Singleplayer - both key sets control the paddle
+  //     if (playerId === 'player1' || playerId === 'player2') {
+  //       moves.player1 = move;
+  //     }
+  //   } else if (this.mode === 'local') {
+  //     // Local mode - player1 -> W/S, player2 -> arrows
+  //     if (playerId === 'player1') {
+  //       moves.player1 = move;
+  //     } else if (playerId === 'player2') {
+  //       moves.player2 = move;
+  //     }
+  //   } else {
+  //     const clientIds = Array.from(this.clients.keys());
+
+  //     if (this.clients.size === 1) {
+  //       // Online mode (1vs1) - both key sets control the paddle
+  //       const thisClientId = clientIds[0];
+  //       const isPlayer1 = thisClientId === this.game.getPlayerId(1);
+  //       if (isPlayer1) {
+  //         moves.player1 = move;
+  //       } else {
+  //         moves.player2 = move;
+  //       }
+  //     } else {
+  //       // Multiplayer mode - Handle standard key sets with multiple clients
+  //       if (
+  //         playerId === 'player1' ||
+  //         (this.clients.has(playerId) && Array.from(this.clients.keys())[0] === playerId)
+  //       ) {
+  //         moves.player1 = move;
+  //       } else if (
+  //         playerId === 'player2' ||
+  //         (this.clients.has(playerId) && Array.from(this.clients.keys())[1] === playerId)
+  //       ) {
+  //         moves.player2 = move;
+  //       }
+  //     }
+  //   }
+
+  //   const updatedState = this.game.updateGameState(moves);
+  //   this.broadcast({ type: 'game_state', state: updatedState });
+  // }
+
   handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
-    if (this.game.getGameStatus() !== 'playing' || !this.areAllPlayersConnected()) return;
-    const moves: Record<string, 'up' | 'down' | null> = {
-      player1: null,
-      player2: null,
-    };
+    const moves: Record<string, 'up' | 'down' | null> = { player1: null, player2: null };
+
+    const player1Id = this.game.getPlayerId(1);
+    const player2Id = this.game.getPlayerId(2);
 
     if (this.mode === 'singleplayer') {
-      // Singleplayer - control both 'player1' and 'player2'
-      if (playerId === 'player1' || playerId === 'player2') {
-        moves.player1 = move;
-      }
-    } else if (this.mode === 'local') {
-      // Local mode - player1 -> W/S, player2 -> arrows
-      if (playerId === 'player1') {
-        moves.player1 = move;
-      } else if (playerId === 'player2') {
-        moves.player2 = move;
-      }
+      if (playerId === player1Id) moves.player1 = move;
     } else {
-      const clientIds = Array.from(this.clients.keys());
-
-      if (this.clients.size === 1) {
-        // Online mode (1vs1) - control both 'player1' and 'player2'
-        const thisClientId = clientIds[0];
-        const isPlayer1 = thisClientId === this.game.getPlayerId(1);
-        if (isPlayer1) {
-          moves.player1 = move;
-        } else {
-          moves.player2 = move;
-        }
-      } else {
-        // Multiplayer mode - Handle standard movements with multiple clients
-        if (
-          playerId === 'player1' ||
-          (this.clients.has(playerId) && Array.from(this.clients.keys())[0] === playerId)
-        ) {
-          moves.player1 = move;
-        } else if (
-          playerId === 'player2' ||
-          (this.clients.has(playerId) && Array.from(this.clients.keys())[1] === playerId)
-        ) {
-          moves.player2 = move;
-        }
-      }
+      if (playerId === player1Id) moves.player1 = move;
+      if (playerId === player2Id) moves.player2 = move;
     }
 
     const updatedState = this.game.updateGameState(moves);
@@ -122,7 +139,6 @@ export class PongGameSession {
 
     const updatedState = this.game.updateGameState({});
     this.broadcast({ type: 'game_state', state: updatedState });
-
     // Broadcast game status (countdown, playing, finished, ...)
     const updatedGameStatus = this.game.getGameStatus();
     if (updatedGameStatus !== this.previousGameStatus) {
@@ -172,6 +188,7 @@ export class PongGameSession {
 
   readyGame(playerId: string, state: boolean): void {
     this.game.setReadyState(playerId, state);
+    this.startGameLoop();
   }
 
   pauseGame(): void {
@@ -182,6 +199,11 @@ export class PongGameSession {
   resumeGame(): void {
     this.game.resumeGame();
     this.broadcast({ type: 'game_status', state: 'playing' });
+  }
+
+  private startGameLoop(): void {
+    this.updateGame();
+    this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }
 }
 

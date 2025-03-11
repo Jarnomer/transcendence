@@ -10,7 +10,7 @@ declare module 'fastify' {
 declare module 'fastify' {
   interface FastifyRequest {
     user: {
-      id: string;
+      user_id: string;
       username: string;
     };
   }
@@ -18,7 +18,7 @@ declare module 'fastify' {
 
 declare module 'fastify' {
   interface JwtPayload {
-    id: string;
+    user_id: string;
     username: string;
   } 
 }

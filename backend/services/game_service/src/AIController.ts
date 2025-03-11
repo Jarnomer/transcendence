@@ -1,4 +1,4 @@
-import { Ball, Player } from '../../../../shared/gameTypes';
+import { Ball, Player } from '@shared/types';
 
 export class AIController {
   private plannedMoves: ('up' | 'down' | null)[] = [];

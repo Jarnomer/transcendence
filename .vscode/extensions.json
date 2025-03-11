@@ -1,5 +1,5 @@
 {
-<<<<<<< HEAD
+
   "recommendations": [
     // Linting and formatting
     "dbaeumer.vscode-eslint",
@@ -25,11 +25,4 @@
     "mikestead.dotenv",
   ]
 }
-=======
-    "recommendations": [
-      "dbaeumer.vscode-eslint",
-      "esbenp.prettier-vscode",
-      "editorconfig.editorconfig"
-    ]
-  }
->>>>>>> d7b27e670f2de63763472decc85fc1add7ae87f4
+

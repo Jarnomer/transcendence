@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api, getUserData } from '../services/api.ts';
+import { acceptFriendRequest, api, getUserData, rejectFriendRequest } from '../services/api.ts';
 import { useParams } from 'react-router-dom';
 import { NavIconButton } from '../components/NavIconButton.tsx';
 import { SVGModal } from '../components/wrappers/svgModal.tsx';
@@ -51,9 +51,10 @@ export const ProfilePage: React.FC = () => {
 
   async function fetchData() {
     if (userId) {
+      console.log('Fetching user data for user ID: ', userId);
       const fetchedUser = await getUserData(userId);
-      console.log(fetchedUser);
       if (fetchedUser) {
+        console.log('Fetched user data: ', fetchedUser);
         setUser(fetchedUser);
       }
     } else {
@@ -63,8 +64,18 @@ export const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetchData();
-    setLoading(false);
+    if (!userId) return;
+    getUserData(userId)
+      .then((data) => {
+        console.log('User dataaaa: ', user);
+        setUser(data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch user data: ', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -140,7 +151,6 @@ export const ProfilePage: React.FC = () => {
     }
 
     setLoading(true);
-    console.log('form-data: ', formData);
     try {
       const res = await api.patch(`user/${userID}`, formData);
       if (res.status != 200) {
@@ -166,6 +176,28 @@ export const ProfilePage: React.FC = () => {
     console.log('Blocking user: ', user_id);
   };
 
+  const handleAcceptFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    acceptFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request accepted');
+      })
+      .catch((error) => {
+        console.error('Failed to accept friend request: ', error);
+      });
+  };
+
+  const handleRejectFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    rejectFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request rejected');
+      })
+      .catch((error) => {
+        console.error('Failed to reject friend request: ', error);
+      });
+  };
+
   if (loading) {
     return <div className="text-center mt-10 text-lg">Loading...</div>;
   }
@@ -173,10 +205,6 @@ export const ProfilePage: React.FC = () => {
   if (!user && !loading) {
     return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
   }
-
-  console.log('placing avatar: ', user.avatar_url);
-  console.log(user);
-  console.log('dominant color: ', dominantColor);
 
   return (
     <>
@@ -191,7 +219,7 @@ export const ProfilePage: React.FC = () => {
             <div className="rounded-full relative w-[150px] h-[150px] border-2 border-primary">
               {/* Profile Picture */}
               <img
-                className="object-cover rounded-full w-full h-full"
+                className="object-cover rounded-full w-full h-full z-10"
                 src={`https://localhost:8443/${user.avatar_url}`}
               />
 
@@ -274,103 +302,165 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {isOwnProfile ? (
-          editProfile ? (
-            <>
-              <div className="relative overflow-hidden">
-                <BackgroundGlow></BackgroundGlow>
-                <div id="edit-profile-content" className="relative overflow-hidden glass-box p-10">
-                  <h3 className="text-lg font-bold">Complete Your Profile</h3>
-                  <p className="text-sm text-gray-500">Please provide your missing information.</p>
-                  <div className="flex flex-col">
-                    <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-                      <input
-                        type="text"
-                        name="display_name"
-                        placeholder="Display Name *"
-                        value={formData.display_name}
-                        onChange={handleInputChange}
-                        className=" p-2 border rounded mt-2"
-                      />
-                      <input
-                        type="text"
-                        name="first_name"
-                        placeholder="First Name"
-                        value={formData.first_name}
-                        onChange={handleInputChange}
-                        className=" p-2 border rounded mt-2"
-                      />
-                      <input
-                        type="text"
-                        name="last_name"
-                        placeholder="Last Name"
-                        value={formData.last_name}
-                        onChange={handleInputChange}
-                        className=" p-2 border rounded mt-2"
-                      />
-                      <button
-                        onClick={handleSubmit}
-                        type={'submit'}
-                        className="mt-4  text-primary border-2 border-primary px-4 py-2 rounded"
-                      >
-                        Save
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="w-full flex gap-4 flex-col md:flex-row items-center justify-center text-center">
-              {/* Friends List */}
-              <div className="w-full max-w-md mt-6 p-4 glass-box">
-                <h3 className="text-lg font-semibold">Friends</h3>
-                <div className="flex flex-col gap-2 mt-2">
-                  {user.friends && user.friends.length > 0 ? (
-                    user.friends.map((friend: any) => (
-                      <div key={friend.user_id} className="flex items-center gap-3">
-                        <img
-                          src={friend.avatar_url}
-                          alt={friend.display_name}
-                          className="w-10 h-10 rounded-full"
-                        />
-                        <span className="text-md font-medium">{friend.display_name}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">No friends yet</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Match History */}
-              <div className="w-full min-h-full max-w-md p-4 glass-box">
-                <h3 className="text-lg font-semibold">Match History</h3>
-                {/* Stats */}
-                <div className="w-full text-center flex items-center justify-center gap-6 text-lg">
-                  <span className="font-semibold">Wins: {user.wins || 0}</span>
-                  <span className="font-semibold">Losses: {user.losses || 0}</span>
-                </div>
-                <div className="flex min-h-full flex-col gap-2 mt-2">
-                  {user.matchHistory && user.matchHistory.length > 0 ? (
-                    user.matchHistory.map((match: any) => (
-                      <div key={match.id} className="flex justify-between">
-                        <span>{match.opponent}</span>
-                        <span
-                          className={match.result === 'Win' ? 'text-green-500' : 'text-red-500'}
-                        >
-                          {match.result}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">No match history</p>
-                  )}
+        {editProfile ? (
+          <>
+            <div className="relative overflow-hidden">
+              <BackgroundGlow></BackgroundGlow>
+              <div id="edit-profile-content" className="relative overflow-hidden glass-box p-10">
+                <h3 className="text-lg font-bold">Complete Your Profile</h3>
+                <p className="text-sm text-gray-500">Please provide your missing information.</p>
+                <div className="flex flex-col">
+                  <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+                    <input
+                      type="text"
+                      name="display_name"
+                      placeholder="Display Name *"
+                      value={formData.display_name}
+                      onChange={handleInputChange}
+                      className=" p-2 border rounded mt-2"
+                    />
+                    <input
+                      type="text"
+                      name="first_name"
+                      placeholder="First Name"
+                      value={formData.first_name}
+                      onChange={handleInputChange}
+                      className=" p-2 border rounded mt-2"
+                    />
+                    <input
+                      type="text"
+                      name="last_name"
+                      placeholder="Last Name"
+                      value={formData.last_name}
+                      onChange={handleInputChange}
+                      className=" p-2 border rounded mt-2"
+                    />
+                    <button
+                      onClick={handleSubmit}
+                      type={'submit'}
+                      className="mt-4  text-primary border-2 border-primary px-4 py-2 rounded"
+                    >
+                      Save
+                    </button>
+                  </form>
                 </div>
               </div>
             </div>
-          )
-        ) : null}
+          </>
+        ) : (
+          <div className="w-full flex gap-4 flex-col md:flex-row items-top justify-center text-center">
+            {/* Friends List */}
+            <div className="w-full max-w-md p-4 glass-box">
+              <h3 className="text-lg font-semibold">Friend Request</h3>
+              <div className="flex flex-col gap-2 mt-2">
+                {user.friend_requests && user.friend_requests.length > 0 ? (
+                  user.friend_requests
+                    .filter((friend) => friend.status === 'pending')
+                    .map((friend: any) => (
+                      <div key={friend.user_id} className="flex items-center gap-3">
+                        <img
+                          className=" w-10 h-10 rounded-full"
+                          src={`https://localhost:8443/${friend.avatar_url}`}
+                          alt={friend.display_name}
+                        />
+                        <span
+                          className={`text-md font-medium ${friend.status === 'pending' ? 'text-red-500' : 'text-green-500'}`}
+                        >
+                          {friend.display_name}
+                        </span>
+                        {friend.status === 'pending' && (
+                          <>
+                            <NavIconButton
+                              id="accept-friend"
+                              icon="checkCircle"
+                              onClick={(event) => handleAcceptFriendClick(event, friend.user_id)}
+                            />
+                            <NavIconButton
+                              id="reject-friend"
+                              icon="xCircle"
+                              onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
+                            />
+                          </>
+                        )}
+                      </div>
+                    ))
+                ) : (
+                  <p className="text-gray-400">No friend request yet</p>
+                )}
+              </div>
+              <h3 className="text-lg font-semibold">Friends</h3>
+
+              <div className="flex flex-col gap-2 mt-2">
+                {user.friends && user.friends.length > 0 ? (
+                  user.friends.map((friend: any) => (
+                    <div key={friend.user_id} className="flex items-center gap-3">
+                      <img
+                        className=" w-10 h-10 rounded-full"
+                        src={`https://localhost:8443/${friend.avatar_url}`}
+                        alt={friend.display_name}
+                      />
+                      <span className="text-md font-medium text-green-500">
+                        {friend.display_name}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400">No friends yet</p>
+                )}
+              </div>
+            </div>
+
+            {/* Match History */}
+            <div className="w-full min-h-full max-w-md p-4 glass-box">
+              <h3 className="text-lg font-semibold">Match History</h3>
+              {/* Stats */}
+              <div className="w-full text-center flex items-center justify-center gap-6 text-lg">
+                <span className="font-semibold">Wins: {user.stats.wins}</span>
+                <span className="font-semibold">Losses: {user.stats.losses}</span>
+              </div>
+              <div className="flex min-h-full flex-col gap-2 mt-2">
+                {user.games && user.games.length > 0 ? (
+                  user.games.map((game: any) => (
+                    <div key={game.game_id} className="flex items-center gap-3">
+                      <span
+                        className={
+                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
+                        }
+                      >
+                        {game.winner.user_id === user.user_id ? 'Victory' : 'Defeat'}
+                      </span>
+                      <span
+                        className={
+                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
+                        }
+                      >
+                        {game.winner.user_id === user.user_id
+                          ? !game.loser.display_name
+                            ? game.loser.user_id
+                            : game.loser.display_name
+                          : !game.winner.display_name
+                            ? game.winner.user_id
+                            : game.winner.display_name}
+                      </span>
+                      <span
+                        className={
+                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
+                        }
+                      >
+                        {game.winner.user_id === user.user_id
+                          ? `${game.winner.score} - ${game.loser.score}`
+                          : `${game.loser.score} - ${game.winner.score}`}
+                      </span>
+                      <span className="text-gray-500">{game.started_at}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400">No match history</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

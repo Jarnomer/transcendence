@@ -17,16 +17,16 @@ export class GameManager {
     // this.sessions[gameId].startGame();
   }
 
-  addClient(gameId: string, connection: any): void {
+  addClient(gameId: string, userId: string, connection: any): void {
     if (!this.sessions[gameId]) {
       console.warn(`Tried to add client to non-existent game ${gameId}`);
       connection.close();
       return;
     }
     if (this.sessions[gameId].getClientCount() === 1) {
-      this.sessions[gameId].addClient('foo', connection);
+      this.sessions[gameId].addClient(userId, connection);
     } else {
-      this.sessions[gameId].addClient('bar', connection);
+      this.sessions[gameId].addClient(userId, connection);
     }
   }
 

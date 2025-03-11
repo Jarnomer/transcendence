@@ -10,20 +10,27 @@ import {
   PlayIcon,
   UserPlusIcon,
   NoSymbolIcon,
+  BellIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+
 } from '@heroicons/react/24/outline';
 
 interface NavIconButtonProps {
   id: string;
   icon:
-    | 'home'
-    | 'user'
-    | 'chat'
-    | 'settings'
-    | 'arrowLeft'
-    | 'close'
-    | 'play'
-    | 'addFriend'
-    | 'block';
+  | 'home'
+  | 'user'
+  | 'chat'
+  | 'settings'
+  | 'arrowLeft'
+  | 'close'
+  | 'play'
+  | 'addFriend'
+  | 'bell'
+  | 'checkCircle'
+  | 'xCircle'
+  | 'block';
   onClick: () => void;
 }
 
@@ -39,6 +46,9 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick 
     play: <PlayIcon className="w-6 h-6" />,
     addFriend: <UserPlusIcon className="w-6 h-6"></UserPlusIcon>,
     block: <NoSymbolIcon className="w-6 h-6"></NoSymbolIcon>,
+    bell: <BellIcon className="w-6 h-6"></BellIcon>,
+    checkCircle: <CheckCircleIcon className="w-6 h-6"></CheckCircleIcon>,
+    xCircle: <XCircleIcon className="w-6 h-6"></XCircleIcon>,
   };
 
   return (

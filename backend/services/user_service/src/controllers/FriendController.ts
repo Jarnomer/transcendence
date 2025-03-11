@@ -1,0 +1,120 @@
+import fastify, { FastifyRequest, FastifyReply } from 'fastify';
+import '@fastify/jwt';
+import { FriendService } from "../services/FriendService";
+import fs from 'fs';
+import path from 'path';
+import { pipeline } from 'stream/promises';
+import { NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError } from '@my-backend/main_server/src/middlewares/errors';
+
+export class FriendController {
+  private friendService: FriendService;
+
+  constructor(friendService: FriendService) {
+    this.friendService = friendService;
+  }
+
+  /**
+   * Send friend request to another user
+   * @param request post: receiver_id as body parameter
+   * @param reply 200 OK message : Friend request sent
+   * @throws NotFoundError if friend user not found
+   */
+  async sendFriendRequest(request: FastifyRequest, reply: FastifyReply) {
+    const { receiver_id } = request.body as { receiver_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Sending friend request to ${receiver_id}`);
+    const friendRequest = await this.friendService.sendFriendRequest(user_id, receiver_id);
+    if (!friendRequest) {
+      throw new NotFoundError("Friend user not found");
+    }
+    reply.code(200).send({ message: "Friend request sent" });
+  }
+
+  /**
+   * Get all sent friend requests
+   * @param request get
+   * @param reply 200 OK friend_requests : Array of FriendRequest objects
+   * @throws NotFoundError if no sent friend requests found
+   */
+
+  async getSentFriendRequests(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting sent friend requests for ${user_id}`);
+    const sentFriendRequests = await this.friendService.getSentFriendRequests(user_id);
+    if (sentFriendRequests.length === 0) {
+      throw new NotFoundError("No sent friend requests found");
+    }
+    reply.code(200).send(sentFriendRequests);
+  }
+
+  /**
+   * Get all received friend requests
+   * @param request get
+   * @param reply 200 OK friend_requests : Array of FriendRequest objects
+   * @throws NotFoundError if no received friend requests found
+   */
+
+  async getReceivedFriendRequests(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting received friend requests for ${user_id}`);
+    const receivedFriendRequests = await this.friendService.getReceivedFriendRequests(user_id);
+    if (receivedFriendRequests.length === 0) {
+      throw new NotFoundError("No received friend requests found");
+    }
+    reply.code(200).send(receivedFriendRequests);
+  }
+
+  /**
+   * Accept friend request from another user
+   * @param request post: receiver_id as path parameter
+   * @param reply 200 OK message : Friend request accepted
+   * @throws NotFoundError if friend user not found
+   */
+  async acceptFriendRequest(request: FastifyRequest, reply: FastifyReply) {
+    const { sender_id } = request.params as { sender_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Accepting friend request from ${sender_id}`);
+    const friendRequest = await this.friendService.acceptFriendRequest(user_id, sender_id);
+    if (!friendRequest) {
+      throw new NotFoundError("Friend user not found");
+    }
+    reply.code(200).send({ message: "Friend request accepted" });
+  }
+
+  /**
+   * Reject friend request from another user
+   * @param request post: receiver_id as path parameter
+   * @param reply 200 OK message : Friend request rejected
+   * @throws NotFoundError if friend user not found
+   */
+  async rejectFriendRequest(request: FastifyRequest, reply: FastifyReply) {
+    const { sender_id } = request.params as { sender_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Rejecting friend request from ${sender_id}`);
+    const friendRequest = await this.friendService.rejectFriendRequest(user_id, sender_id);
+    if (!friendRequest) {
+      throw new NotFoundError("Friend user not found");
+    }
+    reply.code(200).send({ message: "Friend request rejected" });
+
+  }
+
+  /**
+   * Cancel friend request to another user
+   * @param request delete: receiver_id as path parameter
+   * @param reply 204 OK message : Friend request cancelled
+   * @throws NotFoundError if friend user not found
+   */
+
+  async cancelFriendRequest(request: FastifyRequest, reply: FastifyReply) {
+    const { receiver_id } = request.params as { receiver_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Cancelling friend request to ${receiver_id}`);
+    const friendRequest = await this.friendService.cancelFriendRequest(user_id, receiver_id);
+    if (!friendRequest) {
+      throw new NotFoundError("Friend user not found");
+    }
+    reply.code(204).send({ message: "Friend request cancelled" });
+  }
+
+}

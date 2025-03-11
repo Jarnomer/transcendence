@@ -1,8 +1,8 @@
+import { getUserData } from '@services/api';
+import { GameState } from '@shared/types';
 import React, { useEffect, useRef } from 'react';
-import PlayerCard from './PlayerScoreCard';
-import { GameState } from '../../../shared/gameTypes';
-import { getUserData } from '../services/api';
 import { useLocation } from 'react-router-dom';
+import PlayerCard from './PlayerScoreCard';
 
 interface Player {
   name: string;
@@ -25,7 +25,9 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
+        console.log("gameState", gameState);
         if (gameState.players.player1?.id && !player1Ref.current) {
+          console.log("player1 gamestate", gameState.players.player1.id);
           const user1 = await getUserData(localStorage.getItem('userID'));
           if (user1) {
             player1Ref.current = { name: user1.display_name, avatar_url: user1.avatar_url };
@@ -44,6 +46,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
           player2Ref.current = { name: aiName, avatar_url: aiAvatar };
         } else {
           if (gameState.players.player2?.id && !player2Ref.current) {
+            console.log("player2 gamestate", gameState.players.player2.id);
             const user2 = await getUserData(gameState.players.player2.id);
             if (user2) {
               player2Ref.current = { name: user2.display_name, avatar_url: user2.avatar_url };
@@ -56,7 +59,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
     };
 
     fetchPlayers();
-  }, [gameState.players, mode, difficulty]);
+  }, [mode, difficulty]);
 
   // Assign scores to refs to prevent re-renders when score changes
   playerScores.current.player1Score = gameState.players.player1?.score || 0;

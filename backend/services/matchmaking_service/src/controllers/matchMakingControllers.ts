@@ -9,6 +9,18 @@ export class MatchMakingController {
   }
 
   /**
+   * get all users in the match making queue
+   * @param request get
+   * @param reply 200 OK { users: [user1, user2, ...] }
+   */
+  async getQueues(request: FastifyRequest, reply: FastifyReply) {
+    const { page, pageSize } = request.query as { page: number, pageSize: number };
+    request.log.trace(`Getting all users in queue`);
+    const users = await this.matchMakingService.getQueues(page, pageSize);
+    reply.code(200).send(users);
+  }
+
+  /**
    * create single player mode
    * @param request get: user_id as path parameter, difficulty as query parameter
    * @param reply 200 OK { status: 'created', game_id: game.id } if game created
@@ -55,7 +67,8 @@ export class MatchMakingController {
       reply.code(200).send({ status: 'waiting' });
     }
     request.log.trace(`status: ${queue.status}`);
-    reply.code(200).send({ game_id: queue.game_id });
+    console.log(queue);
+    reply.code(200).send({ status: queue.status });
   }
 
   /**

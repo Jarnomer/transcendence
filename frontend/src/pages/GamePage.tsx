@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
+
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import ClipLoader from 'react-spinners/ClipLoader';
 
-import { CountDown } from '../components/CountDown';
+import { CountDown, PlayerScoreBoard } from '@components';
+
+import { useWebSocketContext } from '@services';
+
+import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '@services/api';
+
 import GameCanvas from '../components/GameCanvas';
-import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
-
 import useGameControls from '../hooks/useGameControls';
-import { useWebSocketContext } from '../services/WebSocketContext';
-
-import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '../services/api';
 
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
@@ -55,20 +57,15 @@ export const GamePage: React.FC = () => {
   }, [mode, difficulty]);
 
   useEffect(() => {
+    if (!gameState) return;
+
     // Set player IDs based on game state and mode
     if (mode === 'singleplayer') {
-      setLocalPlayerId('player1');
-      setRemotePlayerId('player1');
+      setLocalPlayerId(userId);
+      setRemotePlayerId(userId);
     } else if (mode === 'local') {
       setLocalPlayerId('player1'); // Account holder uses W/S
       setRemotePlayerId('player2'); // Guest uses arrow keys
-    } else if (gameState && gameState.players) {
-      // Online mode - determine which player the local user is
-      const isPlayer1 = userId === gameState.players.player1.id;
-      const playerRole = isPlayer1 ? 'player1' : 'player2';
-      // Online mode - both key sets control player paddle
-      setLocalPlayerId(playerRole);
-      setRemotePlayerId(playerRole);
     }
   }, [mode, gameState, userId]);
 
@@ -119,6 +116,7 @@ export const GamePage: React.FC = () => {
     params.append('game_id', gameId);
     params.append('mode', mode || '');
     params.append('difficulty', difficulty || '');
+    params.append('user_id', userId || '');
 
     const url = `${baseUrl}?${params.toString()}`;
 

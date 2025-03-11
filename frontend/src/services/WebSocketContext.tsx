@@ -28,8 +28,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         player2: { id: 'player2', y: 0, score: 0 },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0 },
-      timeStamp: Date.now(),
-    },
+    }
   });
 
   const wsManager = useMemo(() => {
