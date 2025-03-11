@@ -13,5 +13,6 @@ COPY shared ./shared/
 RUN pnpm install --frozen-lockfile
 
 COPY frontend ./frontend/
+COPY tsconfig.json ./
 
 CMD ["pnpm", "run", "dev:frontend", "--", "--host"]

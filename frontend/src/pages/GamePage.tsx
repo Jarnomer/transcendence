@@ -1,47 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ClipLoader from 'react-spinners/ClipLoader';
 
-import { PlayerScoreBoard } from '../components/PlayerScoreBoard';
+import { CountDown, PlayerScoreBoard } from '@components';
 import GameCanvas from '../components/GameCanvas';
 
-import { useWebSocketContext } from '../services/WebSocketContext';
+import { useWebSocketContext } from '@services';
 import useGameControls from '../hooks/useGameControls';
 
-import { enterQueue, getQueueStatus, getGameID, singlePlayer, submitResult } from '../services/api';
-
-import { CountDown } from '../components/CountDown';
-
-import ClipLoader from 'react-spinners/ClipLoader';
+import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '../services/api';
 
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
   const navigate = useNavigate();
 
-  // Queue and connection management state
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
+  const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
+  const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
 
   const playerScores = useRef({
     player1Score: gameState.players.player1?.score || 0,
     player2Score: gameState.players.player2?.score || 0,
   });
 
-  // Reference to store the interval for queue polling
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Get game mode and difficulty settings from router
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Log mode and difficulty when they change
   useEffect(() => {
-    console.log('Mode:', mode, 'Difficulty:', difficulty, 'Status:', 1, 'Event:', 1);
-  }, [mode, difficulty]);
+    console.log('Mode:', mode, '| Difficulty:', difficulty, '| Status:', gameStatus);
+  }, [mode, difficulty, gameStatus]);
 
-  // Retrieve user ID and set up game based on mode
   useEffect(() => {
-    if (mode === 'singleplayer' || difficulty === 'local') {
-      // For singleplayer, create a game immediately with AI opponent
+    // Retrieve user ID and set up game based on mode
+    const storedUserId = localStorage.getItem('userID');
+    setUserId(storedUserId);
+    if (mode === 'singleplayer') {
+      // For singleplayer, create a game with AI opponent
       singlePlayer(difficulty).then((data) => {
         console.log('Single player game ID:', data.game_id);
         if (data.status === 'created') {
@@ -56,21 +53,28 @@ export const GamePage: React.FC = () => {
     }
   }, [mode, difficulty]);
 
-  // Poll for queue status in multiplayer mode
   useEffect(() => {
-    // Only start polling in multiplayer mode when we have a user ID
-    const userId = localStorage.getItem('userID');
-    setUserId(userId);
-    console.log('User ID:', userId);
-    console.log('Mode:', mode);
-    if (!userId || mode === 'singleplayer' || difficulty === 'local') return;
+    if (!gameState) return;
 
-    // Clear any existing interval before setting a new one
+    // Set player IDs based on game state and mode
+    if (mode === 'singleplayer') {
+      setLocalPlayerId(userId);
+      setRemotePlayerId(userId);
+    } else if (mode === 'local') {
+      setLocalPlayerId('player1'); // Account holder uses W/S
+      setRemotePlayerId('player2'); // Guest uses arrow keys
+    }
+  }, [mode, gameState, userId]);
+
+  useEffect(() => {
+    // Only start multiplayer polling when we have a user ID
+    console.log('User ID:', userId, 'Mode:', mode);
+    if (!userId || mode === 'singleplayer') return;
+
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
-    // Set up polling interval
     intervalRef.current = setInterval(async () => {
       try {
         const status = await getQueueStatus();
@@ -89,26 +93,38 @@ export const GamePage: React.FC = () => {
       }
     }, 2000); // Poll every 2 seconds
 
-    // Clear interval on unmount or when dependencies change
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [userId, mode]);
+  }, [userId, mode, gameId]);
 
-  // Set up WebSocket URL when gameId is available
   useEffect(() => {
     if (!gameId) return;
+
+    // Set up WebSocket URL when gameId is available
     const token = localStorage.getItem('token');
+    const baseUrl = `wss://${window.location.host}/ws/remote/game/`;
 
-    // Construct WebSocket URL with all necessary parameters
-    const url = `wss://${window.location.host}/ws/remote/game/?token=${token}&game_id=${gameId}&mode=${mode}&difficulty=${difficulty}&user_id=${userId}`;
+    const params = new URLSearchParams();
+    params.append('token', token || '');
+    params.append('game_id', gameId);
+    params.append('mode', mode || '');
+    params.append('difficulty', difficulty || '');
+    params.append('user_id', userId || '');
+
+    const url = `${baseUrl}?${params.toString()}`;
+
     setUrl(url);
-  }, [gameId, mode, difficulty]);
+  }, [gameId, mode, difficulty, setUrl]);
 
-  useGameControls(difficulty); // Set up game controls
+  useGameControls({
+    // Set up game controls with player IDs
+    localPlayerId: localPlayerId || 'player1',
+    remotePlayerId,
+  });
 
   useEffect(() => {
     if (gameStatus === 'finished' && gameId) {
@@ -116,20 +132,12 @@ export const GamePage: React.FC = () => {
       const winnerId =
         gameState.players.player1.score > gameState.players.player2.score
           ? gameState.players.player1.id
-            ? gameState.players.player1.id
-            : difficulty
-          : gameState.players.player2.id
-            ? gameState.players.player2.id
-            : difficulty;
+          : gameState.players.player2.id;
       const loserId =
         gameState.players.player1.score < gameState.players.player2.score
           ? gameState.players.player1.id
-            ? gameState.players.player1.id
-            : difficulty
-          : gameState.players.player2.id
-            ? gameState.players.player2.id
-            : difficulty;
-
+          : gameState.players.player2.id;
+      console.log('Scores:', gameState.players.player1.score, gameState.players.player2.score);
       submitResult(
         gameId,
         winnerId,
@@ -144,7 +152,6 @@ export const GamePage: React.FC = () => {
     }
   }, [gameStatus, gameId]);
 
-  // Returns status message based on current game state
   const getStatusMessage = () => {
     if (connectionStatus !== 'connected') {
       return `Connection: ${connectionStatus}`;
@@ -161,8 +168,6 @@ export const GamePage: React.FC = () => {
 
   // TODO: Reconnection handler
   // TODO: Pause - Resume
-
-  // render component
 
   return (
     <div id="game-page" className="h-full w-full p-10 pt-0 flex flex-col overflow-hidden">

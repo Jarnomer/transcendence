@@ -1,28 +1,137 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "ecmaVersion": 2021,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true,
-    },
-  },
   "settings": {
-    "react": {
-      "version": "detect",
+    "import/resolver": {
+      "typescript": {
+        "project": [
+          "tsconfig.json",
+          "frontend/tsconfig.json",
+          "backend/tsconfig.json",
+          "backend/services/*/tsconfig.json",
+        ],
+        "alwaysTryTypes": true,
+      },
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"],
     },
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:prettier/recommended",
-  ],
   "rules": {
-    "prettier/prettier": "error",
-    "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off",
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["parent", "sibling"],
+          "index",
+          "object",
+          "type",
+        ],
+        "pathGroups": [
+          {
+            "pattern": "react",
+            "group": "builtin",
+            "position": "before",
+          },
+          {
+            "pattern": "react-**",
+            "group": "builtin",
+            "position": "before",
+          },
+          {
+            "pattern": "@",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@components",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@components/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@services",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@services/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@hooks",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@hooks/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@shared",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@shared/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@messages",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@messages/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@types",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@types/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@utils",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@utils/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@my-backend/**",
+            "group": "internal",
+            "position": "before",
+          },
+        ],
+        "pathGroupsExcludedImportTypes": ["react", "react-dom"],
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true,
+        },
+        "newlines-between": "always",
+      },
+    ],
   },
 }

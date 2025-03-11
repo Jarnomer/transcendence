@@ -1,4 +1,4 @@
-import { GameState, GameStatus } from '../../../../shared/gameTypes';
+import { GameState, GameStatus } from '@shared/types';
 
 type PlayerMove = 'up' | 'down' | null;
 
@@ -12,7 +12,9 @@ export default class PongGame {
   private ballSpeed: number = 7;
   private ballSpeedMultiplier: number = 1;
   private maxBallSpeedMultiplier: number = 2.5;
-  private speedIncreaseFactor: number = 1.05; // 5% speed increase on each paddle hit
+
+  // 5% speed increase on each paddle hit
+  private speedIncreaseFactor: number = 1.05;
 
   private gameState: GameState;
   private gameStatus: GameStatus;
@@ -20,6 +22,8 @@ export default class PongGame {
 
   private player1Id: string | null = null;
   private player2Id: string | null = null;
+
+  private readyState = new Map<string, boolean>();
 
   private readonly MAX_SCORE: number = 5;
 
@@ -31,20 +35,45 @@ export default class PongGame {
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0 },
     };
-    this.gameStatus = 'loading';
+    this.gameStatus = 'waiting';
     this.resetBall();
   }
 
   addPlayer(playerId: string): void {
     if (!this.player1Id) {
+      console.log('Adding player1:', playerId);
       this.player1Id = playerId;
       this.gameState.players.player1.id = playerId;
+      this.readyState.set('player1', false);
     } else if (!this.player2Id) {
       this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
+      this.readyState.set('player2', false);
     } else {
       throw new Error('Cannot add more than 2 players');
     }
+  }
+
+  setReadyState(playerId: string, state: boolean): void {
+    console.log('Setting ready state:', playerId, state);
+    console.log('player id', this.player1Id, this.player2Id);
+    if (playerId === this.player1Id) {
+      console.log('Setting player1 ready state:', state);
+      this.readyState.set('player1', state);
+    } else if (playerId === this.player2Id) {
+      console.log('Setting player2 ready state:', state);
+      this.readyState.set('player2', state);
+    }
+    if (this.areAllPlayersReady()) {
+      console.log('All players are ready!');
+      this.startCountdown();
+    } else {
+      console.log('Not all players are ready');
+    }
+  }
+
+  areAllPlayersReady(): boolean {
+    return Array.from(this.readyState.values()).every((val) => val);
   }
 
   getGameStatus(): GameStatus {
@@ -73,8 +102,12 @@ export default class PongGame {
 
   private resetBall(): void {
     this.ballSpeedMultiplier = 1;
-    const angle = (Math.random() * Math.PI) / 3 - Math.PI / 6; // Random starting angle between -30° and 30°
-    const direction = Math.random() > 0.5 ? 1 : -1; // Randomly choose left or right
+
+    // Random starting angle between -30° and 30°
+    const angle = (Math.random() * Math.PI) / 3 - Math.PI / 6;
+
+    // Randomly choose left or right direction
+    const direction = Math.random() > 0.5 ? 1 : -1;
 
     this.gameState.ball = {
       x: this.width / 2,
@@ -90,7 +123,15 @@ export default class PongGame {
   }
 
   startCountdown(): void {
+    if (!this.areAllPlayersReady()) {
+      console.warn('Cannot start countdown — not all players are ready.');
+      return;
+    }
+    console.log('Starting countdown...');
     this.setGameStatus('countdown');
+    this.resetBall();
+    this.resetPaddles();
+
     setTimeout(() => {
       this.setGameStatus('playing');
       this.startGameLoop();
@@ -98,13 +139,13 @@ export default class PongGame {
   }
 
   startGameLoop(): void {
-    if (this.updateInterval) return; // Prevent multiple intervals
-
+    // Prevent multiple intervals
+    if (this.updateInterval) return;
     this.updateInterval = setInterval(() => {
       if (this.gameStatus === 'playing') {
         this.updateBall();
       }
-    }, 1000 / 60); // 60 FPS fixed update rate
+    }, 1000 / 60); // 60 fps
   }
 
   updateGameState(playerMoves: { player1?: PlayerMove; player2?: PlayerMove }): GameState {
@@ -121,7 +162,7 @@ export default class PongGame {
   }
 
   private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
-    if (!move) return;
+    if (this.gameStatus !== 'playing' || !move) return;
 
     if (move === 'up') {
       this.gameState.players[player].y = Math.max(
@@ -146,13 +187,15 @@ export default class PongGame {
 
     // Top wall collision
     if (ball.y <= 0) {
-      ball.y = 0; // Prevent going inside the wall
+      // Prevent going inside the wall
+      ball.y = 0;
       ball.dy *= -1;
     }
 
     // Bottom wall collision
     if (ball.y + this.ballSize >= this.height) {
-      ball.y = this.height - this.ballSize; // Prevent going inside the wall
+      // Prevent going inside the wall
+      ball.y = this.height - this.ballSize;
       ball.dy *= -1;
     }
 
@@ -163,18 +206,14 @@ export default class PongGame {
       if (players.player2.score >= this.MAX_SCORE) {
         this.stopGame();
       } else {
-        this.resetBall();
-        this.resetPaddles();
-        this.startCountdown();
+        this.setGameStatus('waiting');
       }
     } else if (ball.x + this.ballSize >= this.width) {
       players.player1.score++;
       if (players.player1.score >= this.MAX_SCORE) {
         this.stopGame();
       } else {
-        this.resetBall();
-        this.resetPaddles();
-        this.startCountdown();
+        this.setGameStatus('waiting');
       }
     }
   }

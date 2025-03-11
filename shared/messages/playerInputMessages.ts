@@ -3,13 +3,12 @@ export interface PlayerInputMessage {
   action: string;
   payload: {
     playerId: string;
-    direction?: string; // Optional
+    direction?: string; // Up - Down
+    state?: boolean; // Ready state
   };
 }
 
-export const isPlayerInputMessage = (
-  message: any
-): message is PlayerInputMessage => {
+export const isPlayerInputMessage = (message: any): message is PlayerInputMessage => {
   return (
     message &&
     typeof message === 'object' &&
@@ -32,11 +31,26 @@ export const createMoveInputMessage = (
   },
 });
 
-export const createPauseInputMessage = (
-  playerId: string
-): PlayerInputMessage => ({
+export const createPauseInputMessage = (playerId: string): PlayerInputMessage => ({
   type: 'player_input',
   action: 'pause',
+  payload: {
+    playerId,
+  },
+});
+
+export const createReadyInputMessage = (playerId: string, state: boolean): PlayerInputMessage => ({
+  type: 'player_input',
+  action: 'ready',
+  payload: {
+    playerId,
+    state,
+  },
+});
+
+export const createResumeInputMessage = (playerId: string): PlayerInputMessage => ({
+  type: 'player_input',
+  action: 'resume',
   payload: {
     playerId,
   },

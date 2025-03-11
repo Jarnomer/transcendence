@@ -1,5 +1,4 @@
-import { GameState, GameStatus } from '../../../shared/gameTypes';
-import { Game } from '../pages/Game';
+import { GameState, GameStatus } from '@shared/types';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 
