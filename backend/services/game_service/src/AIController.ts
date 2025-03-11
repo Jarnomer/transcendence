@@ -7,19 +7,13 @@ export class AIController {
   private lastBallDx: number = 0;
   private gameHeight: number = 0;
 
-  // difficulty: easy, normal, brutal
+  // difficulty levels: easy, normal, brutal
   constructor(difficulty: string, gameHeight: number) {
     this.difficulty = difficulty;
     this.gameHeight = gameHeight;
   }
 
-  updateAIState(
-    ball: Ball,
-    aiPaddle: Player,
-    gameHeight: number,
-    paddleHeight: number,
-    paddleSpeed: number
-  ): void {
+  updateAIState(ball: Ball, aiPaddle: Player, paddleHeight: number, paddleSpeed: number): void {
     this.plannedMoves = [];
     const aiCenter = aiPaddle.y + paddleHeight / 2;
     const framesPerSecond = 60;
@@ -27,11 +21,11 @@ export class AIController {
     const frameCount = framesPerSecond * updateDuration;
 
     // Predict the ball's position in the future
-    let predictedBallY = this.predictBallPosition(ball, frameCount);
-    predictedBallY = this.applyError(predictedBallY, aiCenter);
+    let predictedBallY = this.predictBallPosition(ball);
+    predictedBallY = this.applyError(predictedBallY, ball.dy);
 
     // Plan the moves to reach predicted position
-    let requiredFrames = Math.abs(predictedBallY - aiCenter) / paddleSpeed;
+    const requiredFrames = Math.abs(predictedBallY - aiCenter) / paddleSpeed;
 
     for (let i = 0; i < frameCount; i++) {
       if (i < requiredFrames) {
@@ -57,7 +51,7 @@ export class AIController {
     return Date.now() - this.lastUpdateTime >= 1000;
   }
 
-  private predictBallPosition(ball: Ball, frames: number): number {
+  private predictBallPosition(ball: Ball): number {
     let predictedY = ball.y;
     let predictedX = ball.x;
     let predictedDy = ball.dy;
@@ -84,19 +78,18 @@ export class AIController {
     return predictedY;
   }
 
-  private applyError(predictedY: number, aiCenter: number): number {
+  private applyError(predictedY: number, ballDy: number): number {
     let errorFactor = 0;
 
     if (this.difficulty === 'easy') {
-      errorFactor = 0.4;
+      errorFactor = 4;
     } else if (this.difficulty === 'normal') {
-      errorFactor = 0.2;
+      errorFactor = 2;
     } else if (this.difficulty === 'brutal') {
-      errorFactor = 0;
+      errorFactor = 1.1;
     }
 
-    const distance = Math.abs(predictedY - aiCenter);
-    const errorAmount = distance * errorFactor;
+    const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.gameHeight / 2);
 
     return predictedY + (Math.random() * errorAmount * 2 - errorAmount);
   }

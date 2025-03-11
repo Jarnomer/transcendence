@@ -35,7 +35,7 @@ export default class PongGame {
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0 },
     };
-    this.gameStatus = 'loading';
+    this.gameStatus = 'waiting';
     this.resetBall();
   }
 
@@ -43,11 +43,11 @@ export default class PongGame {
     if (!this.player1Id) {
       this.player1Id = playerId;
       this.gameState.players.player1.id = playerId;
-      this.setReadyState('player1', false);
+      this.readyState.set('player1', false);
     } else if (!this.player2Id) {
       this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
-      this.setReadyState('player2', false);
+      this.readyState.set('player2', false);
     } else {
       throw new Error('Cannot add more than 2 players');
     }
@@ -155,7 +155,7 @@ export default class PongGame {
   }
 
   private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
-    if (!move) return;
+    if (this.gameStatus !== 'playing' || !move) return;
 
     if (move === 'up') {
       this.gameState.players[player].y = Math.max(
