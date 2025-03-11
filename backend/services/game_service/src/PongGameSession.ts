@@ -139,7 +139,6 @@ export class PongGameSession {
 
     const updatedState = this.game.updateGameState({});
     this.broadcast({ type: 'game_state', state: updatedState });
-
     // Broadcast game status (countdown, playing, finished, ...)
     const updatedGameStatus = this.game.getGameStatus();
     if (updatedGameStatus !== this.previousGameStatus) {
@@ -199,6 +198,11 @@ export class PongGameSession {
   resumeGame(): void {
     this.game.resumeGame();
     this.broadcast({ type: 'game_status', state: 'playing' });
+  }
+
+  private startGameLoop(): void {
+    this.updateGame();
+    this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }
 }
 

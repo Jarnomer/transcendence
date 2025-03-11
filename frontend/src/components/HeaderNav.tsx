@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState} from 'react';
 import { NavIconButton } from './NavIconButton';
 import { useNavigate } from 'react-router-dom';
 import { useModal } from './modals/ModalContext'; // Importing modal context
@@ -10,6 +10,11 @@ export const HeaderNav: React.FC = () => {
   const { openModal } = useModal(); // Accessing openModal from modal context
   const navigate = useNavigate();
   const animatedNavigate = useAnimatedNavigate();
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
 
   const isLoggedInContext = useContext(IsLoggedInContext)!;
   const { isLoggedIn, setIsLoggedIn, logout } = isLoggedInContext;
@@ -41,6 +46,20 @@ export const HeaderNav: React.FC = () => {
         icon="user"
         onClick={() => animatedNavigate(`/profile/${localStorage.getItem('userID')}`)}
       />
+      <NavIconButton id="nav-bell-button" icon="bell" onClick={() => toggleDropdown()} />
+      {isDropdownOpen ? (
+        <div className="absolute right-0 top-10 bg-white shadow-lg rounded-lg p-2">
+          <button
+            onClick={() => {
+              animatedNavigate('/notifications');
+              setIsDropdownOpen(false);
+            }}
+          >
+            Notifications
+          </button>
+        </div>
+      ) : null
+      }
       <NavIconButton id="nav-chat-button" icon="chat" onClick={() => animatedNavigate('/chat')} />
       <NavIconButton
         id="nav-settings-button"

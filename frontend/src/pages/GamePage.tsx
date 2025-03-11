@@ -61,18 +61,11 @@ export const GamePage: React.FC = () => {
 
     // Set player IDs based on game state and mode
     if (mode === 'singleplayer') {
-      setLocalPlayerId('player1');
-      setRemotePlayerId('player1');
+      setLocalPlayerId(userId);
+      setRemotePlayerId(userId);
     } else if (mode === 'local') {
       setLocalPlayerId('player1'); // Account holder uses W/S
       setRemotePlayerId('player2'); // Guest uses arrow keys
-    } else if (gameState && gameState.players) {
-      // Online mode (1vs1) - determine the local user
-      const isPlayer1 = userId === gameState.players.player1.id;
-      const playerRole = isPlayer1 ? 'player1' : 'player2';
-      // Multiplayer - both key sets control player paddle
-      setLocalPlayerId(playerRole);
-      setRemotePlayerId(playerRole);
     }
   }, [mode, gameState, userId]);
 
@@ -123,6 +116,7 @@ export const GamePage: React.FC = () => {
     params.append('game_id', gameId);
     params.append('mode', mode || '');
     params.append('difficulty', difficulty || '');
+    params.append('user_id', userId || '');
 
     const url = `${baseUrl}?${params.toString()}`;
 

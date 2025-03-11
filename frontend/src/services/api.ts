@@ -11,7 +11,7 @@ interface RegisterResponse {
 }
 
 interface TokenDecoded {
-  id: string;
+  user_id: string;
   username: string;
 }
 
@@ -103,9 +103,11 @@ export async function login(username: string, password: string) {
       localStorage.setItem('token', res.data.token);
       console.log('token', res.data.token);
       const user = jwtDecode<TokenDecoded>(res.data.token);
-      localStorage.setItem('userID', user.id);
+      localStorage.setItem('userID', user.user_id);
+      console.log('user id', user.user_id);
+      console.log('username', user.username);
       localStorage.setItem('username', user.username);
-      await api.patch(`/user/${user.id}`, { status: 'online' });
+      await api.patch(`/user/${user.user_id}`, { status: 'online' });
     }
     return res.data;
   } catch (err) {
@@ -193,10 +195,11 @@ export async function getUserData(userId: string) {
     if (!userId) {
       throw new Error('User ID not provided');
     }
-    const res = await api.get(`/user/${userId}`);
+    const res = await api.get(`/user/data/${userId}`);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
+    console.log("user data", res.data);
     return res.data;
   } catch (err) {
     console.error('Failed to get user data:', err);
@@ -262,30 +265,54 @@ export async function submitResult(
   }
 }
 
-// export async function localGame() {
-//   try {
-//     const userID = localStorage.getItem('userID');
-//     if (!userID) {
-//       throw new Error('User ID not found');
-//     }
-//     const res = await api.get<GameIDResponse>(`/matchmaking/localGame/${userID}`);
-//     console.log(res.data);
-//     return res.data;
-//   } catch (err) {
-//     console.error('Failed to create local game:', err);
-//     throw err;
-//   }
-// }
+export async function sendFriendRequest(receiver_id: string) {
+  try {
+    const userID = localStorage.getItem('userID');
+    if (!userID) {
+      throw new Error('User ID not found');
+    }
+    const res = await api.post(`/friend/request`, { receiver_id });
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to send friend request`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to send friend request:', err);
+    throw err;
+  }
 
-//
-// function isTokenExpired(token: string): boolean {
-//   try {
-//     const decoded = jwtDecode<JwtPayload>(token);
-//     if (!decoded || !decoded.exp || typeof decoded.exp !== "number") {
-//       return true;
-//     }
-//     return decoded.exp * 1000 < Date.now(); // Convert expiration time to milliseconds
-//   } catch (e) {
-//     return true; // Treat invalid tokens as expired
-//   }
-// }
+}
+
+export async function acceptFriendRequest(sender_id: string) {
+  try {
+    const userID = localStorage.getItem('userID');
+    if (!userID) {
+      throw new Error('User ID not found');
+    }
+    const res = await api.post(`/friend/request/accept/${sender_id}`, { message: 'Friend request accepted' });
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to accept friend request`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to accept friend request:', err);
+    throw err;
+  }
+}
+
+export async function rejectFriendRequest(sender_id: string) {
+  try {
+    const userID = localStorage.getItem('userID');
+    if (!userID) {
+      throw new Error('User ID not found');
+    }
+    const res = await api.post(`/friend/request/reject/${sender_id}`, { message: 'Friend request rejected' });
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to reject friend request`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to reject friend request:', err);
+    throw err;
+  }
+}

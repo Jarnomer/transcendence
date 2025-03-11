@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { createMoveInputMessage } from '@shared/messages';
+import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
 import { useWebSocketContext } from '../services/WebSocketContext';
 
 interface UseGameControlsProps {
@@ -63,6 +63,9 @@ const useGameControls = ({
 
       if (remotePlayerId && keysPressed['ArrowDown']) {
         sendMessage(createMoveInputMessage(remotePlayerId, 'down'));
+      }
+      if (remotePlayerId && keysPressed['p']) {
+        sendMessage(createReadyInputMessage(localPlayerId, true));
       }
     }, 1000 / 60); // 60fps
 

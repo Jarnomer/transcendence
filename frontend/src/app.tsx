@@ -59,9 +59,8 @@ const App: React.FC = () => {
     }
     try {
       const res = await api.get<ValidateResponse>('/auth/validate'); // Backend should return 200 if valid
-      localStorage.setItem('userID', res.data.user.id);
-      localStorage.setItem('username', res.data.user.username);
-      console.log(res.data);
+      localStorage.setItem('userID', res.data.user_id);
+      localStorage.setItem('username', res.data.username);
       setIsLoggedIn(true);
     } catch (error) {
       console.error('Token validation failed:', error);
@@ -135,8 +134,6 @@ const App: React.FC = () => {
 export default App;
 
 interface ValidateResponse {
-  user: {
-    username: string;
-    id: string;
-  };
+  username: string;
+  user_id: string;
 }

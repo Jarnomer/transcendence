@@ -32,9 +32,9 @@ export class AuthController {
     // }
     const hashedPassword = await bcrypt.hash(password, 10);
     request.log.trace(`Creating user ${username}`);
-    await this.authService.createAuth(username, hashedPassword);
-    const user = await this.authService.getAuth(username);
-    await this.userService.createUser(user.user_id);
+    const user = await this.authService.createAuth(username, hashedPassword);
+    const res = await this.userService.createUser(user.user_id);
+    const stats = await this.userService.createUserStats(user.user_id);
     reply.code(201).send({ message: "User registered successfully" });
   }
 
@@ -48,13 +48,13 @@ export class AuthController {
   async login(request: FastifyRequest, reply: FastifyReply) {
     const { username, password } = request.body as { username: string; password: string };
     request.log.trace(`Logging in user ${username}`);
-    const user = await this.authService.getAuth(username);
+    const user = await this.authService.getAuthByUsername(username);
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new NotAuthorizedError("Invalid credentials");
     }
     request.log.trace(`Signing JWT for user ${username}`);
-    const accessToken = await reply.jwtSign({ id: user.user_id, username: user.username }, { expiresIn: "1h" });
-    const refresh_token = await reply.jwtSign({ id: user.user_id, username: user.username }, { expiresIn: "7d" });
+    const accessToken = await reply.jwtSign({ user_id: user.user_id, username: user.username }, { expiresIn: "1h" });
+    const refresh_token = await reply.jwtSign({ user_id: user.user_id, username: user.username }, { expiresIn: "7d" });
     request.log.trace("Setting refresh token in cookie");
     await this.authService.setRefreshToken(user.username, refresh_token);
     reply.setCookie("refresh_token", refresh_token, { path: "/api/auth/refresh", httpOnly: true, sameSite: "strict", secure: true });
@@ -93,7 +93,7 @@ export class AuthController {
     request.log.trace("Verifying refresh token");
     const decoded = await fastify.jwt.verify<JwtPayload>(refresh_token);
     request.log.trace(`Finding user ${decoded.username}`);
-    const user = await this.authService.getAuth(decoded.username);
+    const user = await this.authService.getAuthByUsername(decoded.username);
     if (!user) {
       throw new NotAuthorizedError("User not found");
     }
@@ -101,7 +101,7 @@ export class AuthController {
       throw new NotAuthorizedError("Invalid refresh token");
     }
     request.log.trace(`Signing JWT for user ${decoded.username}`);
-    const accessToken = await reply.jwtSign({ id: decoded.id, username: decoded.username }, { expiresIn: "1h" });
+    const accessToken = await reply.jwtSign({ user_id: decoded.user_id, username: decoded.username }, { expiresIn: "1h" });
     reply.send({ token: accessToken });
   }
 
@@ -113,7 +113,7 @@ export class AuthController {
    */
   async validate(request: FastifyRequest, reply: FastifyReply) {
     await request.jwtVerify();
-    reply.send({ user: request.user });
+    reply.send(request.user);
   }
 
   /**
