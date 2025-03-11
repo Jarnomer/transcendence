@@ -7,6 +7,7 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { CountDown, PlayerScoreBoard } from '@components';
 
 import { useWebSocketContext } from '@services';
+import { createReadyInputMessage } from '../../../shared/messages';
 
 import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '@services/api';
 
@@ -16,6 +17,7 @@ import useGameControls from '../hooks/useGameControls';
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
   const navigate = useNavigate();
+  const { sendMessage } = useWebSocketContext();
 
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
@@ -35,6 +37,13 @@ export const GamePage: React.FC = () => {
   useEffect(() => {
     console.log('Mode:', mode, '| Difficulty:', difficulty, '| Status:', gameStatus);
   }, [mode, difficulty, gameStatus]);
+
+  useEffect(() => {
+    if (!gameId) return;
+    if (localPlayerId && remotePlayerId) {
+      sendMessage(createReadyInputMessage(localPlayerId, true));
+    }
+  }, [connectionStatus, gameId]);
 
   useEffect(() => {
     // Retrieve user ID and set up game based on mode
@@ -130,9 +139,8 @@ export const GamePage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (gameStatus === 'waiting') {
-      console.log("sending player ready message")
-      dispatch({ type: 'PLAYER_READY' });
+    if (gameStatus === 'waiting' && gameId) {
+      sendMessage(createReadyInputMessage(localPlayerId, true));
     }
     if (gameStatus === 'finished' && gameId) {
       console.log('Game Over');
@@ -177,7 +185,7 @@ export const GamePage: React.FC = () => {
   // TODO: Pause - Resume
 
   return (
-    <div id="game-page" className="h-full w-full p-10 pt-0 flex flex-col overflow-hidden">
+    <div id="game-page" className=" w-full p-10 pt-0 flex flex-col overflow-hidden">
       {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' ? (
         <>
           <div className="h-[10%] flex justify-between items-center">
@@ -185,7 +193,7 @@ export const GamePage: React.FC = () => {
           </div>
           <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
-            <CountDown gameStatus={gameStatus}/>
+            <CountDown gameStatus={gameStatus} />
 
             <p className="text-xs text-gray-500">
               Connection: {connectionStatus} | Game: {gameStatus}

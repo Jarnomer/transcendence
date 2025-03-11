@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { LoginPage } from './pages/LoginPage.tsx';
-import { Header } from './components/Header.tsx';
+import React, { useEffect, useState } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { Footer } from './components/Footer.tsx';
-import { GameMenu } from './pages/GameMenu.tsx';
-import { CreatorsPage } from './pages/CreatorsPage.tsx';
-import { GamePage } from './pages/GamePage.tsx';
-import { HomePage } from './pages/HomePage.tsx';
+import { Header } from './components/Header.tsx';
+import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
-import { api } from './services/api.ts';
-import { ModalProvider } from './components/modals/ModalContext.tsx';
-import { GoBackButton } from './components/GoBackButton.tsx';
-import { ProfilePage } from './pages/ProfilePage.tsx';
-import { useAnimatedNavigate } from './animatedNavigate.tsx';
-import { BackgroundGlow } from './components/BackgroundGlow.tsx';
 import { ChatPage } from './pages/ChatPage.tsx';
+import { CreatorsPage } from './pages/CreatorsPage.tsx';
+import { GameMenu } from './pages/GameMenu.tsx';
+import { GamePage } from './pages/GamePage.tsx';
+import { HomePage } from './pages/HomePage.tsx';
+import { LoginPage } from './pages/LoginPage.tsx';
+import { ProfilePage } from './pages/ProfilePage.tsx';
 import { WebSocketProvider } from './services/WebSocketContext.tsx';
+import { api } from './services/api.ts';
 
 export const IsLoggedInContext = React.createContext<
   | {
@@ -104,7 +101,7 @@ const App: React.FC = () => {
             <Header />
             <div
               id="app-content"
-              className="mt-2 flex flex-grow flex-col w-full min-h-full justify-center items-center"
+              className="mt-2 px-10 flex flex-grow flex-col w-full justify-center items-center"
             >
               <Routes>
                 <Route path="/" element={isLoggedIn ? <GameMenu /> : <LoginPage />} />
