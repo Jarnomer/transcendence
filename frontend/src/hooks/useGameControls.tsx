@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useWebSocketContext } from '../services/WebSocketContext';
+import { createMoveInputMessage } from '@shared/messages';
 
-/**
- * Interface for hooking game controls during gameplay
- * @param wsRef - The WebSocket reference for connection
- */
+interface UseGameControlsProps {
+  localPlayerId?: string;
+  remotePlayerId?: string;
+}
 
-const useGameControls = () => {
-  // Track which keys are currently being pressed during gameplay
+const useGameControls = ({
+  localPlayerId = 'player1',
+  remotePlayerId = 'player2',
+}: UseGameControlsProps = {}) => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
 
   useEffect(() => {
-    // Handle key press events
+    console.log('localPlayerId:', localPlayerId, '| remotePlayerId:', remotePlayerId);
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Prevent default actions for game control keys (prevent scrolling)
+      // Prevent default actions during gameplay
       if (['w', 's', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
         e.preventDefault();
       }
@@ -28,47 +32,43 @@ const useGameControls = () => {
       });
     };
 
-    // Handle key release events
     const handleKeyUp = (e: KeyboardEvent) => {
       setKeysPressed((prev) => ({ ...prev, [e.key]: false }));
     };
 
-    // Event listeners for key presses
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      // Cleanup
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []); // Runs only once on mount
+  }, []);
 
   // Control loop with fixed interval timer
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (keysPressed['w']) {
-        sendMessage({ type: 'move', playerId: 'player1', move: 'up' });
+        sendMessage(createMoveInputMessage(localPlayerId, 'up'));
       }
 
       if (keysPressed['s']) {
-        sendMessage({ type: 'move', playerId: 'player1', move: 'down' });
+        sendMessage(createMoveInputMessage(localPlayerId, 'down'));
       }
 
-      if (keysPressed['ArrowUp']) {
-        sendMessage({ type: 'move', playerId: 'player2', move: 'up' });
+      if (remotePlayerId && keysPressed['ArrowUp']) {
+        sendMessage(createMoveInputMessage(remotePlayerId, 'up'));
       }
 
-      if (keysPressed['ArrowDown']) {
-        sendMessage({ type: 'move', playerId: 'player2', move: 'down' });
+      if (remotePlayerId && keysPressed['ArrowDown']) {
+        sendMessage(createMoveInputMessage(remotePlayerId, 'down'));
       }
     }, 1000 / 60); // 60fps
 
     return () => {
-      // Cleanup
       clearInterval(intervalId);
     };
-  }, [keysPressed]);
+  }, [keysPressed, sendMessage, localPlayerId, remotePlayerId]);
 
   return keysPressed;
 };

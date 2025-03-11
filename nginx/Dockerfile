@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-RUN apk update && apk add  openssl
+RUN apk update && apk add openssl
 RUN addgroup -g 1001 nginxgroup \
     && adduser -D -u 1001 -G nginxgroup nginxuser
 
@@ -12,7 +12,7 @@ RUN openssl req -x509 -nodes \
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-RUN chown -R nginxuser:nginxgroup /var/cache/nginx /var/run /etc/nginx /usr/share/nginx/html 
+RUN chown -R nginxuser:nginxgroup /var/cache/nginx /var/run /etc/nginx /usr/share/nginx/html
 USER nginxuser
 
 EXPOSE 8443

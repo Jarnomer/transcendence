@@ -1,17 +1,24 @@
 FROM node:22-slim
 
 WORKDIR /app
-#RUN apt-get update && apt-get install -y passwd
+
 RUN npm install -g pnpm@latest-10
-# Set CI to true to disable interactive prompts
+
 ENV CI=true
 
-COPY . /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 
-#RUN useradd -m appuser
-#RUN chown -R appuser:appuser /app/
-#USER appuser
+COPY backend/services/main_server/package.json ./backend/services/main_server/
+COPY backend/services/game_service/package.json ./backend/services/game_service/
+COPY backend/services/matchmaking_service/package.json ./backend/services/matchmaking_service/
+COPY backend/services/user_service/package.json ./backend/services/user_service/
+COPY backend/services/remote_service/package.json ./backend/services/remote_service/
 
-RUN pnpm install --no-frozen-lockfile
+COPY backend/package.json ./backend/
 
-CMD ["pnpm", "run", "dev", "--", "--host"]
+RUN pnpm install --frozen-lockfile
+
+COPY backend ./backend/
+COPY shared ./shared/
+
+CMD ["pnpm", "run", "dev:backend"]
