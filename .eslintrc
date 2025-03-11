@@ -1,13 +1,29 @@
 {
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+    },
+    "requireConfigFile": false,
+  },
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true,
+  },
+  "ignorePatterns": ["node_modules/", "dist/", "build/", "*.d.ts"],
   "settings": {
+    "react": {
+      "version": "detect",
+    },
     "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+      },
       "typescript": {
-        "project": [
-          "tsconfig.json",
-          "frontend/tsconfig.json",
-          "backend/tsconfig.json",
-          "backend/services/*/tsconfig.json",
-        ],
         "alwaysTryTypes": true,
       },
     },
@@ -15,7 +31,24 @@
       "@typescript-eslint/parser": [".ts", ".tsx"],
     },
   },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:prettier/recommended",
+  ],
   "rules": {
+    "prettier/prettier": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
     "import/order": [
       "error",
       {
@@ -46,6 +79,16 @@
           },
           {
             "pattern": "@/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@pages",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@pages/**",
             "group": "internal",
             "position": "before",
           },
@@ -134,4 +177,19 @@
       },
     ],
   },
+  "overrides": [
+    {
+      "files": ["*.js", "*.jsx", "*.ts", "*.tsx"],
+      "rules": {},
+    },
+    {
+      "files": ["*.config.js", "*.config.ts", "tailwind-config.js", "vite.config.ts"],
+      "env": {
+        "node": true,
+      },
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+      },
+    },
+  ],
 }

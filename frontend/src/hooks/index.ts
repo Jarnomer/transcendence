@@ -1,2 +1,1 @@
-export * from './useGameControls';
-export * from './useWebSocket';
+export { default as useGameControls } from './useGameControls';

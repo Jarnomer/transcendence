@@ -1,4 +1,9 @@
-node_modules
-build
-dist
-.next
+node_modules/
+dist/
+build/
+coverage/
+*.d.ts
+**/*.config.js
+frontend/public/
+backend/database/
+pnpm-lock.yaml

@@ -1,7 +1,6 @@
 export * from './BackgroundGlow';
 export * from './CountDown';
 export * from './Footer';
-export * from './GameCanvas';
 export * from './GameHeader';
 export * from './GoBackButton';
 export * from './Header';
@@ -11,3 +10,5 @@ export * from './NavIconButton';
 export * from './PlayerScoreBoard';
 export * from './PlayerScoreCard';
 export * from './RadialBackground';
+
+export { default as GameCanvas } from './GameCanvas';
