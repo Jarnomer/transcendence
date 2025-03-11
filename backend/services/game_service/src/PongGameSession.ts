@@ -36,11 +36,7 @@ export class PongGameSession {
     this.clients.set(playerId, connection);
     this.game.addPlayer(playerId);
 
-    // remove these when implementing player ready in frontend
-    this.game.setReadyState(playerId, true); // DELETE
-    this.checkAndStartGame(); // DELETE
-
-    connection.on('message', (message: string) => this.handleMessage(playerId, message));
+    connection.on('message', (message: string) => this.handleMessage(message));
     connection.on('close', () => this.removeClient(playerId));
   }
 
@@ -57,22 +53,7 @@ export class PongGameSession {
     return this.mode === 'singleplayer' || this.mode === 'local' || this.clients.size === 2;
   }
 
-  private checkAndStartGame(): void {
-    if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
-      this.game.startCountdown();
-      this.broadcast({ type: 'game_status', state: 'countdown' });
-      this.startGameLoop();
-    } else {
-      this.broadcast({ type: 'game_status', state: 'waiting' });
-    }
-  }
-
-  private startGameLoop(): void {
-    this.updateGame();
-    this.interval = setInterval(() => this.updateGame(), 1000 / 60);
-  }
-
-  handleMessage(playerId: string, message: string): void {
+  handleMessage(message: string): void {
     try {
       const data = JSON.parse(message);
       if (isPlayerInputMessage(data)) {
@@ -134,16 +115,6 @@ export class PongGameSession {
   }
 
   updateGame(): void {
-    // remove this when implementing player ready in frontend
-    if (
-      this.areAllPlayersConnected() && // DELETE
-      this.game.getGameStatus() === 'waiting'
-    ) {
-      // DELETE
-      this.game.setReadyState('player1', true); // DELETE
-      this.game.setReadyState('player2', true); // DELETE
-    }
-
     if (this.aiController) {
       this.handleAIMove();
     }
@@ -198,7 +169,9 @@ export class PongGameSession {
     this.game.updateGameState({ player2: aiMove });
   }
 
-  // TODO: Create readyGame method
+  readyGame(playerId: string, state: boolean): void {
+    this.game.setReadyState(playerId, state);
+  }
 
   pauseGame(): void {
     this.game.pauseGame();

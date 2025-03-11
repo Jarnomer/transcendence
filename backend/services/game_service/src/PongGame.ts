@@ -35,7 +35,7 @@ export default class PongGame {
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0 },
     };
-    this.gameStatus = 'loading';
+    this.gameStatus = 'waiting';
     this.resetBall();
   }
 
