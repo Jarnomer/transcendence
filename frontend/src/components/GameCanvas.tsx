@@ -125,7 +125,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const reflectiveFloor = createReflectiveFloor(scene);
 
     scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
-      '../assets/game/kloppenheim_02_puresky_4k.exr',
+      '../assets/game/satara_night_4k.exr',
       scene
     );
 
