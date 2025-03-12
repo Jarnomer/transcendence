@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { getUsers } from '../services/api';
-import { useAnimatedNavigate } from '../animatedNavigate';
+import React, { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
-import { NavIconButton } from '../components/NavIconButton';
-import { sendFriendRequest } from '../services/api';
+
+import { NavIconButton } from '@components/UI/buttons/NavIconButton';
+
+import { sendFriendRequest } from '@services/friendService';
+import { getUsersInQueue } from '@services/userService';
+
+import { useAnimatedNavigate } from '../animatedNavigate';
 
 export const HomePage: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [usersInQueue, setUsersInQueue] = useState<any[]>([]);
   const animatedNavigate = useAnimatedNavigate();
   const navigate = useNavigate();
 
   async function fetchData() {
     setLoading(true);
-    const fetchedUsers = await getUsers();
+    const fetchedUsers = await getUsersInQueue();
     if (fetchedUsers) {
-      setUsers(fetchedUsers);
+      setUsersInQueue(fetchedUsers);
       console.log(fetchedUsers);
     }
     setLoading(false);

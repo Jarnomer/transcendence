@@ -1,4 +1,5 @@
 import { PlayerInputMessage } from '@shared/messages';
+
 import { PongGameSession } from '../PongGameSession';
 
 export const handlePlayerInputMessage = (
@@ -44,7 +45,7 @@ const handlePlayerMove = (
 };
 
 const handlePlayerReady = (gameSession: PongGameSession, playerId: string, state: boolean) => {
-  // TODO: Create readyGame method to PongGame
+  console.log('handlePlayerReady():', playerId, state);
   gameSession.readyGame(playerId, state);
 };
 

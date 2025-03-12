@@ -1,21 +1,20 @@
 import { useEffect, useState } from 'react';
 
 import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
-import { useWebSocketContext } from '../services/WebSocketContext';
+
+import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
 interface UseGameControlsProps {
-  localPlayerId?: string;
-  remotePlayerId?: string;
+  localPlayerId: string;
+  remotePlayerId: string;
 }
 
-const useGameControls = ({
-  localPlayerId = 'player1',
-  remotePlayerId = 'player2',
-}: UseGameControlsProps = {}) => {
+const useGameControls = (localPlayerId: string | null, remotePlayerId: string | null) => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
 
   useEffect(() => {
+    if (!localPlayerId || !remotePlayerId) return;
     console.log('localPlayerId:', localPlayerId, '| remotePlayerId:', remotePlayerId);
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -44,10 +43,11 @@ const useGameControls = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [localPlayerId, remotePlayerId]);
 
   // Control loop with fixed interval timer
   useEffect(() => {
+    if (!localPlayerId || !remotePlayerId) return;
     const intervalId = setInterval(() => {
       if (keysPressed['w']) {
         sendMessage(createMoveInputMessage(localPlayerId, 'up'));

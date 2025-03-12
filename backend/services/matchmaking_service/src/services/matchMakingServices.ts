@@ -1,10 +1,12 @@
 import { Database } from 'sqlite';
-import { MatchMakingModel } from '../models/matchMakingModels';
+
 import {
-  NotFoundError,
-  DatabaseError,
   BadRequestError,
+  DatabaseError,
+  NotFoundError,
 } from '@my-backend/main_server/src/middlewares/errors';
+
+import { MatchMakingModel } from '../models/matchMakingModels';
 
 export class MatchMakingService {
   private matchMakingModel: MatchMakingModel;
@@ -38,7 +40,6 @@ export class MatchMakingService {
   async singlePlayer(user_id: string, difficulty: string) {
     return await this.matchMakingModel.runTransaction(async () => {
       const existingGame = await this.matchMakingModel.getOngoingGame(user_id, difficulty);
-      console.log(existingGame);
       if (existingGame) {
         throw new BadRequestError('Game already exists');
       }

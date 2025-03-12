@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import GameMenuCard from '../components/wrappers/gameMenuCard'; // Import the GameMenuCard component
+import React, { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+
+import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
+import { NavIconButton } from '@components/UI/buttons/NavIconButton';
+
 import { useAnimatedNavigate } from '../animatedNavigate';
-import { NavIconButton } from '../components/NavIconButton';
 
 interface GameMenuOption {
   content: string;
@@ -96,7 +99,7 @@ export const GameMenu: React.FC = () => {
 
   const animateCardChange = (
     newValue: string | null,
-    setValue: React.Dispatch<React.SetStateAction<string | null>>,
+    setValue: React.Dispatch<React.SetStateAction<string | null>>
   ) => {
     const appDiv = document.getElementById('home-container');
     if (!appDiv) return;
@@ -175,7 +178,7 @@ export const GameMenu: React.FC = () => {
       				<div className="card-content">
                 <h1>adad</h1>
         				<div className="cyber-lines">
-          					<span></span><span></span><span></span><span></span>  
+          					<span></span><span></span><span></span><span></span>
         				<div className="scan-line"></div>
 						</div>
       				</div>

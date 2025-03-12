@@ -15,10 +15,12 @@ export class PongGameSession {
   private previousGameStatus: GameStatus;
   private interval: NodeJS.Timeout | null = null;
   private isGameFinished: boolean = false;
+  private difficulty: string;
 
   constructor(gameId: string, mode: string, difficulty: string, onEndCallback: () => void) {
     this.gameId = gameId;
     this.mode = mode;
+    this.difficulty = difficulty;
     this.clients = new Map(); // Now maps playerId -> connection
     this.onEndCallback = onEndCallback;
 
@@ -26,7 +28,11 @@ export class PongGameSession {
     this.previousGameStatus = this.game.getGameStatus();
 
     this.aiController =
-      mode === 'singleplayer' ? new AIController(difficulty, this.game.getHeight()) : null;
+      mode === 'singleplayer' ? new AIController(this.difficulty, this.game.getHeight()) : null;
+
+    if (this.mode === '1v1' && this.difficulty === 'local') {
+      this.game.setPlayerId(2, 'player2');
+    }
   }
 
   getClientCount(): number {
@@ -55,12 +61,17 @@ export class PongGameSession {
   }
 
   private areAllPlayersConnected(): boolean {
-    return this.mode === 'singleplayer' || this.mode === 'local' || this.clients.size === 2;
+    return (
+      this.mode === 'singleplayer' ||
+      (this.mode === '1v1' && this.difficulty === 'local') ||
+      this.clients.size === 2
+    );
   }
 
   handleMessage(message: string): void {
     try {
       const data = JSON.parse(message);
+      console.log('Received message:', data);
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
       }
@@ -146,6 +157,7 @@ export class PongGameSession {
   }
 
   readyGame(playerId: string, state: boolean): void {
+    console.log(`Player ${playerId} is ready: ${state}`);
     this.game.setReadyState(playerId, state);
     this.startGameLoop();
   }

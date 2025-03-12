@@ -1,6 +1,7 @@
-import fastify, { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { GameManager } from '@my-backend/game_service';
+import { FastifyRequest } from 'fastify';
+
 import '@fastify/websocket';
+import { GameManager } from '@my-backend/game_service';
 
 export class RemoteController {
   private gameManager: GameManager;
