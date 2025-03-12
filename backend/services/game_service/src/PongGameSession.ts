@@ -39,6 +39,10 @@ export class PongGameSession {
 
     connection.on('message', (message: string) => this.handleMessage(message));
     connection.on('close', () => this.removeClient(playerId));
+
+    if (this.areAllPlayersConnected()) {
+      this.game.setGameStatus('waiting');
+    }
   }
 
   removeClient(playerId: string): void {
@@ -57,6 +61,7 @@ export class PongGameSession {
   handleMessage(message: string): void {
     try {
       const data = JSON.parse(message);
+      console.log('Received message:', data);
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
       }
@@ -139,6 +144,7 @@ export class PongGameSession {
     }
 
     const updatedState = this.game.updateGameState({});
+    console.log('updatedState', updatedState);
     this.broadcast({ type: 'game_state', state: updatedState });
     // Broadcast game status (countdown, playing, finished, ...)
     const updatedGameStatus = this.game.getGameStatus();

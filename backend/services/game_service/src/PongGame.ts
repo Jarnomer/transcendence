@@ -35,7 +35,7 @@ export default class PongGame {
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0 },
     };
-    this.gameStatus = 'waiting';
+    this.gameStatus = 'loading';
     this.resetBall();
   }
 
@@ -46,6 +46,7 @@ export default class PongGame {
       this.gameState.players.player1.id = playerId;
       this.readyState.set('player1', false);
     } else if (!this.player2Id) {
+      console.log('Adding player2:', playerId);
       this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
       this.readyState.set('player2', false);

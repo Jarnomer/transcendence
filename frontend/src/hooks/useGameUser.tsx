@@ -1,26 +1,28 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const useGameUser = (
-  mode: string,
-  setUserId: React.Dispatch<React.SetStateAction<string | null>>,
-  setLocalPlayerId: React.Dispatch<React.SetStateAction<string | null>>,
-  setRemotePlayerId: React.Dispatch<React.SetStateAction<string | null>>
+  mode: string
+  //setUserId: React.Dispatch<React.SetStateAction<string | null>>,
+  //setLocalPlayerId: React.Dispatch<React.SetStateAction<string | null>>,
+  //setRemotePlayerId: React.Dispatch<React.SetStateAction<string | null>>
 ) => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
+  const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
   useEffect(() => {
     setUserId(localStorage.getItem('userID'));
   }, []);
 
   useEffect(() => {
-    if (mode === 'singleplayer' || mode === 'tournament') {
-      setLocalPlayerId(localStorage.getItem('userID'));
-      setRemotePlayerId(localStorage.getItem('userID'));
-    } else if (mode === 'local') {
+    if (mode === 'local') {
       setLocalPlayerId('player1');
       setRemotePlayerId('player2');
+    } else {
+      setLocalPlayerId(userId);
+      setRemotePlayerId(userId);
     }
-  }, [mode, setLocalPlayerId, setRemotePlayerId]);
-
-  return { setUserId, setLocalPlayerId, setRemotePlayerId };
+  }, [mode, userId, setLocalPlayerId, setRemotePlayerId]);
+  return { userId, localPlayerId, remotePlayerId };
 };
 
 export default useGameUser;

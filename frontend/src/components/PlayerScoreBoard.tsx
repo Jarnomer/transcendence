@@ -47,10 +47,10 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
         } else {
           if (gameState.players.player2?.id && !player2Ref.current) {
             console.log("player2 gamestate", gameState.players.player2.id);
-            const user2 = await getUserData(gameState.players.player2.id);
-            if (user2) {
-              player2Ref.current = { name: user2.display_name, avatar_url: user2.avatar_url };
-            }
+           // const user2 = await getUserData(gameState.players.player2.id);
+            // if (user2) {
+            //   player2Ref.current = { name: user2.display_name, avatar_url: user2.avatar_url };
+            // }
           }
         }
       } catch (error) {

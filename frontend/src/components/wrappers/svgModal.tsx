@@ -1,6 +1,8 @@
 import { BackgroundGlow } from '../BackgroundGlow';
 
 export const SVGModal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const kakka = 'add';
+
   return (
     <div className="p-0 m-0 relative inline-block overflow-hidden">
       <div className="relative w-full text-blue p-0 m-0 ">
