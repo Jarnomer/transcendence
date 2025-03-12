@@ -1,21 +1,19 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
+  ArcRotateCamera,
   Color3,
   Color4,
   CubeTexture,
   Engine,
-  FreeCamera,
   HemisphericLight,
-  MeshBuilder,
   PBRMaterial,
   Scene,
-  StandardMaterial,
   Vector3,
 } from 'babylonjs';
 
 import { GameState } from '@shared/types';
-import { parseColor } from '@shared/utils';
+import { createBall, createFloor, createPaddle, getThemeColors } from '@shared/utils';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -28,46 +26,8 @@ const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
 const FIX_POSITION = 2;
 
-function createReflectiveFloor(scene) {
-  const pbr = new PBRMaterial('floorMaterial', scene);
-  const ground = MeshBuilder.CreateGround(
-    'ground',
-    {
-      width: 20,
-      height: 20,
-      subdivisions: 2,
-    },
-    scene
-  );
-
-  pbr.metallic = 0.9;
-  pbr.roughness = 0.15;
-  pbr.environmentIntensity = 0.7;
-
-  const sceneBackgroundColor = scene.clearColor;
-
-  // Use it as the base for the floor's albedo (potentially with some adjustments)
-  // Making it slightly darker for contrast
-  pbr.albedoColor = new BABYLON.Color3(
-    sceneBackgroundColor.r * 0.7,
-    sceneBackgroundColor.g * 0.7,
-    sceneBackgroundColor.b * 0.7
-  );
-
-  // pbr.albedoColor = backgroundColor;
-
-  ground.material = pbr;
-
-  return ground;
-
-  // Optional: create a reflection probe to enhance reflections
-  // const reflectionProbe = new ReflectionProbe("mainReflector", 512, scene);
-  // reflectionProbe.renderList.push(...scene.meshes);
-  // pbr.reflectionTexture = reflectionProbe.cubeTexture;
-}
-
-// Get theme colors from CSS variables
-const getThemeColors = (theme: 'light' | 'dark' = 'dark') => {
+// Helper function to get CSS variables (DOM-dependent code stays in the component)
+const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   // Get computed styles from document
   const computedStyle = getComputedStyle(document.documentElement);
 
@@ -79,22 +39,54 @@ const getThemeColors = (theme: 'light' | 'dark' = 'dark') => {
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
 
-  // Parse colors to Babylon Color3 format
-  return {
-    primaryColor: parseColor(primaryColor || '#ea355a'),
-    secondaryColor: parseColor(secondaryColor || 'oklch(8% 0% 0)'),
-    backgroundColor: parseColor(backgroundColor || 'black'),
-  };
+  return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 };
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
+  const [cameraControlEnabled, setCameraControlEnabled] = useState(false);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const sceneRef = useRef<Scene | null>(null);
+  const cameraRef = useRef<ArcRotateCamera | null>(null);
 
+  const floorRef = useRef<any>(null);
   const player1Ref = useRef<{ mesh: any; y: number }>({ mesh: null, y: 0 });
   const player2Ref = useRef<{ mesh: any; y: number }>({ mesh: null, y: 0 });
   const ballRef = useRef<{ mesh: any; x: number; y: number }>({ mesh: null, x: 0, y: 0 });
+
+  const toggleCameraControl = () => {
+    if (!cameraRef.current) return;
+
+    setCameraControlEnabled((prev) => {
+      const newState = !prev;
+
+      if (newState) {
+        cameraRef.current!.attachControl(canvasRef.current!, true);
+        console.log('Camera controls enabled');
+      } else {
+        cameraRef.current!.detachControl();
+        console.log('Camera controls disabled');
+      }
+
+      return newState;
+    });
+  };
+
+  // Handle key presses globally
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'c') {
+        toggleCameraControl();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Initial render setup
   useEffect(() => {
@@ -104,95 +96,45 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
 
-    // Get colors from current theme
-    const { primaryColor, secondaryColor, backgroundColor } = getThemeColors(theme);
+    const { primaryColor, secondaryColor, backgroundColor } = getThemeColorsFromDOM(theme);
 
-    // Set background color
     scene.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
 
     engineRef.current = engine;
     sceneRef.current = scene;
 
-    // Setup camera
-    const camera = new FreeCamera('camera', new Vector3(0, 0, -24), scene);
-    camera.setTarget(Vector3.Zero());
+    try {
+      scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
+        '../assets/game/satara_night_4k.exr',
+        scene
+      );
+      scene.environmentIntensity = 1.0;
+    } catch (error) {
+      console.error('Error loading environment map:', error);
+    }
+
+    const camera = new ArcRotateCamera(
+      'camera',
+      -Math.PI / 2, // horizontal rotation
+      Math.PI / 2, // vertical rotation
+      24, // distance from target
+      new Vector3(0, 0, 0),
+      scene
+    );
+
+    cameraRef.current = camera;
     camera.detachControl();
 
-    // Setup light
     const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
     light.intensity = 0.7;
 
-    const reflectiveFloor = createReflectiveFloor(scene);
+    floorRef.current = createFloor(scene, backgroundColor);
+    player1Ref.current.mesh = createPaddle(scene, primaryColor);
+    player2Ref.current.mesh = createPaddle(scene, primaryColor);
+    ballRef.current.mesh = createBall(scene, primaryColor);
 
-    scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
-      '../assets/game/satara_night_4k.exr',
-      scene
-    );
-
-    // Setup materials with your theme colors
-    const player1Material = new StandardMaterial('player1Mat', scene);
-    player1Material.diffuseColor = primaryColor;
-    player1Material.emissiveColor = new Color3(
-      primaryColor.r * 0.5,
-      primaryColor.g * 0.5,
-      primaryColor.b * 0.5
-    );
-
-    const player2Material = new StandardMaterial('player2Mat', scene);
-    player2Material.diffuseColor = primaryColor;
-    player2Material.emissiveColor = new Color3(
-      primaryColor.r * 0.5,
-      primaryColor.g * 0.5,
-      primaryColor.b * 0.5
-    );
-
-    const ballMaterial = new StandardMaterial('ballMat', scene);
-    ballMaterial.diffuseColor = primaryColor;
-    ballMaterial.emissiveColor = new Color3(
-      primaryColor.r * 0.7,
-      primaryColor.g * 0.7,
-      primaryColor.b * 0.7
-    );
-    ballMaterial.specularPower = 64;
-
-    // Create paddles
-    player1Ref.current.mesh = MeshBuilder.CreateBox(
-      'paddle1',
-      {
-        height: 4,
-        width: 0.5,
-        depth: 0.5,
-      },
-      scene
-    );
-    player2Ref.current.mesh = MeshBuilder.CreateBox(
-      'paddle2',
-      {
-        height: 4,
-        width: 0.5,
-        depth: 0.5,
-      },
-      scene
-    );
-
-    // Create ball
-    ballRef.current.mesh = MeshBuilder.CreateSphere(
-      'ball',
-      {
-        diameter: 0.8,
-        segments: 16,
-      },
-      scene
-    );
-
-    // Position paddles
     player1Ref.current.mesh.position.x = -20;
     player2Ref.current.mesh.position.x = 20;
-
-    // Apply materials
-    player1Ref.current.mesh.material = player1Material;
-    player2Ref.current.mesh.material = player2Material;
-    ballRef.current.mesh.material = ballMaterial;
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -217,13 +159,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       !sceneRef.current ||
       !player1Ref.current.mesh ||
       !player2Ref.current.mesh ||
-      !ballRef.current.mesh
+      !ballRef.current.mesh ||
+      !floorRef.current
     )
       return;
 
-    const { primaryColor, secondaryColor, backgroundColor } = getThemeColors(theme);
+    const { primaryColor, secondaryColor, backgroundColor } = getThemeColorsFromDOM(theme);
 
-    // Update scene background
     sceneRef.current.clearColor = new Color4(
       backgroundColor.r,
       backgroundColor.g,
@@ -231,10 +173,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       1
     );
 
-    // Update material colors
+    if (floorRef.current.material) {
+      const floorMaterial = floorRef.current.material as PBRMaterial;
+      floorMaterial.albedoColor = backgroundColor;
+    }
+
     if (player1Ref.current.mesh.material) {
-      const material = player1Ref.current.mesh.material as StandardMaterial;
-      material.diffuseColor = primaryColor;
+      const material = player1Ref.current.mesh.material as PBRMaterial;
+      material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
         primaryColor.g * 0.5,
@@ -243,8 +189,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     }
 
     if (player2Ref.current.mesh.material) {
-      const material = player2Ref.current.mesh.material as StandardMaterial;
-      material.diffuseColor = primaryColor;
+      const material = player2Ref.current.mesh.material as PBRMaterial;
+      material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
         primaryColor.g * 0.5,
@@ -253,8 +199,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     }
 
     if (ballRef.current.mesh.material) {
-      const material = ballRef.current.mesh.material as StandardMaterial;
-      material.diffuseColor = primaryColor;
+      const material = ballRef.current.mesh.material as PBRMaterial;
+      material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.7,
         primaryColor.g * 0.7,
@@ -288,6 +234,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       ref={canvasRef}
       className="game-canvas glass-box"
       style={{ width: '100%', height: '100%' }}
+      tabIndex={0}
     />
   );
 };
