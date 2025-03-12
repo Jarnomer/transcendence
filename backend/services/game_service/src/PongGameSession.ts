@@ -27,6 +27,10 @@ export class PongGameSession {
 
     this.aiController =
       mode === 'singleplayer' ? new AIController(difficulty, this.game.getHeight()) : null;
+
+    if (this.mode === 'local') {
+      this.game.setPlayerId(2, 'player2');
+    }
   }
 
   getClientCount(): number {
