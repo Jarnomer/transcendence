@@ -56,9 +56,6 @@ export default class PongGame {
   }
 
   setReadyState(playerId: string, state: boolean): void {
-    console.log('Setting ready state:', playerId, state);
-    console.log('player id', this.player1Id, this.player2Id);
-    console.log(playerId);
     if (playerId === this.player1Id) {
       console.log('Setting player1 ready state:', state);
       this.readyState.set('player1', state);
