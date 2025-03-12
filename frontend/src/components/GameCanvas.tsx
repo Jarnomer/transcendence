@@ -16,7 +16,14 @@ import {
 } from 'babylonjs';
 
 import { GameState } from '@shared/types';
-import { createBall, createFloor, createPaddle, getThemeColors } from '@shared/utils';
+import {
+  createBall,
+  createFloor,
+  createPaddle,
+  getThemeColors,
+  updateBallTrail,
+  updateBallTrailColor,
+} from '@shared/utils';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -47,6 +54,10 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
   const [cameraControlEnabled, setCameraControlEnabled] = useState(false);
+  const [lastTheme, setLastTheme] = useState(theme);
+
+  // Store previous ball position to calculate velocity
+  const prevBallPos = useRef({ x: 0, y: 0 });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
@@ -121,7 +132,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       'camera',
       -Math.PI / 2, // horizontal rotation
       Math.PI / 2, // vertical rotation
-      24, // distance from target
+      24.5, // distance from target
       new Vector3(0, 0, 0),
       scene
     );
@@ -129,11 +140,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     cameraRef.current = camera;
     camera.detachControl();
 
-    // Enhanced lighting setup for better visual effects
     const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
     hemiLight.intensity = 0.5;
 
-    // Add spotlights to enhance the glow effect
     const spotLight1 = new SpotLight(
       'spotLight1',
       new Vector3(-10, 10, 10),
@@ -160,26 +169,34 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     player2Ref.current = createPaddle(scene, primaryColor);
     ballRef.current = createBall(scene, primaryColor);
 
-    // Set initial positions
+    // Set paddle positions
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 20;
 
-    // Add shadow generator for better visual depth
+    // Initialize previous ball position
+    prevBallPos.current = {
+      x: gameState.ball.x,
+      y: gameState.ball.y,
+    };
+
+    // Shadow generation
     const shadowGenerator = new ShadowGenerator(1024, spotLight1);
     shadowGenerator.addShadowCaster(player1Ref.current);
     shadowGenerator.addShadowCaster(player2Ref.current);
     shadowGenerator.addShadowCaster(ballRef.current);
     shadowGenerator.useBlurExponentialShadowMap = true;
 
-    // Add glow layer for the hovering effect
     const glowLayer = new GlowLayer('glowLayer', scene);
     glowLayer.intensity = 1.2;
     glowLayer.blurKernelSize = 32;
 
-    // Add specific objects to the glow layer
+    // Add game objects to glow layer
     glowLayer.addIncludedOnlyMesh(player1Ref.current);
     glowLayer.addIncludedOnlyMesh(player2Ref.current);
     glowLayer.addIncludedOnlyMesh(ballRef.current);
+
+    // Save current theme
+    setLastTheme(theme);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -196,7 +213,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       engine.dispose();
       scene.dispose();
     };
-  }, [theme]);
+  }, []);
 
   // Apply theme change without recreating the scene
   useEffect(() => {
@@ -208,6 +225,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       !floorRef.current
     )
       return;
+
+    // Only update if theme actually changed
+    if (theme === lastTheme) return;
 
     const { primaryColor, secondaryColor, backgroundColor } = getThemeColorsFromDOM(theme);
 
@@ -251,23 +271,28 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         primaryColor.g * 0.7,
         primaryColor.b * 0.7
       );
-    }
-  }, [theme]);
 
-  // Update positions directly from gameState
+      // Update the trail color when theme changes
+      updateBallTrailColor(ballRef.current, primaryColor, sceneRef.current);
+    }
+
+    setLastTheme(theme);
+  }, [theme, lastTheme]);
+
   useEffect(() => {
     if (
       !canvasRef.current ||
       !gameState ||
       !player1Ref.current ||
       !player2Ref.current ||
-      !ballRef.current
+      !ballRef.current ||
+      !sceneRef.current
     )
       return;
 
     const { players, ball } = gameState;
 
-    // Convert coordinates from game state to Babylon.js coordinate system
+    // Convert coordinates to Babylon coordinate system
     const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
     const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
     const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
@@ -278,6 +303,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     player2Ref.current.position.y = player2Y;
     ballRef.current.position.x = ballX;
     ballRef.current.position.y = ballY;
+
+    // Update the ball trail effect using the ball dx/dy
+    // Note: Inverted dy for Babylon coordinate system
+    updateBallTrail(ballRef.current, ball.dx, -ball.dy);
+
+    prevBallPos.current = { x: ball.x, y: ball.y };
   }, [gameState]);
 
   return (
