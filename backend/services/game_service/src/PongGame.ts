@@ -56,8 +56,6 @@ export default class PongGame {
   }
 
   setReadyState(playerId: string, state: boolean): void {
-    console.log('Setting ready state:', playerId, state);
-    console.log('player id', this.player1Id, this.player2Id);
     if (playerId === this.player1Id) {
       console.log('Setting player1 ready state:', state);
       this.readyState.set('player1', state);
@@ -70,6 +68,8 @@ export default class PongGame {
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
+      console.log('Player 1 ready:', this.readyState.get('player1'));
+      console.log('Player 2 ready:', this.readyState.get('player2'));
     }
   }
 
@@ -98,6 +98,16 @@ export default class PongGame {
       return this.player1Id;
     } else {
       return this.player2Id;
+    }
+  }
+
+  setPlayerId(player: number, playerId: string): void {
+    if (player === 1) {
+      this.player1Id = playerId;
+      this.gameState.players.player1.id = playerId;
+    } else {
+      this.player2Id = playerId;
+      this.gameState.players.player2.id = playerId;
     }
   }
 
