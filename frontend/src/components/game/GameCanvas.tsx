@@ -316,7 +316,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       ref={canvasRef}
       className="game-canvas glass-box"
       style={{ width: '100%', height: '100%' }}
-      tabIndex={0}
     />
   );
 };

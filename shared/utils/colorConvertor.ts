@@ -1,5 +1,28 @@
 import { Color3 } from 'babylonjs';
 
+export interface ThemeColors {
+  primaryColor: Color3;
+  secondaryColor: Color3;
+  backgroundColor: Color3;
+}
+
+export function getThemeColors(
+  theme: 'light' | 'dark' = 'dark',
+  primaryColorHex?: string,
+  secondaryColorHex?: string,
+  backgroundColorHex?: string
+): ThemeColors {
+  const primaryColor = parseColor(primaryColorHex || '#ea355a');
+  const secondaryColor = parseColor(secondaryColorHex || 'oklch(8% 0% 0)');
+  const backgroundColor = parseColor(backgroundColorHex || 'black');
+
+  return {
+    primaryColor,
+    secondaryColor,
+    backgroundColor,
+  };
+}
+
 export function parseColor(colorValue: string): Color3 {
   const namedColors: Record<string, Color3> = {
     black: new Color3(0, 0, 0),
