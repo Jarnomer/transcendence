@@ -6,9 +6,12 @@ import {
   Color4,
   CubeTexture,
   Engine,
+  GlowLayer,
   HemisphericLight,
   PBRMaterial,
   Scene,
+  ShadowGenerator,
+  SpotLight,
   Vector3,
 } from 'babylonjs';
 
@@ -50,10 +53,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
+  // Updated refs to only store mesh objects, not positions
   const floorRef = useRef<any>(null);
-  const player1Ref = useRef<{ mesh: any; y: number }>({ mesh: null, y: 0 });
-  const player2Ref = useRef<{ mesh: any; y: number }>({ mesh: null, y: 0 });
-  const ballRef = useRef<{ mesh: any; x: number; y: number }>({ mesh: null, x: 0, y: 0 });
+  const player1Ref = useRef<any>(null);
+  const player2Ref = useRef<any>(null);
+  const ballRef = useRef<any>(null);
 
   const toggleCameraControl = () => {
     if (!cameraRef.current) return;
@@ -125,16 +129,57 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     cameraRef.current = camera;
     camera.detachControl();
 
-    const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
-    light.intensity = 0.7;
+    // Enhanced lighting setup for better visual effects
+    const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
+    hemiLight.intensity = 0.5;
 
+    // Add spotlights to enhance the glow effect
+    const spotLight1 = new SpotLight(
+      'spotLight1',
+      new Vector3(-10, 10, 10),
+      new Vector3(0, -1, -0.5),
+      Math.PI / 3,
+      10,
+      scene
+    );
+    spotLight1.intensity = 0.7;
+
+    const spotLight2 = new SpotLight(
+      'spotLight2',
+      new Vector3(10, 10, 10),
+      new Vector3(0, -1, -0.5),
+      Math.PI / 3,
+      10,
+      scene
+    );
+    spotLight2.intensity = 0.7;
+
+    // Create game objects
     floorRef.current = createFloor(scene, backgroundColor);
-    player1Ref.current.mesh = createPaddle(scene, primaryColor);
-    player2Ref.current.mesh = createPaddle(scene, primaryColor);
-    ballRef.current.mesh = createBall(scene, primaryColor);
+    player1Ref.current = createPaddle(scene, primaryColor);
+    player2Ref.current = createPaddle(scene, primaryColor);
+    ballRef.current = createBall(scene, primaryColor);
 
-    player1Ref.current.mesh.position.x = -20;
-    player2Ref.current.mesh.position.x = 20;
+    // Set initial positions
+    player1Ref.current.position.x = -20;
+    player2Ref.current.position.x = 20;
+
+    // Add shadow generator for better visual depth
+    const shadowGenerator = new ShadowGenerator(1024, spotLight1);
+    shadowGenerator.addShadowCaster(player1Ref.current);
+    shadowGenerator.addShadowCaster(player2Ref.current);
+    shadowGenerator.addShadowCaster(ballRef.current);
+    shadowGenerator.useBlurExponentialShadowMap = true;
+
+    // Add glow layer for the hovering effect
+    const glowLayer = new GlowLayer('glowLayer', scene);
+    glowLayer.intensity = 1.2;
+    glowLayer.blurKernelSize = 32;
+
+    // Add specific objects to the glow layer
+    glowLayer.addIncludedOnlyMesh(player1Ref.current);
+    glowLayer.addIncludedOnlyMesh(player2Ref.current);
+    glowLayer.addIncludedOnlyMesh(ballRef.current);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -157,9 +202,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   useEffect(() => {
     if (
       !sceneRef.current ||
-      !player1Ref.current.mesh ||
-      !player2Ref.current.mesh ||
-      !ballRef.current.mesh ||
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current ||
       !floorRef.current
     )
       return;
@@ -178,8 +223,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       floorMaterial.albedoColor = backgroundColor;
     }
 
-    if (player1Ref.current.mesh.material) {
-      const material = player1Ref.current.mesh.material as PBRMaterial;
+    if (player1Ref.current.material) {
+      const material = player1Ref.current.material as PBRMaterial;
       material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
@@ -188,8 +233,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       );
     }
 
-    if (player2Ref.current.mesh.material) {
-      const material = player2Ref.current.mesh.material as PBRMaterial;
+    if (player2Ref.current.material) {
+      const material = player2Ref.current.material as PBRMaterial;
       material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
@@ -198,8 +243,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       );
     }
 
-    if (ballRef.current.mesh.material) {
-      const material = ballRef.current.mesh.material as PBRMaterial;
+    if (ballRef.current.material) {
+      const material = ballRef.current.material as PBRMaterial;
       material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.7,
@@ -209,24 +254,30 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     }
   }, [theme]);
 
-  // Handle position changes
+  // Update positions directly from gameState
   useEffect(() => {
-    if (!canvasRef.current || !gameState || !player1Ref.current.mesh) return;
+    if (
+      !canvasRef.current ||
+      !gameState ||
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current
+    )
+      return;
 
-    const player1 = gameState.players.player1;
-    const player2 = gameState.players.player2;
-    const ball = gameState.ball;
+    const { players, ball } = gameState;
 
-    // Convert coordinates
-    const player1Y = -((player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const player2Y = -((player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    // Convert coordinates from game state to Babylon.js coordinate system
+    const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
     const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
     const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
 
-    player1Ref.current.mesh.position.y = player1Y;
-    player2Ref.current.mesh.position.y = player2Y;
-    ballRef.current.mesh.position.x = ballX;
-    ballRef.current.mesh.position.y = ballY;
+    // Update mesh positions directly
+    player1Ref.current.position.y = player1Y;
+    player2Ref.current.position.y = player2Y;
+    ballRef.current.position.x = ballX;
+    ballRef.current.position.y = ballY;
   }, [gameState]);
 
   return (
