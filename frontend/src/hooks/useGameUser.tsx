@@ -15,7 +15,7 @@ const useGameUser = (
 
   useEffect(() => {
     if (difficulty === 'local') {
-      setLocalPlayerId('player1');
+      setLocalPlayerId(userId);
       setRemotePlayerId('player2');
     } else {
       setLocalPlayerId(userId);
