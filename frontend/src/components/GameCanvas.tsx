@@ -3,10 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import {
   Color3,
   Color4,
+  CubeTexture,
   Engine,
   FreeCamera,
   HemisphericLight,
   MeshBuilder,
+  PBRMaterial,
   Scene,
   StandardMaterial,
   Vector3,
@@ -25,6 +27,44 @@ const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
 const FIX_POSITION = 2;
+
+function createReflectiveFloor(scene) {
+  const pbr = new PBRMaterial('floorMaterial', scene);
+  const ground = MeshBuilder.CreateGround(
+    'ground',
+    {
+      width: 20,
+      height: 20,
+      subdivisions: 2,
+    },
+    scene
+  );
+
+  pbr.metallic = 0.9;
+  pbr.roughness = 0.15;
+  pbr.environmentIntensity = 0.7;
+
+  const sceneBackgroundColor = scene.clearColor;
+
+  // Use it as the base for the floor's albedo (potentially with some adjustments)
+  // Making it slightly darker for contrast
+  pbr.albedoColor = new BABYLON.Color3(
+    sceneBackgroundColor.r * 0.7,
+    sceneBackgroundColor.g * 0.7,
+    sceneBackgroundColor.b * 0.7
+  );
+
+  // pbr.albedoColor = backgroundColor;
+
+  ground.material = pbr;
+
+  return ground;
+
+  // Optional: create a reflection probe to enhance reflections
+  // const reflectionProbe = new ReflectionProbe("mainReflector", 512, scene);
+  // reflectionProbe.renderList.push(...scene.meshes);
+  // pbr.reflectionTexture = reflectionProbe.cubeTexture;
+}
 
 // Get theme colors from CSS variables
 const getThemeColors = (theme: 'light' | 'dark' = 'dark') => {
@@ -81,6 +121,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     // Setup light
     const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
     light.intensity = 0.7;
+
+    const reflectiveFloor = createReflectiveFloor(scene);
+
+    scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
+      '../assets/game/kloppenheim_02_puresky_4k.exr',
+      scene
+    );
 
     // Setup materials with your theme colors
     const player1Material = new StandardMaterial('player1Mat', scene);
