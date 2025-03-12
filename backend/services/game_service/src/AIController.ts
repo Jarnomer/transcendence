@@ -37,6 +37,13 @@ export class AIController {
 
     this.lastUpdateTime = Date.now();
     this.lastBallDx = ball.dx;
+
+    // Debug logs
+    console.log('AI Update - Planned Moves:', this.plannedMoves.length);
+    console.log('Ball Speed:', ball.dx, ball.dy);
+    console.log('Frame Count:', frameCount);
+    console.log('Last Update Time:', this.lastUpdateTime);
+    console.log('Should Update AI?', this.shouldUpdate(ball.dx));
   }
 
   getNextMove(): 'up' | 'down' | null {
