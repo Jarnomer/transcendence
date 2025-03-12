@@ -1,3 +1,3 @@
-export * from './WebSocketContext';
-export * from './WebSocketManager';
-export * from './WebSocketReducer';
+export * from './webSocket/WebSocketContext';
+export * from './webSocket/WebSocketManager';
+export * from './webSocket/WebSocketReducer';

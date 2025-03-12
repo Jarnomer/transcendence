@@ -7,11 +7,17 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { CountDown, PlayerScoreBoard } from '@components';
 
 import { useWebSocketContext } from '@services';
-import { createReadyInputMessage } from '../../../shared/messages';
+import { createReadyInputMessage } from '@shared/messages';
 
-import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '@services/api';
+import {
+  enterQueue,
+  getGameID,
+  getQueueStatus,
+  singlePlayer,
+  submitResult,
+} from '@services/gameService';
 
-import GameCanvas from '../components/GameCanvas';
+import GameCanvas from '../components/game/GameCanvas';
 import useGameControls from '../hooks/useGameControls';
 
 export const GamePage: React.FC = () => {

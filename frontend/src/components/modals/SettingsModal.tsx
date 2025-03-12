@@ -1,7 +1,6 @@
 import React from 'react';
-import SettingsModalWrapper from '../wrappers/SettingsModalWrapper';
+import SettingsModalWrapper from '../UI/svgWrappers/SettingsModalWrapper';
 import { useModal } from './ModalContext';
-import { ModalWrapper } from '../wrappers/ModalWrapper';
 
 export const SettingsModal: React.FC = () => {
   const { isModalOpen, closeModal } = useModal();
