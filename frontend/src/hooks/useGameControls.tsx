@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react';
 
 import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
+
 import { useWebSocketContext } from '../services/WebSocketContext';
 
 interface UseGameControlsProps {
-  localPlayerId?: string;
-  remotePlayerId?: string;
+  localPlayerId: string;
+  remotePlayerId: string;
 }
 
-const useGameControls = ({
-  localPlayerId = 'player1',
-  remotePlayerId = 'player2',
-}: UseGameControlsProps = {}) => {
+const useGameControls = ({ localPlayerId, remotePlayerId }: UseGameControlsProps) => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
 

@@ -1,4 +1,5 @@
 import { PlayerInputMessage } from '@shared/messages';
+
 import { PongGameSession } from '../PongGameSession';
 
 export const handlePlayerInputMessage = (

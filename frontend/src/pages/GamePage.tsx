@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -8,152 +8,162 @@ import { CountDown, PlayerScoreBoard } from '@components';
 
 import { useWebSocketContext } from '@services';
 
-import { enterQueue, getGameID, getQueueStatus, singlePlayer, submitResult } from '@services/api';
+import {
+  useGameControls,
+  useGameResult,
+  useGameUser,
+  useMatchmaking,
+  useWebSocketSetup,
+} from '@hooks';
 
 import GameCanvas from '../components/GameCanvas';
-import useGameControls from '../hooks/useGameControls';
 
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch } = useWebSocketContext();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { mode, difficulty } = location.state || {};
 
   const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
-
   const playerScores = useRef({
     player1Score: gameState.players.player1?.score || 0,
     player2Score: gameState.players.player2?.score || 0,
   });
 
-  const location = useLocation();
-  const { mode, difficulty } = location.state || {};
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Log mode and difficulty when they change
-  useEffect(() => {
-    console.log('Mode:', mode, '| Difficulty:', difficulty, '| Status:', gameStatus);
-  }, [mode, difficulty, gameStatus]);
-
-  useEffect(() => {
-    // Retrieve user ID and set up game based on mode
-    const storedUserId = localStorage.getItem('userID');
-    setUserId(storedUserId);
-    if (mode === 'singleplayer') {
-      // For singleplayer, create a game with AI opponent
-      singlePlayer(difficulty).then((data) => {
-        console.log('Single player game ID:', data.game_id);
-        if (data.status === 'created') {
-          setGameId(data.game_id);
-        }
-      });
-    } else {
-      // For multiplayer, enter the matchmaking queue
-      enterQueue().then((status) => {
-        console.log('Queue status:', status);
-      });
-    }
-  }, [mode, difficulty]);
-
-  useEffect(() => {
-    if (!gameState) return;
-
-    // Set player IDs based on game state and mode
-    if (mode === 'singleplayer') {
-      setLocalPlayerId(userId);
-      setRemotePlayerId(userId);
-    } else if (mode === 'local') {
-      setLocalPlayerId('player1'); // Account holder uses W/S
-      setRemotePlayerId('player2'); // Guest uses arrow keys
-    }
-  }, [mode, gameState, userId]);
-
-  useEffect(() => {
-    // Only start multiplayer polling when we have a user ID
-    console.log('User ID:', userId, 'Mode:', mode);
-    if (!userId || mode === 'singleplayer') return;
-
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    intervalRef.current = setInterval(async () => {
-      try {
-        const status = await getQueueStatus();
-        if (status === 'matched') {
-          const data = await getGameID();
-          console.log('Matched! Game ID:', data.game_id);
-          setGameId(data.game_id);
-          // Stop polling when matched
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-        }
-      } catch (error) {
-        console.error('Error checking queue:', error);
-      }
-    }, 2000); // Poll every 2 seconds
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [userId, mode, gameId]);
-
-  useEffect(() => {
-    if (!gameId) return;
-
-    // Set up WebSocket URL when gameId is available
-    const token = localStorage.getItem('token');
-    const baseUrl = `wss://${window.location.host}/ws/remote/game/`;
-
-    const params = new URLSearchParams();
-    params.append('token', token || '');
-    params.append('game_id', gameId);
-    params.append('mode', mode || '');
-    params.append('difficulty', difficulty || '');
-    params.append('user_id', userId || '');
-
-    const url = `${baseUrl}?${params.toString()}`;
-
-    setUrl(url);
-  }, [gameId, mode, difficulty, setUrl]);
-
+  useGameUser(mode, setUserId, setLocalPlayerId, setRemotePlayerId);
+  useMatchmaking(mode, difficulty, setGameId);
+  useWebSocketSetup(gameId, mode, difficulty, userId);
+  useGameResult(gameStatus, gameId, gameState, dispatch, userId);
   useGameControls({
-    // Set up game controls with player IDs
-    localPlayerId: localPlayerId || 'player1',
-    remotePlayerId,
+    localPlayerId: localPlayerId,
+    remotePlayerId: remotePlayerId,
   });
 
-  useEffect(() => {
-    if (gameStatus === 'finished' && gameId) {
-      console.log('Game Over');
-      const winnerId =
-        gameState.players.player1.score > gameState.players.player2.score
-          ? gameState.players.player1.id
-          : gameState.players.player2.id;
-      const loserId =
-        gameState.players.player1.score < gameState.players.player2.score
-          ? gameState.players.player1.id
-          : gameState.players.player2.id;
-      console.log('Scores:', gameState.players.player1.score, gameState.players.player2.score);
-      submitResult(
-        gameId,
-        winnerId,
-        loserId,
-        gameState.players.player1.score,
-        gameState.players.player2.score
-      ).then((data) => {
-        console.log('Result submitted:', data);
-        dispatch({ type: 'GAME_RESET' });
-        navigate('/gameMenu');
-      });
-    }
-  }, [gameStatus, gameId]);
+  // const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // useEffect(() => {
+  //   // Retrieve user ID and set up game based on mode
+  //   const storedUserId = localStorage.getItem('userID');
+  //   setUserId(storedUserId);
+  // }, []);
+
+  // // Log mode and difficulty when they change
+  // useEffect(() => {
+  //   console.log('Mode:', mode, '| Difficulty:', difficulty, '| Status:', gameStatus);
+  // }, [mode, difficulty, gameStatus]);
+
+  // useEffect(() => {
+  //   if (mode === 'singleplayer') {
+  //     // For singleplayer, create a game with AI opponent
+  //     singlePlayer(difficulty).then((data) => {
+  //       console.log('Single player game ID:', data.game_id);
+  //       if (data.status === 'created') {
+  //         setGameId(data.game_id);
+  //       }
+  //     });
+  //   } else {
+  //     // For multiplayer, enter the matchmaking queue
+  //     enterQueue().then((status) => {
+  //       console.log('Queue status:', status);
+  //     });
+  //   }
+  // }, [mode, difficulty]);
+
+  // useEffect(() => {
+  //   if (!gameState) return;
+
+  //   // Set player IDs based on game state and mode
+  //   if (mode === 'singleplayer') {
+  //     setLocalPlayerId(userId);
+  //     setRemotePlayerId(userId);
+  //   } else if (mode === 'local') {
+  //     setLocalPlayerId('player1'); // Account holder uses W/S
+  //     setRemotePlayerId('player2'); // Guest uses arrow keys
+  //   }
+  // }, [mode, gameState, userId]);
+
+  // useEffect(() => {
+  //   // Only start multiplayer polling when we have a user ID
+  //   console.log('User ID:', userId, 'Mode:', mode);
+  //   if (!userId || mode === 'singleplayer') return;
+
+  //   if (intervalRef.current) {
+  //     clearInterval(intervalRef.current);
+  //   }
+
+  //   intervalRef.current = setInterval(async () => {
+  //     try {
+  //       const status = await getQueueStatus();
+  //       if (status === 'matched') {
+  //         const data = await getGameID();
+  //         console.log('Matched! Game ID:', data.game_id);
+  //         setGameId(data.game_id);
+  //         // Stop polling when matched
+  //         if (intervalRef.current) {
+  //           clearInterval(intervalRef.current);
+  //           intervalRef.current = null;
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error checking queue:', error);
+  //     }
+  //   }, 2000); // Poll every 2 seconds
+
+  //   return () => {
+  //     if (intervalRef.current) {
+  //       clearInterval(intervalRef.current);
+  //       intervalRef.current = null;
+  //     }
+  //   };
+  // }, [userId, mode, gameId]);
+
+  // useEffect(() => {
+  //   if (!gameId) return;
+
+  //   // Set up WebSocket URL when gameId is available
+  //   const token = localStorage.getItem('token');
+  //   const baseUrl = `wss://${window.location.host}/ws/remote/game/`;
+
+  //   const params = new URLSearchParams();
+  //   params.append('token', token || '');
+  //   params.append('game_id', gameId);
+  //   params.append('mode', mode || '');
+  //   params.append('difficulty', difficulty || '');
+  //   params.append('user_id', userId || '');
+
+  //   const url = `${baseUrl}?${params.toString()}`;
+
+  //   setUrl(url);
+  // }, [gameId, mode, difficulty, setUrl]);
+
+  // useEffect(() => {
+  //   if (gameStatus === 'finished' && gameId) {
+  //     console.log('Game Over');
+  //     const winnerId =
+  //       gameState.players.player1.score > gameState.players.player2.score
+  //         ? gameState.players.player1.id
+  //         : gameState.players.player2.id;
+  //     const loserId =
+  //       gameState.players.player1.score < gameState.players.player2.score
+  //         ? gameState.players.player1.id
+  //         : gameState.players.player2.id;
+  //     console.log('Scores:', gameState.players.player1.score, gameState.players.player2.score);
+  //     submitResult(
+  //       gameId,
+  //       winnerId,
+  //       loserId,
+  //       gameState.players.player1.score,
+  //       gameState.players.player2.score
+  //     ).then((data) => {
+  //       console.log('Result submitted:', data);
+  //       dispatch({ type: 'GAME_RESET' });
+  //       navigate('/gameMenu');
+  //     });
+  //   }
+  // }, [gameStatus, gameId]);
 
   const getStatusMessage = () => {
     if (connectionStatus !== 'connected') {

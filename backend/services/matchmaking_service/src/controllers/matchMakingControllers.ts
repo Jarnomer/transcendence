@@ -1,6 +1,8 @@
-import fastify, { FastifyRequest, FastifyReply } from 'fastify';
-import { MatchMakingService } from '../services/matchMakingServices';
+import { FastifyReply, FastifyRequest } from 'fastify';
+
 import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+
+import { MatchMakingService } from '../services/matchMakingServices';
 export class MatchMakingController {
   private matchMakingService: MatchMakingService;
 
@@ -14,7 +16,7 @@ export class MatchMakingController {
    * @param reply 200 OK { users: [user1, user2, ...] }
    */
   async getQueues(request: FastifyRequest, reply: FastifyReply) {
-    const { page, pageSize } = request.query as { page: number, pageSize: number };
+    const { page, pageSize } = request.query as { page: number; pageSize: number };
     request.log.trace(`Getting all users in queue`);
     const users = await this.matchMakingService.getQueues(page, pageSize);
     reply.code(200).send(users);
@@ -68,7 +70,7 @@ export class MatchMakingController {
     }
     request.log.trace(`status: ${queue.status}`);
     console.log(queue);
-    reply.code(200).send({ status: queue.status });
+    reply.code(200).send({ status: queue.status, game_id: queue.game_id });
   }
 
   /**

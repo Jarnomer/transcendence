@@ -1,8 +1,9 @@
 import { isPlayerInputMessage } from '@shared/messages';
 import { GameStatus } from '@shared/types';
+
 import { AIController } from './AIController';
-import PongGame from './PongGame';
 import { handlePlayerInputMessage } from './handlers/playerInputHandler';
+import PongGame from './PongGame';
 
 export class PongGameSession {
   private gameId: string;
@@ -187,6 +188,7 @@ export class PongGameSession {
   }
 
   readyGame(playerId: string, state: boolean): void {
+    console.log(`Player ${playerId} is ready: ${state}`);
     this.game.setReadyState(playerId, state);
     this.startGameLoop();
   }

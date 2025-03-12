@@ -1,23 +1,25 @@
 import {
-  useEffect,
-  useReducer,
-  useMemo,
-  useCallback,
-  useState,
   createContext,
+  useCallback,
   useContext,
+  useEffect,
+  useMemo,
+  useReducer,
   useRef,
+  useState,
 } from 'react';
+
+import { GameState, GameStatus } from '@shared/types';
 
 import WebSocketManager from './WebSocketManager';
 import webSocketReducer from './WebSocketReducer';
-import { GameState, GameStatus } from '@shared/types';
 
 const WebSocketContext = createContext<any>(null);
 
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [url, setUrl] = useState<string | null>(null);
   const ws = useRef<WebSocket | null>(null);
+  const wsManagerRef = useRef<WebSocketManager | null>(null);
 
   const [state, dispatch] = useReducer(webSocketReducer, {
     connectionStatus: 'connecting',
@@ -28,12 +30,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         player2: { id: 'player2', y: 0, score: 0 },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0 },
-    }
+    },
   });
 
   const wsManager = useMemo(() => {
     if (url) {
-      return WebSocketManager.getInstance(url);
+      wsManagerRef.current = WebSocketManager.getInstance(url);
+      return wsManagerRef.current;
     }
     return null;
   }, [url]);
@@ -88,8 +91,19 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     [wsManager]
   );
 
+  const closeConnection = useCallback(() => {
+    console.log('url', url);
+    if (wsManagerRef.current) {
+      console.log('Closing WebSocket connection');
+      wsManagerRef.current.close();
+      wsManagerRef.current = null;
+    }
+  }, [wsManager]);
+
   return (
-    <WebSocketContext.Provider value={{ ...state, sendMessage, setUrl, ws, dispatch }}>
+    <WebSocketContext.Provider
+      value={{ ...state, sendMessage, setUrl, ws, dispatch, closeConnection }}
+    >
       {children}
     </WebSocketContext.Provider>
   );

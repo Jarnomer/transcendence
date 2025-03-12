@@ -7,6 +7,7 @@ class WebSocketManager {
   private static readonly RECONNECT_INTERVAL = 3000;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private eventHandlers: Record<string, ((data: any) => void)[]> = {};
+  private manualClose = false;
 
   private constructor(url: string) {
     this.url = url;
@@ -37,8 +38,15 @@ class WebSocketManager {
     this.ws.onclose = (event) => {
       console.log('WebSocket disconnected:', this.url, event.code, event.reason);
       this.notifyHandlers('close', event);
-      if (!event.wasClean && this.reconnectAttempts < WebSocketManager.MAX_RECONNECT_ATTEMPTS) {
+      if (
+        !this.manualClose &&
+        !event.wasClean &&
+        this.reconnectAttempts < WebSocketManager.MAX_RECONNECT_ATTEMPTS
+      ) {
         this.scheduleReconnect();
+      } else {
+        console.log('WebSocket closed and deleted:', this.url);
+        delete WebSocketManager.instances[this.url];
       }
     };
 
@@ -89,6 +97,8 @@ class WebSocketManager {
   }
 
   close() {
+    console.log('Closing WebSocket:', this.url);
+    this.manualClose = true;
     if (this.ws) {
       this.ws.close();
     }

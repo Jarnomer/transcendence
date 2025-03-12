@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 const API_URL = '/api/auth';
 
 interface LoginResponse {
@@ -134,7 +134,7 @@ export async function enterQueue() {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}`);
+    const res = await api.get<GameIDResponse>(`/matchmaking/enterQueue/${userID}`);
     console.log(res.data);
     return res.data;
   } catch (err) {
@@ -199,7 +199,7 @@ export async function getUserData(userId: string) {
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
-    console.log("user data", res.data);
+    console.log('user data', res.data);
     return res.data;
   } catch (err) {
     console.error('Failed to get user data:', err);
@@ -280,7 +280,6 @@ export async function sendFriendRequest(receiver_id: string) {
     console.error('Failed to send friend request:', err);
     throw err;
   }
-
 }
 
 export async function acceptFriendRequest(sender_id: string) {
@@ -289,7 +288,9 @@ export async function acceptFriendRequest(sender_id: string) {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.post(`/friend/request/accept/${sender_id}`, { message: 'Friend request accepted' });
+    const res = await api.post(`/friend/request/accept/${sender_id}`, {
+      message: 'Friend request accepted',
+    });
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to accept friend request`);
     }
@@ -306,7 +307,9 @@ export async function rejectFriendRequest(sender_id: string) {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.post(`/friend/request/reject/${sender_id}`, { message: 'Friend request rejected' });
+    const res = await api.post(`/friend/request/reject/${sender_id}`, {
+      message: 'Friend request rejected',
+    });
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to reject friend request`);
     }
