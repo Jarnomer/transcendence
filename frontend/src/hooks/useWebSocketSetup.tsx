@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useWebSocketContext } from '../services/WebSocketContext';
+import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
 export const useWebSocketSetup = (
   gameId: string | null,

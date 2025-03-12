@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 
 import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
 
-import { useWebSocketContext } from '../services/WebSocketContext';
+import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
 interface UseGameControlsProps {
-  localPlayerId: string ;
+  localPlayerId: string;
   remotePlayerId: string;
 }
 

@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
-import { login, register } from '../services/api.ts';
-import { ClippedButton } from '../components/wrappers/clippedButton.tsx';
-import { SVGModal } from '../components/wrappers/svgModal';
-import { IsLoggedInContext } from '../app.tsx';
+import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
+import { SVGModal } from '@components/UI/svgWrappers/svgModal.tsx';
+import { login, register } from '@services/authService.ts';
 import { useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAnimatedNavigate } from '../animatedNavigate';
+import { IsLoggedInContext } from '../app.tsx';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();

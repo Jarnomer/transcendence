@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { Footer } from './components/Footer.tsx';
-import { Header } from './components/Header.tsx';
+
+import { Footer } from './components/footer/Footer.tsx';
+import { Header } from './components/header/Header.tsx';
+import { AuthModal } from './components/modals/authModal.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
-import { AuthModal } from './components/modals/authModal.tsx';
 import { ChatPage } from './pages/ChatPage.tsx';
 import { CreatorsPage } from './pages/CreatorsPage.tsx';
 import { GameMenu } from './pages/GameMenu.tsx';
@@ -12,8 +14,8 @@ import { GamePage } from './pages/GamePage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
-import { WebSocketProvider } from './services/WebSocketContext.tsx';
 import { api } from './services/api.ts';
+import { WebSocketProvider } from './services/webSocket/WebSocketContext.tsx';
 
 export const IsLoggedInContext = React.createContext<
   | {

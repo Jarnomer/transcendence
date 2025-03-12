@@ -1,4 +1,4 @@
-import { enterQueue, getQueueStatus, singlePlayer, getGameID } from './api';
+import { cancelQueue, enterQueue, getGameID, getQueueStatus, singlePlayer } from './gameService';
 
 // Step 1: Define Matchmaking States
 enum MatchmakingState {
@@ -58,6 +58,10 @@ class MatchmakingFactory {
       case 'singleplayer':
         return new SinglePlayerMatchmaking(difficulty);
       case '1v1':
+        if (difficulty === 'local') {
+          console.log('Local 1v1 match');
+          return new SinglePlayerMatchmaking(difficulty);
+        }
         return new OneVsOneMatchmaking();
       case 'tournament':
         return new TournamentMatchmaking(parseInt(difficulty || '4', 10)); // Default to 4-player tournament
@@ -73,8 +77,12 @@ class MatchmakingManager {
   private matchmakingStrategy: MatchmakingStrategy;
   private interval: NodeJS.Timeout | null = null;
   private gameId: string | null = null;
+  private mode: string;
+  private difficulty: string;
 
   constructor(mode: string, difficulty: string) {
+    this.mode = mode;
+    this.difficulty = difficulty;
     this.matchmakingStrategy = MatchmakingFactory.createMatchmaking(mode, difficulty);
   }
 
@@ -116,6 +124,12 @@ class MatchmakingManager {
   stopMatchmaking() {
     if (this.interval) clearInterval(this.interval);
     console.log('Matchmaking stopped');
+    console.log('mode is', this.mode);
+    console.log('difficulty is', this.difficulty);
+    if (this.state === MatchmakingState.WAITING_FOR_PLAYERS) {
+      console.log('Cancelling queue...');
+      cancelQueue();
+    }
   }
 }
 

@@ -1,14 +1,14 @@
-export * from './BackgroundGlow';
-export * from './CountDown';
-export * from './Footer';
-export * from './GameHeader';
-export * from './GoBackButton';
-export * from './Header';
-export * from './HeaderNav';
-export * from './LeaderBoard';
-export * from './NavIconButton';
-export * from './PlayerScoreBoard';
-export * from './PlayerScoreCard';
-export * from './RadialBackground';
+export * from './footer/Footer';
+export * from './game/CountDown';
+export * from './game/GameHeader';
+export * from './game/PlayerScoreBoard';
+export * from './game/PlayerScoreCard';
+export * from './header/Header';
+export * from './header/HeaderNav';
+export * from './home/LeaderBoard';
+export * from './profile/RadialBackground';
+export * from './UI/buttons/GoBackButton';
+export * from './UI/buttons/NavIconButton';
+export * from './visual/BackgroundGlow';
 
-export { default as GameCanvas } from './GameCanvas';
+export { default as GameCanvas } from './game/GameCanvas';

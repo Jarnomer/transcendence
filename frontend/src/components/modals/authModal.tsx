@@ -1,11 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { login, register } from '../../services/api.ts';
-import { ClippedButton } from '../wrappers/clippedButton';
-import { SVGModal } from '../wrappers/svgModal';
 import { IsLoggedInContext } from '../../app.tsx';
+import { login, register } from '../../services/authService.ts';
+import { ClippedButton } from '../UI/buttons/ClippedButton.tsx';
+import { SVGModal } from '../UI/svgWrappers/svgModal.tsx';
 import { useModal } from './ModalContext';
-import { ModalWrapper } from '../wrappers/ModalWrapper.tsx';
+import { ModalWrapper } from './ModalWrapper.tsx';
 
 export const AuthModal: React.FC = () => {
   const navigate = useNavigate();

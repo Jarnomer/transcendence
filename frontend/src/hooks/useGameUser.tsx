@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const useGameUser = (
-  mode: string
+  difficulty: string
   //setUserId: React.Dispatch<React.SetStateAction<string | null>>,
   //setLocalPlayerId: React.Dispatch<React.SetStateAction<string | null>>,
   //setRemotePlayerId: React.Dispatch<React.SetStateAction<string | null>>
@@ -14,14 +14,14 @@ const useGameUser = (
   }, []);
 
   useEffect(() => {
-    if (mode === 'local') {
+    if (difficulty === 'local') {
       setLocalPlayerId('player1');
       setRemotePlayerId('player2');
     } else {
       setLocalPlayerId(userId);
       setRemotePlayerId(userId);
     }
-  }, [mode, userId, setLocalPlayerId, setRemotePlayerId]);
+  }, [difficulty, userId, setLocalPlayerId, setRemotePlayerId]);
   return { userId, localPlayerId, remotePlayerId };
 };
 

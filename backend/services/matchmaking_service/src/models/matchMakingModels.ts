@@ -24,7 +24,7 @@ export class MatchMakingModel {
     const offset = (page - 1) * pageSize;
 
     const users = await this.db.all(
-      'SELECT * FROM matchmaking_queue ORDER BY created_at DESC LIMIT ? OFFSET ?',
+      'SELECT * FROM matchmaking_queue ORDER BY joined_at DESC LIMIT ? OFFSET ?',
       [pageSize, offset]
     );
 
@@ -116,6 +116,9 @@ export class MatchMakingModel {
   }
 
   async deleteQueueByUserID(user_id: string) {
-    return await this.db.run(`DELETE FROM matchmaking_queue WHERE user_id = ?`, [user_id]);
+    return await this.db.run(
+      `DELETE FROM matchmaking_queue WHERE user_id = ? AND status = 'waiting'`,
+      [user_id]
+    );
   }
 }

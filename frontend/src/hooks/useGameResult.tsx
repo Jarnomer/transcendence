@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { submitResult } from '../services/api';
-import { useWebSocketContext } from '../services/WebSocketContext';
+import { submitResult } from '../services/gameService';
+import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
 export const useGameResultSubmission = (
   gameStatus: string,
@@ -51,12 +51,14 @@ export const useGameResultSubmission = (
       const loserId =
         players.player1.score < players.player2.score ? players.player1.id : players.player2.id;
 
-      submitResult(gameId, winnerId, loserId, players.player1.score, players.player2.score).then(
-        () => {
+      submitResult(gameId, winnerId, loserId, players.player1.score, players.player2.score)
+        .then(() => {
           dispatch({ type: 'GAME_RESET' });
           navigate('/gameMenu');
-        }
-      );
+        })
+        .catch((err) => {
+          console.error('Error submitting game result:', err);
+        });
     }
   }, [gameStatus, gameId, gameState, dispatch, navigate]);
 
@@ -83,9 +85,13 @@ export const useGameResultSubmission = (
         loserId,
         scoresRef.current.p1Score,
         scoresRef.current.p2Score
-      ).then(() => {
-        dispatch({ type: 'GAME_RESET' });
-      });
+      )
+        .then(() => {
+          dispatch({ type: 'GAME_RESET' });
+        })
+        .catch((err) => {
+          console.error('Error submitting game result:', err);
+        });
     };
   }, []);
 };
