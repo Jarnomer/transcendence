@@ -1,37 +1,28 @@
 import { Color3 } from 'babylonjs';
 
-// Color parser that handles converts color formats to Color3
 export function parseColor(colorValue: string): Color3 {
-  // Handle named colors with a simple map
   const namedColors: Record<string, Color3> = {
     black: new Color3(0, 0, 0),
-    // Add more named colors as needed
   };
 
-  // Trim the color value
   colorValue = colorValue.trim();
 
-  // Handle empty values
   if (!colorValue) {
     return new Color3(1, 1, 1); // Default to white
   }
 
-  // Handle hex colors
   if (colorValue.startsWith('#')) {
     return hexToColor3(colorValue);
   }
 
-  // Handle OKLCH colors
   if (colorValue.toLowerCase().startsWith('oklch')) {
     return oklchToColor3(colorValue);
   }
 
-  // Handle RGB colors
   if (colorValue.toLowerCase().startsWith('rgb')) {
     return rgbToColor3(colorValue);
   }
 
-  // Handle HSL colors
   if (colorValue.toLowerCase().startsWith('hsl')) {
     return hslToColor3(colorValue);
   }
@@ -46,62 +37,75 @@ export function parseColor(colorValue: string): Color3 {
   return new Color3(1, 1, 1);
 }
 
-/**
- * Converts OKLCH color values to a Babylon.js Color3 (RGB).
- *
- * OKLCH is a perceptually uniform color space:
- * - L: Lightness (0-100%)
- * - C: Chroma (saturation/colorfulness)
- * - H: Hue (angle in degrees, 0-360)
- */
-// Converts OKLCH color values to a Babylon.js Color3
 export function oklchToColor3(colorValue: string): Color3 {
-  const okLchRegex = /oklch\(\s*([0-9.]+)%\s+([0-9.]+)\s+([0-9.]+)\s*\)/;
-  const matches = colorValue.match(okLchRegex);
+  try {
+    // Remove the 'oklch(' prefix and ')' suffix
+    const cleanedStr = colorValue
+      .toLowerCase()
+      .replace(/oklch\s*\(\s*/, '')
+      .replace(/\s*\)$/, '');
 
-  if (!matches) {
-    console.warn(`Failed to parse OKLCH color: ${colorValue}`);
+    // Split by commas or whitespace
+    const parts = cleanedStr.split(/[\s,]+/);
+
+    if (parts.length < 3) {
+      throw new Error(`Invalid OKLCH format: ${colorValue}`);
+    }
+
+    // Parse each component with proper handling of percentages
+    let lightness = parseFloat(parts[0]);
+    if (parts[0].includes('%')) {
+      lightness /= 100; // Convert percentage to 0-1
+    }
+
+    let chroma = parseFloat(parts[1]);
+    if (parts[1].includes('%')) {
+      chroma /= 100; // Convert percentage to decimal
+    }
+
+    let hue = parseFloat(parts[2]);
+    if (parts[2].includes('%')) {
+      hue = hue * 3.6; // Convert percentage to degrees
+    }
+
+    // Ensure values are in expected ranges
+    lightness = Math.max(0, Math.min(1, lightness)); // 0-1
+    chroma = Math.max(0, chroma); // Non-negative
+    hue = hue % 360; // 0-360
+
+    // Convert from OKLCH to OKLAB
+    const L = lightness;
+    const A = chroma * Math.cos((hue * Math.PI) / 180); // Convert hue
+    const B = chroma * Math.sin((hue * Math.PI) / 180); // Convert chroma
+
+    // First, convert to an intermediate color space (LMS)
+    const l = L + 0.3963377774 * A + 0.2158037573 * B;
+    const m = L - 0.1055613458 * A - 0.0638541728 * B;
+    const s = L - 0.0894841775 * A - 1.291485548 * B;
+
+    // Then, apply nonlinear transformation (cube function)
+    const lCubed = l * l * l;
+    const mCubed = m * m * m;
+    const sCubed = s * s * s;
+
+    // Finally, convert to linear RGB
+    let r = +4.0767416621 * lCubed - 3.3077115913 * mCubed + 0.2309699292 * sCubed;
+    let g = -1.2684380046 * lCubed + 2.6097574011 * mCubed - 0.3413193965 * sCubed;
+    let b = -0.0041960863 * lCubed - 0.7034186147 * mCubed + 1.707614701 * sCubed;
+
+    // Apply gamma correction and clamp values
+    r = Math.max(0, Math.min(1, r));
+    g = Math.max(0, Math.min(1, g));
+    b = Math.max(0, Math.min(1, b));
+
+    // Create and return Babylon.js Color3
+    return new Color3(r, g, b);
+  } catch (error) {
+    console.warn(`Failed to parse OKLCH color: ${colorValue}`, error);
     return new Color3(1, 1, 1); // Return white as fallback
   }
-
-  // Extract the three components
-  const lightness = parseFloat(matches[1]) / 100; // Convert to 0-1 range
-  const chroma = parseFloat(matches[2]);
-  const hue = parseFloat(matches[3]);
-
-  // Convert from OKLCH to OKLAB
-  // OKLAB is an intermediate perceptually uniform color space
-  const L = lightness;
-  const A = chroma * Math.cos((hue * Math.PI) / 180); // Convert hue
-  const B = chroma * Math.sin((hue * Math.PI) / 180); // Convert chroma
-
-  // First, convert to an intermediate color space (LMS)
-  const l = L + 0.3963377774 * A + 0.2158037573 * B;
-  const m = L - 0.1055613458 * A - 0.0638541728 * B;
-  const s = L - 0.0894841775 * A - 1.291485548 * B;
-
-  // Then, apply nonlinear transformation (cube function)
-  const lCubed = l * l * l;
-  const mCubed = m * m * m;
-  const sCubed = s * s * s;
-
-  // Finally, convert to linear RGB
-  let r =
-    +4.0767416621 * lCubed - 3.3077115913 * mCubed + 0.2309699292 * sCubed;
-  let g =
-    -1.2684380046 * lCubed + 2.6097574011 * mCubed - 0.3413193965 * sCubed;
-  let b = -0.0041960863 * lCubed - 0.7034186147 * mCubed + 1.707614701 * sCubed;
-
-  // Apply gamma correction and clamp values
-  r = Math.max(0, Math.min(1, r));
-  g = Math.max(0, Math.min(1, g));
-  b = Math.max(0, Math.min(1, b));
-
-  // Create and return Babylon.js Color3
-  return new Color3(r, g, b);
 }
 
-// Convert hex color to Babylon.js Color3
 function hexToColor3(hex: string): Color3 {
   hex = hex.replace('#', ''); // Remove # if present
 
@@ -118,7 +122,6 @@ function hexToColor3(hex: string): Color3 {
   return new Color3(r, g, b);
 }
 
-// Convert RGB color to Babylon.js Color3
 function rgbToColor3(rgb: string): Color3 {
   const rgbRegex = /rgb\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*\)/;
   const matches = rgb.match(rgbRegex);
@@ -135,7 +138,6 @@ function rgbToColor3(rgb: string): Color3 {
   return new Color3(r, g, b);
 }
 
-// Convert HSL color to Babylon.js Color3
 function hslToColor3(hsl: string): Color3 {
   const hslRegex = /hsl\(\s*([0-9]+)\s*,\s*([0-9]+)%\s*,\s*([0-9]+)%\s*\)/;
   const matches = hsl.match(hslRegex);
