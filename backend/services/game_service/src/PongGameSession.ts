@@ -38,6 +38,10 @@ export class PongGameSession {
 
     connection.on('message', (message: string) => this.handleMessage(message));
     connection.on('close', () => this.removeClient(playerId));
+
+    if (this.areAllPlayersConnected()) {
+      this.game.setGameStatus('waiting');
+    }
   }
 
   removeClient(playerId: string): void {
