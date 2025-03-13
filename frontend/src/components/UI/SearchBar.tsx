@@ -8,7 +8,11 @@ interface SearchBarProps {
   placeholder?: string; // optional placeholder text
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder = 'Search...' }) => {
+export const SearchBar: React.FC<SearchBarProps> = ({
+  value,
+  onChange,
+  placeholder = 'Search...',
+}) => {
   return (
     <div className="w-full flex justify-between border">
       <input

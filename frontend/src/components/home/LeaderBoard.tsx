@@ -1,39 +1,102 @@
-import { getUsers } from '@services/userService';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useAnimatedNavigate } from '../../animatedNavigate';
+import SearchBar from '../UI/SearchBar';
 
 export const LeaderBoard: React.FC = () => {
-  const [users, setUsers] = useState<{ username: string; wins: number; losses: number }[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const animatedNavigate = useAnimatedNavigate();
 
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const data = await getUsers();
-        // Sort users by win/loss ratio (handling division by zero)
-        const sortedUsers = data.sort((a, b) => {
-          const ratioA = a.wins / (a.wins + a.losses || 1); // Avoid division by zero
-          const ratioB = b.wins / (b.wins + b.losses || 1);
-          return ratioB - ratioA; // Descending order
-        });
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value.toLowerCase());
+    console.log('asd');
+  };
 
-        setUsers(sortedUsers);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    }
+  // const filteredUsers = users.filter((user) =>
+  //   user.display_name.toLowerCase().startsWith(searchQuery)
+  // );
 
-    fetchUsers();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
+
+  // async function fetchData() {
+  //   setLoading(true);
+  //   const res = await getUsers();
+  //   if (res) {
+  //     console.log(res);
+  //     setUsers(res);
+  //   }
+  //   setLoading(false);
+  // }
 
   return (
-    <div className="p-10 text-center">
-      <h2>Leaderboard</h2>
-      <ul className="p-2">
-        {users.map((user, index) => (
-          <li key={index}>
-            {index + 1}. {user.username} - Wins: {user.wins}, Losses: {user.losses}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      <div className="h-full">
+        <h1 className="font-heading text-3xl">Leaderboard</h1>
+        <div className="w-full">
+          <SearchBar
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search users..."
+          />
+          <p className="text-sm text-gray-500">turned off</p>
+        </div>
+        {/* {!loading ? (
+          <div className=" text-center">
+            <ul className="p-2">
+              {filteredUsers.map((user, index) => (
+                <li
+                  key={index}
+                  className="my-2"
+                  onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
+                >
+                  <div className="flex items-center gap-5">
+                    <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
+                      <img
+                        className="object-cover rounded-full w-full h-full"
+                        src={user.avatar_url}
+                      />
+                    </div>
+                    <p>
+                      {user.display_name || 'N/A'} <br />
+                    </p>
+                    <p>Rank: ??</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null} */}
+      </div>
+    </>
   );
 };
+
+//   <h1 className="font-heading text-3xl border-primary">
+//     Players waiting for an opponent
+//   </h1>
+//   {users
+//     .filter((user) => user.user_id != localStorage.getItem('userID'))
+//     .map((user, index) => (
+//       <li
+//         key={index}
+//         className="my-2"
+//         onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
+//       >
+//         <div className="flex items-center gap-5">
+//           <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
+//             <img
+//               className="object-cover rounded-full w-full h-full"
+//               src={user.avatar_url}
+//             />
+//           </div>
+//           <p>
+//             {user.display_name || 'N/A'} <br />
+//           </p>
+//           <></>
+//         </div>
+//       </li>
+//     ))}
+// </ul>

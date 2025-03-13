@@ -1,14 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-
-import { useParams } from 'react-router-dom';
-
-import { Vibrant } from 'node-vibrant/browser';
-
-import { FriendList } from '@components/profile/FriendList.tsx';
-import { RadialBackground } from '@components/profile/RadialBackground.tsx';
 import { NavIconButton } from '@components/UI/buttons/NavIconButton.tsx';
-import { BackgroundGlow } from '@components/visual/BackgroundGlow.tsx';
-
 import { api } from '@services/api.ts';
 import {
   acceptFriendRequest,
@@ -16,6 +6,13 @@ import {
   sendFriendRequest,
 } from '@services/friendService.ts';
 import { getUserData } from '@services/userService';
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+import { FriendList } from '@components/profile/FriendList.tsx';
+import { RadialBackground } from '@components/profile/RadialBackground.tsx';
+import { BackgroundGlow } from '@components/visual/BackgroundGlow.tsx';
+import { Vibrant } from 'node-vibrant/browser';
 
 function timeAgo(lastActive: string): string {
   const now = new Date();
@@ -187,27 +184,7 @@ export const ProfilePage: React.FC = () => {
     console.log('Blocking user: ', user_id);
   };
 
-  const handleAcceptFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    acceptFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request accepted');
-      })
-      .catch((error) => {
-        console.error('Failed to accept friend request: ', error);
-      });
-  };
 
-  const handleRejectFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    rejectFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request rejected');
-      })
-      .catch((error) => {
-        console.error('Failed to reject friend request: ', error);
-      });
-  };
 
   if (loading) {
     return <div className="text-center mt-10 text-lg">Loading...</div>;
