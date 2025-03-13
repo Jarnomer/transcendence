@@ -32,7 +32,7 @@ export function createParticleTexture(scene: Scene, color: Color3): Texture {
   return texture;
 }
 
-export function createBallTrail(scene: Scene, ballMesh: any, color: Color3) {
+export function createBallTrail(ballMesh: any, speed: number, color: Color3, scene: Scene) {
   const particleSystem = new ParticleSystem('ballTrail', 500, scene);
 
   // Create a slightly bluer version for the "dead" color
@@ -101,22 +101,70 @@ export function updateBallTrail(ballMesh: any, dx: number, dy: number) {
   ps.maxSize = 0.3 + speed * 0.1;
 }
 
-// Update the ball trail's color when theme changes
-export function updateBallTrailColor(ballMesh: any, color: Color3, scene: Scene) {
-  if (!ballMesh || !ballMesh.trailParticleSystem) return;
+export function applyBallOvality(ballMesh: any, dx: number, dy: number, speed: number) {
+  const shapeDampingFactor = 0.5; // How quickly the shape changes
+  const rotationDampingFactor = 0.3; // How quickly the rotation changes
 
-  // Create a slightly bluer version for the "dead" color
-  const deadColorR = Math.max(0, color.r * 0.7);
-  const deadColorG = Math.max(0, color.g * 0.7);
-  const deadColorB = Math.min(1, color.b * 1.3);
-  const ps = ballMesh.trailParticleSystem;
+  // Store the original scale if not already saved
+  if (!ballMesh.originalScale) {
+    ballMesh.originalScale = new Vector3(1, 1, 1);
+  }
 
-  ps.particleTexture.dispose();
-  ps.particleTexture = createParticleTexture(scene, color);
+  const speedDivisor = 50; // Increase for less effect / speed
+  const maxElongation = 0.3; // Increase for less ovality
 
-  ps.color1 = new Color4(color.r, color.g, color.b, 1.0);
-  ps.color2 = new Color4(color.r * 1.2, color.g * 1.2, color.b * 1.2, 1.0);
-  ps.colorDead = new Color4(deadColorR, deadColorG, deadColorB, 0);
+  // Calculate the elongation based on speed with new parameters
+  const speedFactor = Math.min(speed / speedDivisor, maxElongation);
 
-  ballMesh.ballColor = color;
+  if (speed < 0.1) {
+    // Ball is nearly stationary - gradually return to original shape
+    if (Math.abs(ballMesh.scaling.x - 1) > 0.01 || Math.abs(ballMesh.scaling.y - 1) > 0.01) {
+      const newX = ballMesh.scaling.x + (1 - ballMesh.scaling.x) * shapeDampingFactor;
+      const newY = ballMesh.scaling.y + (1 - ballMesh.scaling.y) * shapeDampingFactor;
+      ballMesh.scaling = new Vector3(newX, newY, 1);
+    }
+    return;
+  }
+
+  // Smaller numbers = less pronounced oval
+  const xStretchMultiplier = 0.5;
+  const yCompressionFactor = 0.3;
+
+  // Apply the multipliers to the transformation
+  const targetScaleX = 1 + speedFactor * xStretchMultiplier;
+  const targetScaleY = 1 - speedFactor * yCompressionFactor;
+
+  // Apply smooth transition to target scale
+  ballMesh.scaling.x += (targetScaleX - ballMesh.scaling.x) * shapeDampingFactor;
+  ballMesh.scaling.y += (targetScaleY - ballMesh.scaling.y) * shapeDampingFactor;
+  ballMesh.scaling.z = 1; // Keep Z constant
+
+  // Calculate the rotational angle of movement
+  const angle = Math.atan2(dy, dx);
+
+  // Store the current target rotation if not already saved
+  if (ballMesh._targetRotation === undefined) {
+    ballMesh._targetRotation = 0;
+  }
+
+  ballMesh._targetRotation = angle;
+
+  const currentRotation = ballMesh.rotation.z || 0;
+
+  // Normalize the rotation difference to be in the range [-π, π]
+  let rotationDiff = ballMesh._targetRotation - currentRotation;
+  if (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
+  if (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
+
+  const newRotation = currentRotation + rotationDiff * rotationDampingFactor;
+
+  ballMesh.rotation.z = newRotation;
+}
+
+export function applyBallEffects(ballMesh: any, dx: number, dy: number, color: Color3) {
+  if (!ballMesh) return;
+
+  const speed = Math.sqrt(dx * dx + dy * dy);
+
+  applyBallOvality(ballMesh, dx, dy, speed);
 }

@@ -4,11 +4,9 @@ import {
   ArcRotateCamera,
   Color3,
   Color4,
-  CubeTexture,
   Engine,
   GlowLayer,
   HemisphericLight,
-  PBRMaterial,
   Scene,
   ShadowGenerator,
   SpotLight,
@@ -17,12 +15,12 @@ import {
 
 import { GameState } from '@shared/types';
 import {
+  applyBallEffects,
   applyCollisionEffects,
   createBall,
   createFloor,
   createPaddle,
   getThemeColors,
-  updateBallTrailColor,
 } from '@shared/utils';
 
 interface GameCanvasProps {
@@ -125,21 +123,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     engineRef.current = engine;
     sceneRef.current = scene;
 
-    try {
-      scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
-        '../assets/game/satara_night_4k.exr',
-        scene
-      );
-      scene.environmentIntensity = 1.0;
-    } catch (error) {
-      console.error('Error loading environment map:', error);
-    }
-
     const camera = new ArcRotateCamera(
       'camera',
       -Math.PI / 2, // horizontal rotation
       Math.PI / 2, // vertical rotation
-      24.5, // distance from target
+      24.5, // distance from floor
       new Vector3(0, 0, 0),
       scene
     );
@@ -195,11 +183,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     shadowGenerator.addShadowCaster(ballRef.current);
     shadowGenerator.useBlurExponentialShadowMap = true;
 
+    // Create glow layer and add game objects to it
     const glowLayer = new GlowLayer('glowLayer', scene);
     glowLayer.intensity = 1.2;
     glowLayer.blurKernelSize = 32;
 
-    // Add game objects to glow layer
     glowLayer.addIncludedOnlyMesh(player1Ref.current);
     glowLayer.addIncludedOnlyMesh(player2Ref.current);
     glowLayer.addIncludedOnlyMesh(ballRef.current);
@@ -224,86 +212,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     };
   }, []);
 
-  // Apply theme change without recreating the scene
+  // Update game objects
   useEffect(() => {
-    if (
-      !sceneRef.current ||
-      !player1Ref.current ||
-      !player2Ref.current ||
-      !ballRef.current ||
-      !floorRef.current
-    )
-      return;
-
-    // Only update if theme actually changed
-    if (theme === lastTheme) return;
-
-    const colors = getThemeColorsFromDOM(theme);
-    themeColors.current = colors;
-    const { primaryColor, secondaryColor, backgroundColor } = colors;
-
-    sceneRef.current.clearColor = new Color4(
-      backgroundColor.r,
-      backgroundColor.g,
-      backgroundColor.b,
-      1
-    );
-
-    if (floorRef.current.material) {
-      const floorMaterial = floorRef.current.material as PBRMaterial;
-      floorMaterial.albedoColor = backgroundColor;
-    }
-
-    if (player1Ref.current.material) {
-      const material = player1Ref.current.material as PBRMaterial;
-      material.albedoColor = primaryColor;
-      material.emissiveColor = new Color3(
-        primaryColor.r * 0.5,
-        primaryColor.g * 0.5,
-        primaryColor.b * 0.5
-      );
-    }
-
-    if (player2Ref.current.material) {
-      const material = player2Ref.current.material as PBRMaterial;
-      material.albedoColor = primaryColor;
-      material.emissiveColor = new Color3(
-        primaryColor.r * 0.5,
-        primaryColor.g * 0.5,
-        primaryColor.b * 0.5
-      );
-    }
-
-    if (ballRef.current.material) {
-      const material = ballRef.current.material as PBRMaterial;
-      material.albedoColor = primaryColor;
-      material.emissiveColor = new Color3(
-        primaryColor.r * 0.7,
-        primaryColor.g * 0.7,
-        primaryColor.b * 0.7
-      );
-
-      // Update the trail color when theme changes
-      updateBallTrailColor(ballRef.current, primaryColor, sceneRef.current);
-    }
-
-    setLastTheme(theme);
-  }, [theme, lastTheme]);
-
-  // Update game objects and check for collisions
-  useEffect(() => {
-    if (
-      !canvasRef.current ||
-      !gameState ||
-      !player1Ref.current ||
-      !player2Ref.current ||
-      !ballRef.current ||
-      !sceneRef.current ||
-      !themeColors.current
-    )
-      return;
+    if (!canvasRef.current || !themeColors.current) return;
 
     const { players, ball } = gameState;
+    const prevDx = prevBallState.current.dx;
+    const prevDy = prevBallState.current.dy;
+    const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
     const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
@@ -317,20 +233,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current.position.x = ballX;
     ballRef.current.position.y = ballY;
 
-    // Update the ball trail effect using the ball dx/dy
-    // Note: Inverted dy for Babylon coordinate system
-    // updateBallTrail(ballRef.current, ball.dx, -ball.dy);
+    // Update constant ball effects, inverted dy for Babylon coordinate system
+    applyBallEffects(ballRef.current, ball.dx, -ball.dy, color);
 
     // Check for collisions by comparing current and previous velocity
-    if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
-      applyCollisionEffects(
-        ballRef.current,
-        prevBallState.current.dx,
-        prevBallState.current.dy,
-        ball.dx,
-        ball.dy,
-        themeColors.current.primaryColor
-      );
+    if (prevDx !== 0 || prevDy !== 0) {
+      applyCollisionEffects(ballRef.current, prevDx, prevDy, ball.dx, ball.dy, color);
     }
 
     // Update previous state for next frame

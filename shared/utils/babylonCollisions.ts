@@ -2,7 +2,7 @@ import { Animation, Color3, Color4, ParticleSystem, PointLight, Scene, Vector3 }
 
 import { createParticleTexture } from './babylonParticles';
 
-function applyDeformEffect(
+function applySquishEffect(
   ballMesh: any,
   collisionType: 'dx' | 'dy',
   speedFactor: number,
@@ -295,7 +295,7 @@ function applyShockwaveEffect(
   return shockwaveSystem;
 }
 
-export function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
+function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
   const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
   const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
 
@@ -321,9 +321,7 @@ export function applyCollisionEffects(
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 3.5);
   const scene = ballMesh.getScene();
 
-  console.log(`Babylon collision effect: type=${collisionType}, speedFactor=${speedFactor}`);
-
-  applyDeformEffect(ballMesh, collisionType, speedFactor, scene);
+  applySquishEffect(ballMesh, collisionType, speedFactor, scene);
   applyLightEffect(ballMesh, collisionType, speedFactor, color, scene);
   applyShockwaveEffect(ballMesh, collisionType, speedFactor, color, scene);
   applyParticleEffect(ballMesh, collisionType, speedFactor, color, scene);
