@@ -24,7 +24,7 @@ export class PongGameSession {
     this.clients = new Map(); // Now maps playerId -> connection
     this.onEndCallback = onEndCallback;
 
-    this.game = new PongGame();
+    this.game = new PongGame(mode, difficulty);
     this.previousGameStatus = this.game.getGameStatus();
 
     this.aiController =
@@ -47,7 +47,13 @@ export class PongGameSession {
     connection.on('close', () => this.removeClient(playerId));
 
     if (this.areAllPlayersConnected()) {
+      this.broadcast({ type: 'game_status', state: 'waiting' });
       this.game.setGameStatus('waiting');
+      const updatedState = this.game.updateGameState({});
+      this.broadcast({ type: 'game_state', state: updatedState });
+      console.log('Sent initial game state:', updatedState);
+      console.log('to players:');
+      console.log(this.clients.keys());
     }
   }
 
@@ -61,11 +67,18 @@ export class PongGameSession {
   }
 
   private areAllPlayersConnected(): boolean {
-    return (
-      this.mode === 'singleplayer' ||
-      (this.mode === '1v1' && this.difficulty === 'local') ||
-      this.clients.size === 2
-    );
+    if (
+      this.clients.size === 1 &&
+      (this.mode === 'singleplayer' || (this.mode === '1v1' && this.difficulty === 'local'))
+    ) {
+      console.log('Single player connected');
+      return true;
+    } else if (this.clients.size === 2 && this.mode === '1v1') {
+      console.log('Both players connected');
+      return true;
+    }
+    console.log('Not all players connected');
+    return false;
   }
 
   handleMessage(message: string): void {
@@ -120,6 +133,7 @@ export class PongGameSession {
     for (const connection of this.clients.values()) {
       if (connection.readyState === connection.OPEN) {
         connection.send(JSON.stringify(message));
+        // console.log('Sent message:', message, 'to player:', connection.playerId);
       }
     }
   }
@@ -159,7 +173,9 @@ export class PongGameSession {
   readyGame(playerId: string, state: boolean): void {
     console.log(`Player ${playerId} is ready: ${state}`);
     this.game.setReadyState(playerId, state);
-    this.startGameLoop();
+    if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
+      this.startGameLoop();
+    }
   }
 
   pauseGame(): void {

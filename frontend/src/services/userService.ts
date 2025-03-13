@@ -20,6 +20,7 @@ export async function getUserData(userId: string) {
 export async function getUsers() {
   try {
     const res = await api.get(`/user/all`);
+    console.log(res);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
