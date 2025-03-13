@@ -6,8 +6,8 @@ import SearchBar from '../UI/SearchBar';
 export const LeaderBoard: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const animatedNavigate = useAnimatedNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
@@ -15,7 +15,7 @@ export const LeaderBoard: React.FC = () => {
   };
 
   const filteredUsers = users.filter((user) =>
-    user.display_name.toLowerCase().startsWith(searchQuery)
+    user.display_name?.toLowerCase().startsWith(searchQuery)
   );
 
   useEffect(() => {

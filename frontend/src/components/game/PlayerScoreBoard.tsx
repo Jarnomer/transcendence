@@ -8,6 +8,10 @@ import { GameState } from '@shared/types';
 
 import PlayerCard from './PlayerScoreCard';
 
+import { useWebSocketContext } from '../../services';
+
+import { useLoading } from '../../pages/LoadingContextProvider';
+
 interface Player {
   name: string;
   avatar_url: string;
@@ -18,22 +22,28 @@ interface PlayerScoreBoardProps {
   playerScores: React.RefObject<{ player1Score: number; player2Score: number }>;
 }
 
-export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, playerScores }) => {
+export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playerScores }) => {
   const player1Ref = useRef<Player | null>(null);
   const player2Ref = useRef<Player | null>(null);
 
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
+  const { gameStatus, connectionStatus, gameState } = useWebSocketContext();
+  const { setLoadingState } = useLoading();
 
   // Fetch players only once, avoid re-render
   useEffect(() => {
+    if (gameStatus !== 'waiting') {
+      return;
+    }
     const fetchPlayers = async () => {
       try {
         console.log('gameState', gameState);
-        if (gameState.players.player1?.id && !player1Ref.current) {
+        if (gameState.players.player1?.id != player1Ref.current) {
           console.log('player1 gamestate', gameState.players.player1.id);
-          const user1 = await getUserData(localStorage.getItem('userID'));
+          const user1 = await getUserData(gameState.players.player1.id);
           if (user1) {
+            console.log('user1: ', user1);
             player1Ref.current = { name: user1.display_name, avatar_url: user1.avatar_url };
           }
         }
@@ -49,10 +59,11 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
           }
           player2Ref.current = { name: aiName, avatar_url: aiAvatar };
         } else {
-          if (gameState.players.player2?.id && !player2Ref.current) {
+          if (gameState.players.player2?.id != player2Ref.current) {
             console.log('player2 gamestate', gameState.players.player2.id);
             const user2 = await getUserData(gameState.players.player2.id);
             if (user2) {
+              console.log('user2: ', user2);
               player2Ref.current = { name: user2.display_name, avatar_url: user2.avatar_url };
             }
           }
@@ -61,9 +72,9 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
         console.error('Failed to fetch user data:', error);
       }
     };
-
     fetchPlayers();
-  }, [mode, difficulty]);
+    setLoadingState('scoreBoardLoading', false);
+  }, [mode, difficulty, gameStatus, connectionStatus]);
 
   // Assign scores to refs to prevent re-renders when score changes
   playerScores.current.player1Score = gameState.players.player1?.score || 0;

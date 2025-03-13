@@ -27,6 +27,7 @@
     "axios": "^1.8.1",
     "babylonjs": "^7.50.0",
     "babylonjs-gui": "^7.50.0",
+    "framer-motion": "^12.5.0",
     "jwt-decode": "^4.0.0",
     "node-vibrant": "^4.0.3",
     "react": "^19.0.0",

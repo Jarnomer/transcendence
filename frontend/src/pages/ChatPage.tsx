@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { BackgroundGlow } from '../components';
+import SearchBar from '../components/UI/SearchBar';
 import { getUserData } from '../services/userService';
 
 export const ChatPage: React.FC = () => {
@@ -8,6 +10,17 @@ export const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState();
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value.toLowerCase());
+    console.log('asd');
+  };
+
+  const filteredUsers = friends.filter((user) =>
+    user.display_name.toLowerCase().startsWith(searchQuery)
+  );
 
   useEffect(() => {
     const userId = localStorage.getItem('userID');
@@ -39,9 +52,15 @@ export const ChatPage: React.FC = () => {
 
   return (
     <div className="p-10 w-[80%]">
-      <div className="flex h-[600px] glass-box">
+      <div className="flex relative h-[600px] glass-box overflow-hidden">
+        <BackgroundGlow />
         {/* Friends List */}
         <div className="w-1/4 p-4 border-r ">
+          <SearchBar
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search users..."
+          />
           <h2 className="text-xl font-bold mb-4">Friends</h2>
           <ul>
             {friends.map((friend) => (
