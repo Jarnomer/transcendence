@@ -217,8 +217,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     if (!canvasRef.current || !themeColors.current) return;
 
     const { players, ball } = gameState;
-    const prevDx = prevBallState.current.dx;
-    const prevDy = prevBallState.current.dy;
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
@@ -237,8 +235,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     applyBallEffects(ballRef.current, ball.dx, -ball.dy, color);
 
     // Check for collisions by comparing current and previous velocity
-    if (prevDx !== 0 || prevDy !== 0) {
-      applyCollisionEffects(ballRef.current, prevDx, prevDy, ball.dx, ball.dy, color);
+    if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
+      applyCollisionEffects(
+        ballRef.current,
+        player1Ref.current,
+        player2Ref.current,
+        prevBallState.current.dx,
+        prevBallState.current.dy,
+        ball.dx,
+        ball.dy,
+        color
+      );
     }
 
     // Update previous state for next frame
