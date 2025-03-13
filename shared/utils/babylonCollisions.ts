@@ -2,13 +2,21 @@ import { Animation, Color3, Color4, ParticleSystem, PointLight, Scene, Vector3 }
 
 import { createParticleTexture } from './babylonParticles';
 
-function applyCollisionDeformEffect(
+function applyDeformEffect(
   ballMesh: any,
   collisionType: 'dx' | 'dy',
   speedFactor: number,
   scene: Scene
 ) {
-  const deformEffect = 0.5 - speedFactor * 0.1;
+  const squishAmount = 0.25 + speedFactor * 0.15;
+
+  // Save original scale for reference
+  if (!ballMesh.originalScale) {
+    ballMesh.originalScale = new Vector3(1, 1, 1);
+  }
+
+  // Force reset to original scale to prevent compounding deformations
+  ballMesh.scaling = ballMesh.originalScale.clone();
 
   // Create scale animations with keyframes
   const frameRate = 60;
@@ -20,53 +28,49 @@ function applyCollisionDeformEffect(
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
 
-  // Get current scale to avoid disrupting other animations
-  const currentScale = ballMesh.scaling.clone();
-
   const keys = [];
   if (collisionType === 'dx') {
-    keys.push({
-      frame: 0,
-      value: currentScale.clone(),
-    });
+    // Horizontal collision (paddles) -> Deform vertically
+    keys.push({ frame: 0, value: ballMesh.originalScale.clone() });
     keys.push({
       frame: 5,
-      value: new Vector3(deformEffect, deformEffect, currentScale.z),
+      value: new Vector3(1 - squishAmount, 1 + squishAmount, 1),
     });
     keys.push({
       frame: 15,
-      value: new Vector3(deformEffect * 0.9, deformEffect * 1.1, currentScale.z),
+      value: new Vector3(1 - squishAmount / 2, 1 + squishAmount / 2, 1),
     });
-    keys.push({
-      frame: 30,
-      value: currentScale.clone(),
-    });
+    keys.push({ frame: 30, value: ballMesh.originalScale.clone() });
   } else {
-    keys.push({
-      frame: 0,
-      value: currentScale.clone(),
-    });
+    // Vertical collision (walls) -> Deform horizontally
+    keys.push({ frame: 0, value: ballMesh.originalScale.clone() });
     keys.push({
       frame: 5,
-      value: new Vector3(deformEffect, deformEffect, currentScale.z),
+      value: new Vector3(1 + squishAmount, 1 - squishAmount, 1),
     });
     keys.push({
       frame: 15,
-      value: new Vector3(deformEffect * 1.1, deformEffect * 0.9, currentScale.z),
+      value: new Vector3(1 + squishAmount / 2, 1 - squishAmount / 2, 1),
     });
-    keys.push({
-      frame: 30,
-      value: currentScale.clone(),
-    });
+    keys.push({ frame: 30, value: ballMesh.originalScale.clone() });
   }
 
   squishAnimation.setKeys(keys);
 
   // Stop any existing animations to prevent conflicts
+  scene.stopAnimation(ballMesh);
   ballMesh.animations = [];
   ballMesh.animations.push(squishAnimation);
 
-  scene.beginAnimation(ballMesh, 0, 30, false, speedFactor * 1.5);
+  // Directly adjust animation speed based on speedFactor
+  // Higher speedFactor = faster animation (makes it more responsive for fast collisions)
+  const animationSpeed = Math.max(1, speedFactor);
+
+  // Add a callback to ensure we restore the original scale when animation is done
+  scene.beginDirectAnimation(ballMesh, [squishAnimation], 0, 30, false, animationSpeed, () => {
+    // Ensure we're fully restored after animation completes
+    ballMesh.scaling = ballMesh.originalScale.clone();
+  });
 }
 
 function applyLightEffect(
@@ -319,7 +323,7 @@ export function applyCollisionEffects(
 
   console.log(`Babylon collision effect: type=${collisionType}, speedFactor=${speedFactor}`);
 
-  // applyCollisionDeformEffect(ballMesh, collisionType, speedFactor, scene);
+  applyDeformEffect(ballMesh, collisionType, speedFactor, scene);
   applyLightEffect(ballMesh, collisionType, speedFactor, color, scene);
   applyShockwaveEffect(ballMesh, collisionType, speedFactor, color, scene);
   applyParticleEffect(ballMesh, collisionType, speedFactor, color, scene);
