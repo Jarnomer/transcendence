@@ -18,12 +18,6 @@ export interface GameState {
   ball: Ball;
 }
 
-export type GameStatus =
-  | 'loading'
-  | 'waiting'
-  | 'countdown'
-  | 'playing'
-  | 'paused'
-  | 'finished';
+export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
 export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';

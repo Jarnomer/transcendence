@@ -12,6 +12,7 @@ export default class PongGame {
   private ballSpeed: number = 7;
   private ballSpeedMultiplier: number = 1;
   private maxBallSpeedMultiplier: number = 2.5;
+  private maxBallSpin: number = 3;
 
   // 5% speed increase on each paddle hit
   private speedIncreaseFactor: number = 1.05;
@@ -30,8 +31,8 @@ export default class PongGame {
   constructor() {
     this.gameState = {
       players: {
-        player1: { id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0 },
-        player2: { id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0 },
+        player1: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
+        player2: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
     };
@@ -174,18 +175,22 @@ export default class PongGame {
   }
 
   private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
-    if (this.gameStatus !== 'playing' || !move) return;
+    if (this.gameStatus !== 'playing') return;
 
-    if (move === 'up') {
+    if (!move) {
+      this.gameState.players[player].dy = 0;
+    } else if (move === 'up') {
       this.gameState.players[player].y = Math.max(
         0,
         this.gameState.players[player].y - this.paddleSpeed
       );
+      this.gameState.players[player].dy = -this.paddleSpeed;
     } else if (move === 'down') {
       this.gameState.players[player].y = Math.min(
         this.height - this.paddleHeight,
         this.gameState.players[player].y + this.paddleSpeed
       );
+      this.gameState.players[player].dy = this.paddleSpeed;
     }
   }
 
@@ -202,6 +207,7 @@ export default class PongGame {
       // Prevent going inside the wall
       ball.y = 0;
       ball.dy *= -1;
+      this.adjustForSpin(true);
     }
 
     // Bottom wall collision
@@ -209,6 +215,8 @@ export default class PongGame {
       // Prevent going inside the wall
       ball.y = this.height - this.ballSize;
       ball.dy *= -1;
+      // Spin effect
+      this.adjustForSpin(false);
     }
 
     this.checkPaddleCollision();
@@ -227,6 +235,27 @@ export default class PongGame {
       } else {
         this.setGameStatus('waiting');
       }
+    }
+  }
+
+  private adjustForSpin(isTopWall: boolean): void {
+    const { ball } = this.gameState;
+    if (ball.spin === 0) return;
+
+    if (ball.dx > 0) {
+      if (isTopWall) {
+        ball.dx -= ball.spin / 2;
+      } else {
+        ball.dx += ball.spin / 2;
+      }
+      if (ball.dx < 1) ball.dx = 1;
+    } else {
+      if (isTopWall) {
+        ball.dx -= ball.spin / 2;
+      } else {
+        ball.dx += ball.spin / 2;
+      }
+      if (ball.dx > -1) ball.dx = -1;
     }
   }
 
@@ -251,7 +280,7 @@ export default class PongGame {
   }
 
   private handlePaddleBounce(paddleY: number, isLeftPaddle: boolean): void {
-    const { ball } = this.gameState;
+    const { ball, players } = this.gameState;
     const maxBounceAngle = Math.PI / 4;
     const relativeIntersectY = ball.y + this.ballSize / 2 - (paddleY + this.paddleHeight / 2);
     const normalizedIntersectY = relativeIntersectY / (this.paddleHeight / 2);
@@ -264,6 +293,16 @@ export default class PongGame {
 
     const newSpeed = this.ballSpeed * this.ballSpeedMultiplier;
     const direction = isLeftPaddle ? 1 : -1;
+
+    // Change ball spin based on paddle's vertical speed (dy)
+    const paddle = isLeftPaddle ? players.player1 : players.player2;
+    if (paddle.dy > 0) {
+      const spinChange = paddle.dy / -5;
+      ball.spin = Math.min(ball.spin + spinChange, this.maxBallSpin * -1);
+    } else if (paddle.dy < 0) {
+      const spinChange = paddle.dy / -5;
+      ball.spin = Math.max(ball.spin + spinChange, this.maxBallSpin);
+    }
 
     ball.dx = direction * newSpeed * Math.cos(bounceAngle);
     ball.dy = newSpeed * Math.sin(bounceAngle);

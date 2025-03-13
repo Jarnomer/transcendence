@@ -1,6 +1,7 @@
 export interface Player {
   id: string;
   y: number;
+  dy: number;
   score: number;
 }
 
