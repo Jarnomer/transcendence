@@ -1,19 +1,29 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
+  ArcRotateCamera,
   Color3,
   Color4,
+  CubeTexture,
   Engine,
-  FreeCamera,
+  GlowLayer,
   HemisphericLight,
-  MeshBuilder,
+  PBRMaterial,
   Scene,
-  StandardMaterial,
+  ShadowGenerator,
+  SpotLight,
   Vector3,
 } from 'babylonjs';
 
 import { GameState } from '@shared/types';
-import { parseColor } from '@shared/utils';
+import {
+  applyCollisionEffects,
+  createBall,
+  createFloor,
+  createPaddle,
+  getThemeColors,
+  updateBallTrailColor,
+} from '@shared/utils';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -26,8 +36,8 @@ const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
 const FIX_POSITION = 2;
 
-// Get theme colors from CSS variables
-const getThemeColors = (theme: 'light' | 'dark' = 'dark') => {
+// Helper function to get CSS variables (DOM-dependent code stays in the component)
+const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   // Get computed styles from document
   const computedStyle = getComputedStyle(document.documentElement);
 
@@ -39,22 +49,64 @@ const getThemeColors = (theme: 'light' | 'dark' = 'dark') => {
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
 
-  // Parse colors to Babylon Color3 format
-  return {
-    primaryColor: parseColor(primaryColor || '#ea355a'),
-    secondaryColor: parseColor(secondaryColor || 'oklch(8% 0% 0)'),
-    backgroundColor: parseColor(backgroundColor || 'black'),
-  };
+  return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 };
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
+  const [cameraControlEnabled, setCameraControlEnabled] = useState(false);
+  const [lastTheme, setLastTheme] = useState(theme);
+
+  // Store previous ball position and velocity to calculate changes
+  const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0 });
+  const themeColors = useRef<{
+    primaryColor: Color3;
+    secondaryColor: Color3;
+    backgroundColor: Color3;
+  } | null>(null);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const sceneRef = useRef<Scene | null>(null);
+  const cameraRef = useRef<ArcRotateCamera | null>(null);
 
-  const player1Ref = useRef<{ mesh: any; y: number }>({ mesh: null, y: 0 });
-  const player2Ref = useRef<{ mesh: any; y: number }>({ mesh: null, y: 0 });
-  const ballRef = useRef<{ mesh: any; x: number; y: number }>({ mesh: null, x: 0, y: 0 });
+  // Updated refs to only store mesh objects
+  const floorRef = useRef<any>(null);
+  const player1Ref = useRef<any>(null);
+  const player2Ref = useRef<any>(null);
+  const ballRef = useRef<any>(null);
+
+  const toggleCameraControl = () => {
+    if (!cameraRef.current) return;
+
+    setCameraControlEnabled((prev) => {
+      const newState = !prev;
+
+      if (newState) {
+        cameraRef.current!.attachControl(canvasRef.current!, true);
+        console.log('Camera controls enabled');
+      } else {
+        cameraRef.current!.detachControl();
+        console.log('Camera controls disabled');
+      }
+
+      return newState;
+    });
+  };
+
+  // Handle camera controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'c') {
+        toggleCameraControl();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Initial render setup
   useEffect(() => {
@@ -64,88 +116,96 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
 
-    // Get colors from current theme
-    const { primaryColor, secondaryColor, backgroundColor } = getThemeColors(theme);
+    const colors = getThemeColorsFromDOM(theme);
+    themeColors.current = colors;
+    const { primaryColor, secondaryColor, backgroundColor } = colors;
 
-    // Set background color
     scene.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
 
     engineRef.current = engine;
     sceneRef.current = scene;
 
-    // Setup camera
-    const camera = new FreeCamera('camera', new Vector3(0, 0, -24), scene);
-    camera.setTarget(Vector3.Zero());
+    try {
+      scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
+        '../assets/game/satara_night_4k.exr',
+        scene
+      );
+      scene.environmentIntensity = 1.0;
+    } catch (error) {
+      console.error('Error loading environment map:', error);
+    }
+
+    const camera = new ArcRotateCamera(
+      'camera',
+      -Math.PI / 2, // horizontal rotation
+      Math.PI / 2, // vertical rotation
+      24.5, // distance from target
+      new Vector3(0, 0, 0),
+      scene
+    );
+
+    cameraRef.current = camera;
     camera.detachControl();
 
-    // Setup light
-    const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
-    light.intensity = 0.7;
+    const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
+    hemiLight.intensity = 0.5;
 
-    // Setup materials with your theme colors
-    const player1Material = new StandardMaterial('player1Mat', scene);
-    player1Material.diffuseColor = primaryColor;
-    player1Material.emissiveColor = new Color3(
-      primaryColor.r * 0.5,
-      primaryColor.g * 0.5,
-      primaryColor.b * 0.5
-    );
-
-    const player2Material = new StandardMaterial('player2Mat', scene);
-    player2Material.diffuseColor = primaryColor;
-    player2Material.emissiveColor = new Color3(
-      primaryColor.r * 0.5,
-      primaryColor.g * 0.5,
-      primaryColor.b * 0.5
-    );
-
-    const ballMaterial = new StandardMaterial('ballMat', scene);
-    ballMaterial.diffuseColor = primaryColor;
-    ballMaterial.emissiveColor = new Color3(
-      primaryColor.r * 0.7,
-      primaryColor.g * 0.7,
-      primaryColor.b * 0.7
-    );
-    ballMaterial.specularPower = 64;
-
-    // Create paddles
-    player1Ref.current.mesh = MeshBuilder.CreateBox(
-      'paddle1',
-      {
-        height: 4,
-        width: 0.5,
-        depth: 0.5,
-      },
+    const spotLight1 = new SpotLight(
+      'spotLight1',
+      new Vector3(-10, 10, 10),
+      new Vector3(0, -1, -0.5),
+      Math.PI / 3,
+      10,
       scene
     );
-    player2Ref.current.mesh = MeshBuilder.CreateBox(
-      'paddle2',
-      {
-        height: 4,
-        width: 0.5,
-        depth: 0.5,
-      },
+    spotLight1.intensity = 0.7;
+
+    const spotLight2 = new SpotLight(
+      'spotLight2',
+      new Vector3(10, 10, 10),
+      new Vector3(0, -1, -0.5),
+      Math.PI / 3,
+      10,
       scene
     );
+    spotLight2.intensity = 0.7;
 
-    // Create ball
-    ballRef.current.mesh = MeshBuilder.CreateSphere(
-      'ball',
-      {
-        diameter: 0.8,
-        segments: 16,
-      },
-      scene
-    );
+    // Create game objects
+    floorRef.current = createFloor(scene, backgroundColor);
+    player1Ref.current = createPaddle(scene, primaryColor);
+    player2Ref.current = createPaddle(scene, primaryColor);
+    ballRef.current = createBall(scene, primaryColor);
 
-    // Position paddles
-    player1Ref.current.mesh.position.x = -20;
-    player2Ref.current.mesh.position.x = 20;
+    // Set paddle positions
+    player1Ref.current.position.x = -20;
+    player2Ref.current.position.x = 20;
 
-    // Apply materials
-    player1Ref.current.mesh.material = player1Material;
-    player2Ref.current.mesh.material = player2Material;
-    ballRef.current.mesh.material = ballMaterial;
+    // Initialize previous ball state
+    prevBallState.current = {
+      x: gameState.ball.x,
+      y: gameState.ball.y,
+      dx: gameState.ball.dx,
+      dy: gameState.ball.dy,
+    };
+
+    // Shadow generation
+    const shadowGenerator = new ShadowGenerator(1024, spotLight1);
+    shadowGenerator.addShadowCaster(player1Ref.current);
+    shadowGenerator.addShadowCaster(player2Ref.current);
+    shadowGenerator.addShadowCaster(ballRef.current);
+    shadowGenerator.useBlurExponentialShadowMap = true;
+
+    const glowLayer = new GlowLayer('glowLayer', scene);
+    glowLayer.intensity = 1.2;
+    glowLayer.blurKernelSize = 32;
+
+    // Add game objects to glow layer
+    glowLayer.addIncludedOnlyMesh(player1Ref.current);
+    glowLayer.addIncludedOnlyMesh(player2Ref.current);
+    glowLayer.addIncludedOnlyMesh(ballRef.current);
+
+    // Save current theme
+    setLastTheme(theme);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -162,21 +222,26 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       engine.dispose();
       scene.dispose();
     };
-  }, [theme]);
+  }, []);
 
   // Apply theme change without recreating the scene
   useEffect(() => {
     if (
       !sceneRef.current ||
-      !player1Ref.current.mesh ||
-      !player2Ref.current.mesh ||
-      !ballRef.current.mesh
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current ||
+      !floorRef.current
     )
       return;
 
-    const { primaryColor, secondaryColor, backgroundColor } = getThemeColors(theme);
+    // Only update if theme actually changed
+    if (theme === lastTheme) return;
 
-    // Update scene background
+    const colors = getThemeColorsFromDOM(theme);
+    themeColors.current = colors;
+    const { primaryColor, secondaryColor, backgroundColor } = colors;
+
     sceneRef.current.clearColor = new Color4(
       backgroundColor.r,
       backgroundColor.g,
@@ -184,10 +249,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       1
     );
 
-    // Update material colors
-    if (player1Ref.current.mesh.material) {
-      const material = player1Ref.current.mesh.material as StandardMaterial;
-      material.diffuseColor = primaryColor;
+    if (floorRef.current.material) {
+      const floorMaterial = floorRef.current.material as PBRMaterial;
+      floorMaterial.albedoColor = backgroundColor;
+    }
+
+    if (player1Ref.current.material) {
+      const material = player1Ref.current.material as PBRMaterial;
+      material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
         primaryColor.g * 0.5,
@@ -195,9 +264,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       );
     }
 
-    if (player2Ref.current.mesh.material) {
-      const material = player2Ref.current.mesh.material as StandardMaterial;
-      material.diffuseColor = primaryColor;
+    if (player2Ref.current.material) {
+      const material = player2Ref.current.material as PBRMaterial;
+      material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.5,
         primaryColor.g * 0.5,
@@ -205,35 +274,72 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       );
     }
 
-    if (ballRef.current.mesh.material) {
-      const material = ballRef.current.mesh.material as StandardMaterial;
-      material.diffuseColor = primaryColor;
+    if (ballRef.current.material) {
+      const material = ballRef.current.material as PBRMaterial;
+      material.albedoColor = primaryColor;
       material.emissiveColor = new Color3(
         primaryColor.r * 0.7,
         primaryColor.g * 0.7,
         primaryColor.b * 0.7
       );
+
+      // Update the trail color when theme changes
+      updateBallTrailColor(ballRef.current, primaryColor, sceneRef.current);
     }
-  }, [theme]);
 
-  // Handle position changes
+    setLastTheme(theme);
+  }, [theme, lastTheme]);
+
+  // Update game objects and check for collisions
   useEffect(() => {
-    if (!canvasRef.current || !gameState || !player1Ref.current.mesh) return;
+    if (
+      !canvasRef.current ||
+      !gameState ||
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current ||
+      !sceneRef.current ||
+      !themeColors.current
+    )
+      return;
 
-    const player1 = gameState.players.player1;
-    const player2 = gameState.players.player2;
-    const ball = gameState.ball;
+    const { players, ball } = gameState;
 
-    // Convert coordinates
-    const player1Y = -((player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const player2Y = -((player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    // Convert coordinates to Babylon coordinate system
+    const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
     const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
     const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
 
-    player1Ref.current.mesh.position.y = player1Y;
-    player2Ref.current.mesh.position.y = player2Y;
-    ballRef.current.mesh.position.x = ballX;
-    ballRef.current.mesh.position.y = ballY;
+    // Update mesh positions directly
+    player1Ref.current.position.y = player1Y;
+    player2Ref.current.position.y = player2Y;
+    ballRef.current.position.x = ballX;
+    ballRef.current.position.y = ballY;
+
+    // Update the ball trail effect using the ball dx/dy
+    // Note: Inverted dy for Babylon coordinate system
+    // updateBallTrail(ballRef.current, ball.dx, -ball.dy);
+
+    // Check for collisions by comparing current and previous velocity
+    if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
+      applyCollisionEffects(
+        ballRef.current,
+        prevBallState.current.dx,
+        prevBallState.current.dy,
+        ball.dx,
+        ball.dy,
+        themeColors.current.primaryColor
+      );
+    }
+
+    // Update previous state for next frame
+    prevBallState.current = {
+      x: ball.x,
+      y: ball.y,
+      dx: ball.dx,
+      dy: ball.dy,
+    };
   }, [gameState]);
 
   return (
