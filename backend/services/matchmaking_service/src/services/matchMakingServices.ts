@@ -78,6 +78,19 @@ export class MatchMakingService {
   }
 
   /**
+   * Get game by game ID
+   * @param game_id game ID
+   * @returns game object
+   */
+  async getGame(game_id: string) {
+    const game = await this.matchMakingModel.getGame(game_id);
+    if (!game) {
+      throw new NotFoundError('Game not found');
+    }
+    return game;
+  }
+
+  /**
    * User enters the match making queue
    * uses transaction to ensure atomicity
    */

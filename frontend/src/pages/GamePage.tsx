@@ -30,10 +30,6 @@ export const GamePage: React.FC = () => {
   const [gameId, setGameId] = useState<string | null>(null);
   // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
-  const playerScores = useRef({
-    player1Score: gameState.players.player1?.score || 0,
-    player2Score: gameState.players.player2?.score || 0,
-  });
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser(difficulty);
   useMatchmaking(mode, difficulty, setGameId);
@@ -77,7 +73,7 @@ export const GamePage: React.FC = () => {
       {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' ? (
         <>
           <div className="h-[10%] flex justify-between items-center">
-            <PlayerScoreBoard gameState={gameState} playerScores={playerScores} />
+            <PlayerScoreBoard gameState={gameState}  />
           </div>
           <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
             {/* RENDER COUNTDOWN CONDITIONALLY */}

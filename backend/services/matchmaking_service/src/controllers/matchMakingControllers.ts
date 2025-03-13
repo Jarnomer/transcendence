@@ -91,6 +91,22 @@ export class MatchMakingController {
   }
 
   /**
+   * get game by ID
+   * @param request get: game_id as path parameter
+   * @param reply 200 OK { game: game } if game found
+   * @throws NotFoundError if game not found
+   */
+  async getGame(request: FastifyRequest, reply: FastifyReply) {
+    const { game_id } = request.params as { game_id: string };
+    request.log.trace(`Getting game ${game_id}`);
+    const game = await this.matchMakingService.getGame(game_id);
+    if (!game) {
+      throw new NotFoundError('Game not found');
+    }
+    reply.code(200).send(game);
+  }
+
+  /**
    * user cancels the match making queue
    * @param request get: user_id as path parameter
    * @param reply 200 OK { status: 'canceled' } if user canceled

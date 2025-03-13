@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import { useWebSocketContext } from '@services';
+
 import { getUserData } from '@services/userService';
 
 import { GameState } from '@shared/types';
@@ -15,24 +17,31 @@ interface Player {
 
 interface PlayerScoreBoardProps {
   gameState: GameState;
-  playerScores: React.RefObject<{ player1Score: number; player2Score: number }>;
 }
 
-export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, playerScores }) => {
+export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState }) => {
   const player1Ref = useRef<Player | null>(null);
   const player2Ref = useRef<Player | null>(null);
+  const playerScores = useRef({
+    player1Score: gameState.players.player1?.score || 0,
+    player2Score: gameState.players.player2?.score || 0,
+  });
 
   const location = useLocation();
+  const { connectionStatus } = useWebSocketContext();
   const { mode, difficulty } = location.state || {};
 
   // Fetch players only once, avoid re-render
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
+        console.log('connection statuus', connectionStatus);
+        if (connectionStatus === 'connecting') return;
         console.log('gameState', gameState);
+
         if (gameState.players.player1?.id && !player1Ref.current) {
           console.log('player1 gamestate', gameState.players.player1.id);
-          const user1 = await getUserData(localStorage.getItem('userID'));
+          const user1 = await getUserData(gameState.players.player1.id);
           if (user1) {
             player1Ref.current = { name: user1.display_name, avatar_url: user1.avatar_url };
           }
@@ -63,7 +72,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ gameState, p
     };
 
     fetchPlayers();
-  }, [mode, difficulty]);
+  }, [mode, difficulty, connectionStatus]);
 
   // Assign scores to refs to prevent re-renders when score changes
   playerScores.current.player1Score = gameState.players.player1?.score || 0;

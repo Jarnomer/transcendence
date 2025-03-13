@@ -15,6 +15,7 @@ export async function matchMakingRoutes(fastify: FastifyInstance) {
     matchMakingController.singlePlayer.bind(matchMakingController)
   );
   fastify.get('/getGameID/:user_id', matchMakingController.getGameID.bind(matchMakingController));
+  fastify.get('/getGame/:game_id', matchMakingController.getGame.bind(matchMakingController));
   fastify.delete('/cancel/:user_id', matchMakingController.cancelQueue.bind(matchMakingController));
   fastify.post('/result', matchMakingController.resultGame.bind(matchMakingController));
 }

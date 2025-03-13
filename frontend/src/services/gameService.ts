@@ -70,6 +70,27 @@ export async function getGameID() {
   }
 }
 
+interface GameObject {
+  game_id: string;
+  player1_id: string;
+  player2_id: string;
+  player1_score: number;
+  player2_score: number;
+  winner_id: string;
+  loser_id: string;
+}
+
+export async function getGame(game_id: string) {
+  try {
+    const res = await api.get<GameObject>(`/matchmaking/getGame/${game_id}`);
+    console.log(res);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get game:', err);
+    throw err;
+  }
+}
+
 export async function singlePlayer(difficulty: string) {
   try {
     const userID = localStorage.getItem('userID');

@@ -64,6 +64,10 @@ export class MatchMakingModel {
     );
   }
 
+  async getGame(game_id: string) {
+    return await this.db.get(`SELECT * FROM games WHERE game_id = ?`, [game_id]);
+  }
+
   async createWaitingQueue(user_id: string) {
     const id = uuidv4();
     return await this.db.get(

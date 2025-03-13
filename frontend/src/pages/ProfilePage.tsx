@@ -389,12 +389,8 @@ export const ProfilePage: React.FC = () => {
                         }
                       >
                         {game.winner.user_id === user.user_id
-                          ? !game.loser.display_name
-                            ? game.loser.user_id
-                            : game.loser.display_name
-                          : !game.winner.display_name
-                            ? game.winner.user_id
-                            : game.winner.display_name}
+                          ? game.loser.display_name
+                          : game.winner.display_name}
                       </span>
                       <span
                         className={
