@@ -76,14 +76,12 @@ function applyLightEffect(
   color: Color3,
   scene: Scene
 ) {
-  const lightIntensity = 0.2 * (speedFactor * 100);
-  const lightRadius = 0.5 * (speedFactor * 5);
-
-  console.log(`lightIntensity= ${lightIntensity}, lightRadius=${lightRadius}`);
+  const lightIntensity = 0.5 * speedFactor ** 5;
+  const lightRadius = 0.5 * (speedFactor * 2);
 
   let lightPosition;
   if (collisionType === 'dx') {
-    // For dx collision (hitting left/right paddles), position light slightly to the side
+    // For dx collision (hitting left/right paddles)
     const offsetX = Math.sign(ballMesh.position.x) * -0.5;
     lightPosition = new Vector3(
       ballMesh.position.x + offsetX * 0.25,
@@ -91,7 +89,7 @@ function applyLightEffect(
       ballMesh.position.z
     );
   } else {
-    // For dy collision (hitting top/bottom walls), position light slightly above/below
+    // For dy collision (hitting top/bottom walls)
     const offsetY = Math.sign(ballMesh.position.y) * -0.5;
     lightPosition = new Vector3(
       ballMesh.position.x,
@@ -163,19 +161,24 @@ function applyParticleEffect(
 
   particleSystem.emitter = emitterPosition;
 
-  if (collisionType === 'dx') {
-    // For dx collisions (hitting paddles), cone directed along x-axis
-    const xDirection = Math.sign(ballMesh.position.x) * -1;
-    particleSystem.direction1 = new Vector3(xDirection, 0.5, 0);
-    particleSystem.direction2 = new Vector3(xDirection, -0.5, 0);
-  } else {
-    // For dy collisions (hitting walls), cone directed along y-axis
-    const yDirection = Math.sign(ballMesh.position.y) * -1;
-    particleSystem.direction1 = new Vector3(0.5, yDirection, 0);
-    particleSystem.direction2 = new Vector3(-0.5, yDirection, 0);
-  }
+  // Adjust particle velocity manually based on collision direction
+  particleSystem.startDirectionFunction = (directionToUpdate: any) => {
+    if (collisionType === 'dx') {
+      // For dx collisions (hitting paddles), cone directed along x-axis
+      const xDirection = Math.sign(ballMesh.position.x) * -1;
+      directionToUpdate.x = xDirection;
+      directionToUpdate.y = (Math.random() - 0.5) * 1.0; // Small Y variation
+      directionToUpdate.z = (Math.random() - 0.5) * 0.5;
+    } else {
+      // For dy collisions (hitting walls), cone directed along y-axis
+      const yDirection = Math.sign(ballMesh.position.y) * -1;
+      directionToUpdate.x = (Math.random() - 0.5) * 1.0;
+      directionToUpdate.y = yDirection;
+      directionToUpdate.z = (Math.random() - 0.5) * 0.5;
+    }
+  };
 
-  particleSystem.createConeEmitter(0.1, 1.6); // ~90 degrees
+  particleSystem.createConeEmitter(1, Math.PI * 1.5);
 
   particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
   particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.8);
