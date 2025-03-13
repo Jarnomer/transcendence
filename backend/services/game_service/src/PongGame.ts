@@ -33,7 +33,7 @@ export default class PongGame {
         player1: { id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0 },
         player2: { id: '', y: this.height / 2 - this.paddleHeight / 2, score: 0 },
       },
-      ball: { x: 0, y: 0, dx: 0, dy: 0 },
+      ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
     };
     this.gameStatus = 'loading';
     this.resetBall();
@@ -125,6 +125,7 @@ export default class PongGame {
       y: this.height / 2,
       dx: direction * this.ballSpeed * Math.cos(angle),
       dy: this.ballSpeed * Math.sin(angle),
+      spin: 0,
     };
   }
 
