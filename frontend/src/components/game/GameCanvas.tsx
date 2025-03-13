@@ -17,11 +17,11 @@ import {
 
 import { GameState } from '@shared/types';
 import {
+  applyCollisionEffects,
   createBall,
   createFloor,
   createPaddle,
   getThemeColors,
-  updateBallTrail,
   updateBallTrailColor,
 } from '@shared/utils';
 
@@ -56,15 +56,20 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const [cameraControlEnabled, setCameraControlEnabled] = useState(false);
   const [lastTheme, setLastTheme] = useState(theme);
 
-  // Store previous ball position to calculate velocity
-  const prevBallPos = useRef({ x: 0, y: 0 });
+  // Store previous ball position and velocity to calculate changes
+  const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0 });
+  const themeColors = useRef<{
+    primaryColor: Color3;
+    secondaryColor: Color3;
+    backgroundColor: Color3;
+  } | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
-  // Updated refs to only store mesh objects, not positions
+  // Updated refs to only store mesh objects
   const floorRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
@@ -88,7 +93,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     });
   };
 
-  // Handle key presses globally
+  // Handle camera controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'c') {
@@ -111,7 +116,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
 
-    const { primaryColor, secondaryColor, backgroundColor } = getThemeColorsFromDOM(theme);
+    const colors = getThemeColorsFromDOM(theme);
+    themeColors.current = colors;
+    const { primaryColor, secondaryColor, backgroundColor } = colors;
 
     scene.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
 
@@ -173,10 +180,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 20;
 
-    // Initialize previous ball position
-    prevBallPos.current = {
+    // Initialize previous ball state
+    prevBallState.current = {
       x: gameState.ball.x,
       y: gameState.ball.y,
+      dx: gameState.ball.dx,
+      dy: gameState.ball.dy,
     };
 
     // Shadow generation
@@ -229,7 +238,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     // Only update if theme actually changed
     if (theme === lastTheme) return;
 
-    const { primaryColor, secondaryColor, backgroundColor } = getThemeColorsFromDOM(theme);
+    const colors = getThemeColorsFromDOM(theme);
+    themeColors.current = colors;
+    const { primaryColor, secondaryColor, backgroundColor } = colors;
 
     sceneRef.current.clearColor = new Color4(
       backgroundColor.r,
@@ -279,6 +290,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     setLastTheme(theme);
   }, [theme, lastTheme]);
 
+  // Update game objects and check for collisions
   useEffect(() => {
     if (
       !canvasRef.current ||
@@ -286,7 +298,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       !player1Ref.current ||
       !player2Ref.current ||
       !ballRef.current ||
-      !sceneRef.current
+      !sceneRef.current ||
+      !themeColors.current
     )
       return;
 
@@ -306,9 +319,27 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     // Update the ball trail effect using the ball dx/dy
     // Note: Inverted dy for Babylon coordinate system
-    updateBallTrail(ballRef.current, ball.dx, -ball.dy);
+    // updateBallTrail(ballRef.current, ball.dx, -ball.dy);
 
-    prevBallPos.current = { x: ball.x, y: ball.y };
+    // Check for collisions by comparing current and previous velocity
+    if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
+      applyCollisionEffects(
+        ballRef.current,
+        prevBallState.current.dx,
+        prevBallState.current.dy,
+        ball.dx,
+        ball.dy,
+        themeColors.current.primaryColor
+      );
+    }
+
+    // Update previous state for next frame
+    prevBallState.current = {
+      x: ball.x,
+      y: ball.y,
+      dx: ball.dx,
+      dy: ball.dy,
+    };
   }, [gameState]);
 
   return (
