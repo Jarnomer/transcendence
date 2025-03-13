@@ -1,6 +1,6 @@
 import { Color3, Color4, DynamicTexture, ParticleSystem, Scene, Texture, Vector3 } from 'babylonjs';
 
-function createParticleTexture(scene: Scene, color: Color3): Texture {
+export function createParticleTexture(scene: Scene, color: Color3): Texture {
   const textureSize = 64;
   const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
   const context = texture.getContext();
@@ -19,11 +19,11 @@ function createParticleTexture(scene: Scene, color: Color3): Texture {
   const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
   const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
 
-  gradient.addColorStop(0, 'white'); // Bright center
-  gradient.addColorStop(0.3, rgbColor); // Color matching the theme
-  gradient.addColorStop(1, rgbaColorTransparent); // Transparent edge
+  // Color stops - Center, "middle" and edge
+  gradient.addColorStop(0, 'white');
+  gradient.addColorStop(0.3, rgbColor);
+  gradient.addColorStop(1, rgbaColorTransparent);
 
-  // Fill the canvas with the gradient
   context.fillStyle = gradient;
   context.fillRect(0, 0, textureSize, textureSize);
 
