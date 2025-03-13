@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAnimatedNavigate } from '../../animatedNavigate';
+import { getUsers } from '../../services/userService';
 import SearchBar from '../UI/SearchBar';
 
 export const LeaderBoard: React.FC = () => {
@@ -13,23 +14,23 @@ export const LeaderBoard: React.FC = () => {
     console.log('asd');
   };
 
-  // const filteredUsers = users.filter((user) =>
-  //   user.display_name.toLowerCase().startsWith(searchQuery)
-  // );
+  const filteredUsers = users.filter((user) =>
+    user.display_name.toLowerCase().startsWith(searchQuery)
+  );
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // async function fetchData() {
-  //   setLoading(true);
-  //   const res = await getUsers();
-  //   if (res) {
-  //     console.log(res);
-  //     setUsers(res);
-  //   }
-  //   setLoading(false);
-  // }
+  async function fetchData() {
+    setLoading(true);
+    const res = await getUsers();
+    if (res) {
+      console.log(res);
+      setUsers(res);
+    }
+    setLoading(false);
+  }
 
   return (
     <>
@@ -41,9 +42,9 @@ export const LeaderBoard: React.FC = () => {
             onChange={handleSearchChange}
             placeholder="Search users..."
           />
-          <p className="text-sm text-gray-500">turned off</p>
+          {/* <p className="text-sm text-gray-500">turned off</p> */}
         </div>
-        {/* {!loading ? (
+        {!loading ? (
           <div className=" text-center">
             <ul className="p-2">
               {filteredUsers.map((user, index) => (
@@ -68,7 +69,7 @@ export const LeaderBoard: React.FC = () => {
               ))}
             </ul>
           </div>
-        ) : null} */}
+        ) : null}
       </div>
     </>
   );
