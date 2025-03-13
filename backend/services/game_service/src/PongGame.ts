@@ -238,6 +238,7 @@ export default class PongGame {
     }
   }
 
+  // work in progress
   private adjustForSpin(isTopWall: boolean): void {
     const { ball } = this.gameState;
     if (ball.spin === 0) return;
