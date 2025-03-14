@@ -1,15 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  ArcRotateCamera,
-  Color3,
-  CubeTexture,
-  Engine,
-  GlowLayer,
-  HemisphericLight,
-  Scene,
-  Vector3,
-} from 'babylonjs';
+import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
 import { GameState } from '@shared/types';
 import {
@@ -19,6 +10,10 @@ import {
   createFloor,
   createPaddle,
   getThemeColors,
+  setupPostProcessing,
+  setupSceneCamera,
+  setupSceneEnvironment,
+  setupScenelights,
 } from '@shared/utils';
 
 interface GameCanvasProps {
@@ -30,7 +25,7 @@ interface GameCanvasProps {
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
-const FIX_POSITION = 2.2;
+const FIX_POSITION = 2.25;
 
 // Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
@@ -63,8 +58,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
+  const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
+
   // Updated references to only store mesh objects
-  const floorRef = useRef<Mesh>(null);
+  const floorRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
@@ -80,39 +77,26 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
 
-    themeColors.current = colors;
-    engineRef.current = engine;
-    sceneRef.current = scene;
+    setupSceneEnvironment(scene);
+    setupScenelights(scene);
 
-    scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
-      'https://assets.babylonjs.com/environments/environmentSpecular.env',
-      scene
-    );
+    const camera = setupSceneCamera(scene);
+    const pipeline = setupPostProcessing(scene, camera);
 
-    const camera = new ArcRotateCamera(
-      'camera',
-      -Math.PI / 2, // horizontal rotation
-      Math.PI / 2, // vertical rotation
-      24.5, // distance from floor
-      new Vector3(0, 0, 0),
-      scene
-    );
-
-    cameraRef.current = camera;
-    camera.detachControl();
-
-    const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
-    hemiLight.intensity = 0.7;
-
-    // Create game objects
     floorRef.current = createFloor(scene, backgroundColor);
     player1Ref.current = createPaddle(scene, primaryColor);
     player2Ref.current = createPaddle(scene, primaryColor);
     ballRef.current = createBall(scene, primaryColor);
 
+    engineRef.current = engine;
+    sceneRef.current = scene;
+    themeColors.current = colors;
+    postProcessingRef.current = pipeline;
+    cameraRef.current = camera;
+
     // Set paddle positions
     player1Ref.current.position.x = -20;
-    player2Ref.current.position.x = 20;
+    player2Ref.current.position.x = 19.7;
 
     // Initialize previous ball state
     prevBallState.current = {
@@ -121,15 +105,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       dx: gameState.ball.dx,
       dy: gameState.ball.dy,
     };
-
-    // Create glow layer and add game objects to it
-    const glowLayer = new GlowLayer('glowLayer', scene);
-    glowLayer.intensity = 1.5;
-    glowLayer.blurKernelSize = 32;
-
-    glowLayer.addIncludedOnlyMesh(player1Ref.current);
-    glowLayer.addIncludedOnlyMesh(player2Ref.current);
-    glowLayer.addIncludedOnlyMesh(ballRef.current);
 
     setLastTheme(theme); // Save current theme
 
