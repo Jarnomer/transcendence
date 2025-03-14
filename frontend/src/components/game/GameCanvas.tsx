@@ -3,13 +3,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ArcRotateCamera,
   Color3,
-  Color4,
+  CubeTexture,
   Engine,
   GlowLayer,
   HemisphericLight,
   Scene,
-  ShadowGenerator,
-  SpotLight,
   Vector3,
 } from 'babylonjs';
 
@@ -32,7 +30,7 @@ interface GameCanvasProps {
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
-const FIX_POSITION = 2;
+const FIX_POSITION = 2.2;
 
 // Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
@@ -51,10 +49,8 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 };
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
-  const [cameraControlEnabled, setCameraControlEnabled] = useState(false);
   const [lastTheme, setLastTheme] = useState(theme);
 
-  // Store previous ball position and velocity to calculate changes
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
@@ -67,44 +63,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
-  // Updated refs to only store mesh objects
-  const floorRef = useRef<any>(null);
+  // Updated references to only store mesh objects
+  const floorRef = useRef<Mesh>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
-
-  const toggleCameraControl = () => {
-    if (!cameraRef.current) return;
-
-    setCameraControlEnabled((prev) => {
-      const newState = !prev;
-
-      if (newState) {
-        cameraRef.current!.attachControl(canvasRef.current!, true);
-        console.log('Camera controls enabled');
-      } else {
-        cameraRef.current!.detachControl();
-        console.log('Camera controls disabled');
-      }
-
-      return newState;
-    });
-  };
-
-  // Handle camera controls
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'c') {
-        toggleCameraControl();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
 
   // Initial render setup
   useEffect(() => {
@@ -115,13 +78,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
+    const { primaryColor, backgroundColor } = colors;
+
     themeColors.current = colors;
-    const { primaryColor, secondaryColor, backgroundColor } = colors;
-
-    scene.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
-
     engineRef.current = engine;
     sceneRef.current = scene;
+
+    scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(
+      'https://assets.babylonjs.com/environments/environmentSpecular.env',
+      scene
+    );
 
     const camera = new ArcRotateCamera(
       'camera',
@@ -136,27 +102,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     camera.detachControl();
 
     const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
-    hemiLight.intensity = 0.5;
-
-    const spotLight1 = new SpotLight(
-      'spotLight1',
-      new Vector3(-10, 10, 10),
-      new Vector3(0, -1, -0.5),
-      Math.PI / 3,
-      10,
-      scene
-    );
-    spotLight1.intensity = 0.7;
-
-    const spotLight2 = new SpotLight(
-      'spotLight2',
-      new Vector3(10, 10, 10),
-      new Vector3(0, -1, -0.5),
-      Math.PI / 3,
-      10,
-      scene
-    );
-    spotLight2.intensity = 0.7;
+    hemiLight.intensity = 0.7;
 
     // Create game objects
     floorRef.current = createFloor(scene, backgroundColor);
@@ -176,24 +122,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       dy: gameState.ball.dy,
     };
 
-    // Shadow generation
-    const shadowGenerator = new ShadowGenerator(1024, spotLight1);
-    shadowGenerator.addShadowCaster(player1Ref.current);
-    shadowGenerator.addShadowCaster(player2Ref.current);
-    shadowGenerator.addShadowCaster(ballRef.current);
-    shadowGenerator.useBlurExponentialShadowMap = true;
-
     // Create glow layer and add game objects to it
     const glowLayer = new GlowLayer('glowLayer', scene);
-    glowLayer.intensity = 1.2;
+    glowLayer.intensity = 1.5;
     glowLayer.blurKernelSize = 32;
 
     glowLayer.addIncludedOnlyMesh(player1Ref.current);
     glowLayer.addIncludedOnlyMesh(player2Ref.current);
     glowLayer.addIncludedOnlyMesh(ballRef.current);
 
-    // Save current theme
-    setLastTheme(theme);
+    setLastTheme(theme); // Save current theme
 
     engine.runRenderLoop(() => {
       scene.render();

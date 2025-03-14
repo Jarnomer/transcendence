@@ -1,9 +1,16 @@
-import { Animation, Color3, MeshBuilder, PBRMaterial, Scene } from 'babylonjs';
+import {
+  Animation,
+  Color3,
+  MeshBuilder,
+  PBRMaterial,
+  PBRMetallicRoughnessMaterial,
+  Scene,
+} from 'babylonjs';
 
 import { createBallTrail } from './babylonParticles';
 
 export function createFloor(scene: Scene, color: Color3) {
-  const pbr = new PBRMaterial('floorMaterial', scene);
+  const pbr = new PBRMetallicRoughnessMaterial('floorMaterial', scene);
   const floor = MeshBuilder.CreateBox(
     'floor',
     {
@@ -23,6 +30,7 @@ export function createFloor(scene: Scene, color: Color3) {
   pbr.environmentIntensity = 2.0;
 
   pbr.albedoColor = color;
+  pbr.baseColor = new Color3(0.001, 0.001, 0.001);
   pbr.emissiveColor = new Color3(color.r * 0.07, color.g * 0.07, color.b * 0.07);
   pbr.reflectivityColor = new Color3(1.0, 1.0, 1.0);
 
