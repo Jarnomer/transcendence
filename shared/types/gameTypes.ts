@@ -1,6 +1,7 @@
 export interface Player {
   id: string;
   y: number;
+  dy: number;
   score: number;
 }
 
@@ -9,6 +10,7 @@ export interface Ball {
   y: number;
   dx: number;
   dy: number;
+  spin: number;
 }
 
 export interface GameState {
@@ -16,12 +18,6 @@ export interface GameState {
   ball: Ball;
 }
 
-export type GameStatus =
-  | 'loading'
-  | 'waiting'
-  | 'countdown'
-  | 'playing'
-  | 'paused'
-  | 'finished';
+export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
 export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';
