@@ -12,10 +12,10 @@ export default class PongGame {
   private ballSpeed: number = 7;
   private ballSpeedMultiplier: number = 1;
   private maxBallSpeedMultiplier: number = 2.5;
-  private maxBallSpin: number = 3;
+  private maxBallSpin: number = 5;
 
-  // 5% speed increase on each paddle hit
-  private speedIncreaseFactor: number = 1.05;
+  // 3% speed increase on each paddle hit
+  private speedIncreaseFactor: number = 1.03;
 
   private gameState: GameState;
   private gameStatus: GameStatus;
@@ -29,7 +29,9 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
-  private readonly MAX_SCORE: number = 5;
+  private readonly MAX_SCORE: number = 10;
+
+  private frameCount: number = 0;
 
   constructor(mode: string, difficulty: string) {
     this.mode = mode;
@@ -192,19 +194,38 @@ export default class PongGame {
     if (this.gameStatus !== 'playing') return;
 
     if (!move) {
-      this.gameState.players[player].dy = 0;
+      this.frameCount++;
+      if (this.frameCount % 6 === 0) {
+        this.gameState.players[player].dy = 0;
+        this.frameCount = 0;
+      }
     } else if (move === 'up') {
-      this.gameState.players[player].y = Math.max(
-        0,
-        this.gameState.players[player].y - this.paddleSpeed
-      );
-      this.gameState.players[player].dy = -this.paddleSpeed;
+      this.gameState.players[player].y -= this.paddleSpeed;
+      if (this.gameState.players[player].y < 0) {
+        this.gameState.players[player].y = 0;
+        this.gameState.players[player].dy = 0;
+      } else {
+        this.gameState.players[player].dy = -this.paddleSpeed;
+      }
     } else if (move === 'down') {
-      this.gameState.players[player].y = Math.min(
-        this.height - this.paddleHeight,
-        this.gameState.players[player].y + this.paddleSpeed
-      );
-      this.gameState.players[player].dy = this.paddleSpeed;
+      this.gameState.players[player].y += this.paddleSpeed;
+      if (this.gameState.players[player].y + this.paddleHeight > this.height) {
+        this.gameState.players[player].y = this.height - this.paddleHeight;
+        this.gameState.players[player].dy = 0;
+      } else {
+        this.gameState.players[player].dy = this.paddleSpeed;
+      }
+    }
+  }
+
+  private adjustBallMovementForSpin(): void {
+    const { ball } = this.gameState;
+    if (ball.spin === 0) return;
+
+    if (ball.dx > 0) {
+      ball.dy += ball.spin / 100;
+    } else {
+      ball.dy -= ball.spin / 100;
     }
   }
 
@@ -213,6 +234,7 @@ export default class PongGame {
 
     const { ball, players } = this.gameState;
 
+    this.adjustBallMovementForSpin();
     ball.x += ball.dx;
     ball.y += ball.dy;
 
@@ -221,7 +243,7 @@ export default class PongGame {
       // Prevent going inside the wall
       ball.y = 0;
       ball.dy *= -1;
-      this.adjustForSpin(true);
+      this.adjustBounceForSpin(true);
     }
 
     // Bottom wall collision
@@ -230,7 +252,7 @@ export default class PongGame {
       ball.y = this.height - this.ballSize;
       ball.dy *= -1;
       // Spin effect
-      this.adjustForSpin(false);
+      this.adjustBounceForSpin(false);
     }
 
     this.checkPaddleCollision();
@@ -253,25 +275,27 @@ export default class PongGame {
   }
 
   // work in progress
-  private adjustForSpin(isTopWall: boolean): void {
+  private adjustBounceForSpin(isTopWall: boolean): void {
     const { ball } = this.gameState;
     if (ball.spin === 0) return;
 
     if (ball.dx > 0) {
       if (isTopWall) {
-        ball.dx -= ball.spin / 2;
+        ball.dx -= ball.spin / 3;
       } else {
-        ball.dx += ball.spin / 2;
+        ball.dx += ball.spin / 3;
       }
       if (ball.dx < 1) ball.dx = 1;
     } else {
       if (isTopWall) {
-        ball.dx -= ball.spin / 2;
+        ball.dx -= ball.spin / 3;
       } else {
-        ball.dx += ball.spin / 2;
+        ball.dx += ball.spin / 3;
       }
       if (ball.dx > -1) ball.dx = -1;
     }
+    ball.spin *= 0.5;
+    if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
   }
 
   private checkPaddleCollision(): void {
