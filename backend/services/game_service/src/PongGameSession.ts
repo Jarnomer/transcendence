@@ -33,6 +33,9 @@ export class PongGameSession {
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
     }
+    if (this.mode === 'singleplayer') {
+      this.game.setPlayerId(2, this.difficulty);
+    }
   }
 
   getClientCount(): number {
@@ -71,7 +74,7 @@ export class PongGameSession {
   handleMessage(message: string): void {
     try {
       const data = JSON.parse(message);
-      console.log('Received message:', data);
+      //console.log('Received message:', data);
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
       }
@@ -157,7 +160,7 @@ export class PongGameSession {
   }
 
   readyGame(playerId: string, state: boolean): void {
-    console.log(`Player ${playerId} is ready: ${state}`);
+    //console.log(`Player ${playerId} is ready: ${state}`);
     this.game.setReadyState(playerId, state);
     this.startGameLoop();
   }

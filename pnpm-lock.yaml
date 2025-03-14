@@ -146,6 +146,9 @@ importers:
       sqlite3:
         specifier: ^5.1.7
         version: 5.1.7
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2

@@ -57,17 +57,6 @@ export class MatchMakingModel {
     );
   }
 
-  async getGameByUserID(user_id: string, waiting_user_id: string) {
-    return await this.db.get(
-      `SELECT * FROM games WHERE ((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)) AND status = 'ongoing'`,
-      [user_id, waiting_user_id, waiting_user_id, user_id]
-    );
-  }
-
-  async getGame(game_id: string) {
-    return await this.db.get(`SELECT * FROM games WHERE game_id = ?`, [game_id]);
-  }
-
   async createWaitingQueue(user_id: string) {
     const id = uuidv4();
     return await this.db.get(
@@ -88,34 +77,6 @@ export class MatchMakingModel {
     return await this.db.get(
       `UPDATE matchmaking_queue SET status = 'matched' , matched_with = ? WHERE user_id = ? RETURNING *`,
       [user_id, waiting_user_id]
-    );
-  }
-
-  async createGame(user_id: string, waiting_user_id: string) {
-    const id = uuidv4();
-    return await this.db.get(
-      `INSERT INTO games (game_id, player1_id, player2_id) VALUES (?, ?, ?) RETURNING *`,
-      [id, user_id, waiting_user_id]
-    );
-  }
-
-  async getOngoingGame(user_id: string, waiting_user_id: string) {
-    return await this.db.get(
-      `SELECT * FROM games WHERE ((player1_id = ? AND player2_id = ?) OR (player1_id = ? AND player2_id = ?)) AND status = 'ongoing'`,
-      [user_id, waiting_user_id, waiting_user_id, user_id]
-    );
-  }
-
-  async updateGame(
-    game_id: string,
-    winner_id: string,
-    loser_id: string,
-    player1_score: number,
-    player2_score: number
-  ) {
-    return await this.db.get(
-      `UPDATE games SET winner_id = ?,loser_id=?, player1_score = ?, player2_score = ?, status = 'completed' WHERE game_id = ? RETURNING *`,
-      [winner_id, loser_id, player1_score, player2_score, game_id]
     );
   }
 

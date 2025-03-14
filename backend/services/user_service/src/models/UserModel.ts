@@ -71,48 +71,44 @@ export class UserModel {
     const query = `
     SELECT
   -- Basic User Information
-  up.*, 
+  up.*,
   u.username,
   json_object('wins', us.wins, 'losses', us.losses) AS stats,
 
-  -- ✅ Last 10 Games (Properly Limited)
-  (SELECT json_group_array(
-    json_object(
-      'game_id', g.game_id,
-      'player1', json_object('user_id', g.player1_id, 'score', g.player1_score),
-      'player2', json_object('user_id', g.player2_id, 'score', g.player2_score),
-      'winner', json_object(
-        'user_id', g.winner_id,
-        'display_name', g.display_name,
-        'avatar_url', g.avatar_url,
-        'score', CASE
-          WHEN g.winner_id = g.player1_id THEN g.player1_score
-          ELSE g.player2_score
-        END
-      ),
-      'loser', json_object(
-        'user_id', g.loser_id,
-        'display_name', g.display_name,
-        'avatar_url', g.avatar_url,
-        'score', CASE
-          WHEN g.loser_id = g.player1_id THEN g.player1_score
-          ELSE g.player2_score
-        END
-      ),
-      'started_at', g.start_time,
-      'ended_at', g.end_time
+  (SELECT
+    json_group_array
+    (
+      json_object
+      (
+        'game_id', g.game_id,
+        'status', g.status,
+        'started_at', g.start_time,
+        'ended_at', g.end_time,
+        'my_score', gp_me.score,
+        'vsplayer',
+          json_object
+          (
+            'user_id', gp_opponent.player_id,
+            'display_name', up_opponent.display_name,
+            'avatar_url', up_opponent.avatar_url,
+            'score', gp_opponent.score,
+            'is_winner', gp_opponent.is_winner
+          )
+      )
     )
-  )
-  FROM (
-    -- ✅ First, filter and limit BEFORE joining
-    SELECT * FROM games
-    JOIN user_profiles up1 ON games.winner_id = up1.user_id
-    JOIN user_profiles up2 ON games.loser_id = up2.user_id
-    WHERE player1_id = up.user_id OR player2_id = up.user_id
-    ORDER BY start_time DESC
-    LIMIT 10
-  ) g
+      FROM games g
+      JOIN game_players gp_me ON g.game_id = gp_me.game_id
+      LEFT JOIN game_players gp_opponent ON g.game_id = gp_opponent.game_id AND gp_me.player_id <> gp_opponent.player_id
+      LEFT JOIN user_profiles up_opponent ON gp_opponent.player_id = up_opponent.user_id
+      WHERE gp_me.player_id = up.user_id
+      ORDER BY g.start_time DESC
+      LIMIT 10
   ) AS games,
+
+
+
+
+
 
   -- ✅ Last 10 Friends (Properly Limited)
   (SELECT json_group_array(

@@ -34,6 +34,7 @@ class OneVsOneMatchmaking implements MatchmakingStrategy {
   async findMatch(): Promise<string | null> {
     console.log('Searching for a 1v1 match...');
     const data = await enterQueue();
+    console.log('Queue data:', data);
     if (data.status !== 'matched') {
       console.log('Waiting for match...');
       return null;

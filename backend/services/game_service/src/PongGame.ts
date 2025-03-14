@@ -57,14 +57,14 @@ export default class PongGame {
 
   setReadyState(playerId: string, state: boolean): void {
     if (playerId === this.player1Id) {
-      console.log('Setting player1 ready state:', state);
+      //console.log('Setting player1 ready state:', state);
       this.readyState.set('player1', state);
     } else if (playerId === this.player2Id) {
       console.log('Setting player2 ready state:', state);
       this.readyState.set('player2', state);
     }
     if (this.areAllPlayersReady()) {
-      console.log('All players are ready!');
+      //console.log('All players are ready!');
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
@@ -138,7 +138,7 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
-    console.log('Starting countdown...');
+    //console.log('Starting countdown...');
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();

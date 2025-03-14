@@ -45,7 +45,7 @@ const handlePlayerMove = (
 };
 
 const handlePlayerReady = (gameSession: PongGameSession, playerId: string, state: boolean) => {
-  console.log('handlePlayerReady():', playerId, state);
+  //console.log('handlePlayerReady():', playerId, state);
   gameSession.readyGame(playerId, state);
 };
 

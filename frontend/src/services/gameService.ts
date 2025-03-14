@@ -61,7 +61,7 @@ export async function getGameID() {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<GameIDResponse>(`/matchmaking/getGameID/${userID}`);
+    const res = await api.get<GameIDResponse>(`/game/getGameID/${userID}`);
     console.log(res);
     return res.data;
   } catch (err) {
@@ -82,7 +82,7 @@ interface GameObject {
 
 export async function getGame(game_id: string) {
   try {
-    const res = await api.get<GameObject>(`/matchmaking/getGame/${game_id}`);
+    const res = await api.get<GameObject>(`/game/getGame/${game_id}`);
     console.log(res);
     return res.data;
   } catch (err) {
@@ -98,7 +98,7 @@ export async function singlePlayer(difficulty: string) {
       throw new Error('User ID not found');
     }
     const res = await api.get<GameIDResponse>(
-      `/matchmaking/singlePlayer/${userID}?difficulty=${difficulty}`
+      `/game/singlePlayer/${userID}?difficulty=${difficulty}`
     );
     console.log(res.data);
     return res.data;
@@ -108,20 +108,29 @@ export async function singlePlayer(difficulty: string) {
   }
 }
 
-export async function submitResult(
-  game_id: string,
-  winner_id: string,
-  loser_id: string,
-  player1_score: number,
-  player2_score: number
-) {
+interface GameResult {
+  game_id: string;
+  winner_id: string;
+  loser_id: string;
+  winner_score: number;
+  loser_score: number;
+}
+
+export async function submitResult({
+  game_id,
+  winner_id,
+  loser_id,
+  winner_score,
+  loser_score,
+}: GameResult) {
   try {
-    const res = await api.post(`/matchmaking/result`, {
+    console.log(game_id, winner_id, loser_id, winner_score, loser_score);
+    const res = await api.post(`/game/result`, {
       game_id,
       winner_id,
       loser_id,
-      player1_score,
-      player2_score,
+      winner_score,
+      loser_score,
     });
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to submit result`);

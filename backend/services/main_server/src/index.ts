@@ -1,24 +1,28 @@
 // Import environment variables
+import cookie from '@fastify/cookie';
+import fastifyJwt from '@fastify/jwt';
 import dotenv from 'dotenv';
-dotenv.config();
 
 // Import Fastify and its JWT plugin
 import fastify from 'fastify';
-import fastifyJwt from '@fastify/jwt';
-import cookie from '@fastify/cookie';
-import authPlugin from './middlewares/auth';
+
+import matchMakingService from '@my-backend/matchmaking_service/';
+import remoteService from '@my-backend/remote_service/';
+import userService from '@my-backend/user_service/'; // Everything from user-service is now available
+
 import databasePlugin from './db';
-import loggerPlugin from './middlewares/logger';
+import authPlugin from './middlewares/auth';
 import errorHandlerPlugin from './middlewares/errorHandler';
+import loggerPlugin from './middlewares/logger';
 
 // Import alias support
 import 'module-alias/register';
 
 // Import custom routes
-import userService from '@my-backend/user_service/'; // Everything from user-service is now available
-import remoteService from '@my-backend/remote_service/';
-import matchMakingService from '@my-backend/matchmaking_service/';
+
 import adminRoutes from './routes/adminRoutes';
+
+dotenv.config();
 
 // Create Fastify instance
 const app = fastify({

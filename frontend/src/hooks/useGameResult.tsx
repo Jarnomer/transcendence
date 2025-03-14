@@ -2,13 +2,15 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { GameState } from '@types';
+
 import { submitResult } from '../services/gameService';
 import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
 export const useGameResultSubmission = (
   gameStatus: string,
   gameId: string | null,
-  gameState: any,
+  gameState: GameState,
   dispatch: any,
   userId: string | null
 ) => {
@@ -19,8 +21,10 @@ export const useGameResultSubmission = (
     p1Score: 0,
     p2Score: 0,
   });
-  const gameStateRef = useRef<any>(gameState);
+  const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
+  const gameStatusRef = useRef(gameStatus);
+  const hasSubmittedResult = useRef(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -31,6 +35,11 @@ export const useGameResultSubmission = (
     if (!gameId) return;
     gameIdRef.current = gameId;
   }, [gameId]);
+
+  useEffect(() => {
+    if (!gameStatus) return;
+    gameStatusRef.current = gameStatus;
+  }, [gameStatus]);
 
   useEffect(() => {
     if (!gameState) return;
@@ -46,18 +55,24 @@ export const useGameResultSubmission = (
     if (!gameId) return;
     if (gameStatus === 'finished') {
       const { players } = gameState;
-      const winnerId =
-        players.player1.score > players.player2.score ? players.player1.id : players.player2.id;
-      const loserId =
-        players.player1.score < players.player2.score ? players.player1.id : players.player2.id;
+      const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
 
-      submitResult(gameId, winnerId, loserId, players.player1.score, players.player2.score)
+      submitResult({
+        game_id: gameId,
+        winner_id: sortedPlayers[0].id,
+        loser_id: sortedPlayers[1].id,
+        winner_score: sortedPlayers[0].score,
+        loser_score: sortedPlayers[1].score,
+      })
         .then(() => {
           dispatch({ type: 'GAME_RESET' });
           navigate('/gameMenu');
         })
         .catch((err) => {
           console.error('Error submitting game result:', err);
+        })
+        .finally(() => {
+          hasSubmittedResult.current = true;
         });
     }
   }, [gameStatus, gameId, gameState, dispatch, navigate]);
@@ -65,27 +80,20 @@ export const useGameResultSubmission = (
   // Cleanup
   useEffect(() => {
     return () => {
-      if (!gameIdRef.current) return;
-      console.log('Game Over');
+      console.log('Cleanup');
+      if (!gameIdRef.current || hasSubmittedResult.current) return;
       closeConnection();
       const { players } = gameStateRef.current;
-      console.log('players', players);
-      console.log('gameState', gameStateRef.current);
-      console.log('userid', userIdRef.current);
-      const winnerId =
-        userIdRef.current === players.player1.id ? players.player2.id : players.player1.id;
-      const loserId =
-        userIdRef.current === players.player1.id ? players.player1.id : players.player2.id;
-      console.log('Scores:', scoresRef.current.p1Score, scoresRef.current.p2Score);
-      console.log('Winner:', winnerId);
-      console.log('Loser:', loserId);
-      submitResult(
-        gameIdRef.current,
-        winnerId,
-        loserId,
-        scoresRef.current.p1Score,
-        scoresRef.current.p2Score
-      )
+      const playerArray = [players.player1, players.player2];
+      const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
+      const loserIndex = playerArray.findIndex((e) => e.id === userIdRef.current);
+      submitResult({
+        game_id: gameIdRef.current,
+        winner_id: playerArray[winnerIndex].id,
+        loser_id: playerArray[loserIndex].id,
+        winner_score: playerArray[winnerIndex].score,
+        loser_score: playerArray[loserIndex].score,
+      })
         .then(() => {
           dispatch({ type: 'GAME_RESET' });
         })
