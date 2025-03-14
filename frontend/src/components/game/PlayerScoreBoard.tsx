@@ -8,7 +8,7 @@ import PlayerCard from './PlayerScoreCard';
 
 import { useWebSocketContext } from '../../services';
 
-import { useLoading } from '../../pages/LoadingContextProvider';
+import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 interface Player {
   user_id?: string;
@@ -40,21 +40,28 @@ const aiOptions = {
   },
 };
 
-export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({
-  playersData,
-  playerScores,
-}) => {
+export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData }) => {
   const player1Ref = useRef<Player | null>(null);
   const player2Ref = useRef<Player | null>(null);
 
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
   const { gameStatus, connectionStatus, gameState, gameId } = useWebSocketContext();
-  const { setLoadingState } = useLoading();
+  const { setLoadingState, loadingStates } = useLoading();
+
+  const playerScores = useRef({
+    player1Score: gameState.players.player1?.score || 0,
+    player2Score: gameState.players.player2?.score || 0,
+  });
 
   useEffect(() => {
-    console.log('playerScoreBoard useEffect');
-    if (playersData.player1) {
+    setLoadingState('scoreBoardLoading', true);
+    console.log('playerScoreBoard useEffect playerdata: ', playersData);
+    if (!playersData.player1) {
+      console.log('playerdata null, returning');
+      return;
+    }
+    if (playersData.player1 && player1Ref.current !== playersData.player1) {
       player1Ref.current = {
         display_name: playersData.player1?.display_name,
         avatar_url: playersData.player1?.avatar_url,
@@ -71,6 +78,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({
           avatar_url: playersData.player2?.avatar_url,
         };
       }
+      setLoadingState('scoreBoardLoading', false);
     }
   }, [playersData]);
 

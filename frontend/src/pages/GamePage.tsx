@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { CountDown, PlayerScoreBoard } from '@components';
 
+import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 import { useWebSocketContext } from '@services';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
-import { useLoading } from './LoadingContextProvider';
 
 import {
   useGameControls,
@@ -23,22 +23,17 @@ import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 export const GamePage: React.FC = () => {
   const { setUrl, gameState, gameStatus, connectionStatus, dispatch, sendMessage } =
     useWebSocketContext();
-  const navigate = useNavigate();
+
   const location = useLocation();
+  const { loadingStates } = useLoading();
   const { mode, difficulty } = location.state || {};
   const [animate, setAnimate] = useState<boolean>(false);
-  const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
 
   //const [userId, setUserId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
-
-  const playerScores = useRef({
-    player1Score: gameState.players.player1?.score || 0,
-    player2Score: gameState.players.player2?.score || 0,
-  });
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser(difficulty);
   useMatchmaking(mode, difficulty, setGameId);
@@ -50,16 +45,18 @@ export const GamePage: React.FC = () => {
     gameState,
     gameId,
     mode,
-    localPlayerId,
     connectionStatus,
+    gameStatus,
   });
 
+  // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED
+  // SET LOADING TO FALSE TO RENDER THE GAMECANVAS
   useEffect(() => {
     if (!gameId) return;
-    if (!animate) {
+    if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
       setLoading(false);
     }
-  }, [animate]);
+  }, [animate, loadingStates]);
 
   useEffect(() => {
     if (!gameId) return;
@@ -88,11 +85,11 @@ export const GamePage: React.FC = () => {
 
   return (
     <div id="game-page" className="w-full p-10 pt-0 flex flex-col overflow-hidden">
+      {!loadingStates.matchMakingAnimationLoading ? (
+        <PlayerScoreBoard playersData={playersData} />
+      ) : null}
       {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' && !loading ? (
         <>
-          <div className="h-[10%] flex justify-between items-center">
-            <PlayerScoreBoard playersData={playersData} playerScores={playerScores} />
-          </div>
           <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />

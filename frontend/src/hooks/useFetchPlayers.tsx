@@ -3,18 +3,18 @@ import { getUserData } from '../services/userService';
 
 export const useFetchPlayerData = ({
   gameState,
+  gameStatus,
   gameId,
   mode,
-  localPlayerId,
   connectionStatus,
 }: {
   gameState: any;
+  gameStatus: any;
   gameId: string | null;
   mode: string;
-  localPlayerId: string | null;
   connectionStatus: string;
 }) => {
-  const [playersData, setPlayersData] = useState({ player1: null, player2: null });
+  const [playersData, setPlayersData] = useState({ player1: null, player2: null, gameStatus });
 
   const fetchPlayerData = async () => {
     if (
@@ -33,6 +33,7 @@ export const useFetchPlayerData = ({
       }
 
       setPlayersData({ player1: p1, player2: p2 });
+      console.log('fetched players: ', p1, p2);
     } catch (error) {
       console.error('Error fetching player data:', error);
     }
@@ -40,8 +41,8 @@ export const useFetchPlayerData = ({
 
   useEffect(() => {
     if (!gameId) return;
-
     const interval = setInterval(() => {
+      console.log(gameState.players.player1.id);
       if (gameState?.players?.player1?.id !== 'player1') {
         clearInterval(interval);
         fetchPlayerData();
@@ -49,13 +50,18 @@ export const useFetchPlayerData = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState, gameId, connectionStatus]);
+  }, [gameId, connectionStatus, gameState]);
 
-  useEffect(() => {
-    if (!playersData.player1 && !playersData.player2) {
-      fetchPlayerData();
-    }
-  }, [connectionStatus, gameId, localPlayerId]);
+  // useEffect(() => {
+  //   console.log('FETCHINF PLAYERS');
+  //   if (!gameId) {
+  //     return;
+  //   }
+  //   if (!playersData.player1 && !playersData.player2) {
+  //     console.log(playersData);
+  //     fetchPlayerData();
+  //   }
+  // }, [gameId]);
 
   return playersData;
 };

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useLoading } from '../../contexts/gameContext/LoadingContextProvider';
 import { getUserData } from '../../services/userService';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
@@ -33,7 +34,6 @@ const aiOptions = {
   },
 };
 
-// 🧠 Replace with your real avatars (or use placeholder images)
 const avatarList = [
   './src/assets/images/ai_easy.png',
   './src/assets/images/ai_hard.png',
@@ -53,13 +53,14 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({
   const [opponentFound, setOpponentFound] = useState<boolean>(false);
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
+  const { loadingStates, setLoadingState } = useLoading();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (opponentFound) {
       setTimeout(() => {
-        setAnimate(false);
+        setLoadingState('matchMakingAnimationLoading', false);
       }, 3000);
     }
 
@@ -95,7 +96,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({
   }, [playersData]);
 
   useEffect(() => {
-    setAnimate(true);
+    setLoadingState('matchMakingAnimationLoading', true);
     if (mode === 'singleplayer') setOpponentFound(true);
     const userId = localStorage.getItem('userID');
     if (!userId) return;
