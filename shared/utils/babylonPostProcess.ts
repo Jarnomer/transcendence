@@ -1,10 +1,13 @@
 import {
   ArcRotateCamera,
+  BlurPostProcess,
   Camera,
   CubeTexture,
   DefaultRenderingPipeline,
   HemisphericLight,
+  SSAO2RenderingPipeline,
   Scene,
+  ScreenSpaceReflectionPostProcess,
   Vector3,
 } from 'babylonjs';
 
@@ -28,7 +31,7 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   pipeline.bloomKernel = 64;
   pipeline.bloomScale = 0.2;
 
-  // // Enable chromatic aberration
+  // Enable chromatic aberration
   pipeline.chromaticAberrationEnabled = true;
   pipeline.chromaticAberration.aberrationAmount = 10.0;
   pipeline.chromaticAberration.radialIntensity = 0.2;
@@ -38,8 +41,33 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   pipeline.grain.intensity = 8;
   pipeline.grain.animated = true;
 
-  // // Enable anti-aliasing
+  // Enable anti-aliasing
   pipeline.fxaaEnabled = true;
+
+  // Screen Space Ambient Occlusion
+  const ssaoRatio = {
+    ssaoRatio: 1.0,
+    blurRatio: 0.5,
+  };
+  const ssao = new SSAO2RenderingPipeline('ssao', scene, ssaoRatio);
+  pipeline.samples = 4;
+  pipeline.imageProcessingEnabled = true;
+  ssao.radius = 2;
+  ssao.totalStrength = 1.0;
+  ssao.expensiveBlur = true;
+  ssao.samples = 16;
+
+  scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', camera);
+
+  // Screen Space Reflections
+  const ssr = new ScreenSpaceReflectionPostProcess('ssr', scene, 1.0, camera);
+  ssr.threshold = 0.5;
+  ssr.strength = 1.0;
+  ssr.reflectionSpecularFalloffExponent = 3;
+  ssr.samples = 32;
+  ssr.maxDistance = 1000;
+  ssr.step = 0.1;
+  ssr.thickness = 0.5;
 
   return pipeline;
 }
@@ -62,4 +90,10 @@ export function setupSceneCamera(scene: Scene) {
   camera.detachControl();
 
   return camera;
+}
+
+export function setupMotionBlur(camera: Camera, strength: number = 1.0) {
+  const motionBlur = new BlurPostProcess('motionBlur', new Vector3(0, 0, 1), strength, 1.0, camera);
+
+  return motionBlur;
 }

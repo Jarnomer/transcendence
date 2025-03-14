@@ -51,9 +51,9 @@ export function createPaddle(scene: Scene, color: Color3) {
   const paddle = MeshBuilder.CreateBox(
     'paddle',
     {
-      height: 4,
+      height: 3.8,
       width: 0.5,
-      depth: 0.5,
+      depth: 0.7,
     },
     scene
   );
