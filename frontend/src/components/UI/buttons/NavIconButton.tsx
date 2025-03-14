@@ -1,36 +1,39 @@
-import React from 'react';
 import {
-  HomeIcon,
-  UserIcon,
-  ChatBubbleLeftIcon,
-  CogIcon,
   ArrowLeftIcon,
-  XMarkIcon,
+  ArrowRightIcon,
+  BellIcon,
+  ChatBubbleLeftIcon,
+  CheckCircleIcon,
+  CogIcon,
+  HomeIcon,
+  NoSymbolIcon,
   PauseIcon,
   PlayIcon,
+  UserIcon,
+  UserMinusIcon,
   UserPlusIcon,
-  NoSymbolIcon,
-  BellIcon,
-  CheckCircleIcon,
   XCircleIcon,
-
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
+import React from 'react';
 
 interface NavIconButtonProps {
   id: string;
   icon:
-  | 'home'
-  | 'user'
-  | 'chat'
-  | 'settings'
-  | 'arrowLeft'
-  | 'close'
-  | 'play'
-  | 'addFriend'
-  | 'bell'
-  | 'checkCircle'
-  | 'xCircle'
-  | 'block';
+    | 'home'
+    | 'user'
+    | 'chat'
+    | 'settings'
+    | 'arrowLeft'
+    | 'arrowRight'
+    | 'close'
+    | 'play'
+    | 'addFriend'
+    | 'removeFriend'
+    | 'bell'
+    | 'checkCircle'
+    | 'xCircle'
+    | 'block';
   onClick: () => void;
 }
 
@@ -41,10 +44,12 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick 
     chat: <ChatBubbleLeftIcon className="size-6" />,
     settings: <CogIcon className="size-6" />,
     arrowLeft: <ArrowLeftIcon className="w-8 h-8" />,
+    arrowRight: <ArrowRightIcon className="size-6" />,
     close: <XMarkIcon className="w-8 h-8" />,
     pause: <PauseIcon className="w-8 h-8" />,
     play: <PlayIcon className="w-6 h-6" />,
     addFriend: <UserPlusIcon className="w-6 h-6"></UserPlusIcon>,
+    removeFriend: <UserMinusIcon className="w-6 h-6"></UserMinusIcon>,
     block: <NoSymbolIcon className="w-6 h-6"></NoSymbolIcon>,
     bell: <BellIcon className="w-6 h-6"></BellIcon>,
     checkCircle: <CheckCircleIcon className="w-6 h-6"></CheckCircleIcon>,
@@ -52,7 +57,7 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick 
   };
 
   return (
-    <button id={id} onClick={onClick}>
+    <button className="" id={id} onClick={onClick}>
       {icons[icon]}
     </button>
   );

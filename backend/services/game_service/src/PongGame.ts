@@ -24,11 +24,16 @@ export default class PongGame {
   private player1Id: string | null = null;
   private player2Id: string | null = null;
 
+  private mode: string;
+  private difficulty: string;
+
   private readyState = new Map<string, boolean>();
 
   private readonly MAX_SCORE: number = 5;
 
-  constructor() {
+  constructor(mode: string, difficulty: string) {
+    this.mode = mode;
+    this.difficulty = difficulty;
     this.gameState = {
       players: {
         player1: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
@@ -75,7 +80,16 @@ export default class PongGame {
   }
 
   areAllPlayersReady(): boolean {
-    return Array.from(this.readyState.values()).every((val) => val);
+    if (this.mode === 'singleplayer' || (this.mode === '1v1' && this.difficulty === 'local')) {
+      if (this.readyState.get('player1')) {
+        return true;
+      }
+    } else if (this.mode === '1v1' && this.difficulty === 'online') {
+      if (this.readyState.get('player1') && this.readyState.get('player2')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   getGameStatus(): GameStatus {

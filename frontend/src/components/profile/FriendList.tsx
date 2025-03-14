@@ -1,8 +1,10 @@
+import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
 import React, { useState } from 'react';
 import { useAnimatedNavigate } from '../../animatedNavigate';
+import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 
 type Friend = {
-  user_id: number;
+  user_id: string;
   display_name: string;
   avatar_url: string;
 };
@@ -16,7 +18,7 @@ export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => 
   const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
   const animatedNavigate = useAnimatedNavigate();
 
-  const renderList = (list: Friend[], emptyText: string) => {
+  const renderList = (list: Friend[], emptyText: string, isRequestList: boolean) => {
     return list && list.length > 0 ? (
       <ul>
         {list.map((friend) => (
@@ -32,6 +34,20 @@ export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => 
                 alt={friend.display_name}
               />
               <span className="text-md font-medium">{friend.display_name}</span>
+              {isRequestList && (
+                <>
+                  <NavIconButton
+                    id={`accept-friend-${friend.user_id}`}
+                    icon="checkCircle"
+                    onClick={(event) => handleAcceptFriendClick(event, friend.user_id)}
+                  />
+                  <NavIconButton
+                    id={`reject-friend-${friend.user_id}`}
+                    icon="xCircle"
+                    onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
+                  />
+                </>
+              )}
             </div>
           </li>
         ))}
@@ -39,6 +55,28 @@ export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => 
     ) : (
       <p className="text-gray-400">{emptyText}</p>
     );
+  };
+
+  const handleAcceptFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    acceptFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request accepted');
+      })
+      .catch((error) => {
+        console.error('Failed to accept friend request: ', error);
+      });
+  };
+
+  const handleRejectFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    rejectFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request rejected');
+      })
+      .catch((error) => {
+        console.error('Failed to reject friend request: ', error);
+      });
   };
 
   return (
@@ -64,8 +102,8 @@ export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => 
 
       <div className="flex flex-col gap-2">
         {activeTab === 'friends'
-          ? renderList(friends, 'No friends yet')
-          : renderList(requests, 'No requests yet')}
+          ? renderList(friends, 'No friends yet', false)
+          : renderList(requests, 'No requests yet', true)}
       </div>
     </div>
   );
