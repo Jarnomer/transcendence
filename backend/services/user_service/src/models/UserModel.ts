@@ -1,5 +1,4 @@
 import { Database } from 'sqlite';
-import { v4 as uuidv4 } from 'uuid';
 
 import { queryWithJsonParsing } from '../utils/utils';
 
@@ -23,11 +22,10 @@ export class UserModel {
   }
 
   async createUser(user_id: string) {
-    const profile_id = uuidv4();
-    return await this.db.get(
-      `INSERT INTO user_profiles (user_id, profile_id) VALUES (?, ?) RETURNING *`,
-      [user_id, profile_id]
-    );
+    // const profile_id = uuidv4();
+    return await this.db.get(`INSERT INTO user_profiles (user_id) VALUES (?) RETURNING *`, [
+      user_id,
+    ]);
   }
 
   async getUserByID(user_id: string) {
@@ -97,7 +95,7 @@ export class UserModel {
       )
     )
       FROM games g
-      JOIN game_players gp_me ON g.game_id = gp_me.game_id
+      LEFT JOIN game_players gp_me ON g.game_id = gp_me.game_id
       LEFT JOIN game_players gp_opponent ON g.game_id = gp_opponent.game_id AND gp_me.player_id <> gp_opponent.player_id
       LEFT JOIN user_profiles up_opponent ON gp_opponent.player_id = up_opponent.user_id
       WHERE gp_me.player_id = up.user_id

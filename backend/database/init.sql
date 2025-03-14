@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- User profiles (separate table)
 CREATE TABLE  IF NOT EXISTS user_profiles (
-    profile_id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    -- profile_id TEXT PRIMARY KEY,
+    user_id TEXT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     display_name VARCHAR(100),
     first_name VARCHAR(100),
     last_name VARCHAR(100),
