@@ -285,14 +285,14 @@ export default class PongGame {
       } else {
         ball.dx += ball.spin / 3;
       }
-      if (ball.dx < 1) ball.dx = 1;
+      if (ball.dx < 2) ball.dx = 1;
     } else {
       if (isTopWall) {
         ball.dx -= ball.spin / 3;
       } else {
         ball.dx += ball.spin / 3;
       }
-      if (ball.dx > -1) ball.dx = -1;
+      if (ball.dx > -2) ball.dx = -1;
     }
     ball.spin *= 0.5;
     if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
