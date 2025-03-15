@@ -48,7 +48,7 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
   const [lastTheme, setLastTheme] = useState(theme);
 
-  const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0 });
+  const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
     secondaryColor: Color3;
@@ -114,6 +114,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       y: gameState.ball.y,
       dx: gameState.ball.dx,
       dy: gameState.ball.dy,
+      spin: gameState.ball.spin,
     };
 
     setLastTheme(theme); // Save current theme
@@ -155,7 +156,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current.position.y = ballY;
 
     // Update constant ball effects, inverted dy for Babylon coordinate system
-    applyBallEffects(ballRef.current, ball.dx, -ball.dy, color);
+    applyBallEffects(ballRef.current, ball.dx, -ball.dy, ball.spin, color);
 
     // Check for collisions by comparing current and previous velocity
     if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
@@ -177,6 +178,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       y: ball.y,
       dx: ball.dx,
       dy: ball.dy,
+      spin: ball.spin,
     };
   }, [gameState]);
 
