@@ -1,6 +1,8 @@
 // Import environment variables
 import cookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
+import Swagger from '@fastify/swagger';
+import SwaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 
 // Import Fastify and its JWT plugin
@@ -44,6 +46,27 @@ const app = fastify({
 const start = async () => {
   try {
     // Register fastify-jwt plugin with secret from env variables
+    app.register(Swagger, {
+      swagger: {
+        info: {
+          title: 'My API',
+          description: 'API documentation',
+          version: '1.0.0',
+        },
+        externalDocs: {
+          url: 'https://swagger.io',
+          description: 'Find more info here',
+        },
+        host: 'localhost:8443',
+        schemes: ['https'],
+        consumes: ['application/json'],
+        produces: ['application/json'],
+      },
+    });
+
+    app.register(SwaggerUi, {
+      routePrefix: '/docs', // Swagger UI is served at /docs
+    });
     app.register(fastifyJwt, {
       secret: process.env.JWT_SECRET || 'defaultsecret',
       cookie: {
