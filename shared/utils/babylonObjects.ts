@@ -1,47 +1,91 @@
-import {
-  Animation,
-  Color3,
-  GlowLayer,
-  MeshBuilder,
-  PBRMaterial,
-  PBRMetallicRoughnessMaterial,
-  Scene,
-} from 'babylonjs';
+import { Animation, Color3, GlowLayer, MeshBuilder, PBRMaterial, Scene, Texture } from 'babylonjs';
 
 import { createBallTrail } from './babylonParticles';
 
 export function createFloor(scene: Scene, color: Color3) {
-  const pbr = new PBRMetallicRoughnessMaterial('floorMaterial', scene);
+  const pbr = new PBRMaterial('floorMaterial', scene);
   const floor = MeshBuilder.CreateBox(
     'floor',
     {
-      width: 45,
-      height: 0.5,
-      depth: 25,
-      subdivisions: 40, // Ripple effect
+      width: 60,
+      depth: 30,
     },
     scene
   );
 
-  // Position the floor
-  floor.position.z = 2;
+  // Position and rotate the floor
+  floor.position.z = 1.5;
   floor.rotation.x = Math.PI / 2;
 
-  pbr.metallic = 1.0;
+  const baseUrl = '/floor-metal/';
+  pbr.albedoTexture = new Texture(baseUrl + 'albedo.png', scene);
+  pbr.bumpTexture = new Texture(baseUrl + 'normal.png', scene);
+  pbr.metallicTexture = new Texture(baseUrl + 'metallic.png', scene);
+  pbr.roughnessTexture = new Texture(baseUrl + 'roughness.png', scene);
+  pbr.ambientTexture = new Texture(baseUrl + 'ao.png', scene);
+
+  const textureScale = 4;
+  pbr.albedoTexture.uScale = textureScale;
+  pbr.albedoTexture.vScale = textureScale;
+  pbr.bumpTexture.uScale = textureScale;
+  pbr.bumpTexture.vScale = textureScale;
+  pbr.metallicTexture.uScale = textureScale;
+  pbr.metallicTexture.vScale = textureScale;
+  pbr.roughnessTexture.uScale = textureScale;
+  pbr.roughnessTexture.vScale = textureScale;
+  pbr.ambientTexture.uScale = textureScale;
+  pbr.ambientTexture.vScale = textureScale;
+
+  const multipleColor = 0.12;
+  const adjustedColor = new Color3(
+    Math.max(multipleColor, color.r),
+    Math.max(multipleColor, color.g),
+    Math.max(multipleColor, color.b)
+  );
+  pbr.albedoColor = adjustedColor;
+
+  pbr.emissiveColor = new Color3(color.r * 0.1, color.g * 0.1, color.b * 0.1);
+  pbr.reflectivityColor = new Color3(0.8, 0.8, 0.8);
+
+  pbr.metallic = 0.8;
   pbr.roughness = 0.2;
+  pbr.microSurface = 0.9;
   pbr.environmentIntensity = 1.5;
 
-  pbr.albedoColor = color;
-  pbr.baseColor = new Color3(0.0015, 0.0015, 0.0015);
-  pbr.emissiveColor = new Color3(color.r * 0.1, color.g * 0.1, color.b * 0.1);
-  pbr.reflectivityColor = new Color3(1.0, 1.0, 1.0);
+  pbr.useParallax = true;
+  pbr.useParallaxOcclusion = true;
+  pbr.parallaxScaleBias = 0.3;
+  pbr.ambientTextureStrength = 3.0;
 
-  if (scene.environmentTexture) {
-    pbr.reflectionTexture = scene.environmentTexture;
-  }
+  pbr.clearCoat.isEnabled = true;
+  pbr.clearCoat.intensity = 0.5;
+  pbr.clearCoat.roughness = 0.1;
 
-  pbr.microSurface = 0.96;
+  pbr.albedoTexture.anisotropicFilteringLevel = 16;
+  pbr.bumpTexture.anisotropicFilteringLevel = 16;
+
+  if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
+
+  floor.receiveShadows = true;
   floor.material = pbr;
+
+  const frameRate = 30;
+  const emissiveAnimation = new Animation(
+    'emissiveAnimation',
+    'emissiveIntensity',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const keys = [];
+  keys.push({ frame: 0, value: 0.02 });
+  keys.push({ frame: frameRate, value: 0.1 });
+  keys.push({ frame: frameRate * 2, value: 0.02 });
+
+  emissiveAnimation.setKeys(keys);
+  pbr.animations = [emissiveAnimation];
+  scene.beginAnimation(pbr, 0, frameRate * 2, true);
 
   return floor;
 }
@@ -51,7 +95,7 @@ export function createPaddle(scene: Scene, color: Color3) {
   const paddle = MeshBuilder.CreateBox(
     'paddle',
     {
-      height: 3.8,
+      height: 4.0,
       width: 0.5,
       depth: 0.7,
     },
@@ -83,7 +127,6 @@ export function createPaddle(scene: Scene, color: Color3) {
   glowLayer.blurKernelSize = 32;
   glowLayer.addIncludedOnlyMesh(paddle);
 
-  // Hover animation
   const frameRate = 30;
   const hoverAnimation = new Animation(
     'hoverAnimation',
@@ -157,7 +200,6 @@ export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) 
   glowLayer.blurKernelSize = 64;
   glowLayer.addIncludedOnlyMesh(core);
 
-  // Hover animation
   const frameRate = 30;
   const hoverAnimation = new Animation(
     'ballHoverAnimation',

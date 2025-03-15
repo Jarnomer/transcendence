@@ -10,9 +10,10 @@ import {
   createFloor,
   createPaddle,
   getThemeColors,
+  setupFloorReflections,
   setupPostProcessing,
   setupSceneCamera,
-  setupSceneEnvironment,
+  setupSceneEnvironmentMap,
   setupScenelights,
 } from '@shared/utils';
 
@@ -25,7 +26,7 @@ interface GameCanvasProps {
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
-const FIX_POSITION = 2.25;
+const FIX_POSITION = 2;
 
 // Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
@@ -77,16 +78,24 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
 
-    setupSceneEnvironment(scene);
-    setupScenelights(scene);
+    setupSceneEnvironmentMap(scene);
 
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera);
+    const { shadowGenerators } = setupScenelights(scene);
 
     floorRef.current = createFloor(scene, backgroundColor);
     player1Ref.current = createPaddle(scene, primaryColor);
     player2Ref.current = createPaddle(scene, primaryColor);
     ballRef.current = createBall(scene, primaryColor);
+
+    const gameObjects = [player1Ref.current, player2Ref.current, ballRef.current];
+    setupFloorReflections(scene, floorRef.current, gameObjects);
+    shadowGenerators.forEach((generator) => {
+      gameObjects.forEach((obj) => {
+        generator.addShadowCaster(obj);
+      });
+    });
 
     engineRef.current = engine;
     sceneRef.current = scene;
@@ -96,7 +105,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     // Set paddle positions
     player1Ref.current.position.x = -20;
-    player2Ref.current.position.x = 19.7;
+    player2Ref.current.position.x = 19.5;
 
     // Initialize previous ball state
     prevBallState.current = {
