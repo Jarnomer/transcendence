@@ -1,9 +1,9 @@
 import {
   Color3,
   GlowLayer,
-  LinesMesh,
   Mesh,
   MeshBuilder,
+  Path3D,
   PointLight,
   Scene,
   StandardMaterial,
@@ -12,6 +12,7 @@ import {
 
 /**
  * Creates invisible boundary planes for edge attachment
+ * OPTIMIZATION: Create only when needed and with simpler geometry
  */
 function createCanvasBoundaries(scene: Scene): Mesh[] {
   // Define canvas boundaries with generous size
@@ -23,7 +24,7 @@ function createCanvasBoundaries(scene: Scene): Mesh[] {
   const invisibleMat = new StandardMaterial('boundaryMat', scene);
   invisibleMat.alpha = 0;
 
-  // Create four edge planes
+  // Create simplified boundary planes (only the ones we'll use)
   const topWall = MeshBuilder.CreateBox(
     'topBoundary',
     { width: width, height: depth, depth: 1 },
@@ -42,29 +43,12 @@ function createCanvasBoundaries(scene: Scene): Mesh[] {
   bottomWall.material = invisibleMat;
   bottomWall.isVisible = false;
 
-  const leftWall = MeshBuilder.CreateBox(
-    'leftBoundary',
-    { width: depth, height: height, depth: 1 },
-    scene
-  );
-  leftWall.position.x = -width / 2;
-  leftWall.material = invisibleMat;
-  leftWall.isVisible = false;
-
-  const rightWall = MeshBuilder.CreateBox(
-    'rightBoundary',
-    { width: depth, height: height, depth: 1 },
-    scene
-  );
-  rightWall.position.x = width / 2;
-  rightWall.material = invisibleMat;
-  rightWall.isVisible = false;
-
-  return [topWall, bottomWall, leftWall, rightWall];
+  return [topWall, bottomWall];
 }
 
 /**
  * Creates ball visual effects (glow and inner sphere)
+ * OPTIMIZATION: Simpler effects with better performance
  */
 function setupBallVisualEffects(ballMesh: any, baseColor: Color3, scene: Scene) {
   // Collection of disposable items
@@ -74,42 +58,40 @@ function setupBallVisualEffects(ballMesh: any, baseColor: Color3, scene: Scene) 
   const originalEmissiveColor = ballMesh.material.emissiveColor.clone();
   const originalEmissiveIntensity = ballMesh.material.emissiveIntensity;
 
-  // Enhanced ball glow
-  const ballGlow = new GlowLayer('ballElectricGlow', scene);
-  ballGlow.intensity = 1.5;
-  ballGlow.blurKernelSize = 32;
+  // Enhanced ball glow - SHARED glow layer for better performance
+  const ballGlow = new GlowLayer('ballElectricGlow', scene, {
+    mainTextureFixedSize: 512, // Lower resolution for better performance
+    blurKernelSize: 16, // Reduced blur kernel size
+  });
+
+  ballGlow.intensity = 0.8; // Reduced intensity
   ballGlow.addIncludedOnlyMesh(ballMesh);
   disposables.push(ballGlow);
 
-  // Plasma core effect - modify ball material
-  ballMesh.material.emissiveColor = new Color3(
-    baseColor.r * 1.2,
-    baseColor.g * 0.5,
-    baseColor.b * 0.5
-  );
-  ballMesh.material.emissiveIntensity = 2.0;
+  // Don't modify the ball's material - keep its original appearance
+  // Just use the original values instead of enhancing them
 
-  // Create an inner ball glow effect
+  // Create an inner ball glow effect that's much more subtle
   const glowSphere = MeshBuilder.CreateSphere(
     'ballGlow',
-    { diameter: ballMesh.getBoundingInfo().boundingSphere.radius * 1.4, segments: 16 },
+    { diameter: ballMesh.getBoundingInfo().boundingSphere.radius * 1.2, segments: 12 }, // Reduced size
     scene
   );
   glowSphere.position = ballMesh.position.clone();
   glowSphere.parent = ballMesh; // Make it follow the ball
 
   const glowMaterial = new StandardMaterial('glowMaterial', scene);
-  glowMaterial.emissiveColor = new Color3(baseColor.r * 1.2, baseColor.g * 0.8, baseColor.b * 0.8);
-  glowMaterial.alpha = 0.6;
+  glowMaterial.emissiveColor = new Color3(baseColor.r * 0.6, baseColor.g * 0.4, baseColor.b * 0.4); // Reduced intensity
+  glowMaterial.alpha = 0.3; // More transparent
   glowMaterial.disableLighting = true;
   glowSphere.material = glowMaterial;
   disposables.push(glowSphere);
 
   // Additional point light that flickers with electricity
   const electricLight = new PointLight('electricLight', ballMesh.position.clone(), scene);
-  electricLight.diffuse = new Color3(baseColor.r * 1.5, baseColor.g * 1.5, baseColor.b * 1.5);
-  electricLight.intensity = 0.8;
-  electricLight.range = 10;
+  electricLight.diffuse = new Color3(baseColor.r * 1.2, baseColor.g * 1.2, baseColor.b * 1.2);
+  electricLight.intensity = 0.4; // Reduced intensity
+  electricLight.range = 6; // Reduced range for better performance
   disposables.push(electricLight);
 
   return {
@@ -119,38 +101,46 @@ function setupBallVisualEffects(ballMesh: any, baseColor: Color3, scene: Scene) 
     electricLight,
     originalEmissiveColor,
     originalEmissiveIntensity,
+    sharedGlowLayer: ballGlow, // Make glow layer accessible
   };
 }
 
 /**
+ * OPTIMIZATION: Simplified target selection with fewer options
  * Finds potential targets for electric arcs within range and distributed in 360°
  */
-function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 9) {
+function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 7) {
+  // Reduced range
   const targets: Array<{ mesh: any; point: Vector3 }> = [];
 
-  // Divide the 360° circle into sectors
-  const sectorCount = 8;
+  // OPTIMIZATION: Reduced number of sectors
+  const sectorCount = 6; // Reduced from 8
   const sectorAngle = (Math.PI * 2) / sectorCount;
 
-  // Get all potential target meshes from scene
+  // Get only essential target meshes - OPTIMIZATION: Filter more aggressively
   const potentialTargets = scene.meshes.filter(
     (mesh) =>
       mesh !== ballMesh &&
-      !mesh.name.includes('ballGlow') &&
+      !mesh.name.includes('Glow') &&
       !mesh.name.includes('arc') &&
       !mesh.name.includes('line') &&
-      !mesh.name.includes('glow')
+      (mesh.name.includes('paddle') ||
+        mesh.name.includes('floor') ||
+        mesh.name.includes('Boundary'))
   );
 
-  // For each sector, try to find targets
+  // For each sector, try to find targets (with lower probabilities)
   for (let sector = 0; sector < sectorCount; sector++) {
+    // Skip some sectors randomly for performance
+    if (Math.random() < 0.4) continue;
+
     // Base angle for this sector
     const baseAngle = sector * sectorAngle;
 
     // First, try to find game objects in this direction
     let foundObjectInSector = false;
 
-    // Check for game objects in this sector
+    // Check for game objects in this sector (with more restrictive conditions)
     for (const target of potentialTargets) {
       // Skip very small objects
       if (!target.getBoundingInfo) continue;
@@ -161,6 +151,9 @@ function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 9) {
 
       // Skip if too far
       if (distance > maxRange) continue;
+
+      // OPTIMIZATION: More strict filtering - higher probability to skip
+      if (Math.random() < 0.7) continue;
 
       // Calculate angle to target
       const angleToTarget = Math.atan2(toTarget.y, toTarget.x);
@@ -174,62 +167,37 @@ function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 9) {
       // Now the target is in our sector and in range
       foundObjectInSector = true;
 
-      // Don't always connect to every valid target (vary probability based on distance)
-      const connectionProbability = 0.7 - (distance / maxRange) * 0.5;
+      // OPTIMIZATION: Stricter connection probability to reduce number of arcs
+      const connectionProbability = 0.4 - (distance / maxRange) * 0.3;
       if (Math.random() > connectionProbability) continue;
 
-      // Calculate a connection point on the target's surface
-      const boundingInfo = target.getBoundingInfo();
-      const dimensions = boundingInfo.boundingBox.maximumWorld.subtract(
-        boundingInfo.boundingBox.minimumWorld
-      );
-
-      // Different connection logic based on target type
+      // Calculate a simplified connection point
       let connectionPoint;
 
-      // For large flat objects like the floor, connect to top surface
+      // Simplified connection logic based on target type
       if (target.name === 'floor') {
         connectionPoint = new Vector3(
           ballMesh.position.x + toTarget.x * 0.7,
           ballMesh.position.y + toTarget.y * 0.7,
-          boundingInfo.boundingBox.maximumWorld.z + 0.1
+          target.position.z + 0.1
         );
-      }
-      // For paddles, connect to closest point on paddle
-      else if (target.name.includes('paddle')) {
+      } else if (target.name.includes('paddle')) {
         const paddleDir = target.position.x > 0 ? 1 : -1;
         connectionPoint = new Vector3(
           target.position.x - paddleDir * 0.25,
-          target.position.y + (Math.random() - 0.5) * dimensions.y * 0.8,
-          target.position.z + (Math.random() - 0.5) * 0.2
+          target.position.y + (Math.random() - 0.5) * 1.5, // Simplified calculation
+          target.position.z
         );
-      }
-      // For boundaries, connect to edge
-      else if (target.name.includes('Boundary')) {
-        // Calculate a random point on the boundary
+      } else if (target.name.includes('Boundary')) {
+        // Simplified boundary connection
         if (target.name.includes('top') || target.name.includes('bottom')) {
-          // For top/bottom boundaries
-          connectionPoint = new Vector3(
-            ballMesh.position.x + (Math.random() - 0.5) * 5,
-            target.position.y,
-            target.position.z
-          );
+          connectionPoint = new Vector3(ballMesh.position.x, target.position.y, target.position.z);
         } else {
-          // For left/right boundaries
-          connectionPoint = new Vector3(
-            target.position.x,
-            ballMesh.position.y + (Math.random() - 0.5) * 5,
-            target.position.z
-          );
+          connectionPoint = new Vector3(target.position.x, ballMesh.position.y, target.position.z);
         }
-      }
-      // For other objects, use a random point on their bounding box
-      else {
-        connectionPoint = new Vector3(
-          target.position.x + (Math.random() - 0.5) * dimensions.x * 0.8,
-          target.position.y + (Math.random() - 0.5) * dimensions.y * 0.8,
-          target.position.z + (Math.random() - 0.5) * dimensions.z * 0.8
-        );
+      } else {
+        // Default simple connection point
+        connectionPoint = target.position.clone();
       }
 
       targets.push({
@@ -238,10 +206,11 @@ function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 9) {
       });
     }
 
-    // If no object found in this sector, add a free-air target
-    if (!foundObjectInSector && Math.random() < 0.6) {
-      // Random distance between 2-4 units
-      const distance = 2 + Math.random() * 2;
+    // If no object found in this sector, add a free-air target with low probability
+    if (!foundObjectInSector && Math.random() < 0.3) {
+      // Reduced probability
+      // Random distance between 2-3 units (shorter)
+      const distance = 2 + Math.random() * 1;
 
       // Random angle within this sector
       const angle = baseAngle + (Math.random() - 0.5) * sectorAngle;
@@ -265,52 +234,93 @@ function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 9) {
 
 /**
  * Generates a zigzag lightning pattern between two points
+ * Simpler 2D version with moderate chaos for top-down view
  */
 function generateLightningPoints(start: Vector3, end: Vector3): Vector3[] {
   const points: Vector3[] = [];
   const distance = Vector3.Distance(start, end);
 
-  // More segments for longer distances
-  const segmentCount = 5 + Math.floor(distance / 1.5);
+  // More segments for more chaotic pattern
+  const segmentCount = Math.max(8, Math.floor(distance * 3));
 
-  // Base displacement amount - larger for longer arcs
-  const displacementAmount = distance * 0.15;
+  // Moderate displacement amount (30% of distance)
+  const displacementAmount = distance * 0.3;
+
+  // Vector from start to end
+  const direction = end.subtract(start).normalize();
+
+  // Create perpendicular vector for 2D displacement only
+  const perpVector = new Vector3(-direction.y, direction.x, 0).normalize();
 
   // First point is always the start
   points.push(start.clone());
 
-  // Generate intermediate points with zigzag pattern
+  // Main branch
+  let prevPoint = start.clone();
   for (let i = 1; i < segmentCount; i++) {
     const ratio = i / segmentCount;
 
-    // Get point along straight line
+    // Get point along straight line, but with some variation in progress
+    // This creates uneven segment lengths
+    const segmentRatio = ratio * (0.8 + Math.random() * 0.4);
     const basePoint = new Vector3(
-      start.x + (end.x - start.x) * ratio,
-      start.y + (end.y - start.y) * ratio,
-      start.z + (end.z - start.z) * ratio
+      start.x + (end.x - start.x) * segmentRatio,
+      start.y + (end.y - start.y) * segmentRatio,
+      start.z + (end.z - start.z) * segmentRatio
     );
 
-    // Calculate direction perpendicular to line
-    const direction = end.subtract(start).normalize();
-    const perpVector = new Vector3(
-      -direction.y,
-      direction.x,
-      direction.z * 0.1 // Less variation in Z
-    ).normalize();
-
-    // Add random displacement perpendicular to line direction
+    // Add random displacement in 2D only
     // More displacement in the middle, less at endpoints
     const midPointFactor = 1 - Math.abs((ratio - 0.5) * 2);
+
+    // 2D displacement perpendicular to main direction
     const displacement = (Math.random() - 0.5) * displacementAmount * midPointFactor;
 
-    // Apply displacement
+    // Apply displacement in 2D only
     const point = new Vector3(
       basePoint.x + perpVector.x * displacement,
       basePoint.y + perpVector.y * displacement,
-      basePoint.z + perpVector.z * displacement * 0.5
+      basePoint.z // Keep Z unchanged
     );
 
     points.push(point);
+    prevPoint = point;
+
+    // Randomly add a small branch (20% chance except near start/end)
+    if (ratio > 0.3 && ratio < 0.7 && Math.random() < 0.2) {
+      // Create branch direction (random angle off main path)
+      const branchLength = distance * 0.15 * Math.random();
+      const branchDir = new Vector3(
+        direction.x + (Math.random() - 0.5) * 2,
+        direction.y + (Math.random() - 0.5) * 2,
+        0 // Keep Z unchanged for 2D effect
+      ).normalize();
+
+      // Add 2-3 points for the branch
+      const branchPoints = 2 + Math.floor(Math.random() * 2);
+      let branchPrev = point.clone();
+
+      for (let j = 1; j <= branchPoints; j++) {
+        const branchRatio = j / branchPoints;
+        const branchDisplacement = (Math.random() - 0.5) * branchLength * 0.5;
+
+        const branchPoint = new Vector3(
+          branchPrev.x +
+            branchDir.x * (branchLength / branchPoints) +
+            perpVector.x * branchDisplacement,
+          branchPrev.y +
+            branchDir.y * (branchLength / branchPoints) +
+            perpVector.y * branchDisplacement,
+          branchPrev.z // Keep Z unchanged
+        );
+
+        points.push(branchPoint);
+        branchPrev = branchPoint;
+      }
+
+      // Return to original point to continue the main path
+      points.push(point.clone());
+    }
   }
 
   // Last point is always the end
@@ -321,34 +331,62 @@ function generateLightningPoints(start: Vector3, end: Vector3): Vector3[] {
 
 /**
  * Creates an electric arc from ball to a target point
+ * OPTIMIZATION: Thicker arcs using tubes instead of lines
  */
-function createArcLine(startPoint: Vector3, endPoint: Vector3, baseColor: Color3, scene: Scene) {
+function createArcLine(
+  startPoint: Vector3,
+  endPoint: Vector3,
+  baseColor: Color3,
+  scene: Scene,
+  sharedGlowLayer: GlowLayer
+) {
   // Calculate points for the zigzag pattern
   const arcPoints = generateLightningPoints(startPoint, endPoint);
 
-  // Create line mesh for the arc
-  const lineMesh = MeshBuilder.CreateLines('electricArc', { points: arcPoints }, scene);
+  // ENHANCEMENT: Use tube for thicker lightning instead of lines
+  const path3d = new Path3D(arcPoints);
 
-  // Set line appearance
-  lineMesh.color = new Color3(
-    Math.min(baseColor.r * 1.5 + 0.3, 1),
-    Math.min(baseColor.g * 1.5 + 0.3, 1),
-    Math.min(baseColor.b * 1.5 + 0.3, 1)
+  // Create tube mesh for the arc with consistent thickness
+  const tubeMesh = MeshBuilder.CreateTube(
+    'electricArcTube',
+    {
+      path: arcPoints,
+      radius: 0.045, // 50% thicker than previous 0.03
+      tessellation: 5, // Low tessellation for performance
+      updatable: true,
+    },
+    scene
   );
 
-  // Create an additional glow layer specifically for this line
-  const lineGlow = new GlowLayer(`lineGlow_${Date.now()}`, scene);
-  lineGlow.intensity = 1.0;
-  lineGlow.blurKernelSize = 16;
-  lineGlow.addIncludedOnlyMesh(lineMesh);
+  // Set tube appearance with more variation
+  const tubeMaterial = new StandardMaterial('arcMaterial', scene);
+  tubeMaterial.emissiveColor = new Color3(
+    Math.min(baseColor.r * 1.7 + 0.3, 1),
+    Math.min(baseColor.g * 1.7 + 0.3, 1),
+    Math.min(baseColor.b * 1.7 + 0.3, 1)
+  );
+  tubeMaterial.disableLighting = true; // Better for glow effect
+  tubeMaterial.alpha = 0.7; // Slightly transparent for better glow effect
 
-  return { lineMesh, lineGlow, points: arcPoints };
+  tubeMesh.material = tubeMaterial;
+
+  // Add to shared glow layer
+  sharedGlowLayer.addIncludedOnlyMesh(tubeMesh);
+
+  return { arcMesh: tubeMesh, points: arcPoints, path3d };
 }
 
 /**
  * Creates a new electric arc connecting the ball to a target
+ * OPTIMIZATION: Uses shared resources and simplified calculations
  */
-function createNewArc(ballMesh: any, baseColor: Color3, scene: Scene, activeArcs: any[]) {
+function createNewArc(
+  ballMesh: any,
+  baseColor: Color3,
+  scene: Scene,
+  activeArcs: any[],
+  sharedGlowLayer: GlowLayer
+) {
   // Find potential connection points
   const targets = getTargetsInRange(ballMesh, scene);
 
@@ -361,18 +399,24 @@ function createNewArc(ballMesh: any, baseColor: Color3, scene: Scene, activeArcs
   const startPoint = ballMesh.position.clone();
   const endPoint = targetInfo.point;
 
-  // Create the arc line with glow
-  const { lineMesh, lineGlow, points } = createArcLine(startPoint, endPoint, baseColor, scene);
+  // Create the arc with glow
+  const { arcMesh, points, path3d } = createArcLine(
+    startPoint,
+    endPoint,
+    baseColor,
+    scene,
+    sharedGlowLayer
+  );
 
   // Create a reference for the arc that will be stored in activeArcs
   const arcReference = {
-    lineMesh,
+    arcMesh,
     target: targetInfo.mesh,
     targetPoint: targetInfo.point,
     life: 0,
-    maxLife: 30 + Math.floor(Math.random() * 30), // 0.5-1 second at 60fps
+    maxLife: 60 + Math.floor(Math.random() * 60), // Longer lifetime: 1-2 seconds at 60fps
     points,
-    lineGlow,
+    path3d,
     updateFunction: null as any, // Will be set below
   };
 
@@ -384,45 +428,51 @@ function createNewArc(ballMesh: any, baseColor: Color3, scene: Scene, activeArcs
     // Always update first point to match ball position
     arcReference.points[0] = currentStartPoint;
 
-    // Frequently regenerate the zigzag pattern to make it flicker
-    // Also regenerate whenever the ball has moved significantly
+    // OPTIMIZATION: Regenerate less frequently - only 10% chance per frame
     const shouldRegenerate =
-      Math.random() < 0.25 || Vector3.Distance(currentStartPoint, startPoint) > 0.1;
+      Math.random() < 0.1 || Vector3.Distance(currentStartPoint, startPoint) > 0.2;
 
     if (shouldRegenerate) {
       try {
         // Generate new points using current ball position
         const newPoints = generateLightningPoints(currentStartPoint, endPoint);
 
-        // Create a replacement line mesh
-        const newLineMesh = MeshBuilder.CreateLines('electricArc', { points: newPoints }, scene);
+        // Update the entire path
+        // Update the entire path with consistent thickness
+        MeshBuilder.CreateTube(
+          'electricArcTube',
+          {
+            path: newPoints,
+            radius: 0.045, // 50% thicker than previous 0.03
+            tessellation: 5,
+            instance: arcReference.arcMesh,
+          },
+          scene
+        );
 
-        // Copy properties from old line to new line
-        newLineMesh.color = arcReference.lineMesh.color.clone();
-
-        // Update the glow layer to include the new mesh instead of the old one
-        if (arcReference.lineGlow) {
-          arcReference.lineGlow.removeIncludedOnlyMesh(arcReference.lineMesh);
-          arcReference.lineGlow.addIncludedOnlyMesh(newLineMesh);
-        }
-
-        // Store old mesh for disposal
-        const oldMesh = arcReference.lineMesh;
-
-        // Update the reference directly in our arc object
-        arcReference.lineMesh = newLineMesh;
+        // Update references
         arcReference.points = newPoints;
-
-        // Now it's safe to dispose of the old line mesh
-        oldMesh.dispose();
       } catch (err) {
-        console.error('Error updating arc line:', err);
+        console.error('Error updating arc tube:', err);
         return true; // Signal to remove this arc due to error
+      }
+    } else {
+      // OPTIMIZATION: For frames where we don't regenerate, just update the first point
+      try {
+        const vertices = arcReference.arcMesh.getVerticesData('position');
+        if (vertices && vertices.length >= 3) {
+          vertices[0] = currentStartPoint.x;
+          vertices[1] = currentStartPoint.y;
+          vertices[2] = currentStartPoint.z;
+          arcReference.arcMesh.updateVerticesData('position', vertices);
+        }
+      } catch (err) {
+        // Ignore minor update errors
       }
     }
 
     // Random chance to disappear - higher for free-air arcs
-    const disappearChance = arcReference.target ? 0.03 : 0.08;
+    const disappearChance = arcReference.target ? 0.05 : 0.1; // Increased for better performance
     if (Math.random() < disappearChance) {
       return true; // Signal to remove this arc
     }
@@ -441,6 +491,7 @@ function createNewArc(ballMesh: any, baseColor: Color3, scene: Scene, activeArcs
 
 /**
  * Updates all active arcs and removes finished ones
+ * OPTIMIZATION: Simplified update logic
  */
 function updateArcs(activeArcs: any[], electricLight: PointLight, ballMesh: any) {
   // Update each active arc and remove dead ones
@@ -448,37 +499,22 @@ function updateArcs(activeArcs: any[], electricLight: PointLight, ballMesh: any)
     const arc = activeArcs[i];
     arc.life++;
 
-    // If we don't regenerate the line this frame, at least update the first point
-    // to follow the ball's position
-    if (arc.points && arc.points.length > 0 && arc.lineMesh) {
-      const positions = arc.lineMesh.getVerticesData('position');
-      if (positions && positions.length >= 3) {
-        // Update just the first vertex position to match ball position
-        positions[0] = ballMesh.position.x;
-        positions[1] = ballMesh.position.y;
-        positions[2] = ballMesh.position.z;
-        arc.lineMesh.updateVerticesData('position', positions);
-      }
-    }
-
     // Check if arc should be removed
     const shouldRemove = arc.life > arc.maxLife || arc.updateFunction();
 
     if (shouldRemove) {
-      if (arc.lineGlow) {
-        arc.lineGlow.dispose();
-      }
-      arc.lineMesh.dispose();
+      arc.arcMesh.dispose();
       activeArcs.splice(i, 1);
     }
   }
 
-  // Update light intensity based on number of active arcs
-  electricLight.intensity = 0.8 + activeArcs.length * 0.1;
+  // Update light intensity based on number of active arcs (capped for performance)
+  electricLight.intensity = 0.3 + Math.min(activeArcs.length * 0.05, 0.3);
 }
 
 /**
  * Updates the visual effects of the ball (glow, flicker)
+ * OPTIMIZATION: Simplified effect calculations
  */
 function updateBallEffects(
   ballMesh: any,
@@ -495,18 +531,21 @@ function updateBallEffects(
     glowSphere.position = ballMesh.position.clone();
   }
 
-  // Random flicker for ball and light
-  electricLight.intensity = 0.8 + Math.random() * 0.4;
-  ballMesh.material.emissiveIntensity = 1.8 + Math.random() * 0.4;
-  glowMaterial.alpha = 0.4 + Math.random() * 0.2;
+  // OPTIMIZATION: Less frequent/intense random flicker
+  if (Math.random() < 0.2) {
+    // Only update 20% of frames
+    // Subtle light flicker without affecting the ball material
+    electricLight.intensity = 0.3 + Math.random() * 0.2;
+    glowMaterial.alpha = 0.2 + Math.random() * 0.15;
+  }
 }
 
 /**
- * Creates a Tesla ball effect with electric arcs connecting to nearby objects
- * The effect is constant, with arcs emanating in 360 degrees
+ * Creates a Tesla ball effect with electric arcs
+ * OPTIMIZATION: Fewer arcs, shared resources, thicker appearance
  */
-export function createConstantTeslaBallEffect(ballMesh: any, scene: Scene, baseColor: Color3) {
-  console.log('📣 Creating Constant 360° Tesla ball effect', ballMesh.name);
+export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
+  console.log('📣 Creating Optimized Tesla ball effect', ballMesh.name);
 
   // Collection of all effects for cleanup
   const disposables: any[] = [];
@@ -523,39 +562,48 @@ export function createConstantTeslaBallEffect(ballMesh: any, scene: Scene, baseC
     electricLight,
     originalEmissiveColor,
     originalEmissiveIntensity,
-  } = setupBallVisualEffects(ballMesh, baseColor, scene);
+    sharedGlowLayer,
+  } = setupBallVisualEffects(ballMesh, color, scene);
 
   // Add ball effect disposables to main disposables array
   disposables.push(...ballEffectsDisposables);
 
   // Track active electric arcs
   const activeArcs: {
-    lineMesh: LinesMesh;
+    arcMesh: Mesh;
     target: any;
     targetPoint: Vector3;
     life: number;
     maxLife: number;
     points: Vector3[];
-    lineGlow?: GlowLayer;
+    path3d?: Path3D;
     updateFunction: () => boolean;
   }[] = [];
 
+  // OPTIMIZATION: Use less frequent updates for non-critical effects
+  let frameCounter = 0;
+
   // Main update function
   const observer = scene.onBeforeRenderObservable.add(() => {
+    frameCounter++;
+
     // Update ball glow and flicker effects
     updateBallEffects(ballMesh, glowSphere, glowMaterial, electricLight);
 
-    // Maintain a minimum number of arcs by creating new ones if needed
-    const minArcs = 4; // Minimum number of arcs to maintain
-    const maxArcs = 8; // Maximum number of arcs
+    // OPTIMIZATION: Skip some frames for arc creation/management
+    if (frameCounter % 2 !== 0) return;
+
+    // OPTIMIZATION: Fewer arcs
+    const minArcs = 2; // Reduced from 4
+    const maxArcs = 4; // Reduced from 8
 
     // Random chance to create a new arc, higher when fewer arcs exist
-    const creationProbability = 0.1 + (minArcs - Math.min(minArcs, activeArcs.length)) * 0.2;
+    const creationProbability = 0.05 + (minArcs - Math.min(minArcs, activeArcs.length)) * 0.1;
 
     if (Math.random() < creationProbability && activeArcs.length < maxArcs) {
-      const newArc = createNewArc(ballMesh, baseColor, scene, activeArcs);
+      const newArc = createNewArc(ballMesh, color, scene, activeArcs, sharedGlowLayer);
       if (newArc) {
-        disposables.push(newArc.lineMesh);
+        disposables.push(newArc.arcMesh);
       }
     }
 
@@ -576,10 +624,7 @@ export function createConstantTeslaBallEffect(ballMesh: any, scene: Scene, baseC
 
     // Dispose all arcs
     activeArcs.forEach((arc) => {
-      if (arc.lineGlow) {
-        arc.lineGlow.dispose();
-      }
-      arc.lineMesh.dispose();
+      arc.arcMesh.dispose();
     });
 
     // Dispose all created resources
@@ -589,8 +634,4 @@ export function createConstantTeslaBallEffect(ballMesh: any, scene: Scene, baseC
       }
     });
   };
-}
-
-export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
-  return createConstantTeslaBallEffect(ballMesh, scene, color);
 }

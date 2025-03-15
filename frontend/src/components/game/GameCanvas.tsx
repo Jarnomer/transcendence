@@ -7,7 +7,7 @@ import { GameState } from '@shared/types';
 import {
   applyBallEffects,
   applyCollisionEffects,
-  // ballSparkEffect,
+  ballSparkEffect,
   createBall,
   createFloor,
   createPaddle,
@@ -120,7 +120,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     setLastTheme(theme); // Save current theme
 
-    // const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene);
+    const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -134,7 +134,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      // if (sparkCleanUp) sparkCleanUp();
+      if (sparkCleanUp) sparkCleanUp();
       engine.dispose();
       scene.dispose();
     };
