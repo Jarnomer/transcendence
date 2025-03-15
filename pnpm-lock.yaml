@@ -336,9 +336,9 @@ importers:
       babylonjs:
         specifier: ^7.50.0
         version: 7.52.2
-      babylonjs-gui:
+      babylonjs-materials:
         specifier: ^7.50.0
-        version: 7.52.2
+        version: 7.53.3
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -1329,11 +1329,14 @@ packages:
   axios@1.8.2:
     resolution: {integrity: sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==}
 
-  babylonjs-gui@7.52.2:
-    resolution: {integrity: sha512-8u6V+FDbT8jVIch1OP0SI3Mh/GqD5VzAweOHnpffO0e/zlOWWMF0o5NQZRZ2sSMQVa8IihZp6ZknKpF9QLPSeQ==}
+  babylonjs-materials@7.53.3:
+    resolution: {integrity: sha512-s7cOQTXdGIZgsS1gY0zYr8iaX9U0ZaLWMKuTlMlpsnQnOblcBjUq4EZpEMCswW9c61qMln7mc+yTRHye6YG8Kw==}
 
   babylonjs@7.52.2:
     resolution: {integrity: sha512-fmNem6HtyQzoSpGLzrLex8JTalo+/rNIaylsYOqT1GWM5c3LXZXjTlB+ZThWy2HxcUImFeUAhNK1r+83orVRqQ==}
+
+  babylonjs@7.53.3:
+    resolution: {integrity: sha512-D2IHUwcBdKf4xQBHd6K0BUq+x8BJO6t06Drritbl+XsaGFypRdacn0H5vmXG1UFmIAUuTXkN9Yci9IaZV4T3EQ==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -4439,11 +4442,13 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  babylonjs-gui@7.52.2:
+  babylonjs-materials@7.53.3:
     dependencies:
-      babylonjs: 7.52.2
+      babylonjs: 7.53.3
 
   babylonjs@7.52.2: {}
+
+  babylonjs@7.53.3: {}
 
   balanced-match@1.0.2: {}
 

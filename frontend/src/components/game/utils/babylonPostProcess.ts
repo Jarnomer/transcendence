@@ -1,6 +1,5 @@
 import {
   ArcRotateCamera,
-  BlurPostProcess,
   Camera,
   Color3,
   CubeTexture,
@@ -10,13 +9,12 @@ import {
   Plane,
   SSAO2RenderingPipeline,
   Scene,
-  ScreenSpaceReflectionPostProcess,
   ShadowGenerator,
   SpotLight,
   Vector3,
 } from 'babylonjs';
 
-export function setupSceneEnvironmentMap(scene: Scene) {
+export function setupEnvironmentMap(scene: Scene) {
   const envTex = CubeTexture.CreateFromPrefilteredData(
     'https://assets.babylonjs.com/environments/environmentSpecular.env',
     scene
@@ -48,15 +46,6 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   pipeline.grain.intensity = 8;
   pipeline.grain.animated = true;
 
-  // Enable vignette
-  pipeline.vignetteEnabled = true;
-  if (pipeline.vignette) {
-    pipeline.vignette.color = new Color3(0, 0, 0);
-    pipeline.vignette.intensity = 2.0;
-    pipeline.vignette.stretch = 5;
-    pipeline.vignette.weight = 1.5;
-  }
-
   pipeline.fxaaEnabled = true; // Enable anti-aliasing
 
   // Screen Space Ambient Occlusion
@@ -70,19 +59,9 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   ssao.totalStrength = 2.0;
   ssao.expensiveBlur = true;
   ssao.samples = 16;
-  ssao.radius = 5;
+  ssao.radius = 8;
 
   scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', camera);
-
-  // Screen Space Reflections
-  const ssr = new ScreenSpaceReflectionPostProcess('ssr', scene, 1.0, camera);
-  ssr.threshold = 0.5;
-  ssr.strength = 1.0;
-  ssr.reflectionSpecularFalloffExponent = 3;
-  ssr.samples = 32;
-  ssr.maxDistance = 1000;
-  ssr.step = 0.1;
-  ssr.thickness = 0.5;
 
   return pipeline;
 }
@@ -100,7 +79,7 @@ export function setupScenelights(scene: Scene) {
     scene
   );
   leftSpotlight.intensity = 0.7;
-  leftSpotlight.diffuse = new Color3(0.9, 0.7, 0.7); // Slightly reddish
+  leftSpotlight.diffuse = new Color3(0.7, 0.7, 0.7);
 
   const rightSpotlight = new SpotLight(
     'rightSpot',
@@ -111,7 +90,7 @@ export function setupScenelights(scene: Scene) {
     scene
   );
   rightSpotlight.intensity = 0.7;
-  rightSpotlight.diffuse = new Color3(0.7, 0.7, 0.9); // Slightly bluish
+  rightSpotlight.diffuse = new Color3(0.7, 0.7, 0.7);
 
   const shadowGenerator1 = new ShadowGenerator(1024, leftSpotlight);
   const shadowGenerator2 = new ShadowGenerator(1024, rightSpotlight);
@@ -130,7 +109,7 @@ export function setupScenelights(scene: Scene) {
 export function setupSceneCamera(scene: Scene) {
   const camera = new ArcRotateCamera(
     'camera',
-    -Math.PI / 2.01, // horizontal rotation
+    -Math.PI / 2, // horizontal rotation
     Math.PI / 2, // vertical rotation
     24.5, // distance from floor
     new Vector3(-0.15, -0.15, 0),
@@ -142,13 +121,7 @@ export function setupSceneCamera(scene: Scene) {
   return camera;
 }
 
-export function setupMotionBlur(camera: Camera, strength: number = 1.0) {
-  const motionBlur = new BlurPostProcess('motionBlur', new Vector3(0, 0, 1), strength, 1.0, camera);
-
-  return motionBlur;
-}
-
-export function setupFloorReflections(scene: Scene, floorMesh: any, reflectingObjects: any[]) {
+export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: any[]) {
   const mirrorTexture = new MirrorTexture('floorMirror', 1024, scene, true);
   const floorMaterial = floorMesh.material;
 

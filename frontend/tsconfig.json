@@ -22,6 +22,8 @@
       "@pages/*": ["./src/pages/*"],
       "@components": ["./src/components"],
       "@components/*": ["./src/components/*"],
+      "@game": ["./src/components/game"],
+      "@game/*": ["./src/components/game/*"],
       "@services": ["./src/services"],
       "@services/*": ["./src/services/*"],
       "@hooks": ["./src/hooks"],

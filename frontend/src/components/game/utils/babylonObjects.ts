@@ -1,6 +1,6 @@
 import { Animation, Color3, GlowLayer, MeshBuilder, PBRMaterial, Scene, Texture } from 'babylonjs';
 
-import { createBallTrail } from './babylonParticles';
+import { createBallTrail } from '@game/utils';
 
 export function createFloor(scene: Scene, color: Color3) {
   const pbr = new PBRMaterial('floorMaterial', scene);
@@ -21,20 +21,20 @@ export function createFloor(scene: Scene, color: Color3) {
   pbr.albedoTexture = new Texture(baseUrl + 'albedo.png', scene);
   pbr.bumpTexture = new Texture(baseUrl + 'normal.png', scene);
   pbr.metallicTexture = new Texture(baseUrl + 'metallic.png', scene);
-  pbr.roughnessTexture = new Texture(baseUrl + 'roughness.png', scene);
   pbr.ambientTexture = new Texture(baseUrl + 'ao.png', scene);
+  // pbr.roughnessTexture = new Texture(baseUrl + 'roughness.png', scene);
 
-  const textureScale = 4;
-  pbr.albedoTexture.uScale = textureScale;
-  pbr.albedoTexture.vScale = textureScale;
-  pbr.bumpTexture.uScale = textureScale;
-  pbr.bumpTexture.vScale = textureScale;
-  pbr.metallicTexture.uScale = textureScale;
-  pbr.metallicTexture.vScale = textureScale;
-  pbr.roughnessTexture.uScale = textureScale;
-  pbr.roughnessTexture.vScale = textureScale;
-  pbr.ambientTexture.uScale = textureScale;
-  pbr.ambientTexture.vScale = textureScale;
+  // const textureScale = 4;
+  // pbr.albedoTexture.uScale = textureScale;
+  // pbr.albedoTexture.vScale = textureScale;
+  // pbr.bumpTexture.uScale = textureScale;
+  // pbr.bumpTexture.vScale = textureScale;
+  // pbr.metallicTexture.uScale = textureScale;
+  // pbr.metallicTexture.vScale = textureScale;
+  // pbr.roughnessTexture.uScale = textureScale;
+  // pbr.roughnessTexture.vScale = textureScale;
+  // pbr.ambientTexture.uScale = textureScale;
+  // pbr.ambientTexture.vScale = textureScale;
 
   const multipleColor = 0.12;
   const adjustedColor = new Color3(
@@ -103,7 +103,6 @@ export function createPaddle(scene: Scene, color: Color3) {
   );
 
   pbr.albedoColor = color;
-  pbr.baseColor = color;
   pbr.emissiveColor = new Color3(color.r * 0.8, color.g * 0.8, color.b * 0.8);
   pbr.emissiveIntensity = 1.0;
 
@@ -115,7 +114,6 @@ export function createPaddle(scene: Scene, color: Color3) {
   pbr.subSurface.indexOfRefraction = 1.5;
   pbr.subSurface.isTranslucencyEnabled = true;
   pbr.subSurface.translucencyIntensity = 1.0;
-  pbr.useReflectionFresnelFromSpecular = true;
   pbr.useSpecularOverAlpha = true;
 
   if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
@@ -172,7 +170,6 @@ export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) 
   pbr.subSurface.indexOfRefraction = 1.5;
   pbr.subSurface.isTranslucencyEnabled = true;
   pbr.subSurface.translucencyIntensity = 1.0;
-  pbr.useReflectionFresnelFromSpecular = true;
   pbr.useSpecularOverAlpha = true;
 
   if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
@@ -189,7 +186,6 @@ export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) 
     scene
   );
 
-  pbr.baseColor = color;
   coreMaterial.emissiveColor = new Color3(color.r, color.g, color.b);
   coreMaterial.alpha = 0.5;
   core.material = coreMaterial;

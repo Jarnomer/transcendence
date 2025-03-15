@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
 import { GameState } from '@shared/types';
+
 import {
   applyBallEffects,
   applyCollisionEffects,
@@ -10,23 +11,17 @@ import {
   createFloor,
   createPaddle,
   getThemeColors,
-  setupFloorReflections,
+  setupEnvironmentMap,
   setupPostProcessing,
+  setupReflections,
   setupSceneCamera,
-  setupSceneEnvironmentMap,
   setupScenelights,
-} from '@shared/utils';
+} from '@game/utils';
 
 interface GameCanvasProps {
   gameState: GameState;
   theme?: 'light' | 'dark';
 }
-
-// Fixed values for now, change to dynamic later, maybe?
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 400;
-const SCALE_FACTOR = 20;
-const FIX_POSITION = 2;
 
 // Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
@@ -78,7 +73,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
 
-    setupSceneEnvironmentMap(scene);
+    setupEnvironmentMap(scene);
 
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera);
@@ -90,7 +85,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current = createBall(scene, primaryColor);
 
     const gameObjects = [player1Ref.current, player2Ref.current, ballRef.current];
-    setupFloorReflections(scene, floorRef.current, gameObjects);
+    setupReflections(scene, floorRef.current, gameObjects);
     shadowGenerators.forEach((generator) => {
       gameObjects.forEach((obj) => {
         generator.addShadowCaster(obj);
@@ -142,10 +137,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
-    const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
+    const player1Y = -((players.player1.y - 800 / 2) / 20) - 2;
+    const player2Y = -((players.player2.y - 800 / 2) / 20) - 2;
+    const ballY = -((ball.y - 800 / 2) / 20);
+    const ballX = (ball.x - 400 / 2) / 20;
 
     // Update mesh positions directly
     player1Ref.current.position.y = player1Y;
