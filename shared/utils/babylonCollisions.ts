@@ -2,13 +2,65 @@ import { Animation, Color3, Color4, ParticleSystem, PointLight, Scene, Vector3 }
 
 import { createParticleTexture } from './babylonParticles';
 
-function applyCollisionDeformEffect(
+function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
+  if (!paddleMesh) return;
+
+  // Save original position if not already saved
+  if (!paddleMesh.originalPosition) {
+    paddleMesh.originalPosition = paddleMesh.position.clone();
+  }
+
+  const isLeftPaddle = paddleMesh.position.x < 0;
+  const recoilDirection = isLeftPaddle ? -1 : 1;
+  const recoilDistance = 0.05 * (speedFactor * 3);
+
+  // Create position animation with keyframes
+  const frameRate = 60;
+  const recoilAnimation = new Animation(
+    'paddleRecoilAnimation',
+    'position.x',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  // Define keyframes for the recoil motion
+  const keys = [];
+  const originalX = paddleMesh.originalPosition.x;
+  keys.push({ frame: 0, value: originalX });
+  keys.push({ frame: 5, value: originalX + recoilDirection * recoilDistance });
+  keys.push({ frame: 15, value: originalX - recoilDirection * recoilDistance * 0.2 });
+  keys.push({ frame: 30, value: originalX });
+
+  recoilAnimation.setKeys(keys);
+
+  // Stop any existing animations to prevent conflicts
+  scene.stopAnimation(paddleMesh);
+  paddleMesh.animations = [];
+  paddleMesh.animations.push(recoilAnimation);
+
+  // Adjust animation speed based on speedFactor
+  const animationSpeed = Math.max(1, speedFactor * 0.7);
+
+  // Add a callback to ensure the restoration of origial position
+  scene.beginDirectAnimation(paddleMesh, [recoilAnimation], 0, 30, false, animationSpeed, () => {
+    paddleMesh.position.x = originalX;
+  });
+}
+
+function applySquishEffect(
   ballMesh: any,
   collisionType: 'dx' | 'dy',
   speedFactor: number,
   scene: Scene
 ) {
-  const deformEffect = 0.5 - speedFactor * 0.1;
+  // Save original scale for reference
+  if (!ballMesh.originalScale) {
+    ballMesh.originalScale = new Vector3(1, 1, 1);
+  }
+
+  // Force reset to original scale to prevent compounding deformations
+  ballMesh.scaling = ballMesh.originalScale.clone();
 
   // Create scale animations with keyframes
   const frameRate = 60;
@@ -20,53 +72,48 @@ function applyCollisionDeformEffect(
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
 
-  // Get current scale to avoid disrupting other animations
-  const currentScale = ballMesh.scaling.clone();
-
   const keys = [];
+  const squishAmount = 0.25 + speedFactor * 0.15;
   if (collisionType === 'dx') {
-    keys.push({
-      frame: 0,
-      value: currentScale.clone(),
-    });
+    // Horizontal collision (paddles) -> Deform vertically
+    keys.push({ frame: 0, value: ballMesh.originalScale.clone() });
     keys.push({
       frame: 5,
-      value: new Vector3(deformEffect, deformEffect, currentScale.z),
+      value: new Vector3(1 - squishAmount, 1 + squishAmount, 1),
     });
     keys.push({
       frame: 15,
-      value: new Vector3(deformEffect * 0.9, deformEffect * 1.1, currentScale.z),
+      value: new Vector3(1 - squishAmount / 2, 1 + squishAmount / 2, 1),
     });
-    keys.push({
-      frame: 30,
-      value: currentScale.clone(),
-    });
+    keys.push({ frame: 30, value: ballMesh.originalScale.clone() });
   } else {
-    keys.push({
-      frame: 0,
-      value: currentScale.clone(),
-    });
+    // Vertical collision (walls) -> Deform horizontally
+    keys.push({ frame: 0, value: ballMesh.originalScale.clone() });
     keys.push({
       frame: 5,
-      value: new Vector3(deformEffect, deformEffect, currentScale.z),
+      value: new Vector3(1 + squishAmount, 1 - squishAmount, 1),
     });
     keys.push({
       frame: 15,
-      value: new Vector3(deformEffect * 1.1, deformEffect * 0.9, currentScale.z),
+      value: new Vector3(1 + squishAmount / 2, 1 - squishAmount / 2, 1),
     });
-    keys.push({
-      frame: 30,
-      value: currentScale.clone(),
-    });
+    keys.push({ frame: 30, value: ballMesh.originalScale.clone() });
   }
 
   squishAnimation.setKeys(keys);
 
   // Stop any existing animations to prevent conflicts
+  scene.stopAnimation(ballMesh);
   ballMesh.animations = [];
   ballMesh.animations.push(squishAnimation);
 
-  scene.beginAnimation(ballMesh, 0, 30, false, speedFactor * 1.5);
+  // Directly adjust animation speed based on speedFactor
+  const animationSpeed = Math.max(1, speedFactor);
+
+  // Add a callback to ensure the restoration of origial scale
+  scene.beginDirectAnimation(ballMesh, [squishAnimation], 0, 30, false, animationSpeed, () => {
+    ballMesh.scaling = ballMesh.originalScale.clone();
+  });
 }
 
 function applyLightEffect(
@@ -291,7 +338,7 @@ function applyShockwaveEffect(
   return shockwaveSystem;
 }
 
-export function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
+function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
   const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
   const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
 
@@ -302,13 +349,15 @@ export function detectCollision(prevDx: number, prevDy: number, newDx: number, n
 
 export function applyCollisionEffects(
   ballMesh: any,
+  leftPaddle: any,
+  rightPaddle: any,
   prevDx: number,
   prevDy: number,
   newDx: number,
   newDy: number,
   color: Color3
 ) {
-  if (!ballMesh) return;
+  if (!ballMesh || !leftPaddle || !rightPaddle) return;
 
   const collisionType = detectCollision(prevDx, prevDy, newDx, newDy);
   if (!collisionType) return;
@@ -317,10 +366,17 @@ export function applyCollisionEffects(
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 3.5);
   const scene = ballMesh.getScene();
 
-  console.log(`Babylon collision effect: type=${collisionType}, speedFactor=${speedFactor}`);
-
-  // applyCollisionDeformEffect(ballMesh, collisionType, speedFactor, scene);
+  applySquishEffect(ballMesh, collisionType, speedFactor, scene);
   applyLightEffect(ballMesh, collisionType, speedFactor, color, scene);
   applyShockwaveEffect(ballMesh, collisionType, speedFactor, color, scene);
   applyParticleEffect(ballMesh, collisionType, speedFactor, color, scene);
+
+  if (collisionType === 'dx') {
+    // Determine which paddle was hit based on ball position
+    if (ballMesh.position.x <= 0) {
+      applyPaddleRecoil(leftPaddle, speedFactor, scene);
+    } else {
+      applyPaddleRecoil(rightPaddle, speedFactor, scene);
+    }
+  }
 }

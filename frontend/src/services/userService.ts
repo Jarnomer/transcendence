@@ -20,12 +20,26 @@ export async function getUserData(userId: string) {
 export async function getUsers() {
   try {
     const res = await api.get(`/user/all`);
+    console.log(res);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
     return res.data;
   } catch (err) {
     console.error('Failed to get user list:', err);
+    throw err;
+  }
+}
+
+export async function getUsersWithRank() {
+  try {
+    const res = await api.get(`/user/all/rank`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user data with rank`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get user list with rank:', err);
     throw err;
   }
 }

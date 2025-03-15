@@ -95,6 +95,7 @@ CREATE TABLE  IF NOT EXISTS matchmaking_queue (
   matchmaking_queue_id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
   status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
+  type TEXT CHECK(type IN ('1v1', 'tournament')) DEFAULT '1v1',
   matched_with TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL, -- NULL if not matched
   joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );

@@ -10,11 +10,7 @@ import { NavIconButton } from '@components/UI/buttons/NavIconButton.tsx';
 import { BackgroundGlow } from '@components/visual/BackgroundGlow.tsx';
 
 import { api } from '@services/api.ts';
-import {
-  acceptFriendRequest,
-  rejectFriendRequest,
-  sendFriendRequest,
-} from '@services/friendService.ts';
+import { sendFriendRequest } from '@services/friendService.ts';
 import { getUserData } from '@services/userService';
 
 function timeAgo(lastActive: string): string {
@@ -184,28 +180,6 @@ export const ProfilePage: React.FC = () => {
 
   const handleBlockUserClick = (user_id: string) => {
     console.log('Blocking user: ', user_id);
-  };
-
-  const handleAcceptFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    acceptFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request accepted');
-      })
-      .catch((error) => {
-        console.error('Failed to accept friend request: ', error);
-      });
-  };
-
-  const handleRejectFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    rejectFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request rejected');
-      })
-      .catch((error) => {
-        console.error('Failed to reject friend request: ', error);
-      });
   };
 
   if (loading) {

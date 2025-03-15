@@ -1,24 +1,44 @@
-import React, { useState } from 'react';
-
-const dummyFriends = [
-  { id: 1, username: 'PlayerOne', online: true },
-  { id: 2, username: 'ShadowNinja', online: true },
-  { id: 3, username: 'RogueWarrior', online: false },
-  { id: 4, username: 'CyberGhost', online: true },
-];
-
-const dummyMessages = {
-  1: [
-    { sender: 'PlayerOne', text: 'Hey, wanna play?' },
-    { sender: 'You', text: 'Yeah!' },
-  ],
-  2: [{ sender: 'ShadowNinja', text: 'Sup?' }],
-};
+import React, { useEffect, useState } from 'react';
+import { BackgroundGlow } from '../components';
+import SearchBar from '../components/UI/SearchBar';
+import { getUserData } from '../services/userService';
 
 export const ChatPage: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+  const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<number | null>(null);
-  const [messages, setMessages] = useState(dummyMessages);
+  const [messages, setMessages] = useState();
   const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value.toLowerCase());
+    console.log('asd');
+  };
+
+  const filteredUsers = friends.filter((user) =>
+    user.display_name.toLowerCase().startsWith(searchQuery)
+  );
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userID');
+    if (!userId) return;
+    setLoading(true);
+    getUserData(userId)
+      .then((data) => {
+        console.log('User dataaaa: ', data);
+        setUser(data);
+        setFriends(data.friends);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch user data: ', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const handleSendMessage = () => {
     if (selectedFriend !== null && newMessage.trim() !== '') {
@@ -31,31 +51,37 @@ export const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="p-10">
-      <div className="flex h-[500px] glass-box">
+    <div className="p-10 w-[80%]">
+      <div className="flex relative h-[600px] glass-box overflow-hidden">
+        <BackgroundGlow />
         {/* Friends List */}
         <div className="w-1/4 p-4 border-r ">
-          <h2 className="text-xl font-bold mb-4">Online Friends</h2>
+          <SearchBar
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search users..."
+          />
+          <h2 className="text-xl font-bold mb-4">Friends</h2>
           <ul>
-            {dummyFriends.map((friend) => (
+            {friends.map((friend) => (
               <li
                 key={friend.id}
                 className={`p-2 rounded cursor-pointer ${selectedFriend === friend.id ? 'bg-gray-700' : 'hover:bg-gray-800'} ${friend.online ? 'text-primary' : 'text-gray-500'}`}
                 onClick={() => setSelectedFriend(friend.id)}
               >
-                {friend.username} {friend.online ? '' : '(Offline)'}
+                {friend.display_name} {friend.online ? '' : '(Offline)'}
               </li>
             ))}
           </ul>
         </div>
 
         {/* Chat Window */}
-        <div className="w-3/4 flex flex-col h-full ">
+        <div className="w-full flex flex-col h-full ">
           {selectedFriend !== null ? (
             <>
               <div className="p-4  font-bold">
                 {' '}
-                {dummyFriends.find((f) => f.id === selectedFriend)?.username}
+                {friends.find((f) => f.id === selectedFriend)?.username}
               </div>
               <div className="flex-1 p-4 overflow-y-auto">
                 {messages[selectedFriend]?.map((msg, index) => (

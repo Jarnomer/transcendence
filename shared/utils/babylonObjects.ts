@@ -133,7 +133,7 @@ export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) 
   ball.animations = [hoverAnimation];
   scene.beginAnimation(ball, 0, frameRate * 2, true);
 
-  createBallTrail(scene, ball, color);
+  createBallTrail(ball, color, scene);
 
   return ball;
 }

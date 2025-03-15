@@ -22,19 +22,17 @@ export class MatchMakingService {
    * Get all users in the match making queue
    */
   async getQueues(page: number, pageSize: number) {
-    return await this.matchMakingModel.runTransaction(async () => {
-      const queues = await this.matchMakingModel.getQueues(page, pageSize);
-      const totalQueues = await this.matchMakingModel.getTotalQueues();
-      return {
-        queues,
-        pagination: {
-          page,
-          pageSize,
-          total: totalQueues.total,
-          totalPages: Math.ceil(totalQueues.total / pageSize),
-        },
-      };
-    });
+    const queues = await this.matchMakingModel.getQueues(page, pageSize);
+    const totalQueues = await this.matchMakingModel.getTotalQueues();
+    return {
+      queues,
+      pagination: {
+        page,
+        pageSize,
+        total: totalQueues.total,
+        totalPages: Math.ceil(totalQueues.total / pageSize),
+      },
+    };
   }
 
   /**

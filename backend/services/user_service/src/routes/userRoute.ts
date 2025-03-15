@@ -8,6 +8,7 @@ export async function userRoutes(fastify: FastifyInstance) {
   const userController = new UserController(userService);
   fastify.get('/:user_id', userController.getUserByID.bind(userController));
   fastify.get('/all', userController.getAllUsers.bind(userController));
+  fastify.get('/all/rank', userController.getAllUsersWithRank.bind(userController));
   fastify.patch('/:user_id', userController.updateUserByID.bind(userController));
   fastify.delete('/:user_id', userController.deleteUserByID.bind(userController));
   fastify.post('/avatar/:user_id', userController.uploadAvatar.bind(userController));
