@@ -23,6 +23,12 @@ interface GameCanvasProps {
   theme?: 'light' | 'dark';
 }
 
+// Fixed values for positions
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 400;
+const SCALE_FACTOR = 20;
+const FIX_POSITION = 2;
+
 // Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   // Get computed styles from document
@@ -137,10 +143,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = -((players.player1.y - 800 / 2) / 20) - 2;
-    const player2Y = -((players.player2.y - 800 / 2) / 20) - 2;
-    const ballY = -((ball.y - 800 / 2) / 20);
-    const ballX = (ball.x - 400 / 2) / 20;
+    const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
+    const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
+    const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
 
     // Update mesh positions directly
     player1Ref.current.position.y = player1Y;
