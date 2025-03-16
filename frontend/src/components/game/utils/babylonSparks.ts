@@ -16,7 +16,8 @@ function getTargetsInRange(ballMesh: any, scene: Scene) {
   const sectorAngle = (Math.PI * 2) / sectorCount;
 
   for (let sector = 0; sector < sectorCount; sector++) {
-    if (Math.random() < 0.3) continue; // Skip some sectors randomly
+    // Lower skip probability so we get more arcs
+    if (Math.random() < 0.2) continue;
 
     const baseAngle = sector * sectorAngle;
     const angle = baseAngle + (Math.random() - 0.5) * sectorAngle * 0.8;
@@ -202,7 +203,13 @@ function updateArcs(activeArcs: any[]) {
   }
 }
 
-export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
+export function ballSparkEffect(
+  ballMesh: any,
+  color: Color3,
+  scene: Scene,
+  speed: number = 0,
+  spin: number = 0
+) {
   const disposables: any[] = []; // All effects for cleanup
 
   // Create shared glow layer with minimal settings
@@ -226,38 +233,58 @@ export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
   }[] = [];
 
   let frameCounter = 0;
-  const observer = scene.onBeforeRenderObservable.add(() => {
-    if (++frameCounter % 2 !== 0) return; // Skip every 2nd frame
 
-    const minArcs = 4;
-    const maxArcs = 10;
+  const observerRef = scene.onBeforeRenderObservable.add(() => {
+    frameCounter++;
 
-    // Random chance to create a new arc, higher when fewer arcs exist
-    const creationProbability = 0.05 + (minArcs - Math.min(minArcs, activeArcs.length)) * 0.1;
+    // speed < 0 | spin < 0.5 => 0.0, speed > 11 | spin > 5 => 1.0
+    const speedFactor = Math.min(Math.max((speed - 5) / 6, 0), 1);
+    const spinFactor = Math.min(Math.max((Math.abs(spin) - 0.5) / 5, 0), 1);
+
+    const speedWeight = 0.8;
+    const spinWeight = 1.0;
+
+    const combinedFactor = Math.min(
+      (speedFactor * speedWeight + spinFactor * spinWeight) / (spinWeight + speedWeight),
+      1
+    );
+
+    if (frameCounter % 2 !== 0) return; // process only even frames
+
+    const additionalArcs = Math.floor(combinedFactor * 10);
+    const minArcs = 2 + additionalArcs;
+    const maxArcs = 8 + additionalArcs;
+
+    const baseProbability = 0.1 + combinedFactor * 0.2;
+    const addedProbability = (minArcs - Math.min(minArcs, activeArcs.length)) * 0.15;
+    const creationProbability = baseProbability + addedProbability;
 
     if (Math.random() < creationProbability && activeArcs.length < maxArcs) {
       const newArc = createNewArc(ballMesh, color, scene, activeArcs, sparkGlow);
-      if (newArc) {
-        disposables.push(newArc.arcMesh);
-      }
+      if (newArc) disposables.push(newArc.arcMesh);
     }
 
     updateArcs(activeArcs);
   });
 
-  return () => {
-    scene.onBeforeRenderObservable.remove(observer);
+  return (newSpeed: number, newSpin: number) => {
+    speed = newSpeed; // values for next frame
+    spin = newSpin;
 
-    // Dispose all arcs
-    activeArcs.forEach((arc) => {
-      arc.arcMesh.dispose();
-    });
+    // Run cleanup if both values are zero
+    if (newSpeed === 0 && newSpin === 0) {
+      scene.onBeforeRenderObservable.remove(observerRef);
 
-    // Dispose all created resources
-    disposables.forEach((item) => {
-      if (item && item.dispose) {
-        item.dispose();
-      }
-    });
+      activeArcs.length = 0;
+      activeArcs.forEach((arc) => {
+        arc.arcMesh.dispose();
+      });
+
+      disposables.forEach((item) => {
+        if (item && item.dispose) {
+          item.dispose();
+        }
+      });
+    }
   };
 }

@@ -62,6 +62,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
+  const sparkEffectCleanupRef = useRef<((speed: number, spin: number) => void) | null>(null);
 
   // Updated references to only store mesh objects
   const floorRef = useRef<any>(null);
@@ -120,7 +121,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     setLastTheme(theme); // Save current theme
 
-    const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene);
+    const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
+
+    sparkEffectCleanupRef.current = sparkCleanUp;
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -134,7 +137,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (sparkCleanUp) sparkCleanUp();
+      if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(0, 0);
       engine.dispose();
       scene.dispose();
     };
@@ -159,8 +162,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current.position.x = ballX;
     ballRef.current.position.y = ballY;
 
+    // Calculate current speed (absolute magnitude of velocity)
+    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+
     // Update constant ball effects, inverted dy for Babylon coordinate system
     applyBallEffects(ballRef.current, ball.dx, -ball.dy, ball.spin, color);
+
+    // Update spark effect with current speed and spin
+    if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(speed, ball.spin);
 
     // Check for collisions by comparing current and previous velocity
     if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
