@@ -9,65 +9,20 @@ import {
   Vector3,
 } from 'babylonjs';
 
-function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 5) {
+function getTargetsInRange(ballMesh: any, scene: Scene) {
   const targets: Array<{ mesh: any; point: Vector3 }> = [];
 
-  const sectorCount = 4;
-  const skipChange = 0.4;
+  const sectorCount = 8;
   const sectorAngle = (Math.PI * 2) / sectorCount;
 
-  const potentialTargets = scene.meshes.filter(
-    (mesh) => mesh !== ballMesh && mesh.name.includes('paddle')
-  );
-
   for (let sector = 0; sector < sectorCount; sector++) {
-    if (Math.random() < skipChange) continue;
+    if (Math.random() < 0.3) continue; // Skip some sectors randomly
 
     const baseAngle = sector * sectorAngle;
+    const angle = baseAngle + (Math.random() - 0.5) * sectorAngle * 0.8;
+    const distance = 0.5 + Math.random() * 0.8;
 
-    for (const target of potentialTargets) {
-      if (!target.getBoundingInfo) continue;
-
-      const toTarget = target.position.subtract(ballMesh.position);
-      const distance = toTarget.length();
-
-      if (distance > maxRange) continue;
-
-      if (Math.random() < skipChange) continue;
-
-      const angleToTarget = Math.atan2(toTarget.y, toTarget.x);
-
-      // Check if target is within this sector
-      const angleDiff = Math.abs(
-        ((angleToTarget - baseAngle + Math.PI * 3) % (Math.PI * 2)) - Math.PI
-      );
-
-      if (angleDiff > sectorAngle / 2) continue;
-
-      const connectionProbability = skipChange - (distance / maxRange) * skipChange;
-
-      if (Math.random() > connectionProbability) continue;
-
-      // Get connection logic for paddles
-      if (target.name.includes('paddle')) {
-        const paddleDir = target.position.x > 0 ? 1 : -1;
-        const connectionPoint = new Vector3(
-          target.position.x - paddleDir * 0.25,
-          target.position.y + (Math.random() - 0.5) * 1.5,
-          target.position.z
-        );
-
-        targets.push({
-          mesh: target,
-          point: connectionPoint,
-        });
-      }
-    }
-
-    const distanceMultiplier = 1.5;
-    const distance = 0.5 + Math.random() * distanceMultiplier;
-    const angle = baseAngle + (Math.random() - 0.5) * sectorAngle;
-
+    // Calculate endpoint
     const endPoint = new Vector3(
       ballMesh.position.x + Math.cos(angle) * distance,
       ballMesh.position.y + Math.sin(angle) * distance,
@@ -75,9 +30,37 @@ function getTargetsInRange(ballMesh: any, scene: Scene, maxRange: number = 5) {
     );
 
     targets.push({
-      mesh: null, // No mesh
+      mesh: null,
       point: endPoint,
     });
+  }
+
+  const potentialTargets = scene.meshes.filter(
+    (mesh) => mesh !== ballMesh && mesh.name.includes('paddle')
+  );
+
+  for (const target of potentialTargets) {
+    if (!target.getBoundingInfo) continue;
+
+    const toTarget = target.position.subtract(ballMesh.position);
+    const distance = toTarget.length();
+
+    if (distance > 1.0 || Math.random() < 0.3) continue;
+
+    // Get connection logic for paddles
+    if (target.name.includes('paddle')) {
+      const paddleDir = target.position.x > 0 ? 1 : -1;
+      const connectionPoint = new Vector3(
+        target.position.x - paddleDir * 0.25,
+        target.position.y + (Math.random() - 0.5) * 1.5,
+        target.position.z
+      );
+
+      targets.push({
+        mesh: target,
+        point: connectionPoint,
+      });
+    }
   }
 
   return targets;
@@ -88,8 +71,8 @@ function generateLightningPoints(start: Vector3, end: Vector3): Vector3[] {
   const points: Vector3[] = [];
 
   const direction = end.subtract(start).normalize();
-  const segmentCount = Math.max(6, Math.floor(distance * 3));
-  const displacementAmount = distance * 0.3;
+  const segmentCount = 3 + Math.floor(Math.random());
+  const displacementAmount = distance * 0.2;
 
   // Create perpendicular vector for 2D displacement only
   const perpVector = new Vector3(-direction.y, direction.x, 0).normalize();
@@ -100,16 +83,14 @@ function generateLightningPoints(start: Vector3, end: Vector3): Vector3[] {
     const ratio = i / segmentCount;
 
     // Get point along straight line
-    const segmentRatio = ratio * (0.8 + Math.random() * 0.4); // Less variation
+    const segmentRatio = ratio;
     const basePoint = new Vector3(
       start.x + (end.x - start.x) * segmentRatio,
       start.y + (end.y - start.y) * segmentRatio,
       start.z + (end.z - start.z) * segmentRatio
     );
 
-    // Add and apply random displacement in 2D
-    const midPointFactor = 1 - Math.abs((ratio - 0.5) * 2);
-    const displacement = (Math.random() - 0.5) * displacementAmount * midPointFactor;
+    const displacement = (Math.random() - 0.5) * displacementAmount;
 
     const point = new Vector3(
       basePoint.x + perpVector.x * displacement,
@@ -118,41 +99,9 @@ function generateLightningPoints(start: Vector3, end: Vector3): Vector3[] {
     );
 
     points.push(point);
-
-    // Branching - 10% change - middle section - 2-4 branches
-    if (ratio > 0.4 && ratio < 0.6 && Math.random() < 0.1) {
-      const branchLength = distance * 0.15 * Math.random();
-      const branchDir = new Vector3(
-        direction.x + (Math.random() - 0.5) * 1.5,
-        direction.y + (Math.random() - 0.5) * 1.5,
-        0
-      ).normalize();
-
-      const branchPoints = 1 + Math.floor(Math.random() * 3);
-      let branchPrev = point.clone();
-
-      for (let j = 1; j <= branchPoints; j++) {
-        const branchDisplacement = (Math.random() - 0.5) * branchLength * 0.4;
-        const branchPoint = new Vector3(
-          branchPrev.x +
-            branchDir.x * (branchLength / branchPoints) +
-            perpVector.x * branchDisplacement,
-          branchPrev.y +
-            branchDir.y * (branchLength / branchPoints) +
-            perpVector.y * branchDisplacement,
-          branchPrev.z
-        );
-
-        points.push(branchPoint);
-        branchPrev = branchPoint;
-      }
-
-      points.push(point.clone()); // Return to original point
-    }
   }
 
   points.push(end.clone()); // Last point is always the end
-
   return points;
 }
 
@@ -169,8 +118,8 @@ function createArcLine(
     'electricArcTube',
     {
       path: arcPoints,
-      radius: 0.05,
-      tessellation: 4,
+      radius: 0.035,
+      tessellation: 3,
       updatable: true,
     },
     scene
@@ -220,40 +169,15 @@ function createNewArc(
   const arcReference = {
     arcMesh,
     target: targetInfo.mesh,
-    targetPoint: targetInfo.point,
     life: 0,
-    // Lifetime: 1-2 seconds at 60 fps
-    maxLife: 60 + Math.floor(Math.random() * 60),
+    maxLife: 30 + Math.floor(Math.random() * 30),
     points,
     path3d,
     updateFunction: null as any,
   };
 
-  // Create update function for this arc
   const updateArcLine = () => {
-    // Get current ball position as the new starting point
-    const currentStartPoint = ballMesh.position.clone();
-
-    // Always update first point to match ball position
-    arcReference.points[0] = currentStartPoint;
-
-    // Regenerate less frequently - only 5% chance per frame
-    const regen = Math.random() < 0.05 || Vector3.Distance(currentStartPoint, startPoint) > 0.3;
-
-    if (regen) {
-      arcReference.arcMesh.dispose();
-
-      const newArc = createArcLine(currentStartPoint, endPoint, baseColor, scene, sharedGlowLayer);
-
-      arcReference.arcMesh = newArc.arcMesh;
-      arcReference.points = newArc.points;
-      arcReference.path3d = newArc.path3d;
-    }
-
-    const disappearChance = arcReference.target ? 0.05 : 0.1;
-
-    if (Math.random() < disappearChance) return true;
-
+    if (Math.random() < 0.2) return true;
     return false; // Keep this arc alive
   };
 
@@ -264,7 +188,7 @@ function createNewArc(
   return arcReference;
 }
 
-function updateArcs(activeArcs: any[], ballMesh: any) {
+function updateArcs(activeArcs: any[]) {
   for (let i = activeArcs.length - 1; i >= 0; i--) {
     const arc = activeArcs[i];
     arc.life++;
@@ -294,7 +218,6 @@ export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
   const activeArcs: {
     arcMesh: Mesh;
     target: any;
-    targetPoint: Vector3;
     life: number;
     maxLife: number;
     points: Vector3[];
@@ -306,8 +229,8 @@ export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
   const observer = scene.onBeforeRenderObservable.add(() => {
     if (++frameCounter % 2 !== 0) return; // Skip every 2nd frame
 
-    const minArcs = 2;
-    const maxArcs = 4;
+    const minArcs = 4;
+    const maxArcs = 10;
 
     // Random chance to create a new arc, higher when fewer arcs exist
     const creationProbability = 0.05 + (minArcs - Math.min(minArcs, activeArcs.length)) * 0.1;
@@ -319,7 +242,7 @@ export function ballSparkEffect(ballMesh: any, color: Color3, scene: Scene) {
       }
     }
 
-    updateArcs(activeArcs, ballMesh);
+    updateArcs(activeArcs);
   });
 
   return () => {
