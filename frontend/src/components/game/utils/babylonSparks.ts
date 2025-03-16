@@ -238,42 +238,16 @@ function createNewArc(
     arcReference.points[0] = currentStartPoint;
 
     // Regenerate less frequently - only 5% chance per frame
-    const shouldRegenerate =
-      Math.random() < 0.05 || Vector3.Distance(currentStartPoint, startPoint) > 0.3;
+    const regen = Math.random() < 0.05 || Vector3.Distance(currentStartPoint, startPoint) > 0.3;
 
-    if (shouldRegenerate) {
-      try {
-        const newPoints = generateLightningPoints(currentStartPoint, endPoint);
+    if (regen) {
+      arcReference.arcMesh.dispose();
 
-        MeshBuilder.CreateTube(
-          'electricArcTube',
-          {
-            path: newPoints,
-            radius: 0.05,
-            tessellation: 4,
-            instance: arcReference.arcMesh,
-          },
-          scene
-        );
+      const newArc = createArcLine(currentStartPoint, endPoint, baseColor, scene, sharedGlowLayer);
 
-        arcReference.points = newPoints;
-      } catch (err) {
-        console.error('Error updating arc tube:', err);
-        return true; // Signal to remove this arc due to error
-      }
-    } else {
-      // For frames where we don't regenerate, just update the first point
-      try {
-        const vertices = arcReference.arcMesh.getVerticesData('position');
-        if (vertices && vertices.length >= 3) {
-          vertices[0] = currentStartPoint.x;
-          vertices[1] = currentStartPoint.y;
-          vertices[2] = currentStartPoint.z;
-          arcReference.arcMesh.updateVerticesData('position', vertices);
-        }
-      } catch (err) {
-        // Ignore minor update errors
-      }
+      arcReference.arcMesh = newArc.arcMesh;
+      arcReference.points = newArc.points;
+      arcReference.path3d = newArc.path3d;
     }
 
     const disappearChance = arcReference.target ? 0.05 : 0.1;
