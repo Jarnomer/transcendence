@@ -71,8 +71,8 @@ function generateLightningPoints(start: Vector3, end: Vector3): Vector3[] {
   const points: Vector3[] = [];
 
   const direction = end.subtract(start).normalize();
-  const segmentCount = 3 + Math.floor(Math.random());
-  const displacementAmount = distance * 0.2;
+  const segmentCount = 4 + Math.floor(Math.random());
+  const displacementAmount = distance * 0.4;
 
   // Create perpendicular vector for 2D displacement only
   const perpVector = new Vector3(-direction.y, direction.x, 0).normalize();
@@ -170,7 +170,7 @@ function createNewArc(
     arcMesh,
     target: targetInfo.mesh,
     life: 0,
-    maxLife: 30 + Math.floor(Math.random() * 30),
+    maxLife: 60 + Math.floor(Math.random() * 60),
     points,
     path3d,
     updateFunction: null as any,
