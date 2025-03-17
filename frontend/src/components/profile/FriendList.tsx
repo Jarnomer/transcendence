@@ -1,5 +1,7 @@
-import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
 import React, { useState } from 'react';
+
+import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
+
 import { useAnimatedNavigate } from '../../animatedNavigate';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 
@@ -53,7 +55,7 @@ export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => 
         ))}
       </ul>
     ) : (
-      <p className="text-gray-400">{emptyText}</p>
+      <p className="text-gray-400 ">{emptyText}</p>
     );
   };
 

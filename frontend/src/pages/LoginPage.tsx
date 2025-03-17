@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
 import { SVGModal } from '@components/UI/svgWrappers/svgModal.tsx';
+
 import { login, register } from '@services/authService.ts';
-import { useContext } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+
 import { useAnimatedNavigate } from '../animatedNavigate';
-import { IsLoggedInContext } from '../app.tsx';
+import { useUser } from '../contexts/user/UserContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const animatedNavigate = useAnimatedNavigate();
   const location = useLocation();
-  const { isLoggedIn, setIsLoggedIn } = useContext(IsLoggedInContext);
+  const { user, setUser, refetchUser, checkAuth, logout } = useUser();
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState<string>('');
@@ -40,7 +42,6 @@ export const LoginPage: React.FC = () => {
       // THEN LOG IN THE USER
       try {
         await login(username, password);
-        setIsLoggedIn(true);
         animatedNavigate(`/profile/${localStorage.getItem('userID')}`);
       } catch (error: any) {
         alert('Login failed!');

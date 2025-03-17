@@ -1,8 +1,11 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+
 import { useLocation } from 'react-router-dom';
+
+import { AnimatePresence, motion } from 'framer-motion';
+
 import { useLoading } from '../../contexts/gameContext/LoadingContextProvider';
-import { getUserData } from '../../services/userService';
+import { useUser } from '../../contexts/user/UserContext';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 interface PlayerData {
@@ -41,10 +44,7 @@ const avatarList = [
   './src/assets/images/ai_3.png',
 ];
 
-export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({
-  setAnimate,
-  playersData,
-}) => {
+export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ playersData }) => {
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -54,6 +54,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
   const { loadingStates, setLoadingState } = useLoading();
+  const { user: loggedInUser } = useUser();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -86,9 +87,10 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({
 
   useEffect(() => {
     if (!playersData.player1) return;
-    const localUserId = localStorage.getItem('userID');
     const opponent =
-      playersData.player1?.user_id !== localUserId ? playersData.player1 : playersData.player2;
+      playersData.player1?.user_id !== loggedInUser?.user_id
+        ? playersData.player1
+        : playersData.player2;
 
     setOpponentAvatar(opponent?.avatar_url || '/avatars/default.png');
     setOpponentName(opponent?.display_name || 'Opponent');
@@ -98,19 +100,9 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({
   useEffect(() => {
     setLoadingState('matchMakingAnimationLoading', true);
     if (mode === 'singleplayer') setOpponentFound(true);
-    const userId = localStorage.getItem('userID');
-    if (!userId) return;
-    setLoading(true);
-    getUserData(userId)
-      .then((data) => {
-        setUser(data);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch user data: ', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if (loggedInUser) {
+      setUser(loggedInUser);
+    }
   }, []);
 
   return (
