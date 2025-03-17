@@ -16,7 +16,10 @@ export const SettingsModalWrapper: React.FC<SettingsModalWrapperProps> = ({
         className="absolute top-0 w-screen h-screen bg-black opacity-70 "
         onClick={() => closeModal}
       ></div>
-      <div id="settings-modal" className="modal-content relative text-primary text-center">
+      <div
+        id="settings-modal"
+        className="modal-content w-[600px] relative text-primary text-center"
+      >
         <svg
           className="absolute top-0 left-0 w-full pointer-events-none"
           viewBox="0 0 426 245"

@@ -1,11 +1,12 @@
-import { LeaderBoard } from '@components';
-import { sendFriendRequest } from '@services/friendService';
 import React from 'react';
+
+import { LeaderBoard } from '@components';
+
+import { sendFriendRequest } from '@services/friendService';
+
 import { PlayerQueue } from '../components/home/PlayersInQueue';
 
 export const HomePage: React.FC = () => {
-
-  
   const handleAddFriendClick = (event, receiver_id: string) => {
     // Stop the click event from bubbling up and triggering the navigate function
     event.stopPropagation();
