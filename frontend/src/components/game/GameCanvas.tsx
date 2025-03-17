@@ -11,6 +11,7 @@ import {
   createBall,
   createFloor,
   createPaddle,
+  detectCollision,
   getThemeColors,
   setupEnvironmentMap,
   setupPostProcessing,
@@ -162,30 +163,30 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current.position.x = ballX;
     ballRef.current.position.y = ballY;
 
-    // Calculate current speed (absolute magnitude of velocity)
+    // Calculate current speed, detect collision
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+    const collision = detectCollision(
+      prevBallState.current.dx,
+      prevBallState.current.dy,
+      ball.dx,
+      ball.dy
+    );
 
-    // Update constant ball effects, inverted dy for Babylon coordinate system
-    applyBallEffects(ballRef.current, ball.dx, -ball.dy, ball.spin, color);
+    applyBallEffects(ballRef.current, ball.dx, -ball.dy, ball.spin, color); // Invert dy
 
-    // Update spark effect with current speed and spin
     if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(speed, ball.spin);
 
-    // Check for collisions by comparing current and previous velocity
-    if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
+    if (collision) {
       applyCollisionEffects(
         ballRef.current,
         player1Ref.current,
         player2Ref.current,
-        prevBallState.current.dx,
-        prevBallState.current.dy,
-        ball.dx,
-        ball.dy,
+        collision,
+        speed,
         color
       );
     }
 
-    // Update previous state for next frame
     prevBallState.current = {
       x: ball.x,
       y: ball.y,
