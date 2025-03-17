@@ -27,12 +27,37 @@ export class AIController {
     // Plan the moves to reach predicted position
     const requiredFrames = Math.abs(predictedBallY - aiCenter) / paddleSpeed;
 
-    for (let i = 0; i < frameCount; i++) {
-      if (i < requiredFrames) {
-        this.plannedMoves.push(aiCenter < predictedBallY ? 'down' : 'up');
-      } else {
-        this.plannedMoves.push(null);
+    let applyingSpin = false;
+
+    if (ball.dx > 0) {
+      const spinChance =
+        this.difficulty === 'easy' ? 0.2 : this.difficulty === 'normal' ? 0.5 : 0.8;
+      applyingSpin = Math.random() < spinChance;
+    }
+
+    // First, plan basic movement to intercept the ball
+    const interceptDirection = aiCenter < predictedBallY ? 'down' : 'up';
+    for (let i = 0; i < Math.min(requiredFrames, frameCount); i++) {
+      this.plannedMoves.push(interceptDirection);
+    }
+
+    // Decide whenever to apply spin if remaining frames allow
+    if (applyingSpin && ball.dx > 0 && this.plannedMoves.length < frameCount) {
+      const spinMovesNeeded = Math.min(3, frameCount - this.plannedMoves.length);
+      for (let i = 0; i < spinMovesNeeded; i++) {
+        if (Math.random() < 0.3) {
+          // Short movement in the opposite direction for spin variation
+          this.plannedMoves.push(interceptDirection === 'up' ? 'down' : 'up');
+        } else {
+          // Continue in same direction but with reduced intensity
+          this.plannedMoves.push(interceptDirection);
+        }
       }
+    }
+
+    // Fill remaining frames with null movement
+    while (this.plannedMoves.length < frameCount) {
+      this.plannedMoves.push(null);
     }
 
     this.lastUpdateTime = Date.now();
