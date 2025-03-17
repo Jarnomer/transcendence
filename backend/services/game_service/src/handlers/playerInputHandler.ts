@@ -8,13 +8,11 @@ export const handlePlayerInputMessage = (
 ) => {
   switch (message.action) {
     case 'move':
-      if (message.payload.direction) {
-        handlePlayerMove(
-          gameSession,
-          message.payload.playerId,
-          message.payload.direction as 'up' | 'down'
-        );
-      }
+      handlePlayerMove(
+        gameSession,
+        message.payload.playerId,
+        message.payload.direction as 'up' | 'down' | null
+      );
       break;
 
     case 'ready':
@@ -39,7 +37,7 @@ export const handlePlayerInputMessage = (
 const handlePlayerMove = (
   gameSession: PongGameSession,
   playerId: string,
-  direction: 'up' | 'down'
+  direction: 'up' | 'down' | null
 ) => {
   gameSession.handlePlayerMove(playerId, direction);
 };
