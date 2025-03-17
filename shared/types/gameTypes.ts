@@ -2,6 +2,7 @@ export interface Player {
   id: string;
   y: number;
   dy: number;
+  paddleHeight: number;
   score: number;
 }
 

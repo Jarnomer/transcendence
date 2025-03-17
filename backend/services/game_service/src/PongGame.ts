@@ -38,8 +38,20 @@ export default class PongGame {
     this.difficulty = difficulty;
     this.gameState = {
       players: {
-        player1: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
-        player2: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
+        player1: {
+          id: '',
+          y: this.height / 2 - this.paddleHeight / 2,
+          dy: 0,
+          paddleHeight: this.paddleHeight,
+          score: 0,
+        },
+        player2: {
+          id: '',
+          y: this.height / 2 - this.paddleHeight / 2,
+          paddleHeight: this.paddleHeight,
+          dy: 0,
+          score: 0,
+        },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
     };
@@ -106,8 +118,15 @@ export default class PongGame {
   getHeight() {
     return this.height;
   }
-  getPaddleHeight() {
-    return this.paddleHeight;
+  getWidth() {
+    return this.width;
+  }
+  getPaddleHeight(player: number): number {
+    if (player === 1) {
+      return this.gameState.players.player1.paddleHeight;
+    } else {
+      return this.gameState.players.player2.paddleHeight;
+    }
   }
 
   getPlayerId(player: number): string | null {
@@ -125,6 +144,37 @@ export default class PongGame {
     } else {
       this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
+    }
+  }
+
+  setPaddleHeight(player: number, height: number): void {
+    this.repositionPaddleAfterHeightChange(player, height);
+    if (player === 1) {
+      this.gameState.players.player1.paddleHeight = height;
+    } else {
+      this.gameState.players.player2.paddleHeight = height;
+    }
+  }
+
+  private repositionPaddleAfterHeightChange(player: number, height: number): void {
+    if (player === 1) {
+      if (height > this.gameState.players.player1.paddleHeight) {
+        this.gameState.players.player1.y -=
+          (height - this.gameState.players.player1.paddleHeight) / 2;
+        if (this.gameState.players.player1.y < 0) {
+          this.gameState.players.player1.y = 0;
+        } else if (this.gameState.players.player1.y + height > this.height) {
+          this.gameState.players.player1.y = this.height - height;
+        }
+      } else {
+        this.gameState.players.player1.y += this.gameState.players.player1.paddleHeight - height;
+      }
+    } else {
+      if (height > this.gameState.players.player2.paddleHeight) {
+        this.gameState.players.player2.y -= height - this.gameState.players.player2.paddleHeight;
+      } else {
+        this.gameState.players.player2.y += this.gameState.players.player2.paddleHeight - height;
+      }
     }
   }
 
