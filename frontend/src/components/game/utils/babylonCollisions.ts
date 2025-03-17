@@ -338,7 +338,7 @@ function applyShockwaveEffect(
   return shockwaveSystem;
 }
 
-function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
+export function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
   const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
   const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
 
@@ -351,18 +351,10 @@ export function applyCollisionEffects(
   ballMesh: any,
   leftPaddle: any,
   rightPaddle: any,
-  prevDx: number,
-  prevDy: number,
-  newDx: number,
-  newDy: number,
+  collisionType: 'dx' | 'dy',
+  speed: number,
   color: Color3
 ) {
-  if (!ballMesh || !leftPaddle || !rightPaddle) return;
-
-  const collisionType = detectCollision(prevDx, prevDy, newDx, newDy);
-  if (!collisionType) return;
-
-  const speed = Math.sqrt(newDx * newDx + newDy * newDy);
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 3.5);
   const scene = ballMesh.getScene();
 
@@ -372,7 +364,6 @@ export function applyCollisionEffects(
   applyParticleEffect(ballMesh, collisionType, speedFactor, color, scene);
 
   if (collisionType === 'dx') {
-    // Determine which paddle was hit based on ball position
     if (ballMesh.position.x <= 0) {
       applyPaddleRecoil(leftPaddle, speedFactor, scene);
     } else {
