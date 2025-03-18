@@ -35,39 +35,51 @@ export const HeaderNav: React.FC = () => {
   };
 
   return (
-    <div className="flex gap-3 items-center">
-      <NavIconButton
-        id="nav-game-button"
-        icon="play"
-        onClick={() => animatedNavigate('/gameMenu')}
-      />
-      <NavIconButton id="nav-home-button" icon="home" onClick={() => animatedNavigate('/home')} />
-      <NavIconButton
-        id="nav-profile-button"
-        icon="user"
-        onClick={() => animatedNavigate(`/profile/${localStorage.getItem('userID')}`)}
-      />
-      <NavIconButton id="nav-bell-button" icon="bell" onClick={() => toggleDropdown()} />
-      {isDropdownOpen ? (
-        <div className="absolute right-0 top-10 glass-box p-2 opening">
-          <Notifications></Notifications>
+    <>
+      {user && user.display_name ? (
+        <div className="flex gap-3 items-center">
+          <NavIconButton
+            id="nav-game-button"
+            icon="play"
+            onClick={() => animatedNavigate('/gameMenu')}
+          />
+          <NavIconButton
+            id="nav-home-button"
+            icon="home"
+            onClick={() => animatedNavigate('/home')}
+          />
+          <NavIconButton
+            id="nav-profile-button"
+            icon="user"
+            onClick={() => animatedNavigate(`/profile/${localStorage.getItem('userID')}`)}
+          />
+          <NavIconButton id="nav-bell-button" icon="bell" onClick={() => toggleDropdown()} />
+          {isDropdownOpen ? (
+            <div className="absolute right-0 top-10 glass-box p-2 opening">
+              <Notifications></Notifications>
+            </div>
+          ) : null}
+          <NavIconButton
+            id="nav-chat-button"
+            icon="chat"
+            onClick={() => animatedNavigate('/chat')}
+          />
+          <NavIconButton
+            id="nav-settings-button"
+            icon="settings"
+            onClick={handleSettingsClick} // Trigger settings modal
+          />
+          {user ? (
+            <button
+              onClick={() => {
+                logout();
+              }}
+            >
+              Log Out
+            </button>
+          ) : null}
         </div>
       ) : null}
-      <NavIconButton id="nav-chat-button" icon="chat" onClick={() => animatedNavigate('/chat')} />
-      <NavIconButton
-        id="nav-settings-button"
-        icon="settings"
-        onClick={handleSettingsClick} // Trigger settings modal
-      />
-      {user ? (
-        <button
-          onClick={() => {
-            logout();
-          }}
-        >
-          Log Out
-        </button>
-      ) : null}
-    </div>
+    </>
   );
 };

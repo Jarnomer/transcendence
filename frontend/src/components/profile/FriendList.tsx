@@ -14,9 +14,10 @@ type Friend = {
 type FriendListProps = {
   friends: Friend[];
   requests: Friend[];
+  isOwnProfile: boolean;
 };
 
-export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => {
+export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, requests }) => {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
   const animatedNavigate = useAnimatedNavigate();
 
@@ -92,14 +93,16 @@ export const FriendList: React.FC<FriendListProps> = ({ friends, requests }) => 
         >
           Friends
         </button>
-        <button
-          onClick={() => setActiveTab('requests')}
-          className={`pb-2 font-semibold ${
-            activeTab === 'requests' ? 'border-b-2 border-black' : 'text-gray-400'
-          }`}
-        >
-          Requests
-        </button>
+        {isOwnProfile ? (
+          <button
+            onClick={() => setActiveTab('requests')}
+            className={`pb-2 font-semibold ${
+              activeTab === 'requests' ? 'border-b-2 border-black' : 'text-gray-400'
+            }`}
+          >
+            Requests
+          </button>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-2">

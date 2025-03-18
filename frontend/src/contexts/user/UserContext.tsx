@@ -41,6 +41,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     console.log('Fetching user data in UserContext...');
+    console.log(userId);
     getUserData(userId)
       .then((data) => {
         setUser(data);
@@ -64,12 +65,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await api.get('/auth/validate');
       localStorage.setItem('userID', res.data.user_id);
       localStorage.setItem('username', res.data.username);
-      await fetchUser();
+      fetchUser();
     } catch (error) {
-      console.error('Token validation failed:', error);
       localStorage.removeItem('token');
       localStorage.removeItem('userID');
+      localStorage.removeItem('username');
       setUser(null);
+      window.location.href = '/login';
     }
   };
 
