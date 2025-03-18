@@ -19,6 +19,15 @@ export interface GameState {
   ball: Ball;
 }
 
+export interface PowerUp {
+  id: number;
+  x: number;
+  y: number;
+  active: boolean;
+  affectedPlayer: number;
+  type: 'bigger_paddle' | 'smaller_paddle' | 'extra_point';
+}
+
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
 export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';
