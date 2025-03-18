@@ -243,28 +243,26 @@ export default class PongGame {
   private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
     if (this.gameStatus !== 'playing') return;
 
-    if (!move) {
-      this.frameCount++;
-      if (this.frameCount % 6 === 0) {
-        this.gameState.players[player].dy = 0;
-        this.frameCount = 0;
-      }
-    } else if (move === 'up') {
-      this.gameState.players[player].y -= this.paddleSpeed;
-      if (this.gameState.players[player].y < 0) {
-        this.gameState.players[player].y = 0;
-        this.gameState.players[player].dy = 0;
+    const paddleState = this.gameState.players[player];
+
+    if (move === 'up') {
+      paddleState.y -= this.paddleSpeed;
+      if (paddleState.y < 0) {
+        paddleState.y = 0;
+        paddleState.dy = 0;
       } else {
-        this.gameState.players[player].dy = -this.paddleSpeed;
+        paddleState.dy = -this.paddleSpeed;
       }
     } else if (move === 'down') {
-      this.gameState.players[player].y += this.paddleSpeed;
-      if (this.gameState.players[player].y + this.paddleHeight > this.height) {
-        this.gameState.players[player].y = this.height - this.paddleHeight;
-        this.gameState.players[player].dy = 0;
+      paddleState.y += this.paddleSpeed;
+      if (paddleState.y + this.paddleHeight > this.height) {
+        paddleState.y = this.height - this.paddleHeight;
+        paddleState.dy = 0;
       } else {
-        this.gameState.players[player].dy = this.paddleSpeed;
+        paddleState.dy = this.paddleSpeed;
       }
+    } else if (move === null) {
+      paddleState.dy = 0;
     }
   }
 
@@ -381,15 +379,17 @@ export default class PongGame {
 
     const newSpeed = this.ballSpeed * this.ballSpeedMultiplier;
     const direction = isLeftPaddle ? 1 : -1;
-
-    // Change ball spin based on paddle's vertical speed (dy)
     const paddle = isLeftPaddle ? players.player1 : players.player2;
-    if (paddle.dy > 0) {
-      const spinChange = paddle.dy / -5;
-      ball.spin = Math.min(ball.spin + spinChange, this.maxBallSpin * -1);
-    } else if (paddle.dy < 0) {
-      const spinChange = paddle.dy / -5;
-      ball.spin = Math.max(ball.spin + spinChange, this.maxBallSpin);
+
+    if (paddle.dy !== 0) {
+      const spinDirection = isLeftPaddle ? -1 : 1;
+      const spinChange = (paddle.dy * spinDirection) / 5;
+      const spinIntensity = (Math.abs(paddle.dy) / 5) * 2;
+      ball.spin = Math.max(Math.min(ball.spin + spinChange, this.maxBallSpin), -this.maxBallSpin);
+      ball.spin *= spinIntensity;
+    } else {
+      ball.spin *= 0.8; // Gradually reduce spin
+      if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
     }
 
     ball.dx = direction * newSpeed * Math.cos(bounceAngle);

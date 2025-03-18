@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
+
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IsLoggedInContext } from '../../app.tsx';
+
 import { login, register } from '../../services/authService.ts';
 import { ClippedButton } from '../UI/buttons/ClippedButton.tsx';
 import { SVGModal } from '../UI/svgWrappers/svgModal.tsx';
@@ -10,7 +11,6 @@ import { ModalWrapper } from './ModalWrapper.tsx';
 export const AuthModal: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, setIsLoggedIn } = useContext(IsLoggedInContext);
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState<string>('');
@@ -31,11 +31,9 @@ export const AuthModal: React.FC = () => {
       if (isRegistering) {
         await register(username, password);
         await login(username, password);
-        setIsLoggedIn(true);
         navigate('/gameMenu');
       } else {
         await login(username, password);
-        setIsLoggedIn(true);
         navigate('/gameMenu');
       }
     } catch (error: any) {

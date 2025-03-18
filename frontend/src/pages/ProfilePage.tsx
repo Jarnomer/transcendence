@@ -1,18 +1,20 @@
-import { NavIconButton } from '@components/UI/buttons/NavIconButton.tsx';
-import { api } from '@services/api.ts';
-import {
-  acceptFriendRequest,
-  rejectFriendRequest,
-  sendFriendRequest,
-} from '@services/friendService.ts';
-import { getUserData } from '@services/userService';
 import React, { useEffect, useRef, useState } from 'react';
+
 import { useParams } from 'react-router-dom';
 
-import { FriendList } from '@components/profile/FriendList.tsx';
-import { RadialBackground } from '@components/profile/RadialBackground.tsx';
-import { BackgroundGlow } from '@components/visual/BackgroundGlow.tsx';
 import { Vibrant } from 'node-vibrant/browser';
+
+import { FriendList } from '@components/profile/FriendList.tsx';
+import { MatchHistory } from '@components/profile/MatchHistory';
+import { RadialBackground } from '@components/profile/RadialBackground.tsx';
+import { NavIconButton } from '@components/UI/buttons/NavIconButton.tsx';
+import { BackgroundGlow } from '@components/visual/BackgroundGlow.tsx';
+
+import { api } from '@services/api.ts';
+import { sendFriendRequest } from '@services/friendService.ts';
+import { getUserData } from '@services/userService';
+
+import { useUser } from '../contexts/user/UserContext';
 
 function timeAgo(lastActive: string): string {
   const now = new Date();
@@ -54,35 +56,29 @@ export const ProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const loggedInUserID = localStorage.getItem('userID');
   const isOwnProfile = userId === loggedInUserID;
-
-  async function fetchData() {
-    if (userId) {
-      console.log('Fetching user data for user ID: ', userId);
-      const fetchedUser = await getUserData(userId);
-      if (fetchedUser) {
-        console.log('Fetched user data: ', fetchedUser);
-        setUser(fetchedUser);
-      }
-    } else {
-      console.error('User ID is undefined');
-    }
-  }
+  const { user: loggedInUser, refetchUser, setUser: setLoggedInUser } = useUser();
 
   useEffect(() => {
     setLoading(true);
     if (!userId) return;
-    getUserData(userId)
-      .then((data) => {
-        console.log('User dataaaa: ', user);
-        setUser(data);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch user data: ', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [userId]);
+
+    if (loggedInUser && userId === loggedInUser.user_id) {
+      setUser(loggedInUser);
+      setLoading(false);
+    } else {
+      getUserData(userId)
+        .then((data) => {
+          console.log('User dataaaa: ', user);
+          setUser(data);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch user data: ', error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [userId, loggedInUser]);
 
   useEffect(() => {
     if (!user || !user.avatar_url) return;
@@ -107,7 +103,7 @@ export const ProfilePage: React.FC = () => {
       }
     };
     extractDominantColor();
-  }, [user]);
+  }, [user, loggedInUser]);
 
   // useEffect(() => {
   //   console.log("user from user useEffect: ", user);
@@ -138,7 +134,7 @@ export const ProfilePage: React.FC = () => {
       if (res.status != 200) {
         throw new Error('Failed to upload avatar');
       }
-      setUser(res.data);
+      setLoggedInUser(res.data);
     } catch (error) {
       console.error(error);
     }
@@ -163,7 +159,7 @@ export const ProfilePage: React.FC = () => {
       if (res.status != 200) {
         throw new Error('Failed to update profile');
       }
-      setUser(res.data);
+      setLoggedInUser(res.data);
       setEditProfile(false);
     } catch (error) {
       console.error('Failed to update profile', error);
@@ -183,8 +179,6 @@ export const ProfilePage: React.FC = () => {
   const handleBlockUserClick = (user_id: string) => {
     console.log('Blocking user: ', user_id);
   };
-
-
 
   if (loading) {
     return <div className="text-center mt-10 text-lg">Loading...</div>;
@@ -295,6 +289,14 @@ export const ProfilePage: React.FC = () => {
             <div className="relative overflow-hidden">
               <BackgroundGlow></BackgroundGlow>
               <div id="edit-profile-content" className="relative overflow-hidden glass-box p-10">
+                {user.display_name ? (
+                  <button
+                    className="absolute top-0 right-0 p-2 text-xl"
+                    onClick={() => setEditProfile(false)}
+                  >
+                    x
+                  </button>
+                ) : null}
                 <h3 className="text-lg font-bold">Complete Your Profile</h3>
                 <p className="text-sm text-gray-500">Please provide your missing information.</p>
                 <div className="flex flex-col">
@@ -344,50 +346,11 @@ export const ProfilePage: React.FC = () => {
             {/* Match History */}
             <div className="w-full min-h-full max-w-md p-4 glass-box">
               <h3 className="text-lg font-semibold">Match History</h3>
+              <MatchHistory user={user}></MatchHistory>
               {/* Stats */}
               <div className="w-full text-center flex items-center justify-center gap-6 text-lg">
                 {/* <span className="font-semibold">Wins: {user.stats.wins}</span>
                 <span className="font-semibold">Losses: {user.stats.losses}</span> */}
-              </div>
-              <div className="flex min-h-full flex-col gap-2 mt-2">
-                {user.games && user.games.length > 0 ? (
-                  user.games.map((game: any) => (
-                    <div key={game.game_id} className="flex items-center gap-3">
-                      <span
-                        className={
-                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
-                        }
-                      >
-                        {game.winner.user_id === user.user_id ? 'Victory' : 'Defeat'}
-                      </span>
-                      <span
-                        className={
-                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
-                        }
-                      >
-                        {game.winner.user_id === user.user_id
-                          ? !game.loser.display_name
-                            ? game.loser.user_id
-                            : game.loser.display_name
-                          : !game.winner.display_name
-                            ? game.winner.user_id
-                            : game.winner.display_name}
-                      </span>
-                      <span
-                        className={
-                          game.winner.user_id === user.user_id ? 'text-green-500' : 'text-red-500'
-                        }
-                      >
-                        {game.winner.user_id === user.user_id
-                          ? `${game.winner.score} - ${game.loser.score}`
-                          : `${game.loser.score} - ${game.winner.score}`}
-                      </span>
-                      <span className="text-gray-500">{game.started_at}</span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-400">No match history</p>
-                )}
               </div>
             </div>
           </div>

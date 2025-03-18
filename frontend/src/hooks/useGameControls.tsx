@@ -1,21 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
 
 import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
-interface UseGameControlsProps {
-  localPlayerId: string;
-  remotePlayerId: string;
-}
-
 const useGameControls = (localPlayerId: string | null, remotePlayerId: string | null) => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const { sendMessage } = useWebSocketContext();
 
+  // Only track whether movement was null previously
+  const wasLocalMovingRef = useRef<boolean>(false);
+  const wasRemoteMovingRef = useRef<boolean>(false);
+
   useEffect(() => {
     if (!localPlayerId || !remotePlayerId) return;
-    console.log('localPlayerId:', localPlayerId, '| remotePlayerId:', remotePlayerId);
+
+    console.log(
+      'Game controls =>',
+      ' localPlayerId:',
+      localPlayerId,
+      '| remotePlayerId:',
+      remotePlayerId
+    );
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent default actions during gameplay
@@ -48,22 +54,48 @@ const useGameControls = (localPlayerId: string | null, remotePlayerId: string | 
   // Control loop with fixed interval timer
   useEffect(() => {
     if (!localPlayerId || !remotePlayerId) return;
+
     const intervalId = setInterval(() => {
+      // Determine current movement states
+      let localMovement: 'up' | 'down' | null = null;
+      let remoteMovement: 'up' | 'down' | null = null;
+      let isLocalMoving = false;
+      let isRemoteMoving = false;
+
+      // Local player movement
       if (keysPressed['w']) {
-        sendMessage(createMoveInputMessage(localPlayerId, 'up'));
+        localMovement = 'up';
+        isLocalMoving = true;
+      } else if (keysPressed['s']) {
+        localMovement = 'down';
+        isLocalMoving = true;
       }
 
-      if (keysPressed['s']) {
-        sendMessage(createMoveInputMessage(localPlayerId, 'down'));
+      // Remote player movement
+      if (keysPressed['ArrowUp']) {
+        remoteMovement = 'up';
+        isRemoteMoving = true;
+      } else if (keysPressed['ArrowDown']) {
+        remoteMovement = 'down';
+        isRemoteMoving = true;
       }
 
-      if (remotePlayerId && keysPressed['ArrowUp']) {
-        sendMessage(createMoveInputMessage(remotePlayerId, 'up'));
+      if (isLocalMoving) {
+        sendMessage(createMoveInputMessage(localPlayerId, localMovement));
+        wasLocalMovingRef.current = true;
+      } else if (wasLocalMovingRef.current) {
+        sendMessage(createMoveInputMessage(localPlayerId, null));
+        wasLocalMovingRef.current = false;
       }
 
-      if (remotePlayerId && keysPressed['ArrowDown']) {
-        sendMessage(createMoveInputMessage(remotePlayerId, 'down'));
+      if (isRemoteMoving) {
+        sendMessage(createMoveInputMessage(remotePlayerId, remoteMovement));
+        wasRemoteMovingRef.current = true;
+      } else if (wasRemoteMovingRef.current) {
+        sendMessage(createMoveInputMessage(remotePlayerId, null));
+        wasRemoteMovingRef.current = false;
       }
+
       if (remotePlayerId && keysPressed['p']) {
         sendMessage(createReadyInputMessage(localPlayerId, true));
       }
