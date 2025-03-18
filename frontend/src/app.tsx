@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { Route, Routes, useLocation } from 'react-router-dom';
 
@@ -17,35 +17,9 @@ import { LoginPage } from './pages/LoginPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { WebSocketProvider } from './services/webSocket/WebSocketContext.tsx';
 
-export const IsLoggedInContext = React.createContext<
-  | {
-      isLoggedIn: boolean;
-      setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-      logout: () => void;
-    }
-  | undefined
->(undefined);
-
-// export function animatePageChange() {
-// 	const appDiv = document.getElementById("root")!;
-// 	appDiv.classList.add("closing");
-
-// 	setTimeout(() => {
-// 		appDiv.classList.remove("closing");
-// 		appDiv.classList.add("opening");
-
-// 		setTimeout(() => {
-// 			appDiv.classList.remove("opening");
-// 		}, 400);
-// 	}, 200);
-// }
-
 const App: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false); // Modal state
-  const [isGameRunning, setIsGameRunning] = useState<boolean>(false);
   const location = useLocation();
-  const { user, setUser, refetchUser, checkAuth, logout } = useUser();
+  const { user, checkAuth } = useUser();
 
   console.log('app rendered');
 
@@ -58,7 +32,6 @@ const App: React.FC = () => {
 
   return (
     <ModalProvider>
-      {/* <IsLoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn, logout }}> */}
       <WebSocketProvider>
         <div
           id="app-container"
@@ -86,7 +59,6 @@ const App: React.FC = () => {
           {location.pathname !== '/game' ? <Footer /> : null}
         </div>
       </WebSocketProvider>
-      {/* </IsLoggedInContext.Provider> */}
     </ModalProvider>
   );
 };

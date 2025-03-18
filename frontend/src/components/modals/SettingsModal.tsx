@@ -1,4 +1,5 @@
 import React from 'react';
+
 import SettingsModalWrapper from '../UI/svgWrappers/SettingsModalWrapper';
 import { useModal } from './ModalContext';
 
@@ -16,8 +17,6 @@ export const SettingsModal: React.FC = () => {
   return (
     <>
       <SettingsModalWrapper closeModal={() => closeModal('settingsModal')}>
-        {' '}
-        {/* Pass the modal name */}
         <h1 className="text-3xl mb-4 font-heading font-bold">Settings</h1>
         <p className="mb-4">Not much to do here yet...</p>
         <p>Maybe change the colors of the page?</p>
