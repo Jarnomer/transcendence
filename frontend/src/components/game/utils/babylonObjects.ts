@@ -21,7 +21,7 @@ export function createFloor(scene: Scene, color: Color3) {
   pbr.metallicTexture = new Texture(baseUrl + 'metallic.png', scene);
   pbr.ambientTexture = new Texture(baseUrl + 'ao.png', scene);
 
-  const multipleColor = 0.15;
+  const multipleColor = 0.2;
   const adjustedColor = new Color3(
     Math.max(multipleColor, color.r),
     Math.max(multipleColor, color.g),

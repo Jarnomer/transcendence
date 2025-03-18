@@ -54,7 +54,7 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
 
   // Enable grain effect
   pipeline.grainEnabled = true;
-  pipeline.grain.intensity = 8;
+  pipeline.grain.intensity = 24;
   pipeline.grain.animated = true;
 
   pipeline.fxaaEnabled = true; // Enable anti-aliasing

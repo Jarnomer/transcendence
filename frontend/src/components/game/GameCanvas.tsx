@@ -204,12 +204,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         color
       );
 
-      // Apply collision flash
       if (postProcessingRef.current) {
         applyCollisionFlash(postProcessingRef.current, 0.2, 100);
       }
 
-      // Apply glitch on collision
       if (effectsRef.current.glitchEffect) {
         effectsRef.current.glitchEffect.setGlitchAmount(0.2);
         setTimeout(() => {
@@ -220,7 +218,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       }
     }
 
-    // Check for score change
+    // Check for score change - this need further implementation
     // const totalScore = (score?.player1 || 0) + (score?.player2 || 0);
     // if (score && totalScore !== effectsRef.current.lastScore) {
     //   effectsRef.current.lastScore = totalScore;
