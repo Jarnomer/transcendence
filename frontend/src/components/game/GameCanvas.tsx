@@ -12,7 +12,6 @@ import {
   createBall,
   createFloor,
   createPaddle,
-  detectCollision,
   getThemeColors,
   setupCRTEffect,
   setupEnvironmentMap,
@@ -51,6 +50,41 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 };
 
+// Helper function to detect collision, return either horizontal or vertical collision
+const detectCollision = (
+  prevDx: number,
+  prevDy: number,
+  newDx: number,
+  newDy: number
+): 'dx' | 'dy' | null => {
+  const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
+  const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
+
+  if (dxCollision) return 'dx';
+  if (dyCollision) return 'dy';
+  return null;
+};
+
+// Helper function to detect scoring, update score reference, and return scoring player
+const detectScore = (
+  player1Score: number,
+  player2Score: number,
+  lastScoreRef: { value: number },
+  ballDx: number
+): 'player1' | 'player2' | null => {
+  const currentScore = player1Score + player2Score;
+
+  if (currentScore === lastScoreRef.value) return null;
+
+  if (ballDx < 0) {
+    lastScoreRef.value = currentScore;
+    return 'player2';
+  } else {
+    lastScoreRef.value = currentScore;
+    return 'player1';
+  }
+};
+
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
   const [lastTheme, setLastTheme] = useState(theme);
 
@@ -74,8 +108,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     crtEffect?: any;
     glitchEffect?: { effect: any; setGlitchAmount: (amount: number) => void };
     scanlinesEffect?: any;
-    lastScore?: number;
   }>({});
+
+  const lastScoreRef = useRef<{ value: number }>({ value: 0 });
 
   // Updated references to only store mesh objects
   const floorRef = useRef<any>(null);
@@ -180,7 +215,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current.position.x = ballX;
     ballRef.current.position.y = ballY;
 
-    // Calculate current speed, detect collision
+    // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
     const collision = detectCollision(
@@ -188,6 +223,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       prevBallState.current.dy,
       ball.dx,
       ball.dy
+    );
+    const score = detectScore(
+      players.player1.score,
+      players.player2.score,
+      lastScoreRef.current,
+      ball.dx
     );
 
     applyBallEffects(ballRef.current, speed, angle, ball.spin, color);
@@ -218,27 +259,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       }
     }
 
-    // Check for score change - this need further implementation
-    // const totalScore = (score?.player1 || 0) + (score?.player2 || 0);
-    // if (score && totalScore !== effectsRef.current.lastScore) {
-    //   effectsRef.current.lastScore = totalScore;
-
-    //   // Apply score effect if pipeline exists
-    //   if (postProcessingRef.current && ballRef.current) {
-    //     const scorePosition = ballRef.current.position.clone();
-    //     applyScoreEffects(scene, postProcessingRef.current, scorePosition);
-
-    //     // Apply intense glitch on score
-    //     if (effectsRef.current.glitchEffect) {
-    //       effectsRef.current.glitchEffect.setGlitchAmount(0.8);
-    //       setTimeout(() => {
-    //         if (effectsRef.current.glitchEffect) {
-    //           effectsRef.current.glitchEffect.setGlitchAmount(0);
-    //         }
-    //       }, 1000);
-    //     }
-    //   }
-    // }
+    if (score) {
+      console.log(`player ${score} scored!`);
+    }
 
     prevBallState.current = {
       x: ball.x,

@@ -338,15 +338,6 @@ function applyShockwaveEffect(
   return shockwaveSystem;
 }
 
-export function detectCollision(prevDx: number, prevDy: number, newDx: number, newDy: number) {
-  const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
-
-  if (dxCollision) return 'dx';
-  if (dyCollision) return 'dy';
-  return null;
-}
-
 export function applyCollisionEffects(
   ballMesh: any,
   leftPaddle: any,
