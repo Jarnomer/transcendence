@@ -1,16 +1,15 @@
-import { Ball, Player } from '@shared/types';
+import { Ball, Player, GameParams, defaultGameParams } from '@shared/types';
 
 export class AIController {
   private plannedMoves: ('up' | 'down' | null)[] = [];
   private lastUpdateTime: number = 0;
   private difficulty: string;
   private lastBallDx: number = 0;
-  private gameHeight: number = 0;
+  private params: GameParams = defaultGameParams;
 
   // difficulty levels: easy, normal, brutal
-  constructor(difficulty: string, gameHeight: number) {
+  constructor(difficulty: string) {
     this.difficulty = difficulty;
-    this.gameHeight = gameHeight;
   }
 
   updateAIState(ball: Ball, aiPaddle: Player, paddleHeight: number, paddleSpeed: number): void {
@@ -79,12 +78,12 @@ export class AIController {
   private predictBallPosition(ball: Ball): number {
     // move back to middle if ball is moving away
     if (ball.dx < 0) {
-      return this.gameHeight / 2;
+      return this.params.gameHeight / 2;
     }
 
     const predictedBall = { ...ball };
 
-    while (predictedBall.x < this.gameHeight * 2) {
+    while (predictedBall.x < this.params.gameHeight * 2) {
       this.adjustBallMovementForSpin(predictedBall);
       predictedBall.y += predictedBall.dy;
       predictedBall.x += predictedBall.dx;
@@ -97,7 +96,7 @@ export class AIController {
         predictedBall.y += 2 * predictedBall.dy;
         this.adjustBounceForSpin(predictedBall, true);
       }
-      if (predictedBall.y > this.gameHeight) {
+      if (predictedBall.y > this.params.gameHeight) {
         predictedBall.dy = -predictedBall.dy;
         predictedBall.y += 2 * predictedBall.dy;
         this.adjustBounceForSpin(predictedBall, false);
@@ -111,9 +110,9 @@ export class AIController {
     if (ball.spin === 0) return;
 
     if (ball.dx > 0) {
-      ball.dy += ball.spin / 100;
+      ball.dy += ball.spin * this.params.spinCurveFactor * ball.dx;
     } else {
-      ball.dy -= ball.spin / 100;
+      ball.dy -= ball.spin * this.params.spinCurveFactor * ball.dx * -1;
     }
   }
 
@@ -122,20 +121,20 @@ export class AIController {
 
     if (ball.dx > 0) {
       if (isTopWall) {
-        ball.dx -= ball.spin / 3;
+        ball.dx -= ball.spin * this.params.spinBounceFactor;
       } else {
-        ball.dx += ball.spin / 3;
+        ball.dx += ball.spin * this.params.spinBounceFactor;
       }
-      if (ball.dx < 2) ball.dx = 1;
+      if (ball.dx < this.params.minBallDX) ball.dx = this.params.minBallDX;
     } else {
       if (isTopWall) {
-        ball.dx -= ball.spin / 3;
+        ball.dx -= ball.spin * this.params.spinBounceFactor;
       } else {
-        ball.dx += ball.spin / 3;
+        ball.dx += ball.spin * this.params.spinBounceFactor;
       }
-      if (ball.dx > -2) ball.dx = -1;
+      if (ball.dx > -this.params.minBallDX) ball.dx = -this.params.minBallDX;
     }
-    ball.spin *= 0.5;
+    ball.spin *= this.params.spinReductionFactor;
     if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
   }
 
@@ -150,7 +149,7 @@ export class AIController {
       errorFactor = 1.1;
     }
 
-    const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.gameHeight / 2);
+    const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.params.gameHeight / 2);
 
     return predictedBallY + (Math.random() * errorAmount * 2 - errorAmount);
   }

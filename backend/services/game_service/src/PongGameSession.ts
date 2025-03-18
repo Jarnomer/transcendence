@@ -27,8 +27,7 @@ export class PongGameSession {
     this.game = new PongGame(mode, difficulty);
     this.previousGameStatus = this.game.getGameStatus();
 
-    this.aiController =
-      mode === 'singleplayer' ? new AIController(this.difficulty, this.game.getHeight()) : null;
+    this.aiController = mode === 'singleplayer' ? new AIController(this.difficulty) : null;
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
@@ -163,7 +162,7 @@ export class PongGameSession {
     if (this.aiController.shouldUpdate(ball.dx)) {
       const aiPaddle = this.game.getGameState().players.player2;
       const paddleSpeed = this.game.getPaddleSpeed();
-      this.aiController.updateAIState(ball, aiPaddle, this.game.getPaddleHeight(), paddleSpeed);
+      this.aiController.updateAIState(ball, aiPaddle, this.game.getPaddleHeight(2), paddleSpeed);
     }
 
     const aiMove = this.aiController.getNextMove();
