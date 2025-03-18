@@ -165,6 +165,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     // Calculate current speed, detect collision
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+    const angle = Math.atan2(ball.dx, -ball.dy);
     const collision = detectCollision(
       prevBallState.current.dx,
       prevBallState.current.dy,
@@ -172,7 +173,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       ball.dy
     );
 
-    applyBallEffects(ballRef.current, ball.dx, -ball.dy, ball.spin, color); // Invert dy
+    applyBallEffects(ballRef.current, speed, angle, ball.spin, color);
 
     if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(speed, ball.spin);
 

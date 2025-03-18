@@ -6,8 +6,11 @@ import {
   ParticleSystem,
   PBRMaterial,
   Scene,
+  Texture,
   Vector3,
 } from 'babylonjs';
+
+import { updateMotionBlur } from '@game/utils';
 
 export function createParticleTexture(scene: Scene, color: Color3): Texture {
   const textureSize = 64;
@@ -366,18 +369,20 @@ export function applyBallOvalityWithSpin(
 
 export function applyBallEffects(
   ballMesh: any,
-  dx: number,
-  dy: number,
+  speed: number,
+  angle: number,
   spin: number,
   color: Color3
 ) {
   if (!ballMesh) return;
 
-  const angle = Math.atan2(dy, dx);
-  const speed = Math.sqrt(dx * dx + dy * dy);
   const scene = ballMesh.getScene();
 
   applyBallOvalityWithSpin(ballMesh, angle, speed, spin);
   applyBallTrail(ballMesh, speed, color, scene);
   applySpinEffect(ballMesh, spin, speed, color, scene);
+
+  if (scene.activeCamera) {
+    updateMotionBlur(speed, scene.activeCamera);
+  }
 }

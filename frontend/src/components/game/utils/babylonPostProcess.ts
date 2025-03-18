@@ -6,6 +6,7 @@ import {
   DefaultRenderingPipeline,
   HemisphericLight,
   MirrorTexture,
+  MotionBlurPostProcess,
   Plane,
   SSAO2RenderingPipeline,
   Scene,
@@ -13,6 +14,13 @@ import {
   SpotLight,
   Vector3,
 } from 'babylonjs';
+
+import {
+  createCRTEffect,
+  createGlitchEffect,
+  createScanlinesEffect,
+  registerCustomShaders,
+} from './babylonShaders';
 
 export function setupEnvironmentMap(scene: Scene) {
   const envTex = CubeTexture.CreateFromPrefilteredData(
@@ -27,6 +35,9 @@ export function setupEnvironmentMap(scene: Scene) {
 }
 
 export function setupPostProcessing(scene: Scene, camera: Camera) {
+  // Register custom shaders
+  registerCustomShaders();
+
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
 
   // Enable bloom effect
@@ -47,6 +58,11 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   pipeline.grain.animated = true;
 
   pipeline.fxaaEnabled = true; // Enable anti-aliasing
+
+  // Enable motion blur
+  const motionBlur = new MotionBlurPostProcess('motionBlur', scene, 1.0, camera);
+  motionBlur.motionStrength = 0.1;
+  motionBlur.motionBlurSamples = 15;
 
   // Screen Space Ambient Occlusion
   const ssaoRatio = {
@@ -135,4 +151,30 @@ export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects
   floorMaterial.environmentIntensity = 0.8;
 
   return mirrorTexture;
+}
+
+export function setupCRTEffect(scene: Scene, camera: Camera) {
+  return createCRTEffect(scene, camera, 4.0, 0.15);
+}
+
+export function setupGlitchEffect(scene: Scene, camera: Camera) {
+  return createGlitchEffect(scene, camera);
+}
+
+export function setupScanlinesEffect(scene: Scene, camera: Camera) {
+  return createScanlinesEffect(scene, camera, 0.2);
+}
+
+export function updateMotionBlur(speed: number, camera: Camera) {
+  // Find the motion blur post process
+  const motionBlur = camera._postProcesses?.find(
+    (pp) => pp instanceof MotionBlurPostProcess
+  ) as MotionBlurPostProcess;
+
+  if (motionBlur) {
+    // Scale motion blur with speed (0.05 at low speeds, up to 0.3 at high speeds)
+    const normalizedSpeed = Math.min(Math.max(speed / 10, 0), 1);
+    motionBlur.motionStrength = 0.05 + normalizedSpeed * 0.25;
+    motionBlur.motionBlurSamples = 5 + Math.floor(normalizedSpeed * 15);
+  }
 }
