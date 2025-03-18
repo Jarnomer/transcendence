@@ -7,15 +7,19 @@ import { GameState } from '@shared/types';
 import {
   applyBallEffects,
   applyCollisionEffects,
+  applyCollisionFlash,
   ballSparkEffect,
   createBall,
   createFloor,
   createPaddle,
   detectCollision,
   getThemeColors,
+  setupCRTEffect,
   setupEnvironmentMap,
+  setupGlitchEffect,
   setupPostProcessing,
   setupReflections,
+  setupScanlinesEffect,
   setupSceneCamera,
   setupScenelights,
 } from '@game/utils';
@@ -65,6 +69,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectCleanupRef = useRef<((speed: number, spin: number) => void) | null>(null);
 
+  // Store custom effects
+  const effectsRef = useRef<{
+    crtEffect?: any;
+    glitchEffect?: { effect: any; setGlitchAmount: (amount: number) => void };
+    scanlinesEffect?: any;
+    lastScore?: number;
+  }>({});
+
   // Updated references to only store mesh objects
   const floorRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
@@ -87,6 +99,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera);
     const { shadowGenerators } = setupScenelights(scene);
+
+    // Set up custom effects
+    effectsRef.current.crtEffect = setupCRTEffect(scene, camera);
+    effectsRef.current.glitchEffect = setupGlitchEffect(scene, camera);
+    effectsRef.current.scanlinesEffect = setupScanlinesEffect(scene, camera);
 
     floorRef.current = createFloor(scene, backgroundColor);
     player1Ref.current = createPaddle(scene, primaryColor);
@@ -186,7 +203,44 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         speed,
         color
       );
+
+      // Apply collision flash
+      if (postProcessingRef.current) {
+        applyCollisionFlash(postProcessingRef.current, 0.2, 100);
+      }
+
+      // Apply glitch on collision
+      if (effectsRef.current.glitchEffect) {
+        effectsRef.current.glitchEffect.setGlitchAmount(0.2);
+        setTimeout(() => {
+          if (effectsRef.current.glitchEffect) {
+            effectsRef.current.glitchEffect.setGlitchAmount(0);
+          }
+        }, 200);
+      }
     }
+
+    // Check for score change
+    // const totalScore = (score?.player1 || 0) + (score?.player2 || 0);
+    // if (score && totalScore !== effectsRef.current.lastScore) {
+    //   effectsRef.current.lastScore = totalScore;
+
+    //   // Apply score effect if pipeline exists
+    //   if (postProcessingRef.current && ballRef.current) {
+    //     const scorePosition = ballRef.current.position.clone();
+    //     applyScoreEffects(scene, postProcessingRef.current, scorePosition);
+
+    //     // Apply intense glitch on score
+    //     if (effectsRef.current.glitchEffect) {
+    //       effectsRef.current.glitchEffect.setGlitchAmount(0.8);
+    //       setTimeout(() => {
+    //         if (effectsRef.current.glitchEffect) {
+    //           effectsRef.current.glitchEffect.setGlitchAmount(0);
+    //         }
+    //       }, 1000);
+    //     }
+    //   }
+    // }
 
     prevBallState.current = {
       x: ball.x,

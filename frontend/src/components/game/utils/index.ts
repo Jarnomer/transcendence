@@ -5,3 +5,4 @@ export * from './babylonParticles';
 export * from './babylonPostProcess';
 export * from './babylonShaders';
 export * from './babylonSparks';
+export * from './babylonScore';
