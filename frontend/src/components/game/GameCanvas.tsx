@@ -205,7 +205,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       );
 
       if (postProcessingRef.current) {
-        applyCollisionFlash(postProcessingRef.current, 0.2, 100);
+        applyCollisionFlash(postProcessingRef.current, 0.2, 20);
       }
 
       if (effectsRef.current.glitchEffect) {
