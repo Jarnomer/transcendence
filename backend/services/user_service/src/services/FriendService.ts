@@ -36,9 +36,6 @@ export class FriendService {
 
   async getSentFriendRequests(user_id: string) {
     const res = await this.friendModel.getSentFriendRequests(user_id);
-    if (res.length === 0) {
-      throw new NotFoundError('No sent friend requests found');
-    }
     return res;
   }
 

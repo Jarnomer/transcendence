@@ -17,6 +17,7 @@ type Friend = {
 type FriendListProps = {
   friends: Friend[];
   requests: Friend[];
+  sents: Friend[];
   isOwnProfile: boolean;
 };
 
@@ -50,8 +51,13 @@ const itemVariants = {
   }),
 };
 
-export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, requests }) => {
-  const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
+export const FriendList: React.FC<FriendListProps> = ({
+  isOwnProfile,
+  friends,
+  requests,
+  sents,
+}) => {
+  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
   const navigate = useNavigate();
 
   const renderList = (list: Friend[], emptyText: string, isRequestList: boolean) => {
@@ -133,21 +139,35 @@ export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, r
           Friends
         </button>
         {isOwnProfile ? (
-          <button
-            onClick={() => setActiveTab('requests')}
-            className={`pb-2 font-semibold ${
-              activeTab === 'requests' ? 'border-b-2 border-black' : 'text-gray-400'
-            }`}
-          >
-            Requests
-          </button>
+          <>
+            <button
+              onClick={() => setActiveTab('requests')}
+              className={`pb-2 font-semibold ${
+                activeTab === 'requests' ? 'border-b-2 border-black' : 'text-gray-400'
+              }`}
+            >
+              Requests
+            </button>
+            <button
+              onClick={() => setActiveTab('sent')}
+              className={`pb-2 font-semibold ${
+                activeTab === 'sent' ? 'border-b-2 border-black' : 'text-gray-400'
+              }`}
+            >
+              Sent
+            </button>
+          </>
         ) : null}
       </div>
 
       <div className="flex flex-col gap-2">
         {activeTab === 'friends'
           ? renderList(friends, 'No friends yet', false)
-          : renderList(requests, 'No requests yet', true)}
+          : activeTab === 'requests'
+            ? renderList(requests, 'No requests yet', true)
+            : activeTab === 'sent'
+              ? renderList(sents, 'No requests sent yet', true)
+              : null}
       </div>
     </motion.div>
   );

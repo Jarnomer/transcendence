@@ -49,9 +49,7 @@ export class FriendController {
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting sent friend requests for ${user_id}`);
     const sentFriendRequests = await this.friendService.getSentFriendRequests(user_id);
-    if (sentFriendRequests.length === 0) {
-      throw new NotFoundError('No sent friend requests found');
-    }
+
     reply.code(200).send(sentFriendRequests);
   }
 

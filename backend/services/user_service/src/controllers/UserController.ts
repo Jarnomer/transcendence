@@ -160,11 +160,27 @@ export class UserController {
     const avatarPath = path.join(UPLOAD_DIR, fileName);
     await pipeline(avatar.file, fs.createWriteStream(avatarPath));
 
-    const avatarURL = `uploads/${fileName}`;
+    const avatarURL = `/uploads/${fileName}`;
     const user = await this.userService.updateUserByID(user_id, { avatar_url: avatarURL });
     if (!user) {
       throw new NotFoundError('User not found');
     }
     reply.code(200).send(user);
+  }
+
+  /**
+   * Fetch notifications for user
+   * @param request get
+   * @param reply 200 OK notifications : Array of Notification objects
+   * @throws NotFoundError if no notifications found
+   */
+  async getNotifications(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting notifications for user ${user_id}`);
+    const notifications = await this.userService.getNotifications(user_id);
+    if (notifications.length === 0) {
+      throw new NotFoundError('No notifications found');
+    }
+    reply.code(200).send(notifications);
   }
 }

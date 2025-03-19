@@ -92,4 +92,9 @@ export class UserService {
     }
     return res;
   }
+
+  async getNotifications(user_id: string) {
+    const res = await this.userModel.getNotifications(user_id);
+    return res;
+  }
 }

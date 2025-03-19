@@ -173,7 +173,7 @@ export class UserModel {
           SELECT friend_requests.sender_id, friend_requests.status, user_profiles.display_name, user_profiles.avatar_url
           FROM friend_requests
           JOIN user_profiles ON friend_requests.sender_id = user_profiles.user_id
-          WHERE friend_requests.receiver_id = up.user_id
+          WHERE friend_requests.receiver_id = up.user_id AND friend_requests.status = 'pending'
           LIMIT 10
         ) fr
       ) AS friend_requests
@@ -190,6 +190,18 @@ export class UserModel {
       query,
       [user_id],
       ['games', 'friends', 'friend_requests', 'stats']
+    );
+  }
+
+  async getNotifications(user_id: string) {
+    return await this.db.all(
+      `SELECT
+      n.*,
+      up.*
+      FROM notifications n
+      LEFT JOIN user_profiles up ON n.reference_id = up
+      WHERE user_id = ? ORDER BY created_at DESC`,
+      [user_id]
     );
   }
 }

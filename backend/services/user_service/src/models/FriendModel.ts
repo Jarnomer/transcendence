@@ -51,7 +51,17 @@ export class FriendModel {
   }
 
   async getSentFriendRequests(user_id: string) {
-    return await this.db.all(`SELECT * FROM friend_requests WHERE sender_id = ?`, [user_id]);
+    return await this.db.all(
+      `
+      SELECT
+      fr.*,
+      up.*
+      FROM friend_requests fr
+      LEFT JOIN user_profiles up ON fr.receiver_id = up.user_id
+      WHERE sender_id = ?
+      `,
+      [user_id]
+    );
   }
 
   async getReceivedFriendRequests(user_id: string) {

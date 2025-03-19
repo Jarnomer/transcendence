@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { getUsers } from '../../services/userService';
+import { getUsersWithRank } from '../../services/userService';
 import SearchBar from '../UI/SearchBar';
 
 export const animationVariants = {

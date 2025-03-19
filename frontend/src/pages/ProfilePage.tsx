@@ -13,6 +13,7 @@ import { getUserData } from '@services/userService';
 import { EditProfile } from '../components/profile/EditProfile';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { useUser } from '../contexts/user/UserContext';
+import { getRequestsSent } from '../services/friendService';
 
 export const animationVariants = {
   initial: {
@@ -33,6 +34,7 @@ export const animationVariants = {
 
 export const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
+  const [sent, setSent] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [editProfile, setEditProfile] = useState<boolean>(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -61,6 +63,21 @@ export const ProfilePage: React.FC = () => {
         });
     }
   }, [userId, loggedInUser]);
+
+  useEffect(() => {
+    setLoading(true);
+    if (!userId) return;
+    getRequestsSent()
+      .then((data) => {
+        setSent(data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch user data: ', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [userId]);
 
   useEffect(() => {
     if (!loggedInUser || !user?.avatar_url) return;
@@ -122,6 +139,7 @@ export const ProfilePage: React.FC = () => {
                   isOwnProfile={isOwnProfile}
                   friends={user.friends}
                   requests={user.friend_requests}
+                  sents={sent}
                 />
               </motion.div>
               <motion.div>

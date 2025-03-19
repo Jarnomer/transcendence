@@ -18,7 +18,7 @@ CREATE TABLE  IF NOT EXISTS user_profiles (
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     bio TEXT,
-    avatar_url VARCHAR(255) DEFAULT 'uploads/default_avatar.png',
+    avatar_url VARCHAR(255) DEFAULT '/uploads/default_avatar.png',
     status TEXT CHECK(status IN ('online', 'offline', 'away', 'busy')) DEFAULT 'offline',
     last_active DATETIME DEFAULT (CURRENT_TIMESTAMP),
     updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
@@ -137,14 +137,11 @@ CREATE TABLE IF NOT EXISTS tournament_games (
 );
 
 
--- insert AI users securely in user table
-
-
+-- trigger to update user stats when game is completed
 CREATE TRIGGER IF NOT EXISTS update_user_stats
 AFTER UPDATE ON games
 WHEN NEW.status = 'completed'
 BEGIN
-    -- 🏆 Update wins for the winner
     UPDATE user_stats
     SET wins = wins + 1
     WHERE user_id = (
@@ -152,7 +149,6 @@ BEGIN
         WHERE game_id = NEW.game_id AND is_winner = TRUE
     );
 
-    -- ❌ Update losses for the loser
     UPDATE user_stats
     SET losses = losses + 1
     WHERE user_id = (
@@ -160,7 +156,6 @@ BEGIN
         WHERE game_id = NEW.game_id AND is_winner = FALSE
     );
 
-    -- ⏳ Set game end time
     UPDATE games
     SET end_time = CURRENT_TIMESTAMP
     WHERE game_id = NEW.game_id;
@@ -227,6 +222,8 @@ BEGIN
   VALUES (NEW.sender_id, NEW.receiver_id);
   INSERT INTO friends(user_id, friend_id)
   VALUES (NEW.receiver_id, NEW.sender_id);
+  DELETE FROM friend_requests
+  WHERE sender_id = NEW.sender_id AND receiver_id = NEW.receiver_id;
 END;
 
 --trigger for deleting queue when user leaves queue
@@ -239,4 +236,33 @@ BEGIN
     SELECT * FROM queue_players
     WHERE queue_id = OLD.queue_id
   );
+END;
+
+--trigger for restricting duplicate friend requests
+-- CREATE TRIGGER prevent_duplicate_friend_requests
+-- BEFORE INSERT ON friend_requests
+-- FOR EACH ROW
+-- WHEN EXISTS (
+--   SELECT 1
+--   FROM friends
+--   WHERE (user_id = NEW.sender_id AND friend_id = NEW.receiver_id)
+--      OR (user_id = NEW.receiver_id AND friend_id = NEW.sender_id)
+-- )
+-- BEGIN
+--   SELECT RAISE(ABORT, 'Cannot send a friend request: users are already friends');
+-- END;
+
+--trigger for notifications when friend request is sent
+CREATE TRIGGER IF NOT EXISTS send_notification_on_friend_request
+AFTER INSERT ON friend_requests
+BEGIN
+    INSERT INTO notifications (notification_id, user_id, type, reference_id, seen, created_at)
+    VALUES (
+        LOWER(HEX(RANDOMBLOB(16))), -- Generate a unique notification_id
+        NEW.receiver_id,            -- Notify the receiver of the friend request
+        'friend_request',           -- Type of notification
+        NEW.sender_id,              -- Reference the sender_id (or friend request ID if applicable)
+        FALSE,                      -- Mark as unseen
+        CURRENT_TIMESTAMP           -- Notification timestamp
+    );
 END;

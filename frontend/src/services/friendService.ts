@@ -54,3 +54,17 @@ export async function rejectFriendRequest(sender_id: string) {
     throw err;
   }
 }
+
+export async function getRequestsSent() {
+  try {
+    const res = await api.get(`/friend/requests/sent`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to get sent friend requests`);
+    }
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get sent friend requests:', err);
+    throw err;
+  }
+}

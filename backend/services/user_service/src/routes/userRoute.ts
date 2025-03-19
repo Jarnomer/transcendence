@@ -13,4 +13,5 @@ export async function userRoutes(fastify: FastifyInstance) {
   fastify.delete('/:user_id', userController.deleteUserByID.bind(userController));
   fastify.post('/avatar/:user_id', userController.uploadAvatar.bind(userController));
   fastify.get('/data/:user_id', userController.getUserData.bind(userController));
+  fastify.get('/notifications', userController.getNotifications.bind(userController));
 }
