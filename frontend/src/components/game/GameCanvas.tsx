@@ -167,13 +167,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const retroEffects = createPongRetroEffects(scene, camera, 'default');
     retroEffectsRef.current = retroEffects;
 
-    // setTimeout(() => {
-    //   if (retroEffectsRef.current) {
-    //     retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {
-    //       // Add code here to run once turned on
-    //     });
-    //   }
-    // }, 100);
+    setTimeout(() => {
+      if (retroEffectsRef.current) {
+        retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {
+          if (retroEffectsRef.current) retroEffectsRef.current.setGlitchAmount(0);
+        });
+      }
+    }, 100);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -188,9 +188,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     return () => {
       const timeout = 1500;
 
-      // if (retroEffectsRef.current) {
-      //   retroEffectsRef.current.simulateCRTTurnOff(timeout);
-      // }
+      if (retroEffectsRef.current) retroEffectsRef.current.simulateCRTTurnOff(timeout);
 
       window.removeEventListener('resize', handleResize);
 
@@ -252,14 +250,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         color
       );
 
-      // if (retroEffectsRef.current) {
-      //   retroEffectsRef.current.setGlitchAmount(0.2);
-      //   setTimeout(() => {
-      //     if (retroEffectsRef.current) {
-      //       retroEffectsRef.current.setGlitchAmount(0);
-      //     }
-      //   }, 200);
-      // }
+      if (retroEffectsRef.current) {
+        retroEffectsRef.current.setGlitchAmount(1);
+        setTimeout(() => {
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.setGlitchAmount(0);
+          }
+        }, 200);
+      }
     }
 
     // if (score && retroEffectsRef.current) {

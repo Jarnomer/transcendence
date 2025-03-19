@@ -148,7 +148,7 @@ export function createCRTEffect(
   return crtEffect;
 }
 
-export function createVHSEffect(
+export function createGlitchEffect(
   scene: Scene,
   camera: Camera,
   options = {
@@ -157,8 +157,8 @@ export function createVHSEffect(
     distortion: 0.1, // Geometric distortions and jitter
     colorBleed: 0.2, // RGB bleeding/separation
   }
-): PostProcess {
-  const vhsEffect = new PostProcess(
+): { effect: PostProcess; setGlitchAmount: (amount: number) => void } {
+  const glitchEffect = new PostProcess(
     'vhsEffect',
     'vhsEffect',
     ['time', 'trackingNoiseAmount', 'staticNoiseAmount', 'distortionAmount', 'colorBleedAmount'],
@@ -170,7 +170,7 @@ export function createVHSEffect(
   const engine = scene.getEngine();
   let time = 0;
 
-  vhsEffect.onApply = (effect) => {
+  glitchEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
     effect.setFloat('time', time);
     effect.setFloat('trackingNoiseAmount', options.trackingNoise);
@@ -179,31 +179,14 @@ export function createVHSEffect(
     effect.setFloat('colorBleedAmount', options.colorBleed);
   };
 
-  return vhsEffect;
-}
-
-export function createGlitchEffect(
-  scene: Scene,
-  camera: Camera,
-  options = {
-    trackingNoise: 0.2, // Horizontal tracking noise bands
-    staticNoise: 0.1, // Random noise/static
-    distortion: 0.3, // Geometric distortions and jitter
-    colorBleed: 0.2, // RGB bleeding/separation
-  }
-): { effect: PostProcess; setGlitchAmount: (amount: number) => void } {
-  const glitchEffect = createVHSEffect(scene, camera, options);
-
-  let glitchAmount = 0;
-
   return {
     effect: glitchEffect,
     setGlitchAmount: (amount: number) => {
-      glitchAmount = Math.max(0, Math.min(1, amount));
       const effect = glitchEffect.getEffect();
       if (effect) {
-        effect.setFloat('distortionAmount', glitchAmount * options.distortion);
-        effect.setFloat('staticNoiseAmount', glitchAmount * options.staticNoise);
+        // Scale the distortion and static noise based on the glitch amount
+        effect.setFloat('distortionAmount', options.distortion * amount);
+        effect.setFloat('staticNoiseAmount', options.staticNoise * amount);
       }
     },
   };
@@ -279,7 +262,6 @@ export class RetroEffectsManager {
   private _camera: Camera;
   private _effects: {
     scanlines?: PostProcess;
-    vhs?: PostProcess;
     phosphorDots?: PostProcess;
     tvSwitch?: { effect: PostProcess; setSwitchingProgress: (progress: number) => void };
     crt?: PostProcess;
@@ -318,11 +300,6 @@ export class RetroEffectsManager {
     return this;
   }
 
-  enableVHS(options?: any): RetroEffectsManager {
-    this._effects.vhs = createVHSEffect(this._scene, this._camera, options);
-    return this;
-  }
-
   enableGlitch(options?: any): RetroEffectsManager {
     this._effects.glitch = createGlitchEffect(this._scene, this._camera, options);
     return this;
@@ -330,7 +307,7 @@ export class RetroEffectsManager {
 
   enableTurnOnEffect(): RetroEffectsManager {
     this._turnOnEffect = createCRTTurnOnEffect(this._scene, this._camera);
-    (this._turnOnEffect.effect as any).enabled = false; // Needs type assertion
+    (this._turnOnEffect.effect as any).enabled = false;
     return this;
   }
 
@@ -340,9 +317,26 @@ export class RetroEffectsManager {
     return this;
   }
 
+  setGlitchAmount(amount: number): RetroEffectsManager {
+    if (this._effects.glitch) {
+      this._effects.glitch.setGlitchAmount(amount);
+    }
+    return this;
+  }
+
+  setDistortion(amount: number): RetroEffectsManager {
+    if (this._effects.glitch) {
+      const effect = this._effects.glitch.effect.getEffect();
+      if (effect) {
+        effect.setFloat('distortionAmount', amount);
+      }
+    }
+    return this;
+  }
+
   setTrackingNoise(amount: number): RetroEffectsManager {
-    if (this._effects.vhs) {
-      const effect = this._effects.vhs.getEffect();
+    if (this._effects.glitch) {
+      const effect = this._effects.glitch.effect.getEffect();
       if (effect) {
         effect.setFloat('trackingNoiseAmount', amount);
       }
@@ -351,8 +345,8 @@ export class RetroEffectsManager {
   }
 
   setStaticNoise(amount: number): RetroEffectsManager {
-    if (this._effects.vhs) {
-      const effect = this._effects.vhs.getEffect();
+    if (this._effects.glitch) {
+      const effect = this._effects.glitch.effect.getEffect();
       if (effect) {
         effect.setFloat('staticNoiseAmount', amount);
       }
@@ -366,13 +360,6 @@ export class RetroEffectsManager {
       if (effect) {
         effect.setFloat('scanlineIntensity', amount);
       }
-    }
-    return this;
-  }
-
-  setGlitchAmount(amount: number): RetroEffectsManager {
-    if (this._effects.glitch) {
-      this._effects.glitch.setGlitchAmount(amount);
     }
     return this;
   }
@@ -428,20 +415,15 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
-  async simulateCRTTurnOn(durationMs: number = 2500): Promise<void> {
-    if (!this._turnOnEffect) {
-      this.enableTurnOnEffect();
-    }
+  async simulateCRTTurnOn(durationMs: number = 1500): Promise<void> {
+    if (!this._turnOnEffect) this.enableTurnOnEffect();
 
     if (this._turnOnEffect && !this._isPlayingTurnOnEffect) {
-      this._isPlayingTurnOnEffect = true;
-
-      // Enable other effects that should be present during turn on
-      if (!this._effects.vhs) this.enableVHS();
       if (!this._effects.scanlines) this.enableScanlines();
       if (!this._effects.glitch) this.enableGlitch();
 
       (this._turnOnEffect.effect as any).enabled = true;
+      this._isPlayingTurnOnEffect = true;
 
       return new Promise((resolve) => {
         const startTime = performance.now();
@@ -453,17 +435,14 @@ export class RetroEffectsManager {
           this._turnOnEffect?.setTurnOnProgress(progress);
 
           if (this._effects.glitch) {
-            // More glitches at the beginning
-            const glitchAmount = Math.max(0, 0.5 - progress * 0.5) * Math.sin(progress * 20);
+            const glitchAmount = Math.max(0, 0.15 - progress * 0.15) * Math.sin(progress * 15);
             this._effects.glitch.setGlitchAmount(glitchAmount);
           }
 
-          // Vary scanline intensity
           if (this._effects.scanlines) {
             const effect = this._effects.scanlines.getEffect();
             if (effect) {
-              // Start intense, gradually normalize
-              const intensity = 0.5 - progress * 0.3;
+              const intensity = 0.3 - progress * 0.2;
               effect.setFloat('scanlineIntensity', intensity);
             }
           }
@@ -471,11 +450,10 @@ export class RetroEffectsManager {
           if (progress < 1.0) {
             requestAnimationFrame(updateProgress);
           } else {
-            // Turn off the turn-on effect when done
             setTimeout(() => {
-              if (this._turnOnEffect) {
-                (this._turnOnEffect.effect as any).enabled = false;
-              }
+              if (this._turnOnEffect) (this._turnOnEffect.effect as any).enabled = false;
+              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+
               this._isPlayingTurnOnEffect = false;
               resolve();
             }, 100);
@@ -490,16 +468,13 @@ export class RetroEffectsManager {
   }
 
   async simulateCRTTurnOff(durationMs: number = 1800): Promise<void> {
-    if (!this._turnOffEffect) {
-      this.enableTurnOffEffect();
-    }
+    if (!this._turnOffEffect) this.enableTurnOffEffect();
 
     if (this._turnOffEffect && !this._isPlayingTurnOffEffect) {
-      this._isPlayingTurnOffEffect = true;
-
-      // Enable glitch effect for better turn off appearance
       if (!this._effects.glitch) this.enableGlitch();
+
       (this._turnOffEffect.effect as any).enabled = true;
+      this._isPlayingTurnOffEffect = true;
 
       return new Promise((resolve) => {
         const startTime = performance.now();
@@ -510,25 +485,19 @@ export class RetroEffectsManager {
 
           this._turnOffEffect?.setTurnOffProgress(progress);
 
-          // Add increasing glitches during turn off
           if (this._effects.glitch) {
-            // Glitches increase as turn off progresses but pulsate
-            const glitchBase = Math.min(1.0, progress * 1.5);
-            const glitchPulse = Math.sin(progress * 30) * 0.3;
+            const glitchBase = Math.min(0.4, progress * 0.6);
+            const glitchPulse = Math.sin(progress * 20) * 0.15;
             this._effects.glitch.setGlitchAmount(glitchBase + glitchPulse);
           }
 
           if (progress < 1.0) {
             requestAnimationFrame(updateProgress);
           } else {
-            // Keep black screen for a moment, then resolve
             setTimeout(() => {
-              if (this._turnOffEffect) {
-                (this._turnOffEffect.effect as any).enabled = false;
-              }
-              if (this._effects.glitch) {
-                this._effects.glitch.setGlitchAmount(0);
-              }
+              if (this._turnOffEffect) (this._turnOffEffect.effect as any).enabled = false;
+              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+
               this._isPlayingTurnOffEffect = false;
               resolve();
             }, 300);
@@ -543,34 +512,33 @@ export class RetroEffectsManager {
   }
 
   simulateTrackingDistortion(durationMs: number = 800, intensity: number = 1.0): void {
-    if (!this._effects.vhs) {
-      this.enableVHS();
+    if (!this._effects.glitch) {
+      this.enableGlitch();
     }
 
-    if (this._effects.vhs) {
-      const vhsEffect = this._effects.vhs.getEffect();
-      if (vhsEffect) {
-        const originalTracking = 0.6; // Default if not set
-        const originalDistortion = 0.7; // Default if not set
+    if (this._effects.glitch) {
+      const originalGlitchAmount = 0;
 
-        vhsEffect.setFloat('trackingNoiseAmount', originalTracking * 2 * intensity);
-        vhsEffect.setFloat('distortionAmount', originalDistortion * 2 * intensity);
+      this._effects.glitch.setGlitchAmount(0.3 * intensity);
 
-        if (this._effects.glitch) {
-          this._effects.glitch.setGlitchAmount(0.3 * intensity);
-        }
-
-        setTimeout(() => {
-          if (vhsEffect) {
-            vhsEffect.setFloat('trackingNoiseAmount', originalTracking);
-            vhsEffect.setFloat('distortionAmount', originalDistortion);
-          }
-
-          if (this._effects.glitch) {
-            this._effects.glitch.setGlitchAmount(0);
-          }
-        }, durationMs);
+      // Add some tracking distortion through the glitch effect
+      const effect = this._effects.glitch.effect.getEffect();
+      if (effect) {
+        effect.setFloat('trackingNoiseAmount', 0.4 * intensity);
+        effect.setFloat('distortionAmount', 0.3 * intensity);
       }
+
+      setTimeout(() => {
+        if (this._effects.glitch) {
+          this._effects.glitch.setGlitchAmount(originalGlitchAmount);
+
+          const effect = this._effects.glitch.effect.getEffect();
+          if (effect) {
+            effect.setFloat('trackingNoiseAmount', 0.2);
+            effect.setFloat('distortionAmount', 0.1);
+          }
+        }
+      }, durationMs);
     }
   }
 
@@ -585,13 +553,8 @@ export class RetroEffectsManager {
       }
     });
 
-    if (this._turnOnEffect && this._turnOnEffect.effect) {
-      this._turnOnEffect.effect.dispose();
-    }
-
-    if (this._turnOffEffect && this._turnOffEffect.effect) {
-      this._turnOffEffect.effect.dispose();
-    }
+    if (this._turnOnEffect && this._turnOnEffect.effect) this._turnOnEffect.effect.dispose();
+    if (this._turnOffEffect && this._turnOffEffect.effect) this._turnOffEffect.effect.dispose();
 
     this._effects = {};
   }
@@ -627,24 +590,22 @@ export function createPongRetroEffects(
           dotIntensity: 0.4,
           nonSquareRatio: 0.8,
         })
-        .enableVHS({
+        .enableGlitch({
           trackingNoise: 0.1,
           staticNoise: 0.05,
-          distortion: 0.1,
+          distortion: 0.0,
           colorBleed: 0.2,
-        });
-      // .enableTurnOnEffect()
-      // .enableTurnOffEffect();
+        })
+        .enableTurnOnEffect()
+        .enableTurnOffEffect();
       break;
 
     case 'cinematic':
       manager
         .enableCRT()
         .enableScanlines()
-        .enableVHS()
         .enablePhosphorDots()
         .enableGlitch()
-        .enableTVSwitch()
         .enableTurnOnEffect()
         .enableTurnOffEffect();
       break;
