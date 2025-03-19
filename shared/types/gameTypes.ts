@@ -55,7 +55,7 @@ export const defaultGameParams: GameParams = {
   ballSpeed: 7,
   minBallDX: 5,
   ballSpeedMultiplier: 1,
-  maxBallSpeedMultiplier: 2.5,
+  maxBallSpeedMultiplier: 4,
   speedIncreaseFactor: 1.03, // Ball speed increase on paddle hit
 
   maxSpin: 15,
