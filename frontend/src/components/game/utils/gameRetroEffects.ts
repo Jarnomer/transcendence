@@ -117,10 +117,12 @@ export function createTVSwitchingEffect(
 export function createCRTEffect(
   scene: Scene,
   camera: Camera,
-  curvatureAmount: number = 4.0,
-  scanlineIntensity: number = 0.2,
-  vignette: number = 0.8,
-  colorBleed: number = 0.2
+  options = {
+    curvatureAmount: 4.0, // Horizontal tracking noise bands
+    scanlineIntensity: 0.2, // Random noise/static
+    vignette: 0.8, // Geometric distortions and jitter
+    colorBleed: 0.2, // RGB bleeding/separation
+  }
 ): PostProcess {
   const crtEffect = new PostProcess(
     'crtDistortion',
@@ -136,10 +138,10 @@ export function createCRTEffect(
 
   crtEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat2('curvature', curvatureAmount, curvatureAmount);
-    effect.setFloat('scanlineIntensity', scanlineIntensity);
-    effect.setFloat('vignette', vignette);
-    effect.setFloat('colorBleed', colorBleed);
+    effect.setFloat2('curvature', options.curvatureAmount, options.curvatureAmount);
+    effect.setFloat('scanlineIntensity', options.scanlineIntensity);
+    effect.setFloat('vignette', options.vignette);
+    effect.setFloat('colorBleed', options.colorBleed);
     effect.setFloat('time', time);
   };
 
@@ -301,11 +303,6 @@ export class RetroEffectsManager {
     return this;
   }
 
-  enableVHS(options?: any): RetroEffectsManager {
-    this._effects.vhs = createVHSEffect(this._scene, this._camera, options);
-    return this;
-  }
-
   enablePhosphorDots(options?: any): RetroEffectsManager {
     this._effects.phosphorDots = createPhosphorDotsEffect(this._scene, this._camera, options);
     return this;
@@ -316,45 +313,18 @@ export class RetroEffectsManager {
     return this;
   }
 
-  enableCRT(options?: {
-    curvature?: number;
-    scanlineIntensity?: number;
-    vignette?: number;
-    colorBleed?: number;
-  }): RetroEffectsManager {
-    const crtOptions = {
-      curvature: options?.curvature || 4.0,
-      scanlineIntensity: options?.scanlineIntensity || 0.2,
-      vignette: options?.vignette || 0.2,
-      colorBleed: options?.colorBleed || 0.2,
-    };
-
-    this._effects.crt = createCRTEffect(
-      this._scene,
-      this._camera,
-      crtOptions.curvature,
-      crtOptions.scanlineIntensity,
-      crtOptions.vignette,
-      crtOptions.colorBleed
-    );
-
+  enableCRT(options?: any): RetroEffectsManager {
+    this._effects.crt = createCRTEffect(this._scene, this._camera, options);
     return this;
   }
 
-  enableGlitch(options?: {
-    trackingNoise?: number;
-    staticNoise?: number;
-    distortion?: number;
-    colorBleed?: number;
-  }): RetroEffectsManager {
-    const glitchOptions = {
-      trackingNoise: options?.trackingNoise ?? 0.2,
-      staticNoise: options?.staticNoise ?? 0.1,
-      distortion: options?.distortion ?? 0.3,
-      colorBleed: options?.colorBleed ?? 0.2,
-    };
+  enableVHS(options?: any): RetroEffectsManager {
+    this._effects.vhs = createVHSEffect(this._scene, this._camera, options);
+    return this;
+  }
 
-    this._effects.glitch = createGlitchEffect(this._scene, this._camera, glitchOptions);
+  enableGlitch(options?: any): RetroEffectsManager {
+    this._effects.glitch = createGlitchEffect(this._scene, this._camera, options);
     return this;
   }
 
@@ -370,11 +340,6 @@ export class RetroEffectsManager {
     return this;
   }
 
-  /**
-   * Set functions for all effects
-   * @param amount Effect strength
-   * @returns this instance
-   */
   setTrackingNoise(amount: number): RetroEffectsManager {
     if (this._effects.vhs) {
       const effect = this._effects.vhs.getEffect();
@@ -487,7 +452,6 @@ export class RetroEffectsManager {
 
           this._turnOnEffect?.setTurnOnProgress(progress);
 
-          // Add some glitch/distortion during turn on
           if (this._effects.glitch) {
             // More glitches at the beginning
             const glitchAmount = Math.max(0, 0.5 - progress * 0.5) * Math.sin(progress * 20);
@@ -644,7 +608,7 @@ export function createPongRetroEffects(
     case 'default':
       manager
         .enableCRT({
-          curvature: 5.0,
+          curvatureAmount: 5.0,
           scanlineIntensity: 0.05,
           vignette: 0.5,
           colorBleed: 0.2,
