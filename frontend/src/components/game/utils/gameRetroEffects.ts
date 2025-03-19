@@ -6,13 +6,13 @@ export function createScanlinesEffect(
   scene: Scene,
   camera: Camera,
   options = {
-    intensity: 0.3, // How dark the scanlines are
+    intensity: 0.2, // How dark the scanlines are
     density: 1.0, // How close together the scanlines are
-    speed: 1.0, // How fast scanlines move
-    noise: 0.1, // Random variation in scanlines
-    vignette: 1.2, // Darkened corners
-    flicker: 0.05, // Screen brightness fluctuation
-    colorBleed: 0.5, // RGB channel separation
+    speed: 0.2, // How fast scanlines move
+    noise: 2.0, // Random variation in scanlines
+    vignette: 0.8, // Darkened corners
+    flicker: 0.1, // Screen brightness fluctuation
+    colorBleed: 0.2, // RGB channel separation
   }
 ): PostProcess {
   const scanlinesEffect = new PostProcess(
@@ -51,40 +51,6 @@ export function createScanlinesEffect(
   };
 
   return scanlinesEffect;
-}
-
-export function createVHSEffect(
-  scene: Scene,
-  camera: Camera,
-  options = {
-    trackingNoise: 0.6, // Horizontal tracking noise bands
-    staticNoise: 0.08, // Random noise/static
-    distortion: 0.7, // Geometric distortions and jitter
-    colorBleed: 0.6, // RGB bleeding/separation
-  }
-): PostProcess {
-  const vhsEffect = new PostProcess(
-    'vhsEffect',
-    'vhsEffect',
-    ['time', 'trackingNoiseAmount', 'staticNoiseAmount', 'distortionAmount', 'colorBleedAmount'],
-    null,
-    1.0,
-    camera
-  );
-
-  const engine = scene.getEngine();
-  let time = 0;
-
-  vhsEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    effect.setFloat('trackingNoiseAmount', options.trackingNoise);
-    effect.setFloat('staticNoiseAmount', options.staticNoise);
-    effect.setFloat('distortionAmount', options.distortion);
-    effect.setFloat('colorBleedAmount', options.colorBleed);
-  };
-
-  return vhsEffect;
 }
 
 export function createPhosphorDotsEffect(
@@ -152,7 +118,9 @@ export function createCRTEffect(
   scene: Scene,
   camera: Camera,
   curvatureAmount: number = 4.0,
-  scanlineIntensity: number = 0.2
+  scanlineIntensity: number = 0.2,
+  vignette: number = 0.8,
+  colorBleed: number = 0.2
 ): PostProcess {
   const crtEffect = new PostProcess(
     'crtDistortion',
@@ -170,12 +138,46 @@ export function createCRTEffect(
     time += engine.getDeltaTime() / 1000.0;
     effect.setFloat2('curvature', curvatureAmount, curvatureAmount);
     effect.setFloat('scanlineIntensity', scanlineIntensity);
-    effect.setFloat('vignette', 1.0);
-    effect.setFloat('colorBleed', 0.2);
+    effect.setFloat('vignette', vignette);
+    effect.setFloat('colorBleed', colorBleed);
     effect.setFloat('time', time);
   };
 
   return crtEffect;
+}
+
+export function createVHSEffect(
+  scene: Scene,
+  camera: Camera,
+  options = {
+    trackingNoise: 0.1, // Horizontal tracking noise bands
+    staticNoise: 0.05, // Random noise/static
+    distortion: 0.1, // Geometric distortions and jitter
+    colorBleed: 0.2, // RGB bleeding/separation
+  }
+): PostProcess {
+  const vhsEffect = new PostProcess(
+    'vhsEffect',
+    'vhsEffect',
+    ['time', 'trackingNoiseAmount', 'staticNoiseAmount', 'distortionAmount', 'colorBleedAmount'],
+    null,
+    1.0,
+    camera
+  );
+
+  const engine = scene.getEngine();
+  let time = 0;
+
+  vhsEffect.onApply = (effect) => {
+    time += engine.getDeltaTime() / 1000.0;
+    effect.setFloat('time', time);
+    effect.setFloat('trackingNoiseAmount', options.trackingNoise);
+    effect.setFloat('staticNoiseAmount', options.staticNoise);
+    effect.setFloat('distortionAmount', options.distortion);
+    effect.setFloat('colorBleedAmount', options.colorBleed);
+  };
+
+  return vhsEffect;
 }
 
 export function createGlitchEffect(
@@ -294,10 +296,6 @@ export class RetroEffectsManager {
     registerRetroShaders();
   }
 
-  /**
-   * Enable functions for all effects
-   * @returns this instance
-   */
   enableScanlines(options?: any): RetroEffectsManager {
     this._effects.scanlines = createScanlinesEffect(this._scene, this._camera, options);
     return this;
@@ -318,17 +316,26 @@ export class RetroEffectsManager {
     return this;
   }
 
-  enableCRT(options?: { curvature?: number; scanlineIntensity?: number }): RetroEffectsManager {
+  enableCRT(options?: {
+    curvature?: number;
+    scanlineIntensity?: number;
+    vignette?: number;
+    colorBleed?: number;
+  }): RetroEffectsManager {
     const crtOptions = {
       curvature: options?.curvature || 4.0,
       scanlineIntensity: options?.scanlineIntensity || 0.2,
+      vignette: options?.vignette || 0.2,
+      colorBleed: options?.colorBleed || 0.2,
     };
 
     this._effects.crt = createCRTEffect(
       this._scene,
       this._camera,
       crtOptions.curvature,
-      crtOptions.scanlineIntensity
+      crtOptions.scanlineIntensity,
+      crtOptions.vignette,
+      crtOptions.colorBleed
     );
 
     return this;
@@ -636,29 +643,34 @@ export function createPongRetroEffects(
   switch (preset) {
     case 'default':
       manager
-        .enableCRT({ curvature: 4.0, scanlineIntensity: 0.15 })
+        .enableCRT({
+          curvature: 5.0,
+          scanlineIntensity: 0.05,
+          vignette: 0.5,
+          colorBleed: 0.2,
+        })
         .enableScanlines({
-          intensity: 0.25,
-          density: 1.2,
-          speed: 0.3,
-          noise: 0.1,
+          intensity: 0.2,
+          density: 1.0,
+          speed: 0.2,
+          noise: 2.0,
           vignette: 0.8,
-          flicker: 0.03,
+          flicker: 0.1,
           colorBleed: 0.2,
         })
         .enablePhosphorDots({
-          dotSize: 4.0,
-          dotIntensity: 0.3,
+          dotSize: 3.0,
+          dotIntensity: 0.4,
           nonSquareRatio: 0.8,
         })
-        .enableGlitch({
-          trackingNoise: 0.2,
-          staticNoise: 0.1,
-          distortion: 0.2,
-          colorBleed: 0.3,
-        })
-        .enableTurnOnEffect()
-        .enableTurnOffEffect();
+        .enableVHS({
+          trackingNoise: 0.1,
+          staticNoise: 0.05,
+          distortion: 0.1,
+          colorBleed: 0.2,
+        });
+      // .enableTurnOnEffect()
+      // .enableTurnOffEffect();
       break;
 
     case 'cinematic':
@@ -668,7 +680,9 @@ export function createPongRetroEffects(
         .enableVHS()
         .enablePhosphorDots()
         .enableGlitch()
-        .enableTVSwitch();
+        .enableTVSwitch()
+        .enableTurnOnEffect()
+        .enableTurnOffEffect();
       break;
   }
 

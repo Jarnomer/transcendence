@@ -167,14 +167,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const retroEffects = createPongRetroEffects(scene, camera, 'default');
     retroEffectsRef.current = retroEffects;
 
-    setTimeout(() => {
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {
-          // Add code here to run once turned on
-          console.log('CRT fully turned on');
-        });
-      }
-    }, 100);
+    // setTimeout(() => {
+    //   if (retroEffectsRef.current) {
+    //     retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {
+    //       // Add code here to run once turned on
+    //     });
+    //   }
+    // }, 100);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -189,9 +188,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     return () => {
       const timeout = 1500;
 
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOff(timeout);
-      }
+      // if (retroEffectsRef.current) {
+      //   retroEffectsRef.current.simulateCRTTurnOff(timeout);
+      // }
 
       window.removeEventListener('resize', handleResize);
 
@@ -253,24 +252,24 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         color
       );
 
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.setGlitchAmount(0.2);
-        setTimeout(() => {
-          if (retroEffectsRef.current) {
-            retroEffectsRef.current.setGlitchAmount(0);
-          }
-        }, 200);
-      }
+      // if (retroEffectsRef.current) {
+      //   retroEffectsRef.current.setGlitchAmount(0.2);
+      //   setTimeout(() => {
+      //     if (retroEffectsRef.current) {
+      //       retroEffectsRef.current.setGlitchAmount(0);
+      //     }
+      //   }, 200);
+      // }
     }
 
-    if (score && retroEffectsRef.current) {
-      retroEffectsRef.current.simulateTrackingDistortion(500, 2.0);
-      setTimeout(() => {
-        retroEffectsRef.current?.simulateCRTTurnOff(800).then(() => {
-          // Add code here to run after the channel change
-        });
-      }, 100);
-    }
+    // if (score && retroEffectsRef.current) {
+    //   retroEffectsRef.current.simulateTrackingDistortion(500, 2.0);
+    //   setTimeout(() => {
+    //     retroEffectsRef.current?.simulateCRTTurnOff(800).then(() => {
+    //       // Add code here to run after the channel change
+    //     });
+    //   }, 100);
+    // }
 
     prevBallState.current = {
       x: ball.x,
