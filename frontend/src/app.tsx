@@ -1,21 +1,32 @@
 import React, { useEffect } from 'react';
 
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
+import { AnimatedRoutes } from './AnimatedRoutes.tsx';
 import { Footer } from './components/footer/Footer.tsx';
 import { Header } from './components/header/Header.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { useUser } from './contexts/user/UserContext';
-import { ChatPage } from './pages/ChatPage.tsx';
-import { CreatorsPage } from './pages/CreatorsPage.tsx';
-import { GameMenu } from './pages/GameMenu.tsx';
-import { GamePage } from './pages/GamePage.tsx';
-import { HomePage } from './pages/HomePage.tsx';
-import { LoginPage } from './pages/LoginPage.tsx';
-import { ProfilePage } from './pages/ProfilePage.tsx';
 import { WebSocketProvider } from './services/webSocket/WebSocketContext.tsx';
+
+const pageVariants = {
+  initial: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0% 0 0% 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+  exit: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -42,16 +53,7 @@ const App: React.FC = () => {
             id="app-content"
             className="mt-2 px-10 flex flex-grow flex-col w-full justify-center items-center"
           >
-            <Routes>
-              <Route path="/" element={user ? <GameMenu /> : <LoginPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/home" element={user ? <HomePage /> : <LoginPage />} />
-              <Route path="/gameMenu" element={user ? <GameMenu /> : <LoginPage />} />
-              <Route path="/game" element={user ? <GamePage /> : <LoginPage />} />
-              <Route path="/creators" element={<CreatorsPage />} />
-              <Route path="/profile/:userId" element={user ? <ProfilePage /> : <LoginPage />} />
-              <Route path="/chat" element={user ? <ChatPage /> : <LoginPage />} />
-            </Routes>
+            <AnimatedRoutes></AnimatedRoutes>
             {/* Conditionally render the modals */}
             {<SettingsModal />}
             {<AuthModal />}

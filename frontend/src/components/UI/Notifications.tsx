@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import { useAnimatedNavigate } from '../../animatedNavigate';
+import { useNavigate } from 'react-router-dom';
+
 import { useUser } from '../../contexts/user/UserContext';
 
 export const Notifications: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { user } = useUser();
-  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {}, []);
 
@@ -17,7 +18,7 @@ export const Notifications: React.FC = () => {
   const handleNotificationClick = (event, request: any) => {
     console.log('notification clicked');
     event.stopPropagation();
-    animatedNavigate(`/profile/${request.user_id}`);
+    navigate(`/profile/${request.user_id}`);
   };
 
   return (

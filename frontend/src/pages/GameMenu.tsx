@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
 
+import { motion } from 'framer-motion';
+
 import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
-import { useAnimatedNavigate } from '../animatedNavigate';
+import { pageVariants } from '../components/UI/PageWrapper';
 
 interface GameMenuOption {
   content: string;
@@ -23,7 +25,6 @@ export const GameMenu: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
   const navigate = useNavigate(); // Hook to navigate to different routes
-  const animatedNavigate = useAnimatedNavigate();
 
   const modes = [
     {
@@ -170,7 +171,14 @@ export const GameMenu: React.FC = () => {
   };
 
   return (
-    <div id="home-container" className="flex flex-wrap justify-center gap-4 px-3 items-center p-10">
+    <motion.div
+      id="home-container"
+      className="flex flex-wrap justify-center gap-4 px-3 items-center p-10"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       {renderMenu()}
       {/* <div className="container noselect">
   			<div className="canvas">
@@ -185,6 +193,6 @@ export const GameMenu: React.FC = () => {
     			</div>
   			</div>
 		</div> */}
-    </div>
+    </motion.div>
   );
 };

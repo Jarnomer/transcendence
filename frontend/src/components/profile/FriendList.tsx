@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
 
-import { useAnimatedNavigate } from '../../animatedNavigate';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 
 type Friend = {
@@ -19,7 +20,7 @@ type FriendListProps = {
 
 export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, requests }) => {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
-  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
 
   const renderList = (list: Friend[], emptyText: string, isRequestList: boolean) => {
     return list && list.length > 0 ? (
@@ -27,7 +28,7 @@ export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, r
         {list.map((friend) => (
           <li
             key={friend.user_id}
-            onClick={() => animatedNavigate(`/profile/${friend.user_id}`)}
+            onClick={() => navigate(`/profile/${friend.user_id}`)}
             className="cursor-pointer"
           >
             <div className="flex items-center gap-3">

@@ -1,12 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { useAnimatedNavigate } from '../../animatedNavigate';
+
+import { useNavigate } from 'react-router-dom';
+
+import { motion } from 'framer-motion';
+
 import { getUsers } from '../../services/userService';
 import SearchBar from '../UI/SearchBar';
+
+const containerVariants = {
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const leaderboardExitVariants = {
+  hidden: { opacity: 0, y: -50, scale: 0.9 }, // Fade out, move up and shrink
+  visible: { opacity: 1, y: 0, scale: 1 }, // Normal state (in)
+};
 
 export const LeaderBoard: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +56,13 @@ export const LeaderBoard: React.FC = () => {
 
   return (
     <>
-      <div className="h-full">
+      <motion.div
+        className="h-full"
+        variants={leaderboardExitVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+      >
         <h1 className="font-heading text-3xl">Leaderboard</h1>
         <div className="w-full">
           <SearchBar
@@ -46,12 +74,20 @@ export const LeaderBoard: React.FC = () => {
         </div>
         {!loading ? (
           <div className=" text-center">
-            <ul className="p-2">
+            <motion.ul
+              className="p-2"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="initial"
+              transition={{ duration: 0.4 }}
+            >
               {filteredUsers.map((user, index) => (
-                <li
+                <motion.li
                   key={index}
                   className="my-2"
-                  onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
+                  onClick={() => navigate(`/profile/${user.user_id}`)}
+                  variants={itemVariants}
                 >
                   <div className="flex items-center gap-5">
                     <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
@@ -65,12 +101,12 @@ export const LeaderBoard: React.FC = () => {
                     </p>
                     <p>Rank: ??</p>
                   </div>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </div>
         ) : null}
-      </div>
+      </motion.div>
     </>
   );
 };
@@ -84,7 +120,7 @@ export const LeaderBoard: React.FC = () => {
 //       <li
 //         key={index}
 //         className="my-2"
-//         onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
+//         onClick={() => navigate(`/profile/${user.user_id}`)}
 //       >
 //         <div className="flex items-center gap-5">
 //           <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">

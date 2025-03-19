@@ -90,7 +90,7 @@ export const GamePage: React.FC = () => {
       ) : null}
       {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' && !loading ? (
         <>
-          <div className="w-full h-full relative overflow-hidden border-2 opening border-primary">
+          <div className="w-full h-full relative overflow-hidden border-2 border-primary">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 

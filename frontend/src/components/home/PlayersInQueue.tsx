@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useAnimatedNavigate } from '../../animatedNavigate';
+
+import { useNavigate } from 'react-router-dom';
+
 import { getUserData, getUsersInQueue } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
@@ -7,7 +9,7 @@ export const PlayerQueue: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [usersInQueue, setUsersInQueue] = useState<any[]>([]);
-  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
 
   async function fetchData() {
     setLoading(true);
@@ -49,11 +51,7 @@ export const PlayerQueue: React.FC = () => {
           usersInQueue
             .filter((user) => user.user_id != localStorage.getItem('userID'))
             .map((user, index) => (
-              <li
-                key={index}
-                className="my-2"
-                onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
-              >
+              <li key={index} className="my-2" onClick={() => navigate(`/profile/${user.user_id}`)}>
                 <div className="flex items-center gap-5">
                   <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
                     <img

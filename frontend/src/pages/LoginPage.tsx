@@ -7,12 +7,10 @@ import { SVGModal } from '@components/UI/svgWrappers/svgModal.tsx';
 
 import { login, register } from '@services/authService.ts';
 
-import { useAnimatedNavigate } from '../animatedNavigate';
 import { useUser } from '../contexts/user/UserContext';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const animatedNavigate = useAnimatedNavigate();
   const location = useLocation();
   const { user, setUser, refetchUser, checkAuth, logout } = useUser();
 
@@ -42,7 +40,7 @@ export const LoginPage: React.FC = () => {
       // THEN LOG IN THE USER
       try {
         await login(username, password);
-        animatedNavigate(`/profile/${localStorage.getItem('userID')}`);
+        navigate(`/profile/${localStorage.getItem('userID')}`);
       } catch (error: any) {
         alert('Login failed!');
         setLoading(false);
