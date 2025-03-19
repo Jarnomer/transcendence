@@ -95,7 +95,8 @@ export const GamePage: React.FC = () => {
             <CountDown gameStatus={gameStatus} />
 
             <p className="text-xs text-gray-500">
-              Connection: {connectionStatus} | Game: {gameStatus} | Spin: {gameState.ball.spin}
+              Connection: {connectionStatus} | Game: {gameStatus} | Spin: {gameState.ball.spin} |
+              Player2_DY: {gameState.players.player2.dy}
             </p>
             <GameCanvas gameState={gameState} />
           </div>

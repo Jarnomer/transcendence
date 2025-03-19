@@ -103,6 +103,10 @@ export class PongGameSession {
   handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
     const moves: Record<string, 'up' | 'down' | null> = { player1: null, player2: null };
 
+    if (this.aiControllers.size > 1) {
+      return;
+    }
+
     const player1Id = this.game.getPlayerId(1);
     const player2Id = this.game.getPlayerId(2);
 

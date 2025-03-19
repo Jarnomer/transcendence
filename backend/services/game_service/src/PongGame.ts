@@ -250,17 +250,6 @@ export default class PongGame {
     }
   }
 
-  private adjustBallMovementForSpin(): void {
-    const { ball } = this.gameState;
-    if (ball.spin === 0) return;
-
-    if (ball.dx > 0) {
-      ball.dy += ball.spin * this.params.spinCurveFactor * ball.dx;
-    } else {
-      ball.dy -= ball.spin * this.params.spinCurveFactor * ball.dx * -1;
-    }
-  }
-
   private updateBall(): void {
     if (this.gameStatus !== 'playing') return;
 
@@ -303,6 +292,17 @@ export default class PongGame {
       } else {
         this.setGameStatus('waiting');
       }
+    }
+  }
+
+  private adjustBallMovementForSpin(): void {
+    const { ball } = this.gameState;
+    if (ball.spin === 0) return;
+
+    if (ball.dx > 0) {
+      ball.dy += ball.spin * this.params.spinCurveFactor * ball.dx;
+    } else {
+      ball.dy -= ball.spin * this.params.spinCurveFactor * ball.dx * -1;
     }
   }
 
