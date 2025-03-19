@@ -53,8 +53,8 @@ export const useGameResult = (
 
   useEffect(() => {
     if (!gameId) return;
-    if (gameStatus === 'finished') {
-      const { players } = gameState;
+    if (gameStatusRef.current === 'finished') {
+      const { players } = gameStateRef.current;
       const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
       console.log('Submitting game result:', gameId, sortedPlayers);
       submitResult({
@@ -82,11 +82,19 @@ export const useGameResult = (
     return () => {
       console.log('Cleanup');
       if (!gameIdRef.current || hasSubmittedResult.current) return;
+      console.log('Submitting game result:', gameIdRef.current);
       closeConnection('game');
       const { players } = gameStateRef.current;
       const playerArray = [players.player1, players.player2];
       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
       const loserIndex = playerArray.findIndex((e) => e.id === userIdRef.current);
+      console.log(
+        'Submitting game result:',
+        gameIdRef.current,
+        playerArray,
+        winnerIndex,
+        loserIndex
+      );
       submitResult({
         game_id: gameIdRef.current,
         winner_id: playerArray[winnerIndex].id,

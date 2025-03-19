@@ -35,6 +35,9 @@ export class PongGameSession {
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
     }
+    if (this.mode === 'singleplayer') {
+      this.game.setPlayerId(2, this.difficulty);
+    }
 
     if (this.mode === 'AIvsAI') {
       this.aiControllers.set('player1', new AIController(this.difficulty, true));
