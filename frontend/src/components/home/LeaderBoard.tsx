@@ -58,7 +58,7 @@ export const LeaderBoard: React.FC = () => {
 
   async function fetchData() {
     setLoading(true);
-    const res = await getUsers();
+    const res = await getUsersWithRank();
     if (res) {
       setUsers(res);
     }
@@ -110,7 +110,7 @@ export const LeaderBoard: React.FC = () => {
                     <p>
                       {user.display_name || 'N/A'} <br />
                     </p>
-                    <p>Rank: ??</p>
+                    <p>Rank: {user.rank}</p>
                   </div>
                 </motion.li>
               ))}

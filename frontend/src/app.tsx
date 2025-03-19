@@ -9,24 +9,7 @@ import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { useUser } from './contexts/user/UserContext';
-import { WebSocketProvider } from './services/webSocket/WebSocketContext.tsx';
-
-const pageVariants = {
-  initial: {
-    clipPath: 'inset(50% 0 50% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0% 0 0% 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-  exit: {
-    clipPath: 'inset(50% 0 50% 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -42,8 +25,8 @@ const App: React.FC = () => {
   }, [location]);
 
   return (
-    <ModalProvider>
-      <WebSocketProvider>
+    <WebSocketProvider>
+      <ModalProvider>
         <div
           id="app-container"
           className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}
@@ -60,8 +43,8 @@ const App: React.FC = () => {
           </div>
           {location.pathname !== '/game' ? <Footer /> : null}
         </div>
-      </WebSocketProvider>
-    </ModalProvider>
+      </ModalProvider>
+    </WebSocketProvider>
   );
 };
 

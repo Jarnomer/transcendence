@@ -7,6 +7,7 @@ A brief description of the API and example responses.
 https://localhost.com:8000/api
 
 ## Notes/feature
+- password hashing bcrypt
 - jwt authentication refresh and access
 - type safe with typebox
 - 

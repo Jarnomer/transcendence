@@ -91,7 +91,7 @@ export class PongGameSession {
   handleMessage(message: string): void {
     try {
       const data = JSON.parse(message);
-      console.log('Received message:', data);
+      //console.log('Received message:', data);
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
       }
@@ -153,9 +153,7 @@ export class PongGameSession {
   endGame(): void {
     // Prevent recursive calls
     if (this.isGameFinished) return;
-
     this.isGameFinished = true;
-
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
@@ -190,7 +188,7 @@ export class PongGameSession {
   }
 
   readyGame(playerId: string, state: boolean): void {
-    console.log(`Player ${playerId} is ready: ${state}`);
+    //console.log(`Player ${playerId} is ready: ${state}`);
     this.game.setReadyState(playerId, state);
     if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
       this.startGameLoop();

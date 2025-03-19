@@ -14,17 +14,18 @@ export const PlayerQueue: React.FC = () => {
   async function fetchData() {
     setLoading(true);
     const fetchedQueueData = await getUsersInQueue();
-    if (fetchedQueueData?.queues?.length) {
-      const enrichedUsers = await Promise.all(
-        fetchedQueueData.queues.map(async (userInQueue) => {
-          const userDetails = await getUserData(userInQueue.user_id);
-          return {
-            ...userInQueue,
-            display_name: userDetails?.display_name || 'Unknown',
-            avatar_url: userDetails?.avatar_url || '',
-          };
-        })
+    console.log(fetchedQueueData);
+    if (fetchedQueueData.queues) {
+      console.log('fetched:', fetchedQueueData);
+      const enrichedUsers = fetchedQueueData.queues.flatMap((queue) =>
+        queue.players.map((player) => ({
+          display_name: player.display_name || 'Unknown',
+          avatar_url: player.avatar_url || '',
+          user_id: player.user_id,
+          queue_id: player.queue_id,
+        }))
       );
+      console.log('enriched:', enrichedUsers);
       setUsersInQueue(enrichedUsers);
     }
     setLoading(false);
@@ -34,9 +35,13 @@ export const PlayerQueue: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleJoinGameClick = (event, opponent) => {
+  useEffect(() => {
+    console.log('users in queue:', usersInQueue);
+  }, [usersInQueue]);
+
+  const handleJoinGameClick = (event, opponent, queueId) => {
     event.stopPropagation();
-    console.log('join game against: ', opponent);
+    console.log('join game against: ', opponent, queueId);
   };
 
   return (
@@ -64,7 +69,7 @@ export const PlayerQueue: React.FC = () => {
                   <NavIconButton
                     id="join-game-button"
                     icon="arrowRight"
-                    onClick={(event) => handleJoinGameClick(event, user.user_id)}
+                    onClick={(event) => handleJoinGameClick(event, user.user_id, user.queue_id)}
                   />
                 </div>
               </li>

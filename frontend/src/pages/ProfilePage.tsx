@@ -4,13 +4,13 @@ import { useParams } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { FriendList } from '@components/profile/FriendList.tsx';
+import { MatchHistory } from '@components/profile/MatchHistory';
 import { RadialBackground } from '@components/profile/RadialBackground.tsx';
 
 import { getUserData } from '@services/userService';
 
 import { EditProfile } from '../components/profile/EditProfile';
-import { FriendList } from '../components/profile/FriendList';
-import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { useUser } from '../contexts/user/UserContext';
 

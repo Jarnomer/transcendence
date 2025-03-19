@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- User profiles (separate table)
 CREATE TABLE  IF NOT EXISTS user_profiles (
-    profile_id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    -- profile_id TEXT PRIMARY KEY,
+    user_id TEXT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
     display_name VARCHAR(100),
     first_name VARCHAR(100),
     last_name VARCHAR(100),
@@ -29,12 +29,14 @@ CREATE TABLE   IF NOT EXISTS user_stats (
   user_stat_id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   wins INTEGER DEFAULT 0,
-  losses INTEGER DEFAULT 0
+  losses INTEGER DEFAULT 0,
+  elo INTEGER DEFAULT 1000,
+  rank INTEGER DEFAULT 0
 );
 
 -- creates a table for notifications
 CREATE TABLE   IF NOT EXISTS notifications (
-    notification_id TEXT PRIMARY KEY,  
+    notification_id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     type TEXT CHECK(type IN ('friend_request', 'message_mention', 'game_invite')) NOT NULL,
     reference_id TEXT, -- Can store friend request ID, message ID, etc.
@@ -89,47 +91,79 @@ CREATE TABLE  IF NOT EXISTS message_reactions (
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 
-CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='messages', content_rowid='id');
+-- CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='messages', content_rowid='id');
 
-CREATE TABLE  IF NOT EXISTS matchmaking_queue (
-  matchmaking_queue_id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
-  status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
-  matched_with TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL, -- NULL if not matched
-  joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+CREATE TABLE  IF NOT EXISTS queues (
+  queue_id TEXT PRIMARY KEY,
+  mode TEXT CHECK(mode IN ('1v1', 'tournament', 'random')) DEFAULT '1v1',
+  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 
-CREATE TABLE  IF NOT EXISTS games (
+CREATE TABLE IF NOT EXISTS queue_players (
+  queue_id TEXT NOT NULL REFERENCES queues(queue_id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+  status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
+  joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (queue_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS game_players (
+  game_id TEXT NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+  player_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  score INTEGER DEFAULT 0,
+  is_winner BOOLEAN DEFAULT FALSE,
+  PRIMARY KEY (game_id, player_id)
+);
+
+CREATE TABLE IF NOT EXISTS games (
   game_id TEXT PRIMARY KEY,
-  player1_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-  player2_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-  player1_score INTEGER DEFAULT 0,
-  player2_score INTEGER DEFAULT 0,
   status TEXT CHECK(status IN ('ongoing', 'completed')) DEFAULT 'ongoing',
-  winner_id TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL,
-  loser_id TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL,
   start_time DATETIME DEFAULT (CURRENT_TIMESTAMP),
   end_time DATETIME
 );
 
+CREATE TABLE IF NOT EXISTS tournaments (
+  tournament_id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT CHECK(type IN ('4x4', '8x8', '16x16')) NOT NULL,
+  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+);
 
---trigger to update user stats when a game is completed
+CREATE TABLE IF NOT EXISTS tournament_games (
+  tournament_id TEXT NOT NULL REFERENCES tournaments(tournament_id) ON DELETE CASCADE,
+  game_id TEXT NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
+  round INTEGER NOT NULL,
+  PRIMARY KEY (tournament_id, game_id)
+);
+
+
+-- insert AI users securely in user table
+
+
 CREATE TRIGGER IF NOT EXISTS update_user_stats
 AFTER UPDATE ON games
 WHEN NEW.status = 'completed'
 BEGIN
+    -- 🏆 Update wins for the winner
     UPDATE user_stats
     SET wins = wins + 1
-    WHERE user_id = NEW.winner_id;
+    WHERE user_id = (
+        SELECT player_id FROM game_players
+        WHERE game_id = NEW.game_id AND is_winner = TRUE
+    );
 
+    -- ❌ Update losses for the loser
     UPDATE user_stats
     SET losses = losses + 1
-    WHERE user_id = NEW.loser_id;
+    WHERE user_id = (
+        SELECT player_id FROM game_players
+        WHERE game_id = NEW.game_id AND is_winner = FALSE
+    );
 
+    -- ⏳ Set game end time
     UPDATE games
     SET end_time = CURRENT_TIMESTAMP
     WHERE game_id = NEW.game_id;
-    
 END;
 
 --trigger to update user last active time when user status changes
@@ -170,23 +204,19 @@ BEGIN
   WHERE user_id = NEW.user_id;
 END;
 
-CREATE TRIGGER IF NOT EXISTS delete_matchmaking_queue_on_game_end
-AFTER UPDATE ON games
-WHEN NEW.status = 'completed'
-BEGIN
-  DELETE FROM matchmaking_queue
-  WHERE user_id = NEW.player1_id OR user_id = NEW.player2_id;
-END;
 
-CREATE TRIGGER IF NOT EXISTS update_queue_status_on_games_created
-AFTER INSERT ON games
-BEGIN
-  UPDATE matchmaking_queue
-  SET status = 'playing'
-  WHERE user_id = (NEW.player1_id OR user_id = NEW.player2_id) AND status = 'matched'; 
-END;
-
---friend request trigger
+-- CREATE TRIGGER IF NOT EXISTS remove_matchmaking_entry_on_game_complete
+-- AFTER UPDATE ON games
+-- WHEN NEW.status = 'completed'
+-- BEGIN
+--     DELETE FROM queues
+--     WHERE queue_id IN (
+--         SELECT queque_id
+--         LEFT JOIN queue_players ON queues.queue_id = queue_players.queue_id AND
+--         FROM game_players WHERE game_id = NEW.game_id
+--         WHERE game_id = NEW.game_id
+--     );
+-- END;
 
 --trigger for inserting friend when friend request accepted
 CREATE TRIGGER IF NOT EXISTS insert_friend_on_friend_request_accepted
@@ -197,4 +227,16 @@ BEGIN
   VALUES (NEW.sender_id, NEW.receiver_id);
   INSERT INTO friends(user_id, friend_id)
   VALUES (NEW.receiver_id, NEW.sender_id);
+END;
+
+--trigger for deleting queue when user leaves queue
+CREATE TRIGGER IF NOT EXISTS delete_queue_on_user_leave
+AFTER DELETE ON queue_players
+BEGIN
+  DELETE FROM queues
+  WHERE queue_id = OLD.queue_id
+  AND NOT EXISTS (
+    SELECT * FROM queue_players
+    WHERE queue_id = OLD.queue_id
+  );
 END;

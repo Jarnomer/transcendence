@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
+import { createMoveInputMessage } from '@shared/messages/';
 
-import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 const useGameControls = (localPlayerId: string | null, remotePlayerId: string | null) => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
@@ -81,23 +81,19 @@ const useGameControls = (localPlayerId: string | null, remotePlayerId: string | 
       }
 
       if (isLocalMoving) {
-        sendMessage(createMoveInputMessage(localPlayerId, localMovement));
+        sendMessage('game', createMoveInputMessage(localPlayerId, localMovement));
         wasLocalMovingRef.current = true;
       } else if (wasLocalMovingRef.current) {
-        sendMessage(createMoveInputMessage(localPlayerId, null));
+        sendMessage('game', createMoveInputMessage(localPlayerId, null));
         wasLocalMovingRef.current = false;
       }
 
       if (isRemoteMoving) {
-        sendMessage(createMoveInputMessage(remotePlayerId, remoteMovement));
+        sendMessage('game', createMoveInputMessage(remotePlayerId, remoteMovement));
         wasRemoteMovingRef.current = true;
       } else if (wasRemoteMovingRef.current) {
-        sendMessage(createMoveInputMessage(remotePlayerId, null));
+        sendMessage('game', createMoveInputMessage(remotePlayerId, null));
         wasRemoteMovingRef.current = false;
-      }
-
-      if (remotePlayerId && keysPressed['p']) {
-        sendMessage(createReadyInputMessage(localPlayerId, true));
       }
     }, 1000 / 60); // 60fps
 

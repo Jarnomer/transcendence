@@ -1,4 +1,4 @@
-import { Type, Static, TSchema } from '@sinclair/typebox';
+import { Static, TSchema, Type } from '@sinclair/typebox';
 
 export const LoginSchema = Type.Object({
   username: Type.String(),
@@ -7,23 +7,19 @@ export const LoginSchema = Type.Object({
   refresh_token: Type.Optional(Type.String()),
 });
 
-
 export const RegisterSchema = Type.Object({
   username: Type.String(),
   password: Type.String(),
   email: Type.Optional(Type.String()),
 });
 
-
 export const RefreshSchema = Type.Object({
-  cookie: Type.String({ description: "JWT stored in cookie" }),
+  cookie: Type.String({ description: 'JWT stored in cookie' }),
 });
-
 
 export const ValidateSchema = Type.Object({
-  authorization: Type.String({ description: "Bearer <token>" })
+  authorization: Type.String({ description: 'Bearer <token>' }),
 });
-
 
 export const UpdateSchema = Type.Object({
   user_id: Type.String(),
@@ -35,11 +31,9 @@ export const UpdateSchema = Type.Object({
   }),
 });
 
-
 export const DeleteSchema = Type.Object({
   user_id: Type.String(),
 });
-
 
 export const LogoutSchema = Type.Object({
   user_id: Type.String(),
@@ -50,10 +44,14 @@ export const ApiResponseSchema = <T extends TSchema>(dataSchema: T) =>
     success: Type.Boolean(),
     message: Type.String(),
     data: Type.Optional(dataSchema),
-    errors: Type.Optional(Type.Array(Type.Object({
-      field: Type.String(),
-      message: Type.String()
-    })))
+    errors: Type.Optional(
+      Type.Array(
+        Type.Object({
+          field: Type.String(),
+          message: Type.String(),
+        })
+      )
+    ),
   });
 
 export type LoginType = Static<typeof LoginSchema>;

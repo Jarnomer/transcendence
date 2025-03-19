@@ -9,9 +9,10 @@
     "outDir": "dist",
 
     /* Backend path aliases */
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@my-backend/*": ["services/*/src"],
+      "@my-backend": ["services"],
       "@shared": ["../shared"],
       "@shared/*": ["../shared/*"],
       "@utils": ["../shared/utils"],

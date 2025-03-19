@@ -3,5 +3,17 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["src/**/*", "../main_server/src/db.ts"]
+  "include": ["src/**/*", "../main_server/src/db.ts"],
+    "paths": {
+    "@services/*": ["src/services/*"],
+    "@services": ["src/services"],
+    "@controllers/*": ["src/controllers/*"],
+    "@controllers": ["src/controllers"],
+    "@routes/*": ["src/routes/*"],
+    "@routes": ["src/routes"],
+    "@models/*": ["src/models/*"],
+    "@models": ["src/models"],
+    "@utils/*": ["src/utils/*"],
+    "@utils": ["src/utils"],
+  }
 }

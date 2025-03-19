@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate for routing
 
 import { motion } from 'framer-motion';
 
@@ -23,6 +23,8 @@ export const GameMenu: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
   const navigate = useNavigate(); // Hook to navigate to different routes
+  const location = useLocation();
+  const { lobby } = location.state || {};
 
   const modes = [
     {
@@ -128,7 +130,9 @@ export const GameMenu: React.FC = () => {
   // Effect to navigate once both mode and difficulty are selected
   useEffect(() => {
     if (selectedMode && selectedDifficulty) {
-      navigate('/game', { state: { mode: selectedMode, difficulty: selectedDifficulty } });
+      navigate('/game', {
+        state: { mode: selectedMode, difficulty: selectedDifficulty, lobby: lobby },
+      });
     }
   }, [selectedMode, selectedDifficulty]); // Trigger navigation when both values are set
 

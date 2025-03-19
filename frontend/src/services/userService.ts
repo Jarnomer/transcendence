@@ -30,6 +30,19 @@ export async function getUsers() {
     throw err;
   }
 }
+
+export async function getUsersWithRank() {
+  try {
+    const res = await api.get(`/user/all/rank`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user data with rank`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get user list with rank:', err);
+    throw err;
+  }
+}
 // page = page number, pageSize = number of items per page
 export async function getUsersInQueue() {
   try {
