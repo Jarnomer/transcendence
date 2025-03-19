@@ -393,4 +393,209 @@ export function registerRetroShaders() {
       gl_FragColor = color;
     }
   `;
+
+  // Add a CRT turn ON shader
+  Effect.ShadersStore['crtTurnOnVertexShader'] = `
+  precision highp float;
+  attribute vec2 position;
+  varying vec2 vUV;
+  void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    vUV = position * 0.5 + 0.5;
+  }
+`;
+
+  Effect.ShadersStore['crtTurnOnFragmentShader'] = `
+  precision highp float;
+  varying vec2 vUV;
+  uniform sampler2D textureSampler;
+  uniform float turnOnProgress; // 0 to 1
+  uniform float time;
+  uniform float noise;
+  uniform float scanlineIntensity;
+  uniform float flickerAmount;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  void main() {
+    // Base color with black default
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+    vec2 uv = vUV;
+
+    // Initial horizontal line expanding
+    if (turnOnProgress < 0.3) {
+      float lineSize = turnOnProgress * 3.0;
+      float distFromCenter = abs(uv.y - 0.5);
+
+      if (distFromCenter < lineSize * 0.05) {
+        // Horizontal line
+        float lineIntensity = 1.0 - (distFromCenter / (lineSize * 0.05));
+        color = vec4(1.0, 1.0, 1.0, 1.0) * lineIntensity;
+      }
+    }
+    // Screen expands from middle with scanlines
+    else if (turnOnProgress < 0.7) {
+      float expandProgress = (turnOnProgress - 0.3) / 0.4; // 0 to 1 during this phase
+      float verticalExpand = expandProgress * 0.5; // How much to expand from center
+
+      if (abs(uv.y - 0.5) < verticalExpand) {
+        // Calculate UV for the expanded region
+        float normalizedY = ((uv.y - (0.5 - verticalExpand)) / (2.0 * verticalExpand));
+        vec2 expandedUV = vec2(uv.x, normalizedY);
+
+        // Get texture but add heavy scanlines
+        color = texture2D(textureSampler, expandedUV);
+
+        // Strong scanlines effect during expansion
+        float scanlineFreq = 100.0;
+        float scanline = sin(expandedUV.y * scanlineFreq) * 0.4 + 0.6;
+        color.rgb *= scanline;
+
+        // Add noise during expansion
+        float staticNoise = rand(vec2(expandedUV.x * time, expandedUV.y * time)) * noise * (1.0 - expandProgress);
+        color.rgb = mix(color.rgb, vec3(staticNoise), (1.0 - expandProgress) * 0.5);
+
+        // Add flicker during turn on
+        float flicker = 1.0 - flickerAmount * (1.0 - expandProgress) * sin(time * 30.0);
+        color.rgb *= flicker;
+
+        // Edge glow
+        float edgeGlow = smoothstep(0.0, 0.1, abs(normalizedY - 0.5) * 2.0);
+        color.rgb += vec3(1.0, 1.0, 1.0) * (1.0 - edgeGlow) * (1.0 - expandProgress) * 0.5;
+      }
+    }
+    // Final refinement phase
+    else {
+      float finalProgress = (turnOnProgress - 0.7) / 0.3; // 0 to 1 during this phase
+      color = texture2D(textureSampler, uv);
+
+      // Reduced scanlines and noise as it stabilizes
+      float scanlineFreq = 100.0;
+      float scanline = sin(uv.y * scanlineFreq) * 0.2 + 0.8;
+      color.rgb *= mix(scanline, 1.0, finalProgress);
+
+      // Reducing static noise
+      float staticNoise = rand(vec2(uv.x * time, uv.y * time)) * noise * (1.0 - finalProgress);
+      color.rgb = mix(color.rgb, vec3(staticNoise), (1.0 - finalProgress) * 0.2);
+
+      // Subtle flicker that decreases
+      float flicker = 1.0 - flickerAmount * (1.0 - finalProgress) * 0.5 * sin(time * 20.0);
+      color.rgb *= flicker;
+
+      // Brightness increase to normal
+      color.rgb *= mix(0.8, 1.0, finalProgress);
+    }
+
+    gl_FragColor = color;
+  }
+`;
+
+  // Add a CRT turn OFF shader
+  Effect.ShadersStore['crtTurnOffVertexShader'] = `
+  precision highp float;
+  attribute vec2 position;
+  varying vec2 vUV;
+  void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    vUV = position * 0.5 + 0.5;
+  }
+`;
+
+  Effect.ShadersStore['crtTurnOffFragmentShader'] = `
+  precision highp float;
+  varying vec2 vUV;
+  uniform sampler2D textureSampler;
+  uniform float turnOffProgress; // 0 to 1
+  uniform float time;
+  uniform float noise;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  void main() {
+    vec2 uv = vUV;
+    vec4 color = texture2D(textureSampler, uv);
+
+    if (turnOffProgress < 0.2) {
+      // Initial vertical collapse and increased noise
+      float initialNoise = rand(vec2(uv.x * time, uv.y * time)) * noise * turnOffProgress * 5.0;
+      color.rgb = mix(color.rgb, vec3(initialNoise), turnOffProgress * 2.0);
+
+      // Light flicker at start of turn off
+      float flicker = 1.0 - 0.2 * sin(time * 50.0 * turnOffProgress);
+      color.rgb *= flicker;
+    }
+    else if (turnOffProgress < 0.5) {
+      // Picture degradation phase
+      float verticalCollapse = (turnOffProgress - 0.2) / 0.3; // 0 to 1 for this phase
+
+      // Shrink the picture vertically from center
+      float collapse = 1.0 - verticalCollapse * 0.5;
+      float normalizedY = ((uv.y - 0.5) / collapse) + 0.5;
+
+      if (normalizedY >= 0.0 && normalizedY <= 1.0) {
+        color = texture2D(textureSampler, vec2(uv.x, normalizedY));
+      } else {
+        color = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+
+      // Add distortions
+      float distortion = sin(normalizedY * 20.0 + time * 10.0) * 0.03 * verticalCollapse;
+      if (normalizedY >= 0.0 && normalizedY <= 1.0) {
+        color.r = texture2D(textureSampler, vec2(uv.x + distortion, normalizedY)).r;
+        color.b = texture2D(textureSampler, vec2(uv.x - distortion, normalizedY)).b;
+      }
+
+      // Add growing darkness
+      color.rgb *= max(0.0, 1.0 - verticalCollapse * 0.7);
+    }
+    else if (turnOffProgress < 0.7) {
+      // Extreme collapse to a horizontal line
+      float extremeCollapse = (turnOffProgress - 0.5) / 0.2; // 0 to 1 for this phase
+      float lineSize = 1.0 - extremeCollapse;
+      float distFromCenter = abs(uv.y - 0.5);
+
+      if (distFromCenter < lineSize * 0.1) {
+        float sampleY = 0.5;
+        color = texture2D(textureSampler, vec2(uv.x, sampleY));
+
+        // Line brightness decreases
+        color.rgb *= max(0.0, 1.0 - extremeCollapse * 0.8);
+
+        // Add some bright horizontal scan distortion
+        float scanIntensity = sin(uv.x * 50.0 + time * 20.0) * 0.4 + 0.6;
+        color.rgb *= scanIntensity;
+      } else {
+        color = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+
+      // Brightness fade
+      color.rgb *= (1.0 - extremeCollapse);
+    }
+    else {
+      // Final dot/light collapse
+      float finalCollapse = (turnOffProgress - 0.7) / 0.3;
+
+      // Create a small bright dot in the center that fades out
+      float dotRadius = 0.05 * (1.0 - finalCollapse);
+      float distFromCenter = length(uv - vec2(0.5, 0.5));
+
+      if (distFromCenter < dotRadius) {
+        // White to blue-ish dot that fades out
+        float intensity = 1.0 - (distFromCenter / dotRadius);
+        color = vec4(intensity * (1.0 - finalCollapse),
+                    intensity * (1.0 - finalCollapse),
+                    intensity * (1.0 - finalCollapse * 0.7),
+                    1.0);
+      } else {
+        color = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+    }
+
+    gl_FragColor = color;
+  }
+`;
 }

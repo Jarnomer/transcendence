@@ -205,6 +205,70 @@ export function createGlitchEffect(
   };
 }
 
+export function createCRTTurnOnEffect(
+  scene: Scene,
+  camera: Camera
+): { effect: PostProcess; setTurnOnProgress: (progress: number) => void } {
+  const turnOnEffect = new PostProcess(
+    'crtTurnOn',
+    'crtTurnOn',
+    ['turnOnProgress', 'time', 'noise', 'scanlineIntensity', 'flickerAmount'],
+    null,
+    1.0,
+    camera
+  );
+
+  const engine = scene.getEngine();
+  let time = 0;
+  let turnOnProgress = 0;
+
+  turnOnEffect.onApply = (effect) => {
+    time += engine.getDeltaTime() / 1000.0;
+    effect.setFloat('time', time);
+    effect.setFloat('turnOnProgress', turnOnProgress);
+    effect.setFloat('noise', 0.3);
+    effect.setFloat('scanlineIntensity', 0.4);
+    effect.setFloat('flickerAmount', 0.3);
+  };
+
+  const setTurnOnProgress = (progress: number) => {
+    turnOnProgress = Math.max(0, Math.min(1, progress));
+  };
+
+  return { effect: turnOnEffect, setTurnOnProgress };
+}
+
+export function createCRTTurnOffEffect(
+  scene: Scene,
+  camera: Camera
+): { effect: PostProcess; setTurnOffProgress: (progress: number) => void } {
+  const turnOffEffect = new PostProcess(
+    'crtTurnOff',
+    'crtTurnOff',
+    ['turnOffProgress', 'time', 'noise'],
+    null,
+    1.0,
+    camera
+  );
+
+  const engine = scene.getEngine();
+  let time = 0;
+  let turnOffProgress = 0;
+
+  turnOffEffect.onApply = (effect) => {
+    time += engine.getDeltaTime() / 1000.0;
+    effect.setFloat('time', time);
+    effect.setFloat('turnOffProgress', turnOffProgress);
+    effect.setFloat('noise', 0.4);
+  };
+
+  const setTurnOffProgress = (progress: number) => {
+    turnOffProgress = Math.max(0, Math.min(1, progress));
+  };
+
+  return { effect: turnOffEffect, setTurnOffProgress };
+}
+
 // Retro effects manager to control all retro effects
 export class RetroEffectsManager {
   private _scene: Scene;
@@ -217,6 +281,11 @@ export class RetroEffectsManager {
     crt?: PostProcess;
     glitch?: { effect: PostProcess; setGlitchAmount: (amount: number) => void };
   } = {};
+
+  private _turnOnEffect?: { effect: PostProcess; setTurnOnProgress: (progress: number) => void };
+  private _turnOffEffect?: { effect: PostProcess; setTurnOffProgress: (progress: number) => void };
+  private _isPlayingTurnOnEffect: boolean = false;
+  private _isPlayingTurnOffEffect: boolean = false;
 
   constructor(scene: Scene, camera: Camera) {
     this._scene = scene;
@@ -279,6 +348,18 @@ export class RetroEffectsManager {
     };
 
     this._effects.glitch = createGlitchEffect(this._scene, this._camera, glitchOptions);
+    return this;
+  }
+
+  enableTurnOnEffect(): RetroEffectsManager {
+    this._turnOnEffect = createCRTTurnOnEffect(this._scene, this._camera);
+    (this._turnOnEffect.effect as any).enabled = false; // Needs type assertion
+    return this;
+  }
+
+  enableTurnOffEffect(): RetroEffectsManager {
+    this._turnOffEffect = createCRTTurnOffEffect(this._scene, this._camera);
+    (this._turnOffEffect.effect as any).enabled = false;
     return this;
   }
 
@@ -375,6 +456,121 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
+  async simulateCRTTurnOn(durationMs: number = 2500): Promise<void> {
+    if (!this._turnOnEffect) {
+      this.enableTurnOnEffect();
+    }
+
+    if (this._turnOnEffect && !this._isPlayingTurnOnEffect) {
+      this._isPlayingTurnOnEffect = true;
+
+      // Enable other effects that should be present during turn on
+      if (!this._effects.vhs) this.enableVHS();
+      if (!this._effects.scanlines) this.enableScanlines();
+      if (!this._effects.glitch) this.enableGlitch();
+
+      (this._turnOnEffect.effect as any).enabled = true;
+
+      return new Promise((resolve) => {
+        const startTime = performance.now();
+
+        const updateProgress = () => {
+          const elapsedTime = performance.now() - startTime;
+          const progress = Math.min(elapsedTime / durationMs, 1.0);
+
+          this._turnOnEffect?.setTurnOnProgress(progress);
+
+          // Add some glitch/distortion during turn on
+          if (this._effects.glitch) {
+            // More glitches at the beginning
+            const glitchAmount = Math.max(0, 0.5 - progress * 0.5) * Math.sin(progress * 20);
+            this._effects.glitch.setGlitchAmount(glitchAmount);
+          }
+
+          // Vary scanline intensity
+          if (this._effects.scanlines) {
+            const effect = this._effects.scanlines.getEffect();
+            if (effect) {
+              // Start intense, gradually normalize
+              const intensity = 0.5 - progress * 0.3;
+              effect.setFloat('scanlineIntensity', intensity);
+            }
+          }
+
+          if (progress < 1.0) {
+            requestAnimationFrame(updateProgress);
+          } else {
+            // Turn off the turn-on effect when done
+            setTimeout(() => {
+              if (this._turnOnEffect) {
+                (this._turnOnEffect.effect as any).enabled = false;
+              }
+              this._isPlayingTurnOnEffect = false;
+              resolve();
+            }, 100);
+          }
+        };
+
+        updateProgress();
+      });
+    }
+
+    return Promise.resolve();
+  }
+
+  async simulateCRTTurnOff(durationMs: number = 1800): Promise<void> {
+    if (!this._turnOffEffect) {
+      this.enableTurnOffEffect();
+    }
+
+    if (this._turnOffEffect && !this._isPlayingTurnOffEffect) {
+      this._isPlayingTurnOffEffect = true;
+
+      // Enable glitch effect for better turn off appearance
+      if (!this._effects.glitch) this.enableGlitch();
+      (this._turnOffEffect.effect as any).enabled = true;
+
+      return new Promise((resolve) => {
+        const startTime = performance.now();
+
+        const updateProgress = () => {
+          const elapsedTime = performance.now() - startTime;
+          const progress = Math.min(elapsedTime / durationMs, 1.0);
+
+          this._turnOffEffect?.setTurnOffProgress(progress);
+
+          // Add increasing glitches during turn off
+          if (this._effects.glitch) {
+            // Glitches increase as turn off progresses but pulsate
+            const glitchBase = Math.min(1.0, progress * 1.5);
+            const glitchPulse = Math.sin(progress * 30) * 0.3;
+            this._effects.glitch.setGlitchAmount(glitchBase + glitchPulse);
+          }
+
+          if (progress < 1.0) {
+            requestAnimationFrame(updateProgress);
+          } else {
+            // Keep black screen for a moment, then resolve
+            setTimeout(() => {
+              if (this._turnOffEffect) {
+                (this._turnOffEffect.effect as any).enabled = false;
+              }
+              if (this._effects.glitch) {
+                this._effects.glitch.setGlitchAmount(0);
+              }
+              this._isPlayingTurnOffEffect = false;
+              resolve();
+            }, 300);
+          }
+        };
+
+        updateProgress();
+      });
+    }
+
+    return Promise.resolve();
+  }
+
   simulateTrackingDistortion(durationMs: number = 800, intensity: number = 1.0): void {
     if (!this._effects.vhs) {
       this.enableVHS();
@@ -418,6 +614,14 @@ export class RetroEffectsManager {
       }
     });
 
+    if (this._turnOnEffect && this._turnOnEffect.effect) {
+      this._turnOnEffect.effect.dispose();
+    }
+
+    if (this._turnOffEffect && this._turnOffEffect.effect) {
+      this._turnOffEffect.effect.dispose();
+    }
+
     this._effects = {};
   }
 }
@@ -452,7 +656,9 @@ export function createPongRetroEffects(
           staticNoise: 0.1,
           distortion: 0.2,
           colorBleed: 0.3,
-        });
+        })
+        .enableTurnOnEffect()
+        .enableTurnOffEffect();
       break;
 
     case 'cinematic':
