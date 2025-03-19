@@ -3,7 +3,7 @@ export interface PlayerInputMessage {
   action: string;
   payload: {
     playerId: string;
-    direction?: string; // Up - Down
+    direction?: 'up' | 'down' | null;
     state?: boolean; // Ready state
   };
 }
@@ -21,7 +21,7 @@ export const isPlayerInputMessage = (message: any): message is PlayerInputMessag
 
 export const createMoveInputMessage = (
   playerId: string,
-  direction: 'up' | 'down'
+  direction: 'up' | 'down' | null
 ): PlayerInputMessage => ({
   type: 'player_input',
   action: 'move',

@@ -1,34 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  ArcRotateCamera,
-  Color3,
-  Color4,
-  Engine,
-  GlowLayer,
-  HemisphericLight,
-  Scene,
-  ShadowGenerator,
-  SpotLight,
-  Vector3,
-} from 'babylonjs';
+import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
 import { GameState } from '@shared/types';
+
 import {
   applyBallEffects,
   applyCollisionEffects,
+  ballSparkEffect,
   createBall,
   createFloor,
   createPaddle,
+  detectCollision,
   getThemeColors,
-} from '@shared/utils';
+  setupEnvironmentMap,
+  setupPostProcessing,
+  setupReflections,
+  setupSceneCamera,
+  setupScenelights,
+} from '@game/utils';
 
 interface GameCanvasProps {
   gameState: GameState;
   theme?: 'light' | 'dark';
 }
 
-// Fixed values for now, change to dynamic later, maybe?
+// Fixed values for positions
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const SCALE_FACTOR = 20;
@@ -51,11 +48,9 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 };
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
-  const [cameraControlEnabled, setCameraControlEnabled] = useState(false);
   const [lastTheme, setLastTheme] = useState(theme);
 
-  // Store previous ball position and velocity to calculate changes
-  const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0 });
+  const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
     secondaryColor: Color3;
@@ -67,44 +62,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
-  // Updated refs to only store mesh objects
+  const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
+  const sparkEffectCleanupRef = useRef<((speed: number, spin: number) => void) | null>(null);
+
+  // Updated references to only store mesh objects
   const floorRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
-
-  const toggleCameraControl = () => {
-    if (!cameraRef.current) return;
-
-    setCameraControlEnabled((prev) => {
-      const newState = !prev;
-
-      if (newState) {
-        cameraRef.current!.attachControl(canvasRef.current!, true);
-        console.log('Camera controls enabled');
-      } else {
-        cameraRef.current!.detachControl();
-        console.log('Camera controls disabled');
-      }
-
-      return newState;
-    });
-  };
-
-  // Handle camera controls
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'c') {
-        toggleCameraControl();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
 
   // Initial render setup
   useEffect(() => {
@@ -115,58 +80,36 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
-    themeColors.current = colors;
-    const { primaryColor, secondaryColor, backgroundColor } = colors;
+    const { primaryColor, backgroundColor } = colors;
 
-    scene.clearColor = new Color4(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1);
+    setupEnvironmentMap(scene);
 
-    engineRef.current = engine;
-    sceneRef.current = scene;
+    const camera = setupSceneCamera(scene);
+    const pipeline = setupPostProcessing(scene, camera);
+    const { shadowGenerators } = setupScenelights(scene);
 
-    const camera = new ArcRotateCamera(
-      'camera',
-      -Math.PI / 2, // horizontal rotation
-      Math.PI / 2, // vertical rotation
-      24.5, // distance from floor
-      new Vector3(0, 0, 0),
-      scene
-    );
-
-    cameraRef.current = camera;
-    camera.detachControl();
-
-    const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
-    hemiLight.intensity = 0.5;
-
-    const spotLight1 = new SpotLight(
-      'spotLight1',
-      new Vector3(-10, 10, 10),
-      new Vector3(0, -1, -0.5),
-      Math.PI / 3,
-      10,
-      scene
-    );
-    spotLight1.intensity = 0.7;
-
-    const spotLight2 = new SpotLight(
-      'spotLight2',
-      new Vector3(10, 10, 10),
-      new Vector3(0, -1, -0.5),
-      Math.PI / 3,
-      10,
-      scene
-    );
-    spotLight2.intensity = 0.7;
-
-    // Create game objects
     floorRef.current = createFloor(scene, backgroundColor);
     player1Ref.current = createPaddle(scene, primaryColor);
     player2Ref.current = createPaddle(scene, primaryColor);
     ballRef.current = createBall(scene, primaryColor);
 
+    const gameObjects = [player1Ref.current, player2Ref.current, ballRef.current];
+    setupReflections(scene, floorRef.current, gameObjects);
+    shadowGenerators.forEach((generator) => {
+      gameObjects.forEach((obj) => {
+        generator.addShadowCaster(obj);
+      });
+    });
+
+    engineRef.current = engine;
+    sceneRef.current = scene;
+    themeColors.current = colors;
+    postProcessingRef.current = pipeline;
+    cameraRef.current = camera;
+
     // Set paddle positions
     player1Ref.current.position.x = -20;
-    player2Ref.current.position.x = 20;
+    player2Ref.current.position.x = 19.5;
 
     // Initialize previous ball state
     prevBallState.current = {
@@ -174,26 +117,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
       y: gameState.ball.y,
       dx: gameState.ball.dx,
       dy: gameState.ball.dy,
+      spin: gameState.ball.spin,
     };
 
-    // Shadow generation
-    const shadowGenerator = new ShadowGenerator(1024, spotLight1);
-    shadowGenerator.addShadowCaster(player1Ref.current);
-    shadowGenerator.addShadowCaster(player2Ref.current);
-    shadowGenerator.addShadowCaster(ballRef.current);
-    shadowGenerator.useBlurExponentialShadowMap = true;
+    setLastTheme(theme); // Save current theme
 
-    // Create glow layer and add game objects to it
-    const glowLayer = new GlowLayer('glowLayer', scene);
-    glowLayer.intensity = 1.2;
-    glowLayer.blurKernelSize = 32;
+    const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
 
-    glowLayer.addIncludedOnlyMesh(player1Ref.current);
-    glowLayer.addIncludedOnlyMesh(player2Ref.current);
-    glowLayer.addIncludedOnlyMesh(ballRef.current);
-
-    // Save current theme
-    setLastTheme(theme);
+    sparkEffectCleanupRef.current = sparkCleanUp;
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -207,6 +138,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(0, 0);
       engine.dispose();
       scene.dispose();
     };
@@ -231,29 +163,36 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     ballRef.current.position.x = ballX;
     ballRef.current.position.y = ballY;
 
-    // Update constant ball effects, inverted dy for Babylon coordinate system
-    applyBallEffects(ballRef.current, ball.dx, -ball.dy, color);
+    // Calculate current speed, detect collision
+    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+    const collision = detectCollision(
+      prevBallState.current.dx,
+      prevBallState.current.dy,
+      ball.dx,
+      ball.dy
+    );
 
-    // Check for collisions by comparing current and previous velocity
-    if (prevBallState.current.dx !== 0 || prevBallState.current.dy !== 0) {
+    applyBallEffects(ballRef.current, ball.dx, -ball.dy, ball.spin, color); // Invert dy
+
+    if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(speed, ball.spin);
+
+    if (collision) {
       applyCollisionEffects(
         ballRef.current,
         player1Ref.current,
         player2Ref.current,
-        prevBallState.current.dx,
-        prevBallState.current.dy,
-        ball.dx,
-        ball.dy,
+        collision,
+        speed,
         color
       );
     }
 
-    // Update previous state for next frame
     prevBallState.current = {
       x: ball.x,
       y: ball.y,
       dx: ball.dx,
       dy: ball.dy,
+      spin: ball.spin,
     };
   }, [gameState]);
 
