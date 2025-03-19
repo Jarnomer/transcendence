@@ -12,8 +12,24 @@ import { EditProfile } from '../components/profile/EditProfile';
 import { FriendList } from '../components/profile/FriendList';
 import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
-import { pageVariants } from '../components/UI/PageWrapper';
 import { useUser } from '../contexts/user/UserContext';
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
 
 export const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -70,14 +86,7 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <>
-      <motion.div
-        className="w-full h-full flex flex-col items-center p-6 text-center"
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
-      >
+      <motion.div className="w-full h-full flex flex-col items-center p-6 text-center">
         <RadialBackground avatar_url={user.avatar_url}></RadialBackground>
         <ProfileHeader
           user={user}
@@ -101,12 +110,12 @@ export const ProfilePage: React.FC = () => {
           ) : (
             <motion.div
               key="defaultSection"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.4 }}
-              onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
               className="w-full flex gap-4 flex-col md:flex-row items-top justify-center text-center"
+              // variants={animationVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+              onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
             >
               <motion.div>
                 <FriendList

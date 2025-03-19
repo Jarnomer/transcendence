@@ -40,9 +40,9 @@ export const PlayerQueue: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="glass-box p-5 w-full">
       <ul>
-        <h1 className="font-heading text-3xl ">Join Game</h1>
+        <h1 className="font-heading text-3xl w-full">Join Game</h1>
 
         {usersInQueue.filter((user) => user.user_id != localStorage.getItem('userID')).length ===
         0 ? (

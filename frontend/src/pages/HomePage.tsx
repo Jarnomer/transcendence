@@ -4,37 +4,78 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { LeaderBoard } from '@components';
 
-import { sendFriendRequest } from '@services/friendService';
-
 import { PlayerQueue } from '../components/home/PlayersInQueue';
-import { pageVariants } from '../components/UI/PageWrapper';
+
+export const slideFromLeftVariants = {
+  initial: {
+    x: '-100%', // start fully outside on the left
+    opacity: 0,
+  },
+  animate: {
+    x: 0, // move to the normal position
+    opacity: 1,
+    transition: {
+      duration: 0.4,
+      ease: 'easeInOut',
+    },
+  },
+  exit: {
+    x: '-100%', // slide out to the left again
+    opacity: 0,
+    transition: {
+      duration: 0.4,
+      ease: 'easeInOut',
+    },
+  },
+};
+
+export const slideFromRightVariants = {
+  initial: {
+    x: '100%', // start outside right
+    opacity: 0,
+  },
+  animate: {
+    x: 0, // slide into normal position
+    opacity: 1,
+    transition: {
+      duration: 0.4,
+      ease: 'easeInOut',
+    },
+  },
+  exit: {
+    x: '100%', // slide out to the right again
+    opacity: 0,
+    transition: {
+      duration: 0.4,
+      ease: 'easeInOut',
+    },
+  },
+};
 
 export const HomePage: React.FC = () => {
-  const handleAddFriendClick = (event, receiver_id: string) => {
-    // Stop the click event from bubbling up and triggering the navigate function
-    event.stopPropagation();
-    // Add your logic for adding a friend here
-    console.log('Add friend clicked');
-    sendFriendRequest(receiver_id).then(() => {
-      console.log('Friend request sent');
-    });
-  };
-
   return (
     <>
-      <motion.div
-        className="flex flex-grow w-full h-full justify-center gap-20"
-        variants={pageVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        <AnimatePresence mode="wait">
-          <motion.div key="leaderboard" initial="hidden" animate="visible" exit="exit">
+      <motion.div className="flex flex-grow w-full h-full justify-center gap-20">
+        <AnimatePresence>
+          <motion.div
+            className="w-1/2"
+            key="leaderboard"
+            variants={slideFromLeftVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
             <LeaderBoard />
           </motion.div>
 
-          <motion.div key="playerQueue" initial="hidden" animate="visible" exit="exit">
+          <motion.div
+            className="w-1/2"
+            key="playerQueue"
+            variants={slideFromRightVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
             <PlayerQueue />
           </motion.div>
         </AnimatePresence>

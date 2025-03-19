@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { motion } from 'framer-motion';
+
 import { useUser } from '../../contexts/user/UserContext';
 import { api } from '../../services/api';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
@@ -9,6 +11,23 @@ interface EditProfileProps {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setEditProfile: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(0 100% 0 100% )',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 }, // 👈 delay here
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 100%)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
 
 export const EditProfile: React.FC<EditProfileProps> = ({ user, setEditProfile, setLoading }) => {
   const [formData, setFormData] = useState({ display_name: '', first_name: '', last_name: '' });
@@ -41,7 +60,13 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, setEditProfile, 
   };
   return (
     <>
-      <div className="relative overflow-hidden">
+      <motion.div
+        className="relative overflow-hidden"
+        variants={animationVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
         <BackgroundGlow></BackgroundGlow>
         <div id="edit-profile-content" className="relative overflow-hidden glass-box p-10">
           {user.display_name ? (
@@ -89,7 +114,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, setEditProfile, 
             </form>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

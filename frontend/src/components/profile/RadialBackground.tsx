@@ -57,7 +57,7 @@ export const RadialBackground: React.FC<RadialBackgroundProps> = ({ avatar_url }
   return (
     <div
       id="radial-bg"
-      className="absolute animate-[pulse_5s_ease-in-out_infinite] inset-0 z-0 w-full h-full opacity-30 pointer-events-none overflow-hidden"
+      className="absolute animate-[pulse_5s_ease-in-out_infinite] inset-0 z-0 w-full h-full opacity-30 pointer-events-none"
       style={{
         background: gradientBackground,
       }}

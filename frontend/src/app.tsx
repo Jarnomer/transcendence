@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
-import { AnimatedRoutes } from './AnimatedRoutes.tsx';
 import { Footer } from './components/footer/Footer.tsx';
 import { Header } from './components/header/Header.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
+import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { useUser } from './contexts/user/UserContext';
 import { WebSocketProvider } from './services/webSocket/WebSocketContext.tsx';
 

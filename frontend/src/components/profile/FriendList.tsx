@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { motion } from 'framer-motion';
+
 import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
 
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
@@ -16,6 +18,36 @@ type FriendListProps = {
   friends: Friend[];
   requests: Friend[];
   isOwnProfile: boolean;
+};
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(0 0 0 100% )',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
+  },
+  exit: {
+    clipPath: 'inset(0 0 0 100%)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.1,
+      type: 'tween',
+      ease: 'easeOut',
+    },
+  }),
 };
 
 export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, requests }) => {
@@ -84,7 +116,13 @@ export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, r
   };
 
   return (
-    <div className="w-full max-w-md p-4 glass-box">
+    <motion.div
+      className="w-full max-w-md p-4 glass-box"
+      variants={animationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="flex gap-4 mb-4">
         <button
           onClick={() => setActiveTab('friends')}
@@ -111,6 +149,6 @@ export const FriendList: React.FC<FriendListProps> = ({ isOwnProfile, friends, r
           ? renderList(friends, 'No friends yet', false)
           : renderList(requests, 'No requests yet', true)}
       </div>
-    </div>
+    </motion.div>
   );
 };

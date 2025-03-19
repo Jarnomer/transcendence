@@ -7,22 +7,35 @@ import { motion } from 'framer-motion';
 import { getUsers } from '../../services/userService';
 import SearchBar from '../UI/SearchBar';
 
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(0 0 100% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
 const containerVariants = {
   visible: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.1, // Stagger items
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-};
-
-const leaderboardExitVariants = {
-  hidden: { opacity: 0, y: -50, scale: 0.9 }, // Fade out, move up and shrink
-  visible: { opacity: 1, y: 0, scale: 1 }, // Normal state (in)
+  hidden: { opacity: 0, x: -10 }, // Start from the left
+  visible: { opacity: 1, x: 0 }, // Move to the original position
+  exit: { opacity: 0, x: -10 }, // Exit to the left
 };
 
 export const LeaderBoard: React.FC = () => {
@@ -33,7 +46,6 @@ export const LeaderBoard: React.FC = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
-    console.log('asd');
   };
 
   const filteredUsers = users.filter((user) =>
@@ -48,7 +60,6 @@ export const LeaderBoard: React.FC = () => {
     setLoading(true);
     const res = await getUsers();
     if (res) {
-      console.log(res);
       setUsers(res);
     }
     setLoading(false);
@@ -57,8 +68,8 @@ export const LeaderBoard: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full"
-        variants={leaderboardExitVariants}
+        className="h-full glass-box p-10 overflow-hidden"
+        variants={animationVariants}
         initial="hidden"
         animate="visible"
         exit="hidden"
@@ -70,21 +81,20 @@ export const LeaderBoard: React.FC = () => {
             onChange={handleSearchChange}
             placeholder="Search users..."
           />
-          {/* <p className="text-sm text-gray-500">turned off</p> */}
         </div>
         {!loading ? (
-          <div className=" text-center">
+          <div className="text-center">
             <motion.ul
               className="p-2"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              exit="initial"
+              exit="hidden"
               transition={{ duration: 0.4 }}
             >
               {filteredUsers.map((user, index) => (
                 <motion.li
-                  key={index}
+                  key={user.user_id} // Prefer unique id rather than index for keys
                   className="my-2"
                   onClick={() => navigate(`/profile/${user.user_id}`)}
                   variants={itemVariants}
@@ -94,6 +104,7 @@ export const LeaderBoard: React.FC = () => {
                       <img
                         className="object-cover rounded-full w-full h-full"
                         src={user.avatar_url}
+                        alt={user.display_name}
                       />
                     </div>
                     <p>
@@ -110,30 +121,3 @@ export const LeaderBoard: React.FC = () => {
     </>
   );
 };
-
-//   <h1 className="font-heading text-3xl border-primary">
-//     Players waiting for an opponent
-//   </h1>
-//   {users
-//     .filter((user) => user.user_id != localStorage.getItem('userID'))
-//     .map((user, index) => (
-//       <li
-//         key={index}
-//         className="my-2"
-//         onClick={() => navigate(`/profile/${user.user_id}`)}
-//       >
-//         <div className="flex items-center gap-5">
-//           <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
-//             <img
-//               className="object-cover rounded-full w-full h-full"
-//               src={user.avatar_url}
-//             />
-//           </div>
-//           <p>
-//             {user.display_name || 'N/A'} <br />
-//           </p>
-//           <></>
-//         </div>
-//       </li>
-//     ))}
-// </ul>

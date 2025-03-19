@@ -2,6 +2,23 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
 type user = {
   user_id: string;
   display_name: string;
@@ -32,9 +49,10 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
   return (
     <motion.div
       className="w-full min-h-full max-w-md p-4 glass-box"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      variants={animationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
     >
       <h3 className="text-lg font-semibold">Match History</h3>
       <div className="flex min-h-full flex-col gap-2 mt-2">

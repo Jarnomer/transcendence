@@ -7,8 +7,6 @@ import { motion } from 'framer-motion';
 import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
-import { pageVariants } from '../components/UI/PageWrapper';
-
 interface GameMenuOption {
   content: string;
   imageUrl: string;
@@ -174,10 +172,6 @@ export const GameMenu: React.FC = () => {
     <motion.div
       id="home-container"
       className="flex flex-wrap justify-center gap-4 px-3 items-center p-10"
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
     >
       {renderMenu()}
       {/* <div className="container noselect">
