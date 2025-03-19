@@ -123,6 +123,16 @@
             "position": "before",
           },
           {
+            "pattern": "@game",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@game/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
             "pattern": "@shared",
             "group": "internal",
             "position": "before",

@@ -4,6 +4,7 @@ import {
   Color3,
   CubeTexture,
   DefaultRenderingPipeline,
+  DynamicTexture,
   HemisphericLight,
   MirrorTexture,
   MotionBlurPostProcess,
@@ -14,13 +15,6 @@ import {
   SpotLight,
   Vector3,
 } from 'babylonjs';
-
-import {
-  createCRTEffect,
-  createGlitchEffect,
-  createScanlinesEffect,
-  registerCustomShaders,
-} from './babylonShaders';
 
 export function setupEnvironmentMap(scene: Scene) {
   const envTex = CubeTexture.CreateFromPrefilteredData(
@@ -35,9 +29,6 @@ export function setupEnvironmentMap(scene: Scene) {
 }
 
 export function setupPostProcessing(scene: Scene, camera: Camera) {
-  // Register custom shaders
-  registerCustomShaders();
-
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
 
   // Enable bloom effect
@@ -153,18 +144,6 @@ export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects
   return mirrorTexture;
 }
 
-export function setupCRTEffect(scene: Scene, camera: Camera) {
-  return createCRTEffect(scene, camera, 4.0, 0.15);
-}
-
-export function setupGlitchEffect(scene: Scene, camera: Camera) {
-  return createGlitchEffect(scene, camera);
-}
-
-export function setupScanlinesEffect(scene: Scene, camera: Camera) {
-  return createScanlinesEffect(scene, camera, 0.2);
-}
-
 export function updateMotionBlur(speed: number, camera: Camera) {
   // Find the motion blur post process
   const motionBlur = camera._postProcesses?.find(
@@ -177,4 +156,36 @@ export function updateMotionBlur(speed: number, camera: Camera) {
     motionBlur.motionStrength = 0.05 + normalizedSpeed * 0.25;
     motionBlur.motionBlurSamples = 5 + Math.floor(normalizedSpeed * 15);
   }
+}
+
+export function createParticleTexture(scene: Scene, color: Color3): Texture {
+  const textureSize = 64;
+  const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
+  const context = texture.getContext();
+
+  // Create a radial gradient
+  const gradient = context.createRadialGradient(
+    textureSize / 2,
+    textureSize / 2,
+    0,
+    textureSize / 2,
+    textureSize / 2,
+    textureSize / 2
+  );
+
+  // Convert Color3 to CSS color strings
+  const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
+  const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
+
+  // Color stops - Center, "middle" and edge
+  gradient.addColorStop(0, 'white');
+  gradient.addColorStop(0.3, rgbColor);
+  gradient.addColorStop(1, rgbaColorTransparent);
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, textureSize, textureSize);
+
+  texture.update();
+
+  return texture;
 }

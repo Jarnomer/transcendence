@@ -1,6 +1,6 @@
 import { Animation, Color3, Color4, ParticleSystem, PointLight, Scene, Vector3 } from 'babylonjs';
 
-import { createParticleTexture } from './babylonParticles';
+import { createParticleTexture } from '@game/utils';
 
 function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
   if (!paddleMesh) return;

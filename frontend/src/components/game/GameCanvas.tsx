@@ -2,26 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
-import { GameState } from '@shared/types';
-
 import {
+  RetroEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
-  applyCollisionFlash,
   ballSparkEffect,
   createBall,
   createFloor,
   createPaddle,
+  createPongRetroEffects,
   getThemeColors,
-  setupCRTEffect,
   setupEnvironmentMap,
-  setupGlitchEffect,
   setupPostProcessing,
   setupReflections,
-  setupScanlinesEffect,
   setupSceneCamera,
   setupScenelights,
 } from '@game/utils';
+
+import { GameState } from '@shared/types';
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -101,14 +99,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
-  const sparkEffectCleanupRef = useRef<((speed: number, spin: number) => void) | null>(null);
-
-  // Store custom effects
-  const effectsRef = useRef<{
-    crtEffect?: any;
-    glitchEffect?: { effect: any; setGlitchAmount: (amount: number) => void };
-    scanlinesEffect?: any;
-  }>({});
+  const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
+  const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
 
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
 
@@ -134,11 +126,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera);
     const { shadowGenerators } = setupScenelights(scene);
-
-    // Set up custom effects
-    effectsRef.current.crtEffect = setupCRTEffect(scene, camera);
-    effectsRef.current.glitchEffect = setupGlitchEffect(scene, camera);
-    effectsRef.current.scanlinesEffect = setupScanlinesEffect(scene, camera);
 
     floorRef.current = createFloor(scene, backgroundColor);
     player1Ref.current = createPaddle(scene, primaryColor);
@@ -175,8 +162,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     setLastTheme(theme); // Save current theme
 
     const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
+    sparkEffectsRef.current = sparkCleanUp;
 
-    sparkEffectCleanupRef.current = sparkCleanUp;
+    const retroEffects = createPongRetroEffects(scene, camera, 'default');
+    retroEffectsRef.current = retroEffects;
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -190,7 +179,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(0, 0);
+      if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
+      if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       engine.dispose();
       scene.dispose();
     };
@@ -233,7 +223,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     applyBallEffects(ballRef.current, speed, angle, ball.spin, color);
 
-    if (sparkEffectCleanupRef.current) sparkEffectCleanupRef.current(speed, ball.spin);
+    if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
     if (collision) {
       applyCollisionEffects(
@@ -245,22 +235,26 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         color
       );
 
-      if (postProcessingRef.current) {
-        applyCollisionFlash(postProcessingRef.current, 0.2, 20);
-      }
-
-      if (effectsRef.current.glitchEffect) {
-        effectsRef.current.glitchEffect.setGlitchAmount(0.2);
+      if (retroEffectsRef.current) {
+        retroEffectsRef.current.setGlitchAmount(0.2);
         setTimeout(() => {
-          if (effectsRef.current.glitchEffect) {
-            effectsRef.current.glitchEffect.setGlitchAmount(0);
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.setGlitchAmount(0);
           }
         }, 200);
       }
     }
 
     if (score) {
-      console.log(`player ${score} scored!`);
+      if (retroEffectsRef.current) {
+        retroEffectsRef.current.simulateTrackingDistortion(500, 2.0);
+
+        setTimeout(() => {
+          retroEffectsRef.current?.changeChannel(800).then(() => {
+            // Add code here to run after the channel change
+          });
+        }, 100);
+      }
     }
 
     prevBallState.current = {
@@ -272,13 +266,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     };
   }, [gameState]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="game-canvas glass-box"
-      style={{ width: '100%', height: '100%' }}
-    />
-  );
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default GameCanvas;

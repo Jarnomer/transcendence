@@ -6,43 +6,10 @@ import {
   ParticleSystem,
   PBRMaterial,
   Scene,
-  Texture,
   Vector3,
 } from 'babylonjs';
 
-import { updateMotionBlur } from '@game/utils';
-
-export function createParticleTexture(scene: Scene, color: Color3): Texture {
-  const textureSize = 64;
-  const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
-  const context = texture.getContext();
-
-  // Create a radial gradient
-  const gradient = context.createRadialGradient(
-    textureSize / 2,
-    textureSize / 2,
-    0,
-    textureSize / 2,
-    textureSize / 2,
-    textureSize / 2
-  );
-
-  // Convert Color3 to CSS color strings
-  const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
-  const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
-
-  // Color stops - Center, "middle" and edge
-  gradient.addColorStop(0, 'white');
-  gradient.addColorStop(0.3, rgbColor);
-  gradient.addColorStop(1, rgbaColorTransparent);
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, textureSize, textureSize);
-
-  texture.update();
-
-  return texture;
-}
+import { createParticleTexture, updateMotionBlur } from '@game/utils';
 
 export function createBallTrail(ballMesh: any, color: Color3, scene: Scene) {
   if (ballMesh.trailParticleSystem) ballMesh.trailParticleSystem.dispose();
