@@ -37,7 +37,6 @@ const useMatchmaking = (
   const handleMatchFound = (game: any) => {
     console.log('Match found:', game);
 
-    
     closeConnection('matchmaking');
     matchmaker.current.setMatchMakerState(MatchMakerState.MATCHED);
     setGameId(game.game_id);
@@ -59,6 +58,7 @@ const useMatchmaking = (
           case MatchMakerState.MATCHED:
             console.log('Matched with a game');
             setGameId(matchmaker.current.getGameId());
+            console.log('Game ID:', matchmaker.current.getGameId());
             params.current.set('game_id', matchmaker.current.getGameId() || '');
             console.log('Connecting to game:', params.current.toString());
             gameSocket.connect(params.current);

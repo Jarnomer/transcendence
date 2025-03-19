@@ -29,7 +29,7 @@ export const HomePage: React.FC = () => {
   const handleJoinGameClick = () => {
     // Add your logic for joining a game here
     console.log('Join game clicked');
-    navigate('/gameMenu', { state: { lobby: 'join' } });
+    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'join' } });
   };
   return (
     <>
@@ -40,12 +40,16 @@ export const HomePage: React.FC = () => {
         <div className="">
           <PlayerQueue></PlayerQueue>
         </div>
-        <button className="btn btn-primary" onClick={handleCreateGameClick}>
-          create game
-        </button>
-        <button className="btn btn-primary" onClick={handleJoinGameClick}>
-          join game
-        </button>
+        <div className="">
+          <button className="btn btn-primary" onClick={handleCreateGameClick}>
+            create game
+          </button>
+        </div>
+        <div className="">
+          <button className="btn btn-primary" onClick={handleJoinGameClick}>
+            quick join
+          </button>
+        </div>
       </div>
     </>
   );

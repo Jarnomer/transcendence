@@ -54,8 +54,6 @@ export class QueueModel {
    */
   async getQueues(page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
-    console.log('offset', offset);
-    console.log('pageSize', pageSize);
     const query = `
         SELECT
         q.queue_id,

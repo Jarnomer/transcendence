@@ -10,7 +10,7 @@ export class PongGameSession {
   private game: PongGame;
   private mode: string;
   private clients: Map<string, any>;
-  private aiController: AIController | null;
+  private aiControllers: Map<string, AIController> = new Map();
   private onEndCallback: () => void;
   private previousGameStatus: GameStatus;
   private interval: NodeJS.Timeout | null = null;
@@ -27,13 +27,18 @@ export class PongGameSession {
     this.game = new PongGame(mode, difficulty);
     this.previousGameStatus = this.game.getGameStatus();
 
-    this.aiController = mode === 'singleplayer' ? new AIController(this.difficulty) : null;
+    if (mode === 'singleplayer') {
+      // this.aiControllers.set('player1', new AIController(this.difficulty, true));
+      this.aiControllers.set('player2', new AIController(this.difficulty, false));
+    }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
     }
-    if (this.mode === 'singleplayer') {
-      this.game.setPlayerId(2, this.difficulty);
+
+    if (this.mode === 'AIvsAI') {
+      this.aiControllers.set('player1', new AIController(this.difficulty, true));
+      this.aiControllers.set('player2', new AIController(this.difficulty, false));
     }
   }
 
@@ -98,6 +103,10 @@ export class PongGameSession {
   handlePlayerMove(playerId: string, move: 'up' | 'down' | null): void {
     const moves: Record<string, 'up' | 'down' | null> = { player1: null, player2: null };
 
+    if (this.aiControllers.size > 1) {
+      return;
+    }
+
     const player1Id = this.game.getPlayerId(1);
     const player2Id = this.game.getPlayerId(2);
 
@@ -126,7 +135,8 @@ export class PongGameSession {
       }
     }
 
-    if (this.aiController && updatedGameStatus === 'playing') {
+    // AI Move Handling (for AI vs. AI or Singleplayer)
+    if (this.aiControllers.size > 0 && updatedGameStatus === 'playing') {
       this.handleAIMove();
     }
   }
@@ -149,7 +159,7 @@ export class PongGameSession {
       this.interval = null;
     }
 
-    this.aiController = null;
+    this.aiControllers.clear();
 
     this.game.stopGame();
     this.broadcast({ type: 'game_status', state: 'finished' });
@@ -157,17 +167,24 @@ export class PongGameSession {
   }
 
   private handleAIMove(): void {
-    if (!this.aiController) return;
-
-    const ball = this.game.getGameState().ball;
-    if (this.aiController.shouldUpdate(ball.dx)) {
-      const aiPaddle = this.game.getGameState().players.player2;
+    for (const [playerId, aiController] of this.aiControllers) {
+      const ball = this.game.getGameState().ball;
+      let aiPaddle;
+      if (playerId === 'player1') {
+        aiPaddle = this.game.getGameState().players.player1;
+      } else {
+        aiPaddle = this.game.getGameState().players.player2;
+      }
       const paddleSpeed = this.game.getPaddleSpeed();
-      this.aiController.updateAIState(ball, aiPaddle, this.game.getPaddleHeight(2), paddleSpeed);
-    }
+      const paddleHeight = this.game.getPaddleHeight(playerId === 'player1' ? 1 : 2);
 
-    const aiMove = this.aiController.getNextMove();
-    this.game.updateGameState({ player2: aiMove });
+      if (aiController.shouldUpdate(ball.dx)) {
+        aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed);
+      }
+
+      const aiMove = aiController.getNextMove();
+      this.game.updateGameState({ [playerId]: aiMove }); // Apply AI move
+    }
   }
 
   readyGame(playerId: string, state: boolean): void {

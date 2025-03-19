@@ -151,6 +151,11 @@ class MatchMaker {
         if (lobby === 'create') {
           console.log('Creating 1v1 game...');
           this.state = MatchMakerState.WAITING_FOR_PLAYERS;
+          if (this.difficulty === 'local') {
+            if (!game.game_id) throw new Error('Game ID not found');
+            this.state = MatchMakerState.MATCHED;
+            this.gameId = game.game_id;
+          }
         }
         break;
       case 'tournament':

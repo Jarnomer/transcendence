@@ -27,7 +27,6 @@ export class QueueService {
    */
   async getQueues(page: number, pageSize: number) {
     const queues = await this.queueModel.getQueues(page, pageSize);
-    console.log('queues', queues);
     const totalQueues = await this.queueModel.getTotalQueues();
     return {
       queues,

@@ -87,7 +87,6 @@ export class UserService {
 
   async getUserData(user_id: string) {
     const res = await this.userModel.getUserData(user_id);
-    console.log(res);
     if (!res) {
       throw new NotFoundError('User data not found');
     }
