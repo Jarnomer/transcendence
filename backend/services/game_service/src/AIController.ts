@@ -49,7 +49,8 @@ export class AIController {
 
     if (ballMovingTowardsAI && this.plannedMoves.length <= requiredFrames - spinMovesNeeded) {
       // Decide whether to apply spin based on difficulty
-      const spinChance = this.difficulty === 'easy' ? 0.2 : this.difficulty === 'normal' ? 0.5 : 1;
+      const spinChance =
+        this.difficulty === 'easy' ? 0.2 : this.difficulty === 'normal' ? 0.5 : 0.8;
       applyingSpin = Math.random() < spinChance;
     }
 
@@ -162,7 +163,7 @@ export class AIController {
     } else if (this.difficulty === 'normal') {
       errorFactor = 2;
     } else if (this.difficulty === 'brutal') {
-      errorFactor = 0;
+      errorFactor = 1.1;
     }
 
     const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.params.gameHeight / 2);
