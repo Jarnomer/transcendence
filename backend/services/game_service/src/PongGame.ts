@@ -17,6 +17,8 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
+  private frameCount = 0;
+
   constructor(mode: string, difficulty: string) {
     this.mode = mode;
     this.difficulty = difficulty;
@@ -227,7 +229,12 @@ export default class PongGame {
   private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
     if (this.gameStatus !== 'playing') return;
 
-    const paddleState = this.gameState.players[player];
+    let paddleState;
+    if (player === 'player1') {
+      paddleState = this.gameState.players.player1;
+    } else {
+      paddleState = this.gameState.players.player2;
+    }
 
     if (move === 'up') {
       paddleState.y -= this.params.paddleSpeed;
@@ -246,7 +253,11 @@ export default class PongGame {
         paddleState.dy = this.params.paddleSpeed;
       }
     } else if (move === null) {
-      paddleState.dy = 0;
+      this.frameCount++;
+      if (this.frameCount % 6 === 0) {
+        paddleState.dy = 0;
+        this.frameCount = 0;
+      }
     }
   }
 

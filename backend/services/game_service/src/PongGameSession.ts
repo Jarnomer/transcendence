@@ -28,7 +28,7 @@ export class PongGameSession {
     this.previousGameStatus = this.game.getGameStatus();
 
     if (mode === 'singleplayer') {
-      this.aiControllers.set('player1', new AIController(this.difficulty, true));
+      // this.aiControllers.set('player1', new AIController(this.difficulty, true));
       this.aiControllers.set('player2', new AIController(this.difficulty, false));
     }
 
