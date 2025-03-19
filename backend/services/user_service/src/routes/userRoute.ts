@@ -4,8 +4,8 @@ import { UserController } from '../controllers/UserController';
 import { UserService } from '../services/UserService';
 
 export async function userRoutes(fastify: FastifyInstance) {
-  const userService = new UserService(fastify.db);
-  const userController = new UserController(userService);
+  const userService = UserService.getInstance(fastify.db);
+  const userController = UserController.getInstance(userService);
   fastify.get('/:user_id', userController.getUserByID.bind(userController));
   fastify.get('/all', userController.getAllUsers.bind(userController));
   fastify.get('/all/rank', userController.getAllUsersWithRank.bind(userController));

@@ -144,9 +144,7 @@ export class PongGameSession {
   endGame(): void {
     // Prevent recursive calls
     if (this.isGameFinished) return;
-
     this.isGameFinished = true;
-
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;

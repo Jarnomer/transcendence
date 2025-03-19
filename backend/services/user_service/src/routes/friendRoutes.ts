@@ -4,8 +4,8 @@ import { FriendController } from '../controllers/FriendController';
 import { FriendService } from '../services/FriendService';
 
 export async function friendRoutes(fastify: FastifyInstance) {
-  const friendService = new FriendService(fastify.db);
-  const friendController = new FriendController(friendService);
+  const friendService = FriendService.getInstance(fastify.db);
+  const friendController = FriendController.getInstance(friendService);
 
   //friend requests
   fastify.post('/request', friendController.sendFriendRequest.bind(friendController));

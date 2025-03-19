@@ -6,7 +6,7 @@ import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { GameState } from '@shared/types';
 
-import { useWebSocketContext } from '../../services';
+import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import PlayerCard from './PlayerScoreCard';
 
 interface Player {
@@ -45,7 +45,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
 
   const location = useLocation();
   const { mode, difficulty } = location.state || {};
-  const { gameStatus, connectionStatus, gameState, gameId } = useWebSocketContext();
+  const { gameStatus, connections, gameState, gameId } = useWebSocketContext();
   const { setLoadingState, loadingStates } = useLoading();
 
   const playerScores = useRef({
@@ -84,7 +84,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   playerScores.current.player1Score = gameState.players.player1?.score || 0;
   playerScores.current.player2Score = gameState.players.player2?.score || 0;
 
-  if (connectionStatus !== 'connected') {
+  if (connections.game !== 'connected') {
     return null;
   }
 

@@ -19,9 +19,9 @@ import {
 } from '../types/authTypes';
 
 export async function authRoutes(fastify: FastifyInstance) {
-  const authService = new AuthService(fastify.db);
-  const userService = new UserService(fastify.db);
-  const authController = new AuthController(authService, userService);
+  const authService = AuthService.getInstance(fastify.db);
+  const userService = UserService.getInstance(fastify.db);
+  const authController = AuthController.getInstance(authService, userService);
 
   fastify.post<{ Body: RegisterType }>(
     '/register',

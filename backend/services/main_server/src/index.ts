@@ -4,24 +4,17 @@ import fastifyJwt from '@fastify/jwt';
 import Swagger from '@fastify/swagger';
 import SwaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
-
-// Import Fastify and its JWT plugin
 import fastify from 'fastify';
 
 import matchMakingService from '@my-backend/matchmaking_service/';
 import remoteService from '@my-backend/remote_service/';
 import userService from '@my-backend/user_service/'; // Everything from user-service is now available
 
+import 'module-alias/register';
 import databasePlugin from './db';
 import authPlugin from './middlewares/auth';
 import errorHandlerPlugin from './middlewares/errorHandler';
 import loggerPlugin from './middlewares/logger';
-
-// Import alias support
-import 'module-alias/register';
-
-// Import custom routes
-
 import adminRoutes from './routes/adminRoutes';
 
 dotenv.config();
@@ -96,7 +89,7 @@ const start = async () => {
     app.register(adminRoutes, { prefix: '/api' }); // Register admin routes
     app.register(userService, { prefix: '/api' }); // Register user routes inside the plugin
     app.register(matchMakingService, { prefix: '/api' }); // Register matchmaking routes inside the plugin
-    app.register(remoteService, { prefix: '/ws/remote' }); // Register remote routes inside the plugin
+    app.register(remoteService, { prefix: '/ws' }); // Register remote routes inside the plugin
 
     await app.listen({ port: Number(process.env.BACKEND_PORT) || 8000, host: '0.0.0.0' });
     app.log.info(`Server running on port ${process.env.BACKEND_PORT || 8000}`);

@@ -1,9 +1,10 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-
-import '@fastify/jwt';
 import fs from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
+
+import { FastifyReply, FastifyRequest } from 'fastify';
+
+import '@fastify/jwt';
 
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
@@ -11,9 +12,17 @@ import { UserService } from '../services/UserService';
 
 export class UserController {
   private userService: UserService;
+  private static instance: UserController;
 
   constructor(userService: UserService) {
     this.userService = userService;
+  }
+
+  static getInstance(userService: UserService) {
+    if (!UserController.instance) {
+      UserController.instance = new UserController(userService);
+    }
+    return UserController.instance;
   }
 
   /**

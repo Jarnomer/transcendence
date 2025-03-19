@@ -29,7 +29,9 @@ CREATE TABLE   IF NOT EXISTS user_stats (
   user_stat_id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   wins INTEGER DEFAULT 0,
-  losses INTEGER DEFAULT 0
+  losses INTEGER DEFAULT 0,
+  elo INTEGER DEFAULT 1000,
+  rank INTEGER DEFAULT 0
 );
 
 -- creates a table for notifications
@@ -91,15 +93,19 @@ CREATE TABLE  IF NOT EXISTS message_reactions (
 
 -- CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='messages', content_rowid='id');
 
-CREATE TABLE  IF NOT EXISTS matchmaking_queue (
-  matchmaking_queue_id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
-  status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
-  type TEXT CHECK(type IN ('1v1', 'tournament')) DEFAULT '1v1',
-  matched_with TEXT DEFAULT NULL REFERENCES users(user_id) ON DELETE SET NULL, -- NULL if not matched
-  joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+CREATE TABLE  IF NOT EXISTS queues (
+  queue_id TEXT PRIMARY KEY,
+  mode TEXT CHECK(mode IN ('1v1', 'tournament', 'random')) DEFAULT '1v1',
+  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 
+CREATE TABLE IF NOT EXISTS queue_players (
+  queue_id TEXT NOT NULL REFERENCES queues(queue_id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL UNIQUE REFERENCES users(user_id) ON DELETE CASCADE,
+  status TEXT CHECK(status IN ('waiting', 'matched', 'playing')) NOT NULL,
+  joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (queue_id, user_id)
+);
 
 CREATE TABLE IF NOT EXISTS game_players (
   game_id TEXT NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
@@ -199,15 +205,18 @@ BEGIN
 END;
 
 
-CREATE TRIGGER IF NOT EXISTS remove_matchmaking_entry_on_game_complete
-AFTER UPDATE ON games
-WHEN NEW.status = 'completed'
-BEGIN
-    DELETE FROM matchmaking_queue
-    WHERE user_id IN (
-        SELECT player_id FROM game_players WHERE game_id = NEW.game_id
-    );
-END;
+-- CREATE TRIGGER IF NOT EXISTS remove_matchmaking_entry_on_game_complete
+-- AFTER UPDATE ON games
+-- WHEN NEW.status = 'completed'
+-- BEGIN
+--     DELETE FROM queues
+--     WHERE queue_id IN (
+--         SELECT queque_id
+--         LEFT JOIN queue_players ON queues.queue_id = queue_players.queue_id AND
+--         FROM game_players WHERE game_id = NEW.game_id
+--         WHERE game_id = NEW.game_id
+--     );
+-- END;
 
 --trigger for inserting friend when friend request accepted
 CREATE TRIGGER IF NOT EXISTS insert_friend_on_friend_request_accepted
@@ -218,4 +227,16 @@ BEGIN
   VALUES (NEW.sender_id, NEW.receiver_id);
   INSERT INTO friends(user_id, friend_id)
   VALUES (NEW.receiver_id, NEW.sender_id);
+END;
+
+--trigger for deleting queue when user leaves queue
+CREATE TRIGGER IF NOT EXISTS delete_queue_on_user_leave
+AFTER DELETE ON queue_players
+BEGIN
+  DELETE FROM queues
+  WHERE queue_id = OLD.queue_id
+  AND NOT EXISTS (
+    SELECT * FROM queue_players
+    WHERE queue_id = OLD.queue_id
+  );
 END;

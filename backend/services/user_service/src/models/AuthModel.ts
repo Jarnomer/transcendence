@@ -3,9 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class AuthModel {
   private db: Database;
-
+  private static instance: AuthModel;
   constructor(db: Database) {
     this.db = db;
+  }
+
+  static getInstance(db: Database) {
+    if (!AuthModel.instance) {
+      AuthModel.instance = new AuthModel(db);
+    }
+    return AuthModel.instance;
   }
 
   async runTransaction(callback: (db: Database) => Promise<any>) {

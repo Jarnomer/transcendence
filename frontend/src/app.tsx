@@ -7,6 +7,7 @@ import { Header } from './components/header/Header.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
+import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 import { ChatPage } from './pages/ChatPage.tsx';
 import { CreatorsPage } from './pages/CreatorsPage.tsx';
 import { GameMenu } from './pages/GameMenu.tsx';
@@ -15,7 +16,6 @@ import { HomePage } from './pages/HomePage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 import { api } from './services/api.ts';
-import { WebSocketProvider } from './services/webSocket/WebSocketContext.tsx';
 
 export const IsLoggedInContext = React.createContext<
   | {

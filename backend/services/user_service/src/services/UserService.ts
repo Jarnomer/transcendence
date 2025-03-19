@@ -6,9 +6,17 @@ import { UserModel } from '../models/UserModel';
 
 export class UserService {
   private userModel: UserModel;
+  private static instance: UserService;
 
   constructor(db: Database) {
-    this.userModel = new UserModel(db);
+    this.userModel = UserModel.getInstance(db);
+  }
+
+  static getInstance(db: Database) {
+    if (!UserService.instance) {
+      UserService.instance = new UserService(db);
+    }
+    return UserService.instance;
   }
 
   async createUser(user_id: string) {
@@ -79,6 +87,7 @@ export class UserService {
 
   async getUserData(user_id: string) {
     const res = await this.userModel.getUserData(user_id);
+    console.log(res);
     if (!res) {
       throw new NotFoundError('User data not found');
     }

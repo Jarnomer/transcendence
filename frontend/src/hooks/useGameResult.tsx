@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { GameState } from '@types';
 
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { submitResult } from '../services/gameService';
-import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
 
-export const useGameResultSubmission = (
+export const useGameResult = (
   gameStatus: string,
   gameId: string | null,
   gameState: GameState,
@@ -56,7 +56,7 @@ export const useGameResultSubmission = (
     if (gameStatus === 'finished') {
       const { players } = gameState;
       const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
-
+      console.log('Submitting game result:', gameId, sortedPlayers);
       submitResult({
         game_id: gameId,
         winner_id: sortedPlayers[0].id,
@@ -66,7 +66,7 @@ export const useGameResultSubmission = (
       })
         .then(() => {
           dispatch({ type: 'GAME_RESET' });
-          navigate('/gameMenu');
+          navigate('/home');
         })
         .catch((err) => {
           console.error('Error submitting game result:', err);
@@ -82,7 +82,7 @@ export const useGameResultSubmission = (
     return () => {
       console.log('Cleanup');
       if (!gameIdRef.current || hasSubmittedResult.current) return;
-      closeConnection();
+      closeConnection('game');
       const { players } = gameStateRef.current;
       const playerArray = [players.player1, players.player2];
       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
@@ -104,4 +104,4 @@ export const useGameResultSubmission = (
   }, []);
 };
 
-export default useGameResultSubmission;
+export default useGameResult;

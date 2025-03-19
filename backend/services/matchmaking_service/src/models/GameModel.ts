@@ -3,9 +3,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class GameModel {
   private db: Database;
+  private static instance: GameModel;
 
   constructor(db: Database) {
     this.db = db;
+  }
+
+  static getInstance(db: Database) {
+    if (!GameModel.instance) {
+      GameModel.instance = new GameModel(db);
+    }
+    return GameModel.instance;
   }
 
   async runTransaction(callback: (db: Database) => Promise<any>) {
@@ -20,6 +28,19 @@ export class GameModel {
     }
   }
 
+  /**
+   *
+   * @param user_id  user_id of the player
+   * @param opponent_id user_id of the opponent
+   * @returns game object
+   * @example
+   * {
+   *  game_id: 'game_id',
+   *  start_time: 'created_at',
+   *  end_time: 'end_time',
+   *  status: 'status',
+   *  }
+   */
   async createGame(user_id: string, opponent_id: string) {
     const id = uuidv4();
     console.log('createGame', id, user_id, opponent_id);

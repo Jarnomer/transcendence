@@ -1,8 +1,8 @@
 import { api } from './api';
 
 interface QueueResponse {
+  queue_id: string;
   status: string;
-  message: string;
 }
 
 interface GameIDResponse {
@@ -10,13 +10,13 @@ interface GameIDResponse {
   status: string;
 }
 
-export async function enterQueue() {
+export async function enterQueue(mode: string) {
   try {
     const userID = localStorage.getItem('userID');
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}`);
+    const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}?mode=${mode}`);
     console.log(res.data);
     return res.data;
   } catch (err) {

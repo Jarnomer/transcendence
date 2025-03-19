@@ -3,31 +3,31 @@ class WebSocketManager {
   private ws: WebSocket | null = null;
   private url: string;
   private reconnectAttempts = 0;
+  private params: URLSearchParams = new URLSearchParams();
   private static readonly MAX_RECONNECT_ATTEMPTS = 5;
   private static readonly RECONNECT_INTERVAL = 3000;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private eventHandlers: Record<string, ((data: any) => void)[]> = {};
   private manualClose = false;
 
-  private constructor(url: string) {
-    this.url = url;
-    this.connect();
+  private constructor(type: string) {
+    this.url = `wss://${window.location.host}/ws/${type}/`;
   }
 
-  static getInstance(url: string): WebSocketManager {
-    if (!this.instances[url]) {
-      this.instances[url] = new WebSocketManager(url);
+  static getInstance(type: string): WebSocketManager {
+    if (!this.instances[type]) {
+      this.instances[type] = new WebSocketManager(type);
     }
-    return this.instances[url];
+    return this.instances[type];
   }
 
-  private connect() {
+  connect(params: URLSearchParams) {
     if (this.ws) {
       this.ws.close();
     }
-
+    this.params = params;
     console.log('Connecting to WebSocket:', this.url);
-    this.ws = new WebSocket(this.url);
+    this.ws = new WebSocket(this.url + `?${params.toString()}`);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected:', this.url);
@@ -55,6 +55,14 @@ class WebSocketManager {
       this.notifyHandlers('error', error);
     };
 
+    /**
+     * This function is called whenever a message is received from the WebSocket server.
+     * It parses the message and notifies the event handlers.
+     * If the message is not a valid JSON object, it logs a warning.
+     * @param event - The message event from the WebSocket server.
+     * @data - The parsed JSON object from the message.
+     * @example - { type: 'game', state: 'data' }
+     */
     this.ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -80,7 +88,7 @@ class WebSocketManager {
     }
 
     this.reconnectTimer = setTimeout(() => {
-      this.connect();
+      this.connect(this.params);
     }, WebSocketManager.RECONNECT_INTERVAL);
   }
 

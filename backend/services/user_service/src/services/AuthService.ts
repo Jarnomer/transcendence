@@ -10,8 +10,16 @@ import { AuthModel } from '../models/AuthModel';
 
 export class AuthService {
   private authModel: AuthModel;
+  private static instance: AuthService;
   constructor(db: Database) {
-    this.authModel = new AuthModel(db);
+    this.authModel = AuthModel.getInstance(db);
+  }
+
+  static getInstance(db: Database) {
+    if (!AuthService.instance) {
+      AuthService.instance = new AuthService(db);
+    }
+    return AuthService.instance;
   }
 
   async createAuth(username: string, password: string) {

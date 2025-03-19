@@ -29,7 +29,7 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
-  private readonly MAX_SCORE: number = 10;
+  private readonly MAX_SCORE: number = 3;
 
   private frameCount: number = 0;
 

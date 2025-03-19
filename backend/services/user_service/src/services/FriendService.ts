@@ -6,9 +6,17 @@ import { FriendModel } from '../models/FriendModel';
 
 export class FriendService {
   private friendModel: FriendModel;
+  private static instance: FriendService;
 
   constructor(db: Database) {
-    this.friendModel = new FriendModel(db);
+    this.friendModel = FriendModel.getInstance(db);
+  }
+
+  static getInstance(db: Database) {
+    if (!FriendService.instance) {
+      FriendService.instance = new FriendService(db);
+    }
+    return FriendService.instance;
   }
 
   async sendFriendRequest(user_id: string, receiver_id: string) {

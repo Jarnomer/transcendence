@@ -1,12 +1,20 @@
 import { Database } from 'sqlite';
 
-import { queryWithJsonParsing } from '../utils/utils';
+import { queryWithJsonParsingObject } from '../../../utils/utils';
 
 export class UserModel {
   private db: Database;
+  private static instance: UserModel;
 
   constructor(db: Database) {
     this.db = db;
+  }
+
+  static getInstance(db: Database) {
+    if (!UserModel.instance) {
+      UserModel.instance = new UserModel(db);
+    }
+    return UserModel.instance;
   }
 
   async runTransaction(callback: (db: Database) => Promise<any>) {
@@ -177,7 +185,7 @@ export class UserModel {
     WHERE up.user_id = ?;
     `;
 
-    return await queryWithJsonParsing(
+    return await queryWithJsonParsingObject(
       this.db,
       query,
       [user_id],

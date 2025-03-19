@@ -10,9 +10,17 @@ import { GameModel } from '../models/GameModel';
 
 export class GameService {
   private gameModel: GameModel;
+  private static instance: GameService;
 
   constructor(db: Database) {
-    this.gameModel = new GameModel(db);
+    this.gameModel = GameModel.getInstance(db);
+  }
+
+  static getInstance(db: Database) {
+    if (!GameService.instance) {
+      GameService.instance = new GameService(db);
+    }
+    return GameService.instance;
   }
 
   /**

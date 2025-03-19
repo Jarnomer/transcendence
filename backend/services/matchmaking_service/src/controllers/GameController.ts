@@ -5,11 +5,18 @@ import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 import { GameService } from '../services/GameService';
 export class GameController {
   private gameService: GameService;
+  private static instance: GameController;
 
   constructor(gameService: GameService) {
     this.gameService = gameService;
   }
 
+  static getInstance(gameService: GameService) {
+    if (!GameController.instance) {
+      GameController.instance = new GameController(gameService);
+    }
+    return GameController.instance;
+  }
   /**
    * create single player mode
    * @param request get: user_id as path parameter, difficulty as query parameter

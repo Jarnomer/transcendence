@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { createMoveInputMessage, createReadyInputMessage } from '@shared/messages/';
 
-import { useWebSocketContext } from '../services/webSocket/WebSocketContext';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 interface UseGameControlsProps {
   localPlayerId: string;
@@ -50,22 +50,22 @@ const useGameControls = (localPlayerId: string | null, remotePlayerId: string | 
     if (!localPlayerId || !remotePlayerId) return;
     const intervalId = setInterval(() => {
       if (keysPressed['w']) {
-        sendMessage(createMoveInputMessage(localPlayerId, 'up'));
+        sendMessage('game', createMoveInputMessage(localPlayerId, 'up'));
       }
 
       if (keysPressed['s']) {
-        sendMessage(createMoveInputMessage(localPlayerId, 'down'));
+        sendMessage('game', createMoveInputMessage(localPlayerId, 'down'));
       }
 
       if (remotePlayerId && keysPressed['ArrowUp']) {
-        sendMessage(createMoveInputMessage(remotePlayerId, 'up'));
+        sendMessage('game', createMoveInputMessage(remotePlayerId, 'up'));
       }
 
       if (remotePlayerId && keysPressed['ArrowDown']) {
-        sendMessage(createMoveInputMessage(remotePlayerId, 'down'));
+        sendMessage('game', createMoveInputMessage(remotePlayerId, 'down'));
       }
       if (remotePlayerId && keysPressed['p']) {
-        sendMessage(createReadyInputMessage(localPlayerId, true));
+        sendMessage('game', createReadyInputMessage(localPlayerId, true));
       }
     }, 1000 / 60); // 60fps
 

@@ -1,11 +1,15 @@
-import { LeaderBoard } from '@components';
-import { sendFriendRequest } from '@services/friendService';
 import React from 'react';
+
+import { useNavigate } from 'react-router-dom';
+
+import { LeaderBoard } from '@components';
+
+import { sendFriendRequest } from '@services/friendService';
+
 import { PlayerQueue } from '../components/home/PlayersInQueue';
 
 export const HomePage: React.FC = () => {
-
-  
+  const navigate = useNavigate();
   const handleAddFriendClick = (event, receiver_id: string) => {
     // Stop the click event from bubbling up and triggering the navigate function
     event.stopPropagation();
@@ -16,6 +20,17 @@ export const HomePage: React.FC = () => {
     });
   };
 
+  const handleCreateGameClick = () => {
+    // Add your logic for creating a game here
+    console.log('Create game clicked');
+    navigate('/gameMenu', { state: { lobby: 'create' } });
+  };
+
+  const handleJoinGameClick = () => {
+    // Add your logic for joining a game here
+    console.log('Join game clicked');
+    navigate('/gameMenu', { state: { lobby: 'join' } });
+  };
   return (
     <>
       <div className="flex flex-grow w-full h-full justify-center gap-20">
@@ -25,6 +40,12 @@ export const HomePage: React.FC = () => {
         <div className="">
           <PlayerQueue></PlayerQueue>
         </div>
+        <button className="btn btn-primary" onClick={handleCreateGameClick}>
+          create game
+        </button>
+        <button className="btn btn-primary" onClick={handleJoinGameClick}>
+          join game
+        </button>
       </div>
     </>
   );
