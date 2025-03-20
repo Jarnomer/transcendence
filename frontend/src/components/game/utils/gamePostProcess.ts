@@ -13,6 +13,7 @@ import {
   Scene,
   ShadowGenerator,
   SpotLight,
+  Texture,
   Vector3,
 } from 'babylonjs';
 

@@ -173,18 +173,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     window.addEventListener('resize', handleResize);
 
     return () => {
-      const timeout = 1500;
-
-      if (retroEffectsRef.current) retroEffectsRef.current.simulateCRTTurnOff(timeout);
-
       window.removeEventListener('resize', handleResize);
-
-      setTimeout(() => {
-        if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
-        if (retroEffectsRef.current) retroEffectsRef.current.dispose();
-        engine.dispose();
-        scene.dispose();
-      }, timeout);
+      if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
+      if (retroEffectsRef.current) retroEffectsRef.current.dispose();
+      engine.dispose();
+      scene.dispose();
     };
   }, []);
 

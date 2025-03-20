@@ -266,63 +266,176 @@ export function registerRetroShaders() {
   `;
 
   Effect.ShadersStore['tvSwitchFragmentShader'] = `
-    precision highp float;
-    varying vec2 vUV;
-    uniform sampler2D textureSampler;
-    uniform float time;
-    uniform float switchProgress; // 0 to 1
-    uniform vec4 transitionColor;
+  precision highp float;
+  varying vec2 vUV;
+  uniform sampler2D textureSampler;
+  uniform float time;
+  uniform float switchProgress; // 0 to 1
+  uniform vec4 transitionColor;
 
-    float rand(vec2 co) {
-      return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-    }
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
 
-    void main() {
-      vec2 uv = vUV;
-      vec4 baseColor = texture2D(textureSampler, uv);
-      vec4 outputColor = baseColor;
+  // Create a sinewave pattern for the rolling effect
+  float sinewave(float y, float amplitude, float frequency, float speed) {
+    return amplitude * sin(y * frequency + time * speed);
+  }
 
-      if (switchProgress > 0.0) {
-        // TV collapse animation
-        float collapse = smoothstep(0.0, 0.5, switchProgress);
+  void main() {
+    vec2 uv = vUV;
+    vec4 baseColor = texture2D(textureSampler, uv);
+    vec4 outputColor = baseColor;
 
-        // Vertical collapse & horizontal line
-        float lineWidth = 0.02;
-        float screenHeight = 1.0 - collapse * 0.8;
-        float normalizedY = (uv.y - 0.5) / screenHeight + 0.5;
+    if (switchProgress > 0.0) {
+      // Calculate phases for multi-stage transition
+      float phase1 = smoothstep(0.0, 0.4, switchProgress); // Initial distortion
+      float phase2 = smoothstep(0.3, 0.7, switchProgress); // Rolling collapse
+      float phase3 = smoothstep(0.6, 1.0, switchProgress); // Final fade
 
-        if (normalizedY >= 0.0 && normalizedY <= 1.0 && switchProgress < 0.7) {
-          // Sample from collapsing screen
-          outputColor = texture2D(textureSampler, vec2(uv.x, normalizedY));
+      // HARDCODED VALUE: Rolling wave strength (1.0 = normal, 2.0 = stronger)
+      float rollStrengthValue = 1.2;
 
-          // Add screen distortion during collapse
-          float distortion = sin(normalizedY * 20.0 + time * 5.0) * 0.01 * switchProgress;
-          outputColor.r = texture2D(textureSampler, vec2(uv.x + distortion, normalizedY)).r;
-          outputColor.b = texture2D(textureSampler, vec2(uv.x - distortion, normalizedY)).b;
+      // Create rolling bands effect - stronger as transition progresses
+      float rollingStrength = phase1 * 0.3 * rollStrengthValue;
+      float rollSpeed = 15.0 + phase1 * 30.0;
+      float rollFreq = 10.0 + phase1 * 40.0;
 
-          // Add noise during transition
-          float noiseAmount = switchProgress * 0.3;
-          float noise = rand(vec2(uv.x * time, normalizedY * time)) * noiseAmount;
-          outputColor.rgb += vec3(noise);
+      // Multiple rolling waves with different frequencies
+      float roll1 = sinewave(uv.y, 0.08 * rollingStrength, rollFreq, rollSpeed);
+      float roll2 = sinewave(uv.y, 0.05 * rollingStrength, rollFreq * 2.0, -rollSpeed * 0.7);
+      float roll3 = sinewave(uv.x, 0.03 * rollingStrength, rollFreq * 0.5, rollSpeed * 0.3);
+
+      // Combined rolling effect
+      vec2 rollingUV = vec2(
+        uv.x + roll1 + roll3,
+        uv.y + roll2
+      );
+
+      // Tracking noise lines that move vertically
+      float trackingPos = fract(time * 0.5 + uv.y * 3.0);
+      float trackingLine = step(0.97, trackingPos) * step(phase1, 0.5);
+
+      // Vertical collapse animation
+      float collapseAmount = phase2 * 0.8;
+      float screenHeight = 1.0 - collapseAmount;
+
+      // Create visible division in the screen with straight dark bar that has random vertical movement
+
+      // Base position for the division line (center of screen)
+      float baseDivisionPos = 0.5;
+
+      // HARDCODED VALUES: Line jump frequency and amount (1.0 = normal, 2.0 = more/larger)
+      float lineJumpFrequencyValue = 1.4;  // Make jumps more frequent
+      float lineJumpAmountValue = 1.2;     // Make jumps slightly larger
+
+      // Random vertical position changes
+      // Use time-based random jumps for vertical movement
+      float jumpTime = floor(time * 12.0 * lineJumpFrequencyValue);
+      float jumpSeed1 = rand(vec2(jumpTime, 1.0));
+      float jumpSeed2 = rand(vec2(jumpTime, 2.0));
+      float jumpSeed3 = rand(vec2(jumpTime + 0.5, 1.5));
+
+      // Create large jumps mixed with smaller jumps
+      float largeJump = (jumpSeed1 * 2.0 - 1.0) * 0.2 * phase2 * lineJumpAmountValue;
+      float smallJump = (jumpSeed2 * 2.0 - 1.0) * 0.05 * phase2 * lineJumpAmountValue;
+
+      // Occasional very large jumps
+      float extraLargeJump = 0.0;
+      if (jumpSeed3 > 0.8) {
+          extraLargeJump = (jumpSeed3 - 0.8) * 0.5 * phase2 * lineJumpAmountValue;
+      }
+
+      // Calculate final line position with random movement
+      float divisionLinePos = baseDivisionPos + largeJump + smallJump + extraLargeJump;
+
+      // Line thickness
+      float divisionLineWidth = 0.08 * phase2;
+
+      float inDivisionLine = step(divisionLinePos - divisionLineWidth/2.0, uv.y) *
+                             step(uv.y, divisionLinePos + divisionLineWidth/2.0) *
+                             phase2;
+
+      // Heavy distortion
+      float distortionAmount = min(phase1 * 2.0, 1.0) * rollStrengthValue;
+      vec2 distortedUV = rollingUV;
+
+      // Apply increasing distortion and compression
+      if (phase2 > 0.0) {
+        // Apply vertical compression
+        float normalizedY = ((uv.y - (0.5 - screenHeight/2.0)) / screenHeight);
+
+        // Increasing wave distortion during collapse
+        float waveDistX = sin(normalizedY * 30.0 + time * 10.0) * 0.08 * phase2 * rollStrengthValue;
+        float waveDistY = cos(uv.x * 20.0 + time * 8.0) * 0.05 * phase2 * rollStrengthValue;
+
+        if (normalizedY >= 0.0 && normalizedY <= 1.0) {
+          distortedUV = vec2(
+            uv.x + waveDistX + roll1,
+            normalizedY + waveDistY + roll2
+          );
         } else {
-          // Outside the collapsing screen
-          outputColor = transitionColor;
-
-          // Add horizontal bright line
-          float linePos = (1.0 - screenHeight) * 0.5 + 0.5;
-          float line = smoothstep(0.0, 1.0, 1.0 - abs(uv.y - linePos) / lineWidth);
-          outputColor.rgb += vec3(line);
-        }
-
-        // Complete blackout at end of transition
-        if (switchProgress > 0.8) {
-          float fadeToBlack = smoothstep(0.8, 1.0, switchProgress);
-          outputColor = mix(outputColor, vec4(0.0, 0.0, 0.0, 1.0), fadeToBlack);
+          // Outside the collapsed area - black
+          outputColor = vec4(0.0, 0.0, 0.0, 1.0);
         }
       }
 
-      gl_FragColor = outputColor;
+      // Apply increasing chromatic aberration
+      float rgbOffset = 0.01 * distortionAmount;
+      vec4 colorDistorted;
+
+      // Check if we're in valid UV space
+      if (distortedUV.x >= 0.0 && distortedUV.x <= 1.0 &&
+          distortedUV.y >= 0.0 && distortedUV.y <= 1.0 &&
+          inDivisionLine < 0.5) {
+
+        // Apply color fringing/bleeding
+        colorDistorted.r = texture2D(textureSampler, vec2(distortedUV.x + rgbOffset, distortedUV.y - rgbOffset)).r;
+        colorDistorted.g = texture2D(textureSampler, distortedUV).g;
+        colorDistorted.b = texture2D(textureSampler, vec2(distortedUV.x - rgbOffset, distortedUV.y + rgbOffset)).b;
+        colorDistorted.a = 1.0;
+
+        // Add VHS noise
+        float staticNoise = rand(vec2(distortedUV.x * time * 10.0, distortedUV.y * time * 5.0)) * 0.3 * distortionAmount;
+        colorDistorted.rgb = mix(colorDistorted.rgb, vec3(staticNoise), distortionAmount * 0.4);
+
+        // Add occasional horizontal noise lines
+        if (trackingLine > 0.0) {
+          colorDistorted.rgb += vec3(0.8);
+        }
+
+        outputColor = colorDistorted;
+      } else if (inDivisionLine > 0.0) {
+        // Division line - darker with slight gradient and internal details
+        float distFromCenter = abs(uv.y - divisionLinePos) / (divisionLineWidth/2.0);
+        outputColor = vec4(0.0, 0.0, 0.0, 1.0);
+
+        // Create bright edges on the division line
+        float edgeGlow = smoothstep(0.8, 1.0, distFromCenter) * 0.3;
+
+        // Create internal texture with scanlines and noise
+        float scanline = sin(uv.y * 150.0 - time * 30.0) * 0.15 + 0.05;
+        float horizNoise = rand(vec2(floor(uv.y * 50.0), time * 10.0)) * 0.1;
+
+        // Horizontal streak effect inside the division line
+        float streak =
+            step(0.98, rand(vec2(floor(uv.y * 100.0), time))) *
+            0.4 * (1.0 - distFromCenter);
+
+        // Apply all effects to the division line
+        outputColor.rgb += vec3(scanline * (1.0 - distFromCenter) +
+                               edgeGlow + horizNoise + streak);
+      }
+
+      // Complete blackout at end of transition
+      if (phase3 > 0.0) {
+        float fadeToBlack = phase3;
+        outputColor = mix(outputColor, vec4(0.0, 0.0, 0.0, 1.0), fadeToBlack);
+      }
     }
+
+    gl_FragColor = outputColor;
+  }
   `;
 
   // Add CRT distortion effect with proper screen curvature

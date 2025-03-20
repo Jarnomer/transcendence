@@ -1,8 +1,8 @@
 export function applyScoreEffects(retroEffectsRef: any) {
   if (retroEffectsRef) {
     setTimeout(() => {
-      retroEffectsRef?.changeChannel(1000).then(() => {});
-    }, 100);
+      retroEffectsRef?.changeChannel(1200).then(() => {});
+    }, 300);
   }
 }
 

@@ -405,27 +405,42 @@ export class RetroEffectsManager {
     return this;
   }
 
-  async changeChannel(durationMs: number = 1000): Promise<void> {
+  async changeChannel(durationMs: number = 1200): Promise<void> {
     if (!this._effects.tvSwitch) this.enableTVSwitch();
+    if (!this._effects.glitch) this.enableGlitch();
 
     if (this._effects.tvSwitch) {
+      if (this._effects.glitch) {
+        this._effects.glitch.setGlitchAmount(2.0);
+
+        setTimeout(() => {
+          if (this._effects.glitch) this._effects.glitch.setGlitchAmount(3.0);
+        }, durationMs * 0.3);
+
+        setTimeout(() => {
+          if (this._effects.glitch) this._effects.glitch.setGlitchAmount(5.0);
+        }, durationMs * 0.6);
+
+        setTimeout(() => {
+          if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+        }, durationMs);
+      }
+
       return new Promise((resolve) => {
-        const startTime = performance.now();
+        // const startTime = performance.now();
 
         const updateProgress = () => {
-          const elapsedTime = performance.now() - startTime;
-          const progress = Math.min(elapsedTime / durationMs, 1.0);
-
-          this._effects.tvSwitch!.setSwitchingProgress(progress);
-
-          if (progress < 1.0) {
-            requestAnimationFrame(updateProgress);
-          } else {
-            setTimeout(() => {
-              this._effects.tvSwitch!.setSwitchingProgress(0);
-              resolve();
-            }, 100);
-          }
+          // const elapsedTime = performance.now() - startTime;
+          // const progress = Math.min(elapsedTime / durationMs, 1.0);
+          // this._effects.tvSwitch!.setSwitchingProgress(progress);
+          // if (progress < 1.0) {
+          // requestAnimationFrame(updateProgress);
+          // } else {
+          // setTimeout(() => {
+          // this._effects.tvSwitch!.setSwitchingProgress(0);
+          // resolve();
+          // }, 100);
+          // }
         };
 
         updateProgress();
@@ -459,15 +474,12 @@ export class RetroEffectsManager {
               const pulseIntensity = Math.sin(progress * 40) * 2;
               const intensity = (0.8 - progress) * 10 * pulseIntensity;
               this._effects.glitch.setGlitchAmount(Math.abs(intensity));
-              console.log(`intensity=${intensity}`);
             } else if (progress < 0.8) {
               const randomIntensity = Math.sin(progress * 30) * 2;
               this._effects.glitch.setGlitchAmount(Math.abs(randomIntensity));
-              console.log(`randomIntensity=${randomIntensity}`);
             } else {
               const finalIntensity = Math.max(0, 1 - progress) * 0.8;
               this._effects.glitch.setGlitchAmount(Math.abs(finalIntensity));
-              console.log(`finalIntensity=${finalIntensity}`);
             }
           }
 
