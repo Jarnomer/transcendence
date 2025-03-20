@@ -3,29 +3,36 @@ import { GameState, GameStatus } from '@shared/types';
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 
 type WebSocketState = {
-  connectionStatus: ConnectionStatus;
+  connections: {
+    game: ConnectionStatus;
+    chat: ConnectionStatus;
+    matchmaking: ConnectionStatus;
+  };
   gameStatus: GameStatus;
   gameState: GameState;
 };
 
-export const initialState = {
-  connectionStatus: 'connecting',
+export const initialState: WebSocketState = {
+  connections: {
+    game: 'connecting',
+    chat: 'connecting',
+    matchmaking: 'connecting',
+  },
   gameStatus: 'waiting',
   gameState: {
     players: {
-      player1: { id: 'player1', y: 0, score: 0 },
-      player2: { id: 'player2', y: 0, score: 0 },
+      player1: { id: 'player1', y: 0, score: 0, dy: 0 },
+      player2: { id: 'player2', y: 0, score: 0, dy: 0 },
     },
-    ball: { x: 0, y: 0, dx: 0, dy: 0 },
-    timeStamp: Date.now(),
+    ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
   },
 };
 
 type WebSocketAction =
-  | { type: 'CONNECTED' }
-  | { type: 'DISCONNECTED' }
-  | { type: 'RECONNECTING' }
-  | { type: 'ERROR' }
+  | { type: 'CONNECTED'; socket: 'game' | 'chat' | 'matchmaking' }
+  | { type: 'DISCONNECTED'; socket: 'game' | 'chat' | 'matchmaking' }
+  | { type: 'RECONNECTING'; socket: 'game' | 'chat' | 'matchmaking' }
+  | { type: 'ERROR'; socket: 'game' | 'chat' | 'matchmaking' }
   | {
       type: 'GAME_UPDATE';
       payload: GameState;
@@ -39,13 +46,13 @@ type WebSocketAction =
 function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSocketState {
   switch (action.type) {
     case 'CONNECTED':
-      return { ...state, connectionStatus: 'connected' };
+      return { ...state, connections: { ...state.connections, [action.socket]: 'connected' } };
     case 'RECONNECTING':
-      return { ...state, connectionStatus: 'reconnecting' };
+      return { ...state, connections: { ...state.connections, [action.socket]: 'reconnecting' } };
     case 'DISCONNECTED':
-      return { ...state, connectionStatus: 'disconnected' };
+      return { ...state, connections: { ...state.connections, [action.socket]: 'disconnected' } };
     case 'ERROR':
-      return { ...state, connectionStatus: 'error' };
+      return { ...state, connections: { ...state.connections, [action.socket]: 'error' } };
     case 'GAME_UPDATE':
       return {
         ...state,
@@ -66,15 +73,7 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
       console.log('Game reset');
       return {
         ...state,
-        connectionStatus: 'connecting',
-        gameStatus: 'waiting',
-        gameState: {
-          players: {
-            player1: { id: 'player1', y: 0, score: 0 },
-            player2: { id: 'player2', y: 0, score: 0 },
-          },
-          ball: { x: 0, y: 0, dx: 0, dy: 0 },
-        },
+        ...initialState,
       };
     default:
       return state;

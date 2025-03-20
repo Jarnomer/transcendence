@@ -1,21 +1,29 @@
-import { Database } from "sqlite";
+import { Database } from 'sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
 export class FriendModel {
   private db: Database;
+  private static instance: FriendModel;
 
   constructor(db: Database) {
     this.db = db;
   }
 
+  static getInstance(db: Database) {
+    if (!FriendModel.instance) {
+      FriendModel.instance = new FriendModel(db);
+    }
+    return FriendModel.instance;
+  }
+
   async runTransaction(callback: (db: Database) => Promise<any>) {
     try {
-      await this.db.run("BEGIN TRANSACTION"); // Start transaction
+      await this.db.run('BEGIN TRANSACTION'); // Start transaction
       const result = await callback(this.db); // Run the transaction logic
-      await this.db.run("COMMIT"); // Commit transaction if successful
+      await this.db.run('COMMIT'); // Commit transaction if successful
       return result;
     } catch (error) {
-      await this.db.run("ROLLBACK"); // Rollback transaction on error
+      await this.db.run('ROLLBACK'); // Rollback transaction on error
       throw error; // Rethrow error for handling
     }
   }
@@ -44,16 +52,20 @@ export class FriendModel {
 
   async getSentFriendRequests(user_id: string) {
     return await this.db.all(
-      `SELECT * FROM friend_requests WHERE sender_id = ?`,
+      `
+      SELECT
+      fr.*,
+      up.*
+      FROM friend_requests fr
+      LEFT JOIN user_profiles up ON fr.receiver_id = up.user_id
+      WHERE sender_id = ?
+      `,
       [user_id]
     );
   }
 
   async getReceivedFriendRequests(user_id: string) {
-    return await this.db.all(
-      `SELECT * FROM friend_requests WHERE receiver_id = ?`,
-      [user_id]
-    );
+    return await this.db.all(`SELECT * FROM friend_requests WHERE receiver_id = ?`, [user_id]);
   }
 
   async acceptFriendRequest(user_id: string, sender_id: string) {

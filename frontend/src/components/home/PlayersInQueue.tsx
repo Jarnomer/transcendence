@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useAnimatedNavigate } from '../../animatedNavigate';
+
+import { useNavigate } from 'react-router-dom';
+
 import { getUserData, getUsersInQueue } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
@@ -7,22 +9,23 @@ export const PlayerQueue: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [usersInQueue, setUsersInQueue] = useState<any[]>([]);
-  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
 
   async function fetchData() {
     setLoading(true);
     const fetchedQueueData = await getUsersInQueue();
-    if (fetchedQueueData?.queues?.length) {
-      const enrichedUsers = await Promise.all(
-        fetchedQueueData.queues.map(async (userInQueue) => {
-          const userDetails = await getUserData(userInQueue.user_id);
-          return {
-            ...userInQueue,
-            display_name: userDetails?.display_name || 'Unknown',
-            avatar_url: userDetails?.avatar_url || '',
-          };
-        })
+    console.log(fetchedQueueData);
+    if (fetchedQueueData.queues) {
+      console.log('fetched:', fetchedQueueData);
+      const enrichedUsers = fetchedQueueData.queues.flatMap((queue) =>
+        queue.players.map((player) => ({
+          display_name: player.display_name || 'Unknown',
+          avatar_url: player.avatar_url || '',
+          user_id: player.user_id,
+          queue_id: player.queue_id,
+        }))
       );
+      console.log('enriched:', enrichedUsers);
       setUsersInQueue(enrichedUsers);
     }
     setLoading(false);
@@ -32,15 +35,19 @@ export const PlayerQueue: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleJoinGameClick = (event, opponent) => {
+  useEffect(() => {
+    console.log('users in queue:', usersInQueue);
+  }, [usersInQueue]);
+
+  const handleJoinGameClick = (event, opponent, queueId) => {
     event.stopPropagation();
-    console.log('join game against: ', opponent);
+    console.log('join game against: ', opponent, queueId);
   };
 
   return (
-    <div>
+    <div className="glass-box p-5 w-full">
       <ul>
-        <h1 className="font-heading text-3xl ">Join Game</h1>
+        <h1 className="font-heading text-3xl w-full">Join Game</h1>
 
         {usersInQueue.filter((user) => user.user_id != localStorage.getItem('userID')).length ===
         0 ? (
@@ -49,11 +56,7 @@ export const PlayerQueue: React.FC = () => {
           usersInQueue
             .filter((user) => user.user_id != localStorage.getItem('userID'))
             .map((user, index) => (
-              <li
-                key={index}
-                className="my-2"
-                onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
-              >
+              <li key={index} className="my-2" onClick={() => navigate(`/profile/${user.user_id}`)}>
                 <div className="flex items-center gap-5">
                   <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
                     <img
@@ -66,7 +69,7 @@ export const PlayerQueue: React.FC = () => {
                   <NavIconButton
                     id="join-game-button"
                     icon="arrowRight"
-                    onClick={(event) => handleJoinGameClick(event, user.user_id)}
+                    onClick={(event) => handleJoinGameClick(event, user.user_id, user.queue_id)}
                   />
                 </div>
               </li>

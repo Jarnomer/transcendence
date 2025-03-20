@@ -6,28 +6,21 @@ import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { CountDown, PlayerScoreBoard } from '@components';
 
-import { useWebSocketContext } from '@services';
-
-import {
-  useGameControls,
-  useGameResult,
-  useGameUser,
-  useMatchmaking,
-  useWebSocketSetup,
-} from '@hooks';
+import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@hooks';
 
 import { createReadyInputMessage } from '../../../shared/messages';
 import GameCanvas from '../components/game/GameCanvas';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { setUrl, gameState, gameStatus, connectionStatus, dispatch, sendMessage } =
+  const { setUrl, gameState, gameStatus, connections, dispatch, sendMessage } =
     useWebSocketContext();
 
   const location = useLocation();
   const { loadingStates } = useLoading();
-  const { mode, difficulty } = location.state || {};
+  const { mode, difficulty, lobby } = location.state || {};
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -37,8 +30,7 @@ export const GamePage: React.FC = () => {
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser(difficulty);
-  useMatchmaking(mode, difficulty, setGameId);
-  useWebSocketSetup(gameId, mode, difficulty, userId);
+  useMatchmaking(mode, difficulty, lobby, setGameId, userId);
   useGameResult(gameStatus, gameId, gameState, dispatch, userId);
   useGameControls(localPlayerId, remotePlayerId);
 
@@ -46,7 +38,7 @@ export const GamePage: React.FC = () => {
     gameState,
     gameId,
     mode,
-    connectionStatus,
+    connectionStatus: connections.game,
     gameStatus,
   });
 
@@ -60,26 +52,12 @@ export const GamePage: React.FC = () => {
   }, [animate, loadingStates]);
 
   useEffect(() => {
-    if (!gameId) return;
+    if (!gameId || !localPlayerId) return;
     if (!loading && gameStatus === 'waiting') {
       console.log('sending player ready for player: ', localPlayerId);
-      sendMessage(createReadyInputMessage(localPlayerId, true));
+      sendMessage('game', createReadyInputMessage(localPlayerId, true));
     }
   }, [loading, gameStatus]);
-
-  const getStatusMessage = () => {
-    if (connectionStatus !== 'connected') {
-      return `Connection: ${connectionStatus}`;
-    }
-
-    if (mode === 'singleplayer') {
-      return 'Starting game...';
-    }
-
-    if (mode === '1v1') {
-      return `Game Status: ${gameStatus}`;
-    }
-  };
 
   // TODO: Reconnection handler
   // TODO: Pause - Resume
@@ -89,14 +67,15 @@ export const GamePage: React.FC = () => {
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}
-      {connectionStatus === 'connected' && gameState.gameStatus !== 'finished' && !loading ? (
+      {connections.game === 'connected' && gameStatus !== 'finished' && !loading ? (
         <>
           <div className="w-full h-full relative overflow-hidden">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 
             <p className="text-xs text-gray-500">
-              Connection: {connectionStatus} | Game: {gameStatus} | Spin: {gameState.ball.spin}
+              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState.ball.spin} |
+              Player2_DY: {gameState.players.player2.dy}
             </p>
             <GameCanvas gameState={gameState} />
           </div>

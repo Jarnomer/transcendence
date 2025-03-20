@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+
+import { motion } from 'framer-motion';
 
 import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
-
-import { useAnimatedNavigate } from '../animatedNavigate';
 
 interface GameMenuOption {
   content: string;
@@ -23,7 +23,8 @@ export const GameMenu: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
   const navigate = useNavigate(); // Hook to navigate to different routes
-  const animatedNavigate = useAnimatedNavigate();
+  const location = useLocation();
+  const { lobby } = location.state || {};
 
   const modes = [
     {
@@ -129,7 +130,9 @@ export const GameMenu: React.FC = () => {
   // Effect to navigate once both mode and difficulty are selected
   useEffect(() => {
     if (selectedMode && selectedDifficulty) {
-      navigate('/game', { state: { mode: selectedMode, difficulty: selectedDifficulty } });
+      navigate('/game', {
+        state: { mode: selectedMode, difficulty: selectedDifficulty, lobby: lobby },
+      });
     }
   }, [selectedMode, selectedDifficulty]); // Trigger navigation when both values are set
 
@@ -170,7 +173,10 @@ export const GameMenu: React.FC = () => {
   };
 
   return (
-    <div id="home-container" className="flex flex-wrap justify-center gap-4 px-3 items-center p-10">
+    <motion.div
+      id="home-container"
+      className="flex flex-wrap justify-center gap-4 px-3 items-center p-10"
+    >
       {renderMenu()}
       {/* <div className="container noselect">
   			<div className="canvas">
@@ -185,6 +191,6 @@ export const GameMenu: React.FC = () => {
     			</div>
   			</div>
 		</div> */}
-    </div>
+    </motion.div>
   );
 };

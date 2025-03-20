@@ -1,16 +1,24 @@
-import fastify, { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
+
 import '@fastify/jwt';
-import { FriendService } from "../services/FriendService";
-import fs from 'fs';
-import path from 'path';
-import { pipeline } from 'stream/promises';
-import { NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError } from '@my-backend/main_server/src/middlewares/errors';
+
+import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+
+import { FriendService } from '../services/FriendService';
 
 export class FriendController {
   private friendService: FriendService;
+  private static instance: FriendController;
 
   constructor(friendService: FriendService) {
     this.friendService = friendService;
+  }
+
+  static getInstance(friendService: FriendService) {
+    if (!FriendController.instance) {
+      FriendController.instance = new FriendController(friendService);
+    }
+    return FriendController.instance;
   }
 
   /**
@@ -25,9 +33,9 @@ export class FriendController {
     request.log.trace(`Sending friend request to ${receiver_id}`);
     const friendRequest = await this.friendService.sendFriendRequest(user_id, receiver_id);
     if (!friendRequest) {
-      throw new NotFoundError("Friend user not found");
+      throw new NotFoundError('Friend user not found');
     }
-    reply.code(200).send({ message: "Friend request sent" });
+    reply.code(200).send({ message: 'Friend request sent' });
   }
 
   /**
@@ -41,9 +49,7 @@ export class FriendController {
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting sent friend requests for ${user_id}`);
     const sentFriendRequests = await this.friendService.getSentFriendRequests(user_id);
-    if (sentFriendRequests.length === 0) {
-      throw new NotFoundError("No sent friend requests found");
-    }
+
     reply.code(200).send(sentFriendRequests);
   }
 
@@ -59,7 +65,7 @@ export class FriendController {
     request.log.trace(`Getting received friend requests for ${user_id}`);
     const receivedFriendRequests = await this.friendService.getReceivedFriendRequests(user_id);
     if (receivedFriendRequests.length === 0) {
-      throw new NotFoundError("No received friend requests found");
+      throw new NotFoundError('No received friend requests found');
     }
     reply.code(200).send(receivedFriendRequests);
   }
@@ -76,9 +82,9 @@ export class FriendController {
     request.log.trace(`Accepting friend request from ${sender_id}`);
     const friendRequest = await this.friendService.acceptFriendRequest(user_id, sender_id);
     if (!friendRequest) {
-      throw new NotFoundError("Friend user not found");
+      throw new NotFoundError('Friend user not found');
     }
-    reply.code(200).send({ message: "Friend request accepted" });
+    reply.code(200).send({ message: 'Friend request accepted' });
   }
 
   /**
@@ -93,10 +99,9 @@ export class FriendController {
     request.log.trace(`Rejecting friend request from ${sender_id}`);
     const friendRequest = await this.friendService.rejectFriendRequest(user_id, sender_id);
     if (!friendRequest) {
-      throw new NotFoundError("Friend user not found");
+      throw new NotFoundError('Friend user not found');
     }
-    reply.code(200).send({ message: "Friend request rejected" });
-
+    reply.code(200).send({ message: 'Friend request rejected' });
   }
 
   /**
@@ -112,9 +117,8 @@ export class FriendController {
     request.log.trace(`Cancelling friend request to ${receiver_id}`);
     const friendRequest = await this.friendService.cancelFriendRequest(user_id, receiver_id);
     if (!friendRequest) {
-      throw new NotFoundError("Friend user not found");
+      throw new NotFoundError('Friend user not found');
     }
-    reply.code(204).send({ message: "Friend request cancelled" });
+    reply.code(204).send({ message: 'Friend request cancelled' });
   }
-
 }

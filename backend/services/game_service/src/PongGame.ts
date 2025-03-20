@@ -1,21 +1,9 @@
-import { GameState, GameStatus } from '@shared/types';
+import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
 
 type PlayerMove = 'up' | 'down' | null;
 
 export default class PongGame {
-  private width: number = 800;
-  private height: number = 400;
-  private paddleHeight: number = 80;
-  private paddleWidth: number = 10;
-  private paddleSpeed: number = 10;
-  private ballSize: number = 10;
-  private ballSpeed: number = 7;
-  private ballSpeedMultiplier: number = 1;
-  private maxBallSpeedMultiplier: number = 2.5;
-  private maxBallSpin: number = 5;
-
-  // 3% speed increase on each paddle hit
-  private speedIncreaseFactor: number = 1.03;
+  private params: GameParams = defaultGameParams;
 
   private gameState: GameState;
   private gameStatus: GameStatus;
@@ -29,17 +17,27 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
-  private readonly MAX_SCORE: number = 10;
-
-  private frameCount: number = 0;
+  private frameCount = 0;
 
   constructor(mode: string, difficulty: string) {
     this.mode = mode;
     this.difficulty = difficulty;
     this.gameState = {
       players: {
-        player1: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
-        player2: { id: '', y: this.height / 2 - this.paddleHeight / 2, dy: 0, score: 0 },
+        player1: {
+          id: '',
+          y: this.params.gameHeight / 2 - this.params.paddleHeight / 2,
+          dy: 0,
+          paddleHeight: this.params.paddleHeight,
+          score: 0,
+        },
+        player2: {
+          id: '',
+          y: this.params.gameHeight / 2 - this.params.paddleHeight / 2,
+          paddleHeight: this.params.paddleHeight,
+          dy: 0,
+          score: 0,
+        },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
     };
@@ -65,14 +63,14 @@ export default class PongGame {
 
   setReadyState(playerId: string, state: boolean): void {
     if (playerId === this.player1Id) {
-      console.log('Setting player1 ready state:', state);
+      //console.log('Setting player1 ready state:', state);
       this.readyState.set('player1', state);
     } else if (playerId === this.player2Id) {
       console.log('Setting player2 ready state:', state);
       this.readyState.set('player2', state);
     }
     if (this.areAllPlayersReady()) {
-      console.log('All players are ready!');
+      //console.log('All players are ready!');
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
@@ -101,13 +99,20 @@ export default class PongGame {
     return this.gameState;
   }
   getPaddleSpeed() {
-    return this.paddleSpeed;
+    return this.params.paddleSpeed;
   }
   getHeight() {
-    return this.height;
+    return this.params.gameHeight;
   }
-  getPaddleHeight() {
-    return this.paddleHeight;
+  getWidth() {
+    return this.params.gameWidth;
+  }
+  getPaddleHeight(player: number): number {
+    if (player === 1) {
+      return this.gameState.players.player1.paddleHeight;
+    } else {
+      return this.gameState.players.player2.paddleHeight;
+    }
   }
 
   getPlayerId(player: number): string | null {
@@ -128,8 +133,39 @@ export default class PongGame {
     }
   }
 
+  setPaddleHeight(player: number, height: number): void {
+    this.repositionPaddleAfterHeightChange(player, height);
+    if (player === 1) {
+      this.gameState.players.player1.paddleHeight = height;
+    } else {
+      this.gameState.players.player2.paddleHeight = height;
+    }
+  }
+
+  private repositionPaddleAfterHeightChange(player: number, height: number): void {
+    if (player === 1) {
+      if (height > this.gameState.players.player1.paddleHeight) {
+        this.gameState.players.player1.y -=
+          (height - this.gameState.players.player1.paddleHeight) / 2;
+        if (this.gameState.players.player1.y < 0) {
+          this.gameState.players.player1.y = 0;
+        } else if (this.gameState.players.player1.y + height > this.params.gameHeight) {
+          this.gameState.players.player1.y = this.params.gameHeight - height;
+        }
+      } else {
+        this.gameState.players.player1.y += this.gameState.players.player1.paddleHeight - height;
+      }
+    } else {
+      if (height > this.gameState.players.player2.paddleHeight) {
+        this.gameState.players.player2.y -= height - this.gameState.players.player2.paddleHeight;
+      } else {
+        this.gameState.players.player2.y += this.gameState.players.player2.paddleHeight - height;
+      }
+    }
+  }
+
   private resetBall(): void {
-    this.ballSpeedMultiplier = 1;
+    this.params.ballSpeedMultiplier = 1;
 
     // Random starting angle between -30° and 30°
     const angle = (Math.random() * Math.PI) / 3 - Math.PI / 6;
@@ -138,17 +174,17 @@ export default class PongGame {
     const direction = Math.random() > 0.5 ? 1 : -1;
 
     this.gameState.ball = {
-      x: this.width / 2,
-      y: this.height / 2,
-      dx: direction * this.ballSpeed * Math.cos(angle),
-      dy: this.ballSpeed * Math.sin(angle),
+      x: this.params.gameWidth / 2,
+      y: this.params.gameHeight / 2,
+      dx: direction * this.params.ballSpeed * Math.cos(angle),
+      dy: this.params.ballSpeed * Math.sin(angle),
       spin: 0,
     };
   }
 
   private resetPaddles(): void {
-    this.gameState.players.player1.y = this.height / 2 - this.paddleHeight / 2;
-    this.gameState.players.player2.y = this.height / 2 - this.paddleHeight / 2;
+    this.gameState.players.player1.y = this.params.gameHeight / 2 - this.params.paddleHeight / 2;
+    this.gameState.players.player2.y = this.params.gameHeight / 2 - this.params.paddleHeight / 2;
   }
 
   startCountdown(): void {
@@ -156,7 +192,7 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
-    console.log('Starting countdown...');
+    //console.log('Starting countdown...');
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
@@ -193,37 +229,36 @@ export default class PongGame {
   private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
     if (this.gameStatus !== 'playing') return;
 
-    const paddleState = this.gameState.players[player];
+    let paddleState;
+    if (player === 'player1') {
+      paddleState = this.gameState.players.player1;
+    } else {
+      paddleState = this.gameState.players.player2;
+    }
 
     if (move === 'up') {
-      paddleState.y -= this.paddleSpeed;
+      paddleState.y -= this.params.paddleSpeed;
       if (paddleState.y < 0) {
         paddleState.y = 0;
         paddleState.dy = 0;
       } else {
-        paddleState.dy = -this.paddleSpeed;
+        paddleState.dy = -this.params.paddleSpeed;
       }
     } else if (move === 'down') {
-      paddleState.y += this.paddleSpeed;
-      if (paddleState.y + this.paddleHeight > this.height) {
-        paddleState.y = this.height - this.paddleHeight;
+      paddleState.y += this.params.paddleSpeed;
+      if (paddleState.y + this.params.paddleHeight > this.params.gameHeight) {
+        paddleState.y = this.params.gameHeight - this.params.paddleHeight;
         paddleState.dy = 0;
       } else {
-        paddleState.dy = this.paddleSpeed;
+        paddleState.dy = this.params.paddleSpeed;
       }
     } else if (move === null) {
+      // this.frameCount++;
+      // if (this.frameCount % 6 === 0) {
+      //   paddleState.dy = 0;
+      //   this.frameCount = 0;
+      // }
       paddleState.dy = 0;
-    }
-  }
-
-  private adjustBallMovementForSpin(): void {
-    const { ball } = this.gameState;
-    if (ball.spin === 0) return;
-
-    if (ball.dx > 0) {
-      ball.dy += ball.spin / 100;
-    } else {
-      ball.dy -= ball.spin / 100;
     }
   }
 
@@ -245,9 +280,9 @@ export default class PongGame {
     }
 
     // Bottom wall collision
-    if (ball.y + this.ballSize >= this.height) {
+    if (ball.y + this.params.ballSize >= this.params.gameHeight) {
       // Prevent going inside the wall
-      ball.y = this.height - this.ballSize;
+      ball.y = this.params.gameHeight - this.params.ballSize;
       ball.dy *= -1;
       // Spin effect
       this.adjustBounceForSpin(false);
@@ -257,18 +292,29 @@ export default class PongGame {
 
     if (ball.x <= 0) {
       players.player2.score++;
-      if (players.player2.score >= this.MAX_SCORE) {
+      if (players.player2.score >= this.params.maxScore) {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
       }
-    } else if (ball.x + this.ballSize >= this.width) {
+    } else if (ball.x + this.params.ballSize >= this.params.gameWidth) {
       players.player1.score++;
-      if (players.player1.score >= this.MAX_SCORE) {
+      if (players.player1.score >= this.params.maxScore) {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
       }
+    }
+  }
+
+  private adjustBallMovementForSpin(): void {
+    const { ball } = this.gameState;
+    if (ball.spin === 0) return;
+
+    if (ball.dx > 0) {
+      ball.dy += ball.spin * this.params.spinCurveFactor * ball.dx;
+    } else {
+      ball.dy -= ball.spin * this.params.spinCurveFactor * ball.dx * -1;
     }
   }
 
@@ -278,20 +324,20 @@ export default class PongGame {
 
     if (ball.dx > 0) {
       if (isTopWall) {
-        ball.dx -= ball.spin / 3;
+        ball.dx -= ball.spin * this.params.spinBounceFactor;
       } else {
-        ball.dx += ball.spin / 3;
+        ball.dx += ball.spin * this.params.spinBounceFactor;
       }
-      if (ball.dx < 2) ball.dx = 1;
+      if (ball.dx < this.params.minBallDX) ball.dx = this.params.minBallDX;
     } else {
       if (isTopWall) {
-        ball.dx -= ball.spin / 3;
+        ball.dx -= ball.spin * this.params.spinBounceFactor;
       } else {
-        ball.dx += ball.spin / 3;
+        ball.dx += ball.spin * this.params.spinBounceFactor;
       }
-      if (ball.dx > -2) ball.dx = -1;
+      if (ball.dx > -this.params.minBallDX) ball.dx = -this.params.minBallDX;
     }
-    ball.spin *= 0.5;
+    ball.spin *= this.params.spinReductionFactor;
     if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
   }
 
@@ -299,18 +345,18 @@ export default class PongGame {
     const { ball, players } = this.gameState;
 
     if (
-      ball.x <= this.paddleWidth &&
-      ball.y + this.ballSize >= players.player1.y &&
-      ball.y <= players.player1.y + this.paddleHeight
+      ball.x <= this.params.paddleWidth &&
+      ball.y + this.params.ballSize >= players.player1.y &&
+      ball.y <= players.player1.y + this.params.paddleHeight
     ) {
-      ball.x = this.paddleWidth;
+      ball.x = this.params.paddleWidth;
       this.handlePaddleBounce(players.player1.y, true);
     } else if (
-      ball.x + this.ballSize >= this.width - this.paddleWidth &&
-      ball.y + this.ballSize >= players.player2.y &&
-      ball.y <= players.player2.y + this.paddleHeight
+      ball.x + this.params.ballSize >= this.params.gameWidth - this.params.paddleWidth &&
+      ball.y + this.params.ballSize >= players.player2.y &&
+      ball.y <= players.player2.y + this.params.paddleHeight
     ) {
-      ball.x = this.width - this.paddleWidth - this.ballSize;
+      ball.x = this.params.gameWidth - this.params.paddleWidth - this.params.ballSize;
       this.handlePaddleBounce(players.player2.y, false);
     }
   }
@@ -318,27 +364,29 @@ export default class PongGame {
   private handlePaddleBounce(paddleY: number, isLeftPaddle: boolean): void {
     const { ball, players } = this.gameState;
     const maxBounceAngle = Math.PI / 4;
-    const relativeIntersectY = ball.y + this.ballSize / 2 - (paddleY + this.paddleHeight / 2);
-    const normalizedIntersectY = relativeIntersectY / (this.paddleHeight / 2);
+    const relativeIntersectY =
+      ball.y + this.params.ballSize / 2 - (paddleY + this.params.paddleHeight / 2);
+    const normalizedIntersectY = relativeIntersectY / (this.params.paddleHeight / 2);
     const bounceAngle = normalizedIntersectY * maxBounceAngle;
 
-    this.ballSpeedMultiplier = Math.min(
-      this.ballSpeedMultiplier * this.speedIncreaseFactor,
-      this.maxBallSpeedMultiplier
+    this.params.ballSpeedMultiplier = Math.min(
+      this.params.ballSpeedMultiplier * this.params.speedIncreaseFactor,
+      this.params.maxBallSpeedMultiplier
     );
 
-    const newSpeed = this.ballSpeed * this.ballSpeedMultiplier;
+    const newSpeed = this.params.ballSpeed * this.params.ballSpeedMultiplier;
     const direction = isLeftPaddle ? 1 : -1;
     const paddle = isLeftPaddle ? players.player1 : players.player2;
 
     if (paddle.dy !== 0) {
       const spinDirection = isLeftPaddle ? -1 : 1;
-      const spinChange = (paddle.dy * spinDirection) / 5;
-      const spinIntensity = (Math.abs(paddle.dy) / 5) * 2;
-      ball.spin = Math.max(Math.min(ball.spin + spinChange, this.maxBallSpin), -this.maxBallSpin);
-      ball.spin *= spinIntensity;
+      const spinChange = paddle.dy * spinDirection * this.params.spinIntensityFactor;
+      ball.spin += spinChange;
+      if (Math.abs(ball.spin) > this.params.maxSpin) {
+        ball.spin = this.params.maxSpin * Math.sign(ball.spin);
+      }
     } else {
-      ball.spin *= 0.8; // Gradually reduce spin
+      ball.spin *= this.params.spinReductionFactor;
       if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
     }
 

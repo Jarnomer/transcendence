@@ -1,7 +1,5 @@
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 const API_URL = '/api/auth';
-
 
 interface TokenDecoded {
   user_id: string;
@@ -11,7 +9,6 @@ interface TokenDecoded {
 interface LoginResponse {
   token: string;
 }
-
 
 export const api = axios.create({
   baseURL: '/api',
@@ -78,5 +75,3 @@ export async function refreshToken(): Promise<string | null> {
     return null;
   }
 }
-
-

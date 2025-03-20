@@ -1,17 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { useAnimatedNavigate } from '../../animatedNavigate';
-import { getUsers } from '../../services/userService';
+
+import { useNavigate } from 'react-router-dom';
+
+import { motion } from 'framer-motion';
+
+import { getUsersWithRank } from '../../services/userService';
 import SearchBar from '../UI/SearchBar';
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(0 0 100% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
+const containerVariants = {
+  visible: {
+    transition: {
+      staggerChildren: 0.1, // Stagger items
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -10 }, // Start from the left
+  visible: { opacity: 1, x: 0 }, // Move to the original position
+  exit: { opacity: 0, x: -10 }, // Exit to the left
+};
 
 export const LeaderBoard: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const animatedNavigate = useAnimatedNavigate();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
-    console.log('asd');
   };
 
   const filteredUsers = users.filter((user) =>
@@ -24,9 +58,8 @@ export const LeaderBoard: React.FC = () => {
 
   async function fetchData() {
     setLoading(true);
-    const res = await getUsers();
+    const res = await getUsersWithRank();
     if (res) {
-      console.log(res);
       setUsers(res);
     }
     setLoading(false);
@@ -34,7 +67,13 @@ export const LeaderBoard: React.FC = () => {
 
   return (
     <>
-      <div className="h-full">
+      <motion.div
+        className="h-full glass-box p-10 overflow-hidden"
+        variants={animationVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+      >
         <h1 className="font-heading text-3xl">Leaderboard</h1>
         <div className="w-full">
           <SearchBar
@@ -42,62 +81,43 @@ export const LeaderBoard: React.FC = () => {
             onChange={handleSearchChange}
             placeholder="Search users..."
           />
-          {/* <p className="text-sm text-gray-500">turned off</p> */}
         </div>
         {!loading ? (
-          <div className=" text-center">
-            <ul className="p-2">
+          <div className="text-center">
+            <motion.ul
+              className="p-2"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              transition={{ duration: 0.4 }}
+            >
               {filteredUsers.map((user, index) => (
-                <li
-                  key={index}
+                <motion.li
+                  key={user.user_id} // Prefer unique id rather than index for keys
                   className="my-2"
-                  onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
+                  onClick={() => navigate(`/profile/${user.user_id}`)}
+                  variants={itemVariants}
                 >
                   <div className="flex items-center gap-5">
                     <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
                       <img
                         className="object-cover rounded-full w-full h-full"
                         src={user.avatar_url}
+                        alt={user.display_name}
                       />
                     </div>
                     <p>
                       {user.display_name || 'N/A'} <br />
                     </p>
-                    <p>Rank: ??</p>
+                    <p>Rank: {user.rank}</p>
                   </div>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </div>
         ) : null}
-      </div>
+      </motion.div>
     </>
   );
 };
-
-//   <h1 className="font-heading text-3xl border-primary">
-//     Players waiting for an opponent
-//   </h1>
-//   {users
-//     .filter((user) => user.user_id != localStorage.getItem('userID'))
-//     .map((user, index) => (
-//       <li
-//         key={index}
-//         className="my-2"
-//         onClick={() => animatedNavigate(`/profile/${user.user_id}`)}
-//       >
-//         <div className="flex items-center gap-5">
-//           <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
-//             <img
-//               className="object-cover rounded-full w-full h-full"
-//               src={user.avatar_url}
-//             />
-//           </div>
-//           <p>
-//             {user.display_name || 'N/A'} <br />
-//           </p>
-//           <></>
-//         </div>
-//       </li>
-//     ))}
-// </ul>

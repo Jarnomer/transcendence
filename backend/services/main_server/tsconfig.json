@@ -3,5 +3,17 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "paths": {
+    "@services/*": ["src/services/*"],
+    "@services": ["src/services"],
+    "@controllers/*": ["src/controllers/*"],
+    "@controllers": ["src/controllers"],
+    "@middlewares/*": ["src/middlewares/*"],
+    "@middlewares": ["src/middlewares"],
+    "@routes/*": ["src/routes/*"],
+    "@routes": ["src/routes"],
+    "@models/*": ["src/models/*"],
+    "@models": ["src/models"]
+  }
 }

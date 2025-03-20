@@ -1,22 +1,30 @@
-import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 import { Database } from 'sqlite';
+
+import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+
 import { UserModel } from '../models/UserModel';
 
 export class UserService {
   private userModel: UserModel;
+  private static instance: UserService;
 
   constructor(db: Database) {
-    this.userModel = new UserModel(db);
+    this.userModel = UserModel.getInstance(db);
+  }
+
+  static getInstance(db: Database) {
+    if (!UserService.instance) {
+      UserService.instance = new UserService(db);
+    }
+    return UserService.instance;
   }
 
   async createUser(user_id: string) {
-    return await this.userModel.runTransaction(async (db) => {
-      const res = await this.userModel.createUser(user_id);
-      if (!res) {
-        throw new BadRequestError('Could not create user');
-      }
-      return res;
-    });
+    const res = await this.userModel.createUser(user_id);
+    if (!res) {
+      throw new BadRequestError('Could not create user');
+    }
+    return res;
   }
 
   async getUserByID(user_id: string) {
@@ -35,6 +43,14 @@ export class UserService {
     return res;
   }
 
+  async getAllUsersWithRank() {
+    const res = await this.userModel.getAllUsersWithRank();
+    if (res.length === 0) {
+      throw new NotFoundError('No users found');
+    }
+    return res;
+  }
+
   async updateUserByID(
     user_id: string,
     updates: Partial<{
@@ -46,33 +62,27 @@ export class UserService {
       status: string;
     }>
   ) {
-    return await this.userModel.runTransaction(async (db) => {
-      const res = await this.userModel.updateUserByID(user_id, updates);
-      if (!res) {
-        throw new BadRequestError('Could not update user');
-      }
-      return res;
-    });
+    const res = await this.userModel.updateUserByID(user_id, updates);
+    if (!res) {
+      throw new BadRequestError('Could not update user');
+    }
+    return res;
   }
 
   async deleteUserByID(user_id: string) {
-    return await this.userModel.runTransaction(async (db) => {
-      const res = await this.userModel.deleteUserByID(user_id);
-      if (res.changes === 0) {
-        throw new BadRequestError('No changes made in deleting user');
-      }
-      return res;
-    });
+    const res = await this.userModel.deleteUserByID(user_id);
+    if (res.changes === 0) {
+      throw new BadRequestError('No changes made in deleting user');
+    }
+    return res;
   }
 
   async createUserStats(user_id: string) {
-    return await this.userModel.runTransaction(async (db) => {
-      const res = await this.userModel.createUserStats(user_id);
-      if (!res) {
-        throw new BadRequestError('Could not create user stats');
-      }
-      return res;
-    });
+    const res = await this.userModel.createUserStats(user_id);
+    if (!res) {
+      throw new BadRequestError('Could not create user stats');
+    }
+    return res;
   }
 
   async getUserData(user_id: string) {
@@ -80,6 +90,11 @@ export class UserService {
     if (!res) {
       throw new NotFoundError('User data not found');
     }
+    return res;
+  }
+
+  async getNotifications(user_id: string) {
+    const res = await this.userModel.getNotifications(user_id);
     return res;
   }
 }

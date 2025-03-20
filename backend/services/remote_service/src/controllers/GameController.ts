@@ -1,16 +1,25 @@
 import { FastifyRequest } from 'fastify';
+import 'module-alias/register';
+import * as WebSocket from 'ws';
 
-import '@fastify/websocket';
 import { GameManager } from '@my-backend/game_service';
 
-export class RemoteController {
+export class GameController {
   private gameManager: GameManager;
+  private static instance: GameController;
 
   constructor(gameManager: GameManager) {
     this.gameManager = gameManager;
   }
 
-  async play(socket: any, request: FastifyRequest) {
+  static getInstance(gameManager: GameManager): GameController {
+    if (!GameController.instance) {
+      GameController.instance = new GameController(gameManager);
+    }
+    return GameController.instance;
+  }
+
+  async play(socket: WebSocket.WebSocket, request: FastifyRequest) {
     const { game_id, mode, difficulty, user_id } = request.query as {
       game_id: string;
       mode: string;

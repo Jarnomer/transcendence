@@ -1,16 +1,28 @@
-import fastify, { FastifyRequest, FastifyReply } from 'fastify';
-import '@fastify/jwt';
-import { UserService } from "../services/UserService";
 import fs from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
-import { NotFoundError, BadRequestError, DatabaseError, NotAuthorizedError, InternalServerError } from '@my-backend/main_server/src/middlewares/errors';
+
+import { FastifyReply, FastifyRequest } from 'fastify';
+
+import '@fastify/jwt';
+
+import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+
+import { UserService } from '../services/UserService';
 
 export class UserController {
   private userService: UserService;
+  private static instance: UserController;
 
   constructor(userService: UserService) {
     this.userService = userService;
+  }
+
+  static getInstance(userService: UserService) {
+    if (!UserController.instance) {
+      UserController.instance = new UserController(userService);
+    }
+    return UserController.instance;
   }
 
   /**
@@ -24,7 +36,7 @@ export class UserController {
     request.log.trace(`Getting user ${user_id}`);
     const user = await this.userService.getUserByID(user_id);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
     reply.code(200).send(user);
   }
@@ -41,11 +53,10 @@ export class UserController {
     request.log.trace(`Getting user data ${user_id}`);
     const userData = await this.userService.getUserData(user_id);
     if (!userData) {
-      throw new NotFoundError("User data not found");
+      throw new NotFoundError('User data not found');
     }
     reply.code(200).send(userData);
   }
-
 
   /**
    * Fetch all users
@@ -57,7 +68,22 @@ export class UserController {
     request.log.trace(`Getting all users`);
     const users = await this.userService.getAllUsers();
     if (users.length === 0) {
-      throw new NotFoundError("No users found");
+      throw new NotFoundError('No users found');
+    }
+    reply.code(200).send(users);
+  }
+
+  /**
+   * Fetch all users with rank
+   * @param request get
+   * @param reply 200 OK users : Array of User objects with rank
+   * @throws NotFoundError if no users found
+   */
+  async getAllUsersWithRank(request: FastifyRequest, reply: FastifyReply) {
+    request.log.trace(`Getting all users with rank`);
+    const users = await this.userService.getAllUsersWithRank();
+    if (users.length === 0) {
+      throw new NotFoundError('No users found');
     }
     reply.code(200).send(users);
   }
@@ -81,12 +107,12 @@ export class UserController {
     }>;
     request.log.trace(`Updating user ${user_id}`);
     if (!Object.keys(updates).length) {
-      throw new BadRequestError("No updates provided");
+      throw new BadRequestError('No updates provided');
     }
     request.log.trace(`Updates ${updates.status}`);
     const user = await this.userService.updateUserByID(user_id, updates);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
     reply.code(200).send(user);
   }
@@ -102,7 +128,7 @@ export class UserController {
     request.log.trace(`Deleting user ${user_id}`);
     const user = await this.userService.deleteUserByID(user_id);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
     reply.code(204).send(user.changes);
   }
@@ -121,9 +147,9 @@ export class UserController {
     const avatar = await request.file();
     request.log.trace(`Uploading avatar for user ${user_id}`);
     if (!avatar) {
-      throw new BadRequestError("No avatar provided");
+      throw new BadRequestError('No avatar provided');
     }
-    const UPLOAD_DIR = path.normalize(process.env.UPLOAD_PATH || "./uploads");
+    const UPLOAD_DIR = path.normalize(process.env.UPLOAD_PATH || './uploads');
     if (!fs.existsSync(UPLOAD_DIR)) {
       fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
@@ -134,12 +160,27 @@ export class UserController {
     const avatarPath = path.join(UPLOAD_DIR, fileName);
     await pipeline(avatar.file, fs.createWriteStream(avatarPath));
 
-    const avatarURL = `uploads/${fileName}`;
+    const avatarURL = `/uploads/${fileName}`;
     const user = await this.userService.updateUserByID(user_id, { avatar_url: avatarURL });
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
     reply.code(200).send(user);
   }
 
+  /**
+   * Fetch notifications for user
+   * @param request get
+   * @param reply 200 OK notifications : Array of Notification objects
+   * @throws NotFoundError if no notifications found
+   */
+  async getNotifications(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting notifications for user ${user_id}`);
+    const notifications = await this.userService.getNotifications(user_id);
+    if (notifications.length === 0) {
+      throw new NotFoundError('No notifications found');
+    }
+    reply.code(200).send(notifications);
+  }
 }

@@ -1,56 +1,83 @@
-import { Ball, Player } from '@shared/types';
+import { Ball, Player, GameParams, defaultGameParams } from '@shared/types';
 
 export class AIController {
   private plannedMoves: ('up' | 'down' | null)[] = [];
   private lastUpdateTime: number = 0;
   private difficulty: string;
   private lastBallDx: number = 0;
-  private gameHeight: number = 0;
+  private params: GameParams = defaultGameParams;
+  private isPlayer1: boolean;
 
   // difficulty levels: easy, normal, brutal
-  constructor(difficulty: string, gameHeight: number) {
+  constructor(difficulty: string, isPlayer1: boolean) {
     this.difficulty = difficulty;
-    this.gameHeight = gameHeight;
+    this.isPlayer1 = isPlayer1;
   }
 
   updateAIState(ball: Ball, aiPaddle: Player, paddleHeight: number, paddleSpeed: number): void {
     this.plannedMoves = [];
-    const aiCenter = aiPaddle.y + paddleHeight / 2;
+    const aiCenter = aiPaddle.y + paddleHeight / 2 - this.params.ballSize / 2;
     const framesPerSecond = 60;
     const updateDuration = 1;
     const frameCount = framesPerSecond * updateDuration;
+    const ballMovingTowardsAI = this.isPlayer1 ? ball.dx < 0 : ball.dx > 0;
 
-    // Predict the ball's position in the future
-    let predictedBallY = this.predictBallPosition(ball);
-    predictedBallY = this.applyError(predictedBallY, ball.dy);
+    // Predict the ball's position only if it's moving towards the AI, otherwise stay in the middle
+    let prediction = { y: aiCenter, frames: frameCount };
+    if (ballMovingTowardsAI) {
+      prediction = this.predictBallPosition(ball);
+    }
+
+    prediction.y = this.applyError(prediction.y, ball.dy);
 
     // Plan the moves to reach predicted position
-    const requiredFrames = Math.abs(predictedBallY - aiCenter) / paddleSpeed;
-
-    let applyingSpin = false;
-
-    if (ball.dx > 0) {
-      const spinChance =
-        this.difficulty === 'easy' ? 0.2 : this.difficulty === 'normal' ? 0.5 : 0.8;
-      applyingSpin = Math.random() < spinChance;
+    let requiredFrames = Math.abs(prediction.y - aiCenter) / paddleSpeed;
+    if (requiredFrames > frameCount) {
+      requiredFrames = frameCount;
     }
 
     // First, plan basic movement to intercept the ball
-    const interceptDirection = aiCenter < predictedBallY ? 'down' : 'up';
-    for (let i = 0; i < Math.min(requiredFrames, frameCount); i++) {
+    const interceptDirection = aiCenter < prediction.y ? 'down' : 'up';
+    for (let i = 0; i < requiredFrames; i++) {
       this.plannedMoves.push(interceptDirection);
+      // Stop moving when aiCenter is close to predictedBallY
+      if (Math.abs(aiCenter - prediction.y) < paddleSpeed) {
+        break;
+      }
     }
 
-    // Decide whenever to apply spin if remaining frames allow
-    if (applyingSpin && ball.dx > 0 && this.plannedMoves.length < frameCount) {
-      const spinMovesNeeded = Math.min(3, frameCount - this.plannedMoves.length);
+    let applyingSpin = false;
+    const spinMovesNeeded = 10;
+
+    if (ballMovingTowardsAI && this.plannedMoves.length <= prediction.frames - spinMovesNeeded) {
+      // Decide whether to apply spin based on difficulty
+      const spinChance =
+        this.difficulty === 'easy' ? 0.1 : this.difficulty === 'normal' ? 0.3 : 0.7;
+      applyingSpin = Math.random() < spinChance;
+
+      // If the predicted ball position is close to edge, don't apply spin
+      const edgeBuffer = 20;
+      if (
+        prediction.y < edgeBuffer ||
+        prediction.y + this.params.ballSize > this.params.gameHeight - edgeBuffer
+      ) {
+        applyingSpin = false;
+      }
+    }
+
+    if (applyingSpin) {
+      // First add null moves to wait for the ball to come closer
+      while (this.plannedMoves.length <= prediction.frames - spinMovesNeeded) {
+        this.plannedMoves.push(null);
+      }
+      const intendedSpinDirection = Math.random() < 0.5 ? 'up' : 'down';
       for (let i = 0; i < spinMovesNeeded; i++) {
-        if (Math.random() < 0.3) {
-          // Short movement in the opposite direction for spin variation
-          this.plannedMoves.push(interceptDirection === 'up' ? 'down' : 'up');
+        if (i < spinMovesNeeded * 0.5) {
+          // Pre-move in opposite direction to prepare for spin moves
+          this.plannedMoves.push(intendedSpinDirection === 'up' ? 'down' : 'up');
         } else {
-          // Continue in same direction but with reduced intensity
-          this.plannedMoves.push(interceptDirection);
+          // Apply spin moves
+          this.plannedMoves.push(intendedSpinDirection);
         }
       }
     }
@@ -69,51 +96,54 @@ export class AIController {
   }
 
   shouldUpdate(ballDx: number): boolean {
-    // Brutal AI updates as soon as the player hits the ball
-    if (this.difficulty === 'brutal' && this.lastBallDx < 0 && ballDx > 0) {
+    // Brutal AI updates as soon as the ball changes direction
+    if (this.difficulty === 'brutal' && this.lastBallDx * ballDx < 0) {
       return true;
     }
+    // Other difficulties update once per second
     return Date.now() - this.lastUpdateTime >= 1000;
   }
 
-  private predictBallPosition(ball: Ball): number {
-    // move back to middle if ball is moving away
-    if (ball.dx < 0) {
-      return this.gameHeight / 2;
-    }
-
+  private predictBallPosition(ball: Ball): { y: number; frames: number } {
     const predictedBall = { ...ball };
+    let frames = 0;
 
-    while (predictedBall.x < this.gameHeight * 2) {
+    // Simulate ball movement until it reaches the AI's paddle
+    while (
+      this.isPlayer1
+        ? predictedBall.x >= this.params.paddleWidth
+        : predictedBall.x <= this.params.gameWidth - this.params.paddleWidth
+    ) {
       this.adjustBallMovementForSpin(predictedBall);
       predictedBall.y += predictedBall.dy;
       predictedBall.x += predictedBall.dx;
-      if (predictedBall.x < 0) {
-        predictedBall.dx = -predictedBall.dx;
-        predictedBall.x += 2 * predictedBall.dx;
-      }
-      if (predictedBall.y < 0) {
+      frames++;
+
+      if (
+        predictedBall.y <= 0 ||
+        predictedBall.y + this.params.ballSize >= this.params.gameHeight
+      ) {
+        // Simulate wall bounce
         predictedBall.dy = -predictedBall.dy;
-        predictedBall.y += 2 * predictedBall.dy;
-        this.adjustBounceForSpin(predictedBall, true);
-      }
-      if (predictedBall.y > this.gameHeight) {
-        predictedBall.dy = -predictedBall.dy;
-        predictedBall.y += 2 * predictedBall.dy;
-        this.adjustBounceForSpin(predictedBall, false);
+        this.adjustBounceForSpin(predictedBall, predictedBall.y < 0);
+        if (predictedBall.y < 0) {
+          predictedBall.y = 0;
+        } else if (predictedBall.y + this.params.ballSize > this.params.gameHeight) {
+          predictedBall.y = this.params.gameHeight - this.params.ballSize;
+        }
       }
     }
 
-    return predictedBall.y;
+    return { y: predictedBall.y, frames };
   }
 
   private adjustBallMovementForSpin(ball: Ball): void {
     if (ball.spin === 0) return;
 
     if (ball.dx > 0) {
-      ball.dy += ball.spin / 100;
+      ball.dy += ball.spin * this.params.spinCurveFactor * ball.dx;
     } else {
-      ball.dy -= ball.spin / 100;
+      ball.dy -= ball.spin * this.params.spinCurveFactor * ball.dx * -1;
     }
   }
 
@@ -122,20 +152,20 @@ export class AIController {
 
     if (ball.dx > 0) {
       if (isTopWall) {
-        ball.dx -= ball.spin / 3;
+        ball.dx -= ball.spin * this.params.spinBounceFactor;
       } else {
-        ball.dx += ball.spin / 3;
+        ball.dx += ball.spin * this.params.spinBounceFactor;
       }
-      if (ball.dx < 2) ball.dx = 1;
+      if (ball.dx < this.params.minBallDX) ball.dx = this.params.minBallDX;
     } else {
       if (isTopWall) {
-        ball.dx -= ball.spin / 3;
+        ball.dx -= ball.spin * this.params.spinBounceFactor;
       } else {
-        ball.dx += ball.spin / 3;
+        ball.dx += ball.spin * this.params.spinBounceFactor;
       }
-      if (ball.dx > -2) ball.dx = -1;
+      if (ball.dx > -this.params.minBallDX) ball.dx = -this.params.minBallDX;
     }
-    ball.spin *= 0.5;
+    ball.spin *= this.params.spinReductionFactor;
     if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
   }
 
@@ -150,7 +180,7 @@ export class AIController {
       errorFactor = 1.1;
     }
 
-    const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.gameHeight / 2);
+    const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.params.gameHeight / 2);
 
     return predictedBallY + (Math.random() * errorAmount * 2 - errorAmount);
   }

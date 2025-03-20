@@ -1,24 +1,23 @@
 // Import environment variables
-import dotenv from 'dotenv';
-dotenv.config();
-
-// Import Fastify and its JWT plugin
-import fastify from 'fastify';
-import fastifyJwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
-import authPlugin from './middlewares/auth';
-import databasePlugin from './db';
-import loggerPlugin from './middlewares/logger';
-import errorHandlerPlugin from './middlewares/errorHandler';
+import fastifyJwt from '@fastify/jwt';
+import Swagger from '@fastify/swagger';
+import SwaggerUi from '@fastify/swagger-ui';
+import dotenv from 'dotenv';
+import fastify from 'fastify';
 
-// Import alias support
-import 'module-alias/register';
-
-// Import custom routes
-import userService from '@my-backend/user_service/'; // Everything from user-service is now available
-import remoteService from '@my-backend/remote_service/';
 import matchMakingService from '@my-backend/matchmaking_service/';
+import remoteService from '@my-backend/remote_service/';
+import userService from '@my-backend/user_service/'; // Everything from user-service is now available
+
+import 'module-alias/register';
+import databasePlugin from './db';
+import authPlugin from './middlewares/auth';
+import errorHandlerPlugin from './middlewares/errorHandler';
+import loggerPlugin from './middlewares/logger';
 import adminRoutes from './routes/adminRoutes';
+
+dotenv.config();
 
 // Create Fastify instance
 const app = fastify({
@@ -40,6 +39,27 @@ const app = fastify({
 const start = async () => {
   try {
     // Register fastify-jwt plugin with secret from env variables
+    app.register(Swagger, {
+      swagger: {
+        info: {
+          title: 'My API',
+          description: 'API documentation',
+          version: '1.0.0',
+        },
+        externalDocs: {
+          url: 'https://swagger.io',
+          description: 'Find more info here',
+        },
+        host: 'localhost:8443',
+        schemes: ['https'],
+        consumes: ['application/json'],
+        produces: ['application/json'],
+      },
+    });
+
+    app.register(SwaggerUi, {
+      routePrefix: '/docs', // Swagger UI is served at /docs
+    });
     app.register(fastifyJwt, {
       secret: process.env.JWT_SECRET || 'defaultsecret',
       cookie: {
@@ -69,7 +89,7 @@ const start = async () => {
     app.register(adminRoutes, { prefix: '/api' }); // Register admin routes
     app.register(userService, { prefix: '/api' }); // Register user routes inside the plugin
     app.register(matchMakingService, { prefix: '/api' }); // Register matchmaking routes inside the plugin
-    app.register(remoteService, { prefix: '/ws/remote' }); // Register remote routes inside the plugin
+    app.register(remoteService, { prefix: '/ws' }); // Register remote routes inside the plugin
 
     await app.listen({ port: Number(process.env.BACKEND_PORT) || 8000, host: '0.0.0.0' });
     app.log.info(`Server running on port ${process.env.BACKEND_PORT || 8000}`);

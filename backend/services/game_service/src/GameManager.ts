@@ -4,9 +4,17 @@ import PongGameSession from './PongGameSession';
 
 export class GameManager {
   private sessions: Record<string, PongGameSession>;
+  private static instance: GameManager;
 
   constructor() {
     this.sessions = {};
+  }
+
+  static getInstance(): GameManager {
+    if (!GameManager.instance) {
+      GameManager.instance = new GameManager();
+    }
+    return GameManager.instance;
   }
 
   createGame(gameId: string, mode: string, difficulty: string): void {
