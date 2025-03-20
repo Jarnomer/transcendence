@@ -59,7 +59,7 @@ export const slideFromRightVariants = {
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<string>(null);
+  const [activeTab, setActiveTab] = useState<string>('leaderboard');
 
   // useEffect(() => {}, [activeTab]);
 
@@ -76,10 +76,10 @@ export const HomePage: React.FC = () => {
   };
   return (
     <>
-      <motion.div className="flex flex-grow h-full flex-col w-full h-full gap-10 p-4">
+      <motion.div className="flex flex-grow flex-col w-full h-full gap-5 md:gap-10 md:p-4">
         <motion.div
           id="home-page-nav"
-          className="flex w-full items-center justify-center font-heading text-4xl gap-6"
+          className="flex w-full items-center justify-center font-heading text-2xl gap-3 md:text-4xl md:gap-6"
           layout
           transition={{ duration: 0.4, ease: 'easeInOut' }}
         >
@@ -93,7 +93,7 @@ export const HomePage: React.FC = () => {
           <button onClick={() => setActiveTab('queue')}>Queue</button>
         </motion.div>
 
-        <motion.div id="home-page-content" className="flex w-full h-full gap-20">
+        <motion.div id="home-page-content" className="flex h-full gap-20">
           <AnimatePresence mode="wait">
             {activeTab === 'leaderboard' && (
               <motion.div
@@ -120,6 +120,18 @@ export const HomePage: React.FC = () => {
               >
                 <PlayerQueue />
               </motion.div>
+            )}
+
+            {activeTab === null && (
+              <motion.div
+                key="playerQueue"
+                className="w-full"
+                variants={slideFromRightVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                layout
+              ></motion.div>
             )}
           </AnimatePresence>
         </motion.div>

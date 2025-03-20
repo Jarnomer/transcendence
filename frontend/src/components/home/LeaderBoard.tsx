@@ -53,6 +53,9 @@ export const LeaderBoard: React.FC = () => {
   const filteredUsers = users.filter((user) =>
     user.display_name?.toLowerCase().startsWith(searchQuery)
   );
+  // .filter(
+  //   (user) => !['easy', 'brutal', 'normal'].includes(user.user_id) // Filter by user_id
+  // );
 
   useEffect(() => {
     fetchData();
@@ -71,15 +74,21 @@ export const LeaderBoard: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full relative glass-box p-10 overflow-hidden"
+        className="h-full min-h-[450px] relative glass-box p-10 overflow-hidden"
         variants={animationVariants}
         initial="hidden"
         animate="visible"
         exit="hidden"
       >
         <BackgroundGlow></BackgroundGlow>
+        <div className="absolute bottom-0 h-full  px-20 opacity-30 right-0 w-auto pointer-events-none">
+          <img
+            className="object-contain h-full mix-blend-overlay"
+            src="./src/assets/images/king_of_the_hill.png"
+          />
+        </div>
         <h1 className="font-heading text-3xl">Leaderboard</h1>
-        <div className="w-full">
+        <div className="w-1/2">
           <SearchBar
             value={searchQuery}
             onChange={handleSearchChange}
@@ -98,15 +107,16 @@ export const LeaderBoard: React.FC = () => {
             >
               {filteredUsers.map((user, index) => (
                 <motion.li
-                  key={user.user_id} // Prefer unique id rather than index for keys
-                  className="my-2"
+                  key={user.user_id}
+                  className="my-2 "
                   onClick={() => navigate(`/profile/${user.user_id}`)}
                   variants={itemVariants}
                 >
                   <div className="flex items-center gap-5">
-                    <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
+                    <h2>{index + 1}</h2>
+                    <div className="opacity relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
                       <img
-                        className="object-cover rounded-full w-full h-full"
+                        className="object-cover w-full h-full"
                         src={user.avatar_url}
                         alt={user.display_name}
                       />
