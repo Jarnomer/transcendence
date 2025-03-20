@@ -148,14 +148,50 @@ export function createCRTEffect(
   return crtEffect;
 }
 
+export function createVHSEffect(
+  scene: Scene,
+  camera: Camera,
+  options = {
+    trackingNoise: 0.1, // Horizontal tracking noise bands (more subtle than glitch)
+    staticNoise: 0.05, // Random noise/static (lower for constant presence)
+    distortion: 0.05, // Geometric distortions and jitter
+    colorBleed: 0.2, // RGB bleeding/separation
+  }
+): PostProcess {
+  const vhsEffect = new PostProcess(
+    'vhsEffect',
+    'vhsEffect',
+    ['time', 'trackingNoiseAmount', 'staticNoiseAmount', 'distortionAmount', 'colorBleedAmount'],
+    null,
+    1.0,
+    camera
+  );
+
+  const engine = scene.getEngine();
+  let time = 0;
+
+  vhsEffect.onApply = (effect) => {
+    time += engine.getDeltaTime() / 1000.0;
+    effect.setFloat('time', time);
+    effect.setFloat('trackingNoiseAmount', options.trackingNoise);
+    effect.setFloat('staticNoiseAmount', options.staticNoise);
+    effect.setFloat('distortionAmount', options.distortion);
+    effect.setFloat('colorBleedAmount', options.colorBleed);
+  };
+
+  return vhsEffect;
+}
+
 export function createGlitchEffect(
   scene: Scene,
   camera: Camera,
   options = {
-    trackingNoise: 0.1, // Horizontal tracking noise bands
-    staticNoise: 0.05, // Random noise/static
-    distortion: 0.1, // Geometric distortions and jitter
-    colorBleed: 0.2, // RGB bleeding/separation
+    // WARNING! These values are used for glitch effect
+    // Increase them significantly affects the effect strength
+    trackingNoise: 0.0, // Horizontal tracking noise bands
+    staticNoise: 0.08, // Random noise/static
+    distortion: 0.12, // Geometric distortions and jitter
+    colorBleed: 0.3, // RGB bleeding/separation
   }
 ): {
   effect: PostProcess;
@@ -294,6 +330,7 @@ export class RetroEffectsManager {
     phosphorDots?: PostProcess;
     tvSwitch?: { effect: PostProcess; setSwitchingProgress: (progress: number) => void };
     crt?: PostProcess;
+    vhs?: PostProcess;
     glitch?: { effect: PostProcess; setGlitchAmount: (amount: number) => void };
   } = {};
 
@@ -326,6 +363,11 @@ export class RetroEffectsManager {
 
   enableCRT(options?: any): RetroEffectsManager {
     this._effects.crt = createCRTEffect(this._scene, this._camera, options);
+    return this;
+  }
+
+  enableVHS(options?: any): RetroEffectsManager {
+    this._effects.vhs = createVHSEffect(this._scene, this._camera, options);
     return this;
   }
 
@@ -393,7 +435,7 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
-  async simulateCRTTurnOn(durationMs: number = 1500): Promise<void> {
+  async simulateCRTTurnOn(durationMs: number = 1800): Promise<void> {
     if (!this._turnOnEffect) this.enableTurnOnEffect();
 
     if (this._turnOnEffect && !this._isPlayingTurnOnEffect) {
@@ -573,10 +615,10 @@ export function createPongRetroEffects(
           dotIntensity: 0.4,
           nonSquareRatio: 0.8,
         })
-        .enableGlitch({
+        .enableVHS({
           trackingNoise: 0.1,
           staticNoise: 0.05,
-          distortion: 0.1,
+          distortion: 0.0,
           colorBleed: 0.2,
         })
         .enableTurnOnEffect()

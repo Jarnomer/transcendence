@@ -158,7 +158,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     setTimeout(() => {
       if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {});
+        retroEffectsRef.current.simulateCRTTurnOn(1800).then(() => {});
       }
     }, 100);
 
