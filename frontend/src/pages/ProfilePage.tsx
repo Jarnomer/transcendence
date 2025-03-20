@@ -103,7 +103,7 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full h-full flex flex-col items-center p-6 text-center">
+      <motion.div className="w-full h-full flex flex-col items-center md:p-6 text-center">
         <RadialBackground avatar_url={user.avatar_url}></RadialBackground>
         <ProfileHeader
           user={user}

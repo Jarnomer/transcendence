@@ -89,8 +89,8 @@ export const HomePage: React.FC = () => {
           <button className="btn btn-primary" onClick={handleJoinGameClick}>
             Quick Join
           </button>
+          <button onClick={() => setActiveTab('queue')}>Open Games</button>
           <button onClick={() => setActiveTab('leaderboard')}>Leaderboard</button>
-          <button onClick={() => setActiveTab('queue')}>Queue</button>
         </motion.div>
 
         <motion.div id="home-page-content" className="flex h-full gap-20">
