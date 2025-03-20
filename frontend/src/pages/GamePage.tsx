@@ -38,6 +38,7 @@ export const GamePage: React.FC = () => {
     gameState,
     gameId,
     mode,
+    difficulty,
     connectionStatus: connections.game,
     gameStatus,
   });

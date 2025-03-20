@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { getUserData, getUsersInQueue } from '../../services/userService';
+import { getUsersInQueue } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
+import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 export const PlayerQueue: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -45,7 +46,8 @@ export const PlayerQueue: React.FC = () => {
   };
 
   return (
-    <div className="glass-box p-5 w-full">
+    <div className="glass-box p-5 w-full relative overflow-hidden">
+      <BackgroundGlow></BackgroundGlow>
       <ul>
         <h1 className="font-heading text-3xl w-full">Join Game</h1>
 

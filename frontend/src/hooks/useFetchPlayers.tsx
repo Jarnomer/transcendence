@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import { getUserData } from '../services/userService';
 
 export const useFetchPlayerData = ({
@@ -6,12 +7,14 @@ export const useFetchPlayerData = ({
   gameStatus,
   gameId,
   mode,
+  difficulty,
   connectionStatus,
 }: {
   gameState: any;
   gameStatus: any;
   gameId: string | null;
   mode: string;
+  difficulty: string;
   connectionStatus: string;
 }) => {
   const [playersData, setPlayersData] = useState({ player1: null, player2: null, gameStatus });
@@ -19,7 +22,9 @@ export const useFetchPlayerData = ({
   const fetchPlayerData = async () => {
     if (
       gameState?.players?.player1?.id === 'player1' ||
-      (mode !== 'singleplayer' && gameState?.players?.player2?.id === 'player2')
+      (mode !== 'singleplayer' &&
+        difficulty !== 'local' &&
+        gameState?.players?.player2?.id === 'player2')
     ) {
       return;
     }
@@ -28,7 +33,7 @@ export const useFetchPlayerData = ({
       const p1 = await getUserData(gameState.players.player1.id);
       let p2 = null;
 
-      if (mode !== 'singleplayer') {
+      if (mode !== 'singleplayer' && difficulty !== 'local') {
         p2 = await getUserData(gameState.players.player2.id);
       }
 

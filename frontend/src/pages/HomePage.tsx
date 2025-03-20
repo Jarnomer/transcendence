@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -7,65 +7,61 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LeaderBoard } from '@components';
 
 import { PlayerQueue } from '../components/home/PlayersInQueue';
-import { sendFriendRequest } from '../services/friendService';
 
 export const slideFromLeftVariants = {
   initial: {
-    x: '-100%', // start fully outside on the left
-    opacity: 0,
+    x: '-100%',
+    scale: 1.05,
   },
   animate: {
-    x: 0, // move to the normal position
-    opacity: 1,
+    x: 0,
+    scale: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      x: { duration: 0.4, ease: 'easeInOut' },
+      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
     },
   },
   exit: {
-    x: '-100%', // slide out to the left again
-    opacity: 0,
+    x: '-100%',
+    scale: 1.05,
+    opacity: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      scale: { duration: 0.2, ease: 'easeOut' },
+      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
     },
   },
 };
 
 export const slideFromRightVariants = {
   initial: {
-    x: '100%', // start outside right
-    opacity: 0,
+    x: '100%',
+    scale: 1.05,
   },
   animate: {
-    x: 0, // slide into normal position
-    opacity: 1,
+    x: 0,
+    scale: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      x: { duration: 0.4, ease: 'easeInOut' },
+      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
     },
   },
   exit: {
-    x: '100%', // slide out to the right again
-    opacity: 0,
+    x: '100%',
+    scale: 1.05,
+    opacity: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      scale: { duration: 0.2, ease: 'easeOut' },
+      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
     },
   },
 };
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const handleAddFriendClick = (event, receiver_id: string) => {
-    // Stop the click event from bubbling up and triggering the navigate function
-    event.stopPropagation();
-    // Add your logic for adding a friend here
-    console.log('Add friend clicked');
-    sendFriendRequest(receiver_id).then(() => {
-      console.log('Friend request sent');
-    });
-  };
+
+  const [activeTab, setActiveTab] = useState<string>(null);
+
+  // useEffect(() => {}, [activeTab]);
 
   const handleCreateGameClick = () => {
     // Add your logic for creating a game here
@@ -80,40 +76,53 @@ export const HomePage: React.FC = () => {
   };
   return (
     <>
-      <motion.div className="flex flex-grow w-full h-full justify-center gap-20">
-        <div className="">
+      <motion.div className="flex flex-grow h-full flex-col w-full h-full gap-10 p-4">
+        <motion.div
+          id="home-page-nav"
+          className="flex w-full items-center justify-center font-heading text-4xl gap-6"
+          layout
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
+        >
           <button className="btn btn-primary" onClick={handleCreateGameClick}>
             create game
           </button>
-        </div>
-        <div className="">
           <button className="btn btn-primary" onClick={handleJoinGameClick}>
-            quick join
+            Quick Join
           </button>
-        </div>
-        <AnimatePresence>
-          <motion.div
-            className="w-1/2"
-            key="leaderboard"
-            variants={slideFromLeftVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <LeaderBoard />
-          </motion.div>
+          <button onClick={() => setActiveTab('leaderboard')}>Leaderboard</button>
+          <button onClick={() => setActiveTab('queue')}>Queue</button>
+        </motion.div>
 
-          <motion.div
-            className="w-1/2"
-            key="playerQueue"
-            variants={slideFromRightVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <PlayerQueue />
-          </motion.div>
-        </AnimatePresence>
+        <motion.div id="home-page-content" className="flex w-full h-full gap-20">
+          <AnimatePresence mode="wait">
+            {activeTab === 'leaderboard' && (
+              <motion.div
+                key="leaderboard"
+                className="w-full"
+                variants={slideFromLeftVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <LeaderBoard />
+              </motion.div>
+            )}
+
+            {activeTab === 'queue' && (
+              <motion.div
+                key="playerQueue"
+                className="w-full"
+                variants={slideFromRightVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                layout
+              >
+                <PlayerQueue />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </motion.div>
     </>
   );
