@@ -75,4 +75,8 @@ export class AuthModel {
     const query = `UPDATE users SET ${fields}, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? RETURNING *`;
     return await this.db.get(query, values);
   }
+
+  async deleteAuth(user_id: string) {
+    return await this.db.run(`DELETE FROM users WHERE user_id = ?`, [user_id]);
+  }
 }

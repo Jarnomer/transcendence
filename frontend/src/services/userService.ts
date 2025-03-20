@@ -1,3 +1,11 @@
+import {
+  AllResponseRankType,
+  AllResponseType,
+  QueueResType,
+  UserDataResponseType,
+  UserResponseType,
+} from '@types';
+
 import { api } from './api';
 
 export async function getUserData(userId: string) {
@@ -5,7 +13,7 @@ export async function getUserData(userId: string) {
     if (!userId) {
       throw new Error('User ID not provided');
     }
-    const res = await api.get(`/user/data/${userId}`);
+    const res = await api.get<UserDataResponseType>(`/user/data/${userId}`);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
@@ -19,7 +27,7 @@ export async function getUserData(userId: string) {
 
 export async function getUsers() {
   try {
-    const res = await api.get(`/user/all`);
+    const res = await api.get<AllResponseType>(`/user/all`);
     console.log(res);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
@@ -33,7 +41,7 @@ export async function getUsers() {
 
 export async function getUsersWithRank() {
   try {
-    const res = await api.get(`/user/all/rank`);
+    const res = await api.get<AllResponseRankType>(`/user/all/rank`);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data with rank`);
     }
@@ -46,7 +54,7 @@ export async function getUsersWithRank() {
 // page = page number, pageSize = number of items per page
 export async function getUsersInQueue() {
   try {
-    const res = await api.get(`/matchmaking/all?page=1&pageSize=10`);
+    const res = await api.get<QueueResType>(`/matchmaking/all?page=1&pageSize=10`);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch users in queue`);
     }
@@ -63,7 +71,7 @@ export async function getUserImage() {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get(
+    const res = await api.get<UserResponseType>(
       `/user/avatar/${userID}`,
       { responseType: 'blob' } // Important for binary data
     );

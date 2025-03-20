@@ -28,13 +28,14 @@ export class QueueService {
   async getQueues(page: number, pageSize: number) {
     const queues = await this.queueModel.getQueues(page, pageSize);
     const totalQueues = await this.queueModel.getTotalQueues();
+    console.log('totalQueues', totalQueues);
     return {
       queues,
       pagination: {
         page,
         pageSize,
-        total: totalQueues.total,
-        totalPages: Math.ceil(totalQueues.total / pageSize),
+        total: totalQueues,
+        totalPages: Math.ceil(totalQueues / pageSize),
       },
     };
   }

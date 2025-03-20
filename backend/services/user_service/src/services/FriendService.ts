@@ -35,16 +35,11 @@ export class FriendService {
   }
 
   async getSentFriendRequests(user_id: string) {
-    const res = await this.friendModel.getSentFriendRequests(user_id);
-    return res;
+    return await this.friendModel.getSentFriendRequests(user_id);
   }
 
   async getReceivedFriendRequests(user_id: string) {
-    const res = await this.friendModel.getReceivedFriendRequests(user_id);
-    if (res.length === 0) {
-      throw new NotFoundError('No received friend requests found');
-    }
-    return res;
+    return await this.friendModel.getReceivedFriendRequests(user_id);
   }
 
   async acceptFriendRequest(user_id: string, sender_id: string) {

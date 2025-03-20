@@ -39,7 +39,11 @@ importers:
         specifier: ^3.2.5
         version: 3.5.3
 
-  backend: {}
+  backend:
+    dependencies:
+      module-alias:
+        specifier: ^2.2.3
+        version: 2.2.3
 
   backend/services/game_service:
     dependencies:
@@ -207,6 +211,9 @@ importers:
       fastify:
         specifier: ^5.2.1
         version: 5.2.1
+      module-alias:
+        specifier: ^2.2.3
+        version: 2.2.3
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
@@ -341,6 +348,9 @@ importers:
       fastify-plugin:
         specifier: ^5.0.1
         version: 5.0.1
+      module-alias:
+        specifier: ^2.2.3
+        version: 2.2.3
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
@@ -375,6 +385,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.0.0)
+      '@sinclair/typebox':
+        specifier: ^0.34.30
+        version: 0.34.30
       '@tailwindcss/vite':
         specifier: ^4.0.6
         version: 4.0.12(vite@6.2.1(@types/node@22.13.10)(jiti@2.4.2)(lightningcss@1.29.2)(yaml@2.7.0))
@@ -402,6 +415,9 @@ importers:
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
+      module-alias:
+        specifier: ^2.2.3
+        version: 2.2.3
       node-vibrant:
         specifier: ^4.0.3
         version: 4.0.3(encoding@0.1.13)
@@ -980,6 +996,9 @@ packages:
 
   '@sinclair/typebox@0.34.28':
     resolution: {integrity: sha512-e2B9vmvaa5ym5hWgCHw5CstP54au6AOLXrhZErLsOyyRzuWJtXl/8TszKtc5x8rw/b+oY7HKS9m9iRI53RK0WQ==}
+
+  '@sinclair/typebox@0.34.30':
+    resolution: {integrity: sha512-gFB3BiqjDxEoadW0zn+xyMVb7cLxPCoblVn2C/BKpI41WPYi2d6fwHAlynPNZ5O/Q4WEiujdnJzVtvG/Jc2CBQ==}
 
   '@tailwindcss/node@4.0.12':
     resolution: {integrity: sha512-a6J11K1Ztdln9OrGfoM75/hChYPcHYGNYimqciMrvKXRmmPaS8XZTHhdvb5a3glz4Kd4ZxE1MnuFE2c0fGGmtg==}
@@ -4075,6 +4094,8 @@ snapshots:
   '@rtsao/scc@1.1.0': {}
 
   '@sinclair/typebox@0.34.28': {}
+
+  '@sinclair/typebox@0.34.30': {}
 
   '@tailwindcss/node@4.0.12':
     dependencies:
