@@ -4,12 +4,12 @@ import { useLocation } from 'react-router-dom';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
-import { CountDown, PlayerScoreBoard } from '@components';
+import { CountDown, GameCanvas, PlayerScoreBoard } from '@components';
 
 import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@hooks';
 
-import { createReadyInputMessage } from '../../../shared/messages';
-import GameCanvas from '../components/game/GameCanvas';
+import { createReadyInputMessage } from '@shared/messages';
+
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
