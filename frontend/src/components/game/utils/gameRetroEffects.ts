@@ -157,7 +157,14 @@ export function createGlitchEffect(
     distortion: 0.1, // Geometric distortions and jitter
     colorBleed: 0.2, // RGB bleeding/separation
   }
-): { effect: PostProcess; setGlitchAmount: (amount: number) => void } {
+): {
+  effect: PostProcess;
+  setGlitchAmount: (amount: number) => void;
+  setTrackingNoiseAmount: (amount: number) => void;
+  setStaticNoiseAmount: (amount: number) => void;
+  setDistortionAmount: (amount: number) => void;
+  setColorBleedAmount: (amount: number) => void;
+} {
   const glitchEffect = new PostProcess(
     'vhsEffect',
     'vhsEffect',
@@ -170,24 +177,46 @@ export function createGlitchEffect(
   const engine = scene.getEngine();
   let time = 0;
 
+  // Create state variables in the closure scope
+  let currentTrackingNoise = options.trackingNoise;
+  let currentStaticNoise = options.staticNoise;
+  let currentDistortion = options.distortion;
+  let currentColorBleed = options.colorBleed;
+
   glitchEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
     effect.setFloat('time', time);
-    effect.setFloat('trackingNoiseAmount', options.trackingNoise);
-    effect.setFloat('staticNoiseAmount', options.staticNoise);
-    effect.setFloat('distortionAmount', options.distortion);
-    effect.setFloat('colorBleedAmount', options.colorBleed);
+    effect.setFloat('trackingNoiseAmount', currentTrackingNoise);
+    effect.setFloat('staticNoiseAmount', currentStaticNoise);
+    effect.setFloat('distortionAmount', currentDistortion);
+    effect.setFloat('colorBleedAmount', currentColorBleed);
   };
 
   return {
     effect: glitchEffect,
+
+    // Scales all parameters
     setGlitchAmount: (amount: number) => {
-      const effect = glitchEffect.getEffect();
-      if (effect) {
-        // Scale the distortion and static noise based on the glitch amount
-        effect.setFloat('distortionAmount', options.distortion * amount);
-        effect.setFloat('staticNoiseAmount', options.staticNoise * amount);
-      }
+      currentDistortion = options.distortion * amount;
+      currentStaticNoise = options.staticNoise * amount;
+      currentTrackingNoise = options.trackingNoise * amount;
+    },
+
+    // Individual parameter controls
+    setTrackingNoiseAmount: (amount: number) => {
+      currentTrackingNoise = amount;
+    },
+
+    setStaticNoiseAmount: (amount: number) => {
+      currentStaticNoise = amount;
+    },
+
+    setDistortionAmount: (amount: number) => {
+      currentDistortion = amount;
+    },
+
+    setColorBleedAmount: (amount: number) => {
+      currentColorBleed = amount;
     },
   };
 }
@@ -317,75 +346,27 @@ export class RetroEffectsManager {
     return this;
   }
 
-  setGlitchAmount(amount: number): RetroEffectsManager {
+  setGlitchAmount(amount: number = 1, durationMs: number = 200): RetroEffectsManager {
+    if (!this._effects.glitch) this.enableGlitch();
+
     if (this._effects.glitch) {
       this._effects.glitch.setGlitchAmount(amount);
-    }
-    return this;
-  }
 
-  setDistortion(amount: number): RetroEffectsManager {
-    if (this._effects.glitch) {
-      const effect = this._effects.glitch.effect.getEffect();
-      if (effect) {
-        effect.setFloat('distortionAmount', amount);
+      if (durationMs > 0) {
+        setTimeout(() => {
+          if (this._effects.glitch) {
+            this._effects.glitch.setGlitchAmount(0);
+          }
+        }, durationMs);
       }
     }
     return this;
-  }
-
-  setTrackingNoise(amount: number): RetroEffectsManager {
-    if (this._effects.glitch) {
-      const effect = this._effects.glitch.effect.getEffect();
-      if (effect) {
-        effect.setFloat('trackingNoiseAmount', amount);
-      }
-    }
-    return this;
-  }
-
-  setStaticNoise(amount: number): RetroEffectsManager {
-    if (this._effects.glitch) {
-      const effect = this._effects.glitch.effect.getEffect();
-      if (effect) {
-        effect.setFloat('staticNoiseAmount', amount);
-      }
-    }
-    return this;
-  }
-
-  setScanlineIntensity(amount: number): RetroEffectsManager {
-    if (this._effects.scanlines) {
-      const effect = this._effects.scanlines.getEffect();
-      if (effect) {
-        effect.setFloat('scanlineIntensity', amount);
-      }
-    }
-    return this;
-  }
-
-  getCRTEffect(): PostProcess | null {
-    return this._effects.crt || null;
-  }
-
-  getGlitchEffect(): { effect: PostProcess; setGlitchAmount: (amount: number) => void } | null {
-    return this._effects.glitch || null;
-  }
-
-  getScanlinesEffect(): PostProcess | null {
-    return this._effects.scanlines || null;
   }
 
   async changeChannel(durationMs: number = 1000): Promise<void> {
-    if (!this._effects.tvSwitch) {
-      this.enableTVSwitch();
-    }
+    if (!this._effects.tvSwitch) this.enableTVSwitch();
 
     if (this._effects.tvSwitch) {
-      if (this._effects.glitch) {
-        this._effects.glitch.setGlitchAmount(0.8);
-      }
-
       return new Promise((resolve) => {
         const startTime = performance.now();
 
@@ -400,9 +381,6 @@ export class RetroEffectsManager {
           } else {
             setTimeout(() => {
               this._effects.tvSwitch!.setSwitchingProgress(0);
-              if (this._effects.glitch) {
-                this._effects.glitch.setGlitchAmount(0);
-              }
               resolve();
             }, 100);
           }
@@ -435,8 +413,20 @@ export class RetroEffectsManager {
           this._turnOnEffect?.setTurnOnProgress(progress);
 
           if (this._effects.glitch) {
-            const glitchAmount = Math.max(0, 0.15 - progress * 0.15) * Math.sin(progress * 15);
-            this._effects.glitch.setGlitchAmount(glitchAmount);
+            if (progress < 0.6) {
+              const pulseIntensity = Math.sin(progress * 40) * 2;
+              const intensity = (0.8 - progress) * 10 * pulseIntensity;
+              this._effects.glitch.setGlitchAmount(Math.abs(intensity));
+              console.log(`intensity=${intensity}`);
+            } else if (progress < 0.8) {
+              const randomIntensity = Math.sin(progress * 30) * 2;
+              this._effects.glitch.setGlitchAmount(Math.abs(randomIntensity));
+              console.log(`randomIntensity=${randomIntensity}`);
+            } else {
+              const finalIntensity = Math.max(0, 1 - progress) * 0.8;
+              this._effects.glitch.setGlitchAmount(Math.abs(finalIntensity));
+              console.log(`finalIntensity=${finalIntensity}`);
+            }
           }
 
           if (this._effects.scanlines) {
@@ -486,9 +476,19 @@ export class RetroEffectsManager {
           this._turnOffEffect?.setTurnOffProgress(progress);
 
           if (this._effects.glitch) {
-            const glitchBase = Math.min(0.4, progress * 0.6);
-            const glitchPulse = Math.sin(progress * 20) * 0.15;
-            this._effects.glitch.setGlitchAmount(glitchBase + glitchPulse);
+            if (progress < 0.2) {
+              const initialGlitch = progress * 2;
+              this._effects.glitch.setGlitchAmount(initialGlitch);
+            } else if (progress < 0.5) {
+              const collapseGlitch = 0.4 + (progress - 0.2) * 3;
+              this._effects.glitch.setGlitchAmount(collapseGlitch);
+            } else if (progress < 0.7) {
+              const finalCollapseGlitch = 1.3 + Math.sin(progress * 40) * 1.5;
+              this._effects.glitch.setGlitchAmount(finalCollapseGlitch);
+            } else {
+              const fadeOutGlitch = (1.0 - progress) * 4;
+              this._effects.glitch.setGlitchAmount(fadeOutGlitch);
+            }
           }
 
           if (progress < 1.0) {
@@ -511,32 +511,15 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
-  simulateTrackingDistortion(durationMs: number = 800, intensity: number = 1.0): void {
-    if (!this._effects.glitch) {
-      this.enableGlitch();
-    }
+  simulateTrackingDistortion(intensity: number = 5.0, durationMs: number = 800): void {
+    if (!this._effects.glitch) this.enableGlitch();
 
     if (this._effects.glitch) {
-      const originalGlitchAmount = 0;
-
-      this._effects.glitch.setGlitchAmount(0.3 * intensity);
-
-      // Add some tracking distortion through the glitch effect
-      const effect = this._effects.glitch.effect.getEffect();
-      if (effect) {
-        effect.setFloat('trackingNoiseAmount', 0.4 * intensity);
-        effect.setFloat('distortionAmount', 0.3 * intensity);
-      }
+      this._effects.glitch.setGlitchAmount(intensity);
 
       setTimeout(() => {
         if (this._effects.glitch) {
-          this._effects.glitch.setGlitchAmount(originalGlitchAmount);
-
-          const effect = this._effects.glitch.effect.getEffect();
-          if (effect) {
-            effect.setFloat('trackingNoiseAmount', 0.2);
-            effect.setFloat('distortionAmount', 0.1);
-          }
+          this._effects.glitch.setGlitchAmount(0);
         }
       }, durationMs);
     }

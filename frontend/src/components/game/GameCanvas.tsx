@@ -49,7 +49,6 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 };
 
-// Helper function to detect collision, return either horizontal or vertical collision
 const detectCollision = (
   prevDx: number,
   prevDy: number,
@@ -64,7 +63,6 @@ const detectCollision = (
   return null;
 };
 
-// Helper function to detect scoring, update score reference, and return scoring player
 const detectScore = (
   player1Score: number,
   player2Score: number,
@@ -160,9 +158,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     setTimeout(() => {
       if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {
-          if (retroEffectsRef.current) retroEffectsRef.current.setGlitchAmount(0);
-        });
+        retroEffectsRef.current.simulateCRTTurnOn(2500).then(() => {});
       }
     }, 100);
 

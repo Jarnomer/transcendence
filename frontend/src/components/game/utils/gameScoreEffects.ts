@@ -1,11 +1,7 @@
 export function applyScoreEffects(retroEffectsRef: any) {
   if (retroEffectsRef) {
-    console.log('Applying change channel effect');
-    retroEffectsRef.simulateTrackingDistortion(500, 2.0);
     setTimeout(() => {
-      retroEffectsRef?.changeChannel(1000).then(() => {
-        // Add code here to run after the channel change
-      });
+      retroEffectsRef?.changeChannel(1000).then(() => {});
     }, 100);
   }
 }
