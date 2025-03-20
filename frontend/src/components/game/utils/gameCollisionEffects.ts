@@ -339,6 +339,7 @@ function applyShockwaveEffect(
 }
 
 export function applyCollisionEffects(
+  retroEffectsRef: any,
   ballMesh: any,
   leftPaddle: any,
   rightPaddle: any,
@@ -361,4 +362,34 @@ export function applyCollisionEffects(
       applyPaddleRecoil(rightPaddle, speedFactor, scene);
     }
   }
+
+  if (retroEffectsRef) {
+    console.log('Applying collision glitch effect');
+    retroEffectsRef.setScanlineIntensity(2);
+    retroEffectsRef.setGlitchAmount(2);
+    // setTimeout(() => {
+    //   retroEffectsRef?.changeChannel(1000).then(() => {
+    //     // Add code here to run after the channel change
+    //   });
+    // }, 100);
+  }
+
+  // if (retroEffectsRef) {
+  //   console.log('Applying collision glitch effect');
+  //   // Check if glitch effect is available, enable it if not
+  //   if (!retroEffectsRef._effects?.glitch) {
+  //     retroEffectsRef.enableGlitch();
+  //   }
+  //   // Use a more reasonable value (0.8 is used in changeChannel)
+  //   retroEffectsRef.setGlitchAmount(speedFactor * 0.8);
+
+  //   // You could also try this alternative if the above doesn't work:
+  //   // retroEffectsRef.simulateTrackingDistortion(200, speedFactor);
+
+  //   setTimeout(() => {
+  //     if (retroEffectsRef) {
+  //       retroEffectsRef.setGlitchAmount(0);
+  //     }
+  //   }, 200);
+  // }
 }

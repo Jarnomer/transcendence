@@ -593,7 +593,7 @@ export function createPongRetroEffects(
         .enableGlitch({
           trackingNoise: 0.1,
           staticNoise: 0.05,
-          distortion: 0.0,
+          distortion: 0.1,
           colorBleed: 0.2,
         })
         .enableTurnOnEffect()

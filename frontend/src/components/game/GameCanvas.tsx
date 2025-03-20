@@ -6,6 +6,7 @@ import {
   RetroEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
+  applyScoreEffects,
   ballSparkEffect,
   createBall,
   createFloor,
@@ -104,7 +105,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
 
-  // Updated references to only store mesh objects
   const floorRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
@@ -149,15 +149,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     // Set paddle positions
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 19.5;
-
-    // Initialize previous ball state
-    prevBallState.current = {
-      x: gameState.ball.x,
-      y: gameState.ball.y,
-      dx: gameState.ball.dx,
-      dy: gameState.ball.dy,
-      spin: gameState.ball.spin,
-    };
 
     setLastTheme(theme); // Save current theme
 
@@ -242,6 +233,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     if (collision) {
       applyCollisionEffects(
+        retroEffectsRef.current,
         ballRef.current,
         player1Ref.current,
         player2Ref.current,
@@ -249,25 +241,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
         speed,
         color
       );
-
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.setGlitchAmount(1);
-        setTimeout(() => {
-          if (retroEffectsRef.current) {
-            retroEffectsRef.current.setGlitchAmount(0);
-          }
-        }, 200);
-      }
     }
 
-    // if (score && retroEffectsRef.current) {
-    //   retroEffectsRef.current.simulateTrackingDistortion(500, 2.0);
-    //   setTimeout(() => {
-    //     retroEffectsRef.current?.simulateCRTTurnOff(800).then(() => {
-    //       // Add code here to run after the channel change
-    //     });
-    //   }, 100);
-    // }
+    if (score) {
+      applyScoreEffects(retroEffectsRef.current);
+    }
 
     prevBallState.current = {
       x: ball.x,
