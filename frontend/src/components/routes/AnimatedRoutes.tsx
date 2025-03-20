@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
@@ -21,7 +21,6 @@ export const AnimatedRoutes: React.FC = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Public route - No authentication required */}
         <Route
           path="/login"
           element={
@@ -31,95 +30,66 @@ export const AnimatedRoutes: React.FC = () => {
           }
         />
 
-        {/* Protected routes - Redirect to login if no user is authenticated */}
         <Route
           path="/"
           element={
-            user ? (
-              <PageWrapper>
-                <HomePage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <HomePage />
+            </PageWrapper>
           }
         />
 
         <Route
           path="/home"
           element={
-            user ? (
-              <PageWrapper>
-                <HomePage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <HomePage />
+            </PageWrapper>
           }
         />
 
         <Route
           path="/gameMenu"
           element={
-            user ? (
-              <PageWrapper>
-                <GameMenu />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <GameMenu />
+            </PageWrapper>
           }
         />
 
         <Route
           path="/game"
           element={
-            user ? (
-              <PageWrapper>
-                <GamePage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <GamePage />
+            </PageWrapper>
           }
         />
 
         <Route
           path="/creators"
           element={
-            user ? (
-              <PageWrapper>
-                <CreatorsPage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <CreatorsPage />
+            </PageWrapper>
           }
         />
 
         <Route
           path="/profile/:userId"
           element={
-            user ? (
-              <PageWrapper>
-                <ProfilePage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <ProfilePage />
+            </PageWrapper>
           }
         />
 
         <Route
           path="/chat"
           element={
-            user ? (
-              <PageWrapper>
-                <ChatPage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            <PageWrapper>
+              <ChatPage />
+            </PageWrapper>
           }
         />
       </Routes>

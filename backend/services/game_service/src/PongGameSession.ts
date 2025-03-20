@@ -125,7 +125,7 @@ export class PongGameSession {
   }
 
   updateGame(): void {
-    const updatedState = this.game.updateGameState({});
+    const updatedState = this.game.getGameState();
     this.broadcast({ type: 'game_state', state: updatedState });
     // Broadcast game status (countdown, playing, finished, ...)
     const updatedGameStatus = this.game.getGameStatus();

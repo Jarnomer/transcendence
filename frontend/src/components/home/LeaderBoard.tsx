@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 
 import { getUsersWithRank } from '../../services/userService';
 import SearchBar from '../UI/SearchBar';
+import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 export const animationVariants = {
   initial: {
@@ -28,6 +29,7 @@ const containerVariants = {
   visible: {
     transition: {
       staggerChildren: 0.1, // Stagger items
+      delay: 0.4,
     },
   },
 };
@@ -60,6 +62,7 @@ export const LeaderBoard: React.FC = () => {
     setLoading(true);
     const res = await getUsersWithRank();
     if (res) {
+      console.log(res);
       setUsers(res);
     }
     setLoading(false);
@@ -68,12 +71,13 @@ export const LeaderBoard: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full glass-box p-10 overflow-hidden"
+        className="h-full relative glass-box p-10 overflow-hidden"
         variants={animationVariants}
         initial="hidden"
         animate="visible"
         exit="hidden"
       >
+        <BackgroundGlow></BackgroundGlow>
         <h1 className="font-heading text-3xl">Leaderboard</h1>
         <div className="w-full">
           <SearchBar

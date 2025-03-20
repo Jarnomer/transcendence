@@ -253,11 +253,12 @@ export default class PongGame {
         paddleState.dy = this.params.paddleSpeed;
       }
     } else if (move === null) {
-      this.frameCount++;
-      if (this.frameCount % 6 === 0) {
-        paddleState.dy = 0;
-        this.frameCount = 0;
-      }
+      // this.frameCount++;
+      // if (this.frameCount % 6 === 0) {
+      //   paddleState.dy = 0;
+      //   this.frameCount = 0;
+      // }
+      paddleState.dy = 0;
     }
   }
 

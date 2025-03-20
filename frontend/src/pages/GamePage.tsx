@@ -4,12 +4,12 @@ import { useLocation } from 'react-router-dom';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
-import { CountDown, PlayerScoreBoard } from '@components';
+import { CountDown, GameCanvas, PlayerScoreBoard } from '@components';
 
 import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@hooks';
 
-import { createReadyInputMessage } from '../../../shared/messages';
-import GameCanvas from '../components/game/GameCanvas';
+import { createReadyInputMessage } from '@shared/messages';
+
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
@@ -38,6 +38,7 @@ export const GamePage: React.FC = () => {
     gameState,
     gameId,
     mode,
+    difficulty,
     connectionStatus: connections.game,
     gameStatus,
   });
@@ -69,7 +70,7 @@ export const GamePage: React.FC = () => {
       ) : null}
       {connections.game === 'connected' && gameStatus !== 'finished' && !loading ? (
         <>
-          <div className="w-full h-full relative overflow-hidden border-2 border-primary">
+          <div className="w-full h-full relative overflow-hidden">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 
