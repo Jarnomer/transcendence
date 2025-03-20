@@ -1,6 +1,8 @@
 import { Database } from 'sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
+import { queryWithJsonParsingObject } from '../../../utils/utils';
+
 export class GameModel {
   private db: Database;
   private static instance: GameModel;
@@ -65,8 +67,7 @@ export class GameModel {
   }
 
   async getGame(game_id: string) {
-    return await this.db.get(
-      `
+    const query = `
       SELECT
       g.*,
       ( SELECT json_group_array
@@ -83,9 +84,8 @@ export class GameModel {
       ) AS players
       FROM games g
       WHERE g.game_id = ?;
-    `,
-      [game_id]
-    );
+    `;
+    return await queryWithJsonParsingObject(this.db, query, [game_id], ['players']);
   }
 
   async getOngoingGame(user_id: string) {

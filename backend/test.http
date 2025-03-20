@@ -1,0 +1,102 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODI2ZGIxNzgtNjNkMC00YzE0LWE2ODgtMjg5MjgzOTY2ZGNiIiwidXNlcm5hbWUiOiJqYW4iLCJpYXQiOjE3NDI0ODQxMjgsImV4cCI6MTc0MjQ4NzcyOH0.d3UpFDINr-1yL3TVoZzIcSsxGTRh6dLlbe2dTZSAZpo
+@user = 826db178-63d0-4c14-a688-289283966dcb
+
+### user
+### login
+post https://localhost:8443/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "jan",
+  "password": "123"
+}
+### get user
+get https://localhost:8443/api/user/{{user}}
+Authorization: Bearer {{token}}
+### get all users
+get https://localhost:8443/api/user/all
+Authorization: Bearer {{token}}
+### get all user with rank
+get https://localhost:8443/api/user/all/rank
+Authorization: Bearer {{token}}
+### get data of user
+get https://localhost:8443/api/user/data/{{user}}
+Authorization: Bearer {{token}}
+### get notifications
+get https://localhost:8443/api/user/notifications
+Authorization: Bearer {{token}}
+
+
+
+### friends routes
+@receiver_id = e2c8fd96-3d43-4e78-9cfd-bbb88f4d156c
+@sender_id = 826db178-63d0-4c14-a688-289283966dcb
+### get friend request sent
+get https://localhost:8443/api/friend/requests/sent
+Authorization: Bearer {{token}}
+
+### get friend requests received
+get https://localhost:8443/api/friend/requests/received
+Authorization: Bearer {{token}}
+
+### send friend request
+post https://localhost:8443/api/friend/request/{{receiver_id}}
+Authorization: Bearer {{token}}
+
+### accept friend request
+post https://localhost:8443/api/friend/request/accept/{{sender_id}}
+Authorization: Bearer {{token}}
+
+### reject friend request
+post https://localhost:8443/api/friend/request/reject/{{sender_id}}
+Authorization: Bearer {{token}}
+
+### cancel friend request
+delete https://localhost:8443/api/friend/request/{{receiver_id}}
+Authorization: Bearer {{token}}
+
+
+### get profiles
+get https://localhost:8443/api/user/all
+Authorization: Bearer {{token}}
+
+### get my profile
+get https://localhost:8443/api/user/{{user}}
+Authorization: Bearer {{token}}
+
+### get user data
+get https://localhost:8443/api/user/data/{{user}}
+Authorization: Bearer {{token}}
+
+
+### queues
+#### get all queues
+get https://localhost:8443/api/matchmaking/all?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### get my queues
+get https://localhost:8443/api/matchmaking/status/{{user}}
+Authorization: Bearer {{token}}
+
+### join queue
+post https://localhost:8443/api/matchmaking/enterQueue/{{user}}?mode=1v1
+Authorization: Bearer {{token}}
+
+### leave queue
+delete https://localhost:8443/api/matchmaking/cancel/{{user}}
+Authorization: Bearer {{token}}
+
+
+### games
+### get game id
+get https://localhost:8443/api/game/getGameID/{{user}}
+Authorization: Bearer {{token}}
+
+### get game data
+get https://localhost:8443/api/game/getGame/5444b000-f6dc-4517-a81e-8d771aa14c2a
+Authorization: Bearer {{token}}
+
+### submit result
+post https://localhost:8443/api/game/result
+Authorization: Bearer {{token}}
+

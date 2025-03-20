@@ -1,3 +1,5 @@
+import { EnterQueueResType, QueueStatusResType, GameIdType, GameResType, GameSinglePlayerResType, GameResultResType } from '@types';
+
 import { api } from './api';
 
 interface QueueResponse {
@@ -16,7 +18,7 @@ export async function enterQueue(mode: string) {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<QueueResponse>(`/matchmaking/enterQueue/${userID}?mode=${mode}`);
+    const res = await api.post<EnterQueueResType>(`/matchmaking/enterQueue/${userID}?mode=${mode}`);
     console.log(res.data);
     return res.data;
   } catch (err) {
@@ -31,7 +33,7 @@ export async function cancelQueue() {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.delete(`/matchmaking/cancel/${userID}`);
+    const res = await api.delete<CanPlayTypeResult>(`/matchmaking/cancel/${userID}`);
     console.log(res.data);
     return res.data;
   } catch (err) {
@@ -46,7 +48,7 @@ export async function getQueueStatus() {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<QueueResponse>(`/matchmaking/status/${userID}`);
+    const res = await api.get<QueueStatusResType>(`/matchmaking/status/${userID}`);
     console.log(res.data);
     return res.data.status;
   } catch (err) {
@@ -61,7 +63,7 @@ export async function getGameID() {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<GameIDResponse>(`/game/getGameID/${userID}`);
+    const res = await api.get<GameIdType>(`/game/getGameID/${userID}`);
     console.log(res);
     return res.data;
   } catch (err) {
@@ -82,7 +84,7 @@ interface GameObject {
 
 export async function getGame(game_id: string) {
   try {
-    const res = await api.get<GameObject>(`/game/getGame/${game_id}`);
+    const res = await api.get<GameResType>(`/game/getGame/${game_id}`);
     console.log(res);
     return res.data;
   } catch (err) {
@@ -97,7 +99,7 @@ export async function singlePlayer(difficulty: string) {
     if (!userID) {
       throw new Error('User ID not found');
     }
-    const res = await api.get<GameIDResponse>(
+    const res = await api.post<GameSinglePlayerResType>(
       `/game/singlePlayer/${userID}?difficulty=${difficulty}`
     );
     console.log(res.data);
@@ -125,7 +127,7 @@ export async function submitResult({
 }: GameResult) {
   try {
     console.log(game_id, winner_id, loser_id, winner_score, loser_score);
-    const res = await api.post(`/game/result`, {
+    const res = await api.post<GameResultResType>(`/game/result`, {
       game_id,
       winner_id,
       loser_id,

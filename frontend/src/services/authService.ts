@@ -1,13 +1,8 @@
 import { jwtDecode } from 'jwt-decode';
+
+import { LoginResponseType, RegisterResponseType } from '@types';
+
 import { api } from './api';
-
-interface LoginResponse {
-  token: string;
-}
-
-interface RegisterResponse {
-  message: string;
-}
 
 interface TokenDecoded {
   user_id: string;
@@ -17,7 +12,7 @@ interface TokenDecoded {
 export async function login(username: string, password: string) {
   try {
     console.log('Logging in...');
-    const res = await api.post<LoginResponse>('/auth/login', { username, password });
+    const res = await api.post<LoginResponseType>('/auth/login', { username, password });
     if (res.status !== 200) {
       throw new Error(`Login failed! Status: ${res.status}`);
     }
@@ -40,7 +35,7 @@ export async function login(username: string, password: string) {
 }
 
 export async function register(username: string, password: string) {
-  const res = await api.post<RegisterResponse>('/auth/register', {
+  const res = await api.post<RegisterResponseType>('/auth/register', {
     username,
     password,
   });
@@ -50,22 +45,3 @@ export async function register(username: string, password: string) {
   console.log(res.data);
   return res.data;
 }
-
-// const isLoggedInContext = useContext(IsLoggedInContext)!;
-// const { setIsLoggedIn } = isLoggedInContext;
-
-// export const logout = async () => {
-//   try {
-//     await api.post('/auth/logout', { user_id: localStorage.getItem('userID') });
-//     await api.patch(`/user/${localStorage.getItem('userID')}`, { status: 'offline' });
-//   } catch (error) {
-//     console.error('Logout failed:', error);
-//   } finally {
-//     localStorage.removeItem('token');
-//     localStorage.removeItem('userID');
-//     localStorage.removeItem('username');
-//     setIsLoggedIn(false);
-//     console.log('logged out');
-//     window.location.href = '/login';
-//   }
-// };

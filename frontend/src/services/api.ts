@@ -1,14 +1,8 @@
 import axios from 'axios';
+
+import { RefreshResponseType } from '@types';
+
 const API_URL = '/api/auth';
-
-interface TokenDecoded {
-  user_id: string;
-  username: string;
-}
-
-interface LoginResponse {
-  token: string;
-}
 
 export const api = axios.create({
   baseURL: '/api',
@@ -61,7 +55,7 @@ api.interceptors.response.use(
 // Function to Refresh Token
 export async function refreshToken(): Promise<string | null> {
   try {
-    const response = await api.get<LoginResponse>(
+    const response = await api.get<RefreshResponseType>(
       '/auth/refresh',
       { withCredentials: true } // Important for cookies
     ); // Backend refresh route

@@ -1,6 +1,7 @@
 import fastifyMultipart from '@fastify/multipart';
 import fastifyStatic from '@fastify/static';
 import { FastifyInstance } from 'fastify';
+import 'module-alias/register';
 
 import { authRoutes } from './routes/authRoute';
 import { friendRoutes } from './routes/friendRoutes';

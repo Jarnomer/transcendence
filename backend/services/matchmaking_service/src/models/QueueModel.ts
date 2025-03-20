@@ -224,13 +224,16 @@ export class QueueModel {
    */
   async createWaitingQueue(user_id: string, mode: string) {
     const id = uuidv4();
-    await this.db.get(`INSERT INTO queues (queue_id, mode) VALUES (?, ?) RETURNING *`, [id, mode]);
-    const user = await this.db.run(
+    const queue = await this.db.get(
+      `INSERT INTO queues (queue_id, mode) VALUES (?, ?) RETURNING *`,
+      [id, mode]
+    );
+    await this.db.run(
       `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting')`,
       [id, user_id]
     );
 
-    return user;
+    return queue;
   }
 
   /**

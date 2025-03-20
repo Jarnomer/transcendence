@@ -195,12 +195,9 @@ export class UserModel {
 
   async getNotifications(user_id: string) {
     return await this.db.all(
-      `SELECT
-      n.*,
-      up.*
+      `SELECT *
       FROM notifications n
-      LEFT JOIN user_profiles up ON n.reference_id = up
-      WHERE user_id = ? ORDER BY created_at DESC`,
+      WHERE n.user_id = ? ORDER BY created_at DESC`,
       [user_id]
     );
   }

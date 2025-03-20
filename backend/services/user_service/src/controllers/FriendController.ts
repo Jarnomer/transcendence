@@ -28,7 +28,7 @@ export class FriendController {
    * @throws NotFoundError if friend user not found
    */
   async sendFriendRequest(request: FastifyRequest, reply: FastifyReply) {
-    const { receiver_id } = request.body as { receiver_id: string };
+    const { receiver_id } = request.params as { receiver_id: string };
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Sending friend request to ${receiver_id}`);
     const friendRequest = await this.friendService.sendFriendRequest(user_id, receiver_id);
@@ -64,9 +64,6 @@ export class FriendController {
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting received friend requests for ${user_id}`);
     const receivedFriendRequests = await this.friendService.getReceivedFriendRequests(user_id);
-    if (receivedFriendRequests.length === 0) {
-      throw new NotFoundError('No received friend requests found');
-    }
     reply.code(200).send(receivedFriendRequests);
   }
 
