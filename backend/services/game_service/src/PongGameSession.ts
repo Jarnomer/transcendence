@@ -208,6 +208,10 @@ export class PongGameSession {
     this.broadcast({ type: 'game_status', state: 'playing' });
   }
 
+  getGameState(): void {
+    this.game.getGameState();
+  }
+
   private startGameLoop(): void {
     if (this.interval) {
       clearInterval(this.interval);
