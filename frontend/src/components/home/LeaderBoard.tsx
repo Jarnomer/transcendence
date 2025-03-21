@@ -115,11 +115,11 @@ export const LeaderBoard: React.FC = () => {
                   <div className="flex items-center gap-5">
                     <h2>{index + 1}</h2>
                     <div className="opacity relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
-                      <img
+                      {/* <img
                         className="object-cover w-full h-full"
                         src={user.avatar_url}
                         alt={user.display_name}
-                      />
+                      /> */}
                     </div>
                     <p>
                       {user.display_name || 'N/A'} <br />
