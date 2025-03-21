@@ -6,7 +6,7 @@ export class BackgroundGameManager {
   private static instance: BackgroundGameManager;
   private gameSession: PongGame | null = null;
   private gameId: string = 'background-game';
-  private gameMode: string = 'AIvsAI';
+  private gameMode: string = 'singleplayer';
   private difficulty: string = 'brutal';
   private connections: Map<string, WebSocket> = new Map();
   private broadcastInterval: NodeJS.Timeout | null = null;

@@ -15,14 +15,14 @@ const BackgroundGameProvider: React.FC = () => {
   const initialGameState: GameState = {
     players: {
       player1: {
-        id: 'ai-player-1',
+        id: 'player1',
         y: defaultGameParams.gameHeight / 2 - defaultGameParams.paddleHeight / 2,
         dy: 0,
         paddleHeight: defaultGameParams.paddleHeight,
         score: 0,
       },
       player2: {
-        id: 'ai-player-2',
+        id: 'player2',
         y: defaultGameParams.gameHeight / 2 - defaultGameParams.paddleHeight / 2,
         paddleHeight: defaultGameParams.paddleHeight,
         dy: 0,
@@ -46,7 +46,8 @@ const BackgroundGameProvider: React.FC = () => {
   useEffect(() => {
     if (!isVisible) return;
 
-    const ws = new WebSocket(`ws://${window.location.host}/api/background-game`);
+    const token = localStorage.getItem('token');
+    const ws = new WebSocket(`wss://${window.location.host}/ws/background-game?token=${token}`);
 
     ws.onmessage = (event) => {
       try {
