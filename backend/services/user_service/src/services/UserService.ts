@@ -97,4 +97,12 @@ export class UserService {
     const res = await this.userModel.getNotifications(user_id);
     return res;
   }
+
+  async markNotificationAsSeen(notification_id: string) {
+    const res = await this.userModel.markNotificationAsSeen(notification_id);
+    if (!res) {
+      throw new BadRequestError('Could not mark notification as seen');
+    }
+    return res;
+  }
 }

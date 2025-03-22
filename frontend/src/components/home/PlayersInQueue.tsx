@@ -23,7 +23,7 @@ export const PlayerQueue: React.FC = () => {
           display_name: player.display_name || 'Unknown',
           avatar_url: player.avatar_url || '',
           user_id: player.user_id,
-          queue_id: player.queue_id,
+          queue_id: queue.queue_id,
         }))
       );
       console.log('enriched:', enrichedUsers);
@@ -40,9 +40,12 @@ export const PlayerQueue: React.FC = () => {
     console.log('users in queue:', usersInQueue);
   }, [usersInQueue]);
 
-  const handleJoinGameClick = (event, opponent, queueId) => {
+  const handleJoinGameClick = (event, user) => {
     event.stopPropagation();
-    console.log('join game against: ', opponent, queueId);
+    console.log('join game against: ', user);
+    navigate('/game', {
+      state: { mode: '1v1', difficulty: 'online', lobby: 'join', queueId: user.queue_id },
+    });
   };
 
   return (
@@ -71,7 +74,7 @@ export const PlayerQueue: React.FC = () => {
                   <NavIconButton
                     id="join-game-button"
                     icon="arrowRight"
-                    onClick={(event) => handleJoinGameClick(event, user.user_id, user.queue_id)}
+                    onClick={(event) => handleJoinGameClick(event, user)}
                   />
                 </div>
               </li>

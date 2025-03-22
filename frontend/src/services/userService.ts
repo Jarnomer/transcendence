@@ -1,10 +1,13 @@
+import { Static, Type } from '@sinclair/typebox';
+
 import {
   AllResponseRankType,
   AllResponseType,
   QueueResType,
   UserDataResponseType,
+  UserNotificationType,
   UserResponseType,
-} from '@types';
+} from '@shared/types';
 
 import { api } from './api';
 
@@ -67,12 +70,8 @@ export async function getUsersInQueue() {
 
 export async function getUserImage() {
   try {
-    const userID = localStorage.getItem('userID');
-    if (!userID) {
-      throw new Error('User ID not found');
-    }
     const res = await api.get<UserResponseType>(
-      `/user/avatar/${userID}`,
+      `/user/avatar`,
       { responseType: 'blob' } // Important for binary data
     );
     if (res.status !== 200) {
@@ -81,6 +80,42 @@ export async function getUserImage() {
     return res.data;
   } catch (err) {
     console.error('Failed to get user image:', err);
+    throw err;
+  }
+}
+
+export async function getNotifications() {
+  try {
+    const res = await api.get<UserNotificationType>(`/user/notifications`);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get notifications:', err);
+    throw err;
+  }
+}
+
+export async function markNotificationAsSeen(notificationID: string) {
+  try {
+    const res = await api.post(`/user/notification/seen/${notificationID}`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to mark notification as seen`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to mark notification as seen:', err);
+    throw err;
+  }
+}
+
+export async function getUserByID(userID: string) {
+  try {
+    const res = await api.get<UserResponseType>(`/user/${userID}`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch user`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get user:', err);
     throw err;
   }
 }

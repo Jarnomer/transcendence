@@ -49,9 +49,7 @@ export class QueueService {
    */
   async getStatusQueue(user_id: string) {
     const user = await this.queueModel.getStatusQueue(user_id);
-    if (!user) {
-      throw new NotFoundError('User not found in queue');
-    }
+    if (!user) throw new NotFoundError('User not found in queue');
     return user;
   }
 
@@ -90,5 +88,11 @@ export class QueueService {
       throw new BadRequestError('User not removed from queue');
     }
     return res;
+  }
+
+  async joinQueue(user_id: string, queue_id: string) {
+    console.log('Joining queue', user_id, queue_id);
+    const user = await this.queueModel.joinQueue(user_id, queue_id);
+    return user;
   }
 }

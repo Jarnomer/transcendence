@@ -143,7 +143,7 @@ export class UserController {
    * @throws BadRequestError if no avatar provided
    */
   async uploadAvatar(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { user_id } = request.user as { user_id: string };
     const avatar = await request.file();
     request.log.trace(`Uploading avatar for user ${user_id}`);
     if (!avatar) {
@@ -178,9 +178,16 @@ export class UserController {
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting notifications for user ${user_id}`);
     const notifications = await this.userService.getNotifications(user_id);
-    if (notifications.length === 0) {
-      throw new NotFoundError('No notifications found');
-    }
     reply.code(200).send(notifications);
+  }
+
+  async markNotificationAsSeen(request: FastifyRequest, reply: FastifyReply) {
+    const { notification_id } = request.params as { notification_id: string };
+    request.log.trace(`Marking notification ${notification_id} as seen`);
+    const notification = await this.userService.markNotificationAsSeen(notification_id);
+    if (!notification) {
+      throw new NotFoundError('Notification not found');
+    }
+    reply.code(200).send(notification);
   }
 }

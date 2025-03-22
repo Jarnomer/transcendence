@@ -125,4 +125,29 @@ export class GameModel {
     );
     return updatedGame;
   }
+
+  async getPlayersGameStats(game_id: string) {
+    const players = await this.db.all(
+      `SELECT player_id, elo, is_winner
+      FROM game_players
+      INNER JOIN user_stats ON game_players.player_id = user_stats.user_id
+      WHERE game_id = ?`,
+      [game_id]
+    );
+    return players;
+  }
+
+  async updatePlayerElo(newElo: number, user_id: string) {
+    return await this.db.run('UPDATE user_stats SET elo = ? WHERE user_id = ?', [newElo, user_id]);
+  }
+
+  async updateRanking() {
+    return await this.db.run(`
+    WITH RankedUsers AS (
+    SELECT user_id, elo,
+    RANK() OVER (ORDER BY elo DESC) AS rank
+    FROM user_stats)
+    UPDATE user_stats
+    SET rank = (SELECT rank FROM RankedUsers WHERE RankedUsers.user_id = user_stats.user_id);`);
+  }
 }

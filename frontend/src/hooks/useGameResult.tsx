@@ -14,13 +14,9 @@ export const useGameResult = (
   dispatch: any,
   userId: string | null
 ) => {
-  const { closeConnection } = useWebSocketContext();
+  const { closeConnection, sendMessage } = useWebSocketContext();
   const navigate = useNavigate();
   const gameIdRef = useRef<string | null>(null);
-  const scoresRef = useRef<{ p1Score: number; p2Score: number }>({
-    p1Score: 0,
-    p2Score: 0,
-  });
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
@@ -43,11 +39,6 @@ export const useGameResult = (
 
   useEffect(() => {
     if (!gameState) return;
-    const { players } = gameState;
-    scoresRef.current = {
-      p1Score: players.player1.score,
-      p2Score: players.player2.score,
-    };
     gameStateRef.current = gameState;
   }, [gameState]);
 
@@ -87,7 +78,7 @@ export const useGameResult = (
       const { players } = gameStateRef.current;
       const playerArray = [players.player1, players.player2];
       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
-      const loserIndex = playerArray.findIndex((e) => e.id === userIdRef.current);
+      const loserIndex = winnerIndex === 0 ? 1 : 0;
       console.log(
         'Submitting game result:',
         gameIdRef.current,

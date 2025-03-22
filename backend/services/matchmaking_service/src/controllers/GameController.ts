@@ -25,7 +25,7 @@ export class GameController {
    */
 
   async singlePlayer(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { user_id } = request.user as { user_id: string };
     const { difficulty } = request.query as { difficulty: string };
     request.log.trace(`Joining user ${user_id} as single player`);
     const game = await this.gameService.singlePlayer(user_id, difficulty);
@@ -40,7 +40,7 @@ export class GameController {
    * @throws NotFoundError if user not found
    */
   async getGameID(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting game for user ${user_id}`);
     const game = await this.gameService.getGameID(user_id);
     if (!game) {
@@ -83,13 +83,7 @@ export class GameController {
     request.log.trace(`Updating result for game ${game_id}`);
     console.log(request.body);
     console.log(game_id, winner_id, loser_id, winner_score, loser_score);
-    const result = await this.gameService.resultGame(
-      game_id,
-      winner_id,
-      loser_id,
-      winner_score,
-      loser_score
-    );
+    await this.gameService.resultGame(game_id, winner_id, loser_id, winner_score, loser_score);
     reply.code(200).send({ status: 'completed' });
   }
 }

@@ -142,24 +142,32 @@ CREATE TRIGGER IF NOT EXISTS update_user_stats
 AFTER UPDATE ON games
 WHEN NEW.status = 'completed'
 BEGIN
+    -- Update wins for the winner
     UPDATE user_stats
     SET wins = wins + 1
     WHERE user_id = (
-        SELECT player_id FROM game_players
+        SELECT player_id
+        FROM game_players
         WHERE game_id = NEW.game_id AND is_winner = TRUE
+        LIMIT 1  -- Ensure only one result is returned
     );
 
+    -- Update losses for the loser
     UPDATE user_stats
     SET losses = losses + 1
     WHERE user_id = (
-        SELECT player_id FROM game_players
+        SELECT player_id
+        FROM game_players
         WHERE game_id = NEW.game_id AND is_winner = FALSE
+        LIMIT 1  -- Ensure only one result is returned
     );
 
+    -- Set the end time for the game
     UPDATE games
     SET end_time = CURRENT_TIMESTAMP
     WHERE game_id = NEW.game_id;
 END;
+
 
 --trigger to update user last active time when user status changes
 CREATE TRIGGER IF NOT EXISTS update_user_last_active

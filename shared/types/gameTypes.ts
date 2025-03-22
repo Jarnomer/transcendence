@@ -64,7 +64,7 @@ export const defaultGameParams: GameParams = {
   spinIntensityFactor: 0.8, // Player.dy * spinIntensity = spin change on paddle hit
   spinReductionFactor: 0.7, // Spin reduction on static surfaces
 
-  maxScore: 10,
+  maxScore: 3,
 };
 
 // Don't mind this for now

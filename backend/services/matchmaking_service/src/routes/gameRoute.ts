@@ -27,8 +27,8 @@ export async function gameRoutes(fastify: FastifyInstance) {
   const gameController = GameController.getInstance(gameService);
 
   fastify.get<{ Params: UserIdType }>(
-    '/getGameID/:user_id',
-    { schema: { params: UserIdSchema, response: { 200: GameIdSchema } } },
+    '/getGameID',
+    { schema: { response: { 200: GameIdSchema } } },
     gameController.getGameID.bind(gameController)
   );
   fastify.get<{ Params: GameReqType; Reply: GameResType }>(
@@ -42,14 +42,12 @@ export async function gameRoutes(fastify: FastifyInstance) {
     gameController.resultGame.bind(gameController)
   );
   fastify.post<{
-    Params: UserIdType;
     Query: GameSinglePlayerReqType;
     Reply: GameSinglePlayerResType;
   }>(
-    '/singlePlayer/:user_id',
+    '/singlePlayer',
     {
       schema: {
-        params: UserIdSchema,
         querystring: GameSinglePlayerReqSchema,
         response: { 200: GameSinglePlayerResSchema },
       },

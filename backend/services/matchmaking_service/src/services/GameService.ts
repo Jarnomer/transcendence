@@ -8,6 +8,23 @@ import {
 
 import { GameModel } from '../models/GameModel';
 
+class EloSystem {
+  private static K_FACTOR = 32; // Adjust this based on your ranking system
+
+  static calculateElo(
+    winnerElo: number,
+    loserElo: number
+  ): { newWinnerElo: number; newLoserElo: number } {
+    const expectedWin = 1 / (1 + Math.pow(10, (loserElo - winnerElo) / 400));
+    const expectedLose = 1 / (1 + Math.pow(10, (winnerElo - loserElo) / 400));
+
+    const newWinnerElo = Math.round(winnerElo + this.K_FACTOR * (1 - expectedWin));
+    const newLoserElo = Math.round(loserElo + this.K_FACTOR * (0 - expectedLose));
+
+    return { newWinnerElo, newLoserElo };
+  }
+}
+
 export class GameService {
   private gameModel: GameModel;
   private static instance: GameService;
@@ -86,6 +103,27 @@ export class GameService {
     if (!res) {
       throw new BadRequestError('Could not submit result');
     }
+    await this.updateEloAfterGame(game_id);
+    await this.gameModel.updateRanking();
     return res;
+  }
+
+  async updateEloAfterGame(gameId: string) {
+    const players = await this.gameModel.getPlayersGameStats(gameId);
+    if (players.length !== 2) {
+      console.error('Game must have exactly 2 players for ELO update.');
+      return;
+    }
+    const [player1, player2] = players;
+    const winner = player1.is_winner ? player1 : player2;
+    const loser = player1.is_winner ? player2 : player1;
+
+    const { newWinnerElo, newLoserElo } = EloSystem.calculateElo(winner.elo, loser.elo);
+
+    await this.gameModel.updatePlayerElo(newWinnerElo, winner.player_id);
+    await this.gameModel.updatePlayerElo(newLoserElo, loser.player_id);
+    console.log(
+      `ELO updated! Winner: ${winner.player_id} → ${newWinnerElo}, Loser: ${loser.player_id} → ${newLoserElo}`
+    );
   }
 }

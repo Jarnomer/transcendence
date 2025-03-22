@@ -5,32 +5,47 @@ import { QueueService } from '@my-backend/matchmaking_service/src/services/Queue
 
 abstract class MatchmakingMode {
   protected queue: Set<string>; // Player IDs in queue
-  public matches: Map<string, string[]>; // Match ID → Players
+  public queueMatches: Map<string, string[]>;
   protected gameService: GameService;
-  constructor(gameService: GameService) {
-    this.gameService = gameService;
+  protected queueService: QueueService;
+  protected matchmaking: MatchmakingService;
+  constructor(matchmaking: MatchmakingService) {
+    this.matchmaking = matchmaking;
+    this.gameService = matchmaking.gameService;
+    this.queueService = matchmaking.queueService;
     this.queue = new Set();
-    this.matches = new Map();
+    this.queueMatches = new Map();
   }
 
   abstract addPlayer(playerId: string): void;
   abstract removePlayer(playerId: string): void;
-  abstract findMatch(): Promise<string>;
-  abstract createMatch(playerIds: string[]): Promise<string>;
+  abstract findRandomMatch(): void;
+  abstract joinMatch(user_id: string, queueId: string): void;
+  abstract createMatch(playerIds: string[]): void;
+
+  protected addUserToQueue(queueKey: string, userId: string): number {
+    if (!this.queueMatches.has(queueKey)) {
+      this.queueMatches.set(queueKey, []);
+    }
+    const users = this.queueMatches.get(queueKey)!; // Use the "!" to assert non-null
+    users.push(userId);
+
+    return users.length;
+  }
 
   protected cleanupPlayer(playerId: string) {
     this.queue.delete(playerId);
-    for (const [matchId, players] of this.matches.entries()) {
+    for (const [queueId, players] of this.queueMatches.entries()) {
       if (players.includes(playerId)) {
-        this.matches.delete(matchId);
+        this.queueMatches.delete(queueId);
         break;
       }
     }
   }
 }
 class OneVOneMatchmaking extends MatchmakingMode {
-  constructor(gameService: GameService) {
-    super(gameService);
+  constructor(matchmaking: MatchmakingService) {
+    super(matchmaking);
   }
   addPlayer(playerId: string) {
     this.queue.add(playerId);
@@ -48,23 +63,31 @@ class OneVOneMatchmaking extends MatchmakingMode {
     if (!game) {
       throw new Error('Failed to create game');
     }
-    this.matches.set(game.game_id, playerIds);
-    return game.game_id;
+    this.matchmaking.broadcast(playerIds, {
+      type: 'match_found',
+      state: { game_id: game.game_id },
+    });
   }
 
-  async findMatch() {
+  async findRandomMatch() {
     if (this.queue.size < 2) return;
 
     const players = Array.from(this.queue).slice(0, 2);
     players.forEach((p) => this.queue.delete(p));
-    const gameId = await this.createMatch(players);
-    console.log(`1v1 Match Created: ${gameId} with ${players}`);
-    return gameId;
+    await this.createMatch(players);
+  }
+
+  async joinMatch(queueId: string, user_id: string) {
+    const count = this.addUserToQueue(queueId, user_id);
+    if (count >= 2) {
+      const players = this.queueMatches.get(queueId)!;
+      await this.createMatch(players);
+    }
   }
 }
 class TournamentMatchmaking extends MatchmakingMode {
-  constructor(gameService: GameService) {
-    super(gameService);
+  constructor(matchmaking: MatchmakingService) {
+    super(matchmaking);
   }
   private minPlayers = 4;
 
@@ -84,11 +107,10 @@ class TournamentMatchmaking extends MatchmakingMode {
     if (!game) {
       throw new Error('Failed to create game');
     }
-    this.matches.set(game.game_id, playerIds);
     return game.game_id;
   }
 
-  async findMatch() {
+  async findRandomMatch() {
     if (this.queue.size < this.minPlayers) return;
 
     const players = Array.from(this.queue).slice(0, this.minPlayers);
@@ -97,11 +119,19 @@ class TournamentMatchmaking extends MatchmakingMode {
     console.log(`Tournament Match Created: ${gameId} with ${players}`);
     return gameId;
   }
+
+  async joinMatch(queueId: string, user_id: string) {
+    const count = this.addUserToQueue(queueId, user_id);
+    if (count >= this.minPlayers) {
+      const players = this.queueMatches.get(queueId)!;
+      await this.createMatch(players);
+    }
+  }
 }
 
 export class MatchmakingService {
-  private queueService: QueueService;
-  private gameService: GameService;
+  public queueService: QueueService;
+  public gameService: GameService;
   private static instance: MatchmakingService;
   private matchmakers: { [mode: string]: MatchmakingMode } = {};
   private clients: Map<string, WebSocket.WebSocket> = new Map();
@@ -110,8 +140,8 @@ export class MatchmakingService {
     this.queueService = queueService;
     this.gameService = gameService;
     this.matchmakers = {
-      '1v1': new OneVOneMatchmaking(gameService),
-      tournament: new TournamentMatchmaking(gameService),
+      '1v1': new OneVOneMatchmaking(this),
+      tournament: new TournamentMatchmaking(this),
     };
   }
 
@@ -122,29 +152,9 @@ export class MatchmakingService {
     return MatchmakingService.instance;
   }
 
-  addClient(user_id: string, ws: WebSocket.WebSocket) {
-    console.log(`Adding client: ${user_id}`);
-    this.clients.set(user_id, ws);
-  }
-
-  deleteClient(user_id: string) {
-    this.clients.delete(user_id);
-  }
-
-  async findMatch(user_id: string, mode: string) {
-    console.log(`Finding match for ${user_id} in ${mode} mode`);
-    console.log(this.matchmakers[mode]);
-    const gameId = await this.matchmakers[mode].findMatch();
-    console.log(`Match found: ${gameId}`);
-    if (gameId) {
-      const players = this.matchmakers[mode].matches.get(gameId);
-      if (!players) {
-        throw new Error('Failed to find players');
-      }
-      this.broadcast(players, { type: 'match_found', state: { game_id: gameId } });
-    }
-  }
-
+  /**
+   * Matchmaking Handling
+   */
   addPlayerToQueue(user_id: string, mode: string) {
     console.log(`Adding player, ${user_id} to queue: ${mode}`);
     this.matchmakers[mode].addPlayer(user_id);
@@ -155,6 +165,30 @@ export class MatchmakingService {
     this.matchmakers[mode].removePlayer(user_id);
   }
 
+  async findMatch(user_id: string, mode: string) {
+    console.log(`Finding match for ${user_id} in ${mode} mode`);
+    this.addPlayerToQueue(user_id, mode);
+    console.log(this.matchmakers[mode]);
+    await this.matchmakers[mode].findRandomMatch();
+  }
+
+  async joinMatch(user_id: string, queueId: string, mode: string) {
+    console.log(`Joining match for ${user_id} in queue: ${queueId}`);
+    this.matchmakers[mode].joinMatch(user_id, queueId);
+  }
+
+  /**
+   * Websocket connections handling
+   */
+  addClient(user_id: string, ws: WebSocket.WebSocket) {
+    console.log(`Adding client: ${user_id}`);
+    this.clients.set(user_id, ws);
+  }
+
+  deleteClient(user_id: string) {
+    this.clients.delete(user_id);
+  }
+
   async handleMessage(message: string) {
     const data = JSON.parse(message);
     console.log('Received message:', data);
@@ -162,11 +196,14 @@ export class MatchmakingService {
       this.removePlayerFromQueue(data.user_id, data.mode);
     }
     if (data.type === 'find_match') {
-      await this.findMatch.bind(this)(data.payload.user_id, data.payload.mode);
+      await this.findMatch(data.payload.user_id, data.payload.mode);
+    }
+    if (data.type === 'join_match') {
+      await this.joinMatch(data.payload.queue_id, data.payload.user_id, data.payload.mode);
     }
   }
 
-  private broadcast(players: string[], message: object): void {
+  broadcast(players: string[], message: object): void {
     for (const playerId of players) {
       const connection = this.clients.get(playerId);
       if (!connection) {

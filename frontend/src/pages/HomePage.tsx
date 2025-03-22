@@ -72,7 +72,7 @@ export const HomePage: React.FC = () => {
   const handleJoinGameClick = () => {
     // Add your logic for joining a game here
     console.log('Join game clicked');
-    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'join' } });
+    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'random' } });
   };
   return (
     <>
