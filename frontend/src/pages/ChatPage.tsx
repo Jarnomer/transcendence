@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+
+import { AnimatePresence } from 'framer-motion';
+
 import { BackgroundGlow } from '../components';
 import SearchBar from '../components/UI/SearchBar';
+import { BracketLine } from '../components/visual/svg/shapes/BracketLine';
 import { getUserData } from '../services/userService';
 
 export const ChatPage: React.FC = () => {
@@ -52,6 +56,10 @@ export const ChatPage: React.FC = () => {
 
   return (
     <div className="p-10 w-[80%]">
+      <AnimatePresence>
+        {/* just testing here */}
+        <BracketLine></BracketLine>
+      </AnimatePresence>
       <div className="flex relative h-[600px] glass-box overflow-hidden">
         <BackgroundGlow />
         {/* Friends List */}
