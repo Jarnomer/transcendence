@@ -20,11 +20,13 @@ import {
 
 import { GameController } from '../controllers/GameController';
 import { GameService } from '../services/GameService';
+import { QueueService } from '../services/QueueService';
 
 export async function gameRoutes(fastify: FastifyInstance) {
   // Here we assume fastify.db has been decorated on the instance.
   const gameService = GameService.getInstance(fastify.db);
-  const gameController = GameController.getInstance(gameService);
+  const queueService = QueueService.getInstance(fastify.db);
+  const gameController = GameController.getInstance(gameService, queueService);
 
   fastify.get<{ Params: UserIdType }>(
     '/getGameID',

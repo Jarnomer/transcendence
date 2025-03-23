@@ -3,23 +3,37 @@ import * as WebSocket from '@fastify/websocket';
 import { GameService } from '@my-backend/matchmaking_service/src/services/GameService';
 import { QueueService } from '@my-backend/matchmaking_service/src/services/QueueService';
 
+type Player = {
+  user_id: string;
+  socket: WebSocket.WebSocket;
+  elo: number;
+  joinedAt: Date;
+};
+
 abstract class MatchmakingMode {
-  protected queue: Set<string>; // Player IDs in queue
+  protected queue: Player[]; // Player IDs key bin
   public queueMatches: Map<string, string[]>;
   protected gameService: GameService;
   protected queueService: QueueService;
   protected matchmaking: MatchmakingService;
+  protected INITIAL_ELO_RANGE = 50;
+  protected SEARCH_EXPANSION_INTERVAL = 5000; // Expand every 5 sec
+  protected MAX_WAIT_TIME = 30000; // Timeout after 30 sec
+  protected playerIntervals: Map<string, NodeJS.Timeout> = new Map();
+  protected recentMatches: Set<string> = new Set();
+  protected playerCooldowns: Map<string, number> = new Map(); // Dynamic cooldowns for players
+
   constructor(matchmaking: MatchmakingService) {
     this.matchmaking = matchmaking;
     this.gameService = matchmaking.gameService;
     this.queueService = matchmaking.queueService;
-    this.queue = new Set();
+    this.queue = [];
     this.queueMatches = new Map();
   }
 
-  abstract addPlayer(playerId: string): void;
+  abstract addPlayer(player: Player): void;
   abstract removePlayer(playerId: string): void;
-  abstract findRandomMatch(): void;
+  abstract findRandomMatch(player: Player): void;
   abstract joinMatch(user_id: string, queueId: string): void;
   abstract createMatch(playerIds: string[]): void;
 
@@ -34,7 +48,10 @@ abstract class MatchmakingMode {
   }
 
   protected cleanupPlayer(playerId: string) {
-    this.queue.delete(playerId);
+    this.queue = this.queue.filter((player) => player.user_id !== playerId);
+    this.playerIntervals.delete(playerId);
+    this.playerCooldowns.delete(playerId);
+    this.recentMatches.delete(playerId);
     for (const [queueId, players] of this.queueMatches.entries()) {
       if (players.includes(playerId)) {
         this.queueMatches.delete(queueId);
@@ -47,8 +64,9 @@ class OneVOneMatchmaking extends MatchmakingMode {
   constructor(matchmaking: MatchmakingService) {
     super(matchmaking);
   }
-  addPlayer(playerId: string) {
-    this.queue.add(playerId);
+  addPlayer(player: Player) {
+    this.queue.push(player);
+    this.queue.sort((a, b) => a.elo - b.elo);
     // if (this.queue.size >= 2) {
     //   this.findMatch();
     // }
@@ -69,12 +87,82 @@ class OneVOneMatchmaking extends MatchmakingMode {
     });
   }
 
-  async findRandomMatch() {
-    if (this.queue.size < 2) return;
+  findOpponent(player: Player, eloRange: number): Player | null {
+    const opponent = this.queue.find(
+      (p) => p.user_id !== player.user_id && Math.abs(p.elo - player.elo) <= eloRange
+    );
+    return opponent || null;
+  }
 
-    const players = Array.from(this.queue).slice(0, 2);
-    players.forEach((p) => this.queue.delete(p));
-    await this.createMatch(players);
+  async findRandomMatch(player: Player) {
+    if (this.queue.length < 2) return;
+    // ❌ Prevent recently matched players from rejoining too quickly
+    if (this.recentMatches.has(player.user_id)) {
+      console.log(`Player ${player.user_id} is on cooldown and cannot search yet.`);
+      return;
+    }
+    let eloRange = this.INITIAL_ELO_RANGE;
+    // 🔹 Clear existing interval for this player
+    if (this.playerIntervals.has(player.user_id)) {
+      clearInterval(this.playerIntervals.get(player.user_id));
+      this.playerIntervals.delete(player.user_id);
+    }
+
+    // 🔹 Calculate dynamic cooldown based on player behavior or wait time
+    const playerCooldown = this.playerCooldowns.get(player.user_id) || 5000; // Default 5 seconds
+    console.log(`Cooldown for ${player.user_id}: ${playerCooldown}ms`);
+
+    // 🔹 Set a timeout for the entire matchmaking process to avoid endless searching
+    const timeout = setTimeout(() => {
+      if (this.playerIntervals.has(player.user_id)) {
+        clearInterval(this.playerIntervals.get(player.user_id));
+        this.playerIntervals.delete(player.user_id);
+        console.log(`Matchmaking timed out for player ${player.user_id}`);
+      }
+    }, 30000); // Timeout after 30 seconds (adjust as needed)
+
+    const interval = setInterval(async () => {
+      console.log(`Searching for opponent for: ${player.user_id}`);
+
+      const opponent = this.findOpponent(player, eloRange);
+
+      if (opponent) {
+        console.log(`Opponent found for ${player.user_id}: ${opponent.user_id}`);
+
+        // ✅ Remove players from queue ONLY after a match is confirmed
+        this.queue = this.queue.filter(
+          (p) => p.user_id !== player.user_id && p.user_id !== opponent.user_id
+        );
+
+        // ✅ Clean up interval when match is found
+        clearInterval(interval);
+        clearTimeout(timeout); // Clear the timeout since match was found
+        this.playerIntervals.delete(player.user_id);
+        this.playerIntervals.delete(opponent.user_id);
+
+        // 🕒 Add players to cooldown set to prevent immediate re-matching
+        this.recentMatches.add(player.user_id);
+        this.recentMatches.add(opponent.user_id);
+
+        // Set dynamic cooldown (e.g., based on player behavior or wait time)
+        this.playerCooldowns.set(player.user_id, Math.min(playerCooldown + 2000, 15000)); // Max 15 seconds cooldown
+        this.playerCooldowns.set(opponent.user_id, Math.min(playerCooldown + 2000, 15000)); // Max 15 seconds cooldown
+
+        setTimeout(() => {
+          this.recentMatches.delete(player.user_id);
+          this.recentMatches.delete(opponent.user_id);
+          console.log(`Cooldown expired for ${player.user_id} and ${opponent.user_id}`);
+        }, playerCooldown); // Reset cooldown after dynamic time
+
+        await this.createMatch([player.user_id, opponent.user_id]);
+      } else {
+        console.log(`No opponent found for ${player.user_id}, expanding range...`);
+        eloRange += 50;
+      }
+    }, this.SEARCH_EXPANSION_INTERVAL);
+
+    // 🔹 Store the interval reference
+    this.playerIntervals.set(player.user_id, interval);
   }
 
   async joinMatch(queueId: string, user_id: string) {
@@ -91,8 +179,9 @@ class TournamentMatchmaking extends MatchmakingMode {
   }
   private minPlayers = 4;
 
-  addPlayer(playerId: string) {
-    this.queue.add(playerId);
+  addPlayer(player: Player) {
+    this.queue.push(player);
+    this.queue.sort((a, b) => a.elo - b.elo);
     // if (this.queue.size >= this.minPlayers) {
     //   this.findMatch();
     // }
@@ -110,14 +199,8 @@ class TournamentMatchmaking extends MatchmakingMode {
     return game.game_id;
   }
 
-  async findRandomMatch() {
-    if (this.queue.size < this.minPlayers) return;
-
-    const players = Array.from(this.queue).slice(0, this.minPlayers);
-    players.forEach((p) => this.queue.delete(p));
-    const gameId = await this.createMatch(players);
-    console.log(`Tournament Match Created: ${gameId} with ${players}`);
-    return gameId;
+  async findRandomMatch(player: Player) {
+    if (this.queue.length < this.minPlayers) return;
   }
 
   async joinMatch(queueId: string, user_id: string) {
@@ -155,9 +238,9 @@ export class MatchmakingService {
   /**
    * Matchmaking Handling
    */
-  addPlayerToQueue(user_id: string, mode: string) {
-    console.log(`Adding player, ${user_id} to queue: ${mode}`);
-    this.matchmakers[mode].addPlayer(user_id);
+  addPlayerToQueue(mode: string, player: Player) {
+    console.log(`Adding player, ${player.user_id} to queue: ${mode}`);
+    this.matchmakers[mode].addPlayer(player);
   }
 
   removePlayerFromQueue(user_id: string, mode: string) {
@@ -167,9 +250,16 @@ export class MatchmakingService {
 
   async findMatch(user_id: string, mode: string) {
     console.log(`Finding match for ${user_id} in ${mode} mode`);
-    this.addPlayerToQueue(user_id, mode);
-    console.log(this.matchmakers[mode]);
-    await this.matchmakers[mode].findRandomMatch();
+    const playerElo = await this.gameService.getPlayerElo(user_id);
+    console.log(`Player Elo: ${playerElo.elo}`);
+    const player: Player = {
+      user_id,
+      socket: this.clients.get(user_id)!,
+      elo: playerElo.elo,
+      joinedAt: new Date(),
+    };
+    this.addPlayerToQueue(mode, player);
+    await this.matchmakers[mode].findRandomMatch(player);
   }
 
   async joinMatch(user_id: string, queueId: string, mode: string) {

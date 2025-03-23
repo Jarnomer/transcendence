@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
 
@@ -11,6 +13,7 @@ const useMatchmaking = (
   setGameId: React.Dispatch<React.SetStateAction<string | null>>,
   userId: string | null
 ) => {
+  const navigate = useNavigate();
   const { gameSocket, matchmakingSocket, sendMessage, closeConnection, connections } =
     useWebSocketContext();
   const params = useRef<URLSearchParams>(
@@ -91,6 +94,7 @@ const useMatchmaking = (
       })
       .catch((err) => {
         console.error('Matchmaking failed:', err);
+        navigate('/home');
       });
     return () => {
       matchmaker.current.stopMatchMake();

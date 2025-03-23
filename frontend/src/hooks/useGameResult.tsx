@@ -44,7 +44,7 @@ export const useGameResult = (
 
   useEffect(() => {
     if (!gameId) return;
-    if (gameStatusRef.current === 'finished') {
+    if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
       const { players } = gameStateRef.current;
       const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
       console.log('Submitting game result:', gameId, sortedPlayers);

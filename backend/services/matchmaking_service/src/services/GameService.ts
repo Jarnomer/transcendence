@@ -105,6 +105,7 @@ export class GameService {
     }
     await this.updateEloAfterGame(game_id);
     await this.gameModel.updateRanking();
+    await this.gameModel.updateUserStats(winner_id, loser_id);
     return res;
   }
 
@@ -125,5 +126,12 @@ export class GameService {
     console.log(
       `ELO updated! Winner: ${winner.player_id} → ${newWinnerElo}, Loser: ${loser.player_id} → ${newLoserElo}`
     );
+  }
+  async getPlayerElo(user_id: string) {
+    const user = await this.gameModel.getPlayerElo(user_id);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    return user;
   }
 }

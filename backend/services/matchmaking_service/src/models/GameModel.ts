@@ -141,6 +141,11 @@ export class GameModel {
     return await this.db.run('UPDATE user_stats SET elo = ? WHERE user_id = ?', [newElo, user_id]);
   }
 
+  async updateUserStats(winner_id: string, loser_id: string) {
+    await this.db.run('UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?', [winner_id]);
+    await this.db.run('UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?', [loser_id]);
+  }
+
   async updateRanking() {
     return await this.db.run(`
     WITH RankedUsers AS (
@@ -149,5 +154,9 @@ export class GameModel {
     FROM user_stats)
     UPDATE user_stats
     SET rank = (SELECT rank FROM RankedUsers WHERE RankedUsers.user_id = user_stats.user_id);`);
+  }
+
+  async getPlayerElo(user_id: string) {
+    return await this.db.get('SELECT elo FROM user_stats WHERE user_id = ?', [user_id]);
   }
 }

@@ -1,4 +1,5 @@
-
+PRAGMA foreign_keys = ON;
+ PRAGMA foreign_key_check;
 -- Users table (authentication only)
 CREATE TABLE IF NOT EXISTS users (
   user_id TEXT PRIMARY KEY,
@@ -142,26 +143,6 @@ CREATE TRIGGER IF NOT EXISTS update_user_stats
 AFTER UPDATE ON games
 WHEN NEW.status = 'completed'
 BEGIN
-    -- Update wins for the winner
-    UPDATE user_stats
-    SET wins = wins + 1
-    WHERE user_id = (
-        SELECT player_id
-        FROM game_players
-        WHERE game_id = NEW.game_id AND is_winner = TRUE
-        LIMIT 1  -- Ensure only one result is returned
-    );
-
-    -- Update losses for the loser
-    UPDATE user_stats
-    SET losses = losses + 1
-    WHERE user_id = (
-        SELECT player_id
-        FROM game_players
-        WHERE game_id = NEW.game_id AND is_winner = FALSE
-        LIMIT 1  -- Ensure only one result is returned
-    );
-
     -- Set the end time for the game
     UPDATE games
     SET end_time = CURRENT_TIMESTAMP
@@ -208,18 +189,21 @@ BEGIN
 END;
 
 
--- CREATE TRIGGER IF NOT EXISTS remove_matchmaking_entry_on_game_complete
--- AFTER UPDATE ON games
--- WHEN NEW.status = 'completed'
--- BEGIN
---     DELETE FROM queues
---     WHERE queue_id IN (
---         SELECT queque_id
---         LEFT JOIN queue_players ON queues.queue_id = queue_players.queue_id AND
---         FROM game_players WHERE game_id = NEW.game_id
---         WHERE game_id = NEW.game_id
---     );
--- END;
+CREATE TRIGGER IF NOT EXISTS remove_matchmaking_entry_on_game_complete
+AFTER UPDATE OF status ON games
+FOR EACH ROW
+WHEN NEW.status = 'completed'
+BEGIN
+    DELETE FROM queues
+    WHERE EXISTS (
+        SELECT 1
+        FROM queue_players AS qp
+        JOIN game_players AS gp ON qp.user_id = gp.player_id
+        WHERE gp.game_id = NEW.game_id
+        AND qp.queue_id = queues.queue_id
+    );
+END;
+
 
 --trigger for inserting friend when friend request accepted
 CREATE TRIGGER IF NOT EXISTS insert_friend_on_friend_request_accepted

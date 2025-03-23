@@ -3,17 +3,20 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
 import { GameService } from '../services/GameService';
+import { QueueService } from '../services/QueueService';
 export class GameController {
   private gameService: GameService;
+  private queueService: QueueService;
   private static instance: GameController;
 
-  constructor(gameService: GameService) {
+  constructor(gameService: GameService, queueService: QueueService) {
     this.gameService = gameService;
+    this.queueService = queueService;
   }
 
-  static getInstance(gameService: GameService) {
+  static getInstance(gameService: GameService, queueService: QueueService): GameController {
     if (!GameController.instance) {
-      GameController.instance = new GameController(gameService);
+      GameController.instance = new GameController(gameService, queueService);
     }
     return GameController.instance;
   }

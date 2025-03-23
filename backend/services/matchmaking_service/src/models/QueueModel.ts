@@ -290,4 +290,14 @@ export class QueueModel {
       [queue_id, user_id]
     );
   }
+
+  async deleteQueueByID(queue_id: string) {
+    return await this.db.run(
+      `
+      DELETE FROM queue_players
+      WHERE queue_id = ?;
+      `,
+      [queue_id]
+    );
+  }
 }
