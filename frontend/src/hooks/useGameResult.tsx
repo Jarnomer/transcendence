@@ -57,13 +57,13 @@ export const useGameResult = (
       })
         .then(() => {
           dispatch({ type: 'GAME_RESET' });
-          navigate('/home');
+          hasSubmittedResult.current = true;
         })
         .catch((err) => {
           console.error('Error submitting game result:', err);
         })
         .finally(() => {
-          hasSubmittedResult.current = true;
+          navigate('/home');
         });
     }
   }, [gameStatus, gameId, gameState, dispatch, navigate]);

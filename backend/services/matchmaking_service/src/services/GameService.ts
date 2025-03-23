@@ -93,6 +93,11 @@ export class GameService {
     loser_score: number
   ) {
     console.log(game_id, winner_id, loser_id, winner_score, loser_score);
+    const isGameCompleted = await this.gameModel.isGameCompleted(game_id);
+    if (isGameCompleted) {
+      console.log('Game already completed');
+      return { message: 'Game already completed' };
+    }
     const res = await this.gameModel.updateGame(
       game_id,
       winner_id,

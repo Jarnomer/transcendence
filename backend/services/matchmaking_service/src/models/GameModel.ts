@@ -98,6 +98,15 @@ export class GameModel {
     );
   }
 
+  async isGameCompleted(game_id: string) {
+    return await this.db.get(
+      `SELECT *
+      FROM games
+      WHERE game_id = ? AND status = 'completed'`,
+      [game_id]
+    );
+  }
+
   async updateGame(
     game_id: string,
     winner_id: string,
