@@ -23,7 +23,7 @@ export const pageVariants = {
 export const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <motion.div
-      className="w-full h-full flex-grow p-10"
+      className="w-full h-full pt-10 md:p-10"
       variants={pageVariants}
       initial="initial"
       animate="animate"

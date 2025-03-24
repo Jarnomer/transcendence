@@ -45,6 +45,12 @@ export const useGameResult = (
   useEffect(() => {
     if (!gameId) return;
     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
+      if (gameId === 'local_game_id') {
+        console.log('Local game, no need to submit result');
+        dispatch({ type: 'GAME_RESET' });
+        navigate('/home');
+        return;
+      }
       const { players } = gameStateRef.current;
       const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
       console.log('Submitting game result:', gameId, sortedPlayers);
@@ -73,6 +79,11 @@ export const useGameResult = (
     return () => {
       console.log('Cleanup');
       if (!gameIdRef.current || hasSubmittedResult.current) return;
+      if (gameIdRef.current === 'local_game_id') {
+        dispatch({ type: 'GAME_RESET' });
+        navigate('/home');
+        return;
+      }
       console.log('Submitting game result:', gameIdRef.current);
       closeConnection('game');
       const { players } = gameStateRef.current;
@@ -98,6 +109,9 @@ export const useGameResult = (
         })
         .catch((err) => {
           console.error('Error submitting game result:', err);
+        })
+        .finally(() => {
+          navigate('/home');
         });
     };
   }, []);

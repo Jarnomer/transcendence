@@ -49,38 +49,49 @@ export const PlayerQueue: React.FC = () => {
   };
 
   return (
-    <div className="glass-box p-5 w-full relative overflow-hidden">
-      <BackgroundGlow></BackgroundGlow>
-      <ul>
-        <h1 className="font-heading text-3xl w-full">Join Game</h1>
+    <>
+      <div className="glass-box p-5 w-full relative overflow-hidden">
+        <BackgroundGlow></BackgroundGlow>
+        <ul>
+          <h1 className="font-heading text-3xl w-full">Players looking for an opponent</h1>
 
-        {usersInQueue.filter((user) => user.user_id != localStorage.getItem('userID')).length ===
-        0 ? (
-          <li className="text-muted text-gray-500 text-sm">No players in queue</li>
-        ) : (
-          usersInQueue
-            .filter((user) => user.user_id != localStorage.getItem('userID'))
-            .map((user, index) => (
-              <li key={index} className="my-2" onClick={() => navigate(`/profile/${user.user_id}`)}>
-                <div className="flex items-center gap-5">
-                  <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
-                    <img
-                      className="object-cover rounded-full w-full h-full"
-                      src={user.avatar_url}
+          {usersInQueue.filter((user) => user.user_id != localStorage.getItem('userID')).length ===
+          0 ? (
+            <li className="text-muted text-gray-500 text-sm">No players in queue</li>
+          ) : (
+            usersInQueue
+              .filter((user) => user.user_id != localStorage.getItem('userID'))
+              .map((user, index) => (
+                <li
+                  key={index}
+                  className="my-2"
+                  onClick={() => navigate(`/profile/${user.user_id}`)}
+                >
+                  <div className="flex items-center gap-5">
+                    <div className="rounded-full relative h-[50px] w-[50px] border-2 border-primary overflow-hidden">
+                      <img
+                        className="object-cover rounded-full w-full h-full"
+                        src={user.avatar_url}
+                      />
+                    </div>
+                    <p>{user.display_name || 'N/A'}</p>
+                    <p className="text-gray-500 text-sm">rank: ??</p>
+                    <NavIconButton
+                      id="join-game-button"
+                      icon="arrowRight"
+                      onClick={(event) => handleJoinGameClick(event, user)}
                     />
                   </div>
-                  <p>{user.display_name || 'N/A'}</p>
-                  <p className="text-gray-500 text-sm">rank: ??</p>
-                  <NavIconButton
-                    id="join-game-button"
-                    icon="arrowRight"
-                    onClick={(event) => handleJoinGameClick(event, user)}
-                  />
-                </div>
-              </li>
-            ))
-        )}
-      </ul>
-    </div>
+                </li>
+              ))
+          )}
+        </ul>
+      </div>
+      <div className="glass-box mt-5 p-5 w-full relative overflow-hidden">
+        <BackgroundGlow></BackgroundGlow>
+        <h2 className="font-heading text-3xl">Open Tournaments</h2>
+        <p className="text-gray-500 text-sm">No on going Tournaments</p>
+      </div>
+    </>
   );
 };

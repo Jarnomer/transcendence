@@ -69,7 +69,7 @@ const useMatchmaking = (
     console.log('mode:', mode, 'difficulty:', difficulty, 'lobby:', lobby, 'queueId:', queueId);
     params.current.set('user_id', userId);
     params.current.set('token', localStorage.getItem('token') || '');
-    console.log('Connecting to matchmaking:', params.current.toString());
+    console.log('Connecting to matchmaker:', params.current.toString());
     matchmaker.current
       .startMatchMake()
       .then(() => {

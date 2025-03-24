@@ -1,4 +1,4 @@
-import { enterQueue, joinQueue, singlePlayer } from './gameService';
+import { cancelQueue, enterQueue, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
 export enum MatchMakerState {
@@ -78,12 +78,13 @@ class OneVsOneGame extends GameMode {
     switch (this.difficulty) {
       case 'local': {
         console.log('Creating 1v1 local game...');
-        const data = await singlePlayer(this.difficulty);
-        if (!data || data.status !== 'created') {
-          throw new Error('Problem with creating 1v1 local game');
-        }
+        // const data = await singlePlayer(this.difficulty);
+        // if (!data || data.status !== 'created') {
+        //   throw new Error('Problem with creating 1v1 local game');
+        // }
+        const game_id = 'local_game_id';
         this.matchMaker.setMatchMakerState(MatchMakerState.MATCHED);
-        this.matchMaker.setGameId(data.game_id);
+        this.matchMaker.setGameId(game_id);
         break;
       }
       case 'online': {
@@ -203,46 +204,13 @@ class MatchMaker {
   async startMatchMake() {
     console.log(`start Match Making . Current state: ${this.state}`);
     await this.gameMode.findMatch();
-    // if (!game) {
-    //   console.log('problem with fetching game');
-    //   throw new Error('Problem with fetching game');
-    // }
-    // switch (this.mode) {
-    //   case 'singleplayer':
-    //     if (!game.game_id) throw new Error('Game ID not found');
-    //     console.log(`Single player game created! Game ID: ${game.game_id}`);
-    //     this.gameId = game.game_id;
-    //     this.state = MatchMakerState.MATCHED;
-    //     break;
-    //   case '1v1':
-    //     this.state = MatchMakerState.JOINING_RANDOM;
-    //     if (this.lobby === 'create') {
-    //       console.log('Creating 1v1 game...');
-    //       this.state = MatchMakerState.WAITING_FOR_PLAYERS;
-    //       if (this.difficulty === 'local') {
-    //         if (!game.game_id) throw new Error('Game ID not found');
-    //         this.state = MatchMakerState.MATCHED;
-    //         this.gameId = game.game_id;
-    //       }
-    //     }
-    //     break;
-    //   case 'tournament':
-    //     this.state = MatchMakerState.JOINING_RANDOM;
-    //     if (this.lobby === 'create') {
-    //       console.log('Creating tournament game...');
-    //       this.state = MatchMakerState.WAITING_FOR_PLAYERS;
-    //     }
-    //     break;
-    //   default:
-    //     throw new Error('Invalid game mode');
-    // }
   }
 
   stopMatchMake() {
     console.log('Game stopped');
     if (this.state === MatchMakerState.WAITING_FOR_PLAYERS) {
       console.log('Cancelling queue...');
-      // cancelQueue();
+      cancelQueue();
       this.state = MatchMakerState.SEARCHING;
       this.gameId = null;
     }

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
-import { useNavigate } from 'react-router-dom';
-
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { LeaderBoard } from '@components';
 
+import { HomePageBackgroundGlitch } from '../components/home/HomePageBackgroundGlitch';
+import { HomePageNav } from '../components/home/HomePageNav';
 import { PlayerQueue } from '../components/home/PlayersInQueue';
+import { TabWithBoxes } from '../components/home/TabWithBoxes';
 
 export const slideFromLeftVariants = {
   initial: {
@@ -57,43 +58,15 @@ export const slideFromRightVariants = {
 };
 
 export const HomePage: React.FC = () => {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>('leaderboard');
 
-  const [activeTab, setActiveTab] = useState<string>(null);
-
-  // useEffect(() => {}, [activeTab]);
-
-  const handleCreateGameClick = () => {
-    // Add your logic for creating a game here
-    console.log('Create game clicked');
-    navigate('/gameMenu', { state: { lobby: 'create' } });
-  };
-
-  const handleJoinGameClick = () => {
-    // Add your logic for joining a game here
-    console.log('Join game clicked');
-    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'random' } });
-  };
   return (
     <>
-      <motion.div className="flex flex-grow h-full flex-col w-full h-full gap-10 p-4">
-        <motion.div
-          id="home-page-nav"
-          className="flex w-full items-center justify-center font-heading text-4xl gap-6"
-          layout
-          transition={{ duration: 0.4, ease: 'easeInOut' }}
-        >
-          <button className="btn btn-primary" onClick={handleCreateGameClick}>
-            create game
-          </button>
-          <button className="btn btn-primary" onClick={handleJoinGameClick}>
-            Quick Join
-          </button>
-          <button onClick={() => setActiveTab('leaderboard')}>Leaderboard</button>
-          <button onClick={() => setActiveTab('queue')}>Queue</button>
-        </motion.div>
+      <motion.div className="relative h-full z-10 gap-5 md:gap-10 md:p-4">
+        <HomePageBackgroundGlitch activeTab={activeTab} duration={1100} />
+        <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav>
 
-        <motion.div id="home-page-content" className="flex w-full h-full gap-20">
+        <motion.div id="home-page-content" className=" h-full px-20  gap-20">
           <AnimatePresence mode="wait">
             {activeTab === 'leaderboard' && (
               <motion.div
@@ -119,6 +92,19 @@ export const HomePage: React.FC = () => {
                 layout
               >
                 <PlayerQueue />
+              </motion.div>
+            )}
+
+            {activeTab === 'tabWithBoxes' && (
+              <motion.div
+                key="tabWithBoxes"
+                className="w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit="exit"
+                transition={{ delay: 0.3 }}
+              >
+                <TabWithBoxes></TabWithBoxes>
               </motion.div>
             )}
           </AnimatePresence>

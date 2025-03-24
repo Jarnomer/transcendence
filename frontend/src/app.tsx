@@ -34,7 +34,7 @@ const App: React.FC = () => {
           <Header />
           <div
             id="app-content"
-            className="mt-2 px-10 flex flex-grow flex-col w-full justify-center items-center"
+            className="mt-2 md:px-10 flex flex-grow flex-col w-full justify-center items-center"
           >
             <AnimatedRoutes></AnimatedRoutes>
             {/* Conditionally render the modals */}
