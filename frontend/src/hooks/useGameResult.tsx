@@ -14,7 +14,7 @@ export const useGameResult = (
   dispatch: any,
   userId: string | null
 ) => {
-  const { closeConnection, sendMessage } = useWebSocketContext();
+  const { closeConnection } = useWebSocketContext();
   const navigate = useNavigate();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
