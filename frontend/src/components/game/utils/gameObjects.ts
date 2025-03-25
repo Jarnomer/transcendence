@@ -102,9 +102,9 @@ export function createPaddle(scene: Scene, color: Color3) {
   );
 
   const keys = [];
-  keys.push({ frame: 0, value: 0.1 });
-  keys.push({ frame: frameRate, value: 0.3 });
-  keys.push({ frame: frameRate * 2, value: 0.1 });
+  keys.push({ frame: 0, value: 0.2 });
+  keys.push({ frame: frameRate, value: 0.5 });
+  keys.push({ frame: frameRate * 2, value: 0.2 });
 
   hoverAnimation.setKeys(keys);
   paddle.animations = [hoverAnimation];
@@ -157,9 +157,9 @@ export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) 
   );
 
   const keys = [];
-  keys.push({ frame: 0, value: 0.2 });
-  keys.push({ frame: frameRate, value: 0.5 });
-  keys.push({ frame: frameRate * 2, value: 0.2 });
+  keys.push({ frame: 0, value: 0.3 });
+  keys.push({ frame: frameRate, value: 0.8 });
+  keys.push({ frame: frameRate * 2, value: 0.3 });
 
   hoverAnimation.setKeys(keys);
   ball.animations = [hoverAnimation];
