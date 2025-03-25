@@ -8,6 +8,7 @@ export class GameManager {
 
   constructor() {
     this.sessions = {};
+    this.createBackgroundGame();
   }
 
   static getInstance(): GameManager {
@@ -17,12 +18,15 @@ export class GameManager {
     return GameManager.instance;
   }
 
+  createBackgroundGame(): void {
+    this.createGame('background_game', 'AIvsAI', 'brutal');
+  }
+
   createGame(gameId: string, mode: string, difficulty: string): void {
     console.log(`Creating game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
     this.sessions[gameId] = new PongGameSession(gameId, mode, difficulty, () =>
       this.endGame(gameId)
     );
-    // this.sessions[gameId].startGame();
   }
 
   addClient(gameId: string, userId: string, connection: any): void {
@@ -36,6 +40,15 @@ export class GameManager {
     } else {
       this.sessions[gameId].addClient(userId, connection);
     }
+  }
+
+  addSpectator(gameId: string, userId: string, connection: any): void {
+    if (!this.sessions[gameId]) {
+      console.warn(`Tried to add spectator to non-existent game ${gameId}`);
+      connection.close();
+      return;
+    }
+    this.sessions[gameId].addSpectator(userId, connection);
   }
 
   endGame(gameId: string): void {
