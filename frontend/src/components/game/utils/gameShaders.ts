@@ -459,12 +459,14 @@ export function registerRetroShaders() {
     uniform float colorBleed;
     uniform float time;
 
-    vec2 distort(vec2 p, vec2 curvature) {
+    vec2 distort(vec2 p, vec2 curvatureStrength) {
       // Convert to -1.0 to 1.0 range
       vec2 p2 = p * 2.0 - 1.0;
 
-      // Apply curvature
-      vec2 offset = abs(p2.yx) / curvature;
+      // Apply curvature - MODIFIED: now using multiplication instead of division
+      // Higher values of curvatureStrength = more distortion
+      // Zero = no distortion
+      vec2 offset = abs(p2.yx) * curvatureStrength;
       p2 = p2 + p2 * offset * offset;
 
       // Convert back to 0.0 to 1.0 range
@@ -506,6 +508,64 @@ export function registerRetroShaders() {
       gl_FragColor = color;
     }
   `;
+
+  // Effect.ShadersStore['crtDistortionFragmentShader'] = `
+  //   precision highp float;
+  //   varying vec2 vUV;
+  //   uniform sampler2D textureSampler;
+  //   uniform vec2 curvature;
+  //   uniform float scanlineIntensity;
+  //   uniform float vignette;
+  //   uniform float colorBleed;
+  //   uniform float time;
+
+  //   vec2 distort(vec2 p, vec2 curvature) {
+  //     // Convert to -1.0 to 1.0 range
+  //     vec2 p2 = p * 2.0 - 1.0;
+
+  //     // Apply curvature
+  //     vec2 offset = abs(p2.yx) / curvature;
+  //     p2 = p2 + p2 * offset * offset;
+
+  //     // Convert back to 0.0 to 1.0 range
+  //     return p2 * 0.5 + 0.5;
+  //   }
+
+  //   void main() {
+  //     // Apply CRT curvature distortion
+  //     vec2 uv = distort(vUV, curvature);
+
+  //     // If outside of texture bounds, return black
+  //     if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+  //       gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+  //       return;
+  //     }
+
+  //     vec4 color = texture2D(textureSampler, uv);
+
+  //     // Scanline effect
+  //     float scanlineFreq = 400.0;
+  //     float scanline = sin(uv.y * scanlineFreq) * 0.5 + 0.5;
+  //     scanline = pow(scanline, 1.5) * scanlineIntensity;
+  //     color.rgb *= (0.95 - scanline);
+
+  //     // Vignette effect
+  //     if (vignette > 0.0) {
+  //       float vignetteAmount = length(vec2(0.5, 0.5) - uv) * vignette;
+  //       vignetteAmount = pow(vignetteAmount, 1.5);
+  //       color.rgb *= (1.0 - vignetteAmount);
+  //     }
+
+  //     // Color bleeding
+  //     if (colorBleed > 0.0) {
+  //       float rgbOffset = colorBleed * 0.01;
+  //       color.r = texture2D(textureSampler, vec2(uv.x + rgbOffset, uv.y)).r;
+  //       color.b = texture2D(textureSampler, vec2(uv.x - rgbOffset, uv.y)).b;
+  //     }
+
+  //     gl_FragColor = color;
+  //   }
+  // `;
 
   // Add a CRT turn ON shader
   Effect.ShadersStore['crtTurnOnVertexShader'] = `

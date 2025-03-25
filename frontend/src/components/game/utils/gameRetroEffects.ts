@@ -10,11 +10,14 @@ import {
   retroEffectsPresets,
 } from '@shared/types';
 
-function calculateIntensity(level: number, baseValue: number): number {
+export function setRetroEffectLevel(level: number, baseValue: number): number {
   if (level === 0) return 0;
 
-  // Scale from the level (1-5) to a multiplier (0.2-1.0)
-  const levelScale = Math.min(Math.max(level, 0), 5) / 5;
+  const maxLevel = 5;
+  const levelDivision = 5;
+
+  // Clamp level between 0 and maxLevel, then scale between 0.x and 1.x
+  const levelScale = Math.min(Math.max(level, 0), maxLevel) / levelDivision;
 
   return baseValue * levelScale;
 }
@@ -28,13 +31,13 @@ export function createScanlinesEffect(
   if (levels.scanlines === 0) return null;
 
   const options = {
-    intensity: calculateIntensity(levels.scanlines, baseParams.intensity),
-    density: calculateIntensity(levels.scanlines, baseParams.density),
-    speed: calculateIntensity(levels.scanlines, baseParams.speed),
-    noise: calculateIntensity(levels.noise, baseParams.noise),
-    vignette: calculateIntensity(levels.vignette, baseParams.vignette),
-    flicker: calculateIntensity(levels.flicker, baseParams.flicker),
-    colorBleed: calculateIntensity(levels.colorBleed, baseParams.colorBleed),
+    intensity: setRetroEffectLevel(levels.scanlines, baseParams.intensity),
+    density: setRetroEffectLevel(levels.scanlines, baseParams.density),
+    speed: setRetroEffectLevel(levels.scanlines, baseParams.speed),
+    noise: setRetroEffectLevel(levels.noise, baseParams.noise),
+    vignette: setRetroEffectLevel(levels.vignette, baseParams.vignette),
+    flicker: setRetroEffectLevel(levels.flicker, baseParams.flicker),
+    colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
   };
 
   const scanlinesEffect = new PostProcess(
@@ -84,8 +87,8 @@ export function createPhosphorDotsEffect(
   if (levels.phosphorDots === 0) return null;
 
   const options = {
-    dotSize: calculateIntensity(levels.phosphorDots, baseParams.dotSize),
-    dotIntensity: calculateIntensity(levels.phosphorDots, baseParams.dotIntensity),
+    dotSize: setRetroEffectLevel(levels.phosphorDots, baseParams.dotSize),
+    dotIntensity: setRetroEffectLevel(levels.phosphorDots, baseParams.dotIntensity),
     nonSquareRatio: baseParams.nonSquareRatio,
   };
 
@@ -159,10 +162,10 @@ export function createCRTEffect(
   if (levels.crtDistortion === 0) return null;
 
   const options = {
-    curvatureAmount: calculateIntensity(levels.crtDistortion, baseParams.curvatureAmount),
-    scanlineIntensity: calculateIntensity(levels.scanlines, baseParams.scanlineIntensity),
-    vignette: calculateIntensity(levels.vignette, baseParams.vignette),
-    colorBleed: calculateIntensity(levels.colorBleed, baseParams.colorBleed),
+    curvatureAmount: setRetroEffectLevel(levels.crtDistortion, baseParams.curvatureAmount),
+    scanlineIntensity: setRetroEffectLevel(levels.scanlines, baseParams.scanlineIntensity),
+    vignette: setRetroEffectLevel(levels.vignette, baseParams.vignette),
+    colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
   };
 
   const crtEffect = new PostProcess(
@@ -198,10 +201,10 @@ export function createVHSEffect(
   if (levels.vhsNoise === 0) return null;
 
   const options = {
-    trackingNoise: calculateIntensity(levels.vhsNoise, baseParams.trackingNoise),
-    staticNoise: calculateIntensity(levels.noise, baseParams.staticNoise),
-    distortion: calculateIntensity(levels.vhsNoise, baseParams.distortion),
-    colorBleed: calculateIntensity(levels.colorBleed, baseParams.colorBleed),
+    trackingNoise: setRetroEffectLevel(levels.vhsNoise, baseParams.trackingNoise),
+    staticNoise: setRetroEffectLevel(levels.noise, baseParams.staticNoise),
+    distortion: setRetroEffectLevel(levels.vhsNoise, baseParams.distortion),
+    colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
   };
 
   const vhsEffect = new PostProcess(
@@ -245,10 +248,10 @@ export function createGlitchEffect(
   }
 
   const options = {
-    trackingNoise: calculateIntensity(levels.glitchStrength, baseParams.trackingNoise),
-    staticNoise: calculateIntensity(levels.glitchStrength, baseParams.staticNoise),
-    distortion: calculateIntensity(levels.glitchStrength, baseParams.distortion),
-    colorBleed: calculateIntensity(levels.colorBleed, baseParams.colorBleed),
+    trackingNoise: setRetroEffectLevel(levels.glitchStrength, baseParams.trackingNoise),
+    staticNoise: setRetroEffectLevel(levels.glitchStrength, baseParams.staticNoise),
+    distortion: setRetroEffectLevel(levels.glitchStrength, baseParams.distortion),
+    colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
   };
 
   const glitchEffect = new PostProcess(
@@ -321,9 +324,9 @@ export function createCRTTurnOnEffect(
 
   // Calculate intensity multiplier based on level
   const intensityMultiplier = levels.crtTurnOnEffect / 5;
-  const noiseIntensity = calculateIntensity(levels.noise, 0.3);
-  const scanlineIntensity = calculateIntensity(levels.scanlines, 0.4);
-  const flickerAmount = calculateIntensity(levels.flicker, 0.3);
+  const noiseIntensity = setRetroEffectLevel(levels.noise, 0.3);
+  const scanlineIntensity = setRetroEffectLevel(levels.scanlines, 0.4);
+  const flickerAmount = setRetroEffectLevel(levels.flicker, 0.3);
 
   turnOnEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
@@ -346,11 +349,10 @@ export function createCRTTurnOffEffect(
   camera: Camera,
   levels: RetroEffectsLevels = defaultRetroEffectsLevels
 ): { effect: PostProcess | null; setTurnOffProgress: (progress: number) => void } {
-  // If effect is disabled, return a dummy function
   if (levels.crtTurnOffEffect === 0) {
     return {
       effect: null,
-      setTurnOffProgress: () => {},
+      setTurnOffProgress: () => {}, // dummy function
     };
   }
 
@@ -369,7 +371,7 @@ export function createCRTTurnOffEffect(
 
   // Calculate intensity multiplier based on level
   const intensityMultiplier = levels.crtTurnOffEffect / 5;
-  const noiseIntensity = calculateIntensity(levels.noise, 0.4);
+  const noiseIntensity = setRetroEffectLevel(levels.noise, 0.4);
 
   turnOffEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
@@ -423,8 +425,8 @@ export class RetroEffectsManager {
   ) {
     this._scene = scene;
     this._camera = camera;
-    this._levels = { ...levels }; // Make a copy
-    this._baseParams = { ...baseParams }; // Make a copy
+    this._levels = { ...levels }; // Make copy
+    this._baseParams = { ...baseParams };
 
     registerRetroShaders();
   }
@@ -561,7 +563,7 @@ export class RetroEffectsManager {
 
     if (this._effects.tvSwitch && this._effects.tvSwitch.effect) {
       if (this._effects.glitch) {
-        const glitchIntensity = calculateIntensity(this._levels.glitchStrength, 2.0);
+        const glitchIntensity = setRetroEffectLevel(this._levels.glitchStrength, 2.0);
 
         this._effects.glitch.setGlitchAmount(glitchIntensity);
 
@@ -629,7 +631,7 @@ export class RetroEffectsManager {
           if (this._effects.scanlines && this._effects.scanlines.getEffect()) {
             const effect = this._effects.scanlines.getEffect();
             if (effect) {
-              const intensity = calculateIntensity(this._levels.scanlines, 0.3 - progress * 0.2);
+              const intensity = setRetroEffectLevel(this._levels.scanlines, 0.3 - progress * 0.2);
               effect.setFloat('scanlineIntensity', intensity);
             }
           }
@@ -761,10 +763,8 @@ export function createPongRetroEffects(
   preset: 'default' | 'cinematic' = 'default',
   customLevels: Partial<RetroEffectsLevels> = {}
 ): RetroEffectsManager {
-  // Start with preset levels
   let levels: RetroEffectsLevels;
 
-  // Apply preset-specific levels
   switch (preset) {
     case 'default':
       levels = { ...defaultRetroEffectsLevels };
@@ -778,10 +778,8 @@ export function createPongRetroEffects(
       levels = { ...defaultRetroEffectsLevels };
   }
 
-  // Apply any custom levels specified
   levels = { ...levels, ...customLevels };
 
-  // Create the manager with the configured levels
   const manager = new RetroEffectsManager(scene, camera, levels);
 
   switch (preset) {
