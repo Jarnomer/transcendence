@@ -28,8 +28,6 @@ export function createScanlinesEffect(
   levels: RetroEffectsLevels = defaultRetroEffectsLevels,
   baseParams = defaultRetroEffectsBaseParams.scanlines
 ): PostProcess | null {
-  if (levels.scanlines === 0) return null;
-
   const options = {
     intensity: setRetroEffectLevel(levels.scanlines, baseParams.intensity),
     density: setRetroEffectLevel(levels.scanlines, baseParams.density),
@@ -84,11 +82,9 @@ export function createPhosphorDotsEffect(
   levels: RetroEffectsLevels = defaultRetroEffectsLevels,
   baseParams = defaultRetroEffectsBaseParams.phosphorDots
 ): PostProcess | null {
-  if (levels.phosphorDots === 0) return null;
-
   const options = {
-    dotSize: setRetroEffectLevel(levels.phosphorDots, baseParams.dotSize),
-    dotIntensity: setRetroEffectLevel(levels.phosphorDots, baseParams.dotIntensity),
+    dotSize: setRetroEffectLevel(levels.phosphor, baseParams.dotSize),
+    dotIntensity: setRetroEffectLevel(levels.phosphor, baseParams.dotIntensity),
     nonSquareRatio: baseParams.nonSquareRatio,
   };
 
@@ -113,56 +109,14 @@ export function createPhosphorDotsEffect(
   return phosphorEffect;
 }
 
-export function createTVSwitchingEffect(
-  scene: Scene,
-  camera: Camera,
-  levels: RetroEffectsLevels = defaultRetroEffectsLevels
-): { effect: PostProcess; setSwitchingProgress: (progress: number) => void } | null {
-  if (levels.channelChangeEffect === 0) {
-    return {
-      effect: null as any,
-      setSwitchingProgress: () => {}, // No-op function
-    };
-  }
-
-  const tvSwitchEffect = new PostProcess(
-    'tvSwitch',
-    'tvSwitch',
-    ['time', 'switchProgress', 'transitionColor'],
-    null,
-    1.0,
-    camera
-  );
-
-  const engine = scene.getEngine();
-  let time = 0;
-  let switchProgress = 0;
-
-  tvSwitchEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    const scaledProgress = switchProgress * (levels.channelChangeEffect / 5);
-    effect.setFloat('switchProgress', scaledProgress);
-    effect.setFloat4('transitionColor', 0, 0, 0, 1);
-  };
-
-  const setSwitchingProgress = (progress: number) => {
-    switchProgress = Math.max(0, Math.min(1, progress));
-  };
-
-  return { effect: tvSwitchEffect, setSwitchingProgress };
-}
-
 export function createCRTEffect(
   scene: Scene,
   camera: Camera,
   levels: RetroEffectsLevels = defaultRetroEffectsLevels,
   baseParams = defaultRetroEffectsBaseParams.crtDistortion
 ): PostProcess | null {
-  if (levels.crtDistortion === 0) return null;
-
   const options = {
-    curvatureAmount: setRetroEffectLevel(levels.crtDistortion, baseParams.curvatureAmount),
+    curvatureAmount: setRetroEffectLevel(levels.curvature, baseParams.curvatureAmount),
     scanlineIntensity: setRetroEffectLevel(levels.scanlines, baseParams.scanlineIntensity),
     vignette: setRetroEffectLevel(levels.vignette, baseParams.vignette),
     colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
@@ -198,12 +152,10 @@ export function createVHSEffect(
   levels: RetroEffectsLevels = defaultRetroEffectsLevels,
   baseParams = defaultRetroEffectsBaseParams.vhsEffect
 ): PostProcess | null {
-  if (levels.vhsNoise === 0) return null;
-
   const options = {
-    trackingNoise: setRetroEffectLevel(levels.vhsNoise, baseParams.trackingNoise),
+    trackingNoise: setRetroEffectLevel(levels.noise, baseParams.trackingNoise),
     staticNoise: setRetroEffectLevel(levels.noise, baseParams.staticNoise),
-    distortion: setRetroEffectLevel(levels.vhsNoise, baseParams.distortion),
+    distortion: setRetroEffectLevel(levels.noise, baseParams.distortion),
     colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
   };
 
@@ -240,17 +192,17 @@ export function createGlitchEffect(
   effect: PostProcess | null;
   setGlitchAmount: (amount: number) => void;
 } {
-  if (levels.glitchStrength === 0) {
+  if (levels.glitch === 0) {
     return {
       effect: null,
-      setGlitchAmount: () => {}, // No-op function
+      setGlitchAmount: () => {}, // Dummy function
     };
   }
 
   const options = {
-    trackingNoise: setRetroEffectLevel(levels.glitchStrength, baseParams.trackingNoise),
-    staticNoise: setRetroEffectLevel(levels.glitchStrength, baseParams.staticNoise),
-    distortion: setRetroEffectLevel(levels.glitchStrength, baseParams.distortion),
+    trackingNoise: setRetroEffectLevel(levels.glitch, baseParams.trackingNoise),
+    staticNoise: setRetroEffectLevel(levels.glitch, baseParams.staticNoise),
+    distortion: setRetroEffectLevel(levels.glitch, baseParams.distortion),
     colorBleed: setRetroEffectLevel(levels.colorBleed, baseParams.colorBleed),
   };
 
@@ -281,7 +233,7 @@ export function createGlitchEffect(
     effect.setFloat('colorBleedAmount', currentColorBleed);
   };
 
-  const intensityMultiplier = levels.glitchStrength / 5;
+  const intensityMultiplier = levels.glitch / 5;
 
   return {
     effect: glitchEffect,
@@ -296,6 +248,47 @@ export function createGlitchEffect(
   };
 }
 
+export function createTVSwitchingEffect(
+  scene: Scene,
+  camera: Camera,
+  levels: RetroEffectsLevels = defaultRetroEffectsLevels
+): { effect: PostProcess; setSwitchingProgress: (progress: number) => void } | null {
+  if (levels.crtChannelSwitchEffect === 0) {
+    return {
+      effect: null as any,
+      setSwitchingProgress: () => {}, // Dummy function
+    };
+  }
+
+  const tvSwitchEffect = new PostProcess(
+    'tvSwitch',
+    'tvSwitch',
+    ['time', 'switchProgress', 'transitionColor'],
+    null,
+    1.0,
+    camera
+  );
+
+  const engine = scene.getEngine();
+
+  let switchProgress = 0;
+  let time = 0;
+
+  tvSwitchEffect.onApply = (effect) => {
+    time += engine.getDeltaTime() / 1000.0;
+    effect.setFloat('time', time);
+    const scaledProgress = switchProgress * (levels.crtChannelSwitchEffect / 5);
+    effect.setFloat('switchProgress', scaledProgress);
+    effect.setFloat4('transitionColor', 0, 0, 0, 1);
+  };
+
+  const setSwitchingProgress = (progress: number) => {
+    switchProgress = Math.max(0, Math.min(1, progress));
+  };
+
+  return { effect: tvSwitchEffect, setSwitchingProgress };
+}
+
 export function createCRTTurnOnEffect(
   scene: Scene,
   camera: Camera,
@@ -304,7 +297,7 @@ export function createCRTTurnOnEffect(
   if (levels.crtTurnOnEffect === 0) {
     return {
       effect: null,
-      setTurnOnProgress: () => {}, // No-op function
+      setTurnOnProgress: () => {}, // Dummy function
     };
   }
 
@@ -319,11 +312,10 @@ export function createCRTTurnOnEffect(
 
   const engine = scene.getEngine();
 
-  let time = 0;
   let turnOnProgress = 0;
+  let time = 0;
 
   // Calculate intensity multiplier based on level
-  const intensityMultiplier = levels.crtTurnOnEffect / 5;
   const noiseIntensity = setRetroEffectLevel(levels.noise, 0.3);
   const scanlineIntensity = setRetroEffectLevel(levels.scanlines, 0.4);
   const flickerAmount = setRetroEffectLevel(levels.flicker, 0.3);
@@ -331,7 +323,7 @@ export function createCRTTurnOnEffect(
   turnOnEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
     effect.setFloat('time', time);
-    effect.setFloat('turnOnProgress', turnOnProgress * intensityMultiplier);
+    effect.setFloat('turnOnProgress', turnOnProgress);
     effect.setFloat('noise', noiseIntensity);
     effect.setFloat('scanlineIntensity', scanlineIntensity);
     effect.setFloat('flickerAmount', flickerAmount);
@@ -556,14 +548,14 @@ export class RetroEffectsManager {
     if (!this._effects.tvSwitch) this.enableTVSwitch();
     if (!this._effects.glitch) this.enableGlitch();
 
-    if (this._levels.channelChangeEffect === 0) return Promise.resolve();
+    if (this._levels.crtChannelSwitchEffect === 0) return Promise.resolve();
 
     // Scale duration by effect intensity, maybe change to on/off?
-    const adjustedDuration = durationMs * (this._levels.channelChangeEffect / 5);
+    const adjustedDuration = durationMs * (this._levels.crtChannelSwitchEffect / 5);
 
     if (this._effects.tvSwitch && this._effects.tvSwitch.effect) {
       if (this._effects.glitch) {
-        const glitchIntensity = setRetroEffectLevel(this._levels.glitchStrength, 2.0);
+        const glitchIntensity = setRetroEffectLevel(this._levels.glitch, 2.0);
 
         this._effects.glitch.setGlitchAmount(glitchIntensity);
 
@@ -722,11 +714,11 @@ export class RetroEffectsManager {
   simulateTrackingDistortion(intensity: number = 5.0, durationMs: number = 800): void {
     if (!this._effects.glitch) this.enableGlitch();
 
-    if (this._levels.glitchStrength === 0) return;
+    if (this._levels.glitch === 0) return;
 
     // Scale intensity and duration by effect level, maybe change to on/off?
-    const adjustedIntensity = intensity * (this._levels.glitchStrength / 5);
-    const adjustedDuration = durationMs * (this._levels.glitchStrength / 5);
+    const adjustedIntensity = intensity * (this._levels.glitch / 5);
+    const adjustedDuration = durationMs * (this._levels.glitch / 5);
 
     if (this._effects.glitch) {
       this._effects.glitch.setGlitchAmount(adjustedIntensity);

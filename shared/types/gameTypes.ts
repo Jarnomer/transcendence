@@ -83,10 +83,9 @@ export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';
 
 export interface RetroEffectsLevels {
   scanlines: number;
-  phosphorDots: number;
-  crtDistortion: number;
-  vhsNoise: number;
-  glitchStrength: number;
+  phosphor: number;
+  curvature: number;
+  glitch: number;
   colorBleed: number;
   flicker: number;
   vignette: number;
@@ -95,22 +94,21 @@ export interface RetroEffectsLevels {
   // Turn on/off effects
   crtTurnOnEffect: number;
   crtTurnOffEffect: number;
-  channelChangeEffect: number;
+  crtChannelSwitchEffect: number;
 }
 
 export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 3,
-  phosphorDots: 3,
-  crtDistortion: 3,
-  vhsNoise: 3,
-  glitchStrength: 3,
+  phosphor: 3,
+  curvature: 3,
+  glitch: 3,
   colorBleed: 3,
   flicker: 3,
   vignette: 3,
   noise: 3,
   crtTurnOnEffect: 0,
   crtTurnOffEffect: 0,
-  channelChangeEffect: 1,
+  crtChannelSwitchEffect: 1,
 };
 
 export interface RetroEffectsBaseParams {
@@ -188,16 +186,15 @@ export const retroEffectsPresets = {
 
   cinematic: {
     scanlines: 5,
-    phosphorDots: 5,
-    crtDistortion: 5,
-    vhsNoise: 5,
-    glitchStrength: 5,
+    phosphor: 5,
+    curvature: 5,
+    glitch: 5,
     colorBleed: 5,
     flicker: 5,
     vignette: 5,
     noise: 5,
     crtTurnOnEffect: 1,
     crtTurnOffEffect: 1,
-    channelChangeEffect: 1,
+    crtChannelSwitchEffect: 1,
   } as RetroEffectsLevels,
 };
