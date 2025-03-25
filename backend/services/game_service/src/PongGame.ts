@@ -3,7 +3,7 @@ import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/ty
 type PlayerMove = 'up' | 'down' | null;
 
 export default class PongGame {
-  private params: GameParams = defaultGameParams;
+  private params: GameParams;
 
   private gameState: GameState;
   private gameStatus: GameStatus;
@@ -18,6 +18,7 @@ export default class PongGame {
   private readyState = new Map<string, boolean>();
 
   constructor(mode: string, difficulty: string) {
+    this.params = { ...defaultGameParams };
     this.mode = mode;
     this.difficulty = difficulty;
     this.gameState = {
