@@ -41,6 +41,7 @@ export interface GameParams {
   spinReductionFactor: number;
 
   maxScore: number;
+  countdown: number;
 }
 
 export const defaultGameParams: GameParams = {
@@ -65,6 +66,7 @@ export const defaultGameParams: GameParams = {
   spinReductionFactor: 0.7, // Spin reduction on static surfaces
 
   maxScore: 3,
+  countdown: 3, // Seconds
 };
 
 // Don't mind this for now
