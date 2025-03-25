@@ -225,12 +225,12 @@ export class QueueModel {
   async createWaitingQueue(user_id: string, mode: string) {
     const id = uuidv4();
     await this.db.get(`INSERT INTO queues (queue_id, mode) VALUES (?, ?) RETURNING *`, [id, mode]);
-    const user = await this.db.run(
-      `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting')`,
+    const queue = await this.db.get(
+      `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,
       [id, user_id]
     );
 
-    return user;
+    return queue;
   }
 
   /**
@@ -271,6 +271,33 @@ export class QueueModel {
       WHERE user_id = ? AND status = 'waiting';
       `,
       [user_id]
+    );
+  }
+
+  async joinQueue(user_id: string, queue_id: string) {
+    await this.db.run(
+      `UPDATE queue_players
+      SET status = 'matched'
+      WHERE queue_id = ? AND user_id != ?
+      RETURNING *;`,
+      [queue_id, user_id]
+    );
+
+    return await this.db.get(
+      `INSERT INTO queue_players
+      (queue_id, user_id, status)
+      VALUES (?, ?, 'matched') RETURNING *;`,
+      [queue_id, user_id]
+    );
+  }
+
+  async deleteQueueByID(queue_id: string) {
+    return await this.db.run(
+      `
+      DELETE FROM queue_players
+      WHERE queue_id = ?;
+      `,
+      [queue_id]
     );
   }
 }

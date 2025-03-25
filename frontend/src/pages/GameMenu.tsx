@@ -84,16 +84,16 @@ export const GameMenu: React.FC = () => {
     ],
     tournament: [
       {
-        content: 'Local',
-        imageUrl: './src/assets/images/local_match_5.png',
+        content: '8',
+        imageUrl: './src/assets/images/leaderboard.png',
         hoverInfo: 'local tournament',
-        onClick: () => handleDifficultyClick('local'),
+        onClick: () => handleDifficultyClick('8'),
       },
       {
-        content: 'Online',
-        imageUrl: './src/assets/images/online_match_4.png',
+        content: '16',
+        imageUrl: './src/assets/images/leaderboard.png',
         hoverInfo: 'online tournament',
-        onClick: () => handleDifficultyClick('online'),
+        onClick: () => handleDifficultyClick('16'),
       },
     ],
   };

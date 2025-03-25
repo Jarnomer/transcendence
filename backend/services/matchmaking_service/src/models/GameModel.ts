@@ -1,6 +1,8 @@
 import { Database } from 'sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
+import { queryWithJsonParsingObject } from '../../../utils/utils';
+
 export class GameModel {
   private db: Database;
   private static instance: GameModel;
@@ -65,8 +67,7 @@ export class GameModel {
   }
 
   async getGame(game_id: string) {
-    return await this.db.get(
-      `
+    const query = `
       SELECT
       g.*,
       ( SELECT json_group_array
@@ -83,9 +84,8 @@ export class GameModel {
       ) AS players
       FROM games g
       WHERE g.game_id = ?;
-    `,
-      [game_id]
-    );
+    `;
+    return await queryWithJsonParsingObject(this.db, query, [game_id], ['players']);
   }
 
   async getOngoingGame(user_id: string) {
@@ -95,6 +95,15 @@ export class GameModel {
       JOIN game_players gp ON g.game_id = gp.game_id
       WHERE gp.player_id = ? AND status = 'ongoing'`,
       [user_id]
+    );
+  }
+
+  async isGameCompleted(game_id: string) {
+    return await this.db.get(
+      `SELECT *
+      FROM games
+      WHERE game_id = ? AND status = 'completed'`,
+      [game_id]
     );
   }
 
@@ -124,5 +133,39 @@ export class GameModel {
       [loser_score, game_id, loser_id]
     );
     return updatedGame;
+  }
+
+  async getPlayersGameStats(game_id: string) {
+    const players = await this.db.all(
+      `SELECT player_id, elo, is_winner
+      FROM game_players
+      INNER JOIN user_stats ON game_players.player_id = user_stats.user_id
+      WHERE game_id = ?`,
+      [game_id]
+    );
+    return players;
+  }
+
+  async updatePlayerElo(newElo: number, user_id: string) {
+    return await this.db.run('UPDATE user_stats SET elo = ? WHERE user_id = ?', [newElo, user_id]);
+  }
+
+  async updateUserStats(winner_id: string, loser_id: string) {
+    await this.db.run('UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?', [winner_id]);
+    await this.db.run('UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?', [loser_id]);
+  }
+
+  async updateRanking() {
+    return await this.db.run(`
+    WITH RankedUsers AS (
+    SELECT user_id, elo,
+    RANK() OVER (ORDER BY elo DESC) AS rank
+    FROM user_stats)
+    UPDATE user_stats
+    SET rank = (SELECT rank FROM RankedUsers WHERE RankedUsers.user_id = user_stats.user_id);`);
+  }
+
+  async getPlayerElo(user_id: string) {
+    return await this.db.get('SELECT elo FROM user_stats WHERE user_id = ?', [user_id]);
   }
 }

@@ -1,4 +1,20 @@
 import { FastifyInstance } from 'fastify';
+import 'module-alias/register';
+
+import {
+  CancelQueueResSchema,
+  CancelQueueResType,
+  EnterQueueReqSchema,
+  EnterQueueReqType,
+  EnterQueueResSchema,
+  EnterQueueResType,
+  QueueJoinParamsSchema,
+  QueueJoinParamsType,
+  QueueResSchema,
+  QueueResType,
+  QueueStatusResSchema,
+  QueueStatusResType,
+} from '@shared/types';
 
 import { QueueController } from '../controllers/QueueController';
 import { QueueService } from '../services/QueueService';
@@ -8,8 +24,29 @@ export async function queueRoutes(fastify: FastifyInstance) {
   const queueService = QueueService.getInstance(fastify.db);
   const queueController = QueueController.getInstance(queueService);
 
-  fastify.get('/all', queueController.getQueues.bind(queueController));
-  fastify.get('/status/:user_id', queueController.getStatusQueue.bind(queueController));
-  fastify.get('/enterQueue/:user_id', queueController.enterQueue.bind(queueController));
-  fastify.delete('/cancel/:user_id', queueController.cancelQueue.bind(queueController));
+  fastify.get<{ Reply: QueueResType }>(
+    '/all',
+    { schema: { response: { 200: QueueResSchema } } },
+    queueController.getQueues.bind(queueController)
+  );
+  fastify.get<{ Reply: QueueStatusResType }>(
+    '/status',
+    { schema: { response: { 200: QueueStatusResSchema } } },
+    queueController.getStatusQueue.bind(queueController)
+  );
+  fastify.post<{ Query: EnterQueueReqType; Reply: QueueStatusResType }>(
+    '/enterQueue',
+    { schema: { querystring: EnterQueueReqSchema, response: { 200: QueueStatusResSchema } } },
+    queueController.enterQueue.bind(queueController)
+  );
+  fastify.delete<{ Reply: CancelQueueResType }>(
+    '/cancel',
+    { schema: { response: { 200: CancelQueueResSchema } } },
+    queueController.cancelQueue.bind(queueController)
+  );
+  fastify.post<{ Params: QueueJoinParamsType; Reply: QueueStatusResType }>(
+    '/join1v1/:queue_id',
+    { schema: { params: QueueJoinParamsSchema, response: { 200: QueueStatusResSchema } } },
+    queueController.joinQueue.bind(queueController)
+  );
 }

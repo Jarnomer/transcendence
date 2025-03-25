@@ -72,7 +72,7 @@ export const FriendList: React.FC<FriendListProps> = ({
             <div className="flex items-center gap-3">
               <img
                 className="w-10 h-10 rounded-full"
-                src={`https://localhost:8443/${friend.avatar_url}`}
+                src={friend.avatar_url}
                 alt={friend.display_name}
               />
               <span className="text-md font-medium">{friend.display_name}</span>

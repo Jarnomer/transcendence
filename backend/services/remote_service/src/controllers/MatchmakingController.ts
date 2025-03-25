@@ -26,7 +26,6 @@ export class MatchmakingController {
     };
     console.log(`Matchmaking for ${user_id} in ${mode} mode`);
     this.matchmakingService.addClient(user_id, ws);
-    this.matchmakingService.addPlayerToQueue(user_id, mode);
     ws.on('close', () => {
       this.matchmakingService.removePlayerFromQueue(user_id, mode);
       this.matchmakingService.deleteClient(user_id);

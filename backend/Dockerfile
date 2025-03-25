@@ -16,7 +16,7 @@ COPY backend/services/remote_service/package.json ./backend/services/remote_serv
 
 COPY backend/package.json ./backend/
 
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 COPY backend ./backend/
 COPY shared ./shared/

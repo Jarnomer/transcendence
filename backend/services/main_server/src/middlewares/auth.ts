@@ -10,6 +10,7 @@ async function authPlugin(fastify: FastifyInstance) {
       '/api/auth/login',
       '/api/auth/logout',
       '/api/auth/refresh',
+      '/api/admin/logs',
     ];
     if (publicRoutes.includes(request.url) || request.url?.startsWith('/docs')) {
       return; // Skip authentication

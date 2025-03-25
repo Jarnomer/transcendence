@@ -39,20 +39,28 @@ export const LogoutSchema = Type.Object({
   user_id: Type.String(),
 });
 
-export const ApiResponseSchema = <T extends TSchema>(dataSchema: T) =>
-  Type.Object({
-    success: Type.Boolean(),
-    message: Type.String(),
-    data: Type.Optional(dataSchema),
-    errors: Type.Optional(
-      Type.Array(
-        Type.Object({
-          field: Type.String(),
-          message: Type.String(),
-        })
-      )
-    ),
-  });
+export const RegisterResponseSchema = Type.Object({
+  message: Type.String(),
+});
+export const LoginResponseSchema = Type.Object({
+  token: Type.String(),
+});
+export const LogoutResponseSchema = Type.Object({
+  message: Type.String(),
+});
+export const RefreshResponseSchema = Type.Object({
+  token: Type.String(),
+});
+export const ValidateResponseSchema = Type.Object({
+  user_id: Type.String(),
+  username: Type.String(),
+});
+export const UpdateResponseSchema = Type.Object({
+  message: Type.String(),
+});
+export const DeleteResponseSchema = Type.Object({
+  message: Type.String(),
+});
 
 export type LoginType = Static<typeof LoginSchema>;
 export type RegisterType = Static<typeof RegisterSchema>;
@@ -61,4 +69,10 @@ export type ValidateType = Static<typeof ValidateSchema>;
 export type UpdateType = Static<typeof UpdateSchema>;
 export type DeleteType = Static<typeof DeleteSchema>;
 export type LogoutType = Static<typeof LogoutSchema>;
-export type ApiResponseType<T extends TSchema> = Static<ReturnType<typeof ApiResponseSchema<T>>>;
+export type RegisterResponseType = Static<typeof RegisterResponseSchema>;
+export type LoginResponseType = Static<typeof LoginResponseSchema>;
+export type LogoutResponseType = Static<typeof LogoutResponseSchema>;
+export type RefreshResponseType = Static<typeof RefreshResponseSchema>;
+export type ValidateResponseType = Static<typeof ValidateResponseSchema>;
+export type UpdateResponseType = Static<typeof UpdateResponseSchema>;
+export type DeleteResponseType = Static<typeof DeleteResponseSchema>;

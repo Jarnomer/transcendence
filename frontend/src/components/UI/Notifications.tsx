@@ -2,30 +2,75 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useUser } from '../../contexts/user/UserContext';
+import { getNotifications, getUserByID, markNotificationAsSeen } from '../../services/userService';
 
 export const Notifications: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const { user } = useUser();
+  //const { user } = useUser();
+  const [notifications, setNotifications] = useState<any[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        const res = await getNotifications();
+        console.log(res);
+        const friends = await Promise.all(
+          res.map(async (notification) => {
+            switch (notification.type) {
+              case 'friend_request': {
+                console.log('Friend request:', notification);
+                const friend = await getUserByID(notification.reference_id);
+                const addNotification = {
+                  ...friend,
+                  notification_id: notification.notification_id,
+                  type: notification.type,
+                };
+                console.log('Friend:', friend);
+                return addNotification;
+              }
+              default:
+                console.log('Unknown notification:', notification);
+            }
+          })
+        );
+        setNotifications(friends);
+      } catch (err) {
+        console.error('Failed to get notifications:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
-  if (!user || !user.friend_requests) {
+  useEffect(() => {
+    console.log('Friends:', notifications);
+  }, [notifications]);
+
+  if (!notifications || loading) {
     return <p>Loading...</p>;
   }
 
-  const handleNotificationClick = (event, request: any) => {
+  const handleNotificationClick = async (event, request: any) => {
     console.log('notification clicked');
     event.stopPropagation();
-    navigate(`/profile/${request.user_id}`);
+    switch (request.type) {
+      case 'friend_request':
+        await markNotificationAsSeen(request.notification_id);
+        navigate(`/profile/${request.user_id}`);
+        break;
+      default:
+        console.log('Unknown notification:', request);
+    }
   };
 
   return (
     <>
       <ul>
-        {user.friend_requests.length > 0 ? (
-          user.friend_requests.map((request: any, index: number) => (
+        {notifications.length > 0 ? (
+          notifications.map((request: any, index: number) => (
             <li key={index}>
               <div
                 className="flex items-center justify-center gap-2"
@@ -39,7 +84,7 @@ export const Notifications: React.FC = () => {
             </li>
           ))
         ) : (
-          <p>No friend requests.</p>
+          <p>No new notifications.</p>
         )}
       </ul>
     </>

@@ -77,4 +77,12 @@ export class AuthService {
     }
     return res;
   }
+
+  async deleteAuth(user_id: string) {
+    const res = await this.authModel.deleteAuth(user_id);
+    if (res.changes === 0) {
+      throw new BadRequestError('No changes made in deleting user');
+    }
+    return res;
+  }
 }

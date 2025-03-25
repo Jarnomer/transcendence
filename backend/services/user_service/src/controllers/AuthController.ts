@@ -185,4 +185,20 @@ export class AuthController {
     }
     reply.code(200).send({ message: 'User updated successfully' });
   }
+
+  /**
+   * delete user
+   * @param request delete: user_id
+   * @param reply 200 OK message : User deleted successfully
+   * @throws NotFoundError if user not found
+   */
+  async deleteUser(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.body as { user_id: string };
+    request.log.trace(`Deleting user ${user_id}`);
+    const user = await this.authService.deleteAuth(user_id);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    reply.send({ message: 'User deleted successfully' });
+  }
 }

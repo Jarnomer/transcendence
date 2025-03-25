@@ -28,13 +28,14 @@ export class QueueService {
   async getQueues(page: number, pageSize: number) {
     const queues = await this.queueModel.getQueues(page, pageSize);
     const totalQueues = await this.queueModel.getTotalQueues();
+    console.log('totalQueues', totalQueues);
     return {
       queues,
       pagination: {
         page,
         pageSize,
-        total: totalQueues.total,
-        totalPages: Math.ceil(totalQueues.total / pageSize),
+        total: totalQueues,
+        totalPages: Math.ceil(totalQueues / pageSize),
       },
     };
   }
@@ -48,9 +49,7 @@ export class QueueService {
    */
   async getStatusQueue(user_id: string) {
     const user = await this.queueModel.getStatusQueue(user_id);
-    if (!user) {
-      throw new NotFoundError('User not found in queue');
-    }
+    if (!user) throw new NotFoundError('User not found in queue');
     return user;
   }
 
@@ -89,5 +88,22 @@ export class QueueService {
       throw new BadRequestError('User not removed from queue');
     }
     return res;
+  }
+
+  /**
+   * cancel queue by ID
+   */
+  async cancelQueueByID(queue_id: string) {
+    const res = await this.queueModel.deleteQueueByID(queue_id);
+    if (res.changes === 0) {
+      throw new BadRequestError('Queue not removed');
+    }
+    return res;
+  }
+
+  async joinQueue(user_id: string, queue_id: string) {
+    console.log('Joining queue', user_id, queue_id);
+    const user = await this.queueModel.joinQueue(user_id, queue_id);
+    return user;
   }
 }

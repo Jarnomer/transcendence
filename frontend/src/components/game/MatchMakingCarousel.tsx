@@ -99,7 +99,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
 
   useEffect(() => {
     setLoadingState('matchMakingAnimationLoading', true);
-    if (mode === 'singleplayer') setOpponentFound(true);
+    if (mode === 'singleplayer' || difficulty === 'local') setOpponentFound(true);
     if (loggedInUser) {
       setUser(loggedInUser);
     }

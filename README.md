@@ -7,6 +7,9 @@
 | Olli   | Front-end Framework | Live Chat         | ------           |
 | Jarno  | 3D Graphics         | Microservices     | ------           |
 
+
+#### Current score: 7.5/7 ✅
+
 ### Legend
 
 | Icon | Description |
@@ -91,44 +94,54 @@
 
 ## 🏅 Minor Module [8.5/7] : Game customization options
 
-| Task | Status |
-| ---- | ------ |
+| Task                                                                                                               | Status |
+| ------------------------------------------------------------------------------------------------------------------ | ------ |
+| Offer customization features, such as power-ups, attacks, or different maps, that enhance the gameplay experience. | ⌛️     |
+| Allow users to choose a default version of the game with basic features if they prefer a simpler experience.       | ❌     |
+| Ensure that customization options are available and applicable to all games offered on the platform.               | ❌     |
+| Implement user-friendly settings menus or interfaces for adjusting game parameters.                                | ❌     |
+| Maintain consistency in customization features across all games to provide a unified user experience.              | ❌     |
 
-| Offer customization features, such as power-ups, attacks, or different maps, that enhance the gameplay experience. | ⌛️ |
-| Allow users to choose a default version of the game with basic features if they prefer a simpler experience. | ❌ |
-| Ensure that customization options are available and applicable to all games offered on the platform. | ❌ |
-| Implement user-friendly settings menus or interfaces for adjusting game parameters. | ❌ |
-| Maintain consistency in customization features across all games to provide a unified user experience. | ❌ |
+## 🏅 Minor Module [9/7] : User and Game Stats Dashboards
 
-## 🏅 Minor Module [9/7] : Front-end framework
+| Task                                                                                                                                 | Status |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| Create user-friendly dashboards that provide users with insights into their gaming statistics.                                       | ❌     |
+| Develop a separate dashboard for game sessions, showing detailed statistics, outcomes, and historical data for each match.           | ❌     |
+| Ensure that the dashboards offer an intuitive and informative user interface for tracking and analyzing data.                        | ❌     |
+| Implement data visualization techniques, such as charts and graphs, to present statistics in a clear and visually appealing manner.  | ❌     |
+| Allow users to access and explore their own gaming history and performance metrics conveniently.                                     | ❌     |
+| Feel free to add any metrics you deem useful.                                                                                        | ⚠️     |
+
+## 🏅 Minor Module [9.5/7] : Front-end framework
 
 | Task                                                                                                     | Status |
 | -------------------------------------------------------------------------------------------------------- | ------ |
 | Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. | ✅     |
 
-## 🏅 Minor Module [9.5/7] : Backend database
+## 🏅 Minor Module [10/7] : Backend database
 
 | Task                                                                                                                                                                                                                                            | Status |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. | ✅     |
 
-## 🏅 Minor Module [10/7] : Device Support
+## 🏅 Minor Module [10.5/7] : Device Support
 
 | Task                                                                                                                                                                                  | Status |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | Ensure the website is responsive, adapting to different screen sizes and orientations, providing a consistent user experience on desktops, laptops, tablets, and smartphones.         | ❌     |
 | Ensure that users can easily navigate and interact with the website using different input methods, such as touchscreens, keyboards, and mice, depending on the device they are using. | ❌     |
 
-## 🏅 Minor Module [10.5/7] : Browser Compatibility
+## 🏅 Minor Module [11/7] : Browser Compatibility
 
 | Task                                                                                                                                                    | Status |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Extend browser support to include an additional web browser, ensuring that users can access and use the application seamlessly.                         | ❌     |
-| Conduct thorough testing and optimization to ensure that the web application functions correctly and displays correctly in the newly supported browser. | ❌     |
-| Address any compatibility issues or rendering discrepancies that may arise in the added web browser.                                                    | ❌     |
-| Ensure a consistent user experience across all supported browsers, maintaining usability and functionality.                                             | ❌     |
+| Extend browser support to include an additional web browser, ensuring that users can access and use the application seamlessly.                         | ✅     |
+| Conduct thorough testing and optimization to ensure that the web application functions correctly and displays correctly in the newly supported browser. | ✅     |
+| Address any compatibility issues or rendering discrepancies that may arise in the added web browser.                                                    | ✅     |
+| Ensure a consistent user experience across all supported browsers, maintaining usability and functionality.                                             | ✅     |
 
-## 🏅 Minor Module [11/7] : Multiple language support
+## 🏅 Minor Module [11.5/7] : Multiple language support
 
 | Task                                                                                                                                             | Status |
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |

@@ -1,119 +1,114 @@
-import React from 'react';
-
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { LeaderBoard } from '@components';
 
+import { HomePageBackgroundGlitch } from '../components/home/HomePageBackgroundGlitch';
+import { HomePageNav } from '../components/home/HomePageNav';
 import { PlayerQueue } from '../components/home/PlayersInQueue';
-import { sendFriendRequest } from '../services/friendService';
+import { TabWithBoxes } from '../components/home/TabWithBoxes';
 
 export const slideFromLeftVariants = {
   initial: {
-    x: '-100%', // start fully outside on the left
-    opacity: 0,
+    x: '-100%',
+    scale: 1.05,
   },
   animate: {
-    x: 0, // move to the normal position
-    opacity: 1,
+    x: 0,
+    scale: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      x: { duration: 0.4, ease: 'easeInOut' },
+      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
     },
   },
   exit: {
-    x: '-100%', // slide out to the left again
-    opacity: 0,
+    x: '-100%',
+    scale: 1.05,
+    opacity: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      scale: { duration: 0.2, ease: 'easeOut' },
+      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
     },
   },
 };
 
 export const slideFromRightVariants = {
   initial: {
-    x: '100%', // start outside right
-    opacity: 0,
+    x: '100%',
+    scale: 1.05,
   },
   animate: {
-    x: 0, // slide into normal position
-    opacity: 1,
+    x: 0,
+    scale: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      x: { duration: 0.4, ease: 'easeInOut' },
+      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
     },
   },
   exit: {
-    x: '100%', // slide out to the right again
-    opacity: 0,
+    x: '100%',
+    scale: 1.05,
+    opacity: 1,
     transition: {
-      duration: 0.4,
-      ease: 'easeInOut',
+      scale: { duration: 0.2, ease: 'easeOut' },
+      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
     },
   },
 };
 
 export const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const handleAddFriendClick = (event, receiver_id: string) => {
-    // Stop the click event from bubbling up and triggering the navigate function
-    event.stopPropagation();
-    // Add your logic for adding a friend here
-    console.log('Add friend clicked');
-    sendFriendRequest(receiver_id).then(() => {
-      console.log('Friend request sent');
-    });
-  };
+  const [activeTab, setActiveTab] = useState<string>('leaderboard');
 
-  const handleCreateGameClick = () => {
-    // Add your logic for creating a game here
-    console.log('Create game clicked');
-    navigate('/gameMenu', { state: { lobby: 'create' } });
-  };
-
-  const handleJoinGameClick = () => {
-    // Add your logic for joining a game here
-    console.log('Join game clicked');
-    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'join' } });
-  };
   return (
     <>
-      <motion.div className="flex flex-grow w-full h-full justify-center gap-20">
-        <div className="">
-          <button className="btn btn-primary" onClick={handleCreateGameClick}>
-            create game
-          </button>
-        </div>
-        <div className="">
-          <button className="btn btn-primary" onClick={handleJoinGameClick}>
-            quick join
-          </button>
-        </div>
-        <AnimatePresence>
-          <motion.div
-            className="w-1/2"
-            key="leaderboard"
-            variants={slideFromLeftVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <LeaderBoard />
-          </motion.div>
+      <motion.div className="relative h-full z-10 gap-5 md:gap-10 md:p-4">
+        <HomePageBackgroundGlitch activeTab={activeTab} duration={1100} />
+        <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav>
 
-          <motion.div
-            className="w-1/2"
-            key="playerQueue"
-            variants={slideFromRightVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <PlayerQueue />
-          </motion.div>
-        </AnimatePresence>
+        <motion.div id="home-page-content" className=" h-full px-20  gap-20">
+          <AnimatePresence mode="wait">
+            {activeTab === 'leaderboard' && (
+              <motion.div
+                key="leaderboard"
+                className="w-full"
+                variants={slideFromLeftVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <LeaderBoard />
+              </motion.div>
+            )}
+
+            {activeTab === 'queue' && (
+              <motion.div
+                key="playerQueue"
+                className="w-full"
+                variants={slideFromRightVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                layout
+              >
+                <PlayerQueue />
+              </motion.div>
+            )}
+
+            {activeTab === 'tabWithBoxes' && (
+              <motion.div
+                key="tabWithBoxes"
+                className="w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit="exit"
+                transition={{ delay: 0.3 }}
+              >
+                <TabWithBoxes></TabWithBoxes>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </motion.div>
     </>
   );

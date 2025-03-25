@@ -13,6 +13,10 @@ backend/logs/*.log
 backend/database/data.db
 backend/database/uploads/*
 !backend/database/uploads/default_avatar.png
+!backend/database/uploads/ai.png
+!backend/database/uploads/ai_easy.png
+!backend/database/uploads/ai_hard.png
+
 
 # Frontend specific
 frontend/node_modules
