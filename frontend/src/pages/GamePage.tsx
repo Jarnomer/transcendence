@@ -20,7 +20,7 @@ export const GamePage: React.FC = () => {
 
   const location = useLocation();
   const { loadingStates } = useLoading();
-  const { mode, difficulty, lobby } = location.state || {};
+  const { mode, difficulty, lobby, queueId } = location.state || {};
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -30,7 +30,7 @@ export const GamePage: React.FC = () => {
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser(difficulty);
-  useMatchmaking(mode, difficulty, lobby, setGameId, userId);
+  useMatchmaking(mode, difficulty, lobby, queueId, setGameId, userId);
   useGameResult(gameStatus, gameId, gameState, dispatch, userId);
   useGameControls(localPlayerId, remotePlayerId);
 

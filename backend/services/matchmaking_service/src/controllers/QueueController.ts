@@ -68,7 +68,7 @@ export class QueueController {
    *
    */
   async getStatusQueue(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting user ${user_id}`);
     const queue = await this.queueService.getStatusQueue(user_id);
     if (!queue) {
@@ -91,7 +91,7 @@ export class QueueController {
    * }
    */
   async enterQueue(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { user_id } = request.user as { user_id: string };
     const { mode } = request.query as { mode: string };
     request.log.trace(`Joining user ${user_id}`);
     const queue = await this.queueService.enterQueue(user_id, mode);
@@ -108,12 +108,20 @@ export class QueueController {
    * @throws BadRequestError if no changes made
    */
   async cancelQueue(request: FastifyRequest, reply: FastifyReply) {
-    const { user_id } = request.params as { user_id: string };
+    const { user_id } = request.user as { user_id: string };
     request.log.trace(`Canceling user ${user_id}`);
     const user = await this.queueService.cancelQueue(user_id);
     if (!user) {
       throw new NotFoundError('User not found');
     }
     reply.code(200).send({ status: 'canceled' });
+  }
+
+  async joinQueue(request: FastifyRequest, reply: FastifyReply) {
+    const { queue_id } = request.params as { queue_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Joining queue ${queue_id}`);
+    const queue = await this.queueService.joinQueue(user_id, queue_id);
+    reply.code(200).send(queue);
   }
 }

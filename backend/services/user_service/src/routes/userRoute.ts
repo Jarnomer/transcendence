@@ -49,9 +49,9 @@ export async function userRoutes(fastify: FastifyInstance) {
     '/:user_id',
     userController.deleteUserByID.bind(userController)
   );
-  fastify.post<{ Params: UserIdType; Reply: UserResponseType }>(
-    '/avatar/:user_id',
-    { schema: { params: UserIdSchema, response: { 200: UserResponseSchema } } },
+  fastify.post<{ Reply: UserResponseType }>(
+    '/avatar',
+    { schema: { response: { 200: UserResponseSchema } } },
     userController.uploadAvatar.bind(userController)
   );
   fastify.get<{ Params: UserIdType; Reply: UserDataResponseType }>(
@@ -63,5 +63,10 @@ export async function userRoutes(fastify: FastifyInstance) {
     '/notifications',
     { schema: { response: { 200: UserNotificationSchema } } },
     userController.getNotifications.bind(userController)
+  );
+
+  fastify.post(
+    '/notification/seen/:notification_id',
+    userController.markNotificationAsSeen.bind(userController)
   );
 }

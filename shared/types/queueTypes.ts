@@ -1,6 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
 
-
 export const QueueResSchema = Type.Object({
   queues: Type.Array(
     Type.Object({
@@ -27,7 +26,7 @@ export const QueueResSchema = Type.Object({
 
 export const QueueStatusResSchema = Type.Object({
   queue_id: Type.String(),
-  mode: Type.String(),
+  user_id: Type.String(),
   status: Type.String(),
   joined_at: Type.String(),
 });
@@ -45,6 +44,11 @@ export const EnterQueueResSchema = Type.Object({
   mode: Type.String(),
 });
 
+export const QueueJoinParamsSchema = Type.Object({
+  queue_id: Type.String(),
+});
+
+export type QueueJoinParamsType = Static<typeof QueueJoinParamsSchema>;
 export type QueueResType = Static<typeof QueueResSchema>;
 export type QueueStatusResType = Static<typeof QueueStatusResSchema>;
 export type CancelQueueResType = Static<typeof CancelQueueResSchema>;

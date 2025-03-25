@@ -17,7 +17,7 @@ export const HomePageNav: React.FC<{
 
   const handleJoinGameClick = () => {
     console.log('Join game clicked');
-    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'join' } });
+    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'random' } });
   };
   return (
     <motion.div
