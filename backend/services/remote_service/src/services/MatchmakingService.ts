@@ -118,6 +118,7 @@ class OneVOneMatchmaking extends MatchmakingMode {
         clearInterval(this.playerIntervals.get(player.user_id));
         this.playerIntervals.delete(player.user_id);
         console.log(`Matchmaking timed out for player ${player.user_id}`);
+        //send a message to the player that the matchmaking timed out
       }
     }, 30000); // Timeout after 30 seconds (adjust as needed)
 

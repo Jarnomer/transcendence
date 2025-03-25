@@ -41,7 +41,14 @@ export class QueueService {
   }
 
   async getWaitingQueuesByMode(user_id: string, mode: string) {
-    return await this.queueModel.getWaitingQueuesByMode(user_id, mode);
+    switch (mode) {
+      case '1v1':
+        return await this.queueModel.getWaitingQueuesByPlayerCount(user_id, 2);
+      case '2v2':
+        return await this.queueModel.getWaitingQueuesByPlayerCount(user_id, 4);
+      default:
+        throw new BadRequestError('Invalid mode');
+    }
   }
 
   /**
@@ -57,21 +64,22 @@ export class QueueService {
    * User enters the match making queue
    * uses transaction to ensure atomicity
    */
-  async enterQueue(user_id: string, mode: string) {
+  async enterQueue(user_id: string, mode: string, difficulty: string) {
     return await this.queueModel.runTransaction(async () => {
       const existingUser = await this.queueModel.isInQueque(user_id); // Check if user is already in queue
       if (existingUser) {
         console.log('User is in Queue', existingUser);
         return existingUser;
       }
-      // const waitingUser = await this.queueModel.getWaitingUser(user_id); // Check if there is a waiting user
-      // if (waitingUser) {
-      //   console.log('User is in Queue waiting', waitingUser);
-      //   return waitingUser;
-      // }
       console.log('created new user in queue', user_id);
-      const user = await this.queueModel.createWaitingQueue(user_id, mode); // insert user into queue
-      return user;
+      switch (mode) {
+        case '1v1':
+          return await this.queueModel.createWaitingQueue(user_id, 2); // insert user into queue
+        case 'tournament':
+          return await this.queueModel.createWaitingQueue(user_id, parseInt(difficulty)); // insert user into queue
+        default:
+          throw new BadRequestError('Invalid mode');
+      }
     });
   }
 

@@ -89,7 +89,7 @@ class OneVsOneGame extends GameMode {
       }
       case 'online': {
         console.log('Creating 1v1 online game...');
-        const data = await enterQueue(this.mode);
+        const data = await enterQueue(this.mode, this.difficulty);
         if (!data || data.status !== 'waiting') {
           throw new Error('Problem with creating 1v1 online game');
         }

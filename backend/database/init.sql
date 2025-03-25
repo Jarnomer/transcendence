@@ -96,7 +96,8 @@ CREATE TABLE  IF NOT EXISTS message_reactions (
 
 CREATE TABLE  IF NOT EXISTS queues (
   queue_id TEXT PRIMARY KEY,
-  mode TEXT CHECK(mode IN ('1v1', 'tournament', 'random')) DEFAULT '1v1',
+  -- mode TEXT CHECK(mode IN ('1v1', '4x4', '8x8', '16x16')) DEFAULT '1v1',
+  player_count INTEGER NOT NULL DEFAULT 2,
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 

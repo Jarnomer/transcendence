@@ -92,9 +92,10 @@ export class QueueController {
    */
   async enterQueue(request: FastifyRequest, reply: FastifyReply) {
     const { user_id } = request.user as { user_id: string };
-    const { mode } = request.query as { mode: string };
+    const { mode, difficulty } = request.query as { mode: string; difficulty: string };
     request.log.trace(`Joining user ${user_id}`);
-    const queue = await this.queueService.enterQueue(user_id, mode);
+    console.log(user_id, mode, difficulty);
+    const queue = await this.queueService.enterQueue(user_id, mode, difficulty);
     request.log.trace(`status: ${queue.status}`);
     console.log(queue);
     reply.code(200).send(queue);

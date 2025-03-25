@@ -39,7 +39,7 @@ export class QueueModel {
    * [
    *  {
    *    queue_id: 'queue_id',
-   *    mode: 'mode',
+   *    player_count: 'player_count',
    *    created_at: 'created_at',
    *    players: [
    *      {
@@ -57,7 +57,7 @@ export class QueueModel {
     const query = `
         SELECT
         q.queue_id,
-        q.mode,
+        q.player_count,
         q.created_at,
         COALESCE
         (
@@ -97,9 +97,9 @@ export class QueueModel {
   }
 
   /**
-   * Get waiting users in queue by mode
+   * Get waiting users in queue by player count
    * @param user_id user id
-   * @param mode game mode
+   * @param player_count game player count
    * @returns list of users with status waiting
    * @example
    * [
@@ -111,14 +111,14 @@ export class QueueModel {
    *  }
    * ]
    */
-  async getWaitingQueuesByMode(user_id: string, mode: string) {
+  async getWaitingQueuesByPlayerCount(user_id: string, player_count: number) {
     return await this.db.all(
       `
       SELECT * FROM queues
       LEFT JOIN queue_players ON queues.queue_id = queue_players.queue_id
-      WHERE queue_players.status = 'waiting' AND queues.mode = ? AND queue_players.user_id != ?;
+      WHERE queue_players.status = 'waiting' AND queues.player_count = ? AND queue_players.user_id != ?;
       `,
-      [mode, user_id]
+      [player_count, user_id]
     );
   }
 
@@ -222,9 +222,12 @@ export class QueueModel {
    *  status: 'waiting',
    *  joined_at: 'joined_at'
    */
-  async createWaitingQueue(user_id: string, mode: string) {
+  async createWaitingQueue(user_id: string, player_count: number) {
     const id = uuidv4();
-    await this.db.get(`INSERT INTO queues (queue_id, mode) VALUES (?, ?) RETURNING *`, [id, mode]);
+    await this.db.get(`INSERT INTO queues (queue_id, player_count) VALUES (?, ?) RETURNING *`, [
+      id,
+      player_count,
+    ]);
     const queue = await this.db.get(
       `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,
       [id, user_id]

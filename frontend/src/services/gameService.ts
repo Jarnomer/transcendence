@@ -1,5 +1,4 @@
 import {
-  EnterQueueResType,
   GameIdType,
   GameResType,
   GameResultReqType,
@@ -10,9 +9,11 @@ import {
 
 import { api } from './api';
 
-export async function enterQueue(mode: string) {
+export async function enterQueue(mode: string, difficulty: string) {
   try {
-    const res = await api.post<QueueStatusResType>(`/matchmaking/enterQueue?mode=${mode}`);
+    const res = await api.post<QueueStatusResType>(
+      `/matchmaking/enterQueue?mode=${mode}&difficulty=${difficulty}`
+    );
     console.log(res.data);
     return res.data;
   } catch (err) {
