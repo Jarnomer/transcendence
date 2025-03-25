@@ -198,3 +198,31 @@ export const retroEffectsPresets = {
     crtChannelSwitchEffect: 1,
   } as RetroEffectsLevels,
 };
+
+export interface BallEffectsParams {
+  ovality: {
+    shapeDampingFactor: number; // How quickly the shape changes
+    rotationDampingFactor: number; // How quickly the rotation changes
+    spinNormalizationFactor: number; // The divisor factor calculation
+    spinMaximumFactor: number; // Maximum allowed factor for spin
+    speedDivisor: number; // Divisor for speed effect (higher = less effect)
+    maxOvality: number; // Maximum ovality deformation
+    xStretchMultiplier: number; // X-axis stretch factor
+    yCompressionFactor: number; // Y-axis compression factor
+    spinMultiplier: number; // Spin-based rotation speed
+  };
+}
+
+export const defaultBallEffectsParams: BallEffectsParams = {
+  ovality: {
+    shapeDampingFactor: 0.5,
+    rotationDampingFactor: 0.3,
+    spinNormalizationFactor: 5.0,
+    spinMaximumFactor: 1.0,
+    speedDivisor: 50,
+    maxOvality: 0.3,
+    xStretchMultiplier: 0.5,
+    yCompressionFactor: 0.3,
+    spinMultiplier: 0.05,
+  },
+};

@@ -11,6 +11,8 @@ import {
 
 import { createParticleTexture, updateMotionBlur } from '@game/utils';
 
+import { BallEffectsParams, defaultBallEffectsParams } from '@shared/types';
+
 export function createBallTrail(ballMesh: any, color: Color3, scene: Scene) {
   if (ballMesh.trailParticleSystem) ballMesh.trailParticleSystem.dispose();
 
@@ -268,14 +270,23 @@ export function applyBallOvalityWithSpin(
   ballMesh: any,
   angle: number,
   speed: number,
-  spin: number
+  spin: number,
+  params: BallEffectsParams = defaultBallEffectsParams
 ) {
+  const {
+    shapeDampingFactor,
+    rotationDampingFactor,
+    spinNormalizationFactor,
+    spinMaximumFactor,
+    speedDivisor,
+    maxOvality,
+    xStretchMultiplier,
+    yCompressionFactor,
+    spinMultiplier,
+  } = params.ovality;
+
   // Store the original scale if not already saved
   if (!ballMesh.originalScale) ballMesh.originalScale = new Vector3(1, 1, 1);
-
-  const shapeDampingFactor = 0.5; // How quickly the shape changes
-  const rotationDampingFactor = 0.3; // How quickly the rotation changes
-  const spinFactor = Math.min(Math.abs(spin) / 5, 1); // Normalized spin factor
 
   if (speed < 0.1 && Math.abs(spin) < 0.1) {
     // Ball is nearly stationary with no spin - gradually return to original shape
@@ -287,15 +298,12 @@ export function applyBallOvalityWithSpin(
     return;
   }
 
-  const speedDivisor = 50; // Increase for less effect
-  const maxOvality = 0.3; // Increase for less ovality
-  const stretchMultiplier = 0.5; // Increase for more ovality
-  const compressionFactor = 0.3; // Increase for more ovality
-
-  // Calculate speed-based deformation (from original function)
+  // Calculate speed-based deformation
   const speedFactor = Math.min(speed / speedDivisor, maxOvality);
-  let targetScaleX = 1 + speedFactor * stretchMultiplier;
-  let targetScaleY = 1 - speedFactor * compressionFactor;
+  const spinFactor = Math.min(Math.abs(spin) / spinNormalizationFactor, spinMaximumFactor);
+
+  let targetScaleX = 1 + speedFactor * xStretchMultiplier;
+  let targetScaleY = 1 - speedFactor * yCompressionFactor;
 
   // When spin is high, morph toward a disc shape
   if (Math.abs(spin) > 1) {
@@ -327,10 +335,9 @@ export function applyBallOvalityWithSpin(
   if (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
   if (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
 
-  const spinRotation = spin * 0.03; // Adjust multiplier to control rotation speed
-
   // Combine regular movement-based rotation with spin-based rotation
-  const newRotation = currentRotation + rotationDiff * rotationDampingFactor + spinRotation;
+  const newRotation =
+    currentRotation + rotationDiff * rotationDampingFactor + spin * spinMultiplier;
   ballMesh.rotation.z = newRotation;
 }
 
@@ -339,13 +346,14 @@ export function applyBallEffects(
   speed: number,
   angle: number,
   spin: number,
-  color: Color3
+  color: Color3,
+  params: BallEffectsParams = defaultBallEffectsParams
 ) {
   if (!ballMesh) return;
 
   const scene = ballMesh.getScene();
 
-  applyBallOvalityWithSpin(ballMesh, angle, speed, spin);
+  applyBallOvalityWithSpin(ballMesh, angle, speed, spin, params);
   applyBallTrail(ballMesh, speed, color, scene);
   applySpinEffect(ballMesh, spin, speed, color, scene);
 

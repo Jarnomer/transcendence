@@ -1,5 +1,6 @@
 COMPOSE_FILE   := docker-compose.yml
 DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
+DATABASE       := ./backend/database/data.db
 
 RM = rm -rf
 
@@ -18,10 +19,13 @@ clean: down
 fclean: clean
 	@$(DOCKER_COMPOSE) down -v --rmi all
 
+nuke:
+	@$(RM) $(DATABASE)
+
 ps:
 	@$(DOCKER_COMPOSE) ps
 
 logs:
 	@$(DOCKER_COMPOSE) logs
 
-.PHONY: all up down re clean fclean ps logs
+.PHONY: all up down re clean fclean nuke ps logs
