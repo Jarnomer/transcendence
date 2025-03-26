@@ -96,7 +96,7 @@ export const HomePageBackgroundGlitch: React.FC<{ activeTab: string; duration: n
             <WarningSign></WarningSign>
           </motion.div>
           <motion.div
-            className="absolute z-0 top-[100px] left-0 opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-sm space-y-1"
+            className="absolute z-0 top-[100px] left-0 opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-[6px] sm:text-sm space-y-1"
             variants={parentVariants}
             initial="hidden"
             animate={showLeft ? 'visible' : 'hidden'}
@@ -110,7 +110,7 @@ export const HomePageBackgroundGlitch: React.FC<{ activeTab: string; duration: n
             {lines.map((line, lineIndex) => (
               <motion.div
                 key={lineIndex}
-                className="whitespace-pre text-xs"
+                className="whitespace-pre text-[6px] sm:text-xs"
                 variants={lineVariants}
                 custom={lineIndex}
               >
@@ -122,7 +122,7 @@ export const HomePageBackgroundGlitch: React.FC<{ activeTab: string; duration: n
           </motion.div>
 
           <motion.div
-            className="absolute z-0 w-[200px] top-[0px] right-[100px] opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-sm space-y-1"
+            className={`absolute z-0 w-[200px] top-[0px] right-[0px] md:right-[100px] opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-[5px] sm:text-sm space-y-1`}
             variants={parentVariants}
             initial="hidden"
             animate={shiftRight ? 'visible' : 'hidden'}
@@ -131,7 +131,7 @@ export const HomePageBackgroundGlitch: React.FC<{ activeTab: string; duration: n
             {lines.map((line, lineIndex) => (
               <motion.div
                 key={lineIndex}
-                className="whitespace-pre text-xs"
+                className="whitespace-pre  text-[7px] sm:text-xs"
                 variants={lineVariants}
                 custom={lineIndex}
               >

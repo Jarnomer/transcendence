@@ -156,6 +156,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <span></span>
         </div>
 
+        <div>
+          <span>{user?.bio}</span>
+        </div>
+
         {isOwnProfile ? (
           !editProfile ? (
             <button onClick={() => setEditProfile(true)}>Edit Profile</button>

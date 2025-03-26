@@ -12,6 +12,8 @@ import { GamePage } from '../../pages/GamePage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
+import { Settings } from '../../pages/Settings.tsx';
+import { SignUpPage } from '../../pages/SignUpPage.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
@@ -85,11 +87,37 @@ export const AnimatedRoutes: React.FC = () => {
         />
 
         <Route
+          path="/settings"
+          element={
+            user ? (
+              <PageWrapper>
+                <Settings />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
           path="/creators"
           element={
             user ? (
               <PageWrapper>
                 <CreatorsPage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/signUp"
+          element={
+            user ? (
+              <PageWrapper>
+                <SignUpPage />
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />

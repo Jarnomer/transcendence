@@ -40,7 +40,11 @@ export const LoginPage: React.FC = () => {
       // THEN LOG IN THE USER
       try {
         await login(username, password);
-        navigate(`/profile/${localStorage.getItem('userID')}`);
+        if (isRegistering) {
+          navigate(`/signUp`);
+        } else {
+          navigate(`/profile/${localStorage.getItem('userID')}`);
+        }
       } catch (error: any) {
         alert('Login failed!');
         setLoading(false);

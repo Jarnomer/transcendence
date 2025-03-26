@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -15,7 +17,6 @@ import {
   XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import React from 'react';
 
 interface NavIconButtonProps {
   id: string;
@@ -37,23 +38,25 @@ interface NavIconButtonProps {
   onClick: () => void;
 }
 
+const iconSizeResponsive = 'size-4 sm:size-6';
+
 export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick }) => {
   const icons = {
-    home: <HomeIcon className="size-6" />,
-    user: <UserIcon className="size-6" />,
-    chat: <ChatBubbleLeftIcon className="size-6" />,
-    settings: <CogIcon className="size-6" />,
-    arrowLeft: <ArrowLeftIcon className="w-8 h-8" />,
-    arrowRight: <ArrowRightIcon className="size-6" />,
-    close: <XMarkIcon className="w-8 h-8" />,
-    pause: <PauseIcon className="w-8 h-8" />,
-    play: <PlayIcon className="w-6 h-6" />,
-    addFriend: <UserPlusIcon className="w-6 h-6"></UserPlusIcon>,
-    removeFriend: <UserMinusIcon className="w-6 h-6"></UserMinusIcon>,
-    block: <NoSymbolIcon className="w-6 h-6"></NoSymbolIcon>,
-    bell: <BellIcon className="w-6 h-6"></BellIcon>,
-    checkCircle: <CheckCircleIcon className="w-6 h-6"></CheckCircleIcon>,
-    xCircle: <XCircleIcon className="w-6 h-6"></XCircleIcon>,
+    home: <HomeIcon className={iconSizeResponsive} />,
+    user: <UserIcon className={iconSizeResponsive} />,
+    chat: <ChatBubbleLeftIcon className={iconSizeResponsive} />,
+    settings: <CogIcon className={iconSizeResponsive} />,
+    arrowLeft: <ArrowLeftIcon className={iconSizeResponsive} />,
+    arrowRight: <ArrowRightIcon className={iconSizeResponsive} />,
+    close: <XMarkIcon className={iconSizeResponsive} />,
+    pause: <PauseIcon className={iconSizeResponsive} />,
+    play: <PlayIcon className={iconSizeResponsive} />,
+    addFriend: <UserPlusIcon className={iconSizeResponsive}></UserPlusIcon>,
+    removeFriend: <UserMinusIcon className={iconSizeResponsive}></UserMinusIcon>,
+    block: <NoSymbolIcon className={iconSizeResponsive}></NoSymbolIcon>,
+    bell: <BellIcon className={iconSizeResponsive}></BellIcon>,
+    checkCircle: <CheckCircleIcon className={iconSizeResponsive}></CheckCircleIcon>,
+    xCircle: <XCircleIcon className={iconSizeResponsive}></XCircleIcon>,
   };
 
   return (
