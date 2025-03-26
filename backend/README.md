@@ -10,7 +10,15 @@ https://localhost.com:8000/api
 - password hashing bcrypt
 - jwt authentication refresh and access
 - type safe with typebox
-- 
+- api documentation with swagger
+
+## todo
+-notifications
+-request
+-ranking
+-chat
+
+
 
 ## User Endpoints
 

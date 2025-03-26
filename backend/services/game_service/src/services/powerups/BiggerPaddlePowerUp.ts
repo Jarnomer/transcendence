@@ -1,4 +1,4 @@
-import PongGame from '../PongGame';
+import PongGame from '../services/PongGame';
 import { PowerUp } from './PowerUp';
 
 export class BiggerPaddlePowerUp extends PowerUp {

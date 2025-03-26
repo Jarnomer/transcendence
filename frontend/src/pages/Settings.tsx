@@ -65,8 +65,8 @@ export const SettingsNav: React.FC<{
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
       <span className="relative p-2 px-3 flex gap-4">
-        <div className="absolute w-[30px] h-[30px] top-0 left-0 border-t-1 border-l-1"></div>
-        <div className="absolute w-[30px] h-[30px] bottom-0 right-0 border-b-1 border-r-1"></div>
+        <div className="absolute w-[30px] h-[30px] top-0 left-0 border-t-1 border-l-1 pointer-events-none"></div>
+        <div className="absolute w-[30px] h-[30px] bottom-0 right-0 border-b-1 border-r-1 pointer-events-none"></div>
 
         <button onClick={() => setActiveTab('userSettings')}>
           <span
@@ -118,7 +118,6 @@ export const Settings: React.FC = () => {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                layout
               >
                 <UserSettings></UserSettings>
               </motion.div>

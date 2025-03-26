@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
 import { SvgBorderBig } from '@components/visual/svg/borders/SvgBorderBig';
 
+import { setRetroEffectLevel } from '../game';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
-
 export const animationVariants = {
   initial: {
     clipPath: 'inset(0 0 100% 0)',
@@ -23,10 +23,54 @@ export const animationVariants = {
   },
 };
 
-export const GameSettings: React.FC = () => {
+const RetroEffectSettings: React.FC = () => {
   const [level, setLevel] = useState(2); // Default level
-  const baseValue = 100; // Example base value (adjust as needed)
-  const effectValue = setRetroEffectLevel(level, baseValue);
+  const [isEnabled, setIsEnabled] = useState(true); // Checkbox state
+  const baseValue = 5;
+  const effectValue = isEnabled ? setRetroEffectLevel(level, baseValue) : 0;
+  return (
+    <div className="p-6 max-w-md mx-auto">
+      <h2 className="text-xl font-bold mb-4">Retro Effect</h2>
+
+      {/* Checkbox to Enable/Disable Effect */}
+      <div className="flex items-center mb-4">
+        <input
+          type="checkbox"
+          id="enableEffect"
+          checked={isEnabled}
+          onChange={() => setIsEnabled(!isEnabled)}
+          className="w-5 h-5 cursor-pointer bg-transparent border-1 border-primary"
+        />
+        <label htmlFor="enableEffect" className="ml-2 cursor-pointer">
+          Retro Effect
+        </label>
+      </div>
+
+      {/* Slider Input */}
+      <input
+        type="range"
+        min="0"
+        max="5"
+        step="1"
+        value={level}
+        onChange={(e) => setLevel(parseInt(e.target.value))}
+        disabled={!isEnabled}
+        className={`w-full appearance-none h-2 rounded-lg cursor-pointer ${
+          isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
+        }`}
+      />
+
+      {/* Display Values */}
+      <div className="mt-4 text-center">
+        <p className="text-sm">
+          <span className="font-semibold">{isEnabled ? level : 'Disabled'}</span>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export const GameSettings: React.FC = () => {
   return (
     <>
       <motion.div
@@ -36,7 +80,10 @@ export const GameSettings: React.FC = () => {
         animate="visible"
         exit="hidden"
       >
-        <span className="absolute top-0 left-0 translate-y-[-50%] w-full">
+        <span
+          aria-hidden="true"
+          className="absolute top-0 left-0 translate-y-[-50%] w-full pointer-events-none"
+        >
           <SvgBorderBig></SvgBorderBig>
         </span>
         <div className="w-full h-full relative overflow-hidden">
@@ -44,30 +91,8 @@ export const GameSettings: React.FC = () => {
           <div className="w-full h-full p-10">
             <h1 className="font-heading text-4xl">Game Settings</h1>
 
-            <div className="p-6 max-w-md mx-auto bg-gray-900 text-white rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4">Retro Effect Level</h2>
-
-              {/* Slider Input */}
-              <input
-                type="range"
-                min="0"
-                max="5"
-                step="1"
-                value={level}
-                onChange={(e) => setLevel(parseInt(e.target.value))}
-                className="w-full cursor-pointer appearance-none bg-gray-700 rounded-lg h-2"
-              />
-
-              {/* Display Values */}
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-300">
-                  Level: <span className="font-semibold">{level}</span>
-                </p>
-                <p className="text-sm text-gray-300">
-                  Effect Value: <span className="font-semibold">{effectValue.toFixed(2)}</span>
-                </p>
-              </div>
-            </div>
+            {/* Retro effect controls */}
+            <RetroEffectSettings></RetroEffectSettings>
           </div>
         </div>
       </motion.div>

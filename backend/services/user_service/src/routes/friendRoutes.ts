@@ -16,8 +16,8 @@ import {
   RequestResponseType,
   RequestSchema,
   RequestType,
-  SentResponseType,
   SentResponseSchema,
+  SentResponseType,
 } from '@shared/types';
 
 import { FriendController } from '../controllers/FriendController';
@@ -42,6 +42,7 @@ export async function friendRoutes(fastify: FastifyInstance) {
     { schema: { response: { 200: ReceivedResponseSchema } } },
     friendController.getReceivedFriendRequests.bind(friendController)
   );
+  // fastify.get('/request/request_id', friendController.getFriendRequestById.bind(friendController));
   fastify.post<{ Params: AcceptType; Reply: MessageResponseType }>(
     '/request/accept/:sender_id',
     { schema: { params: AcceptSchema, response: { 200: MessageResponseSchema } } },

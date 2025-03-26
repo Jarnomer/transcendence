@@ -26,7 +26,7 @@ class WebSocketManager {
       this.ws.close();
     }
     this.params = params;
-    console.log('Connecting to WebSocket:', this.url);
+    console.log('Connecting to WebSocket:', this.url + `?${params.toString()}`);
     this.ws = new WebSocket(this.url + `?${params.toString()}`);
 
     this.ws.onopen = () => {

@@ -118,4 +118,6 @@ export class FriendController {
     }
     reply.code(204).send({ message: 'Friend request cancelled' });
   }
+
+
 }

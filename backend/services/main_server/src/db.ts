@@ -21,8 +21,8 @@ async function initDB(): Promise<Database> {
   await db.exec(schemaSQL);
 
   console.log('Database initialized.');
-  insertAIUsers(db);
-  inserAIProfiles(db);
+  await insertAIUsers(db);
+  await inserAIProfiles(db);
   return db;
 }
 

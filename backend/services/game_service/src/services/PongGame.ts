@@ -3,7 +3,7 @@ import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/ty
 type PlayerMove = 'up' | 'down' | null;
 
 export default class PongGame {
-  private params: GameParams = defaultGameParams;
+  private params: GameParams;
 
   private gameState: GameState;
   private gameStatus: GameStatus;
@@ -17,9 +17,8 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
-  private frameCount = 0;
-
   constructor(mode: string, difficulty: string) {
+    this.params = { ...defaultGameParams };
     this.mode = mode;
     this.difficulty = difficulty;
     this.gameState = {
@@ -80,7 +79,13 @@ export default class PongGame {
   }
 
   areAllPlayersReady(): boolean {
-    if (this.mode === 'singleplayer' || (this.mode === '1v1' && this.difficulty === 'local')) {
+    console.log('Checking if all players are ready, mode:', this.mode);
+    if (this.mode === 'AIvsAI') {
+      return true;
+    } else if (
+      this.mode === 'singleplayer' ||
+      (this.mode === '1v1' && this.difficulty === 'local')
+    ) {
       if (this.readyState.get('player1')) {
         return true;
       }
@@ -142,6 +147,18 @@ export default class PongGame {
     }
   }
 
+  setMaxScore(score: number): void {
+    this.params.maxScore = score;
+  }
+
+  setMaxBallSpeed(speed: number): void {
+    this.params.maxBallSpeedMultiplier = speed;
+  }
+
+  setCountdown(duration: number): void {
+    this.params.countdown = duration;
+  }
+
   private repositionPaddleAfterHeightChange(player: number, height: number): void {
     if (player === 1) {
       if (height > this.gameState.players.player1.paddleHeight) {
@@ -200,10 +217,11 @@ export default class PongGame {
     setTimeout(() => {
       this.setGameStatus('playing');
       this.startGameLoop();
-    }, 3000);
+    }, this.params.countdown * 1000);
   }
 
   startGameLoop(): void {
+    console.log('Starting game loop...');
     // Prevent multiple intervals
     if (this.updateInterval) return;
     this.updateInterval = setInterval(() => {
@@ -253,11 +271,6 @@ export default class PongGame {
         paddleState.dy = this.params.paddleSpeed;
       }
     } else if (move === null) {
-      // this.frameCount++;
-      // if (this.frameCount % 6 === 0) {
-      //   paddleState.dy = 0;
-      //   this.frameCount = 0;
-      // }
       paddleState.dy = 0;
     }
   }
@@ -292,14 +305,14 @@ export default class PongGame {
 
     if (ball.x <= 0) {
       players.player2.score++;
-      if (players.player2.score >= this.params.maxScore) {
+      if (this.params.maxScore !== 0 && players.player2.score >= this.params.maxScore) {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
       }
     } else if (ball.x + this.params.ballSize >= this.params.gameWidth) {
       players.player1.score++;
-      if (players.player1.score >= this.params.maxScore) {
+      if (this.params.maxScore !== 0 && players.player1.score >= this.params.maxScore) {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');

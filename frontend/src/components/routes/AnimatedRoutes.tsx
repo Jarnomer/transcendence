@@ -6,6 +6,7 @@ import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is im
 
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
+import { CreateTournament } from '../../pages/CreateTournament.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
@@ -53,6 +54,19 @@ export const AnimatedRoutes: React.FC = () => {
             user ? (
               <PageWrapper>
                 <HomePage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/tournament"
+          element={
+            user ? (
+              <PageWrapper>
+                <CreateTournament />
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />

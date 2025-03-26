@@ -197,8 +197,15 @@ export class UserModel {
     return await this.db.all(
       `SELECT *
       FROM notifications n
-      WHERE n.user_id = ? ORDER BY created_at DESC`,
+      WHERE n.user_id = ? AND n.seen = 'false' ORDER BY created_at DESC`,
       [user_id]
+    );
+  }
+
+  async markNotificationAsSeen(notification_id: string) {
+    return await this.db.get(
+      `UPDATE notifications SET seen = 1 WHERE notification_id = ? RETURNING *`,
+      [notification_id]
     );
   }
 }

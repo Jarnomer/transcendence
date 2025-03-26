@@ -1,15 +1,16 @@
 import { isPlayerInputMessage } from '@shared/messages';
 import { GameStatus } from '@shared/types';
 
-import { AIController } from './AIController';
-import { handlePlayerInputMessage } from './handlers/playerInputHandler';
 import PongGame from './PongGame';
+import { AIController } from '../controllers/AIController';
+import { handlePlayerInputMessage } from '../handlers/playerInputHandler';
 
-export class PongGameSession {
+export default class PongGameSession {
   private gameId: string;
   private game: PongGame;
   private mode: string;
   private clients: Map<string, any>;
+  private spectators: Map<string, any>;
   private aiControllers: Map<string, AIController> = new Map();
   private onEndCallback: () => void;
   private previousGameStatus: GameStatus;
@@ -22,9 +23,11 @@ export class PongGameSession {
     this.mode = mode;
     this.difficulty = difficulty;
     this.clients = new Map(); // Now maps playerId -> connection
+    this.spectators = new Map();
     this.onEndCallback = onEndCallback;
 
     this.game = new PongGame(mode, difficulty);
+    console.log(`Created game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
     this.previousGameStatus = this.game.getGameStatus();
 
     if (mode === 'singleplayer') {
@@ -42,6 +45,14 @@ export class PongGameSession {
     if (this.mode === 'AIvsAI') {
       this.aiControllers.set('player1', new AIController(this.difficulty, true));
       this.aiControllers.set('player2', new AIController(this.difficulty, false));
+      this.game.setPlayerId(1, 'player1');
+      this.game.setPlayerId(2, 'player2');
+      if (this.gameId === 'background_game') {
+        this.game.setMaxScore(0);
+        this.game.setMaxBallSpeed(2);
+        this.game.setCountdown(0);
+      }
+      this.game.setReadyState('player1', true);
     }
   }
 
@@ -76,8 +87,19 @@ export class PongGameSession {
     }
   }
 
+  addSpectator(userId: string, connection: any): void {
+    this.spectators.set(userId, connection);
+
+    connection.on('message', (message: string) => this.handleMessage(message));
+    connection.on('close', () => {
+      this.spectators.delete(userId);
+    });
+  }
+
   private areAllPlayersConnected(): boolean {
-    if (
+    if (this.mode === 'AIvsAI') {
+      return true;
+    } else if (
       this.clients.size === 1 &&
       (this.mode === 'singleplayer' || (this.mode === '1v1' && this.difficulty === 'local'))
     ) {
@@ -151,6 +173,12 @@ export class PongGameSession {
         // console.log('Sent message:', message, 'to player:', connection.playerId);
       }
     }
+    for (const connection of this.spectators.values()) {
+      if (connection.readyState === connection.OPEN) {
+        connection.send(JSON.stringify(message));
+        // console.log('Sent message:', message, 'to spectator:', connection.userId);
+      }
+    }
   }
 
   endGame(): void {
@@ -208,6 +236,10 @@ export class PongGameSession {
     this.broadcast({ type: 'game_status', state: 'playing' });
   }
 
+  getGameState(): void {
+    this.game.getGameState();
+  }
+
   private startGameLoop(): void {
     if (this.interval) {
       clearInterval(this.interval);
@@ -217,5 +249,3 @@ export class PongGameSession {
     this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }
 }
-
-export default PongGameSession;

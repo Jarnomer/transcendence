@@ -67,7 +67,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
     setLoading(true);
     try {
-      const res = await api.post(`user/avatar/${userID}`, formData, {
+      const res = await api.post(`user/avatar`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

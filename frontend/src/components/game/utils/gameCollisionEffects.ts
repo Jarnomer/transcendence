@@ -162,8 +162,8 @@ function applyLightEffect(
 
   const keys = [];
   keys.push({ frame: 0, value: lightIntensity });
-  keys.push({ frame: 5, value: lightIntensity * 1.6 });
-  keys.push({ frame: 10, value: lightIntensity * 0.8 });
+  keys.push({ frame: 5, value: lightIntensity * 2.0 });
+  keys.push({ frame: 10, value: lightIntensity * 1.0 });
   keys.push({ frame: 20, value: 0 });
 
   fadeAnimation.setKeys(keys);
@@ -347,7 +347,7 @@ export function applyCollisionEffects(
   speed: number,
   color: Color3
 ) {
-  const speedFactor = Math.min(Math.max(speed / 5, 1.5), 3.5);
+  const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const scene = ballMesh.getScene();
 
   applySquishEffect(ballMesh, collisionType, speedFactor, scene);
