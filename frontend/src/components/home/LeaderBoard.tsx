@@ -76,7 +76,7 @@ export const LeaderBoard: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10 text-sm"
+        className="h-full w-full relative glass-box mt-10 text-sm"
         variants={animationVariants}
         initial="hidden"
         animate="visible"

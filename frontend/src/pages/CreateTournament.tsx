@@ -7,7 +7,7 @@ import { SvgBorderBig } from '../components/visual/svg/borders/SvgBorderBig';
 export const CreateTournament: React.FC = () => {
   return (
     <>
-      <motion.div className="h-full min-h-[450px] relative glass-box mt-10 text-sm">
+      <motion.div className="h-full w-full min-h-[450px] relative glass-box mt-10 text-sm">
         <span className="absolute top-0 left-0 translate-y-[-50%] w-full mb-2">
           <SvgBorderBig></SvgBorderBig>
         </span>

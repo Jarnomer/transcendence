@@ -4,8 +4,6 @@ import { motion } from 'framer-motion';
 
 import { ProcessingBar } from '@components/visual/animations/ProcessingBar';
 
-import { WarningSign } from '../visual/svg/shapes/WarningSign';
-
 const generateRandomText = (length: number) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}<>?';
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -92,9 +90,9 @@ export const HomePageBackgroundGlitch: React.FC<{ activeTab: string; duration: n
     <>
       {showGlitch ? (
         <>
-          <motion.div className="relative">
+          {/* <motion.div className="relative">
             <WarningSign></WarningSign>
-          </motion.div>
+          </motion.div> */}
           <motion.div
             className="absolute z-0 top-[100px] left-0 opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-[6px] sm:text-sm space-y-1"
             variants={parentVariants}

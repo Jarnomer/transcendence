@@ -60,7 +60,7 @@ export const SettingsNav: React.FC<{
   return (
     <motion.div
       id="settings-nav"
-      className="flex m-2 relative overflow-hidden items-center justify-center font-heading text-lg sm:text-xl gap-3 md:text-2xl lg:text-4xl md:gap-6"
+      className="flex m-2 relative w-full h-full overflow-hidden items-center justify-center font-heading text-lg sm:text-xl gap-3 md:text-2xl lg:text-4xl md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
@@ -92,7 +92,7 @@ export const Settings: React.FC = () => {
 
   return (
     <>
-      <motion.div className="relative h-full z-10 gap-5 md:gap-10 md:p-4">
+      <motion.div className="relative w-full h-full z-10 gap-5 md:gap-10 md:p-4">
         <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
 
         <motion.div id="home-page-content" className=" h-full lg:px-20  gap-20">
