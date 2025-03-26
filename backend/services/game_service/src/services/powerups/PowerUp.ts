@@ -1,4 +1,4 @@
-import PongGame from '../PongGame';
+import PongGame from '../services/PongGame';
 
 export abstract class PowerUp {
   x: number;

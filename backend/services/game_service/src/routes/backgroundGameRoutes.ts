@@ -2,22 +2,22 @@ import { FastifyInstance } from 'fastify';
 import { v4 as uuidv4 } from 'uuid';
 import * as WebSocket from 'ws';
 
-import { BackgroundGameManager } from '../services/BackgroundGameManager';
+import { GameManager } from '../services/GameManager';
 
 export async function backgroundGameRoutes(fastify: FastifyInstance) {
-  const backgroundGameManager = BackgroundGameManager.getInstance();
+  const gameManager = GameManager.getInstance();
 
-  fastify.get('/background-game', { websocket: true }, (socket: WebSocket.WebSocket, request) => {
+  fastify.get('/background-game', { websocket: true }, (socket: WebSocket.WebSocket) => {
     const connectionId = uuidv4();
 
-    backgroundGameManager.addConnection(connectionId, socket);
+    gameManager.addSpectator('background_game', connectionId, socket);
 
     socket.on('close', () => {
-      backgroundGameManager.removeConnection(connectionId);
+      gameManager.removeClient('background_game', connectionId);
     });
 
     socket.on('error', () => {
-      backgroundGameManager.removeConnection(connectionId);
+      gameManager.removeClient('background_game', connectionId);
     });
   });
 }
