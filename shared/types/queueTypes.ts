@@ -4,7 +4,8 @@ export const QueueResSchema = Type.Object({
   queues: Type.Array(
     Type.Object({
       queue_id: Type.String(),
-      player_count: Type.String(),
+      mode: Type.String(),
+      variant: Type.String(),
       players: Type.Array(
         Type.Object({
           user_id: Type.String(),

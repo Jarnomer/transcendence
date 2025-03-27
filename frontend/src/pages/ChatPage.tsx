@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
-import { AnimatePresence } from 'framer-motion';
-
 import { BackgroundGlow } from '../components';
 import SearchBar from '../components/UI/SearchBar';
-import { BracketLine } from '../components/visual/svg/shapes/BracketLine';
 import { getUserData } from '../services/userService';
 
 export const ChatPage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [friends, setFriends] = useState<any[]>([]);
-  const [selectedFriend, setSelectedFriend] = useState<number | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [messages, setMessages] = useState();
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -56,14 +53,21 @@ export const ChatPage: React.FC = () => {
 
   return (
     <div className="p-10 w-[80%]">
-      <AnimatePresence>
-        {/* just testing here */}
-        <BracketLine></BracketLine>
-      </AnimatePresence>
+      {/* <AnimatePresence> */}
+      {/* just testing here */}
+      {/* <BracketLine></BracketLine> */}
+      {/* </AnimatePresence> */}
       <div className="flex relative h-[600px] glass-box overflow-hidden">
         <BackgroundGlow />
         {/* Friends List */}
         <div className="w-1/4 p-4 border-r ">
+          <button
+            onClick={() => {
+              console.log('clicked');
+            }}
+          >
+            Click me
+          </button>
           <SearchBar
             value={searchQuery}
             onChange={handleSearchChange}
@@ -73,11 +77,11 @@ export const ChatPage: React.FC = () => {
           <ul>
             {friends.map((friend) => (
               <li
-                key={friend.id}
-                className={`p-2 rounded cursor-pointer ${selectedFriend === friend.id ? 'bg-gray-700' : 'hover:bg-gray-800'} ${friend.online ? 'text-primary' : 'text-gray-500'}`}
-                onClick={() => setSelectedFriend(friend.id)}
+                key={friend.user_id}
+                className={`p-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:bg-gray-800'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
+                onClick={() => setSelectedFriend(friend.user_id)}
               >
-                {friend.display_name} {friend.online ? '' : '(Offline)'}
+                {friend.display_name} {friend.status === 'online' ? '' : '(Offline)'}
               </li>
             ))}
           </ul>
@@ -89,7 +93,7 @@ export const ChatPage: React.FC = () => {
             <>
               <div className="p-4  font-bold">
                 {' '}
-                {friends.find((f) => f.id === selectedFriend)?.username}
+                {friends.find((f) => f.user_id === selectedFriend)?.username}
               </div>
               <div className="flex-1 p-4 overflow-y-auto">
                 {messages[selectedFriend]?.map((msg, index) => (

@@ -87,7 +87,7 @@ export const GameMenu: React.FC = () => {
         content: '8',
         imageUrl: './src/assets/images/leaderboard.png',
         hoverInfo: 'local tournament',
-        onClick: () => handleDifficultyClick('8'),
+        onClick: () => handleDifficultyClick('4'),
       },
       {
         content: '16',

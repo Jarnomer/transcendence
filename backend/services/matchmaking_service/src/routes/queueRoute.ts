@@ -45,7 +45,7 @@ export async function queueRoutes(fastify: FastifyInstance) {
     queueController.cancelQueue.bind(queueController)
   );
   fastify.post<{ Params: QueueJoinParamsType; Reply: QueueStatusResType }>(
-    '/join1v1/:queue_id',
+    '/joinQueue/:queue_id',
     { schema: { params: QueueJoinParamsSchema, response: { 200: QueueStatusResSchema } } },
     queueController.joinQueue.bind(queueController)
   );

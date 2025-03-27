@@ -78,10 +78,6 @@ class OneVsOneGame extends GameMode {
     switch (this.difficulty) {
       case 'local': {
         console.log('Creating 1v1 local game...');
-        // const data = await singlePlayer(this.difficulty);
-        // if (!data || data.status !== 'created') {
-        //   throw new Error('Problem with creating 1v1 local game');
-        // }
         const game_id = 'local_game_id';
         this.matchMaker.setMatchMakerState(MatchMakerState.MATCHED);
         this.matchMaker.setGameId(game_id);
@@ -132,10 +128,32 @@ class TournamentGame extends GameMode {
   }
 
   async findMatch() {
-    this.matchMaker.setMatchMakerState(MatchMakerState.SEARCHING);
+    console.log('Finding tournament game...');
+    if (this.lobby === 'create') {
+      console.log('Creating tournament game...');
+      await this.createGame();
+    } else if (this.lobby === 'join' && this.queueId) {
+      console.log('Joining tournament game...');
+      const queue = await joinQueue(this.queueId);
+      if (!queue) {
+        throw new Error('Problem with joining tournament game');
+      }
+      this.matchMaker.setMatchMakerState(MatchMakerState.WAITING_FOR_PLAYERS);
+      this.matchMaker.setQueueId(queue.queue_id);
+    } else if (this.lobby === 'random') {
+      console.log('Joining random tournament game...');
+      this.matchMaker.setMatchMakerState(MatchMakerState.JOINING_RANDOM);
+    }
   }
+
   async createGame() {
-    this.matchMaker.setMatchMakerState(MatchMakerState.SEARCHING);
+    console.log('Creating tournament game...');
+    const data = await enterQueue(this.mode, this.difficulty);
+    if (!data || data.status !== 'waiting') {
+      throw new Error('Problem with creating tournament game');
+    }
+    this.matchMaker.setQueueId(data.queue_id);
+    this.matchMaker.setMatchMakerState(MatchMakerState.WAITING_FOR_PLAYERS);
   }
 }
 

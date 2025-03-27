@@ -21,8 +21,8 @@ export const initialState: WebSocketState = {
   gameStatus: 'waiting',
   gameState: {
     players: {
-      player1: { id: 'player1', y: 0, score: 0, dy: 0 },
-      player2: { id: 'player2', y: 0, score: 0, dy: 0 },
+      player1: { id: 'player1', y: 0, score: 0, dy: 0, paddleHeight: 0 },
+      player2: { id: 'player2', y: 0, score: 0, dy: 0, paddleHeight: 0 },
     },
     ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
   },

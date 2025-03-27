@@ -41,14 +41,7 @@ export class QueueService {
   }
 
   async getWaitingQueuesByMode(user_id: string, mode: string) {
-    switch (mode) {
-      case '1v1':
-        return await this.queueModel.getWaitingQueuesByPlayerCount(user_id, 2);
-      case '2v2':
-        return await this.queueModel.getWaitingQueuesByPlayerCount(user_id, 4);
-      default:
-        throw new BadRequestError('Invalid mode');
-    }
+    return await this.queueModel.getWaitingQueuesByMode(user_id, mode);
   }
 
   /**
@@ -58,6 +51,12 @@ export class QueueService {
     const user = await this.queueModel.getStatusQueue(user_id);
     if (!user) throw new NotFoundError('User not found in queue');
     return user;
+  }
+
+  async getQueueVariant(queue_id: string) {
+    const queue = await this.queueModel.getQueueVariant(queue_id);
+    if (!queue) throw new NotFoundError('Queue not found');
+    return queue;
   }
 
   /**
@@ -72,14 +71,7 @@ export class QueueService {
         return existingUser;
       }
       console.log('created new user in queue', user_id);
-      switch (mode) {
-        case '1v1':
-          return await this.queueModel.createWaitingQueue(user_id, 2); // insert user into queue
-        case 'tournament':
-          return await this.queueModel.createWaitingQueue(user_id, parseInt(difficulty)); // insert user into queue
-        default:
-          throw new BadRequestError('Invalid mode');
-      }
+      return await this.queueModel.createWaitingQueue(user_id, mode, difficulty); // insert user into queue
     });
   }
 
@@ -109,9 +101,22 @@ export class QueueService {
     return res;
   }
 
-  async joinQueue(user_id: string, queue_id: string) {
-    console.log('Joining queue', user_id, queue_id);
-    const user = await this.queueModel.joinQueue(user_id, queue_id);
-    return user;
+  async joinQueue(user_id: string, queue_id: string, mode: string, difficulty: string) {
+    if (mode === '1v1') {
+      console.log('User joined 1v1', user_id, queue_id);
+      return await this.queueModel.join1v1(user_id, queue_id);
+    } else {
+      const count = await this.queueModel.getNumberOfPlayersInQueue(queue_id);
+      const size = parseInt(difficulty);
+      if (count.total >= size) {
+        throw new BadRequestError('Queue is full');
+      }
+      const user = await this.queueModel.joinTournament(user_id, queue_id);
+      console.log('User joined tournament', user);
+      if (count.total === size - 1) {
+        await this.queueModel.updateQueueStatus(queue_id, 'matched');
+      }
+      return user;
+    }
   }
 }

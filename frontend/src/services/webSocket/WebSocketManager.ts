@@ -36,7 +36,6 @@ class WebSocketManager {
     };
 
     this.ws.onclose = (event) => {
-      console.log('WebSocket disconnected:', this.url, event.code, event.reason);
       this.notifyHandlers('close', event);
       if (
         !this.manualClose &&

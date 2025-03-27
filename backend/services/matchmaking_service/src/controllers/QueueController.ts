@@ -120,9 +120,10 @@ export class QueueController {
 
   async joinQueue(request: FastifyRequest, reply: FastifyReply) {
     const { queue_id } = request.params as { queue_id: string };
+    const { mode, difficulty } = request.query as { mode: string; difficulty: string };
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Joining queue ${queue_id}`);
-    const queue = await this.queueService.joinQueue(user_id, queue_id);
+    const queue = await this.queueService.joinQueue(user_id, queue_id, mode, difficulty);
     reply.code(200).send(queue);
   }
 }

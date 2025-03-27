@@ -33,9 +33,11 @@ export async function cancelQueue() {
   }
 }
 
-export async function joinQueue(queueID: string) {
+export async function joinQueue(queueID: string, mode: string, difficulty: string) {
   try {
-    const res = await api.post<QueueStatusResType>(`/matchmaking/join1v1/${queueID}`);
+    const res = await api.post<QueueStatusResType>(
+      `/matchmaking/joinQueue/${queueID}?mode=${mode}&difficulty=${difficulty}`
+    );
     console.log(res.data);
     return res.data;
   } catch (err) {

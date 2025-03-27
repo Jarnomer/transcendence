@@ -60,44 +60,60 @@ CREATE TABLE  IF NOT EXISTS friends (
   PRIMARY KEY (user_id, friend_id)
 );
 
--- creates a table for rooms where users can chat
-CREATE TABLE  IF NOT EXISTS chat_rooms (
-    chat_room_id TEXT PRIMARY KEY,  -- UUID for unique chat rooms
-    type TEXT CHECK(type IN ('private', 'group')) NOT NULL,
-    created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+
+
+-- Chat Rooms Table (public, private, global)
+CREATE TABLE IF NOT EXISTS chat_rooms (
+    chat_room_id TEXT PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    type TEXT CHECK(type IN ('public', 'private', 'global')) NOT NULL,
+    password_hash TEXT NULL, -- NULL for public, hashed password for private
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- references the chat_rooms table and users table to keep track of which users are in which chat rooms
-CREATE TABLE  IF NOT EXISTS chat_members (
-    chat_room_id TEXT REFERENCES chat_rooms(chat_room_id) ON DELETE CASCADE,
-    user_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
-    joined_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-    PRIMARY KEY (chat_room_id, user_id)
+-- Direct Messages Table (1-on-1 chat)
+CREATE TABLE IF NOT EXISTS direct_messages (
+    direct_messages_id TEXT PRIMARY KEY,
+    sender_id TEXT NOT NULL,
+    receiver_id TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
 
--- creates a table for messages sent in chat rooms
-CREATE TABLE  IF NOT EXISTS messages (
-    message_id TEXT PRIMARY KEY,  -- UUID for messages
-    chat_room_id TEXT NOT NULL REFERENCES chat_rooms(chat_room_id) ON DELETE CASCADE,
-    sender_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    sent_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+-- Chat Messages Table (storing messages for rooms)
+CREATE TABLE IF NOT EXISTS chat_messages (
+    chat_messages_id TEXT PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    sender_id TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES chat_rooms(id),
+    FOREIGN KEY (sender_id) REFERENCES users(id)
 );
 
-CREATE TABLE  IF NOT EXISTS message_reactions (
-  message_reaction_id TEXT PRIMARY KEY,
-  message_id TEXT NOT NULL REFERENCES messages(message_id) ON DELETE CASCADE,
-  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-  reaction TEXT NOT NULL, -- e.g., 'like', 'heart', 'laugh'
-  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+-- Message Reactions Table (emoji reactions)
+CREATE TABLE IF NOT EXISTS message_reactions (
+    message_reactions_id TEXT PRIMARY KEY,
+    message_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    reaction TEXT NOT NULL, -- e.g., "👍", "🔥"
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES chat_messages(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- Indexing for Fast Querying
+CREATE INDEX idx_chat_messages_room ON chat_messages(room_id);
+CREATE INDEX idx_direct_messages_users ON direct_messages(sender_id, receiver_id);
 
 -- CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='messages', content_rowid='id');
 
 CREATE TABLE  IF NOT EXISTS queues (
   queue_id TEXT PRIMARY KEY,
-  -- mode TEXT CHECK(mode IN ('1v1', '4x4', '8x8', '16x16')) DEFAULT '1v1',
-  player_count INTEGER NOT NULL DEFAULT 2,
+  mode TEXT NOT NULL DEFAULT '1v1',
+  variant TEXT NOT NULL DEFAULT 'online',
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
 
