@@ -43,6 +43,8 @@ export interface BallEffectsParams {
     speedDivisor: number;
     baseEmitRate: number;
     emitSpeedMultiplier: number;
+    offsetMagnitude: number;
+    alphaScaleDivisor: number;
     limits: {
       speedFactor: {
         min: number;
@@ -104,10 +106,12 @@ export const defaultBallEffectsParams: BallEffectsParams = {
   trail: {
     speedDivisor: 5,
     baseEmitRate: 50,
-    emitSpeedMultiplier: 15,
+    emitSpeedMultiplier: 20,
+    offsetMagnitude: 0.1,
+    alphaScaleDivisor: 4,
     limits: {
       speedFactor: {
-        min: 1.5,
+        min: 1.0,
         max: 4.0,
       },
     },

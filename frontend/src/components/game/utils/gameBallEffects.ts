@@ -13,7 +13,14 @@ import { createParticleTexture, updateMotionBlur } from '@game/utils';
 
 import { BallEffectsParams, defaultBallEffectsParams } from '@shared/types';
 
-export function createBallTrail(ballMesh: any, color: Color3, scene: Scene) {
+export function createBallTrail(
+  ballMesh: any,
+  color: Color3,
+  scene: Scene,
+  params: BallEffectsParams = defaultBallEffectsParams
+) {
+  const { particle } = params.trail;
+
   if (ballMesh.trailParticleSystem) ballMesh.trailParticleSystem.dispose();
 
   const particleSystem = new ParticleSystem('ballTrail', 500, scene);
@@ -21,27 +28,21 @@ export function createBallTrail(ballMesh: any, color: Color3, scene: Scene) {
   particleSystem.particleTexture = createParticleTexture(scene, color);
   particleSystem.emitter = ballMesh;
 
-  // Create a slightly bluer version for the "dead" color
-  const deadColorR = Math.max(0, color.r * 0.7);
-  const deadColorG = Math.max(0, color.g * 0.7);
-  const deadColorB = Math.min(1, color.b * 1.3);
-
   // Make the emission box slightly offset to follow behind the ball
   particleSystem.minEmitBox = new Vector3(-0.1, -0.1, -0.1);
   particleSystem.maxEmitBox = new Vector3(0.1, 0.1, 0.1);
 
   particleSystem.color1 = new Color4(color.r, color.g, color.b, 0.8);
   particleSystem.color2 = new Color4(color.r * 1.2, color.g * 1.2, color.b * 1.2, 0.9);
-  particleSystem.colorDead = new Color4(deadColorR, deadColorG, deadColorB, 0);
 
   // Base settings for the trail
-  particleSystem.minSize = 0.1;
-  particleSystem.maxSize = 0.5;
-  particleSystem.minLifeTime = 0.1;
-  particleSystem.maxLifeTime = 0.5;
-  particleSystem.emitRate = 100;
-  particleSystem.minEmitPower = 1;
-  particleSystem.maxEmitPower = 3;
+  particleSystem.minSize = particle.minSize;
+  particleSystem.maxSize = particle.maxSize;
+  particleSystem.minLifeTime = particle.minLifeTime;
+  particleSystem.maxLifeTime = particle.maxLifeTime;
+  particleSystem.emitRate = params.trail.baseEmitRate;
+  particleSystem.minEmitPower = particle.minEmitPower;
+  particleSystem.maxEmitPower = particle.maxEmitPower;
 
   particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
@@ -73,7 +74,7 @@ export function createSpinRing(ballMesh: any, color: Color3, scene: Scene) {
   const ringMaterial = new PBRMaterial('spinRingMaterial', scene);
 
   ringMaterial.emissiveColor = new Color3(color.r, color.g, color.b);
-  ringMaterial.albedoColor = new Color3(color.r, 0, 0);
+  ringMaterial.albedoColor = new Color3(0, 0, 0);
 
   // Create alpha texture for the fade effect
   const textureSize = 256;
@@ -84,16 +85,15 @@ export function createSpinRing(ballMesh: any, color: Color3, scene: Scene) {
 
   alphaTexture.update();
 
-  // Make material translucent
-  ringMaterial.alpha = 0.7;
-  ringMaterial.backFaceCulling = false;
-  ringMaterial.transparencyMode = 2;
-
+  // Material settings
   ringMaterial.metallic = 0.1;
   ringMaterial.roughness = 1.0;
+  ringMaterial.backFaceCulling = false;
   ringMaterial.environmentIntensity = 0.5;
-
   ringMaterial.opacityTexture = alphaTexture;
+  ringMaterial.transparencyMode = 2;
+  ringMaterial.alpha = 0.7;
+
   spinRing.material = ringMaterial;
   spinRing.parent = ballMesh;
   spinRing.visibility = 0;
@@ -110,14 +110,22 @@ export function applyBallTrail(
   scene: Scene,
   params: BallEffectsParams = defaultBallEffectsParams
 ) {
-  const { baseEmitRate, emitSpeedMultiplier, speedDivisor, limits, particle } = params.trail;
+  const {
+    baseEmitRate,
+    emitSpeedMultiplier,
+    alphaScaleDivisor,
+    offsetMagnitude,
+    speedDivisor,
+    limits,
+    particle,
+  } = params.trail;
 
   if (!ballMesh.trailParticleSystem) createBallTrail(ballMesh, color, scene);
 
   const particleSystem = ballMesh.trailParticleSystem;
 
   if (speed < 0.1) {
-    particleSystem.visibility = 0.1;
+    particleSystem.visibility = 0;
     return;
   }
 
@@ -132,17 +140,8 @@ export function applyBallTrail(
   particleSystem.direction2 = new Vector3(dirX * 0.8, dirY * 0.8, 0);
 
   // Adjust emission box to be offset in the opposite direction
-  const offsetMagnitude = 0.2 + (ballMesh.scaling.x - 1) * 0.5;
-  particleSystem.minEmitBox = new Vector3(
-    dirX * offsetMagnitude - 0.1,
-    dirY * offsetMagnitude - 0.1,
-    -0.1
-  );
-  particleSystem.maxEmitBox = new Vector3(
-    dirX * offsetMagnitude + 0.1,
-    dirY * offsetMagnitude + 0.1,
-    0.1
-  );
+  particleSystem.minEmitBox = new Vector3(dirX * offsetMagnitude, dirY * offsetMagnitude, 0);
+  particleSystem.maxEmitBox = new Vector3(dirX * offsetMagnitude, dirY * offsetMagnitude, 0);
 
   const speedFactor = Math.min(
     Math.max(speed / speedDivisor, limits.speedFactor.min),
@@ -158,18 +157,18 @@ export function applyBallTrail(
   particleSystem.maxEmitPower = particle.minEmitPower * speedFactor;
 
   // Adjust particle alpha channel based on speed
-  const alphaScale = Math.min(1, 0.6 + speed * 0.03);
+  const alphaScale = Math.min(1, speedFactor / alphaScaleDivisor);
   particleSystem.color1 = new Color4(
     particleSystem.color1.r,
     particleSystem.color1.g,
     particleSystem.color1.b,
-    0.8 * alphaScale
+    alphaScale
   );
   particleSystem.color2 = new Color4(
     particleSystem.color2.r,
     particleSystem.color2.g,
     particleSystem.color2.b,
-    0.9 * alphaScale
+    alphaScale
   );
 }
 
