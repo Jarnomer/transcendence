@@ -1,4 +1,90 @@
-import { Animation, Color3, GlowLayer, MeshBuilder, PBRMaterial, Scene, Texture } from 'babylonjs';
+import {
+  Vector3,
+  Animation,
+  Color3,
+  GlowLayer,
+  MeshBuilder,
+  PBRMaterial,
+  Scene,
+  Path3D,
+  Texture,
+} from 'babylonjs';
+
+export function createEdge(scene: Scene, color: Color3) {
+  const width = 40;
+  const radius = 0.15;
+  const numPoints = 90;
+  const points: Vector3[] = [];
+
+  // Create straight path initially
+  for (let i = 0; i < numPoints; i++) {
+    const x = (i / (numPoints - 1)) * width - width / 2;
+    points.push(new Vector3(x, 0, 0));
+  }
+
+  const pbr = new PBRMaterial('tubeMaterial', scene);
+  const path3d = new Path3D(points);
+  const tube = MeshBuilder.CreateTube(
+    'edge',
+    {
+      path: points,
+      radius: radius,
+      tessellation: 16,
+      updatable: true,
+    },
+    scene
+  );
+
+  // Set up neon material properties
+  pbr.albedoColor = color;
+  pbr.emissiveColor = new Color3(color.r * 1.8, color.g * 1.8, color.b * 1.8);
+  pbr.emissiveIntensity = 0.5;
+
+  // Make it look like glowing plasma/neon
+  pbr.metallic = 0.0;
+  pbr.roughness = 0.1;
+  pbr.environmentIntensity = 1.0;
+  pbr.subSurface.isRefractionEnabled = true;
+  pbr.subSurface.refractionIntensity = 0.8;
+  pbr.subSurface.indexOfRefraction = 1.5;
+  pbr.subSurface.isTranslucencyEnabled = true;
+  pbr.subSurface.translucencyIntensity = 1.0;
+
+  if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
+  tube.material = pbr;
+
+  const glowLayer = new GlowLayer(`tubeGlowLayer`, scene);
+  glowLayer.intensity = 0.5;
+  glowLayer.blurKernelSize = 64;
+  glowLayer.addIncludedOnlyMesh(tube);
+
+  const frameRate = 30;
+  const hoverAnimation = new Animation(
+    `tubeHoverAnimation`,
+    'position.z',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const keys = [];
+  keys.push({ frame: 0, value: 0.2 });
+  keys.push({ frame: frameRate, value: 0.5 });
+  keys.push({ frame: frameRate * 2, value: 0.2 });
+
+  hoverAnimation.setKeys(keys);
+  tube.animations = [hoverAnimation];
+  scene.beginAnimation(tube, 0, frameRate * 2, true);
+
+  // Save the original points for deformation
+  tube.metadata = {
+    originalPoints: [...points],
+    path3d: path3d,
+    points: points,
+  };
+
+  return tube;
+}
 
 export function createFloor(scene: Scene, color: Color3) {
   const pbr = new PBRMaterial('floorMaterial', scene);
@@ -21,7 +107,7 @@ export function createFloor(scene: Scene, color: Color3) {
   pbr.metallicTexture = new Texture(baseUrl + 'metallic.png', scene);
   pbr.ambientTexture = new Texture(baseUrl + 'ao.png', scene);
 
-  const multipleColor = 0.2;
+  const multipleColor = 0.25;
   const adjustedColor = new Color3(
     Math.max(multipleColor, color.r),
     Math.max(multipleColor, color.g),

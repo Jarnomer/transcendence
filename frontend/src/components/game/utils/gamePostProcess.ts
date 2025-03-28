@@ -119,7 +119,7 @@ export function setupSceneCamera(scene: Scene) {
     'camera',
     -Math.PI / 2, // horizontal rotation
     Math.PI / 2, // vertical rotation
-    24.5, // distance from floor
+    28, // distance from floor
     new Vector3(-0.2, 0.1, 0),
     scene
   );

@@ -17,7 +17,7 @@ export interface RetroEffectsLevels {
 export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 3,
   phosphor: 3,
-  curvature: 3,
+  curvature: 0,
   glitch: 3,
   colorBleed: 3,
   flicker: 3,
