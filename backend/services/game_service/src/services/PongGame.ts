@@ -1,5 +1,7 @@
 import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
 
+import { PowerUpManager } from './PowerUpManager';
+
 type PlayerMove = 'up' | 'down' | null;
 
 export default class PongGame {
@@ -17,8 +19,12 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
+  private powerUpManager: PowerUpManager;
+  private powerUps: any[] = [];
+
   constructor(mode: string, difficulty: string) {
     this.params = { ...defaultGameParams };
+    this.powerUpManager = new PowerUpManager(this);
     this.mode = mode;
     this.difficulty = difficulty;
     this.gameState = {
@@ -39,6 +45,7 @@ export default class PongGame {
         },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
+      powerUps: [],
     };
     this.gameStatus = 'loading';
     this.resetBall();
@@ -126,6 +133,10 @@ export default class PongGame {
     } else {
       return this.player2Id;
     }
+  }
+
+  setPowerUp(powerUp: any): void {
+    this.powerUps.push(powerUp);
   }
 
   setPlayerId(player: number, playerId: string): void {
@@ -409,6 +420,14 @@ export default class PongGame {
 
   setGameStatus(status: GameStatus): void {
     this.gameStatus = status;
+    if (status === 'playing') {
+      this.powerUpManager.startSpawning();
+    } else {
+      this.powerUpManager.stopSpawning();
+    }
+    if (status === 'finished') {
+      this.powerUps = [];
+    }
   }
 
   pauseGame(): void {

@@ -1,3 +1,5 @@
+import { GameParams, defaultGameParams } from '@shared/types';
+
 import PongGame from './PongGame';
 import { BiggerPaddlePowerUp } from './powerups/BiggerPaddlePowerUp';
 import { PowerUp } from './powerups/PowerUp';
@@ -10,14 +12,64 @@ export class PowerUpManager {
     BiggerPaddlePowerUp,
     SmallerPaddlePowerUp,
   ];
+  // private onPowerUpSpawn: (powerUp: any) => void; // Callback function
+  private spawnInterval: NodeJS.Timeout | null = null;
+  private isSpawning: boolean = false;
+  private params: GameParams;
 
   constructor(game: PongGame) {
     this.game = game;
+    this.params = defaultGameParams;
+  }
+
+  getPowerUps(): PowerUp[] {
+    return this.powerUps;
+  }
+
+  startSpawning() {
+    if (this.isSpawning) return;
+    this.isSpawning = true;
+    this.spawnInterval = setInterval(() => {
+      this.spawnPowerUp();
+    }, this.getRandomSpawnTime());
+  }
+
+  stopSpawning() {
+    this.isSpawning = false;
+    if (this.spawnInterval) {
+      clearInterval(this.spawnInterval);
+      this.spawnInterval = null;
+    }
+  }
+
+  private getRandomSpawnTime(): number {
+    return (
+      Math.random() * (this.params.powerUpMaxSpawnInterval - this.params.powerUpMinSpawnInterval) +
+      this.params.powerUpMinSpawnInterval
+    );
+  }
+
+  private getRandomPowerUpType(): string {
+    const types = ['bigger_paddle', 'smaller_paddle'];
+    return types[Math.floor(Math.random() * types.length)];
   }
 
   spawnPowerUp(): void {
-    const randomIndex = Math.floor(Math.random() * this.powerUpTypes.length);
-    const PowerUpClass = this.powerUpTypes[randomIndex];
+    if (!this.isSpawning) return;
+
+    const powerUpType = this.getRandomPowerUpType();
+    let PowerUpClass: new (x: number, y: number) => PowerUp;
+    switch (powerUpType) {
+      case 'bigger_paddle':
+        PowerUpClass = BiggerPaddlePowerUp;
+        break;
+      case 'smaller_paddle':
+        PowerUpClass = SmallerPaddlePowerUp;
+        break;
+      default:
+        console.error(`Unknown power-up type: ${powerUpType}`);
+        return;
+    }
 
     const x = Math.random() * this.game.getWidth();
     const y = Math.random() * this.game.getHeight();
