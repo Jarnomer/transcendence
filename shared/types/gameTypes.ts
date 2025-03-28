@@ -54,7 +54,7 @@ export const defaultGameParams: GameParams = {
 
   ballSize: 10,
   ballSpeed: 7,
-  minBallDX: 5,
+  minBallDX: 7,
   ballSpeedMultiplier: 1,
   maxBallSpeedMultiplier: 4,
   speedIncreaseFactor: 1.03, // Ball speed increase on paddle hit
@@ -62,8 +62,8 @@ export const defaultGameParams: GameParams = {
   maxSpin: 15,
   spinCurveFactor: 0.0015, // Affects ball trajectory
   spinBounceFactor: 0.3, // Affects ball.dx on a wall bounce
-  spinIntensityFactor: 0.8, // Player.dy * spinIntensity = spin change on paddle hit
-  spinReductionFactor: 0.7, // Spin reduction on static surfaces
+  spinIntensityFactor: 0.6, // Player.dy * spinIntensity = spin change on paddle hit
+  spinReductionFactor: 0.5, // Spin reduction on static surfaces
 
   maxScore: 3,
   countdown: 3, // Seconds

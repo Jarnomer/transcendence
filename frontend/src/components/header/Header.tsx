@@ -9,14 +9,16 @@ export const Header: React.FC = () => {
 
   if (location.pathname !== '/game') {
     return (
-      <header className={`header z-10 relative w-full flex justify-center items-center p-2 pb-7`}>
+      <header
+        className={`header z-10 relative w-full flex-col sm:flex justify-center items-center p-2 pb-7`}
+      >
         <h1 className="logo text-center md:absolute text-lg sm:text-lg md:text-xl lg:text-3xl text-primary">
           Super Pong 3D
         </h1>
         <div className="ml-auto pb-2">
           <HeaderNav />
         </div>
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full">
+        <div aria-hidden="true" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full">
           <svg className="w-full text-primary" viewBox="0 0 1438 29" fill="none">
             <defs>
               <clipPath id="header-bottomline">

@@ -79,6 +79,7 @@ export default class PongGame {
   }
 
   areAllPlayersReady(): boolean {
+    console.log('Checking if all players are ready, mode:', this.mode);
     if (this.mode === 'AIvsAI') {
       return true;
     } else if (
@@ -220,6 +221,7 @@ export default class PongGame {
   }
 
   startGameLoop(): void {
+    console.log('Starting game loop...');
     // Prevent multiple intervals
     if (this.updateInterval) return;
     this.updateInterval = setInterval(() => {

@@ -1,7 +1,7 @@
-import PongGame from '../PongGame';
-import { BiggerPaddlePowerUp } from './BiggerPaddlePowerUp';
-import { PowerUp } from './PowerUp';
-import { SmallerPaddlePowerUp } from './SmallerPaddlePowerUp';
+import PongGame from './PongGame';
+import { BiggerPaddlePowerUp } from './powerups/BiggerPaddlePowerUp';
+import { PowerUp } from './powerups/PowerUp';
+import { SmallerPaddlePowerUp } from './powerups/SmallerPaddlePowerUp';
 
 export class PowerUpManager {
   private game: PongGame;

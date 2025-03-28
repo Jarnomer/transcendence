@@ -35,24 +35,41 @@ export const HeaderNav: React.FC = () => {
   return (
     <>
       {user && user.display_name ? (
-        <div className="flex gap-3 items-center">
-          <NavIconButton id="nav-home-button" icon="home" onClick={() => navigate('/home')} />
+        <div className="flex gap-3 items-center" aria-label="Navigation menu">
+          <NavIconButton
+            id="nav-home-button"
+            aria-label="Home"
+            icon="home"
+            onClick={() => navigate('/home')}
+          />
           <NavIconButton
             id="nav-profile-button"
+            aria-label="Profile"
             icon="user"
             onClick={() => navigate(`/profile/${localStorage.getItem('userID')}`)}
           />
-          <NavIconButton id="nav-bell-button" icon="bell" onClick={() => toggleDropdown()} />
+          <NavIconButton
+            id="nav-bell-button"
+            aria-label="Notifications"
+            icon="bell"
+            onClick={() => toggleDropdown()}
+          />
           {isDropdownOpen ? (
             <div className="absolute right-0 top-10 glass-box p-2 opening">
               <Notifications></Notifications>
             </div>
           ) : null}
-          <NavIconButton id="nav-chat-button" icon="chat" onClick={() => navigate('/chat')} />
+          <NavIconButton
+            id="nav-chat-button"
+            aria-label="Chat"
+            icon="chat"
+            onClick={() => navigate('/chat')}
+          />
           <NavIconButton
             id="nav-settings-button"
+            aria-label="Settings"
             icon="settings"
-            onClick={handleSettingsClick} // Trigger settings modal
+            onClick={() => navigate('/settings')}
           />
           {user ? (
             <button

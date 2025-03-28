@@ -129,6 +129,7 @@ export const GameMenu: React.FC = () => {
 
   // Effect to navigate once both mode and difficulty are selected
   useEffect(() => {
+    if (selectedMode === 'tournament') navigate('/tournament');
     if (selectedMode && selectedDifficulty) {
       navigate('/game', {
         state: { mode: selectedMode, difficulty: selectedDifficulty, lobby: lobby },

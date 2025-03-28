@@ -42,9 +42,18 @@ export class GameManager {
     }
   }
 
+  removeClient(gameId: string, userId: string): void {
+    if (!this.sessions[gameId]) {
+      console.warn(`Tried to remove client from non-existent game ${gameId}`);
+      return;
+    }
+    this.sessions[gameId].removeClient(userId);
+  }
+
   addSpectator(gameId: string, userId: string, connection: any): void {
     if (!this.sessions[gameId]) {
       console.warn(`Tried to add spectator to non-existent game ${gameId}`);
+      console.log('Existing games:', Object.keys(this.sessions));
       connection.close();
       return;
     }

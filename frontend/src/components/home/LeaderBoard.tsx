@@ -76,7 +76,7 @@ export const LeaderBoard: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10"
+        className="h-full w-full relative glass-box mt-10 text-sm"
         variants={animationVariants}
         initial="hidden"
         animate="visible"
@@ -88,14 +88,14 @@ export const LeaderBoard: React.FC = () => {
         <div className="w-full h-full relative overflow-hidden">
           <BackgroundGlow></BackgroundGlow>
           <div className="w-full h-full p-10">
-            <div className="absolute bottom-0 h-full  px-20 opacity-30 right-0 w-auto pointer-events-none">
+            <div className="absolute bottom-0 h-full px-20 opacity-30 right-0 w-auto pointer-events-none">
               <img
                 className="object-contain h-full mix-blend-overlay"
                 src="./src/assets/images/king_of_the_hill.png"
               />
             </div>
-            <h1 className="font-heading text-3xl">Leaderboard</h1>
-            <div className="w-1/2">
+            <h1 className="font-heading text-2xl sm:text-3xl text-center w-full">Leaderboard</h1>
+            <div className="w-full md:w-1/2 flex items-center justify-center">
               <SearchBar
                 value={searchQuery}
                 onChange={handleSearchChange}
