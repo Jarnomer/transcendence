@@ -29,7 +29,7 @@ const BackgroundGameCanvas: React.FC<SimpleTestCanvasProps> = ({ isVisible }) =>
     const canvas = canvasRef.current;
     const engine = new Engine(canvas, true);
 
-    // Create scene with green background
+    // Create scene with blue background
     const scene = new Scene(engine);
     scene.clearColor = new Color4(0, 0, 1, 1);
 
@@ -51,7 +51,7 @@ const BackgroundGameCanvas: React.FC<SimpleTestCanvasProps> = ({ isVisible }) =>
     // Create red sphere
     const sphere = MeshBuilder.CreateSphere('sphere', { diameter: 2 }, scene);
     const material = new StandardMaterial('sphereMaterial', scene);
-    material.diffuseColor = new Color3(1, 0, 0); // Red
+    material.diffuseColor = new Color3(1, 0, 0);
     sphere.material = material;
 
     // Store references
@@ -60,7 +60,6 @@ const BackgroundGameCanvas: React.FC<SimpleTestCanvasProps> = ({ isVisible }) =>
 
     // Start render loop
     engine.runRenderLoop(() => {
-      console.log('rendering frame');
       scene.render();
     });
 
@@ -100,13 +99,6 @@ const BackgroundGameCanvas: React.FC<SimpleTestCanvasProps> = ({ isVisible }) =>
       style={{
         width: '100%',
         height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 0,
-        opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.5s ease-in-out',
-        pointerEvents: 'none',
       }}
     />
   );

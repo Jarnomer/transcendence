@@ -10,10 +10,15 @@ import {
   Texture,
 } from 'babylonjs';
 
-export function createEdge(scene: Scene, color: Color3) {
-  const width = 40;
-  const radius = 0.15;
-  const numPoints = 90;
+import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
+
+export function createEdge(
+  scene: Scene,
+  color: Color3,
+  params: GameObjectParams = defaultGameObjectParams
+) {
+  const width = params.edge.width;
+  const numPoints = params.edge.numPoints;
   const points: Vector3[] = [];
 
   // Create straight path initially
@@ -22,45 +27,49 @@ export function createEdge(scene: Scene, color: Color3) {
     points.push(new Vector3(x, 0, 0));
   }
 
-  const pbr = new PBRMaterial('tubeMaterial', scene);
+  const pbr = new PBRMaterial('edgeMaterial', scene);
   const path3d = new Path3D(points);
   const tube = MeshBuilder.CreateTube(
     'edge',
     {
       path: points,
-      radius: radius,
-      tessellation: 16,
+      radius: params.edge.radius,
+      tessellation: params.edge.tessellation,
       updatable: true,
     },
     scene
   );
 
-  // Set up neon material properties
   pbr.albedoColor = color;
-  pbr.emissiveColor = new Color3(color.r * 1.8, color.g * 1.8, color.b * 1.8);
-  pbr.emissiveIntensity = 0.5;
+  pbr.emissiveColor = new Color3(
+    color.r * params.edge.emissiveColorMultiplier,
+    color.g * params.edge.emissiveColorMultiplier,
+    color.b * params.edge.emissiveColorMultiplier
+  );
+  pbr.emissiveIntensity = params.edge.emissiveIntensity;
+  pbr.environmentIntensity = params.edge.environmentIntensity;
 
-  // Make it look like glowing plasma/neon
-  pbr.metallic = 0.0;
-  pbr.roughness = 0.1;
-  pbr.environmentIntensity = 1.0;
+  pbr.metallic = params.edge.materialMetallic;
+  pbr.roughness = params.edge.materialRoughness;
+
   pbr.subSurface.isRefractionEnabled = true;
-  pbr.subSurface.refractionIntensity = 0.8;
-  pbr.subSurface.indexOfRefraction = 1.5;
+  pbr.subSurface.refractionIntensity = params.edge.refractionIntensity;
+  pbr.subSurface.indexOfRefraction = params.edge.indexOfRefraction;
   pbr.subSurface.isTranslucencyEnabled = true;
-  pbr.subSurface.translucencyIntensity = 1.0;
+  pbr.subSurface.translucencyIntensity = params.edge.translucencyIntensity;
 
   if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
+
   tube.material = pbr;
 
-  const glowLayer = new GlowLayer(`tubeGlowLayer`, scene);
-  glowLayer.intensity = 0.5;
-  glowLayer.blurKernelSize = 64;
+  const glowLayer = new GlowLayer(`edgeGlowLayer`, scene);
+  glowLayer.intensity = params.edge.glowLayerIntensity;
+  glowLayer.blurKernelSize = params.edge.glowLayerBlurKernelSize;
   glowLayer.addIncludedOnlyMesh(tube);
 
   const frameRate = 30;
   const hoverAnimation = new Animation(
-    `tubeHoverAnimation`,
+    `edgeHoverAnimation`,
     'position.z',
     frameRate,
     Animation.ANIMATIONTYPE_FLOAT,
@@ -68,9 +77,9 @@ export function createEdge(scene: Scene, color: Color3) {
   );
 
   const keys = [];
-  keys.push({ frame: 0, value: 0.2 });
-  keys.push({ frame: frameRate, value: 0.5 });
-  keys.push({ frame: frameRate * 2, value: 0.2 });
+  keys.push({ frame: 0, value: params.edge.animation.bottomValue });
+  keys.push({ frame: frameRate, value: params.edge.animation.topValue });
+  keys.push({ frame: frameRate * 2, value: params.edge.animation.bottomValue });
 
   hoverAnimation.setKeys(keys);
   tube.animations = [hoverAnimation];
@@ -86,19 +95,23 @@ export function createEdge(scene: Scene, color: Color3) {
   return tube;
 }
 
-export function createFloor(scene: Scene, color: Color3) {
+export function createFloor(
+  scene: Scene,
+  color: Color3,
+  params: GameObjectParams = defaultGameObjectParams
+) {
   const pbr = new PBRMaterial('floorMaterial', scene);
   const floor = MeshBuilder.CreateBox(
     'floor',
     {
-      width: 60,
-      depth: 30,
+      width: params.floor.width,
+      depth: params.floor.depth,
     },
     scene
   );
 
   // Position and rotate the floor
-  floor.position.z = 1.2;
+  floor.position.z = params.floor.positionZ;
   floor.rotation.x = Math.PI / 2;
 
   const baseUrl = '/floor-metal/';
@@ -107,7 +120,7 @@ export function createFloor(scene: Scene, color: Color3) {
   pbr.metallicTexture = new Texture(baseUrl + 'metallic.png', scene);
   pbr.ambientTexture = new Texture(baseUrl + 'ao.png', scene);
 
-  const multipleColor = 0.25;
+  const multipleColor = params.floor.colorMultiplier;
   const adjustedColor = new Color3(
     Math.max(multipleColor, color.r),
     Math.max(multipleColor, color.g),
@@ -115,25 +128,34 @@ export function createFloor(scene: Scene, color: Color3) {
   );
   pbr.albedoColor = adjustedColor;
 
-  pbr.emissiveColor = new Color3(color.r * 0.1, color.g * 0.1, color.b * 0.1);
-  pbr.reflectivityColor = new Color3(0.8, 0.8, 0.8);
+  pbr.emissiveColor = new Color3(
+    color.r * params.floor.emissiveColorMultiplier,
+    color.g * params.floor.emissiveColorMultiplier,
+    color.b * params.floor.emissiveColorMultiplier
+  );
 
-  pbr.metallic = 0.8;
-  pbr.roughness = 0.2;
-  pbr.microSurface = 0.9;
-  pbr.environmentIntensity = 1.5;
+  pbr.reflectivityColor = new Color3(
+    params.floor.reflectivityColor.r,
+    params.floor.reflectivityColor.g,
+    params.floor.reflectivityColor.b
+  );
+
+  pbr.metallic = params.floor.metallic;
+  pbr.roughness = params.floor.roughness;
+  pbr.microSurface = params.floor.microSurface;
+  pbr.environmentIntensity = params.floor.environmentIntensity;
 
   pbr.useParallax = true;
   pbr.useParallaxOcclusion = true;
-  pbr.parallaxScaleBias = 0.3;
-  pbr.ambientTextureStrength = 3.0;
+  pbr.parallaxScaleBias = params.floor.parallaxScaleBias;
+  pbr.ambientTextureStrength = params.floor.ambientTextureStrength;
 
   pbr.clearCoat.isEnabled = true;
-  pbr.clearCoat.intensity = 0.5;
-  pbr.clearCoat.roughness = 0.1;
+  pbr.clearCoat.intensity = params.floor.clearCoat.intensity;
+  pbr.clearCoat.roughness = params.floor.clearCoat.roughness;
 
-  pbr.albedoTexture.anisotropicFilteringLevel = 16;
-  pbr.bumpTexture.anisotropicFilteringLevel = 16;
+  pbr.albedoTexture.anisotropicFilteringLevel = params.floor.textureAnisotropicLevel;
+  pbr.bumpTexture.anisotropicFilteringLevel = params.floor.textureAnisotropicLevel;
 
   if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
 
@@ -143,44 +165,54 @@ export function createFloor(scene: Scene, color: Color3) {
   return floor;
 }
 
-export function createPaddle(scene: Scene, color: Color3) {
-  const pbr = new PBRMaterial('ballMaterial', scene);
+export function createPaddle(
+  scene: Scene,
+  color: Color3,
+  params: GameObjectParams = defaultGameObjectParams
+) {
+  const pbr = new PBRMaterial('paddleMaterial', scene);
   const paddle = MeshBuilder.CreateBox(
     'paddle',
     {
-      height: 4.0,
-      width: 0.5,
-      depth: 0.7,
+      height: params.paddle.height,
+      width: params.paddle.width,
+      depth: params.paddle.depth,
     },
     scene
   );
 
   pbr.albedoColor = color;
-  pbr.emissiveColor = new Color3(color.r * 0.8, color.g * 0.8, color.b * 0.8);
-  pbr.emissiveIntensity = 1.0;
+  pbr.emissiveColor = new Color3(
+    color.r * params.paddle.emissiveColorMultiplier,
+    color.g * params.paddle.emissiveColorMultiplier,
+    color.b * params.paddle.emissiveColorMultiplier
+  );
+  pbr.emissiveIntensity = params.paddle.emissiveIntensity;
+  pbr.environmentIntensity = params.paddle.environmentIntensity;
 
-  pbr.metallic = 0.6;
-  pbr.roughness = 0.2;
-  pbr.environmentIntensity = 0.8;
+  pbr.metallic = params.paddle.materialMetallic;
+  pbr.roughness = params.paddle.materialRoughness;
+
   pbr.subSurface.isRefractionEnabled = true;
-  pbr.subSurface.refractionIntensity = 0.5;
-  pbr.subSurface.indexOfRefraction = 1.5;
   pbr.subSurface.isTranslucencyEnabled = true;
-  pbr.subSurface.translucencyIntensity = 1.0;
   pbr.useSpecularOverAlpha = true;
+
+  pbr.subSurface.refractionIntensity = params.paddle.refractionIntensity;
+  pbr.subSurface.indexOfRefraction = params.paddle.indexOfRefraction;
+  pbr.subSurface.translucencyIntensity = params.ball.translucencyIntensity;
 
   if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
 
   paddle.material = pbr;
 
-  const glowLayer = new GlowLayer('glowLayer', scene);
-  glowLayer.intensity = 0.2;
-  glowLayer.blurKernelSize = 32;
+  const glowLayer = new GlowLayer('paddleGlowLayer', scene);
+  glowLayer.intensity = params.paddle.glowLayerIntensity;
+  glowLayer.blurKernelSize = params.paddle.glowLayerBlurKernelSize;
   glowLayer.addIncludedOnlyMesh(paddle);
 
   const frameRate = 30;
   const hoverAnimation = new Animation(
-    'hoverAnimation',
+    'paddleHoverAnimation',
     'position.z',
     frameRate,
     Animation.ANIMATIONTYPE_FLOAT,
@@ -188,9 +220,9 @@ export function createPaddle(scene: Scene, color: Color3) {
   );
 
   const keys = [];
-  keys.push({ frame: 0, value: 0.2 });
-  keys.push({ frame: frameRate, value: 0.5 });
-  keys.push({ frame: frameRate * 2, value: 0.2 });
+  keys.push({ frame: 0, value: params.paddle.animation.bottomValue });
+  keys.push({ frame: frameRate, value: params.paddle.animation.topValue });
+  keys.push({ frame: frameRate * 2, value: params.paddle.animation.bottomValue });
 
   hoverAnimation.setKeys(keys);
   paddle.animations = [hoverAnimation];
@@ -199,38 +231,49 @@ export function createPaddle(scene: Scene, color: Color3) {
   return paddle;
 }
 
-export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) {
+export function createBall(
+  scene: Scene,
+  color: Color3,
+  params: GameObjectParams = defaultGameObjectParams
+) {
   const pbr = new PBRMaterial('ballMaterial', scene);
   const ball = MeshBuilder.CreateSphere(
     'ball',
     {
-      diameter: diameter,
-      segments: 32,
+      diameter: params.ball.diameter,
+      segments: params.ball.segments,
     },
     scene
   );
 
   pbr.albedoColor = color;
-  pbr.emissiveColor = new Color3(color.r * 1.2, color.g * 1.2, color.b * 1.2);
-  pbr.emissiveIntensity = 2.0;
+  pbr.emissiveColor = new Color3(
+    color.r * params.ball.emissiveColorMultiplier,
+    color.g * params.ball.emissiveColorMultiplier,
+    color.b * params.ball.emissiveColorMultiplier
+  );
 
-  pbr.metallic = 0.1;
-  pbr.roughness = 1.0;
-  pbr.environmentIntensity = 1.2;
+  pbr.emissiveIntensity = params.ball.emissiveIntensity;
+  pbr.environmentIntensity = params.ball.environmentIntensity;
+
+  pbr.metallic = params.ball.materialMetallic;
+  pbr.roughness = params.ball.materialRoughness;
+
   pbr.subSurface.isRefractionEnabled = true;
-  pbr.subSurface.refractionIntensity = 0.5;
-  pbr.subSurface.indexOfRefraction = 1.5;
   pbr.subSurface.isTranslucencyEnabled = true;
-  pbr.subSurface.translucencyIntensity = 1.0;
   pbr.useSpecularOverAlpha = true;
+
+  pbr.subSurface.refractionIntensity = params.ball.refractionIntensity;
+  pbr.subSurface.indexOfRefraction = params.ball.indexOfRefraction;
+  pbr.subSurface.translucencyIntensity = params.ball.translucencyIntensity;
 
   if (scene.environmentTexture) pbr.reflectionTexture = scene.environmentTexture;
 
   ball.material = pbr;
 
-  const glowLayer = new GlowLayer('glowLayer', scene);
-  glowLayer.intensity = 0.3;
-  glowLayer.blurKernelSize = 64;
+  const glowLayer = new GlowLayer('ballGlowLayer', scene);
+  glowLayer.intensity = params.ball.glowLayerIntensity;
+  glowLayer.blurKernelSize = params.ball.glowLayerBlurKernelSize;
   glowLayer.addIncludedOnlyMesh(ball);
 
   const frameRate = 30;
@@ -243,12 +286,15 @@ export function createBall(scene: Scene, color: Color3, diameter: number = 0.8) 
   );
 
   const keys = [];
-  keys.push({ frame: 0, value: 0.3 });
-  keys.push({ frame: frameRate, value: 0.8 });
-  keys.push({ frame: frameRate * 2, value: 0.3 });
+
+  keys.push({ frame: 0, value: params.ball.animation.bottomValue });
+  keys.push({ frame: frameRate, value: params.ball.animation.topValue });
+  keys.push({ frame: frameRate * 2, value: params.ball.animation.bottomValue });
 
   hoverAnimation.setKeys(keys);
+
   ball.animations = [hoverAnimation];
+
   scene.beginAnimation(ball, 0, frameRate * 2, true);
 
   return ball;

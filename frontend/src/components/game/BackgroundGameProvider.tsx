@@ -119,17 +119,12 @@ const BackgroundGameProvider: React.FC = () => {
     <div
       className="background-game-container"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
+        position: 'absolute',
         width: '100vw',
         height: '100vh',
-        zIndex: 0, // Try a higher z-index
-        pointerEvents: 'none',
-        backgroundColor: 'green', // Debug color
       }}
     >
-      <BackgroundGameCanvas isVisible={true} /> {/* Force visibility */}
+      <BackgroundGameCanvas isVisible={isVisible} />
     </div>
   );
 };

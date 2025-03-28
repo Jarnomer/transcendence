@@ -32,10 +32,6 @@ const App: React.FC = () => {
       <BackgroundGameProvider />
 
       <ModalProvider>
-        {/* <div */}
-        {/*   id="app-container" */}
-        {/*   className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2`} */}
-        {/* > */}
         <div
           id="app-container"
           className={`flex flex-col relative items-center min-h-screen w-screen text-primary p-2`}
