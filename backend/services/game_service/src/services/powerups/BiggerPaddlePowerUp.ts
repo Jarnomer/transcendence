@@ -1,5 +1,5 @@
-import PongGame from '../services/PongGame';
 import { PowerUp } from './PowerUp';
+import PongGame from '../PongGame';
 
 export class BiggerPaddlePowerUp extends PowerUp {
   applyEffect(game: PongGame, player: number): void {
@@ -8,6 +8,8 @@ export class BiggerPaddlePowerUp extends PowerUp {
     } else {
       game.setPaddleHeight(2, game.getPaddleHeight(2) + 10);
     }
+    this.active = true;
+    this.affectedPlayer = player;
     setTimeout(() => this.removeEffect(game, player), this.duration);
   }
 

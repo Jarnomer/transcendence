@@ -15,11 +15,12 @@ export interface Ball {
 }
 
 export interface PowerUp {
+  id: number;
   x: number;
   y: number;
-  active: boolean;
+  collected: boolean;
   affectedPlayer: number;
-  type: 'bigger_paddle' | 'smaller_paddle' | 'extra_point';
+  type: 'bigger_paddle' | 'smaller_paddle';
 }
 
 export interface GameState {
@@ -85,7 +86,7 @@ export const defaultGameParams: GameParams = {
   powerUpMinSpawnInterval: 5000, // Milliseconds
   powerUpMaxSpawnInterval: 10000, // Milliseconds
   powerUpDuration: 5000, // Milliseconds
-  powerUpSize: 20,
+  powerUpSize: 50,
 };
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';

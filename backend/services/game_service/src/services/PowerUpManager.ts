@@ -1,3 +1,5 @@
+import { Index } from '@sinclair/typebox';
+
 import { GameParams, defaultGameParams } from '@shared/types';
 
 import PongGame from './PongGame';
@@ -8,11 +10,6 @@ import { SmallerPaddlePowerUp } from './powerups/SmallerPaddlePowerUp';
 export class PowerUpManager {
   private game: PongGame;
   private powerUps: PowerUp[] = [];
-  private powerUpTypes: (new (x: number, y: number) => PowerUp)[] = [
-    BiggerPaddlePowerUp,
-    SmallerPaddlePowerUp,
-  ];
-  // private onPowerUpSpawn: (powerUp: any) => void; // Callback function
   private spawnInterval: NodeJS.Timeout | null = null;
   private isSpawning: boolean = false;
   private params: GameParams;
@@ -58,7 +55,14 @@ export class PowerUpManager {
     if (!this.isSpawning) return;
 
     const powerUpType = this.getRandomPowerUpType();
-    let PowerUpClass: new (x: number, y: number) => PowerUp;
+
+    let id = this.powerUps.length;
+    // Ensure the ID is unique
+    while (this.powerUps.some((powerUp) => powerUp.id === id)) {
+      id++;
+    }
+
+    let PowerUpClass: new (id: number, x: number, y: number) => PowerUp;
     switch (powerUpType) {
       case 'bigger_paddle':
         PowerUpClass = BiggerPaddlePowerUp;
@@ -71,20 +75,39 @@ export class PowerUpManager {
         return;
     }
 
-    const x = Math.random() * this.game.getWidth();
+    // Don't spawn too close to the paddles
+    const minX = this.game.getWidth() * 0.2;
+    const maxX = this.game.getWidth() * 0.8;
+    const x = Math.random() * (maxX - minX) + minX;
     const y = Math.random() * this.game.getHeight();
 
-    const powerUp = new PowerUpClass(x, y);
+    const powerUp = new PowerUpClass(id, x, y);
     this.powerUps.push(powerUp);
+    this.game.spawnPowerUp(id, x, y, false, 0, powerUpType); // Add the power-up to the game state
   }
 
   checkCollision(): void {
     const { ball } = this.game.getGameState();
-    this.powerUps.forEach((powerUp, index) => {
-      if (Math.abs(ball.x - powerUp.x) < 10 && Math.abs(ball.y - powerUp.y) < 10) {
-        powerUp.applyEffect(this.game, ball.dx > 0 ? 1 : 2);
-        this.powerUps.splice(index, 1);
+    for (const powerUp of this.powerUps) {
+      if (
+        powerUp.active &&
+        ball.x < powerUp.x + this.params.powerUpSize &&
+        ball.x + this.params.ballSize > powerUp.x &&
+        ball.y < powerUp.y + this.params.powerUpSize &&
+        ball.y + this.params.ballSize > powerUp.y
+      ) {
+        powerUp.applyEffect(this.game, powerUp.affectedPlayer);
+        this.game.collectPowerUp(powerUp.id, powerUp.affectedPlayer);
       }
-    });
+    }
+  }
+
+  removeExpiredPowerUps(): void {
+    for (const powerUp of this.powerUps) {
+      if (powerUp.isExpired()) {
+        this.game.removePowerUp(powerUp.id);
+        this.powerUps.filter((p) => p.id !== powerUp.id);
+      }
+    }
   }
 }

@@ -1,3 +1,5 @@
+import { Any } from '@sinclair/typebox';
+
 import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
@@ -20,7 +22,6 @@ export default class PongGame {
   private readyState = new Map<string, boolean>();
 
   private powerUpManager: PowerUpManager;
-  private powerUps: any[] = [];
 
   constructor(mode: string, difficulty: string) {
     this.params = { ...defaultGameParams };
@@ -135,8 +136,39 @@ export default class PongGame {
     }
   }
 
-  setPowerUp(powerUp: any): void {
-    this.powerUps.push(powerUp);
+  spawnPowerUp(
+    id: number,
+    x: number,
+    y: number,
+    collected: boolean,
+    affectedPlayer: number,
+    type: 'bigger_paddle' | 'smaller_paddle'
+  ): void {
+    this.gameState.powerUps.push({
+      id,
+      x,
+      y,
+      collected,
+      affectedPlayer,
+      type: type,
+    });
+    console.log(`Power-up spawned: ${id}, Type: ${type}, Position: (${x}, ${y})`);
+  }
+
+  collectPowerUp(id: number, player: number): void {
+    const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
+    if (powerUp) {
+      powerUp.collected = true;
+      powerUp.affectedPlayer = player;
+      console.log(
+        `Power-up ${id} collected by player ${player}. Type: ${powerUp.type}, Affected Player: ${powerUp.affectedPlayer}`
+      );
+    }
+  }
+
+  removePowerUp(id: number): void {
+    this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
+    console.log(`Power-up ${id} removed.`);
   }
 
   setPlayerId(player: number, playerId: string): void {
@@ -426,7 +458,7 @@ export default class PongGame {
       this.powerUpManager.stopSpawning();
     }
     if (status === 'finished') {
-      this.powerUps = [];
+      this.gameState.powerUps = [];
     }
   }
 
