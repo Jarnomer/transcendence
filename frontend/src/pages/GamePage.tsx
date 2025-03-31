@@ -64,7 +64,10 @@ export const GamePage: React.FC = () => {
   // TODO: Pause - Resume
 
   return (
-    <div id="game-page" className="w-full p-10 pt-0 flex flex-col overflow-hidden">
+    <div
+      id="game-page"
+      className="w-full h-full p-15 pt-0 flex flex-col flex-grow items-center justify-center overflow-hidden"
+    >
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}

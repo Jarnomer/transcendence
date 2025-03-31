@@ -24,7 +24,7 @@ export const TabWithBoxes: React.FC = () => {
         className="flex flex-wrap gap-2 justify-center"
       >
         {Array.from({ length: 10 }).map((_, index) => (
-          <li key={index}>
+          <li key={index} className="w-[200px] h-[200px]">
             <BoxDiv index={index} />
           </li>
         ))}

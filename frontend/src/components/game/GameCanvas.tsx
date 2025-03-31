@@ -20,18 +20,19 @@ import {
   setupScenelights,
 } from '@game/utils';
 
-import { GameState } from '@shared/types';
+import {
+  GameState,
+  RetroEffectsLevels,
+  defaultRetroEffectsLevels,
+  defaultGameParams,
+} from '@shared/types';
 
 interface GameCanvasProps {
   gameState: GameState;
   theme?: 'light' | 'dark';
+  retroPreset?: 'default' | 'cinematic';
+  retroLevels?: RetroEffectsLevels;
 }
-
-// Fixed values for positions
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 400;
-const SCALE_FACTOR = 20;
-const FIX_POSITION = 2;
 
 // Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
@@ -82,7 +83,12 @@ const detectScore = (
   }
 };
 
-const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) => {
+const GameCanvas: React.FC<GameCanvasProps> = ({
+  gameState,
+  theme = 'dark',
+  retroPreset = 'default',
+  retroLevels = defaultRetroEffectsLevels,
+}) => {
   const [lastTheme, setLastTheme] = useState(theme);
 
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
@@ -100,7 +106,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
-
+  const retroLevelsRef = useRef<RetroEffectsLevels>(retroLevels);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
 
   const floorRef = useRef<any>(null);
@@ -108,7 +114,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
 
-  // Initial render setup
+  const width = defaultGameParams.gameWidth;
+  const height = defaultGameParams.gameHeight;
+  const scaleFactor = 20;
+
+  // initial render setup
   useEffect(() => {
     if (!canvasRef.current || !gameState) return;
 
@@ -140,9 +150,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     engineRef.current = engine;
     sceneRef.current = scene;
+    cameraRef.current = camera;
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
-    cameraRef.current = camera;
 
     // Set paddle positions
     player1Ref.current.position.x = -20;
@@ -150,17 +160,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
 
     setLastTheme(theme); // Save current theme
 
-    const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
-    sparkEffectsRef.current = sparkCleanUp;
-
-    const retroEffects = createPongRetroEffects(scene, camera, 'default');
-    retroEffectsRef.current = retroEffects;
-
-    setTimeout(() => {
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOn(1800).then(() => {});
-      }
-    }, 100);
+    sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
+    retroEffectsRef.current = createPongRetroEffects(scene, camera, retroPreset, retroLevels);
+    retroLevelsRef.current = retroLevels;
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -181,6 +183,24 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     };
   }, []);
 
+  // Update effect levels
+  useEffect(() => {
+    if (!retroEffectsRef.current) return;
+
+    try {
+      if (retroLevels !== retroLevelsRef.current) {
+        retroEffectsRef.current.updateLevels(retroLevels);
+        retroLevelsRef.current = retroLevels;
+      }
+
+      if (retroPreset === 'cinematic' || retroPreset === 'default') {
+        retroEffectsRef.current.applyPreset(retroPreset);
+      }
+    } catch (error) {
+      console.error('Error updating retro effects:', error);
+    }
+  }, [retroLevels, retroPreset]);
+
   // Update game objects
   useEffect(() => {
     if (!canvasRef.current || !themeColors.current) return;
@@ -189,10 +209,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameState, theme = 'dark' }) =>
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
-    const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
+    const player1Y = -((players.player1.y - height / 2) / scaleFactor) - 2;
+    const player2Y = -((players.player2.y - height / 2) / scaleFactor) - 2;
+    const ballY = -((ball.y - height / 2) / scaleFactor);
+    const ballX = (ball.x - width / 2) / scaleFactor;
 
     // Update mesh positions directly
     player1Ref.current.position.y = player1Y;

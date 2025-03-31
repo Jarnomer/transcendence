@@ -8,7 +8,7 @@ export class GameManager {
 
   constructor() {
     this.sessions = {};
-    this.createBackgroundGame();
+    //this.createBackgroundGame();
   }
 
   static getInstance(): GameManager {
@@ -40,6 +40,14 @@ export class GameManager {
     } else {
       this.sessions[gameId].addClient(userId, connection);
     }
+  }
+
+  removeClient(gameId: string, userId: string): void {
+    if (!this.sessions[gameId]) {
+      console.warn(`Tried to remove client from non-existent game ${gameId}`);
+      return;
+    }
+    this.sessions[gameId].removeClient(userId);
   }
 
   addSpectator(gameId: string, userId: string, connection: any): void {

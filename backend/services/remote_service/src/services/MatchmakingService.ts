@@ -1,11 +1,11 @@
-import * as WebSocket from '@fastify/websocket';
+import { WebSocket } from '@fastify/websocket';
 
 import { GameService } from '@my-backend/matchmaking_service/src/services/GameService';
 import { QueueService } from '@my-backend/matchmaking_service/src/services/QueueService';
 
 type Player = {
   user_id: string;
-  socket: WebSocket.WebSocket;
+  socket: WebSocket;
   elo: number;
   joinedAt: Date;
 };
@@ -227,7 +227,7 @@ export class MatchmakingService {
   public gameService: GameService;
   private static instance: MatchmakingService;
   private matchmakers: { [mode: string]: MatchmakingMode } = {};
-  private clients: Map<string, WebSocket.WebSocket> = new Map();
+  private clients: Map<string, WebSocket> = new Map();
 
   constructor(queueService: QueueService, gameService: GameService) {
     this.queueService = queueService;
@@ -280,7 +280,7 @@ export class MatchmakingService {
   /**
    * Websocket connections handling
    */
-  addClient(user_id: string, ws: WebSocket.WebSocket) {
+  addClient(user_id: string, ws: WebSocket) {
     console.log(`Adding client: ${user_id}`);
     this.clients.set(user_id, ws);
   }

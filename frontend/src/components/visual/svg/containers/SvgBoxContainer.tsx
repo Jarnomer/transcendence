@@ -9,19 +9,21 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export const BoxDiv: React.FC = ({ index }) => {
+export const BoxDiv: React.FC<{ index: number; children: React.ReactNode }> = ({
+  index,
+  children,
+}) => {
   const [showGlitch, setShowGlitch] = useState(true);
 
   return (
-    <motion.div className="overflow-hidden w-[200px] h-[200px] relative" variants={itemVariants}>
+    <motion.div className="overflow-hidden w-full h-full relative" variants={itemVariants}>
       <BackgroundGlow></BackgroundGlow>
       <motion.svg
         className="absolute top-0 left-0 w-full h-full"
-        width="194"
-        height="193"
         viewBox="0 0 194 193"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
       >
         <motion.path
           fillRule="evenodd"
@@ -87,6 +89,7 @@ export const BoxDiv: React.FC = ({ index }) => {
           fill=" currentColor"
         />
       </motion.svg>
+      <div className="h-full w-full">{children}</div>
     </motion.div>
   );
 };

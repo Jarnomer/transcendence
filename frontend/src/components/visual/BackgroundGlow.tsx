@@ -2,7 +2,7 @@ import React from 'react';
 
 export const BackgroundGlow: React.FC = () => {
   return (
-    <div className="parent pointer-events-none">
+    <div aria-hidden="true" className="parent pointer-events-none">
       <div className="">
         <div id="">
           <div className="">

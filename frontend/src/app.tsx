@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import BackgroundGameProvider from '@game/BackgroundGameProvider';
+
 import { Footer } from './components/footer/Footer.tsx';
 import { Header } from './components/header/Header.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
@@ -26,10 +28,13 @@ const App: React.FC = () => {
 
   return (
     <WebSocketProvider>
+      {/* Background game provider */}
+      <BackgroundGameProvider />
+
       <ModalProvider>
         <div
           id="app-container"
-          className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2  `}
+          className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2`}
         >
           <Header />
           <div

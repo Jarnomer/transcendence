@@ -60,16 +60,25 @@ CREATE TABLE  IF NOT EXISTS friends (
   PRIMARY KEY (user_id, friend_id)
 );
 
-
-
 -- Chat Rooms Table (public, private, global)
 CREATE TABLE IF NOT EXISTS chat_rooms (
     chat_room_id TEXT PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
-    type TEXT CHECK(type IN ('public', 'private', 'global')) NOT NULL,
-    password_hash TEXT NULL, -- NULL for public, hashed password for private
+    type TEXT  NOT NULL, -- e.g., "public", "private", "global" "tournament id"
+    created_by TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS room_members (
+  chat_room_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  role TEXT CHECK (role IN ('admin', 'member')) DEFAULT 'member',
+  joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(chat_room_id),
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
+  PRIMARY KEY (chat_room_id, user_id)
+);
+
 
 -- Direct Messages Table (1-on-1 chat)
 CREATE TABLE IF NOT EXISTS direct_messages (
@@ -78,19 +87,19 @@ CREATE TABLE IF NOT EXISTS direct_messages (
     receiver_id TEXT NOT NULL,
     message TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender_id) REFERENCES users(id),
-    FOREIGN KEY (receiver_id) REFERENCES users(id)
+    FOREIGN KEY (sender_id) REFERENCES users(user_id),
+    FOREIGN KEY (receiver_id) REFERENCES users(user_id)
 );
 
 -- Chat Messages Table (storing messages for rooms)
 CREATE TABLE IF NOT EXISTS chat_messages (
     chat_messages_id TEXT PRIMARY KEY,
-    room_id TEXT NOT NULL,
+    chat_room_id TEXT NOT NULL,
     sender_id TEXT NOT NULL,
     message TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (room_id) REFERENCES chat_rooms(id),
-    FOREIGN KEY (sender_id) REFERENCES users(id)
+    FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(chat_room_id),
+    FOREIGN KEY (sender_id) REFERENCES users(user_id)
 );
 
 -- Message Reactions Table (emoji reactions)
@@ -100,13 +109,13 @@ CREATE TABLE IF NOT EXISTS message_reactions (
     user_id TEXT NOT NULL,
     reaction TEXT NOT NULL, -- e.g., "👍", "🔥"
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (message_id) REFERENCES chat_messages(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (message_id) REFERENCES chat_messages(chat_messages_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Indexing for Fast Querying
-CREATE INDEX idx_chat_messages_room ON chat_messages(room_id);
-CREATE INDEX idx_direct_messages_users ON direct_messages(sender_id, receiver_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_room ON chat_messages(chat_room_id);
+CREATE INDEX IF NOT EXISTS idx_direct_messages_users ON direct_messages(sender_id, receiver_id);
 
 -- CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(content, content='messages', content_rowid='id');
 

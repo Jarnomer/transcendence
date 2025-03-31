@@ -50,7 +50,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch((err) => {
         console.error('Failed to fetch user data', err);
         setUser(null);
-        window.location.href = '/login';
       });
   }, []);
 
@@ -71,7 +70,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('token');
       localStorage.removeItem('userID');
       localStorage.removeItem('username');
-      window.location.href = '/login';
       setUser(null);
     }
   };

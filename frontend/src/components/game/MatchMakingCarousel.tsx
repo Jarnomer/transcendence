@@ -110,7 +110,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
       {!opponentFound ? (
         <h2 className="w-full text-center font-heading text-3xl m-2">Looking for an opponent</h2>
       ) : null}
-      <div className="flex h-full relative justify-center items-center gap-5">
+      <div className="flex w-full relative justify-center items-center gap-5">
         {/* PLAYER CARD */}
         <div
           id="player-card"
