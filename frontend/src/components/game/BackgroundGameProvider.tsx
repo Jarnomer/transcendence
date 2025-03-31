@@ -40,18 +40,22 @@ const BackgroundGameProvider: React.FC = () => {
 
   useEffect(() => {
     // Hide background game when on the game page
+    console.log('Location changed:', location.pathname);
     setIsVisible(!location.pathname.includes('/game'));
   }, [location.pathname]);
 
   useEffect(() => {
     if (!isVisible) return;
-
+    console.log('Background game provider mounted');
     const token = localStorage.getItem('token');
-    const ws = new WebSocket(`wss://${window.location.host}/background-game?token=${token}`);
-
+    const ws = new WebSocket(`wss://${window.location.host}/ws/background-game?`);
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+    };
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log('Received background game messages:', data);
         if (data.type === 'game_state') {
           setGameState(data.state);
         }

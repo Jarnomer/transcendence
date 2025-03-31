@@ -54,8 +54,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-interface ValidateResponse {
-  username: string;
-  user_id: string;
-}

@@ -12,6 +12,6 @@ export default async function remoteService(fastify: FastifyInstance) {
   await fastify.register(websocketPlugin); // Register websocket plugin
   await fastify.register(gameRoutes); // Register user routes inside the plugin
   await fastify.register(matchmakingRoutes); // Register user routes inside the plugin
- // await fastify.register(backgroundGameRoutes); // Register background game route
+  await fastify.register(backgroundGameRoutes); // Register background game route
   await fastify.register(chatRoutes); // Register chat routes inside the plugin
 }

@@ -369,7 +369,7 @@ export default class PongGame {
     ) {
       ball.x = this.params.paddleWidth;
       this.handlePaddleBounce(players.player1.y, true);
-      console.log('Player 1 hit the ball');
+      // console.log('Player 1 hit the ball');
     } else if (
       ball.x + this.params.ballSize >= this.params.gameWidth - this.params.paddleWidth &&
       ball.y + this.params.ballSize >= players.player2.y &&
@@ -377,7 +377,7 @@ export default class PongGame {
     ) {
       ball.x = this.params.gameWidth - this.params.paddleWidth - this.params.ballSize;
       this.handlePaddleBounce(players.player2.y, false);
-      console.log('Player 2 hit the ball');
+      // console.log('Player 2 hit the ball');
     }
   }
 
