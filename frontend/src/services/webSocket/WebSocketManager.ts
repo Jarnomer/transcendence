@@ -23,11 +23,12 @@ class WebSocketManager {
 
   connect(params: URLSearchParams) {
     if (this.ws) {
+      console.log('Closing existing WebSocket:', this.url);
       this.ws.close();
     }
     this.params = params;
     console.log('Connecting to WebSocket:', this.url + `?${params.toString()}`);
-    this.ws = new WebSocket(this.url + `?${params.toString()}`);
+    this.ws = new WebSocket(`${this.url}?${params.toString()}`);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected:', this.url);
@@ -36,7 +37,6 @@ class WebSocketManager {
     };
 
     this.ws.onclose = (event) => {
-      console.log('WebSocket disconnected:', this.url, event.code, event.reason);
       this.notifyHandlers('close', event);
       if (
         !this.manualClose &&
@@ -45,6 +45,7 @@ class WebSocketManager {
       ) {
         this.scheduleReconnect();
       } else {
+        console.log('reason', event.reason);
         console.log('WebSocket closed and deleted:', this.url);
         delete WebSocketManager.instances[this.url];
       }
@@ -101,6 +102,7 @@ class WebSocketManager {
       this.ws.send(JSON.stringify(message));
     } else {
       console.warn('WebSocket not connected, message not sent:', message);
+      alert(`WebSocket not connected, message not sent: ${message}`);
     }
   }
 

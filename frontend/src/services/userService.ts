@@ -1,5 +1,3 @@
-import { Static, Type } from '@sinclair/typebox';
-
 import {
   AllResponseRankType,
   AllResponseType,
@@ -116,6 +114,29 @@ export async function getUserByID(userID: string) {
     return res.data;
   } catch (err) {
     console.error('Failed to get user:', err);
+    throw err;
+  }
+}
+
+interface UpdateUserType {
+  display_name: string;
+  first_name: string;
+  last_name: string;
+  bio: string;
+  avatar_url: string;
+  status: string;
+}
+
+export async function updateUser(data: Partial<UpdateUserType>) {
+  try {
+    const userID = localStorage.getItem('userID');
+    const res = await api.patch<UserResponseType>(`/user/${userID}`, data);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to update user`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to update user:', err);
     throw err;
   }
 }

@@ -1,11 +1,11 @@
-import * as WebSocket from '@fastify/websocket';
+import { WebSocket } from '@fastify/websocket';
 
 import { GameService } from '@my-backend/matchmaking_service/src/services/GameService';
 import { QueueService } from '@my-backend/matchmaking_service/src/services/QueueService';
 
 type Player = {
   user_id: string;
-  socket: WebSocket.WebSocket;
+  socket: WebSocket;
   elo: number;
   joinedAt: Date;
 };
@@ -34,7 +34,7 @@ abstract class MatchmakingMode {
   abstract addPlayer(player: Player): void;
   abstract removePlayer(playerId: string): void;
   abstract findRandomMatch(player: Player): void;
-  abstract joinMatch(user_id: string, queueId: string): void;
+  abstract joinMatch(queueId: string, user_id: string): void;
   abstract createMatch(playerIds: string[]): void;
 
   protected addUserToQueue(queueKey: string, userId: string): number {
@@ -118,6 +118,7 @@ class OneVOneMatchmaking extends MatchmakingMode {
         clearInterval(this.playerIntervals.get(player.user_id));
         this.playerIntervals.delete(player.user_id);
         console.log(`Matchmaking timed out for player ${player.user_id}`);
+        //send a message to the player that the matchmaking timed out
       }
     }, 30000); // Timeout after 30 seconds (adjust as needed)
 
@@ -177,7 +178,6 @@ class TournamentMatchmaking extends MatchmakingMode {
   constructor(matchmaking: MatchmakingService) {
     super(matchmaking);
   }
-  private minPlayers = 4;
 
   addPlayer(player: Player) {
     this.queue.push(player);
@@ -199,15 +199,25 @@ class TournamentMatchmaking extends MatchmakingMode {
     return game.game_id;
   }
 
-  async findRandomMatch(player: Player) {
-    if (this.queue.length < this.minPlayers) return;
-  }
+  async findRandomMatch(player: Player) {}
 
   async joinMatch(queueId: string, user_id: string) {
     const count = this.addUserToQueue(queueId, user_id);
-    if (count >= this.minPlayers) {
+    const minPlayers = await this.queueService.getQueueVariant(queueId);
+    const size = parseInt(minPlayers.variant);
+    console.log(`Queue size: ${size}`);
+    console.log(`Players in queue: ${count}`);
+    if (count >= size) {
       const players = this.queueMatches.get(queueId)!;
-      await this.createMatch(players);
+      console.log(`Creating match for players: ${players}`);
+
+      while (players.length >= 2) {
+        const game_id = await this.createMatch(players.splice(0, 2));
+        this.matchmaking.broadcast(players, {
+          type: 'match_found',
+          state: { game_id },
+        });
+      }
     }
   }
 }
@@ -217,7 +227,7 @@ export class MatchmakingService {
   public gameService: GameService;
   private static instance: MatchmakingService;
   private matchmakers: { [mode: string]: MatchmakingMode } = {};
-  private clients: Map<string, WebSocket.WebSocket> = new Map();
+  private clients: Map<string, WebSocket> = new Map();
 
   constructor(queueService: QueueService, gameService: GameService) {
     this.queueService = queueService;
@@ -262,15 +272,15 @@ export class MatchmakingService {
     await this.matchmakers[mode].findRandomMatch(player);
   }
 
-  async joinMatch(user_id: string, queueId: string, mode: string) {
+  async joinMatch(queueId: string, user_id: string, mode: string) {
     console.log(`Joining match for ${user_id} in queue: ${queueId}`);
-    this.matchmakers[mode].joinMatch(user_id, queueId);
+    this.matchmakers[mode].joinMatch(queueId, user_id);
   }
 
   /**
    * Websocket connections handling
    */
-  addClient(user_id: string, ws: WebSocket.WebSocket) {
+  addClient(user_id: string, ws: WebSocket) {
     console.log(`Adding client: ${user_id}`);
     this.clients.set(user_id, ws);
   }

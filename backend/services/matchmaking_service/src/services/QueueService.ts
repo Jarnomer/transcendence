@@ -53,25 +53,25 @@ export class QueueService {
     return user;
   }
 
+  async getQueueVariant(queue_id: string) {
+    const queue = await this.queueModel.getQueueVariant(queue_id);
+    if (!queue) throw new NotFoundError('Queue not found');
+    return queue;
+  }
+
   /**
    * User enters the match making queue
    * uses transaction to ensure atomicity
    */
-  async enterQueue(user_id: string, mode: string) {
+  async enterQueue(user_id: string, mode: string, difficulty: string) {
     return await this.queueModel.runTransaction(async () => {
       const existingUser = await this.queueModel.isInQueque(user_id); // Check if user is already in queue
       if (existingUser) {
         console.log('User is in Queue', existingUser);
         return existingUser;
       }
-      // const waitingUser = await this.queueModel.getWaitingUser(user_id); // Check if there is a waiting user
-      // if (waitingUser) {
-      //   console.log('User is in Queue waiting', waitingUser);
-      //   return waitingUser;
-      // }
       console.log('created new user in queue', user_id);
-      const user = await this.queueModel.createWaitingQueue(user_id, mode); // insert user into queue
-      return user;
+      return await this.queueModel.createWaitingQueue(user_id, mode, difficulty); // insert user into queue
     });
   }
 
@@ -101,9 +101,22 @@ export class QueueService {
     return res;
   }
 
-  async joinQueue(user_id: string, queue_id: string) {
-    console.log('Joining queue', user_id, queue_id);
-    const user = await this.queueModel.joinQueue(user_id, queue_id);
-    return user;
+  async joinQueue(user_id: string, queue_id: string, mode: string, difficulty: string) {
+    if (mode === '1v1') {
+      console.log('User joined 1v1', user_id, queue_id);
+      return await this.queueModel.join1v1(user_id, queue_id);
+    } else {
+      const count = await this.queueModel.getNumberOfPlayersInQueue(queue_id);
+      const size = parseInt(difficulty);
+      if (count.total >= size) {
+        throw new BadRequestError('Queue is full');
+      }
+      const user = await this.queueModel.joinTournament(user_id, queue_id);
+      console.log('User joined tournament', user);
+      if (count.total === size - 1) {
+        await this.queueModel.updateQueueStatus(queue_id, 'matched');
+      }
+      return user;
+    }
   }
 }

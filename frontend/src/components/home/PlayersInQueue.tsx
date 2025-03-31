@@ -6,10 +6,19 @@ import { getUsersInQueue } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
+interface UsersInQueue {
+  display_name: string;
+  avatar_url: string;
+  user_id: string;
+  queue_id: string;
+  mode: string;
+  variant: string;
+}
+
 export const PlayerQueue: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [usersInQueue, setUsersInQueue] = useState<any[]>([]);
+  const [usersInQueue, setUsersInQueue] = useState<UsersInQueue[]>([]);
   const navigate = useNavigate();
 
   async function fetchData() {
@@ -24,6 +33,8 @@ export const PlayerQueue: React.FC = () => {
           avatar_url: player.avatar_url || '',
           user_id: player.user_id,
           queue_id: queue.queue_id,
+          mode: queue.mode,
+          variant: queue.variant,
         }))
       );
       console.log('enriched:', enrichedUsers);
@@ -40,11 +51,11 @@ export const PlayerQueue: React.FC = () => {
     console.log('users in queue:', usersInQueue);
   }, [usersInQueue]);
 
-  const handleJoinGameClick = (event, user) => {
+  const handleJoinGameClick = (event, user: UsersInQueue) => {
     event.stopPropagation();
     console.log('join game against: ', user);
     navigate('/game', {
-      state: { mode: '1v1', difficulty: 'online', lobby: 'join', queueId: user.queue_id },
+      state: { mode: user.mode, difficulty: user.variant, lobby: 'join', queueId: user.queue_id },
     });
   };
 

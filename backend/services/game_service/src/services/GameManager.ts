@@ -8,7 +8,7 @@ export class GameManager {
 
   constructor() {
     this.sessions = {};
-    this.createBackgroundGame();
+    //this.createBackgroundGame();
   }
 
   static getInstance(): GameManager {

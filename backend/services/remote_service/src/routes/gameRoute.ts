@@ -1,5 +1,5 @@
+import { WebSocket } from '@fastify/websocket';
 import { FastifyInstance } from 'fastify';
-import * as WebSocket from 'ws';
 
 import { GameManager } from '@my-backend/game_service';
 
@@ -10,7 +10,7 @@ export async function gameRoutes(fastify: FastifyInstance) {
   const gameManager = GameManager.getInstance();
   const gameController = GameController.getInstance(gameManager);
 
-  fastify.get('/game/', { websocket: true }, (socket: WebSocket.WebSocket, request) =>
+  fastify.get('/game/', { websocket: true }, (socket: WebSocket, request) =>
     gameController.play.bind(gameController)(socket, request)
   );
 }
