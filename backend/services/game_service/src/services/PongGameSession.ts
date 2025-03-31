@@ -185,14 +185,15 @@ export default class PongGameSession {
     // Prevent recursive calls
     if (this.isGameFinished) return;
     this.isGameFinished = true;
+
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
     }
 
     this.aiControllers.clear();
-
     this.game.stopGame();
+
     this.broadcast({ type: 'game_status', state: 'finished' });
     this.onEndCallback();
   }

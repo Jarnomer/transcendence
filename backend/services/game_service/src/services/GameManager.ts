@@ -53,6 +53,7 @@ export class GameManager {
   addSpectator(gameId: string, userId: string, connection: any): void {
     if (!this.sessions[gameId]) {
       console.warn(`Tried to add spectator to non-existent game ${gameId}`);
+      console.log('Existing games:', Object.keys(this.sessions));
       connection.close();
       return;
     }
