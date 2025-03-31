@@ -52,7 +52,7 @@ export default class PongGameSession {
         this.game.setMaxBallSpeed(2);
         this.game.setCountdown(0);
       }
-      this.game.setReadyState('player1', true);
+      this.readyGame('player1', true);
     }
   }
 
@@ -152,11 +152,17 @@ export default class PongGameSession {
     // Broadcast game status (countdown, playing, finished, ...)
     const updatedGameStatus = this.game.getGameStatus();
     if (updatedGameStatus !== this.previousGameStatus) {
+      console.log('Game status changed:', updatedGameStatus);
       this.broadcast({ type: 'game_status', state: updatedGameStatus });
       this.previousGameStatus = updatedGameStatus;
 
       if (updatedGameStatus === 'finished') {
         this.endGame();
+      }
+
+      if (this.gameId === 'background_game' && updatedGameStatus === 'waiting') {
+        console.log('Background game is waiting');
+        this.readyGame('player1', true);
       }
     }
 
@@ -246,7 +252,8 @@ export default class PongGameSession {
       clearInterval(this.interval);
       this.interval = null;
     }
-    this.updateGame();
+    console.log('Starting updateGame interval');
+    // this.updateGame();
     this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }
 }
