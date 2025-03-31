@@ -102,6 +102,7 @@ class WebSocketManager {
       this.ws.send(JSON.stringify(message));
     } else {
       console.warn('WebSocket not connected, message not sent:', message);
+      alert(`WebSocket not connected, message not sent: ${message}`);
     }
   }
 

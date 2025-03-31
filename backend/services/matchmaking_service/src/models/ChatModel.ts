@@ -28,7 +28,15 @@ export class ChatModel {
   }
 
   async getMyRooms(user_id: string) {
-    return await this.db.all('SELECT * FROM chat_rooms WHERE created_by = ?', [user_id]);
+    return await this.db.all(
+      `SELECT *
+      FROM chat_rooms
+      WHERE chat_room_id IN
+      (SELECT chat_room_id
+      FROM room_members
+      WHERE user_id = ?) AND type != 'public'`,
+      [user_id]
+    );
   }
 
   async getDm(user_id: string, receiver_id: string) {

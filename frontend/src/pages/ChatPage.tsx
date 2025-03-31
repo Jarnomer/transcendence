@@ -177,8 +177,10 @@ export const ChatPage: React.FC = () => {
     }
   };
 
-  const createRoom = async () => {
+  const createRoom = async (event) => {
     try {
+      event.preventDefault();
+      console.log('Creating room:', roomName, isPrivate, members);
       const data = await createChatRoom(roomName, isPrivate ? 'private' : 'public');
       console.log('Chat room created:', data);
       if (data) {
@@ -303,9 +305,9 @@ export const ChatPage: React.FC = () => {
           <ul>
             {myRooms.map((room) => (
               <li
-                key={room.room_id}
-                className={`p-2 rounded cursor-pointer ${roomId === room.room_id ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
-                onClick={() => setRoomId(room.room_id)}
+                key={room.chat_room_id}
+                className={`p-2 rounded cursor-pointer ${roomId === room.chat_room_id ? 'bg-gray-700' : 'hover:bg-gray-800'}`}
+                onClick={() => handleRoomJoin(room.chat_room_id)}
               >
                 {room.name}
               </li>

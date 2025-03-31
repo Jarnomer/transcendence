@@ -55,7 +55,7 @@ export async function getDm(receiver_id: string) {
 export async function createChatRoom(name: string, type: string) {
   try {
     const res = await api.post(`/chat/create`, { name, type });
-    if (res.status !== 201) {
+    if (res.status >= 400) {
       throw new Error(`Error ${res.status}: Failed to create chat room`);
     }
     return res.data;
@@ -68,7 +68,7 @@ export async function createChatRoom(name: string, type: string) {
 export async function addMember(room_id: string, members: Array<string>) {
   try {
     const res = await api.post(`/chat/addMember`, { room_id, members });
-    if (res.status !== 200) {
+    if (res.status >= 400) {
       throw new Error(`Error ${res.status}: Failed to add member`);
     }
     return res.data;

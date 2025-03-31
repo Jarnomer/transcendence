@@ -74,6 +74,6 @@ export class ChatController {
       request.log.trace(`Adding member ${member} to chat ${room_id}`);
       await this.chatService.addMember(room_id, member);
     }
-    reply.code(204).send({ success: true });
+    reply.code(200).send({ success: true });
   }
 }

@@ -197,7 +197,7 @@ export class UserModel {
     return await this.db.all(
       `SELECT *
       FROM notifications n
-      WHERE n.user_id = ? AND n.seen = 'false' ORDER BY created_at DESC`,
+      WHERE n.user_id = ? AND n.seen = 0 ORDER BY created_at DESC`,
       [user_id]
     );
   }
