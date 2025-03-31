@@ -1,6 +1,6 @@
+import { WebSocket } from '@fastify/websocket';
 import { FastifyRequest } from 'fastify';
 import 'module-alias/register';
-import * as WebSocket from 'ws';
 
 import { GameManager } from '@my-backend/game_service';
 
@@ -19,7 +19,7 @@ export class GameController {
     return GameController.instance;
   }
 
-  async play(socket: WebSocket.WebSocket, request: FastifyRequest) {
+  async play(socket: WebSocket, request: FastifyRequest) {
     const { game_id, mode, difficulty, user_id } = request.query as {
       game_id: string;
       mode: string;

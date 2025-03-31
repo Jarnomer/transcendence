@@ -10,6 +10,7 @@ import {
 
 import { GameState, GameStatus } from '@shared/types';
 
+import { useChatSocket } from '../hooks/useChatSocket';
 import { useGameSocket } from '../hooks/useGameSocket';
 import { useMatchmakingSocket } from '../hooks/useMatchmakingSocket';
 import WebSocketManager from '../services/webSocket/WebSocketManager';
@@ -55,6 +56,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
 
   useGameSocket(gameSocket, dispatch);
   useMatchmakingSocket(matchmakingSocket, dispatch);
+  useChatSocket(chatSocket, dispatch);
 
   const closeConnection = useCallback(
     (type: 'game' | 'chat' | 'matchmaking') => {
@@ -67,6 +69,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     return () => {
+      console.log('Cleaning up WebSocket connections');
       gameSocket.close();
       chatSocket.close();
       matchmakingSocket.close();

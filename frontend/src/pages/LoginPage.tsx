@@ -6,6 +6,7 @@ import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
 import { SVGModal } from '@components/UI/svgWrappers/svgModal.tsx';
 
 import { login, register } from '@services/authService.ts';
+import { updateUser } from '@services/userService.ts';
 
 import { useUser } from '../contexts/user/UserContext';
 
@@ -43,6 +44,7 @@ export const LoginPage: React.FC = () => {
         if (isRegistering) {
           navigate(`/signUp`);
         } else {
+          await updateUser({ status: 'online' });
           navigate(`/profile/${localStorage.getItem('userID')}`);
         }
       } catch (error: any) {

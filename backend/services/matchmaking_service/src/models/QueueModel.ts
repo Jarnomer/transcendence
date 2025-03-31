@@ -58,6 +58,7 @@ export class QueueModel {
         SELECT
         q.queue_id,
         q.mode,
+        q.variant,
         q.created_at,
         COALESCE
         (
@@ -78,7 +79,7 @@ export class QueueModel {
       LEFT JOIN queue_players qp ON q.queue_id = qp.queue_id
       LEFT JOIN user_profiles u ON qp.user_id = u.user_id
       WHERE qp.status = 'waiting'
-      GROUP BY q.queue_id
+      GROUP BY q.mode
       ORDER BY q.created_at DESC LIMIT ? OFFSET ?`;
     return await queryWithJsonParsingArray(this.db, query, [pageSize, offset], ['players']);
   }
@@ -97,9 +98,9 @@ export class QueueModel {
   }
 
   /**
-   * Get waiting users in queue by mode
+   * Get waiting users in queue by player count
    * @param user_id user id
-   * @param mode game mode
+   * @param mode game player count
    * @returns list of users with status waiting
    * @example
    * [
@@ -143,6 +144,17 @@ export class QueueModel {
       ORDER BY joined_at DESC LIMIT 1;
       `,
       [user_id]
+    );
+  }
+
+  async getQueueVariant(queue_id: string) {
+    return await this.db.get(
+      `
+      SELECT variant
+      FROM queues
+      WHERE queue_id = ?;
+      `,
+      [queue_id]
     );
   }
 
@@ -222,9 +234,13 @@ export class QueueModel {
    *  status: 'waiting',
    *  joined_at: 'joined_at'
    */
-  async createWaitingQueue(user_id: string, mode: string) {
+  async createWaitingQueue(user_id: string, mode: string, variant: string) {
     const id = uuidv4();
-    await this.db.get(`INSERT INTO queues (queue_id, mode) VALUES (?, ?) RETURNING *`, [id, mode]);
+    await this.db.get(`INSERT INTO queues (queue_id, mode, variant) VALUES (?, ?, ?) RETURNING *`, [
+      id,
+      mode,
+      variant,
+    ]);
     const queue = await this.db.get(
       `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,
       [id, user_id]
@@ -268,13 +284,13 @@ export class QueueModel {
     return await this.db.run(
       `
       DELETE FROM queue_players
-      WHERE user_id = ? AND status = 'waiting';
+      WHERE user_id = ?;
       `,
       [user_id]
     );
   }
 
-  async joinQueue(user_id: string, queue_id: string) {
+  async join1v1(user_id: string, queue_id: string) {
     await this.db.run(
       `UPDATE queue_players
       SET status = 'matched'
@@ -288,6 +304,37 @@ export class QueueModel {
       (queue_id, user_id, status)
       VALUES (?, ?, 'matched') RETURNING *;`,
       [queue_id, user_id]
+    );
+  }
+
+  async joinTournament(user_id: string, queue_id: string) {
+    return await this.db.get(
+      `INSERT INTO queue_players
+      (queue_id, user_id, status)
+      VALUES (?, ?, 'waiting') RETURNING *;`,
+      [queue_id, user_id]
+    );
+  }
+
+  async updateQueueStatus(queue_id: string, status: string) {
+    return await this.db.run(
+      `
+      UPDATE queue_players
+      SET status = ?
+      WHERE queue_id = ?;
+      `,
+      [status, queue_id]
+    );
+  }
+
+  async getNumberOfPlayersInQueue(queue_id: string) {
+    return await this.db.get(
+      `
+      SELECT COUNT(*) AS total
+      FROM queue_players
+      WHERE queue_id = ?;
+      `,
+      [queue_id]
     );
   }
 

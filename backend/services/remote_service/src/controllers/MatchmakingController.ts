@@ -1,4 +1,4 @@
-import * as WebSocket from '@fastify/websocket';
+import { WebSocket } from '@fastify/websocket';
 import { FastifyRequest } from 'fastify';
 
 import { MatchmakingService } from '../services/MatchmakingService';
@@ -18,7 +18,7 @@ export class MatchmakingController {
     return MatchmakingController.instance;
   }
 
-  async matchmake(ws: WebSocket.WebSocket, req: FastifyRequest) {
+  async matchmake(ws: WebSocket, req: FastifyRequest) {
     const { user_id, mode, difficulty } = req.query as {
       user_id: string;
       mode: string;
