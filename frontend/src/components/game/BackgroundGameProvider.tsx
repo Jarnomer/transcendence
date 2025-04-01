@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
 import {
   GameState,
   defaultGameParams,
-  retroEffectsPresets,
   defaultRetroCinematicBaseParams,
+  retroEffectsPresets,
 } from '@shared/types';
 
 import BackgroundGameCanvas from './BackgroundGameCanvas';
