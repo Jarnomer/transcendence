@@ -2,6 +2,8 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
+import { UserDataResponseType } from '@shared/types/userTypes';
+
 export const animationVariants = {
   initial: {
     clipPath: 'inset(0 100% 0 0)',
@@ -19,15 +21,8 @@ export const animationVariants = {
   },
 };
 
-type user = {
-  user_id: string;
-  display_name: string;
-  avatar_url: string;
-  games: any[];
-};
-
 interface MatchHistoryProps {
-  user: user[];
+  user: UserDataResponseType;
 }
 
 export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
@@ -63,7 +58,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
       <div className="flex min-h-full flex-col gap-2 mt-2">
         {user.games && user.games.length > 0 ? (
           user.games
-            // .filter((game: any) => game.display_name)
+            .filter((game: any) => game.display_name)
             .map((game: any, index: number) => (
               <motion.div
                 key={game.game_id}

@@ -10,6 +10,8 @@ import { RadialBackground } from '@components/profile/RadialBackground.tsx';
 
 import { getUserData } from '@services/userService';
 
+import { UserDataResponseType } from '@shared/types/userTypes';
+
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { UserInformationForm } from '../components/signUp/UserInformationForm';
 import { useUser } from '../contexts/user/UserContext';
@@ -33,7 +35,7 @@ export const animationVariants = {
 };
 
 export const ProfilePage: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [sent, setSent] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [editProfile, setEditProfile] = useState<boolean>(false);
@@ -101,13 +103,10 @@ export const ProfilePage: React.FC = () => {
     return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
   }
 
-  // if (isOwnProfile && editProfile) {
-  //   return ;
-  // }
   return (
     <>
       <motion.div className="w-full h-full flex flex-col items-center md:p-6 text-center">
-        <RadialBackground avatar_url={user.avatar_url}></RadialBackground>
+        <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
             <div>
@@ -125,6 +124,7 @@ export const ProfilePage: React.FC = () => {
                 setLoading={setLoading}
                 setEditProfile={setEditProfile}
                 editProfile={editProfile}
+                sent={sent}
               ></ProfileHeader>
 
               <motion.div

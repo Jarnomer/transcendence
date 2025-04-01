@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Footer } from './components/footer/Footer.tsx';
-import BackgroundGameProvider from './components/game/BackgroundGameProvider.tsx';
 import { Header } from './components/header/Header.tsx';
 import { AuthModal } from './components/modals/authModal.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
@@ -31,12 +30,12 @@ const App: React.FC = () => {
   return (
     <WebSocketProvider>
       {/* Background game provider */}
-      <BackgroundGameProvider />
+      {/* <BackgroundGameProvider /> */}
 
       <ModalProvider>
         <div
           id="app-container"
-          className={`flex flex-col relative items-center min-h-screen w-screen text-primary p-2`}
+          className={`flex flex-col relative items-center min-h-screen w-screen text-primary p-2 bg-black`}
         >
           <Header />
           <div

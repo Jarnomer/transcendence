@@ -2,21 +2,23 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 import { getUserData } from '@/services/userService';
 
-import { api } from '../../services/api';
+import { UserDataResponseType } from '@shared/types/userTypes';
 
-interface User {
+import { api } from '../../services/api';
+import { getRequestsSent } from '../../services/friendService';
+
+interface FriendRequest {
   user_id: string;
-  profile_id: string;
-  username: string;
-  display_name: string;
-  avatar_url: string;
+  receiver_id: string;
   status: string;
 }
 
 interface UserContextType {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: UserDataResponseType | null;
+  setUser: React.Dispatch<React.SetStateAction<UserDataResponseType | null>>;
+  sentRequests: FriendRequest[];
   refetchUser: () => void;
+  refetchRequests: () => void;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -30,7 +32,8 @@ export const useUser = () => {
 };
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserDataResponseType | null>(null);
+  const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
 
   const userId = localStorage.getItem('userID');
 
@@ -53,6 +56,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
   }, []);
 
+  const fetchRequestsSent = useCallback(() => {
+    if (!userId) return;
+    getRequestsSent()
+      .then((data) => setSentRequests(data))
+      .catch((err) => console.error('Failed to fetch sent friend requests:', err));
+  }, [userId]);
+
   const checkAuth = async () => {
     console.log('checking auth');
     const token = localStorage.getItem('token');
@@ -66,6 +76,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('userID', res.data.user_id);
       localStorage.setItem('username', res.data.username);
       fetchUser();
+      fetchRequestsSent();
     } catch (error) {
       localStorage.removeItem('token');
       localStorage.removeItem('userID');
@@ -95,10 +106,21 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchUser();
-  }, [fetchUser]);
+    fetchRequestsSent();
+  }, [fetchUser, fetchRequestsSent]);
 
   return (
-    <UserContext.Provider value={{ user, setUser, refetchUser: fetchUser, checkAuth, logout }}>
+    <UserContext.Provider
+      value={{
+        user,
+        setUser,
+        sentRequests,
+        refetchUser: fetchUser,
+        checkAuth,
+        logout,
+        refetchRequests: fetchRequestsSent,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

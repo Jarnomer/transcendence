@@ -55,11 +55,11 @@ export const BackgroundGlitchTextBlock: React.FC<{}> = () => {
     const newLines = Array.from({ length: 20 }, () => generateRandomText(60));
     setLines(newLines);
   }, []);
-  
+
   return (
     <>
       <motion.div
-        className="absolute w-full h-full z-0 top-[100px] left-0 opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-[6px] sm:text-sm space-y-1"
+        className="w-full h-full z-0 left-0 opacity-55 pointer-events-none p-4 text-gray-500 font-mono text-[6px] sm:text-sm space-y-1"
         variants={parentVariants}
         initial="hidden"
         animate={'visible'}
@@ -109,7 +109,10 @@ export const BackgroundGlitch: React.FC<{ duration: number }> = ({ duration }) =
           <motion.div className="absolute right-0 translate-x-[-50%] text-primary">
             <ProcessingBar duration={duration} />
           </motion.div>
-          <BackgroundGlitchTextBlock></BackgroundGlitchTextBlock>
+
+          <motion.div className="absolute right-0 top-[100px]">
+            <BackgroundGlitchTextBlock></BackgroundGlitchTextBlock>
+          </motion.div>
         </motion.div>
       ) : null}
     </div>
