@@ -24,7 +24,6 @@ import {
   createPaddle,
   createPongRetroEffects,
   getThemeColors,
-  // setupEnvironmentMap,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
@@ -34,9 +33,11 @@ import {
 import {
   GameState,
   RetroEffectsLevels,
+  RetroEffectsBaseParams,
   defaultRetroEffectsLevels,
   defaultGameParams,
   retroEffectsPresets,
+  defaultRetroCinematicBaseParams,
 } from '@shared/types';
 
 interface BackgroundGameCanvasProps {
@@ -45,28 +46,15 @@ interface BackgroundGameCanvasProps {
   theme?: 'light' | 'dark';
   retroPreset?: 'default' | 'cinematic';
   retroLevels?: RetroEffectsLevels;
+  retroBaseParams?: RetroEffectsBaseParams;
 }
 
-// Camera angle presets
-// interface CameraAngle {
-//   alpha: number; // horizontal rotation in radians
-//   beta: number; // vertical rotation in radians
-//   radius: number; // distance from target
-//   target?: Vector3; // optional target position
-// }
-
-// Camera position interface with extended options
 interface CameraAngle {
-  // Traditional spherical coordinates for ArcRotateCamera
   alpha: number; // horizontal rotation in radians
   beta: number; // vertical rotation in radians
   radius: number; // distance from target
   target?: Vector3; // optional target position
-
-  // Direct positioning (if you want to set XYZ directly)
   position?: Vector3; // explicit XYZ position
-
-  // Depth of field settings
   dofEnabled?: boolean; // enable/disable depth of field
   focalLength?: number; // camera focal length
   fStop?: number; // aperture f-stop
@@ -74,14 +62,13 @@ interface CameraAngle {
   dofBlurLevel?: number; // blur level (low, medium, high)
 }
 
-// Define different camera angles to cycle through
 const cameraAngles: CameraAngle[] = [
   {
     alpha: Math.PI / 3, // ignored if position is set
-    beta: Math.PI / 3,
+    beta: Math.PI / 3, // ignored if position is set
     radius: 20,
     position: new Vector3(35, 20, 10), // explicit position
-    target: new Vector3(20, 10, 5), // where camera points
+    target: new Vector3(20, 10, 4), // where camera targets
     dofEnabled: true,
     focalLength: 50,
     fStop: 1.5,
@@ -367,6 +354,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   theme = 'dark',
   retroPreset = 'cinematic',
   retroLevels = retroEffectsPresets.cinematic,
+  retroBaseParams = defaultRetroCinematicBaseParams,
 }) => {
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
@@ -410,10 +398,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
 
-    // setupEnvironmentMap(scene);
-
     const camera = setupSceneCamera(scene);
-    const pipeline = setupPostProcessing(scene, camera);
+    const pipeline = setupPostProcessing(scene, camera, true);
     const { shadowGenerators } = setupScenelights(scene);
 
     floorRef.current = createFloor(scene, backgroundColor);
@@ -451,7 +437,13 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     player2Ref.current.position.x = 19.5;
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
-    retroEffectsRef.current = createPongRetroEffects(scene, camera, retroPreset, retroLevels);
+    retroEffectsRef.current = createPongRetroEffects(
+      scene,
+      camera,
+      retroPreset,
+      retroLevels,
+      retroBaseParams
+    );
     retroLevelsRef.current = retroLevels;
 
     if (isVisible) {
@@ -642,7 +634,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
         collision,
         speed,
         ball.spin,
-        color
+        color,
+        false
       );
     }
 
@@ -666,8 +659,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
         pointerEvents: 'none',
         width: '100%',
         height: '100%',
-        // opacity: isVisible ? 0.3 : 0,
-        // transition: 'opacity 0.5s ease',
+        opacity: isVisible ? 1 : 0,
+        transition: 'opacity 0.5s ease',
       }}
     />
   );

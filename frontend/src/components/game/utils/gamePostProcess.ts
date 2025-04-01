@@ -29,7 +29,7 @@ export function setupEnvironmentMap(scene: Scene) {
   scene.createDefaultSkybox(envTex, true);
 }
 
-export function setupPostProcessing(scene: Scene, camera: Camera) {
+export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boolean = false) {
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
 
   // Enable bloom effect
@@ -50,6 +50,15 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   pipeline.grain.animated = true;
 
   pipeline.fxaaEnabled = true; // Enable anti-aliasing
+
+  // Enable depth of field if requested
+  if (enableDOF) {
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.depthOfField.focalLength = 50;
+    pipeline.depthOfField.fStop = 1.4;
+    pipeline.depthOfField.focusDistance = 50;
+    pipeline.depthOfFieldBlurLevel = 2;
+  }
 
   // Enable motion blur
   const motionBlur = new MotionBlurPostProcess('motionBlur', scene, 1.0, camera);

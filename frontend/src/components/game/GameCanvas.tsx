@@ -139,7 +139,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     setupEnvironmentMap(scene);
 
     const camera = setupSceneCamera(scene);
-    const pipeline = setupPostProcessing(scene, camera);
+    const pipeline = setupPostProcessing(scene, camera, false);
     const { shadowGenerators } = setupScenelights(scene);
 
     floorRef.current = createFloor(scene, backgroundColor);
@@ -269,7 +269,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         collision,
         speed,
         ball.spin,
-        color
+        color,
+        true
       );
     }
 

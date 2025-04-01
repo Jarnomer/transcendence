@@ -2,7 +2,12 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
-import { GameState, defaultGameParams, retroEffectsPresets } from '@shared/types';
+import {
+  GameState,
+  defaultGameParams,
+  retroEffectsPresets,
+  defaultRetroCinematicBaseParams,
+} from '@shared/types';
 
 import BackgroundGameCanvas from './BackgroundGameCanvas';
 
@@ -56,7 +61,8 @@ const BackgroundGameProvider: React.FC = () => {
 
     // Close existing connection if it exists
     if (wsRef.current) {
-      wsRef.current.onclose = null; // Remove the onclose handler to prevent reconnection
+      // Remove the onclose handler to prevent reconnection
+      wsRef.current.onclose = null;
       if (
         wsRef.current.readyState === WebSocket.OPEN ||
         wsRef.current.readyState === WebSocket.CONNECTING
@@ -85,15 +91,13 @@ const BackgroundGameProvider: React.FC = () => {
 
     ws.onclose = () => {
       console.log('Background game connection closed');
-
-      // Use a current check of isVisible state for reconnection logic
+      // Use current check of isVisible state for reconnection logic
       // This will be re-evaluated each time the connection closes
       if (isVisible) {
         console.log('Attempting to reconnect...');
         reconnectTimeoutRef.current = window.setTimeout(() => {
           reconnectTimeoutRef.current = null;
           if (isVisible) {
-            // Double-check isVisible at reconnection time
             setupWebSocket();
           }
         }, 2000);
@@ -101,7 +105,7 @@ const BackgroundGameProvider: React.FC = () => {
     };
 
     wsRef.current = ws;
-  }, [isVisible]); // Include isVisible in the dependency array to create a new function when it changes
+  }, [isVisible]);
 
   // Setup and manage WebSocket connection
   useEffect(() => {
@@ -113,7 +117,7 @@ const BackgroundGameProvider: React.FC = () => {
       // Clean up when becoming invisible
       if (wsRef.current) {
         console.log('Closing WebSocket connection (not visible)');
-        wsRef.current.onclose = null; // Remove the onclose handler to prevent reconnection
+        wsRef.current.onclose = null;
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -125,7 +129,6 @@ const BackgroundGameProvider: React.FC = () => {
       }
     }
 
-    // Cleanup function
     return () => {
       if (reconnectTimeoutRef.current !== null) {
         window.clearTimeout(reconnectTimeoutRef.current);
@@ -134,7 +137,8 @@ const BackgroundGameProvider: React.FC = () => {
 
       if (wsRef.current) {
         console.log('Closing WebSocket connection on cleanup');
-        wsRef.current.onclose = null; // Remove the onclose handler to prevent reconnection
+        // Remove the onclose handler to prevent reconnection
+        wsRef.current.onclose = null;
         wsRef.current.close();
       }
     };
@@ -155,6 +159,7 @@ const BackgroundGameProvider: React.FC = () => {
         isVisible={isVisible}
         retroPreset="cinematic"
         retroLevels={retroEffectsPresets.cinematic}
+        retroBaseParams={defaultRetroCinematicBaseParams}
       />
     </div>
   );

@@ -753,7 +753,8 @@ export function createPongRetroEffects(
   scene: Scene,
   camera: Camera,
   preset: 'default' | 'cinematic' = 'default',
-  customLevels: Partial<RetroEffectsLevels> = {}
+  customLevels: Partial<RetroEffectsLevels> = {},
+  baseParams: RetroEffectsBaseParams = defaultRetroEffectsBaseParams
 ): RetroEffectsManager {
   let levels: RetroEffectsLevels;
 
@@ -772,7 +773,7 @@ export function createPongRetroEffects(
 
   levels = { ...levels, ...customLevels };
 
-  const manager = new RetroEffectsManager(scene, camera, levels);
+  const manager = new RetroEffectsManager(scene, camera, levels, baseParams);
 
   switch (preset) {
     case 'default':
