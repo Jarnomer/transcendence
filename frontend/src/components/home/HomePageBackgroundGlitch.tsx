@@ -43,12 +43,14 @@ export const HomePageBackgroundGlitch: React.FC<{ activeTab: string; duration: n
           <motion.div className="relative">
             <WarningSign></WarningSign>
           </motion.div>
-          <div className="relative w-full h-full">
-            <div className="absolute z-0 right-[0px] translate-x-[100%] text-primary">
+          <div className="relative w-full ">
+            <div className="absolute z-0 top-0 right-[0px] translate-x-[-50%] text-primary">
               <ProcessingBar duration={activeTab === 'tabWithBoxes' ? duration * 3 : duration} />
             </div>
           </div>
-          <BackgroundGlitchTextBlock></BackgroundGlitchTextBlock>
+          <div className="absolute top-38 left-0">
+            <BackgroundGlitchTextBlock></BackgroundGlitchTextBlock>
+          </div>
         </motion.div>
       ) : null}
     </>
