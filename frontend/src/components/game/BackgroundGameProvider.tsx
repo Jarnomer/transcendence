@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -10,6 +10,8 @@ const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const location = useLocation();
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
 
   // Initialize default values before WebSocket connects
   const initialGameState: GameState = {
@@ -38,14 +40,30 @@ const BackgroundGameProvider: React.FC = () => {
     },
   };
 
+  // Handle location changes to toggle visibility
   useEffect(() => {
-    // Hide background game when on the game page
     console.log('Location changed:', location.pathname);
-    setIsVisible(!location.pathname.includes('/game/'));
+    setIsVisible(!location.pathname.includes('/game'));
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (!isVisible) return;
+  // Create a stable setupWebSocket function with useCallback
+  const setupWebSocket = useCallback(() => {
+    // Clear any existing reconnection timeout
+    if (reconnectTimeoutRef.current !== null) {
+      window.clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
+    // Close existing connection if it exists
+    if (wsRef.current) {
+      wsRef.current.onclose = null; // Remove the onclose handler to prevent reconnection
+      if (
+        wsRef.current.readyState === WebSocket.OPEN ||
+        wsRef.current.readyState === WebSocket.CONNECTING
+      ) {
+        wsRef.current.close();
+      }
+    }
 
     const wsUrl = `wss://${window.location.host}/ws/background-game?`;
     const ws = new WebSocket(wsUrl);
@@ -65,10 +83,62 @@ const BackgroundGameProvider: React.FC = () => {
       }
     };
 
-    // return () => {
-    //   ws.close();
-    // };
-  }, [isVisible]);
+    ws.onclose = () => {
+      console.log('Background game connection closed');
+
+      // Use a current check of isVisible state for reconnection logic
+      // This will be re-evaluated each time the connection closes
+      if (isVisible) {
+        console.log('Attempting to reconnect...');
+        reconnectTimeoutRef.current = window.setTimeout(() => {
+          reconnectTimeoutRef.current = null;
+          if (isVisible) {
+            // Double-check isVisible at reconnection time
+            setupWebSocket();
+          }
+        }, 2000);
+      }
+    };
+
+    wsRef.current = ws;
+  }, [isVisible]); // Include isVisible in the dependency array to create a new function when it changes
+
+  // Setup and manage WebSocket connection
+  useEffect(() => {
+    console.log('isVisible changed:', isVisible);
+
+    if (isVisible) {
+      setupWebSocket();
+    } else {
+      // Clean up when becoming invisible
+      if (wsRef.current) {
+        console.log('Closing WebSocket connection (not visible)');
+        wsRef.current.onclose = null; // Remove the onclose handler to prevent reconnection
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+
+      // Clear any pending reconnection
+      if (reconnectTimeoutRef.current !== null) {
+        window.clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+    }
+
+    // Cleanup function
+    return () => {
+      if (reconnectTimeoutRef.current !== null) {
+        window.clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
+      if (wsRef.current) {
+        console.log('Closing WebSocket connection on cleanup');
+        wsRef.current.onclose = null; // Remove the onclose handler to prevent reconnection
+        wsRef.current.close();
+      }
+    };
+  }, [isVisible, setupWebSocket]);
 
   return (
     <div
