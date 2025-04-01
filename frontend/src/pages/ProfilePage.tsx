@@ -10,8 +10,8 @@ import { RadialBackground } from '@components/profile/RadialBackground.tsx';
 
 import { getUserData } from '@services/userService';
 
-import { EditProfile } from '../components/profile/EditProfile';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
+import { UserInformationForm } from '../components/signUp/UserInformationForm';
 import { useUser } from '../contexts/user/UserContext';
 import { getRequestsSent } from '../services/friendService';
 
@@ -101,51 +101,54 @@ export const ProfilePage: React.FC = () => {
     return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
   }
 
+  // if (isOwnProfile && editProfile) {
+  //   return ;
+  // }
   return (
     <>
       <motion.div className="w-full h-full flex flex-col items-center md:p-6 text-center">
         <RadialBackground avatar_url={user.avatar_url}></RadialBackground>
-        <ProfileHeader
-          user={user}
-          isOwnProfile={isOwnProfile}
-          setLoading={setLoading}
-          setEditProfile={setEditProfile}
-          editProfile={editProfile}
-        ></ProfileHeader>
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
-            <motion.div
-              key="editSection"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.4 }}
-              onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
-            >
-              <EditProfile setLoading={setLoading} user={user} setEditProfile={setEditProfile} />
-            </motion.div>
+            <div>
+              <UserInformationForm
+                user={user}
+                setLoading={setLoading}
+                setEditProfile={setEditProfile}
+              ></UserInformationForm>
+            </div>
           ) : (
-            <motion.div
-              key="defaultSection"
-              className="w-full flex gap-4 flex-col md:flex-row items-top justify-center text-center"
-              // variants={animationVariants}
-              // initial="initial"
-              // animate="animate"
-              // exit="exit"
-              onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
-            >
-              <motion.div>
-                <FriendList
-                  isOwnProfile={isOwnProfile}
-                  friends={user.friends}
-                  requests={user.friend_requests}
-                  sents={sent}
-                />
+            <>
+              <ProfileHeader
+                user={user}
+                isOwnProfile={isOwnProfile}
+                setLoading={setLoading}
+                setEditProfile={setEditProfile}
+                editProfile={editProfile}
+              ></ProfileHeader>
+
+              <motion.div
+                key="defaultSection"
+                className="w-full flex gap-4 flex-col md:flex-row items-top justify-center text-center"
+                // variants={animationVariants}
+                // initial="initial"
+                // animate="animate"
+                // exit="exit"
+                onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
+              >
+                <motion.div>
+                  <FriendList
+                    isOwnProfile={isOwnProfile}
+                    friends={user.friends}
+                    requests={user.friend_requests}
+                    sents={sent}
+                  />
+                </motion.div>
+                <motion.div>
+                  <MatchHistory user={user} />
+                </motion.div>
               </motion.div>
-              <motion.div>
-                <MatchHistory user={user} />
-              </motion.div>
-            </motion.div>
+            </>
           )}
         </AnimatePresence>
       </motion.div>
