@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
-import { GameState, defaultGameParams } from '@shared/types';
+import { GameState, defaultGameParams, retroEffectsPresets } from '@shared/types';
 
 import BackgroundGameCanvas from './BackgroundGameCanvas';
 
@@ -41,21 +41,22 @@ const BackgroundGameProvider: React.FC = () => {
   useEffect(() => {
     // Hide background game when on the game page
     console.log('Location changed:', location.pathname);
-    setIsVisible(!location.pathname.includes('/game'));
+    setIsVisible(!location.pathname.includes('/game/'));
   }, [location.pathname]);
 
   useEffect(() => {
     if (!isVisible) return;
-    console.log('Background game provider mounted');
-    const token = localStorage.getItem('token');
-    const ws = new WebSocket(`wss://${window.location.host}/ws/background-game?`);
+
+    const wsUrl = `wss://${window.location.host}/ws/background-game?`;
+    const ws = new WebSocket(wsUrl);
+
     ws.onopen = () => {
-      console.log('WebSocket connection established');
+      console.log('Background game connection established');
     };
+
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log('Received background game messages:', data);
         if (data.type === 'game_state') {
           setGameState(data.state);
         }
@@ -64,9 +65,9 @@ const BackgroundGameProvider: React.FC = () => {
       }
     };
 
-    return () => {
-      ws.close();
-    };
+    // return () => {
+    //   ws.close();
+    // };
   }, [isVisible]);
 
   return (
@@ -79,7 +80,12 @@ const BackgroundGameProvider: React.FC = () => {
         height: '100vh',
       }}
     >
-      <BackgroundGameCanvas gameState={gameState || initialGameState} isVisible={isVisible} />
+      <BackgroundGameCanvas
+        gameState={gameState || initialGameState}
+        isVisible={isVisible}
+        retroPreset="cinematic"
+        retroLevels={retroEffectsPresets.cinematic}
+      />
     </div>
   );
 };
