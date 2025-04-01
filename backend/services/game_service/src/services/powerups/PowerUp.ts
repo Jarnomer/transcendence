@@ -1,17 +1,21 @@
-import PongGame from '../services/PongGame';
+import { defaultGameParams } from '@shared/types';
+
+import PongGame from '../PongGame';
 
 export abstract class PowerUp {
+  id: number;
   x: number;
   y: number;
-  duration: number;
-  active: boolean;
+  duration: number = defaultGameParams.powerUpDuration;
+  active: boolean = false;
   spawnTime: number = Date.now();
+  isSpent: boolean = false;
+  affectedPlayer: number = 0;
 
-  constructor(x: number, y: number, duration: number = 5000) {
+  constructor(id: number, x: number, y: number) {
+    this.id = id;
     this.x = x;
     this.y = y;
-    this.duration = duration;
-    this.active = true;
   }
 
   isExpired(): boolean {
