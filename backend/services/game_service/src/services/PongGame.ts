@@ -152,7 +152,7 @@ export default class PongGame {
       affectedPlayer,
       type: type,
     });
-    console.log(`Power-up spawned: ${id}, Type: ${type}, Position: (${x}, ${y})`);
+    // console.log(`Power-up spawned, id: ${id}, type: ${type}, position: (${x}, ${y})`);
   }
 
   collectPowerUp(id: number, player: number): void {
@@ -160,15 +160,12 @@ export default class PongGame {
     if (powerUp) {
       powerUp.collected = true;
       powerUp.affectedPlayer = player;
-      console.log(
-        `Power-up ${id} collected by player ${player}. Type: ${powerUp.type}, Affected Player: ${powerUp.affectedPlayer}`
-      );
+      // console.log(`Power-up ${id} collected by player ${player}. Type: ${powerUp.type}`);
     }
   }
 
   removePowerUp(id: number): void {
     this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
-    console.log(`Power-up ${id} removed.`);
   }
 
   setPlayerId(player: number, playerId: string): void {
@@ -182,6 +179,13 @@ export default class PongGame {
   }
 
   setPaddleHeight(player: number, height: number): void {
+    if (height < this.params.minPaddleHeight) {
+      console.warn('Paddle height too small, setting to minimum');
+      height = this.params.minPaddleHeight;
+    } else if (height > this.params.maxPaddleHeight) {
+      console.warn('Paddle height too large, setting to maximum');
+      height = this.params.maxPaddleHeight;
+    }
     this.repositionPaddleAfterHeightChange(player, height);
     if (player === 1) {
       this.gameState.players.player1.paddleHeight = height;
@@ -203,6 +207,7 @@ export default class PongGame {
   }
 
   private repositionPaddleAfterHeightChange(player: number, height: number): void {
+    // console.log('Correcting paddle position after height change:', player, height);
     if (player === 1) {
       if (height > this.gameState.players.player1.paddleHeight) {
         this.gameState.players.player1.y -=
@@ -272,6 +277,8 @@ export default class PongGame {
     this.updateInterval = setInterval(() => {
       if (this.gameStatus === 'playing') {
         this.updateBall();
+        this.powerUpManager.checkCollision();
+        this.powerUpManager.despawnExpiredPowerUps();
       }
     }, 1000 / 60); // 60 fps
   }

@@ -9,6 +9,7 @@ export abstract class PowerUp {
   duration: number = defaultGameParams.powerUpDuration;
   active: boolean = false;
   spawnTime: number = Date.now();
+  isSpent: boolean = false;
   affectedPlayer: number = 0;
 
   constructor(id: number, x: number, y: number) {
