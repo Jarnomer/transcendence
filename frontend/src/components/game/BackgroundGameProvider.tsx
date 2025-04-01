@@ -41,7 +41,11 @@ const BackgroundGameProvider: React.FC = () => {
   useEffect(() => {
     // Hide background game when on the game page
     console.log('Location changed:', location.pathname);
-    setIsVisible(!location.pathname.includes('/game'));
+    if (location.pathname.includes('/game')) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -65,7 +69,7 @@ const BackgroundGameProvider: React.FC = () => {
     };
 
     return () => {
-      ws.close();
+      //  ws.close();
     };
   }, [isVisible]);
 
