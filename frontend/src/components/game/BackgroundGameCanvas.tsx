@@ -21,23 +21,27 @@ import {
   setupScenelights,
 } from '@game/utils';
 
-import { GameState, defaultRetroEffectsLevels, defaultGameParams } from '@shared/types';
+import {
+  GameState,
+  RetroEffectsLevels,
+  defaultRetroEffectsLevels,
+  defaultGameParams,
+  retroEffectsPresets,
+} from '@shared/types';
 
 interface BackgroundGameCanvasProps {
   gameState: GameState;
   isVisible: boolean;
   theme?: 'light' | 'dark';
+  retroPreset?: 'default' | 'cinematic';
+  retroLevels?: RetroEffectsLevels;
 }
 
-// Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
-  // Get computed styles from document
   const computedStyle = getComputedStyle(document.documentElement);
 
-  // Use the data-theme attribute values from CSS
   document.documentElement.setAttribute('data-theme', theme);
 
-  // Get color values from CSS variables
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
@@ -46,16 +50,24 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 };
 
 const detectCollision = (
+  gameHeight: number,
   prevDx: number,
-  prevDy: number,
   newDx: number,
-  newDy: number
+  newY: number,
+  prevY: number
 ): 'dx' | 'dy' | null => {
-  const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
+  const bottomBoundary = gameHeight - 10;
+  const topBoundary = 0;
+
+  const hitTop = newY <= topBoundary && prevY > topBoundary;
+  const hitBottom = newY >= bottomBoundary && prevY < bottomBoundary;
+
+  const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
+  const dyCollision = hitTop || hitBottom;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';
+
   return null;
 };
 
@@ -82,6 +94,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   gameState,
   isVisible,
   theme = 'dark',
+  retroPreset = 'cinematic',
+  retroLevels = retroEffectsPresets.cinematic,
 }) => {
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
@@ -117,10 +131,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     if (!canvasRef.current || !gameState) return;
 
     const canvas = canvasRef.current;
-    const engine = new Engine(canvas, true, {
-      powerPreference: 'low-power', // Optimize for power saving
-      antialias: false, // Disable antialiasing for better performance
-    });
+    const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
@@ -131,16 +142,6 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera);
     const { shadowGenerators } = setupScenelights(scene);
-
-    // For background game, disable some heavy effects
-    if (pipeline) {
-      pipeline.bloomEnabled = false;
-      pipeline.depthOfFieldEnabled = false;
-      pipeline.fxaaEnabled = false;
-    }
-
-    // Set hardware scaling for better performance
-    engine.setHardwareScalingLevel(1.5);
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
@@ -156,13 +157,9 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
       topEdgeRef.current,
       bottomEdgeRef.current,
     ];
+
     setupReflections(scene, floorRef.current, gameObjects);
     shadowGenerators.forEach((generator) => {
-      // Use lower shadow quality for performance
-      generator.useBlurExponentialShadowMap = false;
-      generator.useKernelBlur = false;
-      generator.blurScale = 1;
-
       gameObjects.forEach((obj) => {
         generator.addShadowCaster(obj);
       });
@@ -174,20 +171,15 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
 
-    // Set paddle positions
+    // Set edge and paddle positions
     topEdgeRef.current.position.y = height / 2 / scaleFactor + 0.5;
     bottomEdgeRef.current.position.y = -height / 2 / scaleFactor - 0.5;
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 19.5;
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
-    retroEffectsRef.current = createPongRetroEffects(
-      scene,
-      camera,
-      'default',
-      defaultRetroEffectsLevels
-    );
-    retroLevelsRef.current = defaultRetroEffectsLevels;
+    retroEffectsRef.current = createPongRetroEffects(scene, camera, retroPreset, retroLevels);
+    retroLevelsRef.current = retroLevels;
 
     if (isVisible) {
       engine.runRenderLoop(() => {
@@ -208,7 +200,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
       engine.dispose();
       scene.dispose();
     };
-  }, []);
+  }, [isVisible]);
 
   // Handle visibility changes
   useEffect(() => {
@@ -225,17 +217,31 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     }
   }, [isVisible]);
 
+  // Update effect levels
+  useEffect(() => {
+    if (!retroEffectsRef.current) return;
+
+    try {
+      if (retroLevels !== retroLevelsRef.current) {
+        retroEffectsRef.current.updateLevels(retroLevels);
+        retroLevelsRef.current = retroLevels;
+      }
+
+      if (retroPreset === 'cinematic' || retroPreset === 'default') {
+        retroEffectsRef.current.applyPreset(retroPreset);
+      }
+    } catch (error) {
+      console.error('Error updating retro effects:', error);
+    }
+  }, [retroLevels, retroPreset]);
+
   // Update game objects based on game state
   useEffect(() => {
-    if (
-      !canvasRef.current ||
-      !themeColors.current ||
-      !isVisible ||
-      !ballRef.current ||
-      !player1Ref.current ||
-      !player2Ref.current
-    ) {
-      console.log('No canvas or theme colors or objects');
+    if (!themeColors.current) {
+      console.log('No color theme');
+      return;
+    } else if (!isVisible) {
+      console.log('Canvas not visible');
       return;
     }
 
@@ -258,10 +264,11 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
     const collision = detectCollision(
+      defaultGameParams.gameHeight,
       prevBallState.current.dx,
-      prevBallState.current.dy,
       ball.dx,
-      ball.dy
+      prevBallState.current.y,
+      ball.y
     );
     const score = detectScore(
       players.player1.score,

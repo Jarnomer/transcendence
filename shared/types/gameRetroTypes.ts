@@ -7,8 +7,6 @@ export interface RetroEffectsLevels {
   flicker: number;
   vignette: number;
   noise: number;
-
-  // Turn on/off effects
   crtTurnOnEffect: number;
   crtTurnOffEffect: number;
   crtChannelSwitchEffect: number;
@@ -104,14 +102,14 @@ export const retroEffectsPresets = {
   cinematic: {
     scanlines: 5,
     phosphor: 5,
-    curvature: 5,
+    curvature: 0,
     glitch: 5,
     colorBleed: 5,
     flicker: 5,
     vignette: 5,
     noise: 5,
-    crtTurnOnEffect: 1,
-    crtTurnOffEffect: 1,
-    crtChannelSwitchEffect: 1,
+    crtTurnOnEffect: 0,
+    crtTurnOffEffect: 0,
+    crtChannelSwitchEffect: 0,
   } as RetroEffectsLevels,
 };
