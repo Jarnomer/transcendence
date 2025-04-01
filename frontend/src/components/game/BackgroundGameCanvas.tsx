@@ -1,14 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-import {
-  Animation,
-  ArcRotateCamera,
-  Color3,
-  DefaultRenderingPipeline,
-  Engine,
-  Scene,
-  Vector3,
-} from 'babylonjs';
+import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
 import {
   RetroEffectsManager,
@@ -17,6 +9,7 @@ import {
   applyScoreEffects,
   ballSparkEffect,
   createBall,
+  createEdge,
   createFloor,
   createPaddle,
   createPongRetroEffects,
@@ -28,60 +21,15 @@ import {
   setupScenelights,
 } from '@game/utils';
 
-import { GameState } from '@shared/types';
+import { GameState, defaultRetroEffectsLevels, defaultGameParams } from '@shared/types';
 
 interface BackgroundGameCanvasProps {
   gameState: GameState;
-  theme?: 'light' | 'dark';
   isVisible: boolean;
+  theme?: 'light' | 'dark';
 }
 
-// Define camera preset positions for cinematic effect
-const CAMERA_PRESETS = [
-  {
-    alpha: -Math.PI / 2,
-    beta: Math.PI / 2,
-    radius: 24.5,
-    target: new Vector3(-0.2, 0.1, 0),
-    dof: { focalLength: 50, fStop: 2.8, focusDistance: 24.5 },
-  },
-  {
-    alpha: -Math.PI / 3,
-    beta: Math.PI / 3,
-    radius: 30,
-    target: new Vector3(0, 0, 0),
-    dof: { focalLength: 85, fStop: 1.4, focusDistance: 30 },
-  },
-  {
-    alpha: -Math.PI,
-    beta: Math.PI / 4,
-    radius: 20,
-    target: new Vector3(-15, 0, 0),
-    dof: { focalLength: 35, fStop: 2.0, focusDistance: 20 },
-  },
-  {
-    alpha: 0,
-    beta: Math.PI / 4,
-    radius: 20,
-    target: new Vector3(15, 0, 0),
-    dof: { focalLength: 35, fStop: 2.0, focusDistance: 20 },
-  },
-  {
-    alpha: -Math.PI / 2,
-    beta: Math.PI / 6,
-    radius: 35,
-    target: new Vector3(0, 0, 0),
-    dof: { focalLength: 105, fStop: 1.4, focusDistance: 35 },
-  },
-];
-
-// Fixed values for positions
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 400;
-const SCALE_FACTOR = 20;
-const FIX_POSITION = 2;
-
-// Helper function to get CSS variables
+// Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   // Get computed styles from document
   const computedStyle = getComputedStyle(document.documentElement);
@@ -132,12 +80,9 @@ const detectScore = (
 
 const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   gameState,
-  theme = 'dark',
   isVisible,
+  theme = 'dark',
 }) => {
-  const [lastTheme, setLastTheme] = useState(theme);
-  const [currentPresetIndex, setCurrentPresetIndex] = useState(0);
-
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
@@ -153,186 +98,29 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
-
+  const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
-  const cameraSwitchTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isTransitioningRef = useRef<boolean>(false);
 
   const floorRef = useRef<any>(null);
+  const topEdgeRef = useRef<any>(null);
+  const bottomEdgeRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
 
-  // Function to change camera position with animation
-  const switchCameraPosition = () => {
-    if (
-      !cameraRef.current ||
-      !postProcessingRef.current ||
-      !sceneRef.current ||
-      isTransitioningRef.current
-    ) {
-      return;
-    }
-
-    isTransitioningRef.current = true;
-
-    // Trigger score effect when changing camera
-    if (retroEffectsRef.current) {
-      applyScoreEffects(retroEffectsRef.current);
-    }
-
-    const nextIndex = (currentPresetIndex + 1) % CAMERA_PRESETS.length;
-    const currentPreset = CAMERA_PRESETS[currentPresetIndex];
-    const nextPreset = CAMERA_PRESETS[nextIndex];
-
-    // Animation settings
-    const fps = 60;
-    const transitionDuration = 3; // seconds
-
-    // Create animations for camera position
-    const alphaAnimation = new Animation(
-      'alphaAnimation',
-      'alpha',
-      fps,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const betaAnimation = new Animation(
-      'betaAnimation',
-      'beta',
-      fps,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const radiusAnimation = new Animation(
-      'radiusAnimation',
-      'radius',
-      fps,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const targetAnimation = new Animation(
-      'targetAnimation',
-      'target',
-      fps,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    // Create keyframes
-    const keyframes = {
-      alpha: [
-        { frame: 0, value: currentPreset.alpha },
-        { frame: fps * transitionDuration, value: nextPreset.alpha },
-      ],
-      beta: [
-        { frame: 0, value: currentPreset.beta },
-        { frame: fps * transitionDuration, value: nextPreset.beta },
-      ],
-      radius: [
-        { frame: 0, value: currentPreset.radius },
-        { frame: fps * transitionDuration, value: nextPreset.radius },
-      ],
-      target: [
-        { frame: 0, value: currentPreset.target },
-        { frame: fps * transitionDuration, value: nextPreset.target },
-      ],
-    };
-
-    // Set keyframes
-    alphaAnimation.setKeys(keyframes.alpha);
-    betaAnimation.setKeys(keyframes.beta);
-    radiusAnimation.setKeys(keyframes.radius);
-    targetAnimation.setKeys(keyframes.target);
-
-    // Animate camera
-    sceneRef.current.beginDirectAnimation(
-      cameraRef.current,
-      [alphaAnimation, betaAnimation, radiusAnimation],
-      0,
-      fps * transitionDuration,
-      false,
-      1,
-      () => {
-        // Animation complete callback
-        setCurrentPresetIndex(nextIndex);
-        isTransitioningRef.current = false;
-
-        // Apply the new depth of field settings
-        if (postProcessingRef.current) {
-          postProcessingRef.current.depthOfFieldEnabled = true;
-          postProcessingRef.current.depthOfField.focalLength = nextPreset.dof.focalLength;
-          postProcessingRef.current.depthOfField.fStop = nextPreset.dof.fStop;
-          postProcessingRef.current.depthOfField.focusDistance = nextPreset.dof.focusDistance;
-        }
-      }
-    );
-
-    // Animate target separately (since it's a Vector3)
-    sceneRef.current.beginDirectAnimation(
-      cameraRef.current,
-      [targetAnimation],
-      0,
-      fps * transitionDuration,
-      false
-    );
-
-    // Transition depth of field during camera movement
-    const currentDof = currentPreset.dof;
-    const nextDof = nextPreset.dof;
-
-    if (postProcessingRef.current) {
-      // Enable depth of field for cinematic effect
-      postProcessingRef.current.depthOfFieldEnabled = true;
-
-      // Start with current settings
-      postProcessingRef.current.depthOfField.focalLength = currentDof.focalLength;
-      postProcessingRef.current.depthOfField.fStop = currentDof.fStop;
-      postProcessingRef.current.depthOfField.focusDistance = currentDof.focusDistance;
-
-      // Transition DOF settings
-      const dofTransition = (progress: number) => {
-        if (!postProcessingRef.current) return;
-
-        const focalLength =
-          currentDof.focalLength + progress * (nextDof.focalLength - currentDof.focalLength);
-        const fStop = currentDof.fStop + progress * (nextDof.fStop - currentDof.fStop);
-        const focusDistance =
-          currentDof.focusDistance + progress * (nextDof.focusDistance - currentDof.focusDistance);
-
-        postProcessingRef.current.depthOfField.focalLength = focalLength;
-        postProcessingRef.current.depthOfField.fStop = fStop;
-        postProcessingRef.current.depthOfField.focusDistance = focusDistance;
-      };
-
-      // Create animation loop for DOF transition
-      const startTime = Date.now();
-      const endTime = startTime + transitionDuration * 1000;
-
-      const updateDof = () => {
-        const now = Date.now();
-        if (now >= endTime) {
-          return;
-        }
-
-        const progress = (now - startTime) / (endTime - startTime);
-        dofTransition(progress);
-        requestAnimationFrame(updateDof);
-      };
-
-      updateDof();
-    }
-  };
+  const width = defaultGameParams.gameWidth;
+  const height = defaultGameParams.gameHeight;
+  const scaleFactor = 20;
 
   // Initial render setup
   useEffect(() => {
-    if (!canvasRef.current || !gameState || !isVisible) return;
+    if (!canvasRef.current || !gameState) return;
 
     const canvas = canvasRef.current;
-    const engine = new Engine(canvas, true, { stencil: true });
+    const engine = new Engine(canvas, true, {
+      powerPreference: 'low-power', // Optimize for power saving
+      antialias: false, // Disable antialiasing for better performance
+    });
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
@@ -341,31 +129,40 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     setupEnvironmentMap(scene);
 
     const camera = setupSceneCamera(scene);
-
-    const initialPreset = CAMERA_PRESETS[0];
-    camera.alpha = initialPreset.alpha;
-    camera.beta = initialPreset.beta;
-    camera.radius = initialPreset.radius;
-    camera.setTarget(initialPreset.target);
-
     const pipeline = setupPostProcessing(scene, camera);
-
-    // Configure depth of field for cinematic effect
-    pipeline.depthOfFieldEnabled = true;
-    pipeline.depthOfField.focalLength = initialPreset.dof.focalLength;
-    pipeline.depthOfField.fStop = initialPreset.dof.fStop;
-    pipeline.depthOfField.focusDistance = initialPreset.dof.focusDistance;
-
     const { shadowGenerators } = setupScenelights(scene);
 
+    // For background game, disable some heavy effects
+    if (pipeline) {
+      pipeline.bloomEnabled = false;
+      pipeline.depthOfFieldEnabled = false;
+      pipeline.fxaaEnabled = false;
+    }
+
+    // Set hardware scaling for better performance
+    engine.setHardwareScalingLevel(1.5);
+
     floorRef.current = createFloor(scene, backgroundColor);
+    topEdgeRef.current = createEdge(scene, primaryColor);
+    bottomEdgeRef.current = createEdge(scene, primaryColor);
     player1Ref.current = createPaddle(scene, primaryColor);
     player2Ref.current = createPaddle(scene, primaryColor);
     ballRef.current = createBall(scene, primaryColor);
 
-    const gameObjects = [player1Ref.current, player2Ref.current, ballRef.current];
+    const gameObjects = [
+      player1Ref.current,
+      player2Ref.current,
+      ballRef.current,
+      topEdgeRef.current,
+      bottomEdgeRef.current,
+    ];
     setupReflections(scene, floorRef.current, gameObjects);
     shadowGenerators.forEach((generator) => {
+      // Use lower shadow quality for performance
+      generator.useBlurExponentialShadowMap = false;
+      generator.useKernelBlur = false;
+      generator.blurScale = 1;
+
       gameObjects.forEach((obj) => {
         generator.addShadowCaster(obj);
       });
@@ -373,31 +170,30 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     engineRef.current = engine;
     sceneRef.current = scene;
+    cameraRef.current = camera;
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
-    cameraRef.current = camera;
 
     // Set paddle positions
+    topEdgeRef.current.position.y = height / 2 / scaleFactor + 0.5;
+    bottomEdgeRef.current.position.y = -height / 2 / scaleFactor - 0.5;
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 19.5;
 
-    setLastTheme(theme);
+    sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
+    retroEffectsRef.current = createPongRetroEffects(
+      scene,
+      camera,
+      'default',
+      defaultRetroEffectsLevels
+    );
+    retroLevelsRef.current = defaultRetroEffectsLevels;
 
-    const sparkCleanUp = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
-    sparkEffectsRef.current = sparkCleanUp;
-
-    const retroEffects = createPongRetroEffects(scene, camera, 'cinematic');
-    retroEffectsRef.current = retroEffects;
-
-    setTimeout(() => {
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOn(1800).then(() => {});
-      }
-    }, 100);
-
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
+    if (isVisible) {
+      engine.runRenderLoop(() => {
+        scene.render();
+      });
+    }
 
     const handleResize = () => {
       engine.resize();
@@ -405,31 +201,52 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     window.addEventListener('resize', handleResize);
 
-    // Set up camera switching interval
-    cameraSwitchTimerRef.current = setInterval(switchCameraPosition, 15000);
-
     return () => {
       window.removeEventListener('resize', handleResize);
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
-      if (cameraSwitchTimerRef.current) clearInterval(cameraSwitchTimerRef.current);
       engine.dispose();
       scene.dispose();
     };
+  }, []);
+
+  // Handle visibility changes
+  useEffect(() => {
+    if (!engineRef.current || !sceneRef.current) return;
+
+    if (!isVisible) {
+      engineRef.current.stopRenderLoop();
+    } else {
+      engineRef.current.runRenderLoop(() => {
+        if (sceneRef.current) {
+          sceneRef.current.render();
+        }
+      });
+    }
   }, [isVisible]);
 
-  // Update game objects
+  // Update game objects based on game state
   useEffect(() => {
-    if (!canvasRef.current || !themeColors.current || !isVisible) return;
+    if (
+      !canvasRef.current ||
+      !themeColors.current ||
+      !isVisible ||
+      !ballRef.current ||
+      !player1Ref.current ||
+      !player2Ref.current
+    ) {
+      console.log('No canvas or theme colors or objects');
+      return;
+    }
 
     const { players, ball } = gameState;
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = -((players.player1.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const player2Y = -((players.player2.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR) - FIX_POSITION;
-    const ballY = -((ball.y - CANVAS_HEIGHT / 2) / SCALE_FACTOR);
-    const ballX = (ball.x - CANVAS_WIDTH / 2) / SCALE_FACTOR;
+    const player1Y = -((players.player1.y - height / 2) / scaleFactor) - 2;
+    const player2Y = -((players.player2.y - height / 2) / scaleFactor) - 2;
+    const ballY = -((ball.y - height / 2) / scaleFactor);
+    const ballX = (ball.x - width / 2) / scaleFactor;
 
     // Update mesh positions directly
     player1Ref.current.position.y = player1Y;
@@ -458,13 +275,16 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
     if (collision) {
+      const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
+      const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
       applyCollisionEffects(
         retroEffectsRef.current,
         ballRef.current,
-        player1Ref.current,
-        player2Ref.current,
+        paddleToRecoil,
+        edgeToDeform,
         collision,
         speed,
+        ball.spin,
         color
       );
     }
@@ -482,54 +302,15 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     };
   }, [gameState, isVisible]);
 
-  // Handle visibility changes
-  useEffect(() => {
-    if (!engineRef.current) return;
-
-    if (!isVisible) {
-      if (cameraSwitchTimerRef.current) {
-        clearInterval(cameraSwitchTimerRef.current);
-        cameraSwitchTimerRef.current = null;
-      }
-
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOff(1500);
-      }
-
-      engineRef.current.stopRenderLoop();
-    } else {
-      if (engineRef.current && sceneRef.current) {
-        engineRef.current.runRenderLoop(() => {
-          if (sceneRef.current) {
-            sceneRef.current.render();
-          }
-        });
-      }
-
-      if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOn(1800);
-      }
-
-      // Restart camera switching
-      if (!cameraSwitchTimerRef.current) {
-        cameraSwitchTimerRef.current = setInterval(switchCameraPosition, 15000);
-      }
-    }
-  }, [isVisible]);
-
   return (
     <canvas
       ref={canvasRef}
       style={{
+        pointerEvents: 'none',
         width: '100%',
         height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: -1,
-        opacity: isVisible ? 0.7 : 0,
-        transition: 'opacity 0.5s ease-in-out',
-        pointerEvents: 'none',
+        // opacity: isVisible ? 0.3 : 0,
+        // transition: 'opacity 0.5s ease',
       }}
     />
   );

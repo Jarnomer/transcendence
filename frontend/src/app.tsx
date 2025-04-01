@@ -34,7 +34,7 @@ const App: React.FC = () => {
       <ModalProvider>
         <div
           id="app-container"
-          className={`flex flex-col relative items-center min-h-screen w-screen text-primary bg-background p-2`}
+          className={`flex flex-col relative items-center min-h-screen w-screen text-primary p-2`}
         >
           <Header />
           <div
@@ -54,8 +54,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-interface ValidateResponse {
-  username: string;
-  user_id: string;
-}

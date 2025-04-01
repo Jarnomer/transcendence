@@ -1,4 +1,13 @@
-import { Animation, Color3, Color4, ParticleSystem, PointLight, Scene, Vector3 } from 'babylonjs';
+import {
+  Animation,
+  Color3,
+  MeshBuilder,
+  Color4,
+  ParticleSystem,
+  PointLight,
+  Scene,
+  Vector3,
+} from 'babylonjs';
 
 import { createParticleTexture } from '@game/utils';
 
@@ -338,16 +347,144 @@ function applyShockwaveEffect(
   return shockwaveSystem;
 }
 
+function applyEdgeDeformEffect(
+  edgeMesh: any,
+  ballMesh: any,
+  speedFactor: number,
+  spinFactor: number,
+  scene: Scene
+) {
+  const deformDirection = edgeMesh.position.y < 0 ? -1 : 1;
+  const originalPoints = edgeMesh.metadata.originalPoints;
+  const numPoints = originalPoints.length;
+  const ballX = ballMesh.position.x;
+
+  const combinedFactor = speedFactor + spinFactor;
+
+  const maxDeform = combinedFactor * 0.2;
+  const affectRadius = combinedFactor * 0.5;
+
+  // Create new points array for deformed shape
+  const deformedPoints = [];
+  for (let i = 0; i < numPoints; i++) {
+    const origPoint = originalPoints[i];
+    const newPoint = origPoint.clone();
+
+    const distance = Math.abs(origPoint.x - ballX);
+
+    if (distance < affectRadius) {
+      // Apply cosine-based deformation for smooth falloff
+      const deformFactor = Math.cos(((distance / affectRadius) * Math.PI) / 2);
+      newPoint.y += maxDeform * deformFactor * deformDirection;
+    }
+
+    deformedPoints.push(newPoint);
+  }
+
+  // Apply the deformation immediately
+  MeshBuilder.CreateTube(
+    'updatedEdge',
+    {
+      path: deformedPoints,
+      radius: 0.15,
+      tessellation: 16,
+      updatable: true,
+      instance: edgeMesh,
+    },
+    scene
+  );
+
+  // Create an animation to restore the original shape
+  const frameRate = 60;
+  const animation = new Animation(
+    'edgeRestoreAnimation',
+    'metadata.deformFactor',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  // Store the deformed points for interpolation
+  edgeMesh.metadata.deformedPoints = deformedPoints;
+  edgeMesh.metadata.deformFactor = 0;
+
+  // Adjust animation to be more springy with higher spin values
+  const restoreDuration = Math.max(30, (40 * combinedFactor) / 4);
+  const keys = [];
+  keys.push({ frame: 0, value: 0 });
+  keys.push({ frame: 5, value: 0.2 });
+  keys.push({ frame: 15, value: 0.7 });
+  keys.push({ frame: restoreDuration, value: 1 });
+
+  animation.setKeys(keys);
+
+  // Function to update the mesh during animation
+  const updateMesh = () => {
+    const factor = edgeMesh.metadata.deformFactor;
+
+    // Skip if animation hasn't started
+    if (factor === undefined) return;
+
+    // Create interpolated points
+    const points = [];
+    for (let i = 0; i < numPoints; i++) {
+      const deformedPoint = edgeMesh.metadata.deformedPoints[i];
+      const originalPoint = originalPoints[i];
+
+      // Linear interpolation between deformed and original
+      const x = deformedPoint.x + (originalPoint.x - deformedPoint.x) * factor;
+      const y = deformedPoint.y + (originalPoint.y - deformedPoint.y) * factor;
+      const z = deformedPoint.z;
+
+      points.push(new Vector3(x, y, z));
+    }
+
+    // Update the tube
+    MeshBuilder.CreateTube(
+      'updatedEdge',
+      {
+        path: points,
+        radius: 0.15,
+        tessellation: 16,
+        updatable: true,
+        instance: edgeMesh,
+      },
+      scene
+    );
+  };
+
+  const observer = scene.onBeforeRenderObservable.add(updateMesh);
+
+  scene.beginDirectAnimation(edgeMesh, [animation], 0, restoreDuration, false, 1, () => {
+    scene.onBeforeRenderObservable.remove(observer);
+
+    // Ensure mesh is fully restored to original shape
+    MeshBuilder.CreateTube(
+      'updatedEdge',
+      {
+        path: originalPoints,
+        radius: 0.15,
+        tessellation: 16,
+        updatable: true,
+        instance: edgeMesh,
+      },
+      scene
+    );
+  });
+}
+
 export function applyCollisionEffects(
   retroEffectsRef: any,
   ballMesh: any,
-  leftPaddle: any,
-  rightPaddle: any,
+  paddleMesh: any,
+  edgeMesh: any,
   collisionType: 'dx' | 'dy',
   speed: number,
+  spin: number,
   color: Color3
 ) {
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
+  const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);
   const scene = ballMesh.getScene();
 
   applySquishEffect(ballMesh, collisionType, speedFactor, scene);
@@ -356,11 +493,9 @@ export function applyCollisionEffects(
   applyParticleEffect(ballMesh, collisionType, speedFactor, color, scene);
 
   if (collisionType === 'dx') {
-    if (ballMesh.position.x <= 0) {
-      applyPaddleRecoil(leftPaddle, speedFactor, scene);
-    } else {
-      applyPaddleRecoil(rightPaddle, speedFactor, scene);
-    }
+    applyPaddleRecoil(paddleMesh, speedFactor, scene);
+  } else if (collisionType === 'dy') {
+    applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
   }
 
   if (retroEffectsRef) {

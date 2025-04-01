@@ -252,10 +252,12 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
-    //console.log('Starting countdown...');
+    console.log('Starting countdown...');
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
+
+    console.log('Game starting with max score:', this.params.maxScore);
 
     setTimeout(() => {
       this.setGameStatus('playing');
@@ -326,6 +328,7 @@ export default class PongGame {
     this.adjustBallMovementForSpin();
     ball.x += ball.dx;
     ball.y += ball.dy;
+    // console.log('Ball position:', ball.x, ball.y);
 
     // Top wall collision
     if (ball.y <= 0) {
@@ -348,6 +351,7 @@ export default class PongGame {
 
     if (ball.x <= 0) {
       players.player2.score++;
+      console.log('Player 2 scores!');
       if (this.params.maxScore !== 0 && players.player2.score >= this.params.maxScore) {
         this.stopGame();
       } else {
@@ -355,6 +359,7 @@ export default class PongGame {
       }
     } else if (ball.x + this.params.ballSize >= this.params.gameWidth) {
       players.player1.score++;
+      console.log('Player 1 scores!');
       if (this.params.maxScore !== 0 && players.player1.score >= this.params.maxScore) {
         this.stopGame();
       } else {
@@ -407,6 +412,7 @@ export default class PongGame {
     ) {
       ball.x = this.params.paddleWidth;
       this.handlePaddleBounce(players.player1.y, true);
+      // console.log('Player 1 hit the ball');
     } else if (
       ball.x + this.params.ballSize >= this.params.gameWidth - this.params.paddleWidth &&
       ball.y + this.params.ballSize >= players.player2.y &&
@@ -414,6 +420,7 @@ export default class PongGame {
     ) {
       ball.x = this.params.gameWidth - this.params.paddleWidth - this.params.ballSize;
       this.handlePaddleBounce(players.player2.y, false);
+      // console.log('Player 2 hit the ball');
     }
   }
 

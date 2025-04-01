@@ -18,6 +18,7 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
+  createEdge,
 } from '@game/utils';
 
 import {
@@ -110,6 +111,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
 
   const floorRef = useRef<any>(null);
+  const topEdgeRef = useRef<any>(null);
+  const bottomEdgeRef = useRef<any>(null);
   const player1Ref = useRef<any>(null);
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
@@ -136,11 +139,19 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const { shadowGenerators } = setupScenelights(scene);
 
     floorRef.current = createFloor(scene, backgroundColor);
+    topEdgeRef.current = createEdge(scene, primaryColor);
+    bottomEdgeRef.current = createEdge(scene, primaryColor);
     player1Ref.current = createPaddle(scene, primaryColor);
     player2Ref.current = createPaddle(scene, primaryColor);
     ballRef.current = createBall(scene, primaryColor);
 
-    const gameObjects = [player1Ref.current, player2Ref.current, ballRef.current];
+    const gameObjects = [
+      player1Ref.current,
+      player2Ref.current,
+      ballRef.current,
+      topEdgeRef.current,
+      bottomEdgeRef.current,
+    ];
     setupReflections(scene, floorRef.current, gameObjects);
     shadowGenerators.forEach((generator) => {
       gameObjects.forEach((obj) => {
@@ -155,6 +166,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     postProcessingRef.current = pipeline;
 
     // Set paddle positions
+    topEdgeRef.current.position.y = height / 2 / scaleFactor + 0.5;
+    bottomEdgeRef.current.position.y = -height / 2 / scaleFactor - 0.5;
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 19.5;
 
@@ -241,13 +254,16 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
     if (collision) {
+      const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
+      const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
       applyCollisionEffects(
         retroEffectsRef.current,
         ballRef.current,
-        player1Ref.current,
-        player2Ref.current,
+        paddleToRecoil,
+        edgeToDeform,
         collision,
         speed,
+        ball.spin,
         color
       );
     }

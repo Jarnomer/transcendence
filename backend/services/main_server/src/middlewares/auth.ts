@@ -12,7 +12,11 @@ async function authPlugin(fastify: FastifyInstance) {
       '/api/auth/refresh',
       '/api/admin/logs',
     ];
-    if (publicRoutes.includes(request.url) || request.url?.startsWith('/docs')) {
+    if (
+      publicRoutes.includes(request.url) ||
+      request.url?.startsWith('/docs') ||
+      request.url?.startsWith('/ws/background-game')
+    ) {
       return; // Skip authentication
     }
     if (request.raw.url?.startsWith('/ws')) {
