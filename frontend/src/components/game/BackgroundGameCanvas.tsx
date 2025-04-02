@@ -1,16 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import {
-  ArcRotateCamera,
-  Color3,
-  DefaultRenderingPipeline,
-  Engine,
-  Scene,
-  Vector3,
-  Animation,
-  EasingFunction,
-  CubicEase,
-} from 'babylonjs';
+import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
 import {
   RetroEffectsManager,
@@ -26,8 +16,12 @@ import {
   getThemeColors,
   setupPostProcessing,
   setupReflections,
-  setupSceneCamera,
   setupScenelights,
+  animateCamera,
+  applyCameraAngle,
+  cameraAngles,
+  getRandomCameraAngle,
+  setupSceneCamera,
 } from '@game/utils';
 
 import {
@@ -48,34 +42,6 @@ interface BackgroundGameCanvasProps {
   retroLevels?: RetroEffectsLevels;
   retroBaseParams?: RetroEffectsBaseParams;
 }
-
-interface CameraAngle {
-  alpha: number; // horizontal rotation in radians
-  beta: number; // vertical rotation in radians
-  radius: number; // distance from target
-  target?: Vector3; // optional target position
-  position?: Vector3; // explicit XYZ position
-  dofEnabled?: boolean; // enable/disable depth of field
-  focalLength?: number; // camera focal length
-  fStop?: number; // aperture f-stop
-  focusDistance?: number; // focus distance
-  dofBlurLevel?: number; // blur level (low, medium, high)
-}
-
-const cameraAngles: CameraAngle[] = [
-  {
-    alpha: Math.PI / 3, // ignored if position is set
-    beta: Math.PI / 3, // ignored if position is set
-    radius: 20,
-    position: new Vector3(35, 20, 10), // explicit position
-    target: new Vector3(20, 10, 4), // where camera targets
-    dofEnabled: true,
-    focalLength: 50,
-    fStop: 1.5,
-    focusDistance: 50,
-    dofBlurLevel: 5,
-  },
-];
 
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   const computedStyle = getComputedStyle(document.documentElement);
@@ -128,224 +94,6 @@ const detectScore = (
     lastScoreRef.value = currentScore;
     return 'player1';
   }
-};
-
-// Function to animate camera to a new position
-const animateCamera = (
-  camera: ArcRotateCamera,
-  targetAngle: CameraAngle,
-  pipeline: DefaultRenderingPipeline | null,
-  duration: number = 3000
-) => {
-  const scene = camera.getScene();
-  const animations = [];
-
-  // 1. Handle camera position animations
-  if (targetAngle.position) {
-    // Direct position animation (XYZ coordinates)
-    const positionAnimation = new Animation(
-      'cameraPositionAnimation',
-      'position',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    positionAnimation.setKeys([
-      { frame: 0, value: camera.position.clone() },
-      { frame: 100, value: targetAngle.position },
-    ]);
-
-    animations.push({
-      animation: positionAnimation,
-      target: camera,
-    });
-  } else {
-    // Traditional spherical coordinates animation
-    // Create animations for alpha, beta and radius
-    const alphaAnimation = new Animation(
-      'cameraAlphaAnimation',
-      'alpha',
-      30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const betaAnimation = new Animation(
-      'cameraBetaAnimation',
-      'beta',
-      30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const radiusAnimation = new Animation(
-      'cameraRadiusAnimation',
-      'radius',
-      30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    // Create keyframes
-    const keyframes = {
-      alpha: [
-        { frame: 0, value: camera.alpha },
-        { frame: 100, value: targetAngle.alpha },
-      ],
-      beta: [
-        { frame: 0, value: camera.beta },
-        { frame: 100, value: targetAngle.beta },
-      ],
-      radius: [
-        { frame: 0, value: camera.radius },
-        { frame: 100, value: targetAngle.radius },
-      ],
-    };
-
-    // Set keyframes
-    alphaAnimation.setKeys(keyframes.alpha);
-    betaAnimation.setKeys(keyframes.beta);
-    radiusAnimation.setKeys(keyframes.radius);
-
-    // Add animations to list
-    animations.push({
-      animation: alphaAnimation,
-      target: camera,
-    });
-
-    animations.push({
-      animation: betaAnimation,
-      target: camera,
-    });
-
-    animations.push({
-      animation: radiusAnimation,
-      target: camera,
-    });
-  }
-
-  // 2. Add target animation if specified
-  if (targetAngle.target) {
-    const targetAnimation = new Animation(
-      'cameraTargetAnimation',
-      'target',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    targetAnimation.setKeys([
-      { frame: 0, value: camera.target.clone() },
-      { frame: 100, value: targetAngle.target },
-    ]);
-
-    animations.push({
-      animation: targetAnimation,
-      target: camera,
-    });
-  }
-
-  // 3. Add depth of field animations if specified
-  if (pipeline && targetAngle.dofEnabled !== undefined) {
-    // Enable/disable DOF
-    pipeline.depthOfFieldEnabled = targetAngle.dofEnabled;
-
-    if (targetAngle.dofEnabled) {
-      // Set DOF parameters
-      if (targetAngle.focalLength !== undefined) {
-        const focalLengthAnimation = new Animation(
-          'dofFocalLengthAnimation',
-          'depthOfField.focalLength',
-          30,
-          Animation.ANIMATIONTYPE_FLOAT,
-          Animation.ANIMATIONLOOPMODE_CONSTANT
-        );
-
-        focalLengthAnimation.setKeys([
-          { frame: 0, value: pipeline.depthOfField.focalLength },
-          { frame: 100, value: targetAngle.focalLength },
-        ]);
-
-        animations.push({
-          animation: focalLengthAnimation,
-          target: pipeline,
-        });
-      }
-
-      if (targetAngle.fStop !== undefined) {
-        const fStopAnimation = new Animation(
-          'dofFStopAnimation',
-          'depthOfField.fStop',
-          30,
-          Animation.ANIMATIONTYPE_FLOAT,
-          Animation.ANIMATIONLOOPMODE_CONSTANT
-        );
-
-        fStopAnimation.setKeys([
-          { frame: 0, value: pipeline.depthOfField.fStop },
-          { frame: 100, value: targetAngle.fStop },
-        ]);
-
-        animations.push({
-          animation: fStopAnimation,
-          target: pipeline,
-        });
-      }
-
-      if (targetAngle.focusDistance !== undefined) {
-        const focusDistanceAnimation = new Animation(
-          'dofFocusDistanceAnimation',
-          'depthOfField.focusDistance',
-          30,
-          Animation.ANIMATIONTYPE_FLOAT,
-          Animation.ANIMATIONLOOPMODE_CONSTANT
-        );
-
-        focusDistanceAnimation.setKeys([
-          { frame: 0, value: pipeline.depthOfField.focusDistance },
-          { frame: 100, value: targetAngle.focusDistance },
-        ]);
-
-        animations.push({
-          animation: focusDistanceAnimation,
-          target: pipeline,
-        });
-      }
-
-      if (targetAngle.dofBlurLevel !== undefined) {
-        pipeline.depthOfFieldBlurLevel = targetAngle.dofBlurLevel;
-      }
-    }
-  }
-
-  // Add easing function for smooth transitions to all animations
-  const easingFunction = new CubicEase();
-  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-
-  animations.forEach((anim) => {
-    anim.animation.setEasingFunction(easingFunction);
-  });
-
-  // Start animations
-  const animatables = animations.map((anim) => {
-    return scene.beginDirectAnimation(
-      anim.target,
-      [anim.animation],
-      0,
-      100,
-      false,
-      (1000 / duration) * 100
-    );
-  });
-
-  return animatables;
-};
-
-// Get a random camera angle from the presets
-const getRandomCameraAngle = (): CameraAngle => {
-  const randomIndex = Math.floor(Math.random() * cameraAngles.length);
-  return cameraAngles[randomIndex];
 };
 
 const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
@@ -488,45 +236,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
       const randomAngle = getRandomCameraAngle();
       const camera = cameraRef.current;
 
-      // Set the camera position based on the angle configuration
-      if (randomAngle.position) {
-        // If explicit position is provided, use it
-        camera.position = randomAngle.position.clone();
-      } else {
-        // Otherwise use the traditional spherical coordinates
-        camera.alpha = randomAngle.alpha;
-        camera.beta = randomAngle.beta;
-        camera.radius = randomAngle.radius;
-      }
-
-      // Set target if provided
-      if (randomAngle.target) {
-        camera.target = randomAngle.target.clone();
-      }
-
-      // Set depth of field settings if provided and if post-processing is available
-      if (postProcessingRef.current && randomAngle.dofEnabled !== undefined) {
-        const pipeline = postProcessingRef.current;
-        pipeline.depthOfFieldEnabled = randomAngle.dofEnabled;
-
-        if (randomAngle.dofEnabled) {
-          if (randomAngle.focalLength !== undefined) {
-            pipeline.depthOfField.focalLength = randomAngle.focalLength;
-          }
-
-          if (randomAngle.fStop !== undefined) {
-            pipeline.depthOfField.fStop = randomAngle.fStop;
-          }
-
-          if (randomAngle.focusDistance !== undefined) {
-            pipeline.depthOfField.focusDistance = randomAngle.focusDistance;
-          }
-
-          if (randomAngle.dofBlurLevel !== undefined) {
-            pipeline.depthOfFieldBlurLevel = randomAngle.dofBlurLevel;
-          }
-        }
-      }
+      // Apply the random camera angle
+      applyCameraAngle(camera, randomAngle, postProcessingRef.current);
 
       // Find the index of the randomly chosen angle for tracking
       currentAngleIndexRef.current = cameraAngles.findIndex((angle) => angle === randomAngle);

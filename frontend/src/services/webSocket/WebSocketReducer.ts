@@ -25,6 +25,7 @@ export const initialState: WebSocketState = {
       player2: { id: 'player2', y: 0, score: 0, dy: 0, paddleHeight: 0 },
     },
     ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
+    powerUps: [],
   },
 };
 
@@ -65,6 +66,7 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
             ...state.gameState.ball,
             ...action.payload.ball,
           },
+          powerUps: action.payload.powerUps || [],
         },
       };
     case 'GAME_STATUS':

@@ -4,6 +4,7 @@ import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from
 
 import {
   RetroEffectsManager,
+  PowerUpEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
   applyScoreEffects,
@@ -23,6 +24,7 @@ import {
 
 import {
   GameState,
+  PowerUp,
   RetroEffectsLevels,
   defaultRetroEffectsLevels,
   defaultGameParams,
@@ -112,7 +114,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(retroLevels);
+
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
+  const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
+  const prevPowerUpsRef = useRef<PowerUp[]>([]);
 
   const floorRef = useRef<any>(null);
   const topEdgeRef = useRef<any>(null);
@@ -175,6 +180,14 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     player1Ref.current.position.x = -20;
     player2Ref.current.position.x = 19.5;
 
+    powerUpEffectsRef.current = new PowerUpEffectsManager(
+      scene,
+      colors.primaryColor,
+      defaultGameParams.gameWidth,
+      defaultGameParams.gameHeight,
+      scaleFactor
+    );
+
     setLastTheme(theme); // Save current theme
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
@@ -193,6 +206,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (powerUpEffectsRef.current) powerUpEffectsRef.current.disposeAll();
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       engine.dispose();
@@ -218,7 +232,21 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   }, [retroLevels, retroPreset]);
 
-  // Update game objects
+  // Handle power-up updates
+  useEffect(() => {
+    if (!powerUpEffectsRef.current || !gameState) return;
+
+    const powerUps = gameState.powerUps || [];
+    const powerUpsChanged = JSON.stringify(powerUps) !== JSON.stringify(prevPowerUpsRef.current);
+
+    if (powerUpsChanged) {
+      powerUpEffectsRef.current.updatePowerUpEffects(powerUps);
+      powerUpEffectsRef.current.updatePositions(powerUps);
+      prevPowerUpsRef.current = [...powerUps];
+    }
+  }, [gameState]);
+
+  // Handle game object updates
   useEffect(() => {
     if (!canvasRef.current || !themeColors.current) return;
 
