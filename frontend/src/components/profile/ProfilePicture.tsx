@@ -1,32 +1,48 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
-import { useParams } from 'react-router-dom';
-
+import { UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
-
-type user = {
-  user_id: string;
-  display_name: string;
-  avatar_url: string;
-  games: any[];
-};
+import { api } from '../../services/api';
 
 interface ProfilePictureProps {
-  user: user[];
-  editProfile: boolean;
-  setEditProfile: () => void;
+  user: UserDataResponseType;
+  isOwnProfile: boolean;
 }
 
-export const ProfilePicture: React.FC<ProfilePictureProps> = (
-  user,
-  editProfile,
-  setEditProfile
-) => {
-  const { userId } = useParams<{ userId: string }>();
-  const { user: loggedInUser } = useUser();
-  const isOwnProfile = userId === loggedInUser?.user_id;
+export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfile }) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setUser } = useUser();
 
-  useEffect(() => {}, [user]);
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const userID = localStorage.getItem('userID');
+    if (!userID) {
+      console.error('User ID not found');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    setLoading(true);
+    try {
+      const res = await api.post(`user/avatar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (res.status != 200) {
+        throw new Error('Failed to upload avatar');
+      }
+      setUser(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
+  };
+
   return (
     <>
       <div className="rounded-full relative w-[150px] h-[150px] border-2 border-primary">

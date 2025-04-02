@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 
 import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
 
+import { useUser } from '../../contexts/user/UserContext';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 
 type Friend = {
@@ -59,6 +60,31 @@ export const FriendList: React.FC<FriendListProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
   const navigate = useNavigate();
+  const { refetchUser } = useUser();
+
+  const handleAcceptFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    acceptFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request accepted');
+        refetchUser();
+      })
+      .catch((error) => {
+        console.error('Failed to accept friend request: ', error);
+      });
+  };
+
+  const handleRejectFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    rejectFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request rejected');
+        refetchUser();
+      })
+      .catch((error) => {
+        console.error('Failed to reject friend request: ', error);
+      });
+  };
 
   const renderList = (list: Friend[], emptyText: string, isRequestList: boolean) => {
     return list && list.length > 0 ? (
@@ -97,28 +123,6 @@ export const FriendList: React.FC<FriendListProps> = ({
     ) : (
       <p className="text-gray-400 ">{emptyText}</p>
     );
-  };
-
-  const handleAcceptFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    acceptFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request accepted');
-      })
-      .catch((error) => {
-        console.error('Failed to accept friend request: ', error);
-      });
-  };
-
-  const handleRejectFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    rejectFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request rejected');
-      })
-      .catch((error) => {
-        console.error('Failed to reject friend request: ', error);
-      });
   };
 
   return (
