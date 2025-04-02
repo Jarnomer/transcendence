@@ -142,6 +142,8 @@ export default class PongGame {
     y: number,
     collected: boolean,
     affectedPlayer: number,
+    timeToDespawn: number,
+    timeToExpire: number,
     type: 'bigger_paddle' | 'smaller_paddle'
   ): void {
     this.gameState.powerUps.push({
@@ -150,17 +152,33 @@ export default class PongGame {
       y,
       collected,
       affectedPlayer,
+      timeToDespawn,
+      timeToExpire,
       type: type,
     });
     // console.log(`Power-up spawned, id: ${id}, type: ${type}, position: (${x}, ${y})`);
   }
 
-  collectPowerUp(id: number, player: number): void {
+  collectPowerUp(id: number, player: number, effectDuration: number): void {
     const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
     if (powerUp) {
       powerUp.collected = true;
       powerUp.affectedPlayer = player;
+      powerUp.timeToExpire = effectDuration;
       // console.log(`Power-up ${id} collected by player ${player}. Type: ${powerUp.type}`);
+    }
+  }
+
+  // Decrement timeToDespawn or timeToExpire for all power-ups
+  updatePowerUpTimers(): void {
+    for (const powerUp of this.gameState.powerUps) {
+      if (!powerUp.collected) {
+        powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
+        // console.log(`Power-up ${powerUp.id} time to despawn: ${powerUp.timeToDespawn.toFixed(2)}`);
+      } else {
+        powerUp.timeToExpire -= 1000 / 60; // Assuming 60 FPS
+        // console.log(`Power-up ${powerUp.id} time to expire: ${powerUp.timeToExpire.toFixed(2)}`);
+      }
     }
   }
 
@@ -278,6 +296,7 @@ export default class PongGame {
       if (this.gameStatus === 'playing') {
         this.updateBall();
         this.powerUpManager.checkCollision();
+        this.updatePowerUpTimers();
         this.powerUpManager.despawnExpiredPowerUps();
       }
     }, 1000 / 60); // 60 fps
