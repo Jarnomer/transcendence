@@ -89,9 +89,9 @@ export const defaultGameParams: GameParams = {
   maxScore: 3,
   countdown: 3, // Seconds
 
-  powerUpMinSpawnInterval: 5000, // Milliseconds
-  powerUpMaxSpawnInterval: 10000, // Milliseconds
-  powerUpDuration: 5000, // Milliseconds
+  powerUpMinSpawnInterval: 2000, // Milliseconds
+  powerUpMaxSpawnInterval: 4000, // Milliseconds
+  powerUpDuration: 8000, // Milliseconds
   powerUpSize: 20,
 };
 

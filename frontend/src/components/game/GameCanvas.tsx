@@ -237,16 +237,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!powerUpEffectsRef.current || !gameState) return;
 
     const powerUps = gameState.powerUps || [];
-
-    // Check if power-ups have changed
     const powerUpsChanged = JSON.stringify(powerUps) !== JSON.stringify(prevPowerUpsRef.current);
 
     if (powerUpsChanged) {
-      // Update power-up effects
       powerUpEffectsRef.current.updatePowerUpEffects(powerUps);
       powerUpEffectsRef.current.updatePositions(powerUps);
-
-      // Store current power-ups for next comparison
       prevPowerUpsRef.current = [...powerUps];
     }
   }, [gameState]);
