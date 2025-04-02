@@ -3,6 +3,8 @@ export * from './gameBallSparks';
 export * from './gameCollisionEffects';
 export * from './gameColorConverter';
 export * from './gameObjects';
+export * from './gameCamera.ts';
+export * from './gamePowerUpEffects';
 export * from './gamePostProcess';
 export * from './gameRetroEffects';
 export * from './gameScoreEffects';

@@ -1,5 +1,4 @@
 import {
-  ArcRotateCamera,
   Camera,
   Color3,
   CubeTexture,
@@ -123,21 +122,6 @@ export function setupScenelights(scene: Scene) {
   };
 }
 
-export function setupSceneCamera(scene: Scene) {
-  const camera = new ArcRotateCamera(
-    'camera',
-    -Math.PI / 2, // horizontal rotation
-    Math.PI / 2, // vertical rotation
-    28, // distance from floor
-    new Vector3(-0.2, 0.1, 0),
-    scene
-  );
-
-  camera.detachControl();
-
-  return camera;
-}
-
 export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: any[]) {
   const mirrorTexture = new MirrorTexture('floorMirror', 1024, scene, true);
   const floorMaterial = floorMesh.material;
@@ -152,20 +136,6 @@ export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects
   floorMaterial.environmentIntensity = 0.8;
 
   return mirrorTexture;
-}
-
-export function updateMotionBlur(speed: number, camera: Camera) {
-  // Find the motion blur post process
-  const motionBlur = camera._postProcesses?.find(
-    (pp) => pp instanceof MotionBlurPostProcess
-  ) as MotionBlurPostProcess;
-
-  if (motionBlur) {
-    // Scale motion blur with speed (0.05 at low speeds, up to 0.3 at high speeds)
-    const normalizedSpeed = Math.min(Math.max(speed / 10, 0), 1);
-    motionBlur.motionStrength = 0.05 + normalizedSpeed * 0.25;
-    motionBlur.motionBlurSamples = 5 + Math.floor(normalizedSpeed * 15);
-  }
 }
 
 export function createParticleTexture(scene: Scene, color: Color3): Texture {
