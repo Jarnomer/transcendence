@@ -7,6 +7,7 @@ export abstract class PowerUp {
   x: number;
   y: number;
   duration: number = defaultGameParams.powerUpDuration;
+  effectDuration: number = 0;
   active: boolean = false;
   spawnTime: number = Date.now();
   isSpent: boolean = false;

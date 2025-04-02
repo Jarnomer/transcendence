@@ -2,8 +2,7 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-export const ProcessingBar: React.FC<{ activeTab: string; duration: number }> = ({ duration }) => {
-  console.log(duration / 1000);
+export const ProcessingBar: React.FC<{ duration: number }> = ({ duration }) => {
   return (
     <AnimatePresence>
       <motion.svg

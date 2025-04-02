@@ -21,17 +21,18 @@ export const pageVariants = {
 };
 
 export const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log('page rendered');
   return (
-    <motion.div
-      className="w-full h-full flex flex-grow pt-10 md:p-10"
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      {children}
-    </motion.div>
+    <>
+      <motion.div
+        className="w-full h-full relative flex flex-grow pt-10 md:p-10"
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        {children}
+      </motion.div>
+    </>
   );
 };
 

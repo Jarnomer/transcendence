@@ -20,6 +20,8 @@ export interface PowerUp {
   y: number;
   collected: boolean;
   affectedPlayer: number;
+  timeToDespawn: number; // Time to despawn if not collected
+  timeToExpire: number; // Time to expire after being collected
   type: 'bigger_paddle' | 'smaller_paddle';
 }
 

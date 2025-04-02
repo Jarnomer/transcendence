@@ -80,7 +80,7 @@ export default class PongGameSession {
 
   removeClient(playerId: string): void {
     this.clients.delete(playerId);
-    if (this.clients.size === 0) {
+    if (this.clients.size === 0 && this.gameId !== 'background_game') {
       this.endGame();
     } else {
       this.broadcast({ type: 'game_status', state: 'waiting' });

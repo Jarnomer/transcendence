@@ -3,6 +3,11 @@ import PongGame from '../PongGame';
 
 // Makes the other player's paddle smaller
 export class SmallerPaddlePowerUp extends PowerUp {
+  constructor(id: number, x: number, y: number) {
+    super(id, x, y);
+    this.effectDuration = 15000; // Duration of the effect in milliseconds
+  }
+
   applyEffect(game: PongGame, player: number): void {
     if (player === 1) {
       game.setPaddleHeight(2, game.getPaddleHeight(2) - 20);
@@ -14,7 +19,7 @@ export class SmallerPaddlePowerUp extends PowerUp {
       console.log('Smaller paddle effect applied to player 1');
     }
     this.active = true;
-    setTimeout(() => this.removeEffect(game, player), this.duration);
+    setTimeout(() => this.removeEffect(game, player), this.effectDuration);
   }
 
   removeEffect(game: PongGame, player: number): void {

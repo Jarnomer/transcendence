@@ -83,7 +83,7 @@ export class PowerUpManager {
 
     const powerUp = new PowerUpClass(id, x, y);
     this.powerUps.push(powerUp);
-    this.game.spawnPowerUp(id, x, y, false, 0, powerUpType); // Add the power-up to the game state
+    this.game.spawnPowerUp(id, x, y, false, 0, this.params.powerUpDuration, 0, powerUpType); // Add the power-up to the game state
     console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
   }
 
@@ -98,7 +98,7 @@ export class PowerUpManager {
         ball.y + this.params.ballSize > powerUp.y
       ) {
         const affectedPlayer = ball.dx > 0 ? 1 : 2; // Determine which player is affected based on ball direction
-        this.game.collectPowerUp(powerUp.id, affectedPlayer);
+        this.game.collectPowerUp(powerUp.id, affectedPlayer, powerUp.effectDuration);
         console.log(`Power-up collected by player ${affectedPlayer}:`, powerUp.id);
         powerUp.applyEffect(this.game, affectedPlayer);
       }
@@ -115,6 +115,18 @@ export class PowerUpManager {
         console.log('Despawning expired uncollected power-up id:', powerUp.id);
         this.game.removePowerUp(powerUp.id);
         this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
+      }
+    }
+  }
+
+  updatePowerUpTimers(): void {
+    for (const powerUp of this.powerUps) {
+      if (powerUp.active) {
+        powerUp.effectDuration -= 1000 / 60; // Assuming 60 FPS
+        if (powerUp.effectDuration <= 0) {
+          powerUp.removeEffect(this.game, powerUp.affectedPlayer);
+          powerUp.isSpent = true; // Mark the power-up as spent
+        }
       }
     }
   }
