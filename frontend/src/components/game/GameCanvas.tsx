@@ -35,15 +35,11 @@ interface GameCanvasProps {
   retroLevels?: RetroEffectsLevels;
 }
 
-// Helper function to get CSS variables (DOM-dependent code stays in the component)
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
-  // Get computed styles from document
   const computedStyle = getComputedStyle(document.documentElement);
 
-  // Use the data-theme attribute values from CSS
   document.documentElement.setAttribute('data-theme', theme);
 
-  // Get color values from CSS variables
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
@@ -52,16 +48,24 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 };
 
 const detectCollision = (
+  gameHeight: number,
   prevDx: number,
-  prevDy: number,
   newDx: number,
-  newDy: number
+  newY: number,
+  prevY: number
 ): 'dx' | 'dy' | null => {
-  const dxCollision = prevDx !== 0 && newDx !== 0 && Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = prevDy !== 0 && newDy !== 0 && Math.sign(prevDy) !== Math.sign(newDy);
+  const bottomBoundary = gameHeight - 10;
+  const topBoundary = 0;
+
+  const hitTop = newY <= topBoundary && prevY > topBoundary;
+  const hitBottom = newY >= bottomBoundary && prevY < bottomBoundary;
+
+  const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
+  const dyCollision = hitTop || hitBottom;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';
+
   return null;
 };
 
@@ -135,7 +139,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     setupEnvironmentMap(scene);
 
     const camera = setupSceneCamera(scene);
-    const pipeline = setupPostProcessing(scene, camera);
+    const pipeline = setupPostProcessing(scene, camera, false);
     const { shadowGenerators } = setupScenelights(scene);
 
     floorRef.current = createFloor(scene, backgroundColor);
@@ -237,10 +241,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
     const collision = detectCollision(
+      defaultGameParams.gameHeight,
       prevBallState.current.dx,
-      prevBallState.current.dy,
       ball.dx,
-      ball.dy
+      prevBallState.current.y,
+      ball.y
     );
     const score = detectScore(
       players.player1.score,
@@ -264,7 +269,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         collision,
         speed,
         ball.spin,
-        color
+        color,
+        true
       );
     }
 

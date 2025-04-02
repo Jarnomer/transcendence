@@ -14,9 +14,19 @@ export interface Ball {
   spin: number;
 }
 
+export interface PowerUp {
+  id: number;
+  x: number;
+  y: number;
+  collected: boolean;
+  affectedPlayer: number;
+  type: 'bigger_paddle' | 'smaller_paddle';
+}
+
 export interface GameState {
   players: { player1: Player; player2: Player };
   ball: Ball;
+  powerUps: PowerUp[];
 }
 
 export interface GameParams {
@@ -25,6 +35,8 @@ export interface GameParams {
 
   paddleWidth: number;
   paddleHeight: number;
+  minPaddleHeight: number;
+  maxPaddleHeight: number;
   paddleSpeed: number;
 
   ballSize: number;
@@ -42,6 +54,11 @@ export interface GameParams {
 
   maxScore: number;
   countdown: number;
+
+  powerUpMinSpawnInterval: number;
+  powerUpMaxSpawnInterval: number;
+  powerUpDuration: number;
+  powerUpSize: number;
 }
 
 export const defaultGameParams: GameParams = {
@@ -50,6 +67,8 @@ export const defaultGameParams: GameParams = {
 
   paddleWidth: 10,
   paddleHeight: 80,
+  minPaddleHeight: 20,
+  maxPaddleHeight: 200,
   paddleSpeed: 10,
 
   ballSize: 10,
@@ -67,17 +86,12 @@ export const defaultGameParams: GameParams = {
 
   maxScore: 3,
   countdown: 3, // Seconds
-};
 
-// Don't mind this for now
-export interface PowerUp {
-  id: number;
-  x: number;
-  y: number;
-  active: boolean;
-  affectedPlayer: number;
-  type: 'bigger_paddle' | 'smaller_paddle' | 'extra_point';
-}
+  powerUpMinSpawnInterval: 5000, // Milliseconds
+  powerUpMaxSpawnInterval: 10000, // Milliseconds
+  powerUpDuration: 5000, // Milliseconds
+  powerUpSize: 20,
+};
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 

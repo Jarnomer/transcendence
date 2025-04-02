@@ -1,4 +1,8 @@
+import { Any } from '@sinclair/typebox';
+
 import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
+
+import { PowerUpManager } from './PowerUpManager';
 
 type PlayerMove = 'up' | 'down' | null;
 
@@ -17,8 +21,11 @@ export default class PongGame {
 
   private readyState = new Map<string, boolean>();
 
+  private powerUpManager: PowerUpManager;
+
   constructor(mode: string, difficulty: string) {
     this.params = { ...defaultGameParams };
+    this.powerUpManager = new PowerUpManager(this);
     this.mode = mode;
     this.difficulty = difficulty;
     this.gameState = {
@@ -39,6 +46,7 @@ export default class PongGame {
         },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
+      powerUps: [],
     };
     this.gameStatus = 'loading';
     this.resetBall();
@@ -128,6 +136,38 @@ export default class PongGame {
     }
   }
 
+  spawnPowerUp(
+    id: number,
+    x: number,
+    y: number,
+    collected: boolean,
+    affectedPlayer: number,
+    type: 'bigger_paddle' | 'smaller_paddle'
+  ): void {
+    this.gameState.powerUps.push({
+      id,
+      x,
+      y,
+      collected,
+      affectedPlayer,
+      type: type,
+    });
+    // console.log(`Power-up spawned, id: ${id}, type: ${type}, position: (${x}, ${y})`);
+  }
+
+  collectPowerUp(id: number, player: number): void {
+    const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
+    if (powerUp) {
+      powerUp.collected = true;
+      powerUp.affectedPlayer = player;
+      // console.log(`Power-up ${id} collected by player ${player}. Type: ${powerUp.type}`);
+    }
+  }
+
+  removePowerUp(id: number): void {
+    this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
+  }
+
   setPlayerId(player: number, playerId: string): void {
     if (player === 1) {
       this.player1Id = playerId;
@@ -139,6 +179,13 @@ export default class PongGame {
   }
 
   setPaddleHeight(player: number, height: number): void {
+    if (height < this.params.minPaddleHeight) {
+      console.warn('Paddle height too small, setting to minimum');
+      height = this.params.minPaddleHeight;
+    } else if (height > this.params.maxPaddleHeight) {
+      console.warn('Paddle height too large, setting to maximum');
+      height = this.params.maxPaddleHeight;
+    }
     this.repositionPaddleAfterHeightChange(player, height);
     if (player === 1) {
       this.gameState.players.player1.paddleHeight = height;
@@ -160,6 +207,7 @@ export default class PongGame {
   }
 
   private repositionPaddleAfterHeightChange(player: number, height: number): void {
+    // console.log('Correcting paddle position after height change:', player, height);
     if (player === 1) {
       if (height > this.gameState.players.player1.paddleHeight) {
         this.gameState.players.player1.y -=
@@ -229,6 +277,8 @@ export default class PongGame {
     this.updateInterval = setInterval(() => {
       if (this.gameStatus === 'playing') {
         this.updateBall();
+        this.powerUpManager.checkCollision();
+        this.powerUpManager.despawnExpiredPowerUps();
       }
     }, 1000 / 60); // 60 fps
   }
@@ -416,6 +466,14 @@ export default class PongGame {
 
   setGameStatus(status: GameStatus): void {
     this.gameStatus = status;
+    if (status === 'playing') {
+      this.powerUpManager.startSpawning();
+    } else {
+      this.powerUpManager.stopSpawning();
+    }
+    if (status === 'finished') {
+      this.gameState.powerUps = [];
+    }
   }
 
   pauseGame(): void {

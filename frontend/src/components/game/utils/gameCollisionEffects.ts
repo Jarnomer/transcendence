@@ -481,7 +481,8 @@ export function applyCollisionEffects(
   collisionType: 'dx' | 'dy',
   speed: number,
   spin: number,
-  color: Color3
+  color: Color3,
+  applyGlitch: boolean
 ) {
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);
@@ -497,6 +498,8 @@ export function applyCollisionEffects(
   } else if (collisionType === 'dy') {
     applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
   }
+
+  if (applyGlitch) speedFactor / 100;
 
   if (retroEffectsRef) {
     retroEffectsRef.setGlitchAmount(speedFactor);
