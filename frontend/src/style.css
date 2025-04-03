@@ -7,6 +7,10 @@
 
 @import 'tailwindcss';
 
+:root {
+  background-color: black;
+}
+
 @theme {
   /* --font-display: "Satoshi", "sans-serif"; */
   --font-*: initial;
@@ -712,4 +716,41 @@ button:hover .icon-size {
 .count-down {
   animation: custom-ping 1s infinite;
   opacity: 0;
+}
+
+/* Base slider track */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: currentColor;
+  border-radius: 0px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Custom thumb (handle) as a vertical line */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 4px; /* Narrow width */
+  height: 20px; /* Tall height */
+  background: currentColor; /* Black color */
+  cursor: pointer;
+  border-radius: 0px;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 4px;
+  height: 20px;
+  background: currentColor;
+  border-radius: 0px;
+  cursor: pointer;
+  border: 0px;
+}
+
+/* Hover effect */
+input[type='range']:hover::-webkit-slider-thumb {
+  background: #444;
 }
