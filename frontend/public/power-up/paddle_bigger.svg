@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle with retro arcade glow -->
+  <defs>
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF2D55" stop-opacity="1"/>
+      <stop offset="80%" stop-color="#FF0033" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#CC0000" stop-opacity="1"/>
+    </radialGradient>
+    
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    
+    <!-- Pixelated filter for retro effect -->
+    <filter id="pixelate" x="0%" y="0%" width="100%" height="100%">
+      <feFlood x="4" y="4" height="2" width="2"/>
+      <feComposite width="10" height="10"/>
+      <feTile result="a"/>
+      <feComposite in="SourceGraphic" in2="a" operator="in"/>
+      <feMorphology operator="dilate" radius="2"/>
+    </filter>
+  </defs>
+  
+  <!-- Main circle background -->
+  <circle cx="100" cy="100" r="90" fill="url(#circleGradient)" filter="url(#neonGlow)"/>
+  
+  <!-- Outer arcade-style ring -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-dasharray="10 5" filter="url(#neonGlow)"/>
+  
+  <!-- Paddle shrinking icon -->
+  <g filter="url(#neonGlow)">
+    <!-- Original paddle (ghost outline) -->
+    <rect x="40" y="85" width="120" height="30" rx="5" ry="5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="5 3" opacity="0.5"/>
+    
+    <!-- Shrinking effect arrows -->
+    <polygon points="40,100 55,85 55,115" fill="#FFFFFF"/>
+    <polygon points="160,100 145,85 145,115" fill="#FFFFFF"/>
+    
+    <!-- Smaller paddle -->
+    <rect x="60" y="85" width="80" height="30" rx="5" ry="5" fill="#FFFFFF"/>
+    
+    <!-- Pixel effect squares -->
+    <rect x="60" y="80" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="135" y="80" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="70" y="115" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="125" y="115" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+  </g>
+  
+  <!-- Scanlines for retro effect -->
+  <rect x="10" y="10" width="180" height="180" fill="none" stroke="none">
+    <animate attributeName="opacity" values="0;0.05;0;0.05;0" dur="4s" repeatCount="indefinite"/>
+  </rect>
+  
+  <!-- Grid pattern for arcade feel -->
+  <path d="M 30 0 L 30 200 M 60 0 L 60 200 M 90 0 L 90 200 M 120 0 L 120 200 M 150 0 L 150 200 M 180 0 L 180 200 M 0 30 L 200 30 M 0 60 L 200 60 M 0 90 L 200 90 M 0 120 L 200 120 M 0 150 L 200 150 M 0 180 L 200 180" stroke="#FFFFFF" stroke-width="0.5" opacity="0.1"/>
+</svg>

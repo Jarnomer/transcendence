@@ -185,7 +185,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       colors.primaryColor,
       defaultGameParams.gameWidth,
       defaultGameParams.gameHeight,
-      scaleFactor
+      scaleFactor,
+      defaultGameParams.powerUpSize
     );
 
     setLastTheme(theme); // Save current theme
