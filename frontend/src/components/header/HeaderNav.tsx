@@ -35,7 +35,7 @@ export const HeaderNav: React.FC = () => {
   return (
     <>
       {user && user.display_name ? (
-        <div className="flex gap-3 items-center" aria-label="Navigation menu">
+        <div className="flex gap-3 items-center justify-center w-full" aria-label="Navigation menu">
           <NavIconButton
             id="nav-home-button"
             aria-label="Home"
@@ -77,7 +77,7 @@ export const HeaderNav: React.FC = () => {
                 logout();
               }}
             >
-              Log Out
+              <p className="text-xs md:text-md">Log Out</p>
             </button>
           ) : null}
         </div>

@@ -18,8 +18,12 @@ import { SignUpPage } from '../../pages/SignUpPage.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
-  const { user } = useUser(); // Retrieve user from context
+  const { user, loading } = useUser(); // Retrieve user from context
   const location = useLocation();
+
+  if (loading) {
+    return <div></div>;
+  }
 
   return (
     <AnimatePresence mode="wait">

@@ -21,6 +21,7 @@ interface UserContextType {
   refetchRequests: () => void;
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
+  loading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -34,6 +35,7 @@ export const useUser = () => {
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const userId = localStorage.getItem('userID');
 
@@ -65,6 +67,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkAuth = async () => {
     console.log('checking auth');
+    setLoading(true);
     const token = localStorage.getItem('token');
     if (!token) {
       setUser(null);
@@ -82,6 +85,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('userID');
       localStorage.removeItem('username');
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,6 +124,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         checkAuth,
         logout,
         refetchRequests: fetchRequestsSent,
+        loading,
       }}
     >
       {children}

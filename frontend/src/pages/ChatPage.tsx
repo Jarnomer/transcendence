@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BackgroundGlow } from '../components';
+import { BackgroundGlow, NavIconButton } from '../components';
 import SearchBar from '../components/UI/SearchBar';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import {
@@ -87,6 +87,7 @@ export const ChatPage: React.FC = () => {
         .then((data) => {
           console.log('Chat history:', data);
           setMessages(...messages, data);
+          console.log(messages);
         })
         .catch((error) => {
           console.error('Failed to fetch chat history:', error);
@@ -224,7 +225,7 @@ export const ChatPage: React.FC = () => {
   }, [members]);
 
   return (
-    <div className="p-10 w-[80%]">
+    <div className="p-2 w-full h-full">
       {/* <AnimatePresence> */}
       {/* just testing here */}
       {/* <BracketLine></BracketLine> */}
@@ -270,8 +271,11 @@ export const ChatPage: React.FC = () => {
       )}
       <div className="flex relative h-[600px] glass-box overflow-hidden">
         <BackgroundGlow />
+
         {/* Friends List */}
-        <div className="w-1/4 p-4 border-r ">
+        <div
+          className={`w-full md:w-1/4 p-4 border-r md:block ${selectedFriend === null && roomId === null ? 'block' : 'hidden'}`}
+        >
           <SearchBar
             value={searchQuery}
             onChange={handleSearchChange}
@@ -282,10 +286,19 @@ export const ChatPage: React.FC = () => {
             {filteredUsers.map((friend) => (
               <li
                 key={friend.user_id}
-                className={`p-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:bg-gray-800'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
+                className={`p-2  flex gap-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:brightness-125'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
                 onClick={() => setSelectedFriend(friend.user_id)}
               >
-                {friend.display_name} {friend.status === 'online' ? '' : '(Offline)'}
+                <div className="w-[20px] h-[20px]">
+                  <img
+                    src={friend?.avatar_url}
+                    alt="avatar"
+                    className="w-full max-w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <span>
+                  {friend.display_name} {friend.status === 'online' ? '' : '(Offline)'}
+                </span>
               </li>
             ))}
           </ul>
@@ -316,47 +329,87 @@ export const ChatPage: React.FC = () => {
         </div>
 
         {/* Chat Window */}
-        <div className="w-full flex flex-col h-full ">
+        <>
           {selectedFriend !== null || roomId !== null ? (
-            <>
-              <div className="p-4  font-bold">
-                {' '}
+            <div className="w-full md:w-3/4 flex flex-col h-full">
+              {/* Back Button on Small Screen */}
+              <div className="md:hidden p-4">
+                <NavIconButton
+                  id="arrow-left"
+                  icon="arrowLeft"
+                  onClick={() => {
+                    setSelectedFriend(null);
+                    setRoomId(null);
+                  }}
+                />
+              </div>
+
+              <div className="p-4 font-bold">
                 {friends.find((f) => f.user_id === selectedFriend)?.username}
               </div>
-              <div className="flex-1 p-4 overflow-y-auto">
+              <div className="w-full flex-1 p-4 overflow-y-auto">
                 {/* Chat Messages */}
-                {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`mb-2 p-2 rounded ${msg.sender_id === user.user_id ? 'border-primary border-1 w-max' : 'border-primary border-1 ml-auto w-max'}`}
-                  >
-                    {msg.message}
-                  </div>
-                ))}
+                {messages.map((msg, index) => {
+                  // Find the sender (user or friend)
+                  const sender =
+                    msg.sender_id === user.user_id
+                      ? user
+                      : friends.find((f) => f.user_id === msg.sender_id);
+
+                  // Check if it's the last message of the sender in the current sequence
+                  const showAvatar =
+                    index === messages.length - 1 ||
+                    messages[index + 1].sender_id !== msg.sender_id;
+
+                  return (
+                    <div
+                      key={index}
+                      className={`mb-2 ${msg.sender_id === user.user_id ? 'ml-auto w-max' : 'w-max'}`}
+                    >
+                      <div className="w-full flex gap-2 justify-center items-center">
+                        {/* Conditionally display avatar */}
+                        {showAvatar && (
+                          <div className="w-[20px] h-[20px]">
+                            <img
+                              src={sender?.avatar_url}
+                              alt="avatar"
+                              className="w-full max-w-full h-full object-cover rounded-full"
+                            />
+                          </div>
+                        )}
+                        <span className="p-2 rounded border-primary border-1 ">{msg.message}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               {/* Message Input */}
               <div className="p-4 border-t border-primary flex">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="flex-1 p-2 bg-gray-800 border-2 border-primary bg-black/5 rounded focus:outline-none"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  className="ml-2 bg-primary/25 px-4 py-2 rounded"
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault(); // Prevent page refresh
+                    handleSendMessage(); // Call the send message function
+                  }}
                 >
-                  Send
-                </button>
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 p-2 border-2 border-primary  rounded focus:outline-none"
+                  />
+                  <button type="submit" className="ml-2 bg-primary/25 px-4 py-2 rounded">
+                    send
+                  </button>
+                </form>
               </div>
-            </>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="md:flex md:w-full items-center justify-center h-full text-gray-500 hidden ">
               Select a friend to chat
             </div>
           )}
-        </div>
+        </>
       </div>
     </div>
   );
