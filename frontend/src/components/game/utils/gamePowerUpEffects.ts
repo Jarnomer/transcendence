@@ -51,7 +51,7 @@ export class PowerUpEffectsManager {
     this.powerUpSize = powerUpSize;
   }
 
-  // Check for new, collecter and removed power-ups
+  // Check for new, collected and removed power-ups
   updatePowerUpEffects(powerUps: PowerUp[]): void {
     for (const powerUp of powerUps) {
       if (!this.effects.has(powerUp.id) && !powerUp.collected) {
@@ -68,7 +68,7 @@ export class PowerUpEffectsManager {
     const currentIds = new Set(powerUps.map((p) => p.id));
     for (const [id, effect] of this.effects.entries()) {
       if (!currentIds.has(id) && !effect.collected) {
-        this.disposeEffect(id);
+        this.disposeEffectWithAnimation(id); // Use animated disposal
       }
     }
   }
@@ -83,7 +83,7 @@ export class PowerUpEffectsManager {
 
     const centerMesh = this.createIconMesh(powerUp.type, x, y, baseSize);
     const cube = this.createCubeMesh(powerUp.id, basePosition, cubeSize, 0.6, this.color);
-    const particleSystem = this.createSpiralParticle(powerUp.id, x, y, this.color);
+    const particleSystem = this.createGlitterParticleSystem(powerUp.id, x, y, this.color);
 
     this.effects.set(powerUp.id, {
       id: powerUp.id,
@@ -190,48 +190,57 @@ export class PowerUpEffectsManager {
     cube.metadata = { observer, elapsedTime };
   }
 
-  // Replace this with emissive glitter effect that explodes upon collection
-  private createSpiralParticle(id: number, x: number, y: number, color: Color3): ParticleSystem {
-    const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 150, this.scene);
+  private createGlitterParticleSystem(
+    id: number,
+    x: number,
+    y: number,
+    color: Color3
+  ): ParticleSystem {
+    const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 100, this.scene);
+
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
-    particleSystem.emitter = new Vector3(x, y, 0);
-    particleSystem.minEmitBox = new Vector3(-0.1, -0.1, 0);
-    particleSystem.maxEmitBox = new Vector3(0.1, 0.1, 0);
-    const baseColor = new Color4(color.r, color.g, color.b, 0.8);
-    const brightColor = new Color4(
-      Math.min(color.r * 1.5, 1.0),
-      Math.min(color.g * 1.5, 1.0),
-      Math.min(color.b * 1.5, 1.0),
-      0.9
-    );
-    particleSystem.color1 = baseColor;
-    particleSystem.color2 = brightColor;
-    particleSystem.colorDead = new Color4(color.r, color.g, color.b, 0);
+
+    particleSystem.emitter = new Vector3(x, y, 0.2);
+    particleSystem.minEmitBox = new Vector3(-0.05, -0.05, -0.05);
+    particleSystem.maxEmitBox = new Vector3(0.05, 0.05, 0.05);
+
+    particleSystem.color1 = new Color4(color.r, color.g, color.b, 0.8);
+
+    particleSystem.emitRate = 10;
     particleSystem.minSize = 0.05;
-    particleSystem.maxSize = 0.15;
-    particleSystem.minLifeTime = 1.5;
-    particleSystem.maxLifeTime = 3;
-    particleSystem.emitRate = 30;
+    particleSystem.maxSize = 0.2;
+    particleSystem.minLifeTime = 0.2;
+    particleSystem.maxLifeTime = 0.6;
+    particleSystem.minEmitPower = 0.1;
+    particleSystem.maxEmitPower = 0.5;
+
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
-    particleSystem.direction1 = new Vector3(-0.5, -0.5, 0);
-    particleSystem.direction2 = new Vector3(0.5, 0.5, 0);
-    particleSystem.minAngularSpeed = 0.8;
-    particleSystem.maxAngularSpeed = 2.0;
+    particleSystem.direction1 = new Vector3(-1, -1, -0.5);
+    particleSystem.direction2 = new Vector3(1, 1, 0.5);
+
+    const creationTime = Date.now();
+    const maxLifetime = 8000;
+
     particleSystem.updateFunction = (particles) => {
+      const lifetimeProgress = Math.min((Date.now() - creationTime) / maxLifetime, 1);
+
+      if (particleSystem.emitRate !== 0 && lifetimeProgress % 0.1 < 0.01) {
+        particleSystem.emitRate = 10 + Math.floor(lifetimeProgress * 15);
+      }
+
       for (let i = 0; i < particles.length; i++) {
         const particle = particles[i];
+
         const age = particle.age / particle.lifeTime;
-        const particleOffset = (i % 10) * 0.1;
-        const baseRadius = 1.8;
-        const radius = baseRadius * (age + particleOffset);
-        const angle = age * Math.PI * 12 + particleOffset * Math.PI * 2;
-        const oscillation = Math.sin(age * Math.PI * 4) * 0.2;
-        particle.position.x = x + radius * Math.cos(angle) * (1 + oscillation * 0.1);
-        particle.position.y = y + radius * Math.sin(angle) * (1 + oscillation * 0.1);
-        particle.size = particle.size * (1 + Math.sin(age * Math.PI * 6) * 0.2);
-        particle.color.a = Math.max(0, (1 - age * 1.5) * (0.8 + Math.sin(age * Math.PI * 8) * 0.2));
+        const baseAngle = (i * 137.5) % 360;
+        const speed = 0.008 * (1.0 - age * 0.3);
+
+        particle.color.a = Math.max(0, 1 - age);
+        particle.position.x += Math.cos(baseAngle) * speed * (1 + ((i % 5) - 2) * 0.1);
+        particle.position.y += Math.sin(baseAngle) * speed * (1 + ((i % 7) - 3) * 0.1);
       }
     };
+
     particleSystem.start();
     return particleSystem;
   }
@@ -340,28 +349,6 @@ export class PowerUpEffectsManager {
 
     effect.collected = true;
 
-    // Replace this with glitter effect explosion
-    const emitter = effect.particleSystem.emitter as Vector3;
-    effect.particleSystem.emitRate = 100;
-    setTimeout(() => {
-      effect.particleSystem.emitRate = 0;
-      effect.particleSystem.updateFunction = (particles) => {
-        for (let i = 0; i < particles.length; i++) {
-          const particle = particles[i];
-          const age = particle.age / particle.lifeTime;
-          const particleOffset = (i % 10) * 0.1;
-          const baseRadius = 1.8;
-          const radius = baseRadius * (age + particleOffset);
-          const angle = age * Math.PI * 12 + particleOffset * Math.PI * 2;
-          const oscillation = Math.sin(age * Math.PI * 4) * 0.2;
-          particle.position.x = emitter.x + radius * Math.cos(angle) * (1 + oscillation * 0.1);
-          particle.position.y = emitter.y + radius * Math.sin(angle) * (1 + oscillation * 0.1);
-          particle.size = particle.size * (1 + Math.sin(age * Math.PI * 6) * 0.2);
-          particle.color.a = Math.max(0, (1 - age) * (0.8 + Math.sin(age * Math.PI * 8) * 0.2));
-        }
-      };
-    }, 100);
-
     // Animate icon scaling
     const scaleAnim = new Animation(
       'powerUpCollectAnimation',
@@ -449,6 +436,75 @@ export class PowerUpEffectsManager {
     });
   }
 
+  disposeEffectWithAnimation(powerUpId: number): void {
+    const effect = this.effects.get(powerUpId);
+    if (!effect) return;
+
+    // If already collected, just dispose normally
+    if (effect.collected) {
+      this.disposeEffect(powerUpId);
+      return;
+    }
+
+    effect.collected = true;
+
+    // Animate icon scaling
+    const scaleAnim = new Animation(
+      'powerUpDisposeAnimation',
+      'scaling',
+      60,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const scaleKeys = [
+      { frame: 0, value: effect.icon.scaling.clone() },
+      { frame: 15, value: new Vector3(0, 0, 0) },
+    ];
+    scaleAnim.setKeys(scaleKeys);
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+    scaleAnim.setEasingFunction(easingFunction);
+
+    effect.icon.animations = [scaleAnim];
+
+    // Animate all rotation cubes
+    effect.cubes.forEach((cube) => {
+      // Animate cube scaling
+      const cubeScaleAnim = new Animation(
+        `powerUpCubeDisposeAnimation`,
+        'scaling',
+        60,
+        Animation.ANIMATIONTYPE_VECTOR3,
+        Animation.ANIMATIONLOOPMODE_CONSTANT
+      );
+      const cubeScaleKeys = [
+        { frame: 0, value: cube.scaling.clone() },
+        { frame: 15, value: new Vector3(0, 0, 0) },
+      ];
+      cubeScaleAnim.setKeys(cubeScaleKeys);
+      cubeScaleAnim.setEasingFunction(easingFunction);
+
+      cube.animations = [cubeScaleAnim];
+
+      // Stop the orbit animation
+      if (cube.metadata && cube.metadata.observer) {
+        this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
+      }
+
+      this.scene.beginAnimation(cube, 0, 15, false, 1);
+    });
+
+    // Animate the particle system to fade out
+    if (effect.particleSystem) effect.particleSystem.emitRate = 0;
+
+    this.scene.beginAnimation(effect.icon, 0, 15, false, 1, () => {
+      setTimeout(() => {
+        this.disposeEffect(powerUpId);
+      }, 300);
+    });
+  }
+
   // Clean up the effects completely
   disposeEffect(powerUpId: number): void {
     const effect = this.effects.get(powerUpId);
@@ -475,8 +531,12 @@ export class PowerUpEffectsManager {
   }
 
   disposeAll(): void {
-    for (const [id] of this.effects) {
-      this.disposeEffect(id);
+    for (const [id, effect] of this.effects.entries()) {
+      if (!effect.collected) {
+        this.disposeEffectWithAnimation(id);
+      } else {
+        this.disposeEffect(id);
+      }
     }
   }
 }
