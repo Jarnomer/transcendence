@@ -71,6 +71,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('token');
     if (!token) {
       setUser(null);
+      setLoading(false);
       return;
     }
 
@@ -85,6 +86,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('userID');
       localStorage.removeItem('username');
       setUser(null);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
