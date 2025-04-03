@@ -242,7 +242,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (powerUpsChanged) {
       powerUpEffectsRef.current.updatePowerUpEffects(powerUps);
-      powerUpEffectsRef.current.updatePositions(powerUps);
       prevPowerUpsRef.current = [...powerUps];
     }
   }, [gameState]);

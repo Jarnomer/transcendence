@@ -92,7 +92,7 @@ export const defaultGameParams: GameParams = {
   powerUpMinSpawnInterval: 2000, // Milliseconds
   powerUpMaxSpawnInterval: 4000, // Milliseconds
   powerUpDuration: 8000, // Milliseconds
-  powerUpSize: 20,
+  powerUpSize: 35,
 };
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
