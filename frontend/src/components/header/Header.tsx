@@ -15,10 +15,13 @@ export const Header: React.FC = () => {
         <h1 className="logo text-center md:absolute text-lg sm:text-lg md:text-xl lg:text-3xl text-primary">
           Super Pong 3D
         </h1>
-        <div className="ml-auto pb-2">
+        <div className="ml-0 md:ml-auto  pb-2">
           <HeaderNav />
         </div>
-        <div aria-hidden="true" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full">
+        <div
+          aria-hidden="true"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full hidden md:block"
+        >
           <svg className="w-full text-primary" viewBox="0 0 1438 29" fill="none">
             <defs>
               <clipPath id="header-bottomline">
