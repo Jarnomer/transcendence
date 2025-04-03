@@ -22,7 +22,7 @@ export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>; // You can show a loading spinner or message here
+    return <div></div>;
   }
 
   return (

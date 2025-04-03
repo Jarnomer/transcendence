@@ -225,7 +225,7 @@ export const ChatPage: React.FC = () => {
   }, [members]);
 
   return (
-    <div className="p-10 w-full h-full">
+    <div className="p-2 w-full h-full">
       {/* <AnimatePresence> */}
       {/* just testing here */}
       {/* <BracketLine></BracketLine> */}
@@ -286,10 +286,19 @@ export const ChatPage: React.FC = () => {
             {filteredUsers.map((friend) => (
               <li
                 key={friend.user_id}
-                className={`p-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:bg-gray-800'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
+                className={`p-2  flex gap-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:brightness-125'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
                 onClick={() => setSelectedFriend(friend.user_id)}
               >
-                {friend.display_name} {friend.status === 'online' ? '' : '(Offline)'}
+                <div className="w-[20px] h-[20px]">
+                  <img
+                    src={friend?.avatar_url}
+                    alt="avatar"
+                    className="w-full max-w-full h-full object-cover rounded-full"
+                  />
+                </div>
+                <span>
+                  {friend.display_name} {friend.status === 'online' ? '' : '(Offline)'}
+                </span>
               </li>
             ))}
           </ul>
@@ -396,7 +405,7 @@ export const ChatPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500 hidden md:block">
+            <div className="md:flex md:w-full items-center justify-center h-full text-gray-500 hidden ">
               Select a friend to chat
             </div>
           )}
