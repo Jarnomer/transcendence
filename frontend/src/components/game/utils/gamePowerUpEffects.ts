@@ -431,6 +431,29 @@ export class PowerUpEffectsManager {
       this.scene.beginAnimation(cube, 0, 20, false, 1);
     });
 
+    // Handle particle fadeout
+    if (effect.particleSystem) {
+      effect.particleSystem.emitRate = 0;
+
+      const startTime = Date.now();
+      const fadeOutDuration = 400;
+
+      const originalUpdateFn = effect.particleSystem.updateFunction;
+      effect.particleSystem.updateFunction = (particles) => {
+        // Call the original update function if it exists
+        if (originalUpdateFn) originalUpdateFn(particles);
+
+        const progress = Math.min((Date.now() - startTime) / fadeOutDuration, 1);
+        const fadeOutFactor = 1 - progress;
+
+        for (let i = 0; i < particles.length; i++) {
+          const particle = particles[i];
+          particle.color.a *= fadeOutFactor;
+          particle.size *= fadeOutFactor;
+        }
+      };
+    }
+
     this.scene.beginAnimation(effect.icon, 0, 20, false, 1, () => {
       setTimeout(() => this.disposeEffect(powerUpId), 1000);
     });
