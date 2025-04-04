@@ -40,8 +40,8 @@ export default class PongGame {
         player2: {
           id: '',
           y: this.params.gameHeight / 2 - this.params.paddleHeight / 2,
-          paddleHeight: this.params.paddleHeight,
           dy: 0,
+          paddleHeight: this.params.paddleHeight,
           score: 0,
         },
       },
@@ -204,7 +204,7 @@ export default class PongGame {
       console.warn('Paddle height too large, setting to maximum');
       height = this.params.maxPaddleHeight;
     }
-    this.repositionPaddleAfterHeightChange(player, height);
+    // this.repositionPaddleAfterHeightChange(player, height);
     if (player === 1) {
       this.gameState.players.player1.paddleHeight = height;
     } else {
@@ -236,13 +236,15 @@ export default class PongGame {
           this.gameState.players.player1.y = this.params.gameHeight - height;
         }
       } else {
-        this.gameState.players.player1.y += this.gameState.players.player1.paddleHeight - height;
+        this.gameState.players.player1.y +=
+          this.gameState.players.player1.paddleHeight - height / 2;
       }
     } else {
       if (height > this.gameState.players.player2.paddleHeight) {
         this.gameState.players.player2.y -= height - this.gameState.players.player2.paddleHeight;
       } else {
-        this.gameState.players.player2.y += this.gameState.players.player2.paddleHeight - height;
+        this.gameState.players.player2.y +=
+          this.gameState.players.player2.paddleHeight - height / 2;
       }
     }
   }
@@ -326,19 +328,22 @@ export default class PongGame {
     }
 
     if (move === 'up') {
-      paddleState.y -= this.params.paddleSpeed;
-      if (paddleState.y < 0) {
+      if (paddleState.y - this.params.paddleSpeed < 0) {
         paddleState.y = 0;
         paddleState.dy = 0;
       } else {
+        paddleState.y -= this.params.paddleSpeed;
         paddleState.dy = -this.params.paddleSpeed;
       }
     } else if (move === 'down') {
-      paddleState.y += this.params.paddleSpeed;
-      if (paddleState.y + this.params.paddleHeight > this.params.gameHeight) {
-        paddleState.y = this.params.gameHeight - this.params.paddleHeight;
+      if (
+        paddleState.y + this.params.paddleSpeed + paddleState.paddleHeight >
+        this.params.gameHeight
+      ) {
+        paddleState.y = this.params.gameHeight - paddleState.paddleHeight;
         paddleState.dy = 0;
       } else {
+        paddleState.y += this.params.paddleSpeed;
         paddleState.dy = this.params.paddleSpeed;
       }
     } else if (move === null) {
@@ -434,7 +439,7 @@ export default class PongGame {
     if (
       ball.x <= this.params.paddleWidth &&
       ball.y + this.params.ballSize >= players.player1.y &&
-      ball.y <= players.player1.y + this.params.paddleHeight
+      ball.y <= players.player1.y + players.player1.paddleHeight
     ) {
       ball.x = this.params.paddleWidth;
       this.handlePaddleBounce(players.player1.y, true);
@@ -442,7 +447,7 @@ export default class PongGame {
     } else if (
       ball.x + this.params.ballSize >= this.params.gameWidth - this.params.paddleWidth &&
       ball.y + this.params.ballSize >= players.player2.y &&
-      ball.y <= players.player2.y + this.params.paddleHeight
+      ball.y <= players.player2.y + players.player2.paddleHeight
     ) {
       ball.x = this.params.gameWidth - this.params.paddleWidth - this.params.ballSize;
       this.handlePaddleBounce(players.player2.y, false);
@@ -452,10 +457,10 @@ export default class PongGame {
 
   private handlePaddleBounce(paddleY: number, isLeftPaddle: boolean): void {
     const { ball, players } = this.gameState;
+    const paddleHeight = isLeftPaddle ? players.player1.paddleHeight : players.player2.paddleHeight;
     const maxBounceAngle = Math.PI / 4;
-    const relativeIntersectY =
-      ball.y + this.params.ballSize / 2 - (paddleY + this.params.paddleHeight / 2);
-    const normalizedIntersectY = relativeIntersectY / (this.params.paddleHeight / 2);
+    const relativeIntersectY = ball.y + this.params.ballSize / 2 - (paddleY + paddleHeight / 2);
+    const normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
     const bounceAngle = normalizedIntersectY * maxBounceAngle;
 
     this.params.ballSpeedMultiplier = Math.min(
