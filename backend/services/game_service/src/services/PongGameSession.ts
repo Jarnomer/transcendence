@@ -80,7 +80,7 @@ export default class PongGameSession {
 
   removeClient(playerId: string): void {
     this.clients.delete(playerId);
-    if (this.clients.size === 0 && this.gameId !== 'background_game') {
+    if (this.clients.size === 0) {
       this.endGame();
     } else {
       this.broadcast({ type: 'game_status', state: 'waiting' });
@@ -215,9 +215,10 @@ export default class PongGameSession {
       }
       const paddleSpeed = this.game.getPaddleSpeed();
       const paddleHeight = this.game.getPaddleHeight(playerId === 'player1' ? 1 : 2);
+      const powerUps = this.game.getPowerUps();
 
       if (aiController.shouldUpdate(ball.dx)) {
-        aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed);
+        aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed, powerUps);
       }
 
       const aiMove = aiController.getNextMove();

@@ -1,4 +1,4 @@
-import { Ball, Player, GameParams, defaultGameParams } from '@shared/types';
+import { Ball, Player, GameParams, defaultGameParams, PowerUp } from '@shared/types';
 
 export class AIController {
   private plannedMoves: ('up' | 'down' | null)[] = [];
@@ -14,7 +14,13 @@ export class AIController {
     this.isPlayer1 = isPlayer1;
   }
 
-  updateAIState(ball: Ball, aiPaddle: Player, paddleHeight: number, paddleSpeed: number): void {
+  updateAIState(
+    ball: Ball,
+    aiPaddle: Player,
+    paddleHeight: number,
+    paddleSpeed: number,
+    powerUps: PowerUp[]
+  ): void {
     this.plannedMoves = [];
     const aiCenter = aiPaddle.y + paddleHeight / 2 - this.params.ballSize / 2;
     const framesPerSecond = 60;
@@ -27,6 +33,37 @@ export class AIController {
     if (ballMovingTowardsAI) {
       prediction = this.predictBallPosition(ball);
     }
+
+    // Find the first power up that is not collected
+    const powerUp = powerUps.find((p) => !p.collected);
+
+    if (powerUp) {
+      const playerX = this.isPlayer1
+        ? this.params.paddleWidth
+        : this.params.gameWidth - this.params.paddleWidth;
+
+      // Calculate the required bounce angle
+      const powerUpY = powerUp.y + this.params.powerUpSize / 2;
+      const powerUpX = powerUp.x + this.params.powerUpSize / 2;
+      const distanceToPowerUp = powerUpX - playerX;
+      const desiredBounceAngle = Math.atan((powerUpY - prediction.y) / distanceToPowerUp);
+      // console.log('Desired bounce angle:', desiredBounceAngle);
+
+      // Convert bounce angle to paddle position
+      const maxBounceAngle = Math.PI / 4;
+      const normalizedIntersectY = desiredBounceAngle / maxBounceAngle;
+      const relativeIntersectY = normalizedIntersectY * (this.params.paddleHeight / 2);
+      // console.log('Power up coordinates:', powerUpX, powerUpY);
+      // console.log('Predicted Y before aiming:', prediction.y);
+      prediction.y = prediction.y + relativeIntersectY;
+      // console.log('Predicted Y after aiming:', prediction.y);
+    }
+
+    // const maxBounceAngle = Math.PI / 4;
+    // const relativeIntersectY =
+    //   ball.y + this.params.ballSize / 2 - (paddleY + this.params.paddleHeight / 2);
+    // const normalizedIntersectY = relativeIntersectY / (this.params.paddleHeight / 2);
+    // const bounceAngle = normalizedIntersectY * maxBounceAngle;
 
     prediction.y = this.applyError(prediction.y, ball.dy);
 
@@ -49,7 +86,12 @@ export class AIController {
     let applyingSpin = false;
     const spinMovesNeeded = 10;
 
-    if (ballMovingTowardsAI && this.plannedMoves.length <= prediction.frames - spinMovesNeeded) {
+    // Don't apply spin if there are power-ups or if the ball is not moving towards AI
+    if (
+      !powerUps.length &&
+      ballMovingTowardsAI &&
+      this.plannedMoves.length <= prediction.frames - spinMovesNeeded
+    ) {
       // Decide whether to apply spin based on difficulty
       const spinChance =
         this.difficulty === 'easy' ? 0.1 : this.difficulty === 'normal' ? 0.3 : 0.7;
@@ -177,7 +219,7 @@ export class AIController {
     } else if (this.difficulty === 'normal') {
       errorFactor = 2;
     } else if (this.difficulty === 'brutal') {
-      errorFactor = 1.1;
+      errorFactor = 0;
     }
 
     const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.params.gameHeight / 2);

@@ -106,34 +106,47 @@ export default class PongGame {
   }
 
   getGameStatus(): GameStatus {
-    return this.gameStatus;
+    return structuredClone(this.gameStatus);
   }
   getGameState(): GameState {
-    return this.gameState;
+    return structuredClone(this.gameState);
   }
   getPaddleSpeed() {
-    return this.params.paddleSpeed;
+    return structuredClone(this.params.paddleSpeed);
   }
   getHeight() {
-    return this.params.gameHeight;
+    return structuredClone(this.params.gameHeight);
   }
   getWidth() {
-    return this.params.gameWidth;
+    return structuredClone(this.params.gameWidth);
   }
   getPaddleHeight(player: number): number {
     if (player === 1) {
-      return this.gameState.players.player1.paddleHeight;
+      return structuredClone(this.gameState.players.player1.paddleHeight);
     } else {
-      return this.gameState.players.player2.paddleHeight;
+      return structuredClone(this.gameState.players.player2.paddleHeight);
     }
   }
 
   getPlayerId(player: number): string | null {
     if (player === 1) {
-      return this.player1Id;
+      return structuredClone(this.player1Id);
     } else {
-      return this.player2Id;
+      return structuredClone(this.player2Id);
     }
+  }
+
+  getPowerUps(): Array<{
+    id: number;
+    x: number;
+    y: number;
+    collected: boolean;
+    affectedPlayer: number;
+    timeToDespawn: number;
+    timeToExpire: number;
+    type: 'bigger_paddle' | 'smaller_paddle';
+  }> {
+    return structuredClone(this.gameState.powerUps);
   }
 
   spawnPowerUp(
