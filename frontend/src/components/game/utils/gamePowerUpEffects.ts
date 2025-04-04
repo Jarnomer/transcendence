@@ -76,7 +76,7 @@ export class PowerUpEffectsManager {
   private createPowerUpEffect(powerUp: PowerUp): void {
     const x = (powerUp.x - this.gameWidth / 2) / this.scaleFactor;
     const y = -((powerUp.y - this.gameHeight / 2) / this.scaleFactor);
-    const basePosition = new Vector3(x, y, 0.2);
+    const basePosition = new Vector3(x, y, -0.2);
 
     const baseSize = this.powerUpSize / this.scaleFactor;
     const cubeSize = baseSize * 1.01;
@@ -104,7 +104,7 @@ export class PowerUpEffectsManager {
       this.scene
     );
     console.log(`size: ${size}`);
-    mesh.position = new Vector3(x, y, 0.2);
+    mesh.position = new Vector3(x, y, -0.2);
 
     const material = new StandardMaterial(`powerUpMaterial-${type}`, this.scene);
     const iconPath = this.getPowerUpIconPath(type);
@@ -226,7 +226,7 @@ export class PowerUpEffectsManager {
 
     const baseSize = this.powerUpSize / this.scaleFactor;
     const cubeSize = baseSize * 1.01;
-    const maxDistance = cubeSize * 0.8;
+    const maxDistance = cubeSize * 1.1;
 
     particleSystem.updateFunction = (particles) => {
       const lifetimeProgress = Math.min((Date.now() - creationTime) / maxLifetime, 1);
@@ -255,10 +255,11 @@ export class PowerUpEffectsManager {
           particle.position.x += deltaX;
           particle.position.y += deltaY;
         } else {
-          // Move particle slightly back toward center
-          const factor = 0.98;
-          particle.position.x = (particle.position.x - x) * factor + x;
-          particle.position.y = (particle.position.y - y) * factor + y;
+          // Move particle slightly or completely towards the center
+          // particle.position.x = (particle.position.x - x) * 0.98 + x;
+          // particle.position.y = (particle.position.y - y) * 0.98 + y;
+          particle.position.x = x + (Math.random() - 0.5) * emitBoxSize * 2;
+          particle.position.y = y + (Math.random() - 0.5) * emitBoxSize * 2;
         }
       }
     };
