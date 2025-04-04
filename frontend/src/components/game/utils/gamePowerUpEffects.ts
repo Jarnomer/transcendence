@@ -309,28 +309,6 @@ export class PowerUpEffectsManager {
     ];
     positionAnim.setKeys(positionKeys);
 
-    // Create emissive glow effect
-    const emissiveAnim = new Animation(
-      'powerUpEmissiveAnimation',
-      'material.emissiveColor',
-      30,
-      Animation.ANIMATIONTYPE_COLOR3,
-      Animation.ANIMATIONLOOPMODE_CYCLE
-    );
-
-    const baseColor = this.color.clone();
-    const brightColor = new Color3(
-      Math.min(baseColor.r * 2, 1.5),
-      Math.min(baseColor.g * 2, 1.5),
-      Math.min(baseColor.b * 2, 1.5)
-    );
-    const emissiveKeys = [
-      { frame: 0, value: baseColor },
-      { frame: 30, value: brightColor },
-      { frame: 60, value: baseColor },
-    ];
-    emissiveAnim.setKeys(emissiveKeys);
-
     // Easing functions - smoother animations
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -338,7 +316,7 @@ export class PowerUpEffectsManager {
     scaleYAnim.setEasingFunction(easingFunction);
     positionAnim.setEasingFunction(easingFunction);
 
-    mesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, positionAnim, emissiveAnim];
+    mesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, positionAnim];
 
     this.scene.beginAnimation(mesh, 0, 60, true);
   }
