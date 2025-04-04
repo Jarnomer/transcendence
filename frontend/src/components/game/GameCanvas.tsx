@@ -15,6 +15,8 @@ import {
   createPaddle,
   createPongRetroEffects,
   getThemeColors,
+  gameToSceneX,
+  gameToSceneY,
   setupEnvironmentMap,
   setupPostProcessing,
   setupReflections,
@@ -127,9 +129,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
 
-  const width = defaultGameParams.gameWidth;
-  const height = defaultGameParams.gameHeight;
-  const scaleFactor = 20;
+  const gameWidth = defaultGameParams.gameWidth;
+  const gameHeight = defaultGameParams.gameHeight;
+  const scaleFactor = defaultGameParams.scaleFactor;
 
   // initial render setup
   useEffect(() => {
@@ -176,10 +178,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     postProcessingRef.current = pipeline;
 
     // Set paddle positions
-    topEdgeRef.current.position.y = height / 2 / scaleFactor + 0.5;
-    bottomEdgeRef.current.position.y = -height / 2 / scaleFactor - 0.5;
-    player1Ref.current.position.x = -20;
-    player2Ref.current.position.x = 19.5;
+    topEdgeRef.current.position.y = gameToSceneY(0, topEdgeRef.current);
+    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight, topEdgeRef.current);
+    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
 
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
@@ -255,10 +257,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = -((players.player1.y - height / 2) / scaleFactor) - 2;
-    const player2Y = -((players.player2.y - height / 2) / scaleFactor) - 2;
-    const ballY = -((ball.y - height / 2) / scaleFactor);
-    const ballX = (ball.x - width / 2) / scaleFactor;
+    const player1Y = gameToSceneY(players.player1.y, player1Ref.current);
+    const player2Y = gameToSceneY(players.player2.y, player2Ref.current);
+    const ballY = gameToSceneY(ball.y, ballRef.current);
+    const ballX = gameToSceneX(ball.x, ballRef.current);
 
     // Update mesh positions directly
     player1Ref.current.position.y = player1Y;
@@ -303,9 +305,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       );
     }
 
-    if (score) {
-      applyScoreEffects(retroEffectsRef.current);
-    }
+    if (score) applyScoreEffects(retroEffectsRef.current);
 
     if (sceneRef.current && powerUps && powerUps.length > 0) {
       applyPlayerEffects(

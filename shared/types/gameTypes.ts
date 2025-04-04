@@ -32,6 +32,7 @@ export interface GameState {
 }
 
 export interface GameParams {
+  scaleFactor: number;
   gameWidth: number;
   gameHeight: number;
 
@@ -64,6 +65,7 @@ export interface GameParams {
 }
 
 export const defaultGameParams: GameParams = {
+  scaleFactor: 20,
   gameWidth: 800,
   gameHeight: 400,
 
@@ -73,7 +75,7 @@ export const defaultGameParams: GameParams = {
   maxPaddleHeight: 200,
   paddleSpeed: 10,
 
-  ballSize: 10,
+  ballSize: 15,
   ballSpeed: 7,
   minBallDX: 7,
   ballSpeedMultiplier: 1,
@@ -92,7 +94,7 @@ export const defaultGameParams: GameParams = {
   powerUpMinSpawnInterval: 2000, // Milliseconds
   powerUpMaxSpawnInterval: 4000, // Milliseconds
   powerUpDuration: 8000, // Milliseconds
-  powerUpSize: 35,
+  powerUpSize: 30,
 };
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
