@@ -60,6 +60,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
               type="file"
               ref={fileInputRef}
               className="hidden"
+              aria-label="Upload profile picture"
               accept="image/*"
               onChange={handleFileChange}
             />

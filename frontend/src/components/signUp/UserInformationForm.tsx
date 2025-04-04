@@ -399,6 +399,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   className="hidden"
                   accept="image/*"
                   onChange={handleFileChange}
+                  aria-label="Upload profile picture"
                 />
 
                 <button
@@ -504,7 +505,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                       <input
                         type="text"
                         name="last_name"
-                        id="lasName"
+                        id="lastName"
                         placeholder={user.last_name ? user.last_name : 'Missing data'}
                         value={formData.last_name}
                         onChange={handleInputChange}

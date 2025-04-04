@@ -48,6 +48,8 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
               <div style={{ width: '100%', height: '100%' }}>
                 <img
                   src={imageUrl}
+                  alt=""
+                  role="presentation"
                   style={{
                     width: '100%',
                     clipPath: 'url(#image-mask)',

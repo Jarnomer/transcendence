@@ -131,7 +131,7 @@ export const LeaderBoard: React.FC = () => {
                                 ? './src/assets/images/ai.png'
                                 : user.avatar_url
                             }
-                            alt={user.display_name}
+                            alt={`${user.display_name}'s profile picture`}
                           />
                         </div>
                         <p>
