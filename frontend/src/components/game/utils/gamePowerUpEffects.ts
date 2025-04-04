@@ -292,7 +292,6 @@ export class PowerUpEffectsManager {
     ];
     scaleZAnim.setKeys(scaleZKeys);
 
-    // Add hover animation
     const positionAnim = new Animation(
       'powerUpHoverAnimation',
       'position.y',
@@ -304,8 +303,9 @@ export class PowerUpEffectsManager {
     const originalY = mesh.position.y;
     const positionKeys = [
       { frame: 0, value: originalY },
-      { frame: 45, value: originalY + 0.4 },
-      { frame: 90, value: originalY },
+      { frame: 15, value: originalY + 0.05 },
+      { frame: 45, value: originalY - 0.05 },
+      { frame: 60, value: originalY },
     ];
     positionAnim.setKeys(positionKeys);
 
