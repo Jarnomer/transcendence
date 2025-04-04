@@ -44,10 +44,12 @@ class WebSocketManager {
         this.reconnectAttempts < WebSocketManager.MAX_RECONNECT_ATTEMPTS
       ) {
         this.scheduleReconnect();
-      } else {
-        console.log('reason', event.reason);
-        console.log('WebSocket closed and deleted:', this.url);
-        delete WebSocketManager.instances[this.url];
+      } else if (
+        this.manualClose ||
+        this.reconnectAttempts >= WebSocketManager.MAX_RECONNECT_ATTEMPTS
+      ) {
+        console.log('WebSocket closed:', this.url);
+        this.reset();
       }
     };
 
@@ -76,6 +78,21 @@ class WebSocketManager {
         console.error('Error parsing WebSocket message:', error);
       }
     };
+  }
+
+  reset() {
+    this.reconnectAttempts = 0;
+    this.reconnectTimer = null;
+    this.ws = null;
+    this.manualClose = false;
+    this.params = new URLSearchParams();
+  }
+
+  deleteInstance() {
+    if (WebSocketManager.instances[this.url]) {
+      WebSocketManager.instances[this.url].close();
+      delete WebSocketManager.instances[this.url];
+    }
   }
 
   private scheduleReconnect() {

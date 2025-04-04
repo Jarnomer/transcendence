@@ -36,4 +36,11 @@ export class ChatModel {
     const rooms = await this.db.all('SELECT * FROM chat_rooms');
     return rooms;
   }
+
+  async getRoomMembers(room_id: string) {
+    const members = await this.db.all('SELECT user_id FROM room_members WHERE chat_room_id = ?', [
+      room_id,
+    ]);
+    return members;
+  }
 }

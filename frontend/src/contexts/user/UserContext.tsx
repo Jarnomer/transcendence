@@ -34,6 +34,7 @@ export const useUser = () => {
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+  
 
   const userId = localStorage.getItem('userID');
 

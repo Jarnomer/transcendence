@@ -1,5 +1,3 @@
-import { Index } from '@sinclair/typebox';
-
 import { GameParams, defaultGameParams } from '@shared/types';
 
 import PongGame from './PongGame';
@@ -84,7 +82,7 @@ export class PowerUpManager {
     const powerUp = new PowerUpClass(id, x, y);
     this.powerUps.push(powerUp);
     this.game.spawnPowerUp(id, x, y, false, 0, this.params.powerUpDuration, 0, powerUpType); // Add the power-up to the game state
-    console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
+    //console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
   }
 
   checkCollision(): void {
@@ -112,7 +110,7 @@ export class PowerUpManager {
         this.game.removePowerUp(powerUp.id);
         this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
       } else if (!powerUp.active && powerUp.isExpired()) {
-        console.log('Despawning expired uncollected power-up id:', powerUp.id);
+        // console.log('Despawning expired uncollected power-up id:', powerUp.id);
         this.game.removePowerUp(powerUp.id);
         this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
       }
