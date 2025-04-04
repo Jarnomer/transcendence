@@ -68,7 +68,7 @@ export class PowerUpEffectsManager {
     const currentIds = new Set(powerUps.map((p) => p.id));
     for (const [id, effect] of this.effects.entries()) {
       if (!currentIds.has(id) && !effect.collected) {
-        this.disposeEffectWithAnimation(id); // Use animated disposal
+        this.disposeEffectWithAnimation(id);
       }
     }
   }
@@ -196,30 +196,37 @@ export class PowerUpEffectsManager {
     y: number,
     color: Color3
   ): ParticleSystem {
-    const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 100, this.scene);
+    const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 200, this.scene);
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
     particleSystem.emitter = new Vector3(x, y, 0.2);
-    particleSystem.minEmitBox = new Vector3(-0.05, -0.05, -0.05);
-    particleSystem.maxEmitBox = new Vector3(0.05, 0.05, 0.05);
+
+    const emitBoxSize = 0.03;
+    particleSystem.minEmitBox = new Vector3(-emitBoxSize, -emitBoxSize, -emitBoxSize);
+    particleSystem.maxEmitBox = new Vector3(emitBoxSize, emitBoxSize, emitBoxSize);
 
     particleSystem.color1 = new Color4(color.r, color.g, color.b, 0.8);
 
     particleSystem.emitRate = 10;
     particleSystem.minSize = 0.05;
     particleSystem.maxSize = 0.2;
-    particleSystem.minLifeTime = 0.2;
-    particleSystem.maxLifeTime = 0.6;
-    particleSystem.minEmitPower = 0.1;
-    particleSystem.maxEmitPower = 0.5;
+    particleSystem.minLifeTime = 0.05;
+    particleSystem.maxLifeTime = 0.2;
+    particleSystem.minEmitPower = 0.05;
+    particleSystem.maxEmitPower = 0.25;
 
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
-    particleSystem.direction1 = new Vector3(-1, -1, -0.5);
-    particleSystem.direction2 = new Vector3(1, 1, 0.5);
+
+    particleSystem.direction1 = new Vector3(-0.5, -0.5, -0.25);
+    particleSystem.direction2 = new Vector3(0.5, 0.5, 0.25);
 
     const creationTime = Date.now();
     const maxLifetime = 8000;
+
+    const baseSize = this.powerUpSize / this.scaleFactor;
+    const cubeSize = baseSize * 1.01;
+    const maxDistance = cubeSize * 0.8;
 
     particleSystem.updateFunction = (particles) => {
       const lifetimeProgress = Math.min((Date.now() - creationTime) / maxLifetime, 1);
@@ -233,11 +240,26 @@ export class PowerUpEffectsManager {
 
         const age = particle.age / particle.lifeTime;
         const baseAngle = (i * 137.5) % 360;
-        const speed = 0.008 * (1.0 - age * 0.3);
+        const speed = 0.004 * (1.0 - age * 0.3);
+
+        const deltaX = Math.cos(baseAngle) * speed * (1 + ((i % 5) - 2) * 0.1);
+        const deltaY = Math.sin(baseAngle) * speed * (1 + ((i % 7) - 3) * 0.1);
 
         particle.color.a = Math.max(0, 1 - age);
-        particle.position.x += Math.cos(baseAngle) * speed * (1 + ((i % 5) - 2) * 0.1);
-        particle.position.y += Math.sin(baseAngle) * speed * (1 + ((i % 7) - 3) * 0.1);
+
+        const nextX = particle.position.x + deltaX;
+        const nextY = particle.position.y + deltaY;
+        const distanceFromCenter = Math.sqrt(Math.pow(nextX - x, 2) + Math.pow(nextY - y, 2));
+
+        if (distanceFromCenter <= maxDistance) {
+          particle.position.x += deltaX;
+          particle.position.y += deltaY;
+        } else {
+          // Move particle slightly back toward center
+          const factor = 0.98;
+          particle.position.x = (particle.position.x - x) * factor + x;
+          particle.position.y = (particle.position.y - y) * factor + y;
+        }
       }
     };
 
