@@ -104,9 +104,9 @@ export const SignUpPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.4 }}
-              onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
+              onAnimationComplete={() => handleExitComplete(true)}
             >
-              <h3 className="text-lg font-bold">Create Profile</h3>
+              <h1 className="text-lg font-bold">Edit Profile</h1>
 
               <UserInformationForm
                 loading={loading}

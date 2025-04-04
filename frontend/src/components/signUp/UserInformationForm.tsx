@@ -389,6 +389,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                 <img
                   className="object-cover w-full h-full"
                   src={`https://localhost:8443/${user.avatar_url}`}
+                  alt="profile picture"
                 />
               </div>
               <>
@@ -403,6 +404,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                 <button
                   className="absolute right-0 bottom-0"
                   onClick={() => fileInputRef.current?.click()}
+                  aria-label="upload profile picture"
                 >
                   <svg
                     className="size-9"
@@ -435,16 +437,16 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                 </button>
               ) : null}
               <div className="">
-                <div className="flex mb-2 gap-2 text-left text-xs">
+                <div className="flex mb-2 gap-2 text-left text-xs" aria-hidden="true">
                   <div className="border-1 w-2/3">
-                    <p className="px-1 text-xs text-gray-500">user id</p>
+                    <p className="px-1 text-xs text-neutral-200 opacity-45">user id</p>
                     <br></br>
-                    <p className="px-2 text-gray-500">{user.user_id?.slice(0, 20)}</p>
+                    <p className="px-2 text-neutral-200 opacity-45">{user.user_id?.slice(0, 20)}</p>
                   </div>
                   <div className="border-1 w-1/3">
-                    <p className="px-1 text-xs text-gray-500">Username</p>
+                    <p className="px-1 text-xs text-neutral-200 opacity-45">Username</p>
                     <br></br>
-                    <p className="px-2 text-gray-500">{user.username}</p>
+                    <p className="px-2 text-neutral-200 opacity-45">{user.username}</p>
                   </div>
                 </div>
                 <form className="flex flex-col justify-center" onSubmit={handleSubmit}>
@@ -453,10 +455,14 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
               </div> */}
                   <span className="flex flex-row relative">
                     <div className="border relative">
-                      <span className="text-xs absolute top-1 left-1">Display Name *</span>
+                      <label htmlFor="displayName">
+                        <span className="text-xs absolute top-1 left-1">Display Name *</span>
+                      </label>
+
                       <input
                         type="text"
                         name="display_name"
+                        id="displayName"
                         required
                         placeholder={user.display_name ? user.display_name : 'Missing data'}
                         value={formData.display_name}
@@ -478,9 +484,12 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   </span>
                   <span className="flex flex-row relative">
                     <div className="border relative">
-                      <span className="text-xs absolute top-1 left-1">First Name</span>
+                      <label htmlFor="firstName">
+                        <span className="text-xs absolute top-1 left-1">First Name</span>
+                      </label>
                       <input
                         type="text"
+                        id="firstName"
                         name="first_name"
                         placeholder={user.first_name ? user.first_name : 'Missing data'}
                         value={formData.first_name}
@@ -489,10 +498,13 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                       />
                     </div>
                     <div className="border relative">
-                      <span className="text-xs absolute top-1 left-1">Last Name</span>
+                      <label htmlFor="lastName">
+                        <span className="text-xs absolute top-1 left-1">Last Name</span>
+                      </label>
                       <input
                         type="text"
                         name="last_name"
+                        id="lasName"
                         placeholder={user.last_name ? user.last_name : 'Missing data'}
                         value={formData.last_name}
                         onChange={handleInputChange}
@@ -501,9 +513,12 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                     </div>
                   </span>
                   <div className="border flex flex-row w-full relative">
-                    <span className="text-xs absolute top-1 left-1">Biography</span>
+                    <label htmlFor="bio">
+                      <span className="text-xs absolute top-1 left-1">Biography</span>
+                    </label>
                     <textarea
                       name="bio"
+                      id="bio"
                       placeholder="Write something about yourself..."
                       value={formData.bio}
                       onChange={handleInputChange}

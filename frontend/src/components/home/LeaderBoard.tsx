@@ -82,7 +82,7 @@ export const LeaderBoard: React.FC = () => {
         animate="visible"
         exit="hidden"
       >
-        <span className="absolute top-0 left-0 translate-y-[-50%] w-full">
+        <span className="absolute top-0 left-0 translate-y-[-50%] w-full" aria-hidden="true">
           <SvgBorderBig></SvgBorderBig>
         </span>
         <div className="w-full h-full relative overflow-hidden">
@@ -92,6 +92,8 @@ export const LeaderBoard: React.FC = () => {
               <img
                 className="object-contain h-full mix-blend-overlay"
                 src="./src/assets/images/king_of_the_hill.png"
+                aria-hidden="true"
+                alt=""
               />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl text-center w-full">Leaderboard</h1>

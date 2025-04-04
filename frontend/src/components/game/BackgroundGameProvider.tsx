@@ -147,6 +147,7 @@ const BackgroundGameProvider: React.FC = () => {
   return (
     <div
       className="background-game-container"
+      // aria-hidden="true"
       style={{
         position: 'absolute',
         pointerEvents: 'none',
