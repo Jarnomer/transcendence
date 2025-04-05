@@ -39,7 +39,6 @@ export const ProfilePage: React.FC = () => {
   const [sent, setSent] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [editProfile, setEditProfile] = useState<boolean>(false);
-  const [isExiting, setIsExiting] = useState(false);
 
   const { userId } = useParams<{ userId: string }>();
   const { user: loggedInUser } = useUser();
@@ -88,13 +87,6 @@ export const ProfilePage: React.FC = () => {
     }
   }, [user]);
 
-  const handleExitComplete = (isExitAnimation: boolean) => {
-    if (isExitAnimation) {
-      console.log('is exiting set to true');
-      setIsExiting(true); // Set a flag to indicate exit completion
-    }
-  };
-
   if (loading) {
     return <div className="text-center mt-10 text-lg">Loading...</div>;
   }
@@ -130,11 +122,6 @@ export const ProfilePage: React.FC = () => {
               <motion.div
                 key="defaultSection"
                 className="w-full flex gap-4 flex-col md:flex-row items-top justify-center text-center"
-                // variants={animationVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-                onAnimationComplete={() => handleExitComplete(true)} // <-- Handle exit animation completion
               >
                 <motion.div>
                   <FriendList
