@@ -13,9 +13,10 @@ import {
   CubicEase,
 } from 'babylonjs';
 
-import { PowerUp } from '@shared/types';
+import { PowerUp, defaultGameObjectParams } from '@shared/types';
 
 import { createParticleTexture } from './gamePostProcess';
+import { gameToSceneSize, gameToSceneX, gameToSceneY } from './gameUtilities';
 
 interface PowerUpEffect {
   id: number;
@@ -30,24 +31,11 @@ export class PowerUpEffectsManager {
   private scene: Scene;
   private effects: Map<number, PowerUpEffect> = new Map();
   private color: Color3;
-  private scaleFactor: number;
-  private gameWidth: number;
-  private gameHeight: number;
   private powerUpSize: number;
 
-  constructor(
-    scene: Scene,
-    color: Color3,
-    width: number,
-    height: number,
-    scaleFactor: number,
-    powerUpSize: number
-  ) {
+  constructor(scene: Scene, color: Color3, powerUpSize: number) {
     this.scene = scene;
     this.color = color;
-    this.gameWidth = width;
-    this.gameHeight = height;
-    this.scaleFactor = scaleFactor;
     this.powerUpSize = powerUpSize;
   }
 
@@ -74,38 +62,38 @@ export class PowerUpEffectsManager {
   }
 
   private createPowerUpEffect(powerUp: PowerUp): void {
-    const x = (powerUp.x - this.gameWidth / 2) / this.scaleFactor;
-    const y = -((powerUp.y - this.gameHeight / 2) / this.scaleFactor);
-    const basePosition = new Vector3(x, y, -0.2);
-
-    const baseSize = this.powerUpSize / this.scaleFactor;
+    const baseSize = gameToSceneSize(this.powerUpSize);
     const cubeSize = baseSize * 1.01;
 
-    const centerMesh = this.createIconMesh(powerUp.type, x, y, baseSize);
+    const icon = this.createIconMesh(powerUp.type, baseSize);
+
+    const x = gameToSceneX(powerUp.x, icon);
+    const y = gameToSceneY(powerUp.y, icon);
+    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor);
+
+    icon.position = basePosition.clone();
+
     const cube = this.createCubeMesh(powerUp.id, basePosition, cubeSize, 0.6, this.color);
     const particleSystem = this.createGlitterParticleSystem(powerUp.id, x, y, this.color);
 
     this.effects.set(powerUp.id, {
       id: powerUp.id,
       particleSystem,
-      icon: centerMesh,
+      icon: icon,
       cubes: [cube],
       type: powerUp.type,
       collected: false,
     });
 
-    this.animatePowerUpIcon(centerMesh);
+    this.animatePowerUpIcon(icon);
   }
 
-  private createIconMesh(type: string, x: number, y: number, size: number): Mesh {
+  private createIconMesh(type: string, size: number): Mesh {
     const mesh = MeshBuilder.CreatePlane(
       `powerUpIcon-${type}`,
-      { width: size * 1.15, height: size * 1.15 },
+      { width: size, height: size },
       this.scene
     );
-    console.log(`size: ${size}`);
-    mesh.position = new Vector3(x, y, -0.2);
-
     const material = new StandardMaterial(`powerUpMaterial-${type}`, this.scene);
     const iconPath = this.getPowerUpIconPath(type);
     const texture = new Texture(iconPath, this.scene);
@@ -200,7 +188,7 @@ export class PowerUpEffectsManager {
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
-    particleSystem.emitter = new Vector3(x, y, 0.2);
+    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor);
 
     const emitBoxSize = 0.03;
     particleSystem.minEmitBox = new Vector3(-emitBoxSize, -emitBoxSize, -emitBoxSize);
@@ -224,9 +212,7 @@ export class PowerUpEffectsManager {
     const creationTime = Date.now();
     const maxLifetime = 8000;
 
-    const baseSize = this.powerUpSize / this.scaleFactor;
-    const cubeSize = baseSize * 1.01;
-    const maxDistance = cubeSize * 1.1;
+    const cubeSize = gameToSceneSize(this.powerUpSize) * 1.01;
 
     particleSystem.updateFunction = (particles) => {
       const lifetimeProgress = Math.min((Date.now() - creationTime) / maxLifetime, 1);
@@ -251,13 +237,10 @@ export class PowerUpEffectsManager {
         const nextY = particle.position.y + deltaY;
         const distanceFromCenter = Math.sqrt(Math.pow(nextX - x, 2) + Math.pow(nextY - y, 2));
 
-        if (distanceFromCenter <= maxDistance) {
+        if (distanceFromCenter <= cubeSize * 1.1) {
           particle.position.x += deltaX;
           particle.position.y += deltaY;
         } else {
-          // Move particle slightly or completely towards the center
-          // particle.position.x = (particle.position.x - x) * 0.98 + x;
-          // particle.position.y = (particle.position.y - y) * 0.98 + y;
           particle.position.x = x + (Math.random() - 0.5) * emitBoxSize * 2;
           particle.position.y = y + (Math.random() - 0.5) * emitBoxSize * 2;
         }

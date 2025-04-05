@@ -84,10 +84,6 @@ function animatePaddleResize(
   const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
   const targetScaleY = targetHeightInBabylonUnits / originalHeight;
 
-  console.log(
-    `targetHeight: ${targetHeight}, targetHeightInBabylonUnits: ${targetHeightInBabylonUnits}, originalHeight: ${originalHeight}, targetScaleY: ${targetScaleY}`
-  );
-
   if (Math.abs(paddleMesh.scaling.y - targetScaleY) < 0.05) return;
 
   const scaleAnim = new Animation(
@@ -104,6 +100,7 @@ function animatePaddleResize(
 
   const keys = [
     { frame: 0, value: paddleMesh.scaling.y },
+    { frame: 5, value: targetScaleY * 1.3 },
     { frame: 15, value: targetScaleY * 1.1 },
     { frame: 30, value: targetScaleY },
   ];

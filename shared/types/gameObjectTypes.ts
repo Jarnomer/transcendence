@@ -1,6 +1,7 @@
 import { defaultGameParams } from './gameTypes';
 
 export interface GameObjectParams {
+  distanceFromFloor: number;
   ball: {
     diameter: number;
     segments: number;
@@ -84,6 +85,7 @@ export interface GameObjectParams {
 }
 
 export const defaultGameObjectParams: GameObjectParams = {
+  distanceFromFloor: -0.2,
   ball: {
     diameter: defaultGameParams.ballSize / defaultGameParams.scaleFactor,
     segments: 32,

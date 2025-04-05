@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
+import {
+  ArcRotateCamera,
+  Vector3,
+  Color3,
+  DefaultRenderingPipeline,
+  Engine,
+  Scene,
+} from 'babylonjs';
 
 import {
   RetroEffectsManager,
@@ -11,6 +18,7 @@ import {
   applyScoreEffects,
   ballSparkEffect,
   createBall,
+  createEdge,
   createFloor,
   createPaddle,
   createPongRetroEffects,
@@ -22,7 +30,6 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  createEdge,
 } from '@game/utils';
 
 import {
@@ -31,6 +38,7 @@ import {
   RetroEffectsLevels,
   defaultRetroEffectsLevels,
   defaultGameParams,
+  defaultGameObjectParams,
 } from '@shared/types';
 
 interface GameCanvasProps {
@@ -131,7 +139,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   const gameWidth = defaultGameParams.gameWidth;
   const gameHeight = defaultGameParams.gameHeight;
-  const scaleFactor = defaultGameParams.scaleFactor;
 
   // initial render setup
   useEffect(() => {
@@ -177,18 +184,20 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
 
-    // Set paddle positions
-    topEdgeRef.current.position.y = gameToSceneY(0, topEdgeRef.current);
-    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight, topEdgeRef.current);
-    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
-    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+    topEdgeRef.current.position = new Vector3(
+      0,
+      gameToSceneY(0, bottomEdgeRef.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
+    bottomEdgeRef.current.position = new Vector3(
+      0,
+      gameToSceneY(gameHeight, bottomEdgeRef.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
 
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
       colors.primaryColor,
-      defaultGameParams.gameWidth,
-      defaultGameParams.gameHeight,
-      scaleFactor,
       defaultGameParams.powerUpSize
     );
 
@@ -257,16 +266,21 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = gameToSceneY(players.player1.y, player1Ref.current);
-    const player2Y = gameToSceneY(players.player2.y, player2Ref.current);
-    const ballY = gameToSceneY(ball.y, ballRef.current);
-    const ballX = gameToSceneX(ball.x, ballRef.current);
-
-    // Update mesh positions directly
-    player1Ref.current.position.y = player1Y;
-    player2Ref.current.position.y = player2Y;
-    ballRef.current.position.x = ballX;
-    ballRef.current.position.y = ballY;
+    player1Ref.current.position = new Vector3(
+      gameToSceneX(0, player1Ref.current),
+      gameToSceneY(players.player1.y, player1Ref.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
+    player2Ref.current.position = new Vector3(
+      gameToSceneX(gameWidth, player2Ref.current),
+      gameToSceneY(players.player2.y, player2Ref.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
+    ballRef.current.position = new Vector3(
+      gameToSceneX(ball.x, ballRef.current),
+      gameToSceneY(ball.y, ballRef.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
 
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
