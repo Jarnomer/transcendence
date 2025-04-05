@@ -11,6 +11,18 @@ interface LastAppliedPowerUp {
   position: number;
 }
 
+interface LogConfig {
+  enabled: boolean;
+  logFrequency: number;
+}
+
+const loggingConfig: LogConfig = {
+  enabled: true,
+  logFrequency: 3000, // ms
+};
+
+let lastLogTime = 0;
+
 const lastAppliedPowerUps: Map<number, LastAppliedPowerUp> = new Map();
 
 export function applyPlayerEffects(
@@ -26,6 +38,17 @@ export function applyPlayerEffects(
 
   applyPaddleEffects(scene, player1Mesh, players.player1, player1PowerUps, color, 1);
   applyPaddleEffects(scene, player2Mesh, players.player2, player2PowerUps, color, 2);
+
+  // Logging player power ups and statistics every X second(s)
+  const currentTime = Date.now();
+  if (loggingConfig.enabled && currentTime - lastLogTime > loggingConfig.logFrequency) {
+    logPlayerState({
+      player: players.player1,
+      mesh: player1Mesh,
+      powerUps: player1PowerUps,
+    });
+    lastLogTime = currentTime;
+  }
 }
 
 function applyPaddleEffects(
@@ -122,8 +145,37 @@ function animatePaddleResize(
   scene.beginAnimation(paddleMesh, 0, 20, false, 1);
 }
 
-export function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] {
+function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] {
   return powerUps.filter(
     (p) => p.collected && p.affectedPlayer === playerIndex && p.timeToExpire > 0
   );
+}
+
+function logPlayerState(player1Data: { player: Player; mesh: Mesh; powerUps: PowerUp[] }): void {
+  const player1Log = formatPlayerLog(player1Data.player, player1Data.mesh, player1Data.powerUps);
+
+  console.log(`${player1Log}`);
+
+  function formatPlayerLog(player: Player, mesh: Mesh, powerUps: PowerUp[]): string {
+    const sceneY = gameToSceneY(player.y, mesh);
+    const scenePaddleHeight = gameToSceneSize(player.paddleHeight);
+    const actualMeshHeight = mesh.getBoundingInfo().boundingBox.extendSize.y * 2 * mesh.scaling.y;
+
+    const powerUpsInfo =
+      powerUps.length > 0
+        ? powerUps.map((p) => `    - ${p.type} (expires in: ${p.timeToExpire}ms)`).join('\n')
+        : '    - None';
+
+    return `
+    Position Y: ${player.y.toFixed(2)}
+    Paddle Height: ${player.paddleHeight.toFixed(2)}
+    Mesh position Y: ${mesh.position.y.toFixed(4)}
+    Mesh Height: ${mesh.scaling.y.toFixed(4)}
+    Calculated Height: ${actualMeshHeight.toFixed(4)}
+    Converted Scene Y: ${sceneY.toFixed(4)}
+    Converted Scene Height: ${scenePaddleHeight.toFixed(4)}
+
+    Active Power-Ups:
+  ${powerUpsInfo}`;
+  }
 }
