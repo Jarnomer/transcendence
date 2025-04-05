@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
 
 interface GameMenuCardProps {
@@ -38,10 +39,17 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
             />
           </g>
           <g>
-            <foreignObject xmlns="http://www.w3.org/1999/xhtml" width="100%" height="100%">
+            <foreignObject
+              aria-hidden="true"
+              xmlns="http://www.w3.org/1999/xhtml"
+              width="100%"
+              height="100%"
+            >
               <div style={{ width: '100%', height: '100%' }}>
                 <img
                   src={imageUrl}
+                  alt=""
+                  role="presentation"
                   style={{
                     width: '100%',
                     clipPath: 'url(#image-mask)',

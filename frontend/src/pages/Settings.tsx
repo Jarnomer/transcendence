@@ -88,7 +88,7 @@ export const SettingsNav: React.FC<{
 };
 
 export const Settings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('gameSettings');
+  const [activeTab, setActiveTab] = useState<string>('userSettings');
 
   return (
     <>

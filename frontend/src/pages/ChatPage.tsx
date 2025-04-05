@@ -238,6 +238,7 @@ export const ChatPage: React.FC = () => {
           <label className="flex items-center mt-2">
             <input
               type="checkbox"
+              aria-label="Make room private"
               className="mr-2"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
@@ -247,6 +248,7 @@ export const ChatPage: React.FC = () => {
           <input
             type="text"
             placeholder="Room name"
+            aria-label="Room name"
             className="flex border p-2 items-center"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
@@ -336,6 +338,7 @@ export const ChatPage: React.FC = () => {
               <div className="md:hidden p-4">
                 <NavIconButton
                   id="arrow-left"
+                  ariaLabel="Back button, returns to conversation list"
                   icon="arrowLeft"
                   onClick={() => {
                     setSelectedFriend(null);
@@ -391,14 +394,22 @@ export const ChatPage: React.FC = () => {
                     handleSendMessage(); // Call the send message function
                   }}
                 >
+                  <label htmlFor="chat-input" className="sr-only">
+                    Message input
+                  </label>
                   <input
                     type="text"
+                    id="chat-input"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
                     className="flex-1 p-2 border-2 border-primary  rounded focus:outline-none"
                   />
-                  <button type="submit" className="ml-2 bg-primary/25 px-4 py-2 rounded">
+                  <button
+                    type="submit"
+                    aria-label="send"
+                    className="ml-2 bg-primary/25 px-4 py-2 rounded"
+                  >
                     send
                   </button>
                 </form>

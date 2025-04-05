@@ -44,7 +44,7 @@ const App: React.FC = () => {
             className="mt-2 md:px-10 flex flex-grow flex-col w-full justify-center items-center"
           >
             <AnimatePresence>
-              <motion.div id="backgroundGlitch" className="w-full h-full">
+              <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
                 <BackgroundGlitch duration={1100} />
               </motion.div>
             </AnimatePresence>

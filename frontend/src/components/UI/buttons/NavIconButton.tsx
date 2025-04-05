@@ -20,6 +20,7 @@ import {
 
 interface NavIconButtonProps {
   id: string;
+  ariaLabel: string;
   icon:
     | 'home'
     | 'user'
@@ -40,7 +41,7 @@ interface NavIconButtonProps {
 
 const iconSizeResponsive = 'size-4 sm:size-6';
 
-export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick }) => {
+export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick, ariaLabel }) => {
   const icons = {
     home: <HomeIcon className={iconSizeResponsive} />,
     user: <UserIcon className={iconSizeResponsive} />,
@@ -60,7 +61,7 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick 
   };
 
   return (
-    <button className="" id={id} onClick={onClick}>
+    <button className="" id={id} onClick={onClick} aria-label={ariaLabel}>
       {icons[icon]}
     </button>
   );

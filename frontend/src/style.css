@@ -538,8 +538,8 @@ button:hover .icon-size {
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(234, 53, 90, 0.15),
-    /* Adjusted to match #ea355a */ transparent
+    color-mix(in srgb, currentColor 15%, transparent),
+    transparent
   );
   transform: translateY(-100%);
   animation: scanMove 2s linear infinite;
