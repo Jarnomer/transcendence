@@ -60,21 +60,10 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 };
 
-const detectCollision = (
-  gameHeight: number,
-  prevDx: number,
-  newDx: number,
-  newY: number,
-  prevY: number
-): 'dx' | 'dy' | null => {
-  const bottomBoundary = gameHeight - 10;
-  const topBoundary = 0;
-
-  const hitTop = newY <= topBoundary && prevY > topBoundary;
-  const hitBottom = newY >= bottomBoundary && prevY < bottomBoundary;
-
+const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
+  const gameHeight = defaultGameParams.gameHeight;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = hitTop || hitBottom;
+  const dyCollision = newY === 0 || newY === gameHeight - 15;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';
@@ -186,12 +175,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     topEdgeRef.current.position = new Vector3(
       0,
-      gameToSceneY(0, bottomEdgeRef.current),
+      gameToSceneY(0, bottomEdgeRef.current) + 0.5,
       defaultGameObjectParams.distanceFromFloor
     );
     bottomEdgeRef.current.position = new Vector3(
       0,
-      gameToSceneY(gameHeight, bottomEdgeRef.current),
+      gameToSceneY(gameHeight, bottomEdgeRef.current) - 0.5,
       defaultGameObjectParams.distanceFromFloor
     );
 
@@ -285,13 +274,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
-    const collision = detectCollision(
-      defaultGameParams.gameHeight,
-      prevBallState.current.dx,
-      ball.dx,
-      prevBallState.current.y,
-      ball.y
-    );
+    const collision = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
     const score = detectScore(
       players.player1.score,
       players.player2.score,
