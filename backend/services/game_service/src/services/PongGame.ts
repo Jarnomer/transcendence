@@ -204,7 +204,7 @@ export default class PongGame {
       console.warn('Paddle height too large, setting to maximum');
       height = this.params.maxPaddleHeight;
     }
-    // this.repositionPaddleAfterHeightChange(player, height);
+    this.repositionPaddleAfterHeightChange(player, height);
     if (player === 1) {
       this.gameState.players.player1.paddleHeight = height;
     } else {
