@@ -2,6 +2,7 @@ import {
   Animation,
   Color3,
   Color4,
+  GlowLayer,
   EasingFunction,
   Mesh,
   MeshBuilder,
@@ -145,6 +146,11 @@ export class PowerUpEffectsManager {
 
     cube.position = basePosition.clone();
     cube.material = material;
+
+    const glowLayer = new GlowLayer('paddleGlowLayer', cube.getScene());
+    glowLayer.intensity = 0.3;
+    glowLayer.blurKernelSize = 32;
+    glowLayer.addIncludedOnlyMesh(cube);
 
     this.animateCubeRotation(cube, basePosition);
 
