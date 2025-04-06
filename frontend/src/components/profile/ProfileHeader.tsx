@@ -16,7 +16,7 @@ type Friend = {
 };
 
 interface ProfileHeaderProps {
-  user: UserDataResponseType;
+  user: UserDataResponseType | null;
   isOwnProfile: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setEditProfile: React.Dispatch<React.SetStateAction<boolean>>;

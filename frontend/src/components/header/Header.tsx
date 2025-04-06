@@ -18,11 +18,11 @@ export const Header: React.FC = () => {
         <div className="ml-0 md:ml-auto  pb-2">
           <HeaderNav />
         </div>
-        <div
+        {/* <div
           aria-hidden="true"
           className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full hidden md:block"
         >
-          <svg className="w-full text-primary" viewBox="0 0 1438 29" fill="none">
+        <svg className="w-full text-secondary" viewBox="0 0 1438 29" fill="none">
             <defs>
               <clipPath id="header-bottomline">
                 <path d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z" />
@@ -35,7 +35,7 @@ export const Header: React.FC = () => {
               className="stroke-2"
             />
           </svg>
-        </div>
+        </div> */}
       </header>
     );
   } else {

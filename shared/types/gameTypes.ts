@@ -70,7 +70,7 @@ export const defaultGameParams: GameParams = {
   gameHeight: 400,
 
   paddleWidth: 10,
-  paddleHeight: 80,
+  paddleHeight: 90,
   minPaddleHeight: 20,
   maxPaddleHeight: 200,
   paddleSpeed: 10,

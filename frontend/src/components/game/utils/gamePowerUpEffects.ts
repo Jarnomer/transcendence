@@ -2,6 +2,7 @@ import {
   Animation,
   Color3,
   Color4,
+  GlowLayer,
   EasingFunction,
   Mesh,
   MeshBuilder,
@@ -63,7 +64,7 @@ export class PowerUpEffectsManager {
 
   private createPowerUpEffect(powerUp: PowerUp): void {
     const baseSize = gameToSceneSize(this.powerUpSize);
-    const cubeSize = baseSize * 1.01;
+    const cubeSize = baseSize * 1.02;
 
     const icon = this.createIconMesh(powerUp.type, baseSize);
 
@@ -104,7 +105,8 @@ export class PowerUpEffectsManager {
     material.opacityTexture = texture;
     material.useAlphaFromDiffuseTexture = true;
 
-    mesh.scaling = new Vector3(0.5, 0.5, 0.5);
+    // mesh.scaling = new Vector3(0.5, 0.5, 0.5);
+    mesh.scaling = new Vector3(1, 1, 1);
     mesh.material = material;
 
     return mesh;
@@ -146,16 +148,17 @@ export class PowerUpEffectsManager {
     cube.position = basePosition.clone();
     cube.material = material;
 
+    const glowLayer = new GlowLayer('paddleGlowLayer', cube.getScene());
+    glowLayer.intensity = 0.25;
+    glowLayer.blurKernelSize = 32;
+    glowLayer.addIncludedOnlyMesh(cube);
+
     this.animateCubeRotation(cube, basePosition);
 
     return cube;
   }
 
   private animateCubeRotation(cube: Mesh, centerPosition: Vector3): void {
-    const rotationSpeedX = Math.random() * 0.025;
-    const rotationSpeedY = Math.random() * 0.025;
-    const rotationSpeedZ = Math.random() * 0.025;
-
     cube.rotation.x = Math.random() * Math.PI;
     cube.rotation.y = Math.random() * Math.PI;
     cube.rotation.z = Math.random() * Math.PI;
@@ -170,9 +173,9 @@ export class PowerUpEffectsManager {
       cube.position.y = centerPosition.y + 0.1;
       cube.position.z = centerPosition.z + 0.1;
 
-      cube.rotation.x += rotationSpeedX;
-      cube.rotation.y += rotationSpeedY;
-      cube.rotation.z += rotationSpeedZ;
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      cube.rotation.z += 0.01;
     });
 
     cube.metadata = { observer, elapsedTime };
@@ -261,9 +264,9 @@ export class PowerUpEffectsManager {
     );
 
     const scaleXKeys = [
-      { frame: 0, value: 0.5 },
-      { frame: 30, value: 0.7 },
-      { frame: 60, value: 0.5 },
+      { frame: 0, value: 1.0 },
+      { frame: 30, value: 1.4 },
+      { frame: 60, value: 1.0 },
     ];
     scaleXAnim.setKeys(scaleXKeys);
 
@@ -276,10 +279,10 @@ export class PowerUpEffectsManager {
     );
 
     const scaleYKeys = [
-      { frame: 0, value: 0.5 },
-      { frame: 15, value: 0.6 },
-      { frame: 45, value: 0.7 },
-      { frame: 60, value: 0.5 },
+      { frame: 0, value: 1.0 },
+      { frame: 15, value: 1.2 },
+      { frame: 45, value: 1.4 },
+      { frame: 60, value: 1.0 },
     ];
     scaleYAnim.setKeys(scaleYKeys);
 
@@ -343,7 +346,7 @@ export class PowerUpEffectsManager {
     );
     const scaleKeys = [
       { frame: 0, value: effect.icon.scaling.clone() },
-      { frame: 10, value: new Vector3(1.5, 1.5, 1.5) },
+      { frame: 10, value: new Vector3(4, 4, 4) },
       { frame: 20, value: new Vector3(0, 0, 0) },
     ];
     scaleAnim.setKeys(scaleKeys);
@@ -383,29 +386,12 @@ export class PowerUpEffectsManager {
       );
       const cubeScaleKeys = [
         { frame: 0, value: cube.scaling.clone() },
-        { frame: 10, value: cube.scaling.scale(1.8) },
+        { frame: 10, value: cube.scaling.scale(2) },
         { frame: 30, value: new Vector3(0, 0, 0) },
       ];
       cubeScaleAnim.setKeys(cubeScaleKeys);
 
-      // Animate flash emission
-      const cubeEmissiveAnim = new Animation(
-        `powerUpCubeFlashAnimation`,
-        'material.emissiveColor',
-        60,
-        Animation.ANIMATIONTYPE_COLOR3,
-        Animation.ANIMATIONLOOPMODE_CONSTANT
-      );
-      const baseColor = this.color.clone();
-      const flashColor = new Color3(1, 1, 1);
-      const cubeEmissiveKeys = [
-        { frame: 0, value: baseColor },
-        { frame: 5, value: flashColor },
-        { frame: 15, value: baseColor },
-      ];
-      cubeEmissiveAnim.setKeys(cubeEmissiveKeys);
-
-      cube.animations = [cubeScaleAnim, cubeEmissiveAnim];
+      cube.animations = [cubeScaleAnim];
 
       // Stop the orbit animation
       if (cube.metadata && cube.metadata.observer) {

@@ -17,10 +17,10 @@ export class BiggerPaddlePowerUp extends PowerUp {
       return;
     }
     if (player === 1) {
-      game.setPaddleHeight(1, game.getPaddleHeight(1) + 40);
+      game.setPaddleHeight(1, game.getPaddleHeight(1) + 30);
       console.log('Bigger paddle effect applied to player 1');
     } else {
-      game.setPaddleHeight(2, game.getPaddleHeight(2) + 40);
+      game.setPaddleHeight(2, game.getPaddleHeight(2) + 30);
       console.log('Bigger paddle effect applied to player 2');
     }
     this.active = true;
@@ -30,10 +30,10 @@ export class BiggerPaddlePowerUp extends PowerUp {
 
   removeEffect(game: PongGame, player: number): void {
     if (player === 1) {
-      game.setPaddleHeight(1, game.getPaddleHeight(1) - 40);
+      game.setPaddleHeight(1, game.getPaddleHeight(1) - 30);
       console.log('Bigger paddle effect removed from player 1');
     } else {
-      game.setPaddleHeight(2, game.getPaddleHeight(2) - 40);
+      game.setPaddleHeight(2, game.getPaddleHeight(2) - 30);
       console.log('Bigger paddle effect removed from player 2');
     }
     this.active = false;
