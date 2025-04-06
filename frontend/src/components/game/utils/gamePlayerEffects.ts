@@ -159,23 +159,20 @@ function logPlayerState(player1Data: { player: Player; mesh: Mesh; powerUps: Pow
   function formatPlayerLog(player: Player, mesh: Mesh, powerUps: PowerUp[]): string {
     const sceneY = gameToSceneY(player.y, mesh);
     const scenePaddleHeight = gameToSceneSize(player.paddleHeight);
-    const actualMeshHeight = mesh.getBoundingInfo().boundingBox.extendSize.y * 2 * mesh.scaling.y;
 
     const powerUpsInfo =
       powerUps.length > 0
-        ? powerUps.map((p) => `    - ${p.type} (expires in: ${p.timeToExpire}ms)`).join('\n')
-        : '    - None';
+        ? powerUps.map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`).join('\n')
+        : '      - None';
 
     return `
-    Position Y: ${player.y.toFixed(2)}
-    Paddle Height: ${player.paddleHeight.toFixed(2)}
-    Mesh position Y: ${mesh.position.y.toFixed(4)}
-    Mesh Height: ${mesh.scaling.y.toFixed(4)}
-    Calculated Height: ${actualMeshHeight.toFixed(4)}
-    Converted Scene Y: ${sceneY.toFixed(4)}
-    Converted Scene Height: ${scenePaddleHeight.toFixed(4)}
-
+    BACKEND
+    Position Y: ${player.y}
+    Paddle Height: ${player.paddleHeight}
+    FRONTEND
+    Mesh Y: ${sceneY}
+    Mesh Height: ${scenePaddleHeight}
     Active Power-Ups:
-  ${powerUpsInfo}`;
+${powerUpsInfo}`;
   }
 }
