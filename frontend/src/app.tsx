@@ -7,9 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundGameProvider from './components/game/BackgroundGameProvider.tsx';
 import { Header } from './components/header/Header.tsx';
-import { AuthModal } from './components/modals/authModal.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
-import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { useUser } from './contexts/user/UserContext';
@@ -31,7 +29,6 @@ const App: React.FC = () => {
   return (
     <WebSocketProvider>
       {/* Background game provider */}
-
       <BackgroundGameProvider />
       <ModalProvider>
         <div
@@ -49,9 +46,6 @@ const App: React.FC = () => {
               </motion.div>
             </AnimatePresence>
             <AnimatedRoutes></AnimatedRoutes>
-            {/* Conditionally render the modals */}
-            {<SettingsModal />}
-            {<AuthModal />}
           </div>
           {location.pathname !== '/game' ? <Footer /> : null}
         </div>
