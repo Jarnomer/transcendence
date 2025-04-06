@@ -143,8 +143,8 @@ export const retroEffectsPresets = {
     flicker: 5,
     vignette: 5,
     noise: 5,
-    crtTurnOnEffect: 0,
-    crtTurnOffEffect: 0,
+    crtTurnOnEffect: 1,
+    crtTurnOffEffect: 1,
     crtChannelSwitchEffect: 1,
   } as RetroEffectsLevels,
 };
