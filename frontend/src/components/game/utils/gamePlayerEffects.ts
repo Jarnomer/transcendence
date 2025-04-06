@@ -118,8 +118,20 @@ function animatePaddleResize(
   const targetHeightInBabylonUnits = gameToSceneSize(targetHeight);
   const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
   const targetScaleY = targetHeightInBabylonUnits / originalHeight;
+  const isGrowing = paddleMesh.scaling.y < targetScaleY;
 
   if (Math.abs(paddleMesh.scaling.y - targetScaleY) < 0.05) return;
+
+  let overshootMultiplier: number;
+  let dampingMultiplier: number;
+
+  if (isGrowing) {
+    overshootMultiplier = 1.3;
+    dampingMultiplier = 1.1;
+  } else {
+    overshootMultiplier = 0.7;
+    dampingMultiplier = 0.9;
+  }
 
   const scaleAnim = new Animation(
     'paddleResizeAnimation',
@@ -128,21 +140,20 @@ function animatePaddleResize(
     Animation.ANIMATIONTYPE_FLOAT,
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
+  const scaleKeys = [
+    { frame: 0, value: paddleMesh.scaling.y },
+    { frame: 5, value: targetScaleY * overshootMultiplier },
+    { frame: 15, value: targetScaleY * dampingMultiplier },
+    { frame: 30, value: targetScaleY },
+  ];
+  scaleAnim.setKeys(scaleKeys);
 
   const easingFunction = new CubicEase();
   easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
   scaleAnim.setEasingFunction(easingFunction);
 
-  const keys = [
-    { frame: 0, value: paddleMesh.scaling.y },
-    { frame: 5, value: targetScaleY * 1.3 },
-    { frame: 15, value: targetScaleY * 1.1 },
-    { frame: 30, value: targetScaleY },
-  ];
-  scaleAnim.setKeys(keys);
-
   paddleMesh.animations = [scaleAnim];
-  scene.beginAnimation(paddleMesh, 0, 20, false, 1);
+  scene.beginAnimation(paddleMesh, 0, 30, false, 1);
 }
 
 function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] {
@@ -165,8 +176,7 @@ function logPlayerState(player1Data: { player: Player; mesh: Mesh; powerUps: Pow
         ? powerUps.map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`).join('\n')
         : '      - None';
 
-    return `
-    BACKEND
+    return `    BACKEND
     Position Y: ${player.y}
     Paddle Height: ${player.paddleHeight}
     FRONTEND
