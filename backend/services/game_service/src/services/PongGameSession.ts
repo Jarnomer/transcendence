@@ -11,7 +11,7 @@ export default class PongGameSession {
   private mode: string;
   private clients: Map<string, any>;
   private spectators: Map<string, any>;
-  private aiControllers: Map<string, AIController> = new Map();
+  private aiControllers: Map<number, AIController> = new Map();
   private onEndCallback: () => void;
   private setGameResult: (gameResult: any) => void;
   private previousGameStatus: GameStatus;
@@ -39,8 +39,15 @@ export default class PongGameSession {
     this.previousGameStatus = this.game.getGameStatus();
 
     if (mode === 'singleplayer') {
-      // this.aiControllers.set('player1', new AIController(this.difficulty, true));
-      this.aiControllers.set('player2', new AIController(this.difficulty, false));
+      // this.aiControllers.set(1, new AIController(this.difficulty, true));
+      this.aiControllers.set(2, new AIController(this.difficulty, false));
+    }
+
+    // For testing tournaments, player moves not needed
+    // Readystate is still needed from both players!
+    if (mode === '1v1') {
+      this.aiControllers.set(1, new AIController(this.difficulty, true));
+      this.aiControllers.set(2, new AIController(this.difficulty, false));
     }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
@@ -51,8 +58,8 @@ export default class PongGameSession {
     }
 
     if (this.mode === 'AIvsAI') {
-      this.aiControllers.set('player1', new AIController(this.difficulty, true));
-      this.aiControllers.set('player2', new AIController(this.difficulty, false));
+      this.aiControllers.set(1, new AIController(this.difficulty, true));
+      this.aiControllers.set(2, new AIController(this.difficulty, false));
       this.game.setPlayerId(1, 'player1');
       this.game.setPlayerId(2, 'player2');
       if (this.gameId === 'background_game') {
@@ -217,24 +224,44 @@ export default class PongGameSession {
     this.onEndCallback();
   }
 
+  // private handleAIMove(): void {
+  //   for (const [playerId, aiController] of this.aiControllers) {
+  //     const ball = this.game.getGameState().ball;
+  //     let aiPaddle;
+  //     if (playerId === 'player1') {
+  //       aiPaddle = this.game.getGameState().players.player1;
+  //     } else {
+  //       aiPaddle = this.game.getGameState().players.player2;
+  //     }
+  //     const paddleSpeed = this.game.getPaddleSpeed();
+  //     const paddleHeight = this.game.getPaddleHeight(playerId === 'player1' ? 1 : 2);
+
+  //     if (aiController.shouldUpdate(ball.dx)) {
+  //       aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed);
+  //     }
+
+  //     const aiMove = aiController.getNextMove();
+  //     this.game.updateGameState({ [playerId]: aiMove }); // Apply AI move
+  //   }
+  // }
+
   private handleAIMove(): void {
-    for (const [playerId, aiController] of this.aiControllers) {
+    for (const aiController of this.aiControllers.values()) {
       const ball = this.game.getGameState().ball;
-      let aiPaddle;
-      if (playerId === 'player1') {
-        aiPaddle = this.game.getGameState().players.player1;
-      } else {
-        aiPaddle = this.game.getGameState().players.player2;
-      }
+      const aiPaddle = aiController.isPlayer1
+        ? this.game.getGameState().players.player1
+        : this.game.getGameState().players.player2;
+
       const paddleSpeed = this.game.getPaddleSpeed();
-      const paddleHeight = this.game.getPaddleHeight(playerId === 'player1' ? 1 : 2);
+      const paddleHeight = this.game.getPaddleHeight(aiController.isPlayer1 ? 1 : 2);
 
       if (aiController.shouldUpdate(ball.dx)) {
         aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed);
       }
 
       const aiMove = aiController.getNextMove();
-      this.game.updateGameState({ [playerId]: aiMove }); // Apply AI move
+      const playerKey = aiController.isPlayer1 ? 'player1' : 'player2';
+      this.game.updateGameState({ [playerKey]: aiMove }); // Apply AI move
     }
   }
 
