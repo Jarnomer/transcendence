@@ -30,7 +30,7 @@ const App: React.FC = () => {
   return (
     <WebSocketProvider>
       {/* Background game provider */}
-      {/* <BackgroundGameProvider /> */}
+      <BackgroundGameProvider />
       {/* Game options provider */}
       <ModalProvider>
         <GameOptionsProvider>

@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import {
   GameState,
+  GameEvent,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
   retroEffectsPresets,
@@ -13,10 +12,11 @@ import BackgroundGameCanvas from './BackgroundGameCanvas';
 
 const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [gameEvent, setGameEvent] = useState<GameEvent | null>(null);
   const [isVisible, setIsVisible] = useState(true);
-  const location = useLocation();
-  const wsRef = useRef<WebSocket | null>(null);
+
   const reconnectTimeoutRef = useRef<number | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Initialize default values before WebSocket connects
   const initialGameState: GameState = {
@@ -43,17 +43,19 @@ const BackgroundGameProvider: React.FC = () => {
       dy: 3,
       spin: 0,
     },
+    powerUps: [],
   };
 
-  // Handle location changes to toggle visibility
+  // Update visibility based on game events
   useEffect(() => {
-    console.log('Location changed:', location.pathname);
-    if (location.pathname.includes('/game')) {
+    if (gameEvent === 'players_matched') {
+      console.log('Background game set invisible');
       setIsVisible(false);
-    } else {
+    } else if (gameEvent === 'player_left') {
+      console.log('Background game set visible');
       setIsVisible(true);
     }
-  }, [location.pathname]);
+  }, [gameEvent]);
 
   // Create a stable setupWebSocket function with useCallback
   const setupWebSocket = useCallback(() => {
@@ -87,6 +89,8 @@ const BackgroundGameProvider: React.FC = () => {
         const data = JSON.parse(event.data);
         if (data.type === 'game_state') {
           setGameState(data.state);
+        } else if (data.type === 'game_event') {
+          setGameEvent(data.event as GameEvent);
         }
       } catch (error) {
         console.error('Error parsing background game message:', error);

@@ -21,8 +21,8 @@ export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   flicker: 3,
   vignette: 3,
   noise: 3,
-  crtTurnOnEffect: 1,
-  crtTurnOffEffect: 1,
+  crtTurnOnEffect: 0,
+  crtTurnOffEffect: 0,
   crtChannelSwitchEffect: 1,
 };
 
