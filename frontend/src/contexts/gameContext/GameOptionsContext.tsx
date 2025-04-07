@@ -1,40 +1,63 @@
 // FlowContext.tsx
-import { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 type GameOptionsContextType = {
-  selectedMode: string | null;
-  setSelectedMode: (mode: string) => void;
-  selectedDifficulty: string | null;
-  setSelectedDifficulty: (difficulty: string) => void;
-  selectedLobby: string | null;
-  setSelectedLobby: (lobby: string) => void;
+  mode: string | null;
+  setMode: React.Dispatch<React.SetStateAction<string | null>>;
+  difficulty: string | null;
+  setDifficulty: React.Dispatch<React.SetStateAction<string | null>>;
+  lobby: string | null;
+  setLobby: React.Dispatch<React.SetStateAction<string | null>>;
   queueId: string | null;
-  setQueueId: (queueId: string) => void;
+  setQueueId: React.Dispatch<React.SetStateAction<string | null>>;
   gameId: string | null;
-  setGameId: (gameId: string) => void;
+  setGameId: React.Dispatch<React.SetStateAction<string | null>>;
+  resetGameOptions: () => void;
+  tournamentOptions: tournamentOptionsType | null;
+  setTournamentOptions: React.Dispatch<React.SetStateAction<tournamentOptionsType | null>>;
 };
+
+type tournamentOptionsType = {
+  playerCount: number;
+  tournamentName: string;
+  isPrivate: boolean;
+  password: string | null;
+}
 
 const GameOptionsContext = createContext<GameOptionsContextType | undefined>(undefined);
 
 export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedMode, setSelectedMode] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
-  const [selectedLobby, setSelectedLobby] = useState<string | null>(null);
+  const [mode, setMode] = useState<string | null>(null);
+  const [difficulty, setDifficulty] = useState<string | null>(null);
+  const [lobby, setLobby] = useState<string | null>(null);
   const [queueId, setQueueId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
+  const [tournamentOptions, setTournamentOptions] = useState<tournamentOptionsType | null>(null);
+
+  const resetGameOptions = () => {
+    setMode(null);
+    setDifficulty(null);
+    setLobby(null);
+    setQueueId(null);
+    setGameId(null);
+    setTournamentOptions(null);
+  };
   return (
     <GameOptionsContext.Provider
       value={{
-        selectedMode,
-        setSelectedMode,
-        selectedDifficulty,
-        setSelectedDifficulty,
-        selectedLobby,
-        setSelectedLobby,
+        mode,
+        setMode,
+        difficulty,
+        setDifficulty,
+        lobby,
+        setLobby,
         queueId,
         setQueueId,
         gameId,
         setGameId,
+        resetGameOptions,
+        tournamentOptions,
+        setTournamentOptions,
       }}
     >
       {children}

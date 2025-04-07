@@ -123,6 +123,16 @@ export class QueueModel {
     );
   }
 
+  async getQueueByID(queue_id: string) {
+    return await this.db.get(
+      `
+      SELECT * FROM queues
+      WHERE queue_id = ?;
+      `,
+      [queue_id]
+    );
+  }
+
   /**
    * Get user status in match making queue by ID
    * @param user_id user id
@@ -234,13 +244,17 @@ export class QueueModel {
    *  status: 'waiting',
    *  joined_at: 'joined_at'
    */
-  async createWaitingQueue(user_id: string, mode: string, variant: string) {
+  async createWaitingQueue(
+    user_id: string,
+    mode: string,
+    variant: string,
+    password: string | null
+  ) {
     const id = uuidv4();
-    await this.db.get(`INSERT INTO queues (queue_id, mode, variant) VALUES (?, ?, ?) RETURNING *`, [
-      id,
-      mode,
-      variant,
-    ]);
+    await this.db.get(
+      `INSERT INTO queues (queue_id, mode, variant, password) VALUES (?, ?, ?, ?) RETURNING *`,
+      [id, mode, variant, password]
+    );
     const queue = await this.db.get(
       `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,
       [id, user_id]

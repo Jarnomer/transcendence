@@ -13,8 +13,8 @@ export const useFetchPlayerData = ({
   gameState: any;
   gameStatus: any;
   gameId: string | null;
-  mode: string;
-  difficulty: string;
+  mode: string | null;
+  difficulty: string | null;
   connectionStatus: string;
 }) => {
   const [playersData, setPlayersData] = useState({ player1: null, player2: null, gameStatus });

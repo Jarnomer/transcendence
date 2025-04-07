@@ -90,12 +90,16 @@ export class QueueController {
    *    joined_at: 'joined_at'
    * }
    */
-  async enterQueue(request: FastifyRequest, reply: FastifyReply) {
+  async createQueue(request: FastifyRequest, reply: FastifyReply) {
     const { user_id } = request.user as { user_id: string };
-    const { mode, difficulty } = request.query as { mode: string; difficulty: string };
+    const { mode, difficulty, password } = request.query as {
+      mode: string;
+      difficulty: string;
+      password: string;
+    };
     request.log.trace(`Joining user ${user_id}`);
     console.log(user_id, mode, difficulty);
-    const queue = await this.queueService.enterQueue(user_id, mode, difficulty);
+    const queue = await this.queueService.createQueue(user_id, mode, difficulty, password);
     request.log.trace(`status: ${queue.status}`);
     console.log(queue);
     reply.code(200).send(queue);
@@ -120,9 +124,17 @@ export class QueueController {
 
   async joinQueue(request: FastifyRequest, reply: FastifyReply) {
     const { queue_id } = request.params as { queue_id: string };
-    const { mode, difficulty } = request.query as { mode: string; difficulty: string };
+    const { mode, difficulty, password } = request.query as {
+      mode: string;
+      difficulty: string;
+      password: string | null;
+    };
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Joining queue ${queue_id}`);
+    const passwordCheck = await this.queueService.getQueueByID(queue_id);
+    if (passwordCheck.password !== password) {
+      throw new NotFoundError('Password is incorrect');
+    }
     const queue = await this.queueService.joinQueue(user_id, queue_id, mode, difficulty);
     reply.code(200).send(queue);
   }

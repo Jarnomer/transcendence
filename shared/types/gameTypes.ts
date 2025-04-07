@@ -99,4 +99,9 @@ export const defaultGameParams: GameParams = {
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
-export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';
+export type GameEvent =
+  | 'game_goal'
+  | 'player_joined'
+  | 'player_left'
+  | 'players_matched'
+  | 'matching_players';

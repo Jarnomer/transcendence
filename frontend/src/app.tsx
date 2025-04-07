@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Footer } from './components/footer/Footer.tsx';
+import BackgroundGameProvider from './components/game/BackgroundGameProvider.tsx';
 import { Header } from './components/header/Header.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';

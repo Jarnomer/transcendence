@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { PowerUpSelection } from '../components/menu/cards/PowerUpSelection';
 import { ClippedButton } from '../components/UI/buttons/ClippedButton';
 import { SvgBorderBig } from '../components/visual/svg/borders/SvgBorderBig';
+import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 
 export const CreateTournament: React.FC = () => {
   const [playerCount, setPlayerCount] = useState(8);
@@ -12,26 +13,21 @@ export const CreateTournament: React.FC = () => {
   const [password, setPassword] = useState('');
   const [enablePowerUps, setEnablePowerUps] = useState(false);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
+  const [tournamentName, setTournamentName] = useState('');
+  const { setTournamentOptions } = useGameOptionsContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = {
       playerCount,
+      tournamentName,
       isPrivate,
-      password: isPrivate ? password : undefined,
-      enablePowerUps,
-      selectedPowerUps: enablePowerUps ? selectedPowerUps : [],
+      password: isPrivate ? password : null,
+      // enablePowerUps,
+      // selectedPowerUps: enablePowerUps ? selectedPowerUps : [],
     };
+    setTournamentOptions(formData);
     console.log('Submitting tournament data:', formData);
-    // Send data to backend
-    fetch('/api/tournament', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log('Response:', data))
-      .catch((error) => console.error('Error:', error));
   };
 
   return (
@@ -56,6 +52,18 @@ export const CreateTournament: React.FC = () => {
             />
           </label>
 
+          <label className="block w-full md:w-[50%]">
+            Tournament Name:
+            <input
+              type="text"
+              placeholder="Enter tournament name"
+              className="block w-full p-2 border rounded"
+              required
+              value={tournamentName}
+              onChange={(e) => setTournamentName(e.target.value)}
+            />
+          </label>
+
           {/* Private Tournament Checkbox & Password Field */}
           <label className="flex items-center space-x-2">
             <input
@@ -77,7 +85,7 @@ export const CreateTournament: React.FC = () => {
           )}
 
           {/* Enable Power-Ups Checkbox & Power-Up Selection */}
-          <label className="flex items-center space-x-2">
+          {/* <label className="flex items-center space-x-2">
             <input
               type="checkbox"
               checked={enablePowerUps}
@@ -92,7 +100,7 @@ export const CreateTournament: React.FC = () => {
               selectedPowerUps={selectedPowerUps}
               setSelectedPowerUps={setSelectedPowerUps}
             />
-          )}
+          )} */}
 
           <ClippedButton label={'Create tournament'} type="submit" />
         </form>

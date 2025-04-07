@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate for routing
 
 import { motion } from 'framer-motion';
+
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx'; // Import the GameOptionsContext
 
 import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
@@ -20,11 +22,12 @@ interface SelectedMode {
 }
 
 export const GameMenu: React.FC = () => {
-  const [selectedMode, setSelectedMode] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
+  // const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  //const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
   const navigate = useNavigate(); // Hook to navigate to different routes
-  const location = useLocation();
-  const { lobby } = location.state || {};
+  // const location = useLocation();
+  const { setMode, setDifficulty, difficulty, mode } = useGameOptionsContext(); // Destructure context functions
+  // const { lobby } = location.state || {};
 
   const modes = [
     {
@@ -120,30 +123,28 @@ export const GameMenu: React.FC = () => {
   };
 
   const handleModeClick = (mode: string | null) => {
-    animateCardChange(mode, setSelectedMode);
+    animateCardChange(mode, setMode);
   };
 
   const handleDifficultyClick = (difficulty: string | null) => {
-    animateCardChange(difficulty, setSelectedDifficulty);
+    animateCardChange(difficulty, setDifficulty);
   };
 
-  // Effect to navigate once both mode and difficulty are selected
+  // Effect to navigate once both mode and difficulty are
   useEffect(() => {
-    if (selectedMode === 'tournament') navigate('/tournament');
-    if (selectedMode && selectedDifficulty) {
-      navigate('/game', {
-        state: { mode: selectedMode, difficulty: selectedDifficulty, lobby: lobby },
-      });
+    if (mode === 'tournament') navigate('/tournament');
+    if (mode && difficulty) {
+      navigate('/game');
     }
-  }, [selectedMode, selectedDifficulty]); // Trigger navigation when both values are set
+  }, [mode, difficulty]); // Trigger navigation when both values are set
 
   const renderMenu = () => {
-    if (selectedMode && !selectedDifficulty) {
-      // Render the submenu for the selected mode
+    if (mode && !difficulty) {
+      // Render the submenu for the  mode
       return (
         <>
           <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
-          {subMenus[selectedMode].map((option, index) => (
+          {subMenus[mode].map((option, index) => (
             <div key={index} style={{ flexBasis: '300px' }}>
               <GameMenuCard
                 content={option.content}

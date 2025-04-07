@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { CountDown, GameCanvas, PlayerScoreBoard } from '@components';
@@ -11,21 +9,22 @@ import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@ho
 import { createReadyInputMessage } from '@shared/messages';
 
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
+import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { setUrl, gameState, gameStatus, connections, dispatch, sendMessage } =
+  const { gameState, gameStatus, connections, dispatch, sendMessage, gameEvent } =
     useWebSocketContext();
-
-  const location = useLocation();
+  const { gameId, mode, difficulty, lobby, queueId, setGameId } = useGameOptionsContext();
+  // const location = useLocation();
   const { loadingStates } = useLoading();
-  const { mode, difficulty, lobby, queueId } = location.state || {};
+  // const { mode, difficulty, lobby, queueId } = location.state || {};
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   //const [userId, setUserId] = useState<string | null>(null);
-  const [gameId, setGameId] = useState<string | null>(null);
+  // const [gameId, setGameId] = useState<string | null>(null);
   // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
 
@@ -42,6 +41,10 @@ export const GamePage: React.FC = () => {
     connectionStatus: connections.game,
     gameStatus,
   });
+
+  useEffect(() => {
+    console.log('game event', gameEvent);
+  }, [gameEvent]);
 
   // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED
   // SET LOADING TO FALSE TO RENDER THE GAMECANVAS

@@ -9,10 +9,10 @@ import {
 
 import { api } from './api';
 
-export async function enterQueue(mode: string, difficulty: string) {
+export async function createQueue(mode: string, difficulty: string) {
   try {
     const res = await api.post<QueueStatusResType>(
-      `/matchmaking/enterQueue?mode=${mode}&difficulty=${difficulty}`
+      `/matchmaking/createQueue?mode=${mode}&difficulty=${difficulty}`
     );
     console.log(res.data);
     return res.data;

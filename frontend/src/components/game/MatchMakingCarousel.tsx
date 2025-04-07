@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useLoading } from '../../contexts/gameContext/LoadingContextProvider';
 import { useUser } from '../../contexts/user/UserContext';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
@@ -52,7 +53,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const [opponentName, setOpponentName] = useState<string>('???');
   const [opponentFound, setOpponentFound] = useState<boolean>(false);
   const location = useLocation();
-  const { mode, difficulty } = location.state || {};
+  const { mode, difficulty } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const { user: loggedInUser } = useUser();
 
