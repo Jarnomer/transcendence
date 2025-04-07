@@ -252,7 +252,7 @@ export default class PongGameSession {
         ? this.game.getGameState().players.player1
         : this.game.getGameState().players.player2;
 
-      const paddleSpeed = this.game.getPaddleSpeed();
+      const paddleSpeed = this.game.getPaddleSpeed(aiController.isPlayer1 ? 1 : 2);
       const paddleHeight = this.game.getPaddleHeight(aiController.isPlayer1 ? 1 : 2);
       const powerUps = this.game.getPowerUps();
 

@@ -12,6 +12,7 @@ export abstract class PowerUp {
   spawnTime: number = Date.now();
   isSpent: boolean = false;
   affectedPlayer: number = 0;
+  negativeEffect: boolean = false;
 
   constructor(id: number, x: number, y: number) {
     this.id = id;
