@@ -88,7 +88,7 @@ export const defaultGameParams: GameParams = {
   spinIntensityFactor: 0.6, // Player.dy * spinIntensity = spin change on paddle hit
   spinReductionFactor: 0.5, // Spin reduction on static surfaces
 
-  maxScore: 10,
+  maxScore: 5,
   countdown: 3, // Seconds
 
   powerUpMinSpawnInterval: 2000, // Milliseconds
@@ -99,4 +99,9 @@ export const defaultGameParams: GameParams = {
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
-export type GameEvent = 'game_goal' | 'player_joined' | 'player_left';
+export type GameEvent =
+  | 'game_goal'
+  | 'player_joined'
+  | 'player_left'
+  | 'players_matched'
+  | 'matching_players';

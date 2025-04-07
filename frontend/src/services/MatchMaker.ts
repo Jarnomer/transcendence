@@ -1,4 +1,4 @@
-import { cancelQueue, enterQueue, joinQueue, singlePlayer } from './gameService';
+import { cancelQueue, createQueue, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
 export enum MatchMakerState {
@@ -85,7 +85,7 @@ class OneVsOneGame extends GameMode {
       }
       case 'online': {
         console.log('Creating 1v1 online game...');
-        const data = await enterQueue(this.mode, this.difficulty);
+        const data = await createQueue(this.mode, this.difficulty);
         if (!data || data.status !== 'waiting') {
           throw new Error('Problem with creating 1v1 online game');
         }
@@ -103,7 +103,7 @@ class OneVsOneGame extends GameMode {
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining 1v1 game...');
-      const queue = await joinQueue(this.queueId);
+      const queue = await joinQueue(this.queueId, this.mode, this.difficulty);
       if (!queue) {
         throw new Error('Problem with joining 1v1 game');
       }
@@ -134,7 +134,7 @@ class TournamentGame extends GameMode {
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining tournament game...');
-      const queue = await joinQueue(this.queueId);
+      const queue = await joinQueue(this.queueId, this.mode, this.difficulty);
       if (!queue) {
         throw new Error('Problem with joining tournament game');
       }
@@ -148,7 +148,7 @@ class TournamentGame extends GameMode {
 
   async createGame() {
     console.log('Creating tournament game...');
-    const data = await enterQueue(this.mode, this.difficulty);
+    const data = await createQueue(this.mode, this.difficulty);
     if (!data || data.status !== 'waiting') {
       throw new Error('Problem with creating tournament game');
     }
@@ -172,7 +172,7 @@ class GameFactory {
       case '1v1':
         return new OneVsOneGame(matchMaker, lobby, mode, difficulty, queueId);
       case 'tournament':
-        return new TournamentGame(matchMaker, lobby, mode, difficulty, queueId); // Default to 4-player tournament
+        return new TournamentGame(matchMaker, lobby, mode, difficulty, queueId);
       default:
         throw new Error('Invalid game mode');
     }

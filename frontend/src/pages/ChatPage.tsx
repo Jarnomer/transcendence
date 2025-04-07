@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { BackgroundGlow, NavIconButton } from '../components';
 import SearchBar from '../components/UI/SearchBar';
@@ -28,9 +28,9 @@ export const ChatPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [members, setMembers] = useState<any[]>([]);
-
+  const roomIdRef = useRef(roomId);
+  const selectedFriendRef = useRef(selectedFriend);
   const [roomName, setRoomName] = useState('');
-
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +41,14 @@ export const ChatPage: React.FC = () => {
   const filteredUsers = friends.filter((user) =>
     user.display_name.toLowerCase().startsWith(searchQuery)
   );
+
+  useEffect(() => {
+    roomIdRef.current = roomId;
+  }, [roomId]);
+
+  useEffect(() => {
+    selectedFriendRef.current = selectedFriend;
+  }, [selectedFriend]);
 
   useEffect(() => {
     const userId = localStorage.getItem('userID');
@@ -86,8 +94,9 @@ export const ChatPage: React.FC = () => {
       getDm(selectedFriend)
         .then((data) => {
           console.log('Chat history:', data);
-          setMessages(...messages, data);
-          console.log(messages);
+          setMessages(data);
+
+          // setMessages(...messages, data);
         })
         .catch((error) => {
           console.error('Failed to fetch chat history:', error);
@@ -107,7 +116,9 @@ export const ChatPage: React.FC = () => {
       getChat(roomId)
         .then((data) => {
           console.log('Chat history:', data);
-          setMessages(...messages, data);
+          setMessages(data);
+
+          // setMessages(...messages, data);
           console.log('messages:', messages);
         })
         .catch((error) => {
@@ -155,7 +166,17 @@ export const ChatPage: React.FC = () => {
 
   const handleChatMessage = (event: MessageEvent) => {
     console.log('Chat message:', event);
-    setMessages((prev) => [...prev, event]);
+    console.log('Chat room id:', event.room_id);
+    console.log('chat receiver_id:', event.receiver_id);
+    console.log('chat selected room id:', roomIdRef.current);
+    console.log('chat selected friend id:', selectedFriendRef.current);
+    if (
+      (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
+      (selectedFriendRef.current && event.receiver_id && event.sender_id === selectedFriendRef.current)
+    ) {
+      console.log('Adding message:', event);
+      setMessages((prev) => [...prev, event]);
+    }
   };
 
   const handleSendMessage = () => {
@@ -195,7 +216,8 @@ export const ChatPage: React.FC = () => {
 
   const handleRoomJoin = (roomId: string) => {
     setRoomId(roomId);
-    setMessages([]);
+    //setMessages([]);
+    setSelectedFriend(null);
     sendMessage('chat', {
       type: 'join',
       payload: {
@@ -218,6 +240,11 @@ export const ChatPage: React.FC = () => {
     } else {
       setMembers((prev) => prev.filter((member) => member !== value));
     }
+  };
+
+  const handleSelectFriend = (friendId: string) => {
+    setSelectedFriend(friendId);
+    setRoomId(null);
   };
 
   useEffect(() => {
@@ -289,7 +316,7 @@ export const ChatPage: React.FC = () => {
               <li
                 key={friend.user_id}
                 className={`p-2  flex gap-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:brightness-125'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
-                onClick={() => setSelectedFriend(friend.user_id)}
+                onClick={() => handleSelectFriend(friend.user_id)}
               >
                 <div className="w-[20px] h-[20px]">
                   <img

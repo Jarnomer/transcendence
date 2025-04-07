@@ -1,23 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
+
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
 
 export const HomePageNav: React.FC<{
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
+  const { setLobby, setDifficulty, setMode, resetGameOptions } = useGameOptionsContext();
+
+  useEffect(() => {
+    resetGameOptions();
+  }, []);
 
   const handleCreateGameClick = () => {
     console.log('Create game clicked');
-    navigate('/gameMenu', { state: { lobby: 'create' } });
+    setLobby('create');
+    navigate('/gameMenu');
   };
 
   const handleJoinGameClick = () => {
     console.log('Join game clicked');
-    navigate('/game', { state: { mode: '1v1', difficulty: 'online', lobby: 'random' } });
+    setLobby('random');
+    setMode('1v1');
+    setDifficulty('online');
+    navigate('/game');
   };
   return (
     <motion.div

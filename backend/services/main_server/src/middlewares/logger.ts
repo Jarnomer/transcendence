@@ -43,8 +43,26 @@ function getStackTrace() {
 // Override console.log globally
 const originalLog = console.log;
 
+// console.log = (...args) => {
+//   originalLog(`[${getStackTrace()}]`, ...args);
+// };
+
 console.log = (...args) => {
-  originalLog(`[${getStackTrace()}]`, ...args);
+  const formattedArgs = args.map((arg) =>
+    typeof arg === 'object'
+      ? JSON.stringify(arg) // pretty-print JSON
+      : arg
+  );
+
+  const logMessage = `[${getStackTrace()}] ${formattedArgs.join(' ')}`;
+
+  // Add prefix on every line if multi-line
+  originalLog(
+    logMessage
+      .split('\n')
+      .map((line) => `${line}`)
+      .join('\n')
+  );
 };
 
 // You can override other console methods similarly
