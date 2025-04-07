@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
 import {
   GameState,
-  GameEvent,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
   retroEffectsPresets,
@@ -12,8 +13,9 @@ import BackgroundGameCanvas from './BackgroundGameCanvas';
 
 const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [gameEvent, setGameEvent] = useState<GameEvent | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+
+  const location = useLocation();
 
   const reconnectTimeoutRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -46,16 +48,15 @@ const BackgroundGameProvider: React.FC = () => {
     powerUps: [],
   };
 
-  // Update visibility based on game events
+  // Handle location changes to toggle visibility
   useEffect(() => {
-    if (gameEvent === 'players_matched') {
-      console.log('Background game set invisible');
+    console.log('Location changed:', location.pathname);
+    if (location.pathname.includes('/game')) {
       setIsVisible(false);
-    } else if (gameEvent === 'player_left') {
-      console.log('Background game set visible');
+    } else {
       setIsVisible(true);
     }
-  }, [gameEvent]);
+  }, [location.pathname]);
 
   // Create a stable setupWebSocket function with useCallback
   const setupWebSocket = useCallback(() => {
@@ -89,8 +90,6 @@ const BackgroundGameProvider: React.FC = () => {
         const data = JSON.parse(event.data);
         if (data.type === 'game_state') {
           setGameState(data.state);
-        } else if (data.type === 'game_event') {
-          setGameEvent(data.event as GameEvent);
         }
       } catch (error) {
         console.error('Error parsing background game message:', error);
