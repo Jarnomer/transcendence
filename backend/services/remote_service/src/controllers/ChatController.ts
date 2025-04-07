@@ -6,6 +6,7 @@ import { ChatService } from '../services/ChatService';
 export class ChatController {
   private chatService: ChatService;
   private static instance: ChatController;
+  private timer: number = 0;
 
   constructor(chatService: ChatService) {
     this.chatService = chatService;
@@ -22,10 +23,14 @@ export class ChatController {
     const { user_id } = req.query as {
       user_id: string;
     };
+
+    this.timer = Date.now();
+    console.log('timeout:', this.timer);
     console.log('Adding client to chat:', user_id);
+    this.chatService.addClient(user_id, ws);
     await this.chatService.initRooms();
-    await this.chatService.addClient(user_id, ws);
     ws.on('close', () => {
+      console.log('difference:', Date.now() - this.timer);
       this.chatService.deleteClient(user_id);
     });
     ws.on('error', () => {

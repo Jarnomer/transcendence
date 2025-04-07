@@ -103,7 +103,7 @@ class OneVsOneGame extends GameMode {
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining 1v1 game...');
-      const queue = await joinQueue(this.queueId);
+      const queue = await joinQueue(this.queueId, this.mode, this.difficulty);
       if (!queue) {
         throw new Error('Problem with joining 1v1 game');
       }
@@ -134,7 +134,7 @@ class TournamentGame extends GameMode {
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining tournament game...');
-      const queue = await joinQueue(this.queueId);
+      const queue = await joinQueue(this.queueId, this.mode, this.difficulty);
       if (!queue) {
         throw new Error('Problem with joining tournament game');
       }

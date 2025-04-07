@@ -62,7 +62,7 @@ export const HomePage: React.FC = () => {
   return (
     <>
       <motion.div className="w-full relative h-full z-10 gap-5 md:gap-10 md:p-4">
-        <div className="absolute w-full h-full">
+        <div className="absolute w-full h-full" aria-hidden="true">
           <HomePageBackgroundGlitch activeTab={activeTab} duration={1100} />
         </div>
         <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav>

@@ -70,9 +70,9 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     return () => {
       console.log('Cleaning up WebSocket connections');
-      gameSocket.close();
-      chatSocket.close();
-      matchmakingSocket.close();
+      gameSocket.deleteInstance();
+      chatSocket.deleteInstance();
+      matchmakingSocket.deleteInstance();
     };
   }, []);
 

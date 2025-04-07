@@ -32,6 +32,7 @@ export interface GameState {
 }
 
 export interface GameParams {
+  scaleFactor: number;
   gameWidth: number;
   gameHeight: number;
 
@@ -64,6 +65,7 @@ export interface GameParams {
 }
 
 export const defaultGameParams: GameParams = {
+  scaleFactor: 20,
   gameWidth: 800,
   gameHeight: 400,
 
@@ -73,7 +75,7 @@ export const defaultGameParams: GameParams = {
   maxPaddleHeight: 200,
   paddleSpeed: 10,
 
-  ballSize: 10,
+  ballSize: 15,
   ballSpeed: 7,
   minBallDX: 7,
   ballSpeedMultiplier: 1,
@@ -86,13 +88,13 @@ export const defaultGameParams: GameParams = {
   spinIntensityFactor: 0.6, // Player.dy * spinIntensity = spin change on paddle hit
   spinReductionFactor: 0.5, // Spin reduction on static surfaces
 
-  maxScore: 10,
+  maxScore: 5,
   countdown: 3, // Seconds
 
   powerUpMinSpawnInterval: 5000, // Milliseconds
   powerUpMaxSpawnInterval: 10000, // Milliseconds
   powerUpDuration: 8000, // Milliseconds
-  powerUpSize: 20,
+  powerUpSize: 30,
 };
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';

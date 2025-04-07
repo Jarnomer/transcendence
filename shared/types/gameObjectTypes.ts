@@ -1,4 +1,7 @@
+import { defaultGameParams } from './gameTypes';
+
 export interface GameObjectParams {
+  distanceFromFloor: number;
   ball: {
     diameter: number;
     segments: number;
@@ -82,8 +85,9 @@ export interface GameObjectParams {
 }
 
 export const defaultGameObjectParams: GameObjectParams = {
+  distanceFromFloor: -0.2,
   ball: {
-    diameter: 0.8,
+    diameter: defaultGameParams.ballSize / defaultGameParams.scaleFactor,
     segments: 32,
     emissiveColorMultiplier: 1.2,
     emissiveIntensity: 2.0,
@@ -101,9 +105,9 @@ export const defaultGameObjectParams: GameObjectParams = {
     },
   },
   paddle: {
-    height: 4.0,
-    width: 0.5,
-    depth: 0.7,
+    height: defaultGameParams.paddleHeight / defaultGameParams.scaleFactor,
+    width: defaultGameParams.paddleWidth / defaultGameParams.scaleFactor,
+    depth: (defaultGameParams.paddleWidth / defaultGameParams.scaleFactor) * 1.5,
     emissiveColorMultiplier: 0.8,
     emissiveIntensity: 1.0,
     materialMetallic: 0.6,
@@ -120,7 +124,7 @@ export const defaultGameObjectParams: GameObjectParams = {
     },
   },
   edge: {
-    width: 40,
+    width: defaultGameParams.gameWidth / defaultGameParams.scaleFactor,
     radius: 0.15,
     numPoints: 90,
     tessellation: 16,
@@ -140,8 +144,8 @@ export const defaultGameObjectParams: GameObjectParams = {
     },
   },
   floor: {
-    width: 60,
-    depth: 30,
+    width: (defaultGameParams.gameWidth / defaultGameParams.scaleFactor) * 1.5,
+    depth: ((defaultGameParams.gameWidth / defaultGameParams.scaleFactor) * 1.5) / 2,
     positionZ: 1.2,
     colorMultiplier: 0.25,
     emissiveColorMultiplier: 0.1,

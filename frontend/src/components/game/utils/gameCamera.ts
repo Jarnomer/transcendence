@@ -46,7 +46,7 @@ export function setupSceneCamera(scene: Scene): ArcRotateCamera {
     -Math.PI / 2, // horizontal rotation
     Math.PI / 2, // vertical rotation
     28, // distance from floor
-    new Vector3(-0.2, 0.1, 0),
+    new Vector3(0, -0.15, 0),
     scene
   );
 

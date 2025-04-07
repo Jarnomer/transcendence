@@ -38,19 +38,19 @@ export const HeaderNav: React.FC = () => {
         <div className="flex gap-3 items-center justify-center w-full" aria-label="Navigation menu">
           <NavIconButton
             id="nav-home-button"
-            aria-label="Home"
+            ariaLabel="Home"
             icon="home"
             onClick={() => navigate('/home')}
           />
           <NavIconButton
             id="nav-profile-button"
-            aria-label="Profile"
+            ariaLabel="Profile"
             icon="user"
             onClick={() => navigate(`/profile/${localStorage.getItem('userID')}`)}
           />
           <NavIconButton
             id="nav-bell-button"
-            aria-label="Notifications"
+            ariaLabel="Notifications"
             icon="bell"
             onClick={() => toggleDropdown()}
           />
@@ -61,18 +61,19 @@ export const HeaderNav: React.FC = () => {
           ) : null}
           <NavIconButton
             id="nav-chat-button"
-            aria-label="Chat"
+            ariaLabel="Chat"
             icon="chat"
             onClick={() => navigate('/chat')}
           />
           <NavIconButton
             id="nav-settings-button"
-            aria-label="Settings"
+            ariaLabel="Settings"
             icon="settings"
             onClick={() => navigate('/settings')}
           />
           {user ? (
             <button
+              aria-label="logout"
               onClick={() => {
                 logout();
               }}

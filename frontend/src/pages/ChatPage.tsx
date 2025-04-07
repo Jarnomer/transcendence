@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { BackgroundGlow, NavIconButton } from '../components';
 import SearchBar from '../components/UI/SearchBar';
@@ -28,9 +28,9 @@ export const ChatPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [members, setMembers] = useState<any[]>([]);
-
+  const roomIdRef = useRef(roomId);
+  const selectedFriendRef = useRef(selectedFriend);
   const [roomName, setRoomName] = useState('');
-
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,6 +41,14 @@ export const ChatPage: React.FC = () => {
   const filteredUsers = friends.filter((user) =>
     user.display_name.toLowerCase().startsWith(searchQuery)
   );
+
+  useEffect(() => {
+    roomIdRef.current = roomId;
+  }, [roomId]);
+
+  useEffect(() => {
+    selectedFriendRef.current = selectedFriend;
+  }, [selectedFriend]);
 
   useEffect(() => {
     const userId = localStorage.getItem('userID');
@@ -86,8 +94,9 @@ export const ChatPage: React.FC = () => {
       getDm(selectedFriend)
         .then((data) => {
           console.log('Chat history:', data);
-          setMessages(...messages, data);
-          console.log(messages);
+          setMessages(data);
+
+          // setMessages(...messages, data);
         })
         .catch((error) => {
           console.error('Failed to fetch chat history:', error);
@@ -107,7 +116,9 @@ export const ChatPage: React.FC = () => {
       getChat(roomId)
         .then((data) => {
           console.log('Chat history:', data);
-          setMessages(...messages, data);
+          setMessages(data);
+
+          // setMessages(...messages, data);
           console.log('messages:', messages);
         })
         .catch((error) => {
@@ -155,7 +166,17 @@ export const ChatPage: React.FC = () => {
 
   const handleChatMessage = (event: MessageEvent) => {
     console.log('Chat message:', event);
-    setMessages((prev) => [...prev, event]);
+    console.log('Chat room id:', event.room_id);
+    console.log('chat receiver_id:', event.receiver_id);
+    console.log('chat selected room id:', roomIdRef.current);
+    console.log('chat selected friend id:', selectedFriendRef.current);
+    if (
+      (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
+      (selectedFriendRef.current && event.receiver_id && event.sender_id === selectedFriendRef.current)
+    ) {
+      console.log('Adding message:', event);
+      setMessages((prev) => [...prev, event]);
+    }
   };
 
   const handleSendMessage = () => {
@@ -195,7 +216,8 @@ export const ChatPage: React.FC = () => {
 
   const handleRoomJoin = (roomId: string) => {
     setRoomId(roomId);
-    setMessages([]);
+    //setMessages([]);
+    setSelectedFriend(null);
     sendMessage('chat', {
       type: 'join',
       payload: {
@@ -220,6 +242,11 @@ export const ChatPage: React.FC = () => {
     }
   };
 
+  const handleSelectFriend = (friendId: string) => {
+    setSelectedFriend(friendId);
+    setRoomId(null);
+  };
+
   useEffect(() => {
     console.log('Members:', members);
   }, [members]);
@@ -238,6 +265,7 @@ export const ChatPage: React.FC = () => {
           <label className="flex items-center mt-2">
             <input
               type="checkbox"
+              aria-label="Make room private"
               className="mr-2"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
@@ -247,6 +275,7 @@ export const ChatPage: React.FC = () => {
           <input
             type="text"
             placeholder="Room name"
+            aria-label="Room name"
             className="flex border p-2 items-center"
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
@@ -287,7 +316,7 @@ export const ChatPage: React.FC = () => {
               <li
                 key={friend.user_id}
                 className={`p-2  flex gap-2 rounded cursor-pointer ${selectedFriend === friend.user_id ? 'bg-gray-700' : 'hover:brightness-125'} ${friend.status === 'online' ? 'text-primary' : 'text-gray-500'}`}
-                onClick={() => setSelectedFriend(friend.user_id)}
+                onClick={() => handleSelectFriend(friend.user_id)}
               >
                 <div className="w-[20px] h-[20px]">
                   <img
@@ -336,6 +365,7 @@ export const ChatPage: React.FC = () => {
               <div className="md:hidden p-4">
                 <NavIconButton
                   id="arrow-left"
+                  ariaLabel="Back button, returns to conversation list"
                   icon="arrowLeft"
                   onClick={() => {
                     setSelectedFriend(null);
@@ -391,14 +421,22 @@ export const ChatPage: React.FC = () => {
                     handleSendMessage(); // Call the send message function
                   }}
                 >
+                  <label htmlFor="chat-input" className="sr-only">
+                    Message input
+                  </label>
                   <input
                     type="text"
+                    id="chat-input"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
                     className="flex-1 p-2 border-2 border-primary  rounded focus:outline-none"
                   />
-                  <button type="submit" className="ml-2 bg-primary/25 px-4 py-2 rounded">
+                  <button
+                    type="submit"
+                    aria-label="send"
+                    className="ml-2 bg-primary/25 px-4 py-2 rounded"
+                  >
                     send
                   </button>
                 </form>

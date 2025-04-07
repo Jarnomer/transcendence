@@ -1,7 +1,7 @@
 import { WebSocket } from '@fastify/websocket';
+import { Database } from 'sqlite';
 
-import { GameService } from '@my-backend/matchmaking_service/src/services/GameService';
-import { QueueService } from '@my-backend/matchmaking_service/src/services/QueueService';
+import { GameService, QueueService } from '@my-backend/matchmaking_service';
 
 type Player = {
   user_id: string;
@@ -10,18 +10,33 @@ type Player = {
   joinedAt: Date;
 };
 
+type TournamentMatch = {
+  gameId: string;
+  players: [Player, Player];
+  round: number;
+  isComplete: boolean;
+};
+
+type TournamentSession = {
+  tournamentId: string;
+  name: string;
+  size: number;
+  currentRound: number;
+  totalRounds: number;
+  matches: TournamentMatch[];
+  activePlayers: Player[];
+  nextRoundPlayers: Player[];
+  completedMatches: TournamentMatch[];
+  createdAt: Date;
+};
+
 abstract class MatchmakingMode {
-  protected queue: Player[]; // Player IDs key bin
-  public queueMatches: Map<string, string[]>;
+  protected queue: Player[]; // Player IDs key bin for matchmaking for 1v1
+  protected queueMatches: Map<string, Player[]>; // Queue ID to Player IDs for joining matches for 1v1
+  protected tournaments: Map<string, TournamentSession>; // Tournament sessions
   protected gameService: GameService;
   protected queueService: QueueService;
   protected matchmaking: MatchmakingService;
-  protected INITIAL_ELO_RANGE = 50;
-  protected SEARCH_EXPANSION_INTERVAL = 5000; // Expand every 5 sec
-  protected MAX_WAIT_TIME = 30000; // Timeout after 30 sec
-  protected playerIntervals: Map<string, NodeJS.Timeout> = new Map();
-  protected recentMatches: Set<string> = new Set();
-  protected playerCooldowns: Map<string, number> = new Map(); // Dynamic cooldowns for players
 
   constructor(matchmaking: MatchmakingService) {
     this.matchmaking = matchmaking;
@@ -29,38 +44,46 @@ abstract class MatchmakingMode {
     this.queueService = matchmaking.queueService;
     this.queue = [];
     this.queueMatches = new Map();
+    this.tournaments = new Map();
   }
 
   abstract addPlayer(player: Player): void;
   abstract removePlayer(playerId: string): void;
   abstract findRandomMatch(player: Player): void;
-  abstract joinMatch(queueId: string, user_id: string): void;
-  abstract createMatch(playerIds: string[]): void;
+  abstract joinQueue(queueId: string, player: Player): void;
+  abstract createMatch(playerIds: string[]): Promise<string>;
+  abstract handleGameResult(gameId: string, winnerId: string): void;
 
-  protected addUserToQueue(queueKey: string, userId: string): number {
+  protected addUserToQueue(queueKey: string, player: Player): number {
     if (!this.queueMatches.has(queueKey)) {
       this.queueMatches.set(queueKey, []);
     }
     const users = this.queueMatches.get(queueKey)!; // Use the "!" to assert non-null
-    users.push(userId);
+    users.push(player);
 
     return users.length;
   }
 
   protected cleanupPlayer(playerId: string) {
     this.queue = this.queue.filter((player) => player.user_id !== playerId);
-    this.playerIntervals.delete(playerId);
-    this.playerCooldowns.delete(playerId);
-    this.recentMatches.delete(playerId);
     for (const [queueId, players] of this.queueMatches.entries()) {
-      if (players.includes(playerId)) {
-        this.queueMatches.delete(queueId);
-        break;
+      const player = players.findIndex((p) => p.user_id === playerId);
+      if (player !== -1) {
+        players.splice(player, 1);
+        if (players.length === 0) {
+          this.queueMatches.delete(queueId);
+        }
       }
     }
   }
 }
 class OneVOneMatchmaking extends MatchmakingMode {
+  private INITIAL_ELO_RANGE = 50; // expansion range
+  private SEARCH_EXPANSION_INTERVAL = 5000; // Expand every 5 sec
+  private MAX_WAIT_TIME = 30000; // Timeout after 30 sec
+  private playerIntervals: Map<string, NodeJS.Timeout> = new Map(); // intervals for searching player opponent
+  private recentMatches: Set<string> = new Set(); // Set of recently matched players
+  private playerCooldowns: Map<string, number> = new Map(); // Dynamic cooldowns for players
   constructor(matchmaking: MatchmakingService) {
     super(matchmaking);
   }
@@ -73,6 +96,9 @@ class OneVOneMatchmaking extends MatchmakingMode {
   }
 
   removePlayer(playerId: string) {
+    this.playerIntervals.delete(playerId);
+    this.playerCooldowns.delete(playerId);
+    this.recentMatches.delete(playerId);
     this.cleanupPlayer(playerId);
   }
 
@@ -85,6 +111,7 @@ class OneVOneMatchmaking extends MatchmakingMode {
       type: 'match_found',
       state: { game_id: game.game_id },
     });
+    return game.game_id;
   }
 
   findOpponent(player: Player, eloRange: number): Player | null {
@@ -118,6 +145,7 @@ class OneVOneMatchmaking extends MatchmakingMode {
         clearInterval(this.playerIntervals.get(player.user_id));
         this.playerIntervals.delete(player.user_id);
         console.log(`Matchmaking timed out for player ${player.user_id}`);
+        this.cleanupPlayer(player.user_id);
         //send a message to the player that the matchmaking timed out
       }
     }, 30000); // Timeout after 30 seconds (adjust as needed)
@@ -166,26 +194,116 @@ class OneVOneMatchmaking extends MatchmakingMode {
     this.playerIntervals.set(player.user_id, interval);
   }
 
-  async joinMatch(queueId: string, user_id: string) {
-    const count = this.addUserToQueue(queueId, user_id);
+  async joinQueue(queueId: string, player: Player) {
+    const count = this.addUserToQueue(queueId, player);
     if (count >= 2) {
       const players = this.queueMatches.get(queueId)!;
-      await this.createMatch(players);
+      const playerIds = players.map((p) => p.user_id);
+      await this.createMatch(playerIds);
     }
   }
+
+  handleGameResult(gameId: string, winnerId: string) {}
 }
 class TournamentMatchmaking extends MatchmakingMode {
   constructor(matchmaking: MatchmakingService) {
     super(matchmaking);
   }
 
-  addPlayer(player: Player) {
-    this.queue.push(player);
-    this.queue.sort((a, b) => a.elo - b.elo);
-    // if (this.queue.size >= this.minPlayers) {
-    //   this.findMatch();
-    // }
+  createTournament(tournamentId: string, name: string, size: number, players: Player[]) {
+    if (this.tournaments.has(tournamentId)) {
+      throw new Error('Tournament already exists');
+    }
+    const totalRounds = Math.log2(players.length);
+    const session: TournamentSession = {
+      tournamentId,
+      name,
+      size,
+      currentRound: 1,
+      totalRounds,
+      matches: [],
+      activePlayers: players,
+      nextRoundPlayers: [],
+      completedMatches: [],
+      createdAt: new Date(),
+    };
+    this.tournaments.set(tournamentId, session);
+    this.generateMatches(tournamentId);
   }
+
+  private async generateMatches(tournamentId: string) {
+    const session = this.tournaments.get(tournamentId);
+    if (!session) return;
+
+    const matches: TournamentMatch[] = [];
+    const stack = [...session.activePlayers];
+
+    while (stack.length >= 2) {
+      const p1 = stack.pop()!;
+      const p2 = stack.pop()!;
+      const gameId = await this.createMatch([p1.user_id, p2.user_id]);
+      const match: TournamentMatch = {
+        gameId,
+        players: [p1, p2],
+        round: session.currentRound,
+        isComplete: false,
+      };
+      matches.push(match);
+    }
+
+    session.matches = matches;
+    session.activePlayers = [];
+  }
+
+  handleGameResult(gameId: string, winnerId: string) {
+    let tournamentId: string | null = null;
+    for (const [queueId, players] of this.queueMatches.entries()) {
+      if (players.findIndex((p) => p.user_id === winnerId)) {
+        tournamentId = queueId;
+        break;
+      }
+    }
+    if (!tournamentId) return;
+    if (!this.tournaments.has(tournamentId)) return;
+    const session = this.tournaments.get(tournamentId);
+    if (!session) return;
+
+    const match = session.matches.find((m) => m.gameId === gameId);
+    if (!match || match.isComplete) return;
+
+    match.isComplete = true;
+    session.completedMatches.push(match);
+
+    const winner = match.players.find((p) => p.user_id === winnerId);
+    if (winner) {
+      session.nextRoundPlayers.push(winner);
+    }
+
+    if (session.matches.every((m) => m.isComplete)) {
+      if (session.nextRoundPlayers.length === 1) {
+        this.endTournament(tournamentId);
+      } else {
+        session.activePlayers = [...session.nextRoundPlayers];
+        session.nextRoundPlayers = [];
+        session.currentRound++;
+        this.generateMatches(tournamentId);
+      }
+    }
+  }
+
+  endTournament(tournamentId: string) {
+    const session = this.tournaments.get(tournamentId);
+    if (!session) return;
+    const winner = session.nextRoundPlayers[0];
+    if (winner) {
+      console.log(`Tournament ${session.name} won by ${winner.user_id}`);
+      // Save winner to DB, notify all participants
+    }
+    this.tournaments.delete(tournamentId);
+    this.queueMatches.delete(tournamentId);
+  }
+
+  addPlayer(player: Player) {}
 
   removePlayer(playerId: string) {
     this.cleanupPlayer(playerId);
@@ -196,28 +314,28 @@ class TournamentMatchmaking extends MatchmakingMode {
     if (!game) {
       throw new Error('Failed to create game');
     }
+    this.matchmaking.broadcast(playerIds, {
+      type: 'match_found',
+      state: { game_id: game.game_id },
+    });
     return game.game_id;
   }
 
   async findRandomMatch(player: Player) {}
 
-  async joinMatch(queueId: string, user_id: string) {
-    const count = this.addUserToQueue(queueId, user_id);
+  async joinQueue(queueId: string, player: Player) {
+    const count = this.addUserToQueue(queueId, player);
     const minPlayers = await this.queueService.getQueueVariant(queueId);
     const size = parseInt(minPlayers.variant);
     console.log(`Queue size: ${size}`);
     console.log(`Players in queue: ${count}`);
     if (count >= size) {
-      const players = this.queueMatches.get(queueId)!;
-      console.log(`Creating match for players: ${players}`);
-
-      while (players.length >= 2) {
-        const game_id = await this.createMatch(players.splice(0, 2));
-        this.matchmaking.broadcast(players, {
-          type: 'match_found',
-          state: { game_id },
-        });
-      }
+      this.createTournament(
+        queueId,
+        `Tournament ${queueId}`,
+        size,
+        this.queueMatches.get(queueId)!
+      );
     }
   }
 }
@@ -229,18 +347,18 @@ export class MatchmakingService {
   private matchmakers: { [mode: string]: MatchmakingMode } = {};
   private clients: Map<string, WebSocket> = new Map();
 
-  constructor(queueService: QueueService, gameService: GameService) {
-    this.queueService = queueService;
-    this.gameService = gameService;
+  constructor(db: Database) {
+    this.queueService = QueueService.getInstance(db);
+    this.gameService = GameService.getInstance(db);
     this.matchmakers = {
       '1v1': new OneVOneMatchmaking(this),
       tournament: new TournamentMatchmaking(this),
     };
   }
 
-  static getInstance(queueService: QueueService, gameService: GameService): MatchmakingService {
+  static getInstance(db: Database): MatchmakingService {
     if (!MatchmakingService.instance) {
-      MatchmakingService.instance = new MatchmakingService(queueService, gameService);
+      MatchmakingService.instance = new MatchmakingService(db);
     }
     return MatchmakingService.instance;
   }
@@ -258,6 +376,18 @@ export class MatchmakingService {
     this.matchmakers[mode].removePlayer(user_id);
   }
 
+  handleGameResult(gameId: string, winnerId: string) {
+    console.log(`Game result for game ${gameId}: ${winnerId} won`);
+    for (const matchmaker of Object.values(this.matchmakers)) {
+      matchmaker.handleGameResult(gameId, winnerId);
+    }
+  }
+
+  /**
+   * player enters a match making queue
+   * matchmaking Find match for player based on players Elo
+   * Elo range is expanded every by 50 until match is found
+   */
   async findMatch(user_id: string, mode: string) {
     console.log(`Finding match for ${user_id} in ${mode} mode`);
     const playerElo = await this.gameService.getPlayerElo(user_id);
@@ -272,9 +402,20 @@ export class MatchmakingService {
     await this.matchmakers[mode].findRandomMatch(player);
   }
 
-  async joinMatch(queueId: string, user_id: string, mode: string) {
+  /**
+   * player joins a queue for a match
+   * no match making is done
+   */
+  async joinQueue(queueId: string, user_id: string, mode: string) {
     console.log(`Joining match for ${user_id} in queue: ${queueId}`);
-    this.matchmakers[mode].joinMatch(queueId, user_id);
+    const playerElo = await this.gameService.getPlayerElo(user_id);
+    const player: Player = {
+      user_id,
+      socket: this.clients.get(user_id)!,
+      elo: playerElo.elo,
+      joinedAt: new Date(),
+    };
+    this.matchmakers[mode].joinQueue(queueId, player);
   }
 
   /**
@@ -299,7 +440,7 @@ export class MatchmakingService {
       await this.findMatch(data.payload.user_id, data.payload.mode);
     }
     if (data.type === 'join_match') {
-      await this.joinMatch(data.payload.queue_id, data.payload.user_id, data.payload.mode);
+      await this.joinQueue(data.payload.queue_id, data.payload.user_id, data.payload.mode);
     }
   }
 
