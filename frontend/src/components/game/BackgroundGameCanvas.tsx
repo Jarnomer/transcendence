@@ -219,7 +219,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     };
   }, [isVisible]);
 
-  // Handle visibility changes and initialize camera position
+  // Handle visibility and camera positions
   useEffect(() => {
     if (!engineRef.current || !sceneRef.current || !cameraRef.current) return;
 
@@ -232,34 +232,33 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     if (!isVisible) {
       engineRef.current.stopRenderLoop();
     } else {
-      // When becoming visible, set a random initial camera angle
       const randomAngle = getRandomCameraAngle();
       const camera = cameraRef.current;
 
-      // Apply the random camera angle
       applyCameraAngle(camera, randomAngle, postProcessingRef.current);
 
-      // Find the index of the randomly chosen angle for tracking
       currentAngleIndexRef.current = cameraAngles.findIndex((angle) => angle === randomAngle);
 
-      // Start the camera movement timer
       cameraMoveTimerRef.current = window.setInterval(() => {
         if (cameraRef.current) {
-          // Move to the next camera angle
           currentAngleIndexRef.current = (currentAngleIndexRef.current + 1) % cameraAngles.length;
           const newAngle = cameraAngles[currentAngleIndexRef.current];
 
-          // Animate to the new position with DOF settings
           animateCamera(cameraRef.current, newAngle, postProcessingRef.current);
         }
       }, 10000); // Change camera every 10 seconds
 
-      // Start the render loop
       engineRef.current.runRenderLoop(() => {
         if (sceneRef.current) {
           sceneRef.current.render();
         }
       });
+
+      if (retroEffectsRef.current) {
+        setTimeout(() => {
+          retroEffectsRef.current.simulateCRTTurnOn();
+        }, 500);
+      }
     }
 
     return () => {
@@ -270,33 +269,9 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     };
   }, [isVisible]);
 
-  // Update effect levels
+  // Update game objects
   useEffect(() => {
-    if (!retroEffectsRef.current) return;
-
-    try {
-      if (retroLevels !== retroLevelsRef.current) {
-        retroEffectsRef.current.updateLevels(retroLevels);
-        retroLevelsRef.current = retroLevels;
-      }
-
-      if (retroPreset === 'cinematic' || retroPreset === 'default') {
-        retroEffectsRef.current.applyPreset(retroPreset);
-      }
-    } catch (error) {
-      console.error('Error updating retro effects:', error);
-    }
-  }, [retroLevels, retroPreset]);
-
-  // Update game objects based on game state
-  useEffect(() => {
-    if (!themeColors.current) {
-      console.log('No color theme');
-      return;
-    } else if (!isVisible) {
-      console.log('Canvas not visible');
-      return;
-    }
+    if (!themeColors.current || !isVisible) return;
 
     const { players, ball } = gameState;
     const color = themeColors.current.primaryColor;
@@ -350,9 +325,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
       );
     }
 
-    if (score) {
-      applyScoreEffects(retroEffectsRef.current);
-    }
+    if (score) applyScoreEffects(retroEffectsRef.current);
 
     prevBallState.current = {
       x: ball.x,

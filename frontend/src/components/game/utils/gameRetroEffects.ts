@@ -583,12 +583,8 @@ export class RetroEffectsManager {
   }
 
   async simulateCRTTurnOn(durationMs: number = 1800): Promise<void> {
-    if (!this._turnOnEffect) this.enableTurnOnEffect();
-
     if (this._levels.crtTurnOnEffect === 0) return Promise.resolve();
-
-    // Scale duration by effect intensity, maybe change to on/off?
-    const adjustedDuration = durationMs * (this._levels.crtTurnOnEffect / 5);
+    if (!this._turnOnEffect) this.enableTurnOnEffect();
 
     if (this._turnOnEffect && this._turnOnEffect.effect && !this._isPlayingTurnOnEffect) {
       if (!this._effects.scanlines) this.enableScanlines();
@@ -602,7 +598,7 @@ export class RetroEffectsManager {
 
         const updateProgress = () => {
           const elapsedTime = performance.now() - startTime;
-          const progress = Math.min(elapsedTime / adjustedDuration, 1.0);
+          const progress = Math.min(elapsedTime / durationMs, 1.0);
 
           this._turnOnEffect?.setTurnOnProgress(progress);
 
@@ -620,22 +616,20 @@ export class RetroEffectsManager {
             }
           }
 
-          if (this._effects.scanlines && this._effects.scanlines.getEffect()) {
+          if (this._effects.scanlines) {
             const effect = this._effects.scanlines.getEffect();
-            if (effect) {
-              const intensity = setRetroEffectLevel(this._levels.scanlines, 0.3 - progress * 0.2);
-              effect.setFloat('scanlineIntensity', intensity);
-            }
+            const intensity = setRetroEffectLevel(this._levels.scanlines, 5 - progress * 5);
+            effect.setFloat('scanlineIntensity', intensity);
           }
 
           if (progress < 1.0) {
             requestAnimationFrame(updateProgress);
           } else {
             setTimeout(() => {
+              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
               if (this._turnOnEffect && this._turnOnEffect.effect) {
                 (this._turnOnEffect.effect as any).enabled = false;
               }
-              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
 
               this._isPlayingTurnOnEffect = false;
               resolve();
@@ -651,83 +645,104 @@ export class RetroEffectsManager {
   }
 
   async simulateCRTTurnOff(durationMs: number = 1800): Promise<void> {
-    if (!this._turnOffEffect) this.enableTurnOffEffect();
-
     if (this._levels.crtTurnOffEffect === 0) return Promise.resolve();
-
-    // Scale duration by effect intensity, maybe change to on/off?
-    const adjustedDuration = durationMs * (this._levels.crtTurnOffEffect / 5);
+    if (!this._turnOffEffect) this.enableTurnOffEffect();
 
     if (this._turnOffEffect && this._turnOffEffect.effect && !this._isPlayingTurnOffEffect) {
       if (!this._effects.glitch) this.enableGlitch();
 
-      (this._turnOffEffect.effect as any).enabled = true;
-      this._isPlayingTurnOffEffect = true;
+      try {
+        (this._turnOffEffect.effect as any).enabled = true;
+        this._isPlayingTurnOffEffect = true;
 
-      return new Promise((resolve) => {
-        const startTime = performance.now();
+        return new Promise((resolve) => {
+          const startTime = performance.now();
 
-        const updateProgress = () => {
-          const elapsedTime = performance.now() - startTime;
-          const progress = Math.min(elapsedTime / adjustedDuration, 1.0);
-
-          this._turnOffEffect?.setTurnOffProgress(progress);
-
-          if (this._effects.glitch) {
-            if (progress < 0.2) {
-              const initialGlitch = progress * 2;
-              this._effects.glitch.setGlitchAmount(initialGlitch);
-            } else if (progress < 0.5) {
-              const collapseGlitch = 0.4 + (progress - 0.2) * 3;
-              this._effects.glitch.setGlitchAmount(collapseGlitch);
-            } else if (progress < 0.7) {
-              const finalCollapseGlitch = 1.3 + Math.sin(progress * 40) * 1.5;
-              this._effects.glitch.setGlitchAmount(finalCollapseGlitch);
-            } else {
-              const fadeOutGlitch = (1.0 - progress) * 4;
-              this._effects.glitch.setGlitchAmount(fadeOutGlitch);
-            }
-          }
-
-          if (progress < 1.0) {
-            requestAnimationFrame(updateProgress);
-          } else {
-            setTimeout(() => {
-              if (this._turnOffEffect && this._turnOffEffect.effect) {
-                (this._turnOffEffect.effect as any).enabled = false;
+          const updateProgress = () => {
+            try {
+              if (
+                !this._turnOffEffect ||
+                !this._turnOffEffect.effect ||
+                !(this._turnOffEffect.effect as any).enabled
+              ) {
+                this._isPlayingTurnOffEffect = false;
+                resolve();
+                return;
               }
-              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
 
+              const elapsedTime = performance.now() - startTime;
+              const progress = Math.min(elapsedTime / durationMs, 1.0);
+
+              this._turnOffEffect?.setTurnOffProgress(progress);
+
+              if (this._effects.glitch) {
+                try {
+                  if (progress < 0.2) {
+                    const initialGlitch = progress * 2;
+                    this._effects.glitch.setGlitchAmount(initialGlitch);
+                  } else if (progress < 0.5) {
+                    const collapseGlitch = 0.4 + (progress - 0.2) * 3;
+                    this._effects.glitch.setGlitchAmount(collapseGlitch);
+                  } else if (progress < 0.7) {
+                    const finalCollapseGlitch = 1.3 + Math.sin(progress * 40) * 1.5;
+                    this._effects.glitch.setGlitchAmount(finalCollapseGlitch);
+                  } else {
+                    const fadeOutGlitch = (1.0 - progress) * 4;
+                    this._effects.glitch.setGlitchAmount(fadeOutGlitch);
+                  }
+                } catch (e) {
+                  console.warn('Error updating glitch effect:', e);
+                }
+              }
+
+              if (progress < 1.0) {
+                requestAnimationFrame(updateProgress);
+              } else {
+                setTimeout(() => {
+                  try {
+                    if (this._turnOffEffect && this._turnOffEffect.effect) {
+                      (this._turnOffEffect.effect as any).enabled = false;
+                    }
+                    if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+                  } catch (e) {
+                    console.warn('Error cleaning up turn off effect:', e);
+                  }
+
+                  this._isPlayingTurnOffEffect = false;
+                  resolve();
+                }, 300);
+              }
+            } catch (e) {
+              console.error('Error in CRT turn off animation:', e);
               this._isPlayingTurnOffEffect = false;
               resolve();
-            }, 300);
-          }
-        };
+            }
+          };
 
-        updateProgress();
-      });
+          updateProgress();
+        });
+      } catch (e) {
+        console.error('Error starting CRT turn off effect:', e);
+        this._isPlayingTurnOffEffect = false;
+        return Promise.resolve();
+      }
     }
 
     return Promise.resolve();
   }
 
   simulateTrackingDistortion(intensity: number = 5.0, durationMs: number = 800): void {
+    if (this._levels.glitch === 0) return;
     if (!this._effects.glitch) this.enableGlitch();
 
-    if (this._levels.glitch === 0) return;
-
-    // Scale intensity and duration by effect level, maybe change to on/off?
-    const adjustedIntensity = intensity * (this._levels.glitch / 5);
-    const adjustedDuration = durationMs * (this._levels.glitch / 5);
-
     if (this._effects.glitch) {
-      this._effects.glitch.setGlitchAmount(adjustedIntensity);
+      this._effects.glitch.setGlitchAmount(intensity);
 
       setTimeout(() => {
         if (this._effects.glitch) {
           this._effects.glitch.setGlitchAmount(0);
         }
-      }, adjustedDuration);
+      }, durationMs);
     }
   }
 
