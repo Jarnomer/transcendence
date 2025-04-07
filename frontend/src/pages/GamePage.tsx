@@ -14,9 +14,8 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, dispatch, sendMessage, gameEvent } =
-    useWebSocketContext();
-  const { gameId, mode, difficulty, lobby, queueId, setGameId } = useGameOptionsContext();
+  const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
+  const { gameId, mode, difficulty } = useGameOptionsContext();
   // const location = useLocation();
   const { loadingStates } = useLoading();
   // const { mode, difficulty, lobby, queueId } = location.state || {};
@@ -28,23 +27,11 @@ export const GamePage: React.FC = () => {
   // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
 
-  const { userId, localPlayerId, remotePlayerId } = useGameUser(difficulty);
-  useMatchmaking(mode, difficulty, lobby, queueId, setGameId, userId);
-  useGameResult(gameStatus, gameId, gameState, dispatch, userId);
+  const { userId, localPlayerId, remotePlayerId } = useGameUser();
+  useMatchmaking(userId);
+  useGameResult(userId);
   useGameControls(localPlayerId, remotePlayerId);
-
-  const playersData = useFetchPlayerData({
-    gameState,
-    gameId,
-    mode,
-    difficulty,
-    connectionStatus: connections.game,
-    gameStatus,
-  });
-
-  useEffect(() => {
-    console.log('game event', gameEvent);
-  }, [gameEvent]);
+  const playersData = useFetchPlayerData();
 
   // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED
   // SET LOADING TO FALSE TO RENDER THE GAMECANVAS
@@ -88,7 +75,7 @@ export const GamePage: React.FC = () => {
           </div>
         </>
       ) : (
-        <MatchMakingCarousel setAnimate={setAnimate} gameId={gameId} playersData={playersData} />
+        <MatchMakingCarousel playersData={playersData} />
       )}
     </div>
   );

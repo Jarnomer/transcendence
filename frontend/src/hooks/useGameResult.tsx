@@ -9,21 +9,15 @@ import { GameState } from '@types';
 
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
-export const useGameResult = (
-  gameStatus: string,
-  gameId: string | null,
-  gameState: GameState,
-  dispatch: any,
-  userId: string | null
-) => {
+export const useGameResult = (userId: string | null) => {
   const navigate = useNavigate();
+  const { resetGameOptions, gameId } = useGameOptionsContext();
+  const { closeConnection, gameStatus, gameState, dispatch } = useWebSocketContext();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
-  const { resetGameOptions } = useGameOptionsContext();
-  const { closeConnection } = useWebSocketContext();
 
   useEffect(() => {
     if (!userId) return;

@@ -9,7 +9,7 @@ type WebSocketState = {
     matchmaking: ConnectionStatus;
   };
   gameStatus: GameStatus;
-  gameState: GameState;
+  gameState: GameState | null;
   gameEvent: GameEvent;
 };
 
@@ -19,15 +19,8 @@ export const initialState: WebSocketState = {
     chat: 'connecting',
     matchmaking: 'connecting',
   },
-  gameStatus: 'waiting',
-  gameState: {
-    players: {
-      player1: { id: 'player1', y: 0, score: 0, dy: 0, paddleHeight: 0 },
-      player2: { id: 'player2', y: 0, score: 0, dy: 0, paddleHeight: 0 },
-    },
-    ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
-    powerUps: [],
-  },
+  gameStatus: 'loading',
+  gameState: null,
   gameEvent: 'matching_players',
 };
 
@@ -65,11 +58,11 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
         ...state,
         gameState: {
           players: {
-            ...state.gameState.players,
+            ...state.gameState?.players,
             ...action.payload.players,
           },
           ball: {
-            ...state.gameState.ball,
+            ...state.gameState?.ball,
             ...action.payload.ball,
           },
           powerUps: action.payload.powerUps || [],

@@ -1,3 +1,4 @@
+import { GameOptionsType } from '../contexts/gameContext/GameOptionsContext';
 import { cancelQueue, createQueue, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
@@ -15,13 +16,12 @@ abstract class GameMode {
   protected difficulty: string;
   protected queueId: string | null;
   protected matchMaker: MatchMaker;
-  constructor(
-    matchMaker: MatchMaker,
-    lobby: string,
-    mode: string,
-    difficulty: string,
-    queueId: string | null
-  ) {
+  protected name: string;
+  protected password: string | null;
+  constructor(matchMaker: MatchMaker, options: GameOptionsType) {
+    const { lobby, mode, difficulty, queueId } = options;
+    this.name = options.tournamentOptions?.tournamentName || 'Default name';
+    this.password = options.tournamentOptions?.password || null;
     this.matchMaker = matchMaker;
     this.lobby = lobby;
     this.mode = mode;
@@ -33,14 +33,8 @@ abstract class GameMode {
 
 // Step 3: Implement Different Game Strategies
 class SinglePlayerGame extends GameMode {
-  constructor(
-    matchMaker: MatchMaker,
-    lobby: string,
-    mode: string,
-    difficulty: string,
-    queueId: string | null
-  ) {
-    super(matchMaker, lobby, mode, difficulty, queueId);
+  constructor(matchMaker: MatchMaker, options: GameOptionsType) {
+    super(matchMaker, options);
   }
   async createGame() {
     console.log('Creating single-player game...');
@@ -65,14 +59,8 @@ class SinglePlayerGame extends GameMode {
 }
 
 class OneVsOneGame extends GameMode {
-  constructor(
-    matchMaker: MatchMaker,
-    lobby: string,
-    mode: string,
-    difficulty: string,
-    queueId: string | null
-  ) {
-    super(matchMaker, lobby, mode, difficulty, queueId);
+  constructor(matchMaker: MatchMaker, options: GameOptionsType) {
+    super(matchMaker, options);
   }
   async createGame() {
     switch (this.difficulty) {
@@ -85,7 +73,12 @@ class OneVsOneGame extends GameMode {
       }
       case 'online': {
         console.log('Creating 1v1 online game...');
-        const data = await createQueue(this.mode, this.difficulty);
+        const data = await createQueue({
+          mode: this.mode,
+          difficulty: this.difficulty,
+          name: this.name,
+          password: this.password,
+        });
         if (!data || data.status !== 'waiting') {
           throw new Error('Problem with creating 1v1 online game');
         }
@@ -103,7 +96,12 @@ class OneVsOneGame extends GameMode {
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining 1v1 game...');
-      const queue = await joinQueue(this.queueId, this.mode, this.difficulty);
+      const queue = await joinQueue({
+        queueId: this.queueId,
+        mode: this.mode,
+        difficulty: this.difficulty,
+        password: this.password,
+      });
       if (!queue) {
         throw new Error('Problem with joining 1v1 game');
       }
@@ -117,14 +115,8 @@ class OneVsOneGame extends GameMode {
 }
 
 class TournamentGame extends GameMode {
-  constructor(
-    matchMaker: MatchMaker,
-    lobby: string,
-    mode: string,
-    difficulty: string,
-    queueId: string | null
-  ) {
-    super(matchMaker, lobby, mode, difficulty, queueId);
+  constructor(matchMaker: MatchMaker, options: GameOptionsType) {
+    super(matchMaker, options);
   }
 
   async findMatch() {
@@ -134,7 +126,12 @@ class TournamentGame extends GameMode {
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining tournament game...');
-      const queue = await joinQueue(this.queueId, this.mode, this.difficulty);
+      const queue = await joinQueue({
+        queueId: this.queueId,
+        mode: this.mode,
+        difficulty: this.difficulty,
+        password: this.password,
+      });
       if (!queue) {
         throw new Error('Problem with joining tournament game');
       }
@@ -148,7 +145,12 @@ class TournamentGame extends GameMode {
 
   async createGame() {
     console.log('Creating tournament game...');
-    const data = await createQueue(this.mode, this.difficulty);
+    const data = await createQueue({
+      mode: this.mode,
+      difficulty: this.difficulty,
+      name: this.name,
+      password: this.password,
+    });
     if (!data || data.status !== 'waiting') {
       throw new Error('Problem with creating tournament game');
     }
@@ -159,20 +161,15 @@ class TournamentGame extends GameMode {
 
 // Step 4: Create a Factory for Game Strategies
 class GameFactory {
-  static createMode(
-    matchMaker: MatchMaker,
-    lobby: string,
-    mode: string,
-    difficulty: string,
-    queueId: string | null
-  ): GameMode {
+  static createMode(matchMaker: MatchMaker, options: GameOptionsType): GameMode {
+    const { mode } = options;
     switch (mode) {
       case 'singleplayer':
-        return new SinglePlayerGame(matchMaker, lobby, mode, difficulty, queueId);
+        return new SinglePlayerGame(matchMaker, options);
       case '1v1':
-        return new OneVsOneGame(matchMaker, lobby, mode, difficulty, queueId);
+        return new OneVsOneGame(matchMaker, options);
       case 'tournament':
-        return new TournamentGame(matchMaker, lobby, mode, difficulty, queueId);
+        return new TournamentGame(matchMaker, options);
       default:
         throw new Error('Invalid game mode');
     }
@@ -188,11 +185,12 @@ class MatchMaker {
   private mode: string;
   private difficulty: string;
   private lobby: string;
-  constructor(mode: string, difficulty: string, lobby: string, queueId: string | null) {
+  constructor(options: GameOptionsType) {
+    const { mode, difficulty, lobby } = options;
     this.mode = mode;
     this.difficulty = difficulty;
     this.lobby = lobby;
-    this.gameMode = GameFactory.createMode(this, lobby, mode, difficulty, queueId);
+    this.gameMode = GameFactory.createMode(this, options);
   }
 
   getGameId(): string | null {

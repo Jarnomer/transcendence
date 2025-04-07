@@ -248,12 +248,13 @@ export class QueueModel {
     user_id: string,
     mode: string,
     variant: string,
+    name: string,
     password: string | null
   ) {
     const id = uuidv4();
     await this.db.get(
-      `INSERT INTO queues (queue_id, mode, variant, password) VALUES (?, ?, ?, ?) RETURNING *`,
-      [id, mode, variant, password]
+      `INSERT INTO queues (queue_id, mode, variant,name, password) VALUES (?, ?, ?, ?, ?) RETURNING *`,
+      [id, mode, variant, name, password]
     );
     const queue = await this.db.get(
       `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,

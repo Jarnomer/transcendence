@@ -2,20 +2,16 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
 
-const useMatchmaking = (
-  mode: string | null,
-  difficulty: string | null,
-  lobby: string | null,
-  queueId: string | null,
-  setGameId: React.Dispatch<React.SetStateAction<string | null>>,
-  userId: string | null
-) => {
+const useMatchmaking = (userId: string | null) => {
   const navigate = useNavigate();
   const { gameSocket, matchmakingSocket, sendMessage, closeConnection, connections } =
     useWebSocketContext();
+  const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions } =
+    useGameOptionsContext();
   const params = useRef<URLSearchParams>(new URLSearchParams());
   const matchmaker = useRef<MatchMaker>(null);
   useEffect(() => {
@@ -26,7 +22,7 @@ const useMatchmaking = (
   useEffect(() => {
     if (!mode || !difficulty || !lobby) return;
     console.log('Setting matchmaker:', mode, difficulty);
-    matchmaker.current = new MatchMaker(mode!, difficulty, lobby, queueId);
+    matchmaker.current = new MatchMaker({ mode, difficulty, lobby, queueId, tournamentOptions });
   }, [mode, difficulty, lobby, queueId]);
 
   const handleFindMatch = () => {
@@ -40,6 +36,7 @@ const useMatchmaking = (
   const handleGameStart = () => {
     if (!matchmaker.current) return;
     console.log('Game started');
+    console.log('userId:', userId);
     setGameId(matchmaker.current.getGameId());
     console.log('Game ID:', matchmaker.current.getGameId());
     params.current.set('game_id', matchmaker.current.getGameId() || '');

@@ -16,7 +16,7 @@ interface PlayerData {
 }
 
 interface MatchMakingCarouselProps {
-  setAnimate: (value: boolean) => void;
+  // setAnimate: (value: boolean) => void;
   playersData: {
     player1: PlayerData | null;
     player2: PlayerData | null;
@@ -87,7 +87,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   }, [opponentFound, opponentAvatar]);
 
   useEffect(() => {
-    if (!playersData.player1) return;
+    if (!playersData?.player1) return;
     const opponent =
       playersData.player1?.user_id !== loggedInUser?.user_id
         ? playersData.player1

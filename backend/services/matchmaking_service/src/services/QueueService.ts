@@ -69,14 +69,20 @@ export class QueueService {
    * User enters the match making queue
    * uses transaction to ensure atomicity
    */
-  async createQueue(user_id: string, mode: string, difficulty: string, password: string | null) {
+  async createQueue(
+    user_id: string,
+    mode: string,
+    difficulty: string,
+    name: string,
+    password: string | null
+  ) {
     const existingUser = await this.queueModel.isInQueque(user_id); // Check if user is already in queue
     if (existingUser) {
       console.log('User is in Queue', existingUser);
       return existingUser;
     }
     console.log('created new user in queue', user_id);
-    return await this.queueModel.createWaitingQueue(user_id, mode, difficulty, password); // insert user into queue
+    return await this.queueModel.createWaitingQueue(user_id, mode, difficulty, name, password); // insert user into queue
   }
 
   /**

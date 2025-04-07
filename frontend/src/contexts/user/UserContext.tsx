@@ -97,8 +97,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userId = user?.user_id || localStorage.getItem('userID');
       if (userId) {
-        await api.post('/auth/logout', { user_id: userId });
         await api.patch(`/user/${userId}`, { status: 'offline' });
+        await api.post('/auth/logout', { user_id: userId });
       }
     } catch (error) {
       console.error('Logout failed:', error);
