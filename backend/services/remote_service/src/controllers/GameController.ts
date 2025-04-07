@@ -1,6 +1,7 @@
 import { WebSocket } from '@fastify/websocket';
 import { FastifyRequest } from 'fastify';
 import 'module-alias/register';
+import { Database } from 'sqlite';
 
 import { GameManager } from '@my-backend/game_service';
 
@@ -8,13 +9,13 @@ export class GameController {
   private gameManager: GameManager;
   private static instance: GameController;
 
-  constructor(gameManager: GameManager) {
-    this.gameManager = gameManager;
+  constructor(db: Database) {
+    this.gameManager = GameManager.getInstance(db);
   }
 
-  static getInstance(gameManager: GameManager): GameController {
+  static getInstance(db: Database): GameController {
     if (!GameController.instance) {
-      GameController.instance = new GameController(gameManager);
+      GameController.instance = new GameController(db);
     }
     return GameController.instance;
   }

@@ -10,6 +10,7 @@ import { Header } from './components/header/Header.tsx';
 import { ModalProvider } from './components/modals/ModalContext.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
+import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
 import { useUser } from './contexts/user/UserContext';
 import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
@@ -29,26 +30,29 @@ const App: React.FC = () => {
   return (
     <WebSocketProvider>
       {/* Background game provider */}
-      <BackgroundGameProvider />
+      {/* <BackgroundGameProvider /> */}
+      {/* Game options provider */}
       <ModalProvider>
-        <div
-          id="app-container"
-          className={`flex flex-col relative items-center min-h-screen w-screen text-primary p-2 `}
-        >
-          <Header />
+        <GameOptionsProvider>
           <div
-            id="app-content"
-            className="mt-2 md:px-10 flex flex-grow flex-col w-full justify-center items-center"
+            id="app-container"
+            className={`flex flex-col relative items-center min-h-screen w-screen text-primary p-2 `}
           >
-            <AnimatePresence>
-              <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
-                <BackgroundGlitch duration={1100} />
-              </motion.div>
-            </AnimatePresence>
-            <AnimatedRoutes></AnimatedRoutes>
+            <Header />
+            <div
+              id="app-content"
+              className="mt-2 md:px-10 flex flex-grow flex-col w-full justify-center items-center"
+            >
+              <AnimatePresence>
+                <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
+                  <BackgroundGlitch duration={1100} />
+                </motion.div>
+              </AnimatePresence>
+              <AnimatedRoutes></AnimatedRoutes>
+            </div>
+            {location.pathname !== '/game' ? <Footer /> : null}
           </div>
-          {location.pathname !== '/game' ? <Footer /> : null}
-        </div>
+        </GameOptionsProvider>
       </ModalProvider>
     </WebSocketProvider>
   );

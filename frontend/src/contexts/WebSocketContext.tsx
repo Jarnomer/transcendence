@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 
-import { GameState, GameStatus } from '@shared/types';
+import { GameState, GameStatus, GameEvent } from '@shared/types';
 
 import { useChatSocket } from '../hooks/useChatSocket';
 import { useGameSocket } from '../hooks/useGameSocket';
@@ -32,6 +32,7 @@ interface WebSocketContextType {
   };
   gameStatus: GameStatus;
   gameState: GameState;
+  gameEvent: GameEvent;
   dispatch: React.Dispatch<any>;
 }
 
@@ -70,9 +71,9 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     return () => {
       console.log('Cleaning up WebSocket connections');
-      gameSocket.close();
-      chatSocket.close();
-      matchmakingSocket.close();
+      gameSocket.deleteInstance();
+      chatSocket.deleteInstance();
+      matchmakingSocket.deleteInstance();
     };
   }, []);
 

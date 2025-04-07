@@ -48,7 +48,11 @@ const BackgroundGameProvider: React.FC = () => {
   // Handle location changes to toggle visibility
   useEffect(() => {
     console.log('Location changed:', location.pathname);
-    setIsVisible(!location.pathname.includes('/game'));
+    if (location.pathname.includes('/game')) {
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
   }, [location.pathname]);
 
   // Create a stable setupWebSocket function with useCallback

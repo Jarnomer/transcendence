@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
+import { submitResult } from '@/services/gameService';
+
 import { GameState } from '@types';
 
 import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { submitResult } from '../services/gameService';
 
 export const useGameResult = (
   gameStatus: string,
@@ -14,13 +16,14 @@ export const useGameResult = (
   dispatch: any,
   userId: string | null
 ) => {
-  const { closeConnection } = useWebSocketContext();
   const navigate = useNavigate();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
+  const { resetGameOptions } = useGameOptionsContext();
+  const { closeConnection } = useWebSocketContext();
 
   useEffect(() => {
     if (!userId) return;
@@ -43,36 +46,46 @@ export const useGameResult = (
   }, [gameState]);
 
   useEffect(() => {
-    if (!gameId) return;
     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
-      if (gameId === 'local_game_id') {
-        console.log('Local game, no need to submit result');
-        dispatch({ type: 'GAME_RESET' });
-        navigate('/home');
-        return;
-      }
-      const { players } = gameStateRef.current;
-      const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
-      console.log('Submitting game result:', gameId, sortedPlayers);
-      submitResult({
-        game_id: gameId,
-        winner_id: sortedPlayers[0].id,
-        loser_id: sortedPlayers[1].id,
-        winner_score: sortedPlayers[0].score,
-        loser_score: sortedPlayers[1].score,
-      })
-        .then(() => {
-          dispatch({ type: 'GAME_RESET' });
-          hasSubmittedResult.current = true;
-        })
-        .catch((err) => {
-          console.error('Error submitting game result:', err);
-        })
-        .finally(() => {
-          navigate('/home');
-        });
+      console.log('Game finished, submitting result');
+      dispatch({ type: 'GAME_RESET' });
+      navigate('/home');
+      resetGameOptions();
+      hasSubmittedResult.current = true;
     }
-  }, [gameStatus, gameId, gameState, dispatch, navigate]);
+  }, [gameStatus, dispatch, navigate]);
+
+  //   useEffect(() => {
+  //     if (!gameId) return;
+  //     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
+  //       if (gameId === 'local_game_id') {
+  //         console.log('Local game, no need to submit result');
+  //         dispatch({ type: 'GAME_RESET' });
+  //         navigate('/home');
+  //         return;
+  //       }
+  //       const { players } = gameStateRef.current;
+  //       const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
+  //       console.log('Submitting game result:', gameId, sortedPlayers);
+  //       submitResult({
+  //         game_id: gameId,
+  //         winner_id: sortedPlayers[0].id,
+  //         loser_id: sortedPlayers[1].id,
+  //         winner_score: sortedPlayers[0].score,
+  //         loser_score: sortedPlayers[1].score,
+  //       })
+  //         .then(() => {
+  //           dispatch({ type: 'GAME_RESET' });
+  //           hasSubmittedResult.current = true;
+  //         })
+  //         .catch((err) => {
+  //           console.error('Error submitting game result:', err);
+  //         })
+  //         .finally(() => {
+  //           navigate('/home');
+  //         });
+  //     }
+  //   }, [gameStatus, gameId, gameState, dispatch, navigate]);
 
   // Cleanup
   useEffect(() => {

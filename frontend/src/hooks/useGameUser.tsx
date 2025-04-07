@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const useGameUser = (
-  difficulty: string
+  difficulty: string | null
   //setUserId: React.Dispatch<React.SetStateAction<string | null>>,
   //setLocalPlayerId: React.Dispatch<React.SetStateAction<string | null>>,
   //setRemotePlayerId: React.Dispatch<React.SetStateAction<string | null>>

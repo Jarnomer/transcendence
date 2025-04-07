@@ -6,7 +6,7 @@ export class AIController {
   private difficulty: string;
   private lastBallDx: number = 0;
   private params: GameParams = defaultGameParams;
-  private isPlayer1: boolean;
+  public isPlayer1: boolean;
 
   // difficulty levels: easy, normal, brutal
   constructor(difficulty: string, isPlayer1: boolean) {
@@ -23,7 +23,7 @@ export class AIController {
     const ballMovingTowardsAI = this.isPlayer1 ? ball.dx < 0 : ball.dx > 0;
 
     // Predict the ball's position only if it's moving towards the AI, otherwise stay in the middle
-    let prediction = { y: aiCenter, frames: frameCount };
+    let prediction = { y: this.params.gameHeight / 2, frames: frameCount };
     if (ballMovingTowardsAI) {
       prediction = this.predictBallPosition(ball);
     }
