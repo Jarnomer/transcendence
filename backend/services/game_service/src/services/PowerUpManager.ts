@@ -121,10 +121,10 @@ export class PowerUpManager {
     for (const powerUp of this.powerUps) {
       if (powerUp.active) {
         powerUp.effectDuration -= 1000 / 60; // Assuming 60 FPS
-        if (powerUp.effectDuration <= 0) {
-          powerUp.removeEffect(this.game, powerUp.affectedPlayer);
-          powerUp.isSpent = true; // Mark the power-up as spent
-        }
+        // if (powerUp.effectDuration <= 0) {
+        //   powerUp.removeEffect(this.game, powerUp.affectedPlayer);
+        //   powerUp.isSpent = true; // Mark the power-up as spent
+        // }
       }
     }
   }

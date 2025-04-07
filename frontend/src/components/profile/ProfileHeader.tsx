@@ -16,7 +16,7 @@ type Friend = {
 };
 
 interface ProfileHeaderProps {
-  user: UserDataResponseType;
+  user: UserDataResponseType | null;
   isOwnProfile: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setEditProfile: React.Dispatch<React.SetStateAction<boolean>>;
@@ -90,11 +90,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             />
             <NavIconButton
               id="send-message"
+              ariaLabel="send message"
               icon="chat"
               onClick={() => handleChatClick(user.user_id)}
             />
             <NavIconButton
               id="block-user"
+              ariaLabel="block user"
               icon="block"
               onClick={() => handleBlockUserClick(user.user_id)}
             />

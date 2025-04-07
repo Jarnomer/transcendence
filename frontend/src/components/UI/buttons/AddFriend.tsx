@@ -47,7 +47,11 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
   };
 
   return (
-    <button onClick={handleAddFriendClick} disabled={loading}>
+    <button
+      onClick={handleAddFriendClick}
+      disabled={loading}
+      aria-label={`${isPending ? 'delete friend' : 'add friend'}`}
+    >
       {isPending ? icons.removeFriend : icons.addFriend}
     </button>
   );

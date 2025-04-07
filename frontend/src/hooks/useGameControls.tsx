@@ -15,14 +15,6 @@ const useGameControls = (localPlayerId: string | null, remotePlayerId: string | 
   useEffect(() => {
     if (!localPlayerId || !remotePlayerId) return;
 
-    console.log(
-      'Game controls =>',
-      ' localPlayerId:',
-      localPlayerId,
-      '| remotePlayerId:',
-      remotePlayerId
-    );
-
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent default actions during gameplay
       if (['w', 's', 'ArrowUp', 'ArrowDown'].includes(e.key)) {

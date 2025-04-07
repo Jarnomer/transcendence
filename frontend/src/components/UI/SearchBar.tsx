@@ -15,8 +15,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   return (
     <div className="w-full flex justify-between border">
+      <label htmlFor="searchBar" className="sr-only">
+        Search
+      </label>
       <input
         type="text"
+        id="searchBar"
         value={value}
         onChange={onChange}
         placeholder={placeholder}

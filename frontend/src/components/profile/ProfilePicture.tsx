@@ -50,6 +50,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
         <img
           className="object-cover rounded-full w-full h-full z-10"
           src={`https://localhost:8443/${user.avatar_url}`}
+          alt="user profile picture"
         />
 
         {/* Upload Button */}
@@ -59,11 +60,13 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
               type="file"
               ref={fileInputRef}
               className="hidden"
+              aria-label="Upload profile picture"
               accept="image/*"
               onChange={handleFileChange}
             />
 
             <button
+              aria-label="upload profile picture"
               className="absolute right-0 bottom-0 rounded-full"
               onClick={() => fileInputRef.current?.click()}
             >

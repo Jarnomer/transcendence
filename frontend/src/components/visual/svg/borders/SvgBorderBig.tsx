@@ -2,7 +2,13 @@ import React from 'react';
 
 export const SvgBorderBig: React.FC = () => {
   return (
-    <svg className="w-full" viewBox="0 0 249 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      className="w-full"
+      viewBox="0 0 249 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
       <path
         d="M143.57 11.8432H95.9664C95.8425 11.8432 95.7804 11.8432 95.7804 11.8432L89.83 5.89282H44.8301V5.33496H90.016C90.14 5.33496 90.2019 5.33496 90.2019 5.33496L96.1523 11.2854H143.384L149.334 5.33496C149.334 5.33496 149.396 5.33496 149.52 5.33496H248.074V5.89282H149.706L143.756 11.8432C143.632 11.8432 143.57 11.8432 143.57 11.8432Z"
         fill=" currentColor"

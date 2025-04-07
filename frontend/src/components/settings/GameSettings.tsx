@@ -49,6 +49,7 @@ const RetroEffectSettings: React.FC = () => {
       {/* Slider Input */}
       <input
         type="range"
+        id="effectLevel"
         min="0"
         max="5"
         step="1"
@@ -59,12 +60,13 @@ const RetroEffectSettings: React.FC = () => {
           isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
         }`}
       />
+      <label htmlFor="effectLevel" className="block text-sm font-medium text-gray-700">
+        <span className="font-semibold">{isEnabled ? level : 'Disabled'}</span>
+      </label>
 
       {/* Display Values */}
       <div className="mt-4 text-center">
-        <p className="text-sm">
-          <span className="font-semibold">{isEnabled ? level : 'Disabled'}</span>
-        </p>
+        <p className="text-sm"></p>
       </div>
     </div>
   );

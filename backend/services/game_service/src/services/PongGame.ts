@@ -204,7 +204,7 @@ export default class PongGame {
       console.warn('Paddle height too large, setting to maximum');
       height = this.params.maxPaddleHeight;
     }
-    // this.repositionPaddleAfterHeightChange(player, height);
+    this.repositionPaddleAfterHeightChange(player, height);
     if (player === 1) {
       this.gameState.players.player1.paddleHeight = height;
     } else {
@@ -237,14 +237,20 @@ export default class PongGame {
         }
       } else {
         this.gameState.players.player1.y +=
-          this.gameState.players.player1.paddleHeight - height / 2;
+          (this.gameState.players.player1.paddleHeight - height) / 2;
       }
     } else {
       if (height > this.gameState.players.player2.paddleHeight) {
-        this.gameState.players.player2.y -= height - this.gameState.players.player2.paddleHeight;
+        this.gameState.players.player2.y -=
+          (height - this.gameState.players.player2.paddleHeight) / 2;
+        if (this.gameState.players.player2.y < 0) {
+          this.gameState.players.player2.y = 0;
+        } else if (this.gameState.players.player2.y + height > this.params.gameHeight) {
+          this.gameState.players.player2.y = this.params.gameHeight - height;
+        }
       } else {
         this.gameState.players.player2.y +=
-          this.gameState.players.player2.paddleHeight - height / 2;
+          (this.gameState.players.player2.paddleHeight - height) / 2;
       }
     }
   }
