@@ -638,8 +638,12 @@ export function registerRetroShaders() {
       // Phase 1: Full screen with increasing noise and initial vertical collapse
       float phase1Progress = turnOffProgress / 0.3; // 0 to 1 for this phase
 
-      // Calculate collapse factor - starts at 0, increases to compress screen
-      float verticalCollapse = phase1Progress * 0.35; // Controls how much vertical height is removed
+      // Apply ease-in curve to make collapse start slow and accelerate
+      // Using cubic ease-in: progress^3
+      float easedProgress = phase1Progress * phase1Progress * phase1Progress;
+
+      // Calculate collapse factor - starts very slow, then accelerates
+      float verticalCollapse = easedProgress * 0.35; // Controls how much vertical height is removed
 
       // Calculate the visible region - starts as full screen, shrinks toward center
       float visibleHalfHeight = 0.5 - verticalCollapse;
@@ -650,8 +654,8 @@ export function registerRetroShaders() {
         float normalizedY = ((uv.y - 0.5) / visibleHalfHeight) * 0.5 + 0.5;
         color = texture2D(textureSampler, vec2(uv.x, normalizedY));
 
-        // Add increasing noise as we progress
-        float noiseAmount = phase1Progress * noise;
+        // Add increasing noise as we progress - also follows the eased curve
+        float noiseAmount = mix(phase1Progress * 0.5, easedProgress, 0.7) * noise;
         float staticNoise = rand(vec2(uv.x * time * 10.0, uv.y * time * 5.0)) * noiseAmount;
         color.rgb = mix(color.rgb, vec3(staticNoise), phase1Progress * 0.3);
 
@@ -662,17 +666,19 @@ export function registerRetroShaders() {
           color.b = texture2D(textureSampler, vec2(uv.x - distortion, normalizedY)).b;
         }
 
-        // Add scan lines that get more pronounced
-        float scanline = sin(normalizedY * 100.0 + time * 10.0) * 0.1 * phase1Progress;
+        // Add scan lines that get more pronounced - follows easing curve
+        float scanlineIntensity = mix(phase1Progress * 0.3, easedProgress, 0.7);
+        float scanline = sin(normalizedY * 100.0 + time * 10.0) * 0.1 * scanlineIntensity;
         color.rgb *= (1.0 - scanline);
 
-        // Slight vignetting effect
-        float vignette = length(vec2(uv.x - 0.5, (uv.y - 0.5) / (1.0 - verticalCollapse))) * phase1Progress;
+        // Slight vignetting effect - follows easing curve
+        float vignette = length(vec2(uv.x - 0.5, (uv.y - 0.5) / (1.0 - verticalCollapse))) * easedProgress;
         color.rgb *= (1.0 - vignette * 0.5);
       }
 
-      // Add slight flickering
-      float flicker = 1.0 - 0.1 * sin(time * 20.0) * phase1Progress;
+      // Add slight flickering - starts very subtle, increases with progress
+      float flickerAmount = mix(phase1Progress * 0.4, easedProgress, 0.6);
+      float flicker = 1.0 - 0.1 * sin(time * 20.0) * flickerAmount;
       color.rgb *= flicker;
     }
     else if (turnOffProgress < 0.6) {
