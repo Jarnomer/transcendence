@@ -2,7 +2,10 @@ import { GameParams, defaultGameParams } from '@shared/types';
 
 import PongGame from './PongGame';
 import { BiggerPaddlePowerUp } from './powerups/BiggerPaddlePowerUp';
+import { FasterPaddlePowerUp } from './powerups/FasterPaddlePowerUp';
+import { MoreSpinPowerUp } from './powerups/MoreSpinPowerUp';
 import { PowerUp } from './powerups/PowerUp';
+import { SlowerPaddlePowerUp } from './powerups/SlowerPaddlePowerUp';
 import { SmallerPaddlePowerUp } from './powerups/SmallerPaddlePowerUp';
 
 export class PowerUpManager {
@@ -45,7 +48,13 @@ export class PowerUpManager {
   }
 
   private getRandomPowerUpType(): string {
-    const types = ['bigger_paddle', 'smaller_paddle'];
+    const types = [
+      'bigger_paddle',
+      'smaller_paddle',
+      'faster_paddle',
+      'slower_paddle',
+      'more_spin',
+    ];
     return types[Math.floor(Math.random() * types.length)];
   }
 
@@ -68,6 +77,15 @@ export class PowerUpManager {
       case 'smaller_paddle':
         PowerUpClass = SmallerPaddlePowerUp;
         break;
+      case 'faster_paddle':
+        PowerUpClass = FasterPaddlePowerUp;
+        break;
+      case 'slower_paddle':
+        PowerUpClass = SlowerPaddlePowerUp;
+        break;
+      case 'more_spin':
+        PowerUpClass = MoreSpinPowerUp;
+        break;
       default:
         console.error(`Unknown power-up type: ${powerUpType}`);
         return;
@@ -81,7 +99,7 @@ export class PowerUpManager {
 
     const powerUp = new PowerUpClass(id, x, y);
     this.powerUps.push(powerUp);
-    this.game.spawnPowerUp(id, x, y, false, 0, this.params.powerUpDuration, 0, powerUpType); // Add the power-up to the game state
+    this.game.spawnPowerUp(id, x, y, 0, 0, this.params.powerUpDuration, 0, powerUpType); // Add the power-up to the game state
     //console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
   }
 
@@ -95,8 +113,13 @@ export class PowerUpManager {
         ball.y < powerUp.y + this.params.powerUpSize &&
         ball.y + this.params.ballSize > powerUp.y
       ) {
-        const affectedPlayer = ball.dx > 0 ? 1 : 2; // Determine which player is affected based on ball direction
-        this.game.collectPowerUp(powerUp.id, affectedPlayer, powerUp.effectDuration);
+        const collectedBy = ball.dx > 0 ? 1 : 2; // Determine which player collected the power-up
+        let affectedPlayer = collectedBy;
+        if (powerUp.negativeEffect) {
+          // If the power-up has a negative effect, apply it to the other player
+          affectedPlayer = collectedBy === 1 ? 2 : 1;
+        }
+        this.game.collectPowerUp(powerUp.id, collectedBy, affectedPlayer, powerUp.effectDuration);
         console.log(`Power-up collected by player ${affectedPlayer}:`, powerUp.id);
         powerUp.applyEffect(this.game, affectedPlayer);
       }
