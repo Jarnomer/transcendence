@@ -18,10 +18,10 @@ export class SlowerPaddlePowerUp extends PowerUp {
       return;
     }
     if (player === 1) {
-      game.setPaddleSpeed(2, game.getPaddleSpeed(1) - 10);
+      game.setPaddleSpeed(2, game.getPaddleSpeed(1) - 5);
       console.log('Slower paddle effect applied to player 2');
     } else {
-      game.setPaddleSpeed(1, game.getPaddleSpeed(2) - 10);
+      game.setPaddleSpeed(1, game.getPaddleSpeed(2) - 5);
       console.log('Slower paddle effect applied to player 1');
     }
     this.active = true;
@@ -31,10 +31,10 @@ export class SlowerPaddlePowerUp extends PowerUp {
 
   removeEffect(game: PongGame, player: number): void {
     if (player === 1) {
-      game.setPaddleSpeed(2, game.getPaddleSpeed(1) + 10);
+      game.setPaddleSpeed(2, game.getPaddleSpeed(1) + 5);
       console.log('Slower paddle effect removed from player 2');
     } else {
-      game.setPaddleSpeed(1, game.getPaddleSpeed(2) + 10);
+      game.setPaddleSpeed(1, game.getPaddleSpeed(2) + 5);
       console.log('Slower paddle effect removed from player 1');
     }
     this.active = false;
