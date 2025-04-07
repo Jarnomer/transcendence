@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
+import { UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
 import { api } from '../../services/api';
 
 interface EditProfileProps {
-  user: any[];
+  user: UserDataResponseType;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setEditProfile: React.Dispatch<React.SetStateAction<boolean>>;
   loading: boolean;

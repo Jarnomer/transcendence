@@ -8,6 +8,9 @@ import { chatRoutes } from './routes/chatRoutes';
 import { gameRoutes } from './routes/gameRoute';
 import { matchmakingRoutes } from './routes/matchmakingRoute';
 
+export * from './services/ChatService';
+export * from './services/MatchmakingService';
+
 export default async function remoteService(fastify: FastifyInstance) {
   await fastify.register(websocketPlugin); // Register websocket plugin
   await fastify.register(gameRoutes); // Register user routes inside the plugin

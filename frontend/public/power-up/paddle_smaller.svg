@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background diamond with glow -->
+  <defs>
+    <linearGradient id="diamondGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--primary-color, #FF2D55)" stop-opacity="1"/>
+      <stop offset="80%" stop-color="var(--primary-bright, #FF0033)" stop-opacity="1"/>
+      <stop offset="100%" stop-color="var(--primary-dark, #CC0000)" stop-opacity="1"/>
+    </linearGradient>
+
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Main diamond background -->
+  <polygon points="100,10 190,100 100,190 10,100" fill="url(#diamondGradient)" filter="url(#neonGlow)"/>
+
+  <!-- Outer arcade-style diamond ring -->
+  <polygon points="100,10 190,100 100,190 10,100" fill="none" stroke="#FFFFFF" stroke-width="4" filter="url(#neonGlow)"/>
+
+  <!-- Paddle shrinking icon -->
+  <g filter="url(#neonGlow)">
+    <!-- Original paddle (ghost outline) -->
+    <rect x="40" y="85" width="120" height="30" rx="5" ry="5" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="5 3" opacity="0.5"/>
+
+    <!-- Shrinking effect arrows -->
+    <polygon points="40,100 55,85 55,115" fill="#FFFFFF"/>
+    <polygon points="160,100 145,85 145,115" fill="#FFFFFF"/>
+
+    <!-- Smaller paddle -->
+    <rect x="60" y="85" width="80" height="30" rx="5" ry="5" fill="#FFFFFF"/>
+
+    <!-- Pixel effect squares -->
+    <rect x="60" y="80" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="135" y="80" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="70" y="115" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="125" y="115" width="5" height="5" fill="#FFFFFF" opacity="0.7"/>
+  </g>
+</svg>

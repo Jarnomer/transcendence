@@ -122,6 +122,7 @@ CREATE INDEX IF NOT EXISTS idx_direct_messages_users ON direct_messages(sender_i
 CREATE TABLE  IF NOT EXISTS queues (
   queue_id TEXT PRIMARY KEY,
   mode TEXT NOT NULL DEFAULT '1v1',
+  name TEXT NOT NULL DEFAULT 'default',
   variant TEXT NOT NULL DEFAULT 'online',
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
@@ -157,10 +158,10 @@ CREATE TABLE IF NOT EXISTS tournaments (
 );
 
 CREATE TABLE IF NOT EXISTS tournament_games (
-  tournament_id TEXT NOT NULL REFERENCES tournaments(tournament_id) ON DELETE CASCADE,
+  queue_id TEXT NOT NULL REFERENCES queues(queue_id) ON DELETE CASCADE,
   game_id TEXT NOT NULL REFERENCES games(game_id) ON DELETE CASCADE,
   round INTEGER NOT NULL,
-  PRIMARY KEY (tournament_id, game_id)
+  PRIMARY KEY (queue_id, game_id)
 );
 
 

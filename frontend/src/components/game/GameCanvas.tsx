@@ -7,6 +7,7 @@ import {
   PowerUpEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
+  applyPlayerEffects,
   applyScoreEffects,
   ballSparkEffect,
   createBall,
@@ -185,7 +186,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       colors.primaryColor,
       defaultGameParams.gameWidth,
       defaultGameParams.gameHeight,
-      scaleFactor
+      scaleFactor,
+      defaultGameParams.powerUpSize
     );
 
     setLastTheme(theme); // Save current theme
@@ -241,7 +243,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (powerUpsChanged) {
       powerUpEffectsRef.current.updatePowerUpEffects(powerUps);
-      powerUpEffectsRef.current.updatePositions(powerUps);
       prevPowerUpsRef.current = [...powerUps];
     }
   }, [gameState]);
@@ -250,7 +251,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   useEffect(() => {
     if (!canvasRef.current || !themeColors.current) return;
 
-    const { players, ball } = gameState;
+    const { players, ball, powerUps } = gameState;
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
@@ -304,6 +305,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (score) {
       applyScoreEffects(retroEffectsRef.current);
+    }
+
+    if (sceneRef.current && powerUps && powerUps.length > 0) {
+      applyPlayerEffects(
+        sceneRef.current,
+        player1Ref.current,
+        player2Ref.current,
+        players,
+        powerUps,
+        color
+      );
     }
 
     prevBallState.current = {

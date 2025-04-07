@@ -4,11 +4,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
+
 export const HomePageNav: React.FC<{
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
+  const { setSelectedLobby } = useGameOptionsContext();
 
   const handleCreateGameClick = () => {
     console.log('Create game clicked');

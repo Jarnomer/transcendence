@@ -13,18 +13,26 @@ export default class PongGameSession {
   private spectators: Map<string, any>;
   private aiControllers: Map<string, AIController> = new Map();
   private onEndCallback: () => void;
+  private setGameResult: (gameResult: any) => void;
   private previousGameStatus: GameStatus;
   private interval: NodeJS.Timeout | null = null;
   private isGameFinished: boolean = false;
   private difficulty: string;
 
-  constructor(gameId: string, mode: string, difficulty: string, onEndCallback: () => void) {
+  constructor(
+    gameId: string,
+    mode: string,
+    difficulty: string,
+    onEndCallback: () => void,
+    setGameResult: (gameResult: any) => void
+  ) {
     this.gameId = gameId;
     this.mode = mode;
     this.difficulty = difficulty;
     this.clients = new Map(); // Now maps playerId -> connection
     this.spectators = new Map();
     this.onEndCallback = onEndCallback;
+    this.setGameResult = setGameResult;
 
     this.game = new PongGame(mode, difficulty);
     console.log(`Created game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
@@ -157,6 +165,11 @@ export default class PongGameSession {
       this.previousGameStatus = updatedGameStatus;
 
       if (updatedGameStatus === 'finished') {
+        const result = {
+          players: updatedState.players,
+          game_id: this.gameId,
+        };
+        this.setGameResult(result);
         this.endGame();
       }
 

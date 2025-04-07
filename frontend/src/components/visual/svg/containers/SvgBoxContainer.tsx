@@ -16,7 +16,10 @@ export const BoxDiv: React.FC<{ index: number; children: React.ReactNode }> = ({
   const [showGlitch, setShowGlitch] = useState(true);
 
   return (
-    <motion.div className="overflow-hidden w-full h-full relative" variants={itemVariants}>
+    <motion.div
+      className="aspect-square overflow-hidden w-full h-full relative"
+      variants={itemVariants}
+    >
       <BackgroundGlow></BackgroundGlow>
       <motion.svg
         className="absolute top-0 left-0 w-full h-full"

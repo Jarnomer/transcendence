@@ -1,3 +1,5 @@
+import { defaultGameParams } from '@shared/types';
+
 import { PowerUp } from './PowerUp';
 import PongGame from '../PongGame';
 
@@ -8,6 +10,12 @@ export class BiggerPaddlePowerUp extends PowerUp {
   }
 
   applyEffect(game: PongGame, player: number): void {
+    const paddleHeight = player === 1 ? game.getPaddleHeight(1) : game.getPaddleHeight(2);
+    if (paddleHeight >= defaultGameParams.maxPaddleHeight) {
+      console.log('Paddle height is already at maximum, no effect applied');
+      this.isSpent = true; // Mark the power-up as spent
+      return;
+    }
     if (player === 1) {
       game.setPaddleHeight(1, game.getPaddleHeight(1) + 40);
       console.log('Bigger paddle effect applied to player 1');

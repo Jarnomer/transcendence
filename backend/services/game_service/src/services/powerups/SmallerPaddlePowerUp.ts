@@ -1,3 +1,5 @@
+import { defaultGameParams } from '@shared/types';
+
 import { PowerUp } from './PowerUp';
 import PongGame from '../PongGame';
 
@@ -9,6 +11,12 @@ export class SmallerPaddlePowerUp extends PowerUp {
   }
 
   applyEffect(game: PongGame, player: number): void {
+    const paddleHeight = player === 1 ? game.getPaddleHeight(1) : game.getPaddleHeight(2);
+    if (paddleHeight <= defaultGameParams.minPaddleHeight) {
+      console.log('Paddle height is already at minimum, no effect applied');
+      this.isSpent = true; // Mark the power-up as spent
+      return;
+    }
     if (player === 1) {
       game.setPaddleHeight(2, game.getPaddleHeight(2) - 20);
       this.affectedPlayer = 2;
