@@ -632,81 +632,152 @@ export function registerRetroShaders() {
 
   void main() {
     vec2 uv = vUV;
-    vec4 color = texture2D(textureSampler, uv);
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0); // Default black
 
-    if (turnOffProgress < 0.2) {
-      // Initial vertical collapse and increased noise
-      float initialNoise = rand(vec2(uv.x * time, uv.y * time)) * noise * turnOffProgress * 5.0;
-      color.rgb = mix(color.rgb, vec3(initialNoise), turnOffProgress * 2.0);
+    if (turnOffProgress < 0.3) {
+      // Phase 1: Full screen with increasing noise and initial vertical collapse
+      float phase1Progress = turnOffProgress / 0.3; // 0 to 1 for this phase
 
-      // Light flicker at start of turn off
-      float flicker = 1.0 - 0.2 * sin(time * 50.0 * turnOffProgress);
+      // Calculate collapse factor - starts at 0, increases to compress screen
+      float verticalCollapse = phase1Progress * 0.35; // Controls how much vertical height is removed
+
+      // Calculate the visible region - starts as full screen, shrinks toward center
+      float visibleHalfHeight = 0.5 - verticalCollapse;
+
+      // Check if pixel is in the visible region
+      if (abs(uv.y - 0.5) <= visibleHalfHeight) {
+        // Renormalize Y coordinate to sample from original texture
+        float normalizedY = ((uv.y - 0.5) / visibleHalfHeight) * 0.5 + 0.5;
+        color = texture2D(textureSampler, vec2(uv.x, normalizedY));
+
+        // Add increasing noise as we progress
+        float noiseAmount = phase1Progress * noise;
+        float staticNoise = rand(vec2(uv.x * time * 10.0, uv.y * time * 5.0)) * noiseAmount;
+        color.rgb = mix(color.rgb, vec3(staticNoise), phase1Progress * 0.3);
+
+        // Add slight color distortion/bleeding
+        if (phase1Progress > 0.5) {
+          float distortion = phase1Progress * 0.02;
+          color.r = texture2D(textureSampler, vec2(uv.x + distortion, normalizedY)).r;
+          color.b = texture2D(textureSampler, vec2(uv.x - distortion, normalizedY)).b;
+        }
+
+        // Add scan lines that get more pronounced
+        float scanline = sin(normalizedY * 100.0 + time * 10.0) * 0.1 * phase1Progress;
+        color.rgb *= (1.0 - scanline);
+
+        // Slight vignetting effect
+        float vignette = length(vec2(uv.x - 0.5, (uv.y - 0.5) / (1.0 - verticalCollapse))) * phase1Progress;
+        color.rgb *= (1.0 - vignette * 0.5);
+      }
+
+      // Add slight flickering
+      float flicker = 1.0 - 0.1 * sin(time * 20.0) * phase1Progress;
       color.rgb *= flicker;
     }
-    else if (turnOffProgress < 0.5) {
-      // Picture degradation phase
-      float verticalCollapse = (turnOffProgress - 0.2) / 0.3; // 0 to 1 for this phase
+    else if (turnOffProgress < 0.6) {
+      // Phase 2: Extreme vertical collapse to a horizontal line
+      float phase2Progress = (turnOffProgress - 0.3) / 0.3; // 0 to 1 for this phase
 
-      // Shrink the picture vertically from center
-      float collapse = 1.0 - verticalCollapse * 0.5;
-      float normalizedY = ((uv.y - 0.5) / collapse) + 0.5;
+      // Thickness of center line, gets thinner
+      float lineThickness = 0.1 * (1.0 - phase2Progress * 0.9);
 
-      if (normalizedY >= 0.0 && normalizedY <= 1.0) {
-        color = texture2D(textureSampler, vec2(uv.x, normalizedY));
-      } else {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
-      }
-
-      // Add distortions
-      float distortion = sin(normalizedY * 20.0 + time * 10.0) * 0.03 * verticalCollapse;
-      if (normalizedY >= 0.0 && normalizedY <= 1.0) {
-        color.r = texture2D(textureSampler, vec2(uv.x + distortion, normalizedY)).r;
-        color.b = texture2D(textureSampler, vec2(uv.x - distortion, normalizedY)).b;
-      }
-
-      // Add growing darkness
-      color.rgb *= max(0.0, 1.0 - verticalCollapse * 0.7);
-    }
-    else if (turnOffProgress < 0.7) {
-      // Extreme collapse to a horizontal line
-      float extremeCollapse = (turnOffProgress - 0.5) / 0.2; // 0 to 1 for this phase
-      float lineSize = 1.0 - extremeCollapse;
+      // Distance from center line
       float distFromCenter = abs(uv.y - 0.5);
 
-      if (distFromCenter < lineSize * 0.1) {
-        float sampleY = 0.5;
-        color = texture2D(textureSampler, vec2(uv.x, sampleY));
+      if (distFromCenter < lineThickness) {
+        // Calculate intensity based on distance from center
+        float lineIntensity = 1.0 - (distFromCenter / lineThickness);
+        lineIntensity = pow(lineIntensity, 1.2); // Sharpen the falloff slightly
 
-        // Line brightness decreases
-        color.rgb *= max(0.0, 1.0 - extremeCollapse * 0.8);
+        // Sample from the center of the screen with slight x distortion
+        float xDistortion = sin(uv.x * 20.0 + time * 15.0) * 0.01 * phase2Progress;
+        vec2 samplePos = vec2(uv.x + xDistortion, 0.5);
 
-        // Add some bright horizontal scan distortion
-        float scanIntensity = sin(uv.x * 50.0 + time * 20.0) * 0.4 + 0.6;
-        color.rgb *= scanIntensity;
-      } else {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
+        // Get original color from the center of the screen
+        vec4 originalColor = texture2D(textureSampler, samplePos);
+
+        // Brighten the line as it gets thinner
+        float brightness = mix(1.0, 2.5, phase2Progress);
+
+        // Make it progressively whiter
+        vec3 lineColor = mix(originalColor.rgb, vec3(1.0), phase2Progress * 0.7);
+
+        // Apply intensity and brightness
+        color.rgb = lineColor * lineIntensity * brightness;
+        color.a = 1.0;
+
+        // Add slight horizontal variation/noise
+        float lineNoise = rand(vec2(uv.x * 50.0, time)) * 0.2 * phase2Progress;
+        color.rgb *= (1.0 - lineNoise);
+
+        // As we progress, start shortening the line from the edges
+        if (phase2Progress > 0.5) {
+          float shortenProgress = (phase2Progress - 0.5) * 2.0; // 0 to 1
+          float maxWidth = 1.0 - shortenProgress * 0.4; // Controls how much the line shortens
+          float distFromCenterX = abs(uv.x - 0.5) / 0.5; // 0 at center, 1 at edges
+
+          if (distFromCenterX > maxWidth) {
+            float edgeFade = (distFromCenterX - maxWidth) / (1.0 - maxWidth);
+            color.rgb *= (1.0 - edgeFade);
+          }
+        }
       }
-
-      // Brightness fade
-      color.rgb *= (1.0 - extremeCollapse);
     }
     else {
-      // Final dot/light collapse
-      float finalCollapse = (turnOffProgress - 0.7) / 0.3;
+      // Phase 3: Final bright dot
+      float phase3Progress = (turnOffProgress - 0.6) / 0.4; // 0 to 1 for this phase
 
-      // Create a small bright dot in the center that fades out
-      float dotRadius = 0.05 * (1.0 - finalCollapse);
-      float distFromCenter = length(uv - vec2(0.5, 0.5));
+      // The line continues to shorten
+      float lineMaxWidth = 0.6 * (1.0 - phase3Progress * 0.8);
+      float lineThickness = 0.015 * (1.0 - phase3Progress * 0.8);
+      float distFromCenterY = abs(uv.y - 0.5);
+      float distFromCenterX = abs(uv.x - 0.5) / 0.5; // Normalized 0-1
 
-      if (distFromCenter < dotRadius) {
-        // White to blue-ish dot that fades out
-        float intensity = 1.0 - (distFromCenter / dotRadius);
-        color = vec4(intensity * (1.0 - finalCollapse),
-                    intensity * (1.0 - finalCollapse),
-                    intensity * (1.0 - finalCollapse * 0.7),
-                    1.0);
-      } else {
-        color = vec4(0.0, 0.0, 0.0, 1.0);
+      // Show the remaining line if we're in the first half of this phase
+      if (phase3Progress < 0.5 && distFromCenterY < lineThickness && distFromCenterX < lineMaxWidth) {
+        float lineBrightness = 1.0 - (distFromCenterY / lineThickness);
+        lineBrightness = pow(lineBrightness, 1.5);
+
+        // Line fades as we transition to the dot
+        float lineFade = 1.0 - (phase3Progress * 2.0);
+        color.rgb = vec3(1.0) * lineBrightness * lineFade * 2.0;
+      }
+
+      // Calculate dot parameters - starts small, grows slightly, then shrinks
+      float dotPhase = phase3Progress * 3.0; // 0 to 3
+      float dotSize = 0.0;
+      float dotBrightness = 0.0;
+
+      if (dotPhase < 1.0) {
+        // Initial small dot
+        dotSize = 0.02 + dotPhase * 0.03;
+        dotBrightness = 2.0 + dotPhase * 1.0;
+      }
+      else if (dotPhase < 2.0) {
+        // Slightly larger, brightest phase
+        dotSize = 0.05 - (dotPhase - 1.0) * 0.01;
+        dotBrightness = 3.0;
+      }
+      else {
+        // Shrinking and fading
+        dotSize = 0.04 - (dotPhase - 2.0) * 0.04;
+        dotBrightness = 3.0 - (dotPhase - 2.0) * 3.0;
+      }
+
+      // Distance from screen center
+      float dotDist = length(vec2(uv.x - 0.5, (uv.y - 0.5) * 1.2));
+
+      if (dotDist < dotSize) {
+        // Calculate intensity based on distance from center
+        float dotIntensity = 1.0 - (dotDist / dotSize);
+        dotIntensity = pow(dotIntensity, 1.5); // Sharper falloff
+
+        // Apply the dot color (bright white)
+        vec3 dotColor = vec3(1.0);
+
+        // Combine with any existing color (line)
+        color.rgb = mix(color.rgb, dotColor * dotBrightness, min(1.0, dotIntensity));
       }
     }
 
