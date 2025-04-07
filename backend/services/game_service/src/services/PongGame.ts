@@ -1,4 +1,4 @@
-import { Any } from '@sinclair/typebox';
+// import { Any } from '@sinclair/typebox';
 
 import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
 
@@ -35,6 +35,8 @@ export default class PongGame {
           y: this.params.gameHeight / 2 - this.params.paddleHeight / 2,
           dy: 0,
           paddleHeight: this.params.paddleHeight,
+          paddleSpeed: this.params.paddleSpeed,
+          spinIntensity: this.params.spinIntensityFactor,
           score: 0,
         },
         player2: {
@@ -42,6 +44,8 @@ export default class PongGame {
           y: this.params.gameHeight / 2 - this.params.paddleHeight / 2,
           dy: 0,
           paddleHeight: this.params.paddleHeight,
+          paddleSpeed: this.params.paddleSpeed,
+          spinIntensity: this.params.spinIntensityFactor,
           score: 0,
         },
       },
@@ -106,51 +110,77 @@ export default class PongGame {
   }
 
   getGameStatus(): GameStatus {
-    return this.gameStatus;
+    return structuredClone(this.gameStatus);
   }
   getGameState(): GameState {
-    return this.gameState;
+    return structuredClone(this.gameState);
   }
-  getPaddleSpeed() {
-    return this.params.paddleSpeed;
+  getPaddleSpeed(player: number): number {
+    if (player === 1) {
+      return structuredClone(this.gameState.players.player1.paddleSpeed);
+    } else {
+      return structuredClone(this.gameState.players.player2.paddleSpeed);
+    }
   }
+
+  getSpinIntensity(player: number): number {
+    if (player === 1) {
+      return structuredClone(this.gameState.players.player1.spinIntensity);
+    } else {
+      return structuredClone(this.gameState.players.player2.spinIntensity);
+    }
+  }
+
   getHeight() {
-    return this.params.gameHeight;
+    return structuredClone(this.params.gameHeight);
   }
   getWidth() {
-    return this.params.gameWidth;
+    return structuredClone(this.params.gameWidth);
   }
   getPaddleHeight(player: number): number {
     if (player === 1) {
-      return this.gameState.players.player1.paddleHeight;
+      return structuredClone(this.gameState.players.player1.paddleHeight);
     } else {
-      return this.gameState.players.player2.paddleHeight;
+      return structuredClone(this.gameState.players.player2.paddleHeight);
     }
   }
 
   getPlayerId(player: number): string | null {
     if (player === 1) {
-      return this.player1Id;
+      return structuredClone(this.player1Id);
     } else {
-      return this.player2Id;
+      return structuredClone(this.player2Id);
     }
+  }
+
+  getPowerUps(): Array<{
+    id: number;
+    x: number;
+    y: number;
+    collectedBy: number;
+    affectedPlayer: number;
+    timeToDespawn: number;
+    timeToExpire: number;
+    type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
+  }> {
+    return structuredClone(this.gameState.powerUps);
   }
 
   spawnPowerUp(
     id: number,
     x: number,
     y: number,
-    collected: boolean,
+    collectedBy: number,
     affectedPlayer: number,
     timeToDespawn: number,
     timeToExpire: number,
-    type: 'bigger_paddle' | 'smaller_paddle'
+    type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin'
   ): void {
     this.gameState.powerUps.push({
       id,
       x,
       y,
-      collected,
+      collectedBy,
       affectedPlayer,
       timeToDespawn,
       timeToExpire,
@@ -159,20 +189,27 @@ export default class PongGame {
     // console.log(`Power-up spawned, id: ${id}, type: ${type}, position: (${x}, ${y})`);
   }
 
-  collectPowerUp(id: number, player: number, effectDuration: number): void {
+  collectPowerUp(
+    id: number,
+    collectedBy: number,
+    affectedPlayer: number,
+    effectDuration: number
+  ): void {
     const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
     if (powerUp) {
-      powerUp.collected = true;
-      powerUp.affectedPlayer = player;
+      powerUp.collectedBy = collectedBy;
+      powerUp.affectedPlayer = affectedPlayer;
       powerUp.timeToExpire = effectDuration;
-      // console.log(`Power-up ${id} collected by player ${player}. Type: ${powerUp.type}`);
+      console.log(
+        `Power-up ${id} collected by player ${collectedBy}, affected player: ${affectedPlayer}`
+      );
     }
   }
 
   // Decrement timeToDespawn or timeToExpire for all power-ups
   updatePowerUpTimers(): void {
     for (const powerUp of this.gameState.powerUps) {
-      if (!powerUp.collected) {
+      if (!powerUp.collectedBy) {
         powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
         // console.log(`Power-up ${powerUp.id} time to despawn: ${powerUp.timeToDespawn.toFixed(2)}`);
       } else {
@@ -209,6 +246,22 @@ export default class PongGame {
       this.gameState.players.player1.paddleHeight = height;
     } else {
       this.gameState.players.player2.paddleHeight = height;
+    }
+  }
+
+  setPaddleSpeed(player: number, speed: number): void {
+    if (player === 1) {
+      this.gameState.players.player1.paddleSpeed = speed;
+    } else {
+      this.gameState.players.player2.paddleSpeed = speed;
+    }
+  }
+
+  setSpinIntensity(player: number, intensity: number): void {
+    if (player === 1) {
+      this.gameState.players.player1.spinIntensity = intensity;
+    } else {
+      this.gameState.players.player2.spinIntensity = intensity;
     }
   }
 
@@ -338,8 +391,8 @@ export default class PongGame {
         paddleState.y = 0;
         paddleState.dy = 0;
       } else {
-        paddleState.y -= this.params.paddleSpeed;
-        paddleState.dy = -this.params.paddleSpeed;
+        paddleState.y -= paddleState.paddleSpeed;
+        paddleState.dy = -paddleState.paddleSpeed;
       }
     } else if (move === 'down') {
       if (
@@ -349,8 +402,8 @@ export default class PongGame {
         paddleState.y = this.params.gameHeight - paddleState.paddleHeight;
         paddleState.dy = 0;
       } else {
-        paddleState.y += this.params.paddleSpeed;
-        paddleState.dy = this.params.paddleSpeed;
+        paddleState.y += paddleState.paddleSpeed;
+        paddleState.dy = paddleState.paddleSpeed;
       }
     } else if (move === null) {
       paddleState.dy = 0;
@@ -463,10 +516,17 @@ export default class PongGame {
 
   private handlePaddleBounce(paddleY: number, isLeftPaddle: boolean): void {
     const { ball, players } = this.gameState;
-    const paddleHeight = isLeftPaddle ? players.player1.paddleHeight : players.player2.paddleHeight;
+    let paddleState;
+    if (isLeftPaddle) {
+      paddleState = players.player1;
+    } else {
+      paddleState = players.player2;
+    }
+
     const maxBounceAngle = Math.PI / 4;
-    const relativeIntersectY = ball.y + this.params.ballSize / 2 - (paddleY + paddleHeight / 2);
-    const normalizedIntersectY = relativeIntersectY / (paddleHeight / 2);
+    const relativeIntersectY =
+      ball.y + this.params.ballSize / 2 - (paddleY + paddleState.paddleHeight / 2);
+    const normalizedIntersectY = relativeIntersectY / (paddleState.paddleHeight / 2);
     const bounceAngle = normalizedIntersectY * maxBounceAngle;
 
     this.params.ballSpeedMultiplier = Math.min(
@@ -480,7 +540,7 @@ export default class PongGame {
 
     if (paddle.dy !== 0) {
       const spinDirection = isLeftPaddle ? -1 : 1;
-      const spinChange = paddle.dy * spinDirection * this.params.spinIntensityFactor;
+      const spinChange = paddle.dy * spinDirection * paddleState.spinIntensity;
       ball.spin += spinChange;
       if (Math.abs(ball.spin) > this.params.maxSpin) {
         ball.spin = this.params.maxSpin * Math.sign(ball.spin);

@@ -3,6 +3,8 @@ export interface Player {
   y: number;
   dy: number;
   paddleHeight: number;
+  paddleSpeed: number;
+  spinIntensity: number;
   score: number;
 }
 
@@ -18,11 +20,11 @@ export interface PowerUp {
   id: number;
   x: number;
   y: number;
-  collected: boolean;
+  collectedBy: number;
   affectedPlayer: number;
   timeToDespawn: number; // Time to despawn if not collected
   timeToExpire: number; // Time to expire after being collected
-  type: 'bigger_paddle' | 'smaller_paddle';
+  type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
 }
 
 export interface GameState {
@@ -41,6 +43,8 @@ export interface GameParams {
   minPaddleHeight: number;
   maxPaddleHeight: number;
   paddleSpeed: number;
+  minPaddleSpeed: number;
+  maxPaddleSpeed: number;
 
   ballSize: number;
   ballSpeed: number;
@@ -74,6 +78,8 @@ export const defaultGameParams: GameParams = {
   minPaddleHeight: 20,
   maxPaddleHeight: 200,
   paddleSpeed: 10,
+  minPaddleSpeed: 5,
+  maxPaddleSpeed: 20,
 
   ballSize: 15,
   ballSpeed: 7,
@@ -91,8 +97,8 @@ export const defaultGameParams: GameParams = {
   maxScore: 5,
   countdown: 3, // Seconds
 
-  powerUpMinSpawnInterval: 2000, // Milliseconds
-  powerUpMaxSpawnInterval: 4000, // Milliseconds
+  powerUpMinSpawnInterval: 5000, // Milliseconds
+  powerUpMaxSpawnInterval: 10000, // Milliseconds
   powerUpDuration: 8000, // Milliseconds
   powerUpSize: 30,
 };
