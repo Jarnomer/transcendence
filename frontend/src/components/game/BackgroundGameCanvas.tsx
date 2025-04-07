@@ -1,6 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 
-import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
+import {
+  ArcRotateCamera,
+  Color3,
+  Vector3,
+  DefaultRenderingPipeline,
+  Engine,
+  Scene,
+} from 'babylonjs';
 
 import {
   RetroEffectsManager,
@@ -14,6 +21,8 @@ import {
   createPaddle,
   createPongRetroEffects,
   getThemeColors,
+  gameToSceneX,
+  gameToSceneY,
   setupPostProcessing,
   setupReflections,
   setupScenelights,
@@ -28,6 +37,7 @@ import {
   GameState,
   RetroEffectsLevels,
   RetroEffectsBaseParams,
+  defaultGameObjectParams,
   defaultRetroEffectsLevels,
   defaultGameParams,
   retroEffectsPresets,
@@ -55,21 +65,10 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 };
 
-const detectCollision = (
-  gameHeight: number,
-  prevDx: number,
-  newDx: number,
-  newY: number,
-  prevY: number
-): 'dx' | 'dy' | null => {
-  const bottomBoundary = gameHeight - 10;
-  const topBoundary = 0;
-
-  const hitTop = newY <= topBoundary && prevY > topBoundary;
-  const hitBottom = newY >= bottomBoundary && prevY < bottomBoundary;
-
+const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
+  const gameHeight = defaultGameParams.gameHeight;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = hitTop || hitBottom;
+  const dyCollision = newY === 0 || newY === gameHeight - 15;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';
@@ -131,9 +130,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
 
-  const width = defaultGameParams.gameWidth;
-  const height = defaultGameParams.gameHeight;
-  const scaleFactor = 20;
+  const gameWidth = defaultGameParams.gameWidth;
+  const gameHeight = defaultGameParams.gameHeight;
 
   // Initial render setup
   useEffect(() => {
@@ -178,11 +176,16 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
 
-    // Set edge and paddle positions
-    topEdgeRef.current.position.y = height / 2 / scaleFactor + 0.5;
-    bottomEdgeRef.current.position.y = -height / 2 / scaleFactor - 0.5;
-    player1Ref.current.position.x = -20;
-    player2Ref.current.position.x = 19.5;
+    topEdgeRef.current.position = new Vector3(
+      0,
+      gameToSceneY(0, bottomEdgeRef.current) + 0.5,
+      defaultGameObjectParams.distanceFromFloor
+    );
+    bottomEdgeRef.current.position = new Vector3(
+      0,
+      gameToSceneY(gameHeight, bottomEdgeRef.current) - 0.5,
+      defaultGameObjectParams.distanceFromFloor
+    );
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
     retroEffectsRef.current = createPongRetroEffects(
@@ -281,27 +284,26 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    const player1Y = -((players.player1.y - height / 2) / scaleFactor) - 2;
-    const player2Y = -((players.player2.y - height / 2) / scaleFactor) - 2;
-    const ballY = -((ball.y - height / 2) / scaleFactor);
-    const ballX = (ball.x - width / 2) / scaleFactor;
-
-    // Update mesh positions directly
-    player1Ref.current.position.y = player1Y;
-    player2Ref.current.position.y = player2Y;
-    ballRef.current.position.x = ballX;
-    ballRef.current.position.y = ballY;
+    player1Ref.current.position = new Vector3(
+      gameToSceneX(0, player1Ref.current),
+      gameToSceneY(players.player1.y, player1Ref.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
+    player2Ref.current.position = new Vector3(
+      gameToSceneX(gameWidth, player2Ref.current),
+      gameToSceneY(players.player2.y, player2Ref.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
+    ballRef.current.position = new Vector3(
+      gameToSceneX(ball.x, ballRef.current),
+      gameToSceneY(ball.y, ballRef.current),
+      defaultGameObjectParams.distanceFromFloor
+    );
 
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
-    const collision = detectCollision(
-      defaultGameParams.gameHeight,
-      prevBallState.current.dx,
-      ball.dx,
-      prevBallState.current.y,
-      ball.y
-    );
+    const collision = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
     const score = detectScore(
       players.player1.score,
       players.player2.score,
@@ -347,7 +349,6 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
         pointerEvents: 'none',
         width: '100%',
         height: '100%',
-        opacity: isVisible ? 1 : 1,
       }}
     />
   );
