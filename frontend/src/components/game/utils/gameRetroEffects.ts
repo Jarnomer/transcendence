@@ -633,7 +633,7 @@ export class RetroEffectsManager {
 
               this._isPlayingTurnOnEffect = false;
               resolve();
-            }, 100);
+            }, 300);
           }
         };
 
@@ -651,81 +651,51 @@ export class RetroEffectsManager {
     if (this._turnOffEffect && this._turnOffEffect.effect && !this._isPlayingTurnOffEffect) {
       if (!this._effects.glitch) this.enableGlitch();
 
-      try {
-        (this._turnOffEffect.effect as any).enabled = true;
-        this._isPlayingTurnOffEffect = true;
+      (this._turnOffEffect.effect as any).enabled = true;
+      this._isPlayingTurnOffEffect = true;
 
-        return new Promise((resolve) => {
-          const startTime = performance.now();
+      return new Promise((resolve) => {
+        const startTime = performance.now();
 
-          const updateProgress = () => {
-            try {
-              if (
-                !this._turnOffEffect ||
-                !this._turnOffEffect.effect ||
-                !(this._turnOffEffect.effect as any).enabled
-              ) {
-                this._isPlayingTurnOffEffect = false;
-                resolve();
-                return;
+        const updateProgress = () => {
+          const elapsedTime = performance.now() - startTime;
+          const progress = Math.min(elapsedTime / durationMs, 1.0);
+
+          this._turnOffEffect?.setTurnOffProgress(progress);
+
+          if (this._effects.glitch) {
+            if (progress < 0.2) {
+              const initialGlitch = progress * 2;
+              this._effects.glitch.setGlitchAmount(initialGlitch);
+            } else if (progress < 0.5) {
+              const collapseGlitch = 0.4 + (progress - 0.2) * 3;
+              this._effects.glitch.setGlitchAmount(collapseGlitch);
+            } else if (progress < 0.7) {
+              const finalCollapseGlitch = 1.3 + Math.sin(progress * 40) * 1.5;
+              this._effects.glitch.setGlitchAmount(finalCollapseGlitch);
+            } else {
+              const fadeOutGlitch = (1.0 - progress) * 4;
+              this._effects.glitch.setGlitchAmount(fadeOutGlitch);
+            }
+          }
+
+          if (progress < 1.0) {
+            requestAnimationFrame(updateProgress);
+          } else {
+            setTimeout(() => {
+              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+              if (this._turnOffEffect && this._turnOffEffect.effect) {
+                (this._turnOffEffect.effect as any).enabled = false;
               }
 
-              const elapsedTime = performance.now() - startTime;
-              const progress = Math.min(elapsedTime / durationMs, 1.0);
-
-              this._turnOffEffect?.setTurnOffProgress(progress);
-
-              if (this._effects.glitch) {
-                try {
-                  if (progress < 0.2) {
-                    const initialGlitch = progress * 2;
-                    this._effects.glitch.setGlitchAmount(initialGlitch);
-                  } else if (progress < 0.5) {
-                    const collapseGlitch = 0.4 + (progress - 0.2) * 3;
-                    this._effects.glitch.setGlitchAmount(collapseGlitch);
-                  } else if (progress < 0.7) {
-                    const finalCollapseGlitch = 1.3 + Math.sin(progress * 40) * 1.5;
-                    this._effects.glitch.setGlitchAmount(finalCollapseGlitch);
-                  } else {
-                    const fadeOutGlitch = (1.0 - progress) * 4;
-                    this._effects.glitch.setGlitchAmount(fadeOutGlitch);
-                  }
-                } catch (e) {
-                  console.warn('Error updating glitch effect:', e);
-                }
-              }
-
-              if (progress < 1.0) {
-                requestAnimationFrame(updateProgress);
-              } else {
-                setTimeout(() => {
-                  try {
-                    if (this._turnOffEffect && this._turnOffEffect.effect) {
-                      (this._turnOffEffect.effect as any).enabled = false;
-                    }
-                    if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
-                  } catch (e) {
-                    console.warn('Error cleaning up turn off effect:', e);
-                  }
-
-                  this._isPlayingTurnOffEffect = false;
-                  resolve();
-                }, 300);
-              }
-            } catch (e) {
-              console.error('Error in CRT turn off animation:', e);
               this._isPlayingTurnOffEffect = false;
               resolve();
-            }
-          };
+            }, 300);
+          }
+        };
 
-          updateProgress();
-        });
-      } catch (e) {
-        console.error('Error starting CRT turn off effect:', e);
-        this._isPlayingTurnOffEffect = false;
-        return Promise.resolve();
-      }
+        updateProgress();
+      });
     }
 
     return Promise.resolve();

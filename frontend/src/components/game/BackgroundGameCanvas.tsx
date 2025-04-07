@@ -230,7 +230,13 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     }
 
     if (!isVisible) {
-      engineRef.current.stopRenderLoop();
+      engineRef.current.runRenderLoop(() => {
+        if (sceneRef.current) sceneRef.current.render();
+      });
+
+      retroEffectsRef.current.simulateCRTTurnOff(1800).then(() => {
+        if (engineRef.current) engineRef.current.stopRenderLoop();
+      });
     } else {
       const randomAngle = getRandomCameraAngle();
       const camera = cameraRef.current;
@@ -249,9 +255,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
       }, 10000); // Change camera every 10 seconds
 
       engineRef.current.runRenderLoop(() => {
-        if (sceneRef.current) {
-          sceneRef.current.render();
-        }
+        if (sceneRef.current) sceneRef.current.render();
       });
 
       if (retroEffectsRef.current) {
@@ -343,8 +347,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
         pointerEvents: 'none',
         width: '100%',
         height: '100%',
-        opacity: isVisible ? 1 : 0,
-        transition: 'opacity 0.5s ease',
+        opacity: isVisible ? 1 : 1,
       }}
     />
   );
