@@ -358,17 +358,16 @@ export function createCRTTurnOffEffect(
   );
 
   const engine = scene.getEngine();
-  let time = 0;
-  let turnOffProgress = 0;
 
-  // Calculate intensity multiplier based on level
-  const intensityMultiplier = levels.crtTurnOffEffect / 5;
-  const noiseIntensity = setRetroEffectLevel(levels.noise, 0.4);
+  let turnOffProgress = 0;
+  let time = 0;
+
+  const noiseIntensity = setRetroEffectLevel(levels.noise, 0.6);
 
   turnOffEffect.onApply = (effect) => {
     time += engine.getDeltaTime() / 1000.0;
     effect.setFloat('time', time);
-    effect.setFloat('turnOffProgress', turnOffProgress * intensityMultiplier);
+    effect.setFloat('turnOffProgress', turnOffProgress);
     effect.setFloat('noise', noiseIntensity);
   };
 
