@@ -11,17 +11,17 @@ export class SlowerPaddlePowerUp extends PowerUp {
   }
 
   applyEffect(game: PongGame, player: number): void {
-    // const paddleSpeed = player === 1 ? game.getPaddleSpeed(1) : game.getPaddleSpeed(2);
-    // if (paddleSpeed <= defaultGameParams.minPaddleSpeed) {
-    //   console.log('Paddle speed is already at minimum, no effect applied');
-    //   this.isSpent = true; // Mark the power-up as spent
-    //   return;
-    // }
     if (player === 1) {
-      game.setPaddleSpeed(2, game.getPaddleSpeed(1) - 5);
+      game.setPaddleSpeed(
+        2,
+        game.getPaddleSpeed(1) - defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Slower paddle effect applied to player 2');
     } else {
-      game.setPaddleSpeed(1, game.getPaddleSpeed(2) - 5);
+      game.setPaddleSpeed(
+        1,
+        game.getPaddleSpeed(2) - defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Slower paddle effect applied to player 1');
     }
     this.active = true;
@@ -31,10 +31,16 @@ export class SlowerPaddlePowerUp extends PowerUp {
 
   removeEffect(game: PongGame, player: number): void {
     if (player === 1) {
-      game.setPaddleSpeed(2, game.getPaddleSpeed(1) + 5);
+      game.setPaddleSpeed(
+        2,
+        game.getPaddleSpeed(1) + defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Slower paddle effect removed from player 2');
     } else {
-      game.setPaddleSpeed(1, game.getPaddleSpeed(2) + 5);
+      game.setPaddleSpeed(
+        1,
+        game.getPaddleSpeed(2) + defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Slower paddle effect removed from player 1');
     }
     this.active = false;

@@ -42,8 +42,9 @@ export class PowerUpManager {
 
   private getRandomSpawnTime(): number {
     return (
-      Math.random() * (this.params.powerUpMaxSpawnInterval - this.params.powerUpMinSpawnInterval) +
-      this.params.powerUpMinSpawnInterval
+      Math.random() *
+        (this.params.powerUps.maxSpawnInterval - this.params.powerUps.minSpawnInterval) +
+      this.params.powerUps.minSpawnInterval
     );
   }
 
@@ -120,10 +121,10 @@ export class PowerUpManager {
     for (const powerUp of this.powerUps) {
       if (
         !powerUp.active &&
-        ball.x < powerUp.x + this.params.powerUpSize &&
-        ball.x + this.params.ballSize > powerUp.x &&
-        ball.y < powerUp.y + this.params.powerUpSize &&
-        ball.y + this.params.ballSize > powerUp.y
+        ball.x < powerUp.x + this.params.powerUps.size &&
+        ball.x + this.params.ball.size > powerUp.x &&
+        ball.y < powerUp.y + this.params.powerUps.size &&
+        ball.y + this.params.ball.size > powerUp.y
       ) {
         const collectedBy = ball.dx > 0 ? 1 : 2; // Determine which player collected the power-up
         let affectedPlayer = collectedBy;

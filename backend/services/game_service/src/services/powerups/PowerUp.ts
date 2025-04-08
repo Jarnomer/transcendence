@@ -7,8 +7,8 @@ export abstract class PowerUp {
   x: number;
   y: number;
   type: string = 'no_type';
-  timeToDespawn: number = defaultGameParams.powerUpDespawnTime;
-  timeToExpire: number = defaultGameParams.powerUpExpireTime;
+  timeToDespawn: number = defaultGameParams.powerUps.despawnTime;
+  timeToExpire: number = defaultGameParams.powerUps.expireTime;
   active: boolean = false;
   spawnTime: number = Date.now();
   collectedTime: number = 0;

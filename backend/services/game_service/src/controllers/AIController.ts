@@ -22,14 +22,14 @@ export class AIController {
     powerUps: PowerUp[]
   ): void {
     this.plannedMoves = [];
-    const aiCenter = aiPaddle.y + paddleHeight / 2 - this.params.ballSize / 2;
+    const aiCenter = aiPaddle.y + paddleHeight / 2 - this.params.ball.size / 2;
     const framesPerSecond = 60;
     const updateDuration = 1;
     const frameCount = framesPerSecond * updateDuration;
     const ballMovingTowardsAI = this.isPlayer1 ? ball.dx < 0 : ball.dx > 0;
 
     // Predict the ball's position only if it's moving towards the AI, otherwise stay in the middle
-    let prediction = { y: this.params.gameHeight / 2, frames: frameCount };
+    let prediction = { y: this.params.dimensions.gameHeight / 2, frames: frameCount };
     if (ballMovingTowardsAI) {
       prediction = this.predictBallPosition(ball);
     }
@@ -39,12 +39,12 @@ export class AIController {
 
     if (powerUp) {
       const playerX = this.isPlayer1
-        ? this.params.paddleWidth
-        : this.params.gameWidth - this.params.paddleWidth;
+        ? this.params.paddle.width
+        : this.params.dimensions.gameWidth - this.params.paddle.width;
 
       // Calculate the required bounce angle
-      const powerUpY = powerUp.y + this.params.powerUpSize / 2;
-      const powerUpX = powerUp.x + this.params.powerUpSize / 2;
+      const powerUpY = powerUp.y + this.params.powerUps.size / 2;
+      const powerUpX = powerUp.x + this.params.powerUps.size / 2;
       const distanceToPowerUp = powerUpX - playerX;
       const desiredBounceAngle = Math.atan((powerUpY - prediction.y) / distanceToPowerUp);
       // console.log('Desired bounce angle:', desiredBounceAngle);
@@ -52,18 +52,12 @@ export class AIController {
       // Convert bounce angle to paddle position
       const maxBounceAngle = Math.PI / 4;
       const normalizedIntersectY = desiredBounceAngle / maxBounceAngle;
-      const relativeIntersectY = normalizedIntersectY * (this.params.paddleHeight / 2);
+      const relativeIntersectY = normalizedIntersectY * (this.params.paddle.height / 2);
       // console.log('Power up coordinates:', powerUpX, powerUpY);
       // console.log('Predicted Y before aiming:', prediction.y);
       prediction.y = prediction.y + relativeIntersectY;
       // console.log('Predicted Y after aiming:', prediction.y);
     }
-
-    // const maxBounceAngle = Math.PI / 4;
-    // const relativeIntersectY =
-    //   ball.y + this.params.ballSize / 2 - (paddleY + this.params.paddleHeight / 2);
-    // const normalizedIntersectY = relativeIntersectY / (this.params.paddleHeight / 2);
-    // const bounceAngle = normalizedIntersectY * maxBounceAngle;
 
     prediction.y = this.applyError(prediction.y, ball.dy);
 
@@ -101,7 +95,7 @@ export class AIController {
       const edgeBuffer = 20;
       if (
         prediction.y < edgeBuffer ||
-        prediction.y + this.params.ballSize > this.params.gameHeight - edgeBuffer
+        prediction.y + this.params.ball.size > this.params.dimensions.gameHeight - edgeBuffer
       ) {
         applyingSpin = false;
       }
@@ -153,8 +147,8 @@ export class AIController {
     // Simulate ball movement until it reaches the AI's paddle
     while (
       this.isPlayer1
-        ? predictedBall.x >= this.params.paddleWidth
-        : predictedBall.x <= this.params.gameWidth - this.params.paddleWidth
+        ? predictedBall.x >= this.params.paddle.width
+        : predictedBall.x <= this.params.dimensions.gameWidth - this.params.paddle.width
     ) {
       this.adjustBallMovementForSpin(predictedBall);
       predictedBall.y += predictedBall.dy;
@@ -163,15 +157,15 @@ export class AIController {
 
       if (
         predictedBall.y <= 0 ||
-        predictedBall.y + this.params.ballSize >= this.params.gameHeight
+        predictedBall.y + this.params.ball.size >= this.params.dimensions.gameHeight
       ) {
         // Simulate wall bounce
         predictedBall.dy = -predictedBall.dy;
         this.adjustBounceForSpin(predictedBall, predictedBall.y < 0);
         if (predictedBall.y < 0) {
           predictedBall.y = 0;
-        } else if (predictedBall.y + this.params.ballSize > this.params.gameHeight) {
-          predictedBall.y = this.params.gameHeight - this.params.ballSize;
+        } else if (predictedBall.y + this.params.ball.size > this.params.dimensions.gameHeight) {
+          predictedBall.y = this.params.dimensions.gameHeight - this.params.ball.size;
         }
       }
     }
@@ -183,9 +177,9 @@ export class AIController {
     if (ball.spin === 0) return;
 
     if (ball.dx > 0) {
-      ball.dy += ball.spin * this.params.spinCurveFactor * ball.dx;
+      ball.dy += ball.spin * this.params.spin.curveFactor * ball.dx;
     } else {
-      ball.dy -= ball.spin * this.params.spinCurveFactor * ball.dx * -1;
+      ball.dy -= ball.spin * this.params.spin.curveFactor * ball.dx * -1;
     }
   }
 
@@ -194,20 +188,20 @@ export class AIController {
 
     if (ball.dx > 0) {
       if (isTopWall) {
-        ball.dx -= ball.spin * this.params.spinBounceFactor;
+        ball.dx -= ball.spin * this.params.spin.bounceFactor;
       } else {
-        ball.dx += ball.spin * this.params.spinBounceFactor;
+        ball.dx += ball.spin * this.params.spin.bounceFactor;
       }
-      if (ball.dx < this.params.minBallDX) ball.dx = this.params.minBallDX;
+      if (ball.dx < this.params.ball.minDX) ball.dx = this.params.ball.minDX;
     } else {
       if (isTopWall) {
-        ball.dx -= ball.spin * this.params.spinBounceFactor;
+        ball.dx -= ball.spin * this.params.spin.bounceFactor;
       } else {
-        ball.dx += ball.spin * this.params.spinBounceFactor;
+        ball.dx += ball.spin * this.params.spin.bounceFactor;
       }
-      if (ball.dx > -this.params.minBallDX) ball.dx = -this.params.minBallDX;
+      if (ball.dx > -this.params.ball.minDX) ball.dx = -this.params.ball.minDX;
     }
-    ball.spin *= this.params.spinReductionFactor;
+    ball.spin *= this.params.spin.reductionFactor;
     if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
   }
 
@@ -222,7 +216,8 @@ export class AIController {
       errorFactor = 0;
     }
 
-    const errorAmount = errorFactor * Math.min(Math.abs(ballDy * 2), this.params.gameHeight / 2);
+    const errorAmount =
+      errorFactor * Math.min(Math.abs(ballDy * 2), this.params.dimensions.gameHeight / 2);
 
     return predictedBallY + (Math.random() * errorAmount * 2 - errorAmount);
   }

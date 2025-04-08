@@ -10,17 +10,17 @@ export class FasterPaddlePowerUp extends PowerUp {
   }
 
   applyEffect(game: PongGame, player: number): void {
-    // const paddleSpeed = player === 1 ? game.getPaddleSpeed(1) : game.getPaddleSpeed(2);
-    // if (paddleSpeed >= defaultGameParams.maxPaddleSpeed) {
-    //   console.log('Paddle speed is already at maximum, no effect applied');
-    //   this.isSpent = true; // Mark the power-up as spent
-    //   return;
-    // }
     if (player === 1) {
-      game.setPaddleSpeed(1, game.getPaddleSpeed(1) + 5);
+      game.setPaddleSpeed(
+        1,
+        game.getPaddleSpeed(1) + defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Faster paddle effect applied to player 1');
     } else {
-      game.setPaddleSpeed(2, game.getPaddleSpeed(2) + 5);
+      game.setPaddleSpeed(
+        2,
+        game.getPaddleSpeed(2) + defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Faster paddle effect applied to player 2');
     }
     this.active = true;
@@ -30,10 +30,16 @@ export class FasterPaddlePowerUp extends PowerUp {
 
   removeEffect(game: PongGame, player: number): void {
     if (player === 1) {
-      game.setPaddleSpeed(1, game.getPaddleSpeed(1) - 5);
+      game.setPaddleSpeed(
+        1,
+        game.getPaddleSpeed(1) - defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Faster paddle effect removed from player 1');
     } else {
-      game.setPaddleSpeed(2, game.getPaddleSpeed(2) - 5);
+      game.setPaddleSpeed(
+        2,
+        game.getPaddleSpeed(2) - defaultGameParams.powerUps.effects.paddleSpeedIncrease
+      );
       console.log('Faster paddle effect removed from player 2');
     }
     this.active = false;
