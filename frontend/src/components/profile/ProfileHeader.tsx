@@ -2,6 +2,8 @@ import React from 'react';
 
 import { UserDataResponseType } from '@shared/types/userTypes';
 
+import { useChatContext } from '../../contexts/chatContext/ChatContext';
+import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { sendFriendRequest } from '../../services/friendService';
 import { AddFriend } from '../UI/buttons/AddFriend';
@@ -33,6 +35,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   sent,
 }) => {
   const { setUser } = useUser();
+  const { setSelectedFriend, setRoomId } = useChatContext();
+  const { openModal } = useModal();
+  const {
+    messages,
+    user: loggedInUser,
+    friends,
+    selectedFriendId,
+    sendChatMessage,
+  } = useChatContext();
 
   const handleAddFriendClick = (user_id: string) => {
     console.log('Sending friend request to user: ', user_id);
@@ -40,7 +51,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   const handleChatClick = (user_id: string) => {
+    setSelectedFriend(user.user_id);
+    setRoomId(null);
     console.log('Sending message to user: ', user_id);
+    openModal('chatModal', {
+      loggedInUser,
+      friends,
+      selectedFriendId: user?.user_id,
+      sendChatMessage,
+    });
   };
 
   const handleBlockUserClick = (user_id: string) => {
