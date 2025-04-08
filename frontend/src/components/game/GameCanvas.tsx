@@ -253,7 +253,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!canvasRef.current || !themeColors.current) return;
 
     const { players, ball, powerUps } = gameState;
-    const color = themeColors.current.primaryColor;
+    const primaryColor = themeColors.current.primaryColor;
+    const secondaryColor = themeColors.current.secondaryColor;
 
     // Convert coordinates to Babylon coordinate system
     player1Ref.current.position = new Vector3(
@@ -283,7 +284,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       ball.dx
     );
 
-    applyBallEffects(ballRef.current, speed, angle, ball.spin, color);
+    applyBallEffects(ballRef.current, speed, angle, ball.spin, primaryColor);
 
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
@@ -298,7 +299,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         collision,
         speed,
         ball.spin,
-        color,
+        primaryColor,
         true
       );
     }
@@ -312,7 +313,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         player2Ref.current,
         players,
         powerUps,
-        color
+        primaryColor,
+        secondaryColor
       );
     }
 

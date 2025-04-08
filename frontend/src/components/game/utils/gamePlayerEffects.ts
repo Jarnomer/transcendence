@@ -13,7 +13,7 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { PowerUp, Player } from '@shared/types';
+import { PowerUp, Player, defaultGameObjectParams } from '@shared/types';
 
 import { enforceBoundary, gameToSceneY, gameToSceneSize } from './gameUtilities';
 
@@ -108,13 +108,8 @@ function applyPaddleEffects(
     const hasHeightChanged = Math.abs(lastState.height - player.paddleHeight) > 0.1;
 
     if (isNewPowerUp || hasHeightChanged) {
-      // Clean up any existing effects
-      if (lastState.particleSystem) {
-        lastState.particleSystem.dispose();
-      }
-      if (lastState.glowLayer) {
-        lastState.glowLayer.dispose();
-      }
+      if (lastState.particleSystem) lastState.particleSystem.dispose();
+      if (lastState.glowLayer) lastState.glowLayer.dispose();
 
       // Create new effects
       const { particleSystem, glowLayer } = createPowerUpVisualEffects(
@@ -147,13 +142,8 @@ function applyPaddleEffects(
   }
   // No active power-ups but we had one before
   else if (lastState.type !== null) {
-    // Clean up effects
-    if (lastState.particleSystem) {
-      fadeOutAndDisposeParticleSystem(lastState.particleSystem);
-    }
-    if (lastState.glowLayer) {
-      lastState.glowLayer.dispose();
-    }
+    if (lastState.particleSystem) disposeParticleWithAnimation(lastState.particleSystem);
+    if (lastState.glowLayer) lastState.glowLayer.dispose();
 
     // Reset the paddle material
     applyPaddleMaterial(paddleMesh, null, primaryColor, secondaryColor, false);
@@ -185,19 +175,14 @@ function createPowerUpVisualEffects(
   secondaryColor: Color3,
   playerIndex: number
 ): { particleSystem: ParticleSystem; glowLayer: GlowLayer } {
-  // Determine if the power-up is negative
   const isNegative = isNegativePowerUp(powerUpType);
-
-  // Use secondary color for negative power-ups, primary for positive
   const effectColor = isNegative ? secondaryColor : primaryColor;
 
-  // Create glow layer
   const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}`, scene);
-  glowLayer.intensity = 0.6;
-  glowLayer.blurKernelSize = 64;
+  glowLayer.intensity = 0.4;
+  glowLayer.blurKernelSize = 48;
   glowLayer.addIncludedOnlyMesh(paddleMesh);
 
-  // Create particle system
   const particleSystem = createPowerUpParticles(
     scene,
     paddleMesh,
@@ -216,7 +201,6 @@ function createPowerUpParticles(
   color: Color3,
   playerIndex: number
 ): ParticleSystem {
-  // Determine which particle texture to use based on power-up type
   let particleTexturePath = '';
 
   switch (powerUpType) {
@@ -239,18 +223,14 @@ function createPowerUpParticles(
       particleTexturePath = '/power-up/sign_unknown.png';
   }
 
-  // Create the particle system
   const particleSystem = new ParticleSystem(`powerUpParticles-${playerIndex}`, 50, scene);
 
-  // Set the particle texture
   particleSystem.particleTexture = new Texture(particleTexturePath, scene);
 
-  // Set emitter to be at the paddle position
   const paddlePosition = paddleMesh.position.clone();
 
-  // Adjust emitter position based on player side (left or right)
   const isPlayer1 = playerIndex === 1;
-  const xOffset = isPlayer1 ? 0.2 : -0.2; // Offset from paddle
+  const xOffset = isPlayer1 ? 0.2 : -0.2;
 
   particleSystem.emitter = new Vector3(
     paddlePosition.x + xOffset,
@@ -258,7 +238,6 @@ function createPowerUpParticles(
     paddlePosition.z
   );
 
-  // Set particle release direction (approximately 150 degrees, adjusted for player side)
   const emitAngle = isPlayer1 ? Math.PI * (150 / 180) : Math.PI * (30 / 180);
   const dirX = Math.cos(emitAngle);
   const dirY = Math.sin(emitAngle);
@@ -266,7 +245,6 @@ function createPowerUpParticles(
   particleSystem.direction1 = new Vector3(dirX - 0.2, dirY + 0.1, 0);
   particleSystem.direction2 = new Vector3(dirX + 0.2, dirY + 0.3, 0);
 
-  // Configure particle properties
   particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
   particleSystem.color2 = new Color4(color.r * 1.2, color.g * 1.2, color.b * 1.2, 1.0);
   particleSystem.colorDead = new Color4(color.r * 0.3, color.g * 0.3, color.b * 0.3, 0);
@@ -279,10 +257,8 @@ function createPowerUpParticles(
   particleSystem.minEmitPower = 0.2;
   particleSystem.maxEmitPower = 0.5;
 
-  // Add gravity effect to make particles float slightly upward
+  // Add small anti gravity effect and slight rotation
   particleSystem.gravity = new Vector3(0, -0.05, 0);
-
-  // Add slight rotation to particles
   particleSystem.minAngularSpeed = -0.5;
   particleSystem.maxAngularSpeed = 0.5;
 
@@ -291,18 +267,15 @@ function createPowerUpParticles(
     (particleSystem.emitter as Vector3).y = paddleMesh.position.y;
   });
 
-  // Start the particle system
   particleSystem.start();
 
   return particleSystem;
 }
 
-function fadeOutAndDisposeParticleSystem(particleSystem: ParticleSystem): void {
-  // Stop emitting new particles
+function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
   particleSystem.emitRate = 0;
 
-  // Gradually fade out existing particles
-  const fadeOutDuration = 1000; // ms
+  const fadeOutDuration = 400;
   const startTime = Date.now();
 
   const fadeInterval = setInterval(() => {
@@ -310,11 +283,9 @@ function fadeOutAndDisposeParticleSystem(particleSystem: ParticleSystem): void {
     const progress = Math.min(elapsedTime / fadeOutDuration, 1);
 
     if (progress >= 1) {
-      // Dispose the particle system after fade-out
       clearInterval(fadeInterval);
       particleSystem.dispose();
     } else {
-      // Reduce particle size and opacity gradually
       particleSystem.minSize *= 1 - progress * 0.1;
       particleSystem.maxSize *= 1 - progress * 0.1;
     }
@@ -331,32 +302,25 @@ function applyPaddleMaterial(
   if (!paddleMesh.material) return;
 
   const material = paddleMesh.material as PBRMaterial;
+  const baseEmissive = defaultGameObjectParams.paddle.emissiveIntensity;
 
   if (isPowerUpActive && powerUpType) {
-    // Determine if this is a negative power-up
     const isNegative = isNegativePowerUp(powerUpType);
 
-    // Set paddle to bright/glowing based on power-up type
     if (isNegative) {
-      // Negative power-up (use secondary color)
       material.emissiveColor = secondaryColor;
     } else {
-      // Positive power-up (use primary color)
       material.emissiveColor = primaryColor;
     }
 
-    // Enhance emissive properties for power-up effect
-    material.emissiveIntensity = 2.0; // Higher intensity for power-up state
+    material.emissiveIntensity = baseEmissive * 1.5;
 
-    // Animate transition to glowing state
-    animateMaterialTransition(paddleMesh, material.emissiveColor, 2.0);
+    animateMaterialTransition(paddleMesh, material.emissiveColor, baseEmissive * 1.5);
   } else {
-    // Return to normal state (use primary color)
     material.emissiveColor = primaryColor;
-    material.emissiveIntensity = 1.0; // Default from defaultGameObjectParams
+    material.emissiveIntensity = baseEmissive;
 
-    // Animate transition back to normal
-    animateMaterialTransition(paddleMesh, primaryColor, 1.0);
+    animateMaterialTransition(paddleMesh, primaryColor, baseEmissive);
   }
 }
 
