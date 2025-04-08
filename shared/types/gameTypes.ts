@@ -28,6 +28,14 @@ export interface PowerUp {
   type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
 }
 
+export interface PowerUpEffects {
+  biggerPaddleSize: number;
+  smallerPaddleSize: number;
+  fasterPaddleSpeed: number;
+  slowerPaddleSpeed: number;
+  moreSpin: number;
+}
+
 export interface GameState {
   players: { player1: Player; player2: Player };
   ball: Ball;
@@ -65,7 +73,8 @@ export interface GameParams {
 
   powerUpMinSpawnInterval: number;
   powerUpMaxSpawnInterval: number;
-  powerUpDuration: number;
+  powerUpDespawnTime: number;
+  powerUpExpireTime: number;
   powerUpSize: number;
 }
 
@@ -98,9 +107,10 @@ export const defaultGameParams: GameParams = {
   maxScore: 5,
   countdown: 3, // Seconds
 
-  powerUpMinSpawnInterval: 5000, // Milliseconds
-  powerUpMaxSpawnInterval: 10000, // Milliseconds
-  powerUpDuration: 8000, // Milliseconds
+  powerUpMinSpawnInterval: 4000, // Milliseconds
+  powerUpMaxSpawnInterval: 8000, // Milliseconds
+  powerUpDespawnTime: 10000, // Milliseconds
+  powerUpExpireTime: 10000, // Milliseconds
   powerUpSize: 30,
 };
 

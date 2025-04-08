@@ -4,7 +4,7 @@ import PongGame from '../PongGame';
 export class MoreSpinPowerUp extends PowerUp {
   constructor(id: number, x: number, y: number) {
     super(id, x, y);
-    this.effectDuration = 15000; // Duration of the effect in milliseconds
+    this.type = 'more_spin';
   }
 
   applyEffect(game: PongGame, player: number): void {
@@ -17,7 +17,7 @@ export class MoreSpinPowerUp extends PowerUp {
     }
     this.active = true;
     this.affectedPlayer = player;
-    setTimeout(() => this.removeEffect(game, player), this.effectDuration);
+    this.collectedTime = Date.now(); // Store the time when the power-up was collected
   }
 
   removeEffect(game: PongGame, player: number): void {

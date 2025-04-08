@@ -6,16 +6,16 @@ import PongGame from '../PongGame';
 export class BiggerPaddlePowerUp extends PowerUp {
   constructor(id: number, x: number, y: number) {
     super(id, x, y);
-    this.effectDuration = 15000; // Duration of the effect in milliseconds
+    this.type = 'bigger_paddle';
   }
 
   applyEffect(game: PongGame, player: number): void {
-    const paddleHeight = player === 1 ? game.getPaddleHeight(1) : game.getPaddleHeight(2);
-    if (paddleHeight >= defaultGameParams.maxPaddleHeight) {
-      console.log('Paddle height is already at maximum, no effect applied');
-      this.isSpent = true; // Mark the power-up as spent
-      return;
-    }
+    // const paddleHeight = player === 1 ? game.getPaddleHeight(1) : game.getPaddleHeight(2);
+    // if (paddleHeight >= defaultGameParams.maxPaddleHeight) {
+    //   console.log('Paddle height is already at maximum, no effect applied');
+    //   this.isSpent = true; // Mark the power-up as spent
+    //   return;
+    // }
     if (player === 1) {
       game.setPaddleHeight(1, game.getPaddleHeight(1) + 40);
       console.log('Bigger paddle effect applied to player 1');
@@ -25,7 +25,7 @@ export class BiggerPaddlePowerUp extends PowerUp {
     }
     this.active = true;
     this.affectedPlayer = player;
-    setTimeout(() => this.removeEffect(game, player), this.effectDuration);
+    this.collectedTime = Date.now(); // Store the time when the power-up was collected
   }
 
   removeEffect(game: PongGame, player: number): void {

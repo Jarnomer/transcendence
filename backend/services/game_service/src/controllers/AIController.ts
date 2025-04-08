@@ -35,7 +35,7 @@ export class AIController {
     }
 
     // Find the first power up that is not collected
-    const powerUp = powerUps.find((p) => !p.collected);
+    const powerUp = powerUps.find((p) => !p.collectedBy);
 
     if (powerUp) {
       const playerX = this.isPlayer1

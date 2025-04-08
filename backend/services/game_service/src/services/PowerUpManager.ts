@@ -108,11 +108,11 @@ export class PowerUpManager {
       0,
       0,
       powerUp.negativeEffect,
-      this.params.powerUpDuration,
+      powerUp.timeToDespawn,
       0,
       powerUpType
     ); // Add the power-up to the game state
-    console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
+    console.log(`Spawned power-up id: ${id}, type: ${powerUp.type} at (${x}, ${y})`);
   }
 
   checkCollision(): void {
@@ -131,36 +131,60 @@ export class PowerUpManager {
           // If the power-up has a negative effect, apply it to the other player
           affectedPlayer = collectedBy === 1 ? 2 : 1;
         }
-        this.game.collectPowerUp(powerUp.id, collectedBy, affectedPlayer, powerUp.effectDuration);
-        console.log(`Power-up collected by player ${affectedPlayer}:`, powerUp.id);
-        powerUp.applyEffect(this.game, affectedPlayer);
+        // If player already has this power up type, just refresh timeToExpire
+        const existingPowerUp = this.powerUps.find(
+          (p) => p.type === powerUp.type && p.affectedPlayer === affectedPlayer
+        );
+        if (existingPowerUp) {
+          console.log(
+            `Power-up already collected by player ${affectedPlayer}:`,
+            existingPowerUp.id
+          );
+          existingPowerUp.resetcollectedTime();
+          this.game.resetPowerUpTimeToExpire(existingPowerUp.id, existingPowerUp.timeToExpire);
+          this.removePowerUp(powerUp.id);
+        } else {
+          // Otherwise, collect the power-up
+          this.game.collectPowerUp(powerUp.id, collectedBy, affectedPlayer, powerUp.timeToExpire);
+          console.log(`New power-up collected by player ${affectedPlayer}:`, powerUp.id);
+          powerUp.applyEffect(this.game, affectedPlayer);
+        }
       }
     }
   }
 
-  despawnExpiredPowerUps(): void {
+  removeExpiredPowerUps(): void {
     for (const powerUp of this.powerUps) {
-      if (powerUp.isSpent) {
-        // console.log('Power-up spent:', powerUp.id);
-        this.game.removePowerUp(powerUp.id);
-        this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
-      } else if (!powerUp.active && powerUp.isExpired()) {
-        // console.log('Despawning expired uncollected power-up id:', powerUp.id);
-        this.game.removePowerUp(powerUp.id);
-        this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
+      if (powerUp.shouldDespawn()) {
+        console.log('Despawning expired uncollected power-up id:', powerUp.id);
+        this.removePowerUp(powerUp.id);
+      }
+      if (powerUp.shouldExpire()) {
+        console.log('Removing expired power-up id:', powerUp.id);
+        powerUp.removeEffect(this.game, powerUp.affectedPlayer);
+        this.removePowerUp(powerUp.id);
       }
     }
   }
 
-  updatePowerUpTimers(): void {
+  resetPowerUps(): void {
     for (const powerUp of this.powerUps) {
-      if (powerUp.active) {
-        powerUp.effectDuration -= 1000 / 60; // Assuming 60 FPS
-        // if (powerUp.effectDuration <= 0) {
-        //   powerUp.removeEffect(this.game, powerUp.affectedPlayer);
-        //   powerUp.isSpent = true; // Mark the power-up as spent
-        // }
-      }
+      // if (!powerUp.active) {
+      //   console.log('Deleting uncollected power-up id:', powerUp.id);
+      //   this.removePowerUp(powerUp.id);
+      // }
+      this.removePowerUp(powerUp.id);
+    }
+  }
+
+  removePowerUp(id: number): void {
+    const powerUpIndex = this.powerUps.findIndex((powerUp) => powerUp.id === id);
+    if (powerUpIndex !== -1) {
+      this.game.removePowerUp(id);
+      this.powerUps.splice(powerUpIndex, 1);
+      console.log(`Power-up id ${id} removed from the game.`);
+    } else {
+      console.log(`Power-up id ${id} not found.`);
     }
   }
 }

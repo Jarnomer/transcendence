@@ -159,6 +159,7 @@ export default class PongGame {
     y: number;
     collectedBy: number;
     affectedPlayer: number;
+    negativeEffect: boolean;
     timeToDespawn: number;
     timeToExpire: number;
     type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
@@ -208,17 +209,24 @@ export default class PongGame {
     }
   }
 
+  resetPowerUpTimeToExpire(id: number, time: number): void {
+    const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
+    if (powerUp) {
+      powerUp.timeToExpire = time;
+      console.log(`Power-up ${id} time to expire reset to ${time}`);
+    }
+  }
+
   // Decrement timeToDespawn or timeToExpire for all power-ups
   updatePowerUpTimers(): void {
     for (const powerUp of this.gameState.powerUps) {
       if (!powerUp.collectedBy) {
         powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
-        // console.log(`Power-up ${powerUp.id} time to despawn: ${powerUp.timeToDespawn.toFixed(2)}`);
       } else {
         powerUp.timeToExpire -= 1000 / 60; // Assuming 60 FPS
-        // console.log(`Power-up ${powerUp.id} time to expire: ${powerUp.timeToExpire.toFixed(2)}`);
       }
     }
+    this.powerUpManager.removeExpiredPowerUps();
   }
 
   removePowerUp(id: number): void {
@@ -342,6 +350,7 @@ export default class PongGame {
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
+    this.powerUpManager.resetPowerUps();
 
     console.log('Game starting with max score:', this.params.maxScore);
 
@@ -360,7 +369,6 @@ export default class PongGame {
         this.updateBall();
         this.powerUpManager.checkCollision();
         this.updatePowerUpTimers();
-        this.powerUpManager.despawnExpiredPowerUps();
       }
     }, 1000 / 60); // 60 fps
   }
