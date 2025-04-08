@@ -187,6 +187,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
       colors.primaryColor,
+      colors.secondaryColor,
       defaultGameParams.powerUpSize
     );
 

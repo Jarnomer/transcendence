@@ -31,23 +31,25 @@ interface PowerUpEffect {
 export class PowerUpEffectsManager {
   private scene: Scene;
   private effects: Map<number, PowerUpEffect> = new Map();
-  private color: Color3;
+  private primaryColor: Color3;
+  private secondaryColor: Color3;
   private powerUpSize: number;
 
-  constructor(scene: Scene, color: Color3, powerUpSize: number) {
+  constructor(scene: Scene, primaryColor: Color3, secondaryColor: Color3, powerUpSize: number) {
     this.scene = scene;
-    this.color = color;
+    this.primaryColor = primaryColor;
+    this.secondaryColor = secondaryColor;
     this.powerUpSize = powerUpSize;
   }
 
   // Check for new, collected and removed power-ups
   updatePowerUpEffects(powerUps: PowerUp[]): void {
     for (const powerUp of powerUps) {
-      if (!this.effects.has(powerUp.id) && !powerUp.collected) {
+      if (!this.effects.has(powerUp.id) && powerUp.collectedBy === 0) {
         this.createPowerUpEffect(powerUp);
       } else if (
         this.effects.has(powerUp.id) &&
-        powerUp.collected &&
+        powerUp.collectedBy > 0 &&
         !this.effects.get(powerUp.id)!.collected
       ) {
         this.collectPowerUpEffect(powerUp.id);
@@ -74,8 +76,9 @@ export class PowerUpEffectsManager {
 
     icon.position = basePosition.clone();
 
-    const cube = this.createCubeMesh(powerUp.id, basePosition, cubeSize, 0.6, this.color);
-    const particleSystem = this.createGlitterParticleSystem(powerUp.id, x, y, this.color);
+    const color = this.getPowerUpColor(powerUp.type);
+    const cube = this.createCubeMesh(powerUp.id, basePosition, cubeSize, 0.6, color);
+    const particleSystem = this.createGlitterParticleSystem(powerUp.id, x, y, color);
 
     this.effects.set(powerUp.id, {
       id: powerUp.id,
@@ -89,6 +92,14 @@ export class PowerUpEffectsManager {
     this.animatePowerUpIcon(icon);
   }
 
+  private isNegativePowerUp(type: string): boolean {
+    return type === 'smaller_paddle' || type === 'slower_paddle';
+  }
+
+  private getPowerUpColor(type: string): Color3 {
+    return this.isNegativePowerUp(type) ? this.secondaryColor : this.primaryColor;
+  }
+
   private createIconMesh(type: string, size: number): Mesh {
     const mesh = MeshBuilder.CreatePlane(
       `powerUpIcon-${type}`,
@@ -99,13 +110,14 @@ export class PowerUpEffectsManager {
     const iconPath = this.getPowerUpIconPath(type);
     const texture = new Texture(iconPath, this.scene);
 
-    material.emissiveColor = this.color;
+    // Use secondaryColor for negative power-ups
+    const color = this.isNegativePowerUp(type) ? this.secondaryColor : this.primaryColor;
+    material.emissiveColor = color;
     material.disableLighting = true;
     material.diffuseTexture = texture;
     material.opacityTexture = texture;
     material.useAlphaFromDiffuseTexture = true;
 
-    // mesh.scaling = new Vector3(0.5, 0.5, 0.5);
     mesh.scaling = new Vector3(1, 1, 1);
     mesh.material = material;
 
@@ -117,9 +129,15 @@ export class PowerUpEffectsManager {
       case 'bigger_paddle':
         return '/power-up/paddle_bigger.png';
       case 'smaller_paddle':
-        return '/power-up/paddle_smalller.png';
+        return '/power-up/paddle_smaller.png';
+      case 'faster_paddle':
+        return '/power-up/paddle_faster.png';
+      case 'slower_paddle':
+        return '/power-up/paddle_slower.png';
+      case 'more_spin':
+        return '/power-up/paddle_spin.png';
       default:
-        return '/power-up/paddle_bigger.png';
+        return '/power-up/unknown_powerup.png';
     }
   }
 
@@ -359,7 +377,8 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_COLOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
-    const baseColor = this.color.clone();
+
+    const baseColor = this.getPowerUpColor(effect.type);
     const flashColor = new Color3(2, 1, 1);
     const emissiveKeys = [
       { frame: 0, value: baseColor },
