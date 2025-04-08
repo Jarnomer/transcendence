@@ -1,3 +1,2 @@
-export * from './authModal';
-export * from './ModalContext';
-export * from './SettingsModal';
+export * from './ChatModal';
+export * from './ModalWrapper';
