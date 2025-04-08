@@ -172,6 +172,7 @@ export default class PongGame {
     y: number,
     collectedBy: number,
     affectedPlayer: number,
+    negativeEffect: boolean,
     timeToDespawn: number,
     timeToExpire: number,
     type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin'
@@ -182,6 +183,7 @@ export default class PongGame {
       y,
       collectedBy,
       affectedPlayer,
+      negativeEffect,
       timeToDespawn,
       timeToExpire,
       type: type,

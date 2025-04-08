@@ -91,16 +91,28 @@ export class PowerUpManager {
         return;
     }
 
-    // Don't spawn too close to the paddles
-    const minX = this.game.getWidth() * 0.2;
-    const maxX = this.game.getWidth() * 0.8;
+    // Don't spawn too close to the paddles or walls
+    const minX = this.game.getWidth() * 0.3;
+    const maxX = this.game.getWidth() * 0.7;
+    const minY = this.game.getHeight() * 0.2;
+    const maxY = this.game.getHeight() * 0.8;
     const x = Math.random() * (maxX - minX) + minX;
-    const y = Math.random() * this.game.getHeight();
+    const y = Math.random() * (maxY - minY) + minY;
 
     const powerUp = new PowerUpClass(id, x, y);
     this.powerUps.push(powerUp);
-    this.game.spawnPowerUp(id, x, y, 0, 0, this.params.powerUpDuration, 0, powerUpType); // Add the power-up to the game state
-    //console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
+    this.game.spawnPowerUp(
+      id,
+      x,
+      y,
+      0,
+      0,
+      powerUp.negativeEffect,
+      this.params.powerUpDuration,
+      0,
+      powerUpType
+    ); // Add the power-up to the game state
+    console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
   }
 
   checkCollision(): void {

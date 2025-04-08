@@ -22,6 +22,7 @@ export interface PowerUp {
   y: number;
   collectedBy: number;
   affectedPlayer: number;
+  negativeEffect: boolean; // If true, the power-up has a negative effect on the other player
   timeToDespawn: number; // Time to despawn if not collected
   timeToExpire: number; // Time to expire after being collected
   type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
