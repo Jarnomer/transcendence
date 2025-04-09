@@ -17,7 +17,7 @@ export class PowerUpManager {
 
   constructor(game: PongGame) {
     this.game = game;
-    this.params = defaultGameParams;
+    this.params = structuredClone(defaultGameParams);
   }
 
   getPowerUps(): PowerUp[] {

@@ -24,7 +24,7 @@ export default class PongGame {
   private powerUpManager: PowerUpManager;
 
   constructor(mode: string, difficulty: string) {
-    this.params = { ...defaultGameParams };
+    this.params = structuredClone(defaultGameParams);
     this.powerUpManager = new PowerUpManager(this);
     this.mode = mode;
     this.difficulty = difficulty;
@@ -342,6 +342,7 @@ export default class PongGame {
       return;
     }
     console.log('Starting countdown...');
+    console.log('Countdown length:', this.params.rules.countdown);
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
