@@ -22,12 +22,14 @@ export default class PongGame {
   private readyState = new Map<string, boolean>();
 
   private powerUpManager: PowerUpManager;
+  private powerUps: boolean;
 
-  constructor(mode: string, difficulty: string) {
-    this.params = { ...defaultGameParams };
+  constructor(mode: string, difficulty: string, powerUps: boolean) {
+    this.params = structuredClone(defaultGameParams);
     this.powerUpManager = new PowerUpManager(this);
     this.mode = mode;
     this.difficulty = difficulty;
+    this.powerUps = powerUps;
     this.gameState = {
       players: {
         player1: {
@@ -230,6 +232,7 @@ export default class PongGame {
   }
 
   removePowerUp(id: number): void {
+    console.log('Removed power up id ${id}');
     this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
   }
 
@@ -334,6 +337,10 @@ export default class PongGame {
       this.params.dimensions.gameHeight / 2 - this.params.paddle.height / 2;
     this.gameState.players.player2.y =
       this.params.dimensions.gameHeight / 2 - this.params.paddle.height / 2;
+    this.setPaddleHeight(1, this.params.paddle.height);
+    this.setPaddleHeight(2, this.params.paddle.height);
+    this.setPaddleSpeed(1, this.params.paddle.speed);
+    this.setPaddleSpeed(2, this.params.paddle.speed);
   }
 
   startCountdown(): void {
@@ -342,6 +349,7 @@ export default class PongGame {
       return;
     }
     console.log('Starting countdown...');
+    console.log('Countdown length:', this.params.rules.countdown);
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
@@ -563,7 +571,9 @@ export default class PongGame {
   setGameStatus(status: GameStatus): void {
     this.gameStatus = status;
     if (status === 'playing') {
-      this.powerUpManager.startSpawning();
+      if (this.powerUps) {
+        this.powerUpManager.startSpawning();
+      }
     } else {
       this.powerUpManager.stopSpawning();
     }

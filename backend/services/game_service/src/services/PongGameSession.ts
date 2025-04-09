@@ -34,7 +34,8 @@ export default class PongGameSession {
     this.onEndCallback = onEndCallback;
     this.setGameResult = setGameResult;
 
-    this.game = new PongGame(mode, difficulty);
+    const powerUps = this.gameId === 'background_game' ? false : true;
+    this.game = new PongGame(mode, difficulty, powerUps);
     console.log(`Created game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
     this.previousGameStatus = this.game.getGameStatus();
 
@@ -95,7 +96,7 @@ export default class PongGameSession {
 
   removeClient(playerId: string): void {
     this.clients.delete(playerId);
-    if (this.clients.size === 0) {
+    if (this.clients.size === 0 && this.gameId !== 'background_game') {
       this.endGame();
     } else {
       this.broadcast({ type: 'game_status', state: 'waiting' });

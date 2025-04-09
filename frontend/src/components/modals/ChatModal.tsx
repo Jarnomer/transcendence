@@ -4,6 +4,7 @@ import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { ChatWindow } from '../chat/ChatWindow';
+import { ModalWrapper } from './ModalWrapper';
 
 export const ChatModal: React.FC = () => {
   const { isModalOpen, getModalProps, closeModal } = useModal();
@@ -19,8 +20,8 @@ export const ChatModal: React.FC = () => {
   console.log(user, friends, selectedFriendId);
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex justify-center items-center p-2">
-      <div className="glass-box text-primary w-full h-full md:max-h-[600px] md:max-w-4xl overflow-hidden">
+    <ModalWrapper modalName="chatModal">
+      <div className="glass-box text-primary w-full h-full md:h-[600px] md:max-h-[600px] md:max-w-4xl overflow-hidden">
         <ChatWindow
           user={user}
           friends={friends}
@@ -33,6 +34,6 @@ export const ChatModal: React.FC = () => {
           onSend={onSend}
         />
       </div>
-    </div>
+    </ModalWrapper>
   );
 };
