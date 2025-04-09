@@ -35,9 +35,9 @@ export async function queueRoutes(fastify: FastifyInstance) {
     queueController.getStatusQueue.bind(queueController)
   );
   fastify.post<{ Query: EnterQueueReqType; Reply: QueueStatusResType }>(
-    '/enterQueue',
+    '/createQueue',
     { schema: { querystring: EnterQueueReqSchema, response: { 200: QueueStatusResSchema } } },
-    queueController.enterQueue.bind(queueController)
+    queueController.createQueue.bind(queueController)
   );
   fastify.delete<{ Reply: CancelQueueResType }>(
     '/cancel',

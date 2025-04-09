@@ -13,10 +13,11 @@ export class GameManager {
   private gameService: GameService;
   private matchmakingService: MatchmakingService;
   constructor(db: Database) {
+    console.log('GameManager constructor');
     this.sessions = {};
     this.gameService = GameService.getInstance(db);
     this.matchmakingService = MatchmakingService.getInstance(db);
-    // this.createBackgroundGame();
+    this.createBackgroundGame();
   }
 
   static getInstance(db: Database): GameManager {

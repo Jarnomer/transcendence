@@ -1,4 +1,4 @@
-import { GameState, GameStatus } from '@shared/types';
+import { GameEvent, GameState, GameStatus } from '@shared/types';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 
@@ -10,6 +10,7 @@ type WebSocketState = {
   };
   gameStatus: GameStatus;
   gameState: GameState;
+  gameEvent: GameEvent;
 };
 
 export const initialState: WebSocketState = {
@@ -27,6 +28,7 @@ export const initialState: WebSocketState = {
     ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
     powerUps: [],
   },
+  gameEvent: 'matching_players',
 };
 
 type WebSocketAction =
@@ -42,6 +44,10 @@ type WebSocketAction =
   | {
       type: 'GAME_STATUS';
       payload: GameStatus;
+    }
+  | {
+      type: 'GAME_EVENT';
+      payload: GameEvent;
     };
 
 function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSocketState {
@@ -71,6 +77,8 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
       };
     case 'GAME_STATUS':
       return { ...state, gameStatus: action.payload };
+    case 'GAME_EVENT':
+      return { ...state, gameEvent: action.payload };
     case 'GAME_RESET':
       console.log('Game reset');
       return {

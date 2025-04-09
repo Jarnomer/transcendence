@@ -107,12 +107,12 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     colorBleed: 0,
   },
   phosphorDots: {
-    dotSize: 0,
-    dotIntensity: 0,
-    nonSquareRatio: 0,
+    dotSize: 5,
+    dotIntensity: 0.2,
+    nonSquareRatio: 0.2,
   },
   crtDistortion: {
-    curvatureAmount: 0.0,
+    curvatureAmount: 0.2,
     scanlineIntensity: 0.05,
     vignette: 1.2,
     colorBleed: 0.0,
@@ -143,8 +143,8 @@ export const retroEffectsPresets = {
     flicker: 5,
     vignette: 5,
     noise: 5,
-    crtTurnOnEffect: 0,
-    crtTurnOffEffect: 0,
+    crtTurnOnEffect: 1,
+    crtTurnOffEffect: 1,
     crtChannelSwitchEffect: 1,
   } as RetroEffectsLevels,
 };

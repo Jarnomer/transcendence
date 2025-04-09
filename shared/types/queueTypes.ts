@@ -38,6 +38,8 @@ export const CancelQueueResSchema = Type.Object({
 
 export const EnterQueueReqSchema = Type.Object({
   mode: Type.String(),
+  difficulty: Type.String(),
+  password: Type.Optional(Type.String()),
 });
 
 export const EnterQueueResSchema = Type.Object({

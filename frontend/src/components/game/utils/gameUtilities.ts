@@ -3,8 +3,8 @@ import { Mesh } from 'babylonjs';
 import { defaultGameParams } from '@shared/types';
 
 export function gameToSceneX(gameX: number, mesh: Mesh): number {
-  const gameWidth = defaultGameParams.gameWidth;
-  const scaleFactor = defaultGameParams.scaleFactor;
+  const gameWidth = defaultGameParams.dimensions.gameWidth;
+  const scaleFactor = defaultGameParams.dimensions.scaleFactor;
   const canvasX = (gameX - gameWidth / 2) / scaleFactor;
 
   const boundingInfo = mesh.getBoundingInfo();
@@ -14,8 +14,8 @@ export function gameToSceneX(gameX: number, mesh: Mesh): number {
 }
 
 export function gameToSceneY(gameY: number, mesh: Mesh): number {
-  const gameHeight = defaultGameParams.gameHeight;
-  const scaleFactor = defaultGameParams.scaleFactor;
+  const gameHeight = defaultGameParams.dimensions.gameHeight;
+  const scaleFactor = defaultGameParams.dimensions.scaleFactor;
   const canvasY = -((gameY - gameHeight / 2) / scaleFactor);
 
   const boundingInfo = mesh.getBoundingInfo();
@@ -25,13 +25,13 @@ export function gameToSceneY(gameY: number, mesh: Mesh): number {
 }
 
 export function gameToSceneSize(gameSize: number): number {
-  return gameSize / defaultGameParams.scaleFactor;
+  return gameSize / defaultGameParams.dimensions.scaleFactor;
 }
 
 export function enforceBoundary(
   position: number,
   objectHeight: number,
-  gameHeight: number = defaultGameParams.gameHeight
+  gameHeight: number = defaultGameParams.dimensions.gameHeight
 ): number {
   const halfHeight = objectHeight / 2;
   return Math.max(halfHeight, Math.min(gameHeight - halfHeight, position));

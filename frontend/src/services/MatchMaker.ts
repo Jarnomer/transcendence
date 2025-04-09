@@ -1,4 +1,4 @@
-import { cancelQueue, enterQueue, joinQueue, singlePlayer } from './gameService';
+import { cancelQueue, createQueue, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
 export enum MatchMakerState {
@@ -85,7 +85,7 @@ class OneVsOneGame extends GameMode {
       }
       case 'online': {
         console.log('Creating 1v1 online game...');
-        const data = await enterQueue(this.mode, this.difficulty);
+        const data = await createQueue(this.mode, this.difficulty);
         if (!data || data.status !== 'waiting') {
           throw new Error('Problem with creating 1v1 online game');
         }
@@ -148,7 +148,7 @@ class TournamentGame extends GameMode {
 
   async createGame() {
     console.log('Creating tournament game...');
-    const data = await enterQueue(this.mode, this.difficulty);
+    const data = await createQueue(this.mode, this.difficulty);
     if (!data || data.status !== 'waiting') {
       throw new Error('Problem with creating tournament game');
     }
@@ -172,7 +172,7 @@ class GameFactory {
       case '1v1':
         return new OneVsOneGame(matchMaker, lobby, mode, difficulty, queueId);
       case 'tournament':
-        return new TournamentGame(matchMaker, lobby, mode, difficulty, queueId); // Default to 4-player tournament
+        return new TournamentGame(matchMaker, lobby, mode, difficulty, queueId);
       default:
         throw new Error('Invalid game mode');
     }

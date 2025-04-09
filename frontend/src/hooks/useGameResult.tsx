@@ -2,6 +2,9 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
+import { submitResult } from '@/services/gameService';
+
 import { GameState } from '@types';
 
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -13,13 +16,14 @@ export const useGameResult = (
   dispatch: any,
   userId: string | null
 ) => {
-  const { closeConnection } = useWebSocketContext();
   const navigate = useNavigate();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
+  const { resetGameOptions } = useGameOptionsContext();
+  const { closeConnection } = useWebSocketContext();
 
   useEffect(() => {
     if (!userId) return;
@@ -46,6 +50,8 @@ export const useGameResult = (
       console.log('Game finished, submitting result');
       dispatch({ type: 'GAME_RESET' });
       navigate('/home');
+      resetGameOptions();
+      hasSubmittedResult.current = true;
     }
   }, [gameStatus, dispatch, navigate]);
 
@@ -81,47 +87,47 @@ export const useGameResult = (
   //     }
   //   }, [gameStatus, gameId, gameState, dispatch, navigate]);
 
-  //   // Cleanup
-  //   useEffect(() => {
-  //     return () => {
-  //       console.log('Cleanup');
-  //       if (!gameIdRef.current || hasSubmittedResult.current) return;
-  //       if (gameIdRef.current === 'local_game_id') {
-  //         dispatch({ type: 'GAME_RESET' });
-  //         navigate('/home');
-  //         return;
-  //       }
-  //       console.log('Submitting game result:', gameIdRef.current);
-  //       closeConnection('game');
-  //       const { players } = gameStateRef.current;
-  //       const playerArray = [players.player1, players.player2];
-  //       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
-  //       const loserIndex = winnerIndex === 0 ? 1 : 0;
-  //       console.log(
-  //         'Submitting game result:',
-  //         gameIdRef.current,
-  //         playerArray,
-  //         winnerIndex,
-  //         loserIndex
-  //       );
-  //       submitResult({
-  //         game_id: gameIdRef.current,
-  //         winner_id: playerArray[winnerIndex].id,
-  //         loser_id: playerArray[loserIndex].id,
-  //         winner_score: playerArray[winnerIndex].score,
-  //         loser_score: playerArray[loserIndex].score,
-  //       })
-  //         .then(() => {
-  //           dispatch({ type: 'GAME_RESET' });
-  //         })
-  //         .catch((err) => {
-  //           console.error('Error submitting game result:', err);
-  //         })
-  //         .finally(() => {
-  //           navigate('/home');
-  //         });
-  //     };
-  //   }, []);
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      console.log('Cleanup');
+      if (!gameIdRef.current || hasSubmittedResult.current) return;
+      if (gameIdRef.current === 'local_game_id') {
+        dispatch({ type: 'GAME_RESET' });
+        navigate('/home');
+        return;
+      }
+      console.log('Submitting game result:', gameIdRef.current);
+      closeConnection('game');
+      const { players } = gameStateRef.current;
+      const playerArray = [players.player1, players.player2];
+      const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
+      const loserIndex = winnerIndex === 0 ? 1 : 0;
+      console.log(
+        'Submitting game result:',
+        gameIdRef.current,
+        playerArray,
+        winnerIndex,
+        loserIndex
+      );
+      submitResult({
+        game_id: gameIdRef.current,
+        winner_id: playerArray[winnerIndex].id,
+        loser_id: playerArray[loserIndex].id,
+        winner_score: playerArray[winnerIndex].score,
+        loser_score: playerArray[loserIndex].score,
+      })
+        .then(() => {
+          dispatch({ type: 'GAME_RESET' });
+        })
+        .catch((err) => {
+          console.error('Error submitting game result:', err);
+        })
+        .finally(() => {
+          navigate('/home');
+        });
+    };
+  }, []);
 };
 
 export default useGameResult;
