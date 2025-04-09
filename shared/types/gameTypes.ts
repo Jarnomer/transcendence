@@ -140,7 +140,6 @@ export const defaultGameParams: GameParams = {
   },
 };
 
-
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
 export type GameEvent =
