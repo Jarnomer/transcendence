@@ -232,6 +232,7 @@ export default class PongGame {
   }
 
   removePowerUp(id: number): void {
+    console.log('Removed power up id ${id}');
     this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
   }
 
@@ -336,6 +337,10 @@ export default class PongGame {
       this.params.dimensions.gameHeight / 2 - this.params.paddle.height / 2;
     this.gameState.players.player2.y =
       this.params.dimensions.gameHeight / 2 - this.params.paddle.height / 2;
+    this.setPaddleHeight(1, this.params.paddle.height);
+    this.setPaddleHeight(2, this.params.paddle.height);
+    this.setPaddleSpeed(1, this.params.paddle.speed);
+    this.setPaddleSpeed(2, this.params.paddle.speed);
   }
 
   startCountdown(): void {
