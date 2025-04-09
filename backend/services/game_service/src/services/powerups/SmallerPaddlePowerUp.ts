@@ -14,7 +14,7 @@ export class SmallerPaddlePowerUp extends PowerUp {
   }
 
   applyEffect(game: PongGame, player: number): void {
-    game.setPaddleHeight(player, game.getPaddleHeight(player) - this.decrease);
+    game.setPaddleHeight(player, game.getPaddleHeight(player) + this.decrease);
     console.log(
       `Smaller paddle effect applied to player ${player} with decrease: ${this.decrease}`
     );
@@ -24,7 +24,7 @@ export class SmallerPaddlePowerUp extends PowerUp {
   }
 
   removeEffect(game: PongGame, player: number): void {
-    game.setPaddleHeight(player, game.getPaddleHeight(player) + this.decrease);
+    game.setPaddleHeight(player, game.getPaddleHeight(player) - this.decrease);
     console.log(
       `Smaller paddle effect removed from player ${player} with increase: ${this.decrease}`
     );
