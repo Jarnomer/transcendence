@@ -223,30 +223,39 @@ function createPowerUpParticles(
       particleTexturePath = '/power-up/sign_unknown.png';
   }
 
-  const particleSystem = new ParticleSystem(`powerUpParticles-${playerIndex}`, 50, scene);
+  const particleSystem = new ParticleSystem(`powerUpParticles-${playerIndex}`, 40, scene);
   const paddlePosition = paddleMesh.position.clone();
 
   particleSystem.emitter = new Vector3(paddlePosition.x, paddlePosition.y, paddlePosition.z);
   particleSystem.particleTexture = new Texture(particleTexturePath, scene);
 
-  particleSystem.minSize = 0.4;
-  particleSystem.maxSize = 1.2;
-  particleSystem.minLifeTime = 1.5;
-  particleSystem.maxLifeTime = 3.0;
+  particleSystem.minSize = 0.5;
+  particleSystem.maxSize = 1.5;
+  particleSystem.minLifeTime = 3;
+  particleSystem.maxLifeTime = 5;
+  particleSystem.minEmitPower = 4;
+  particleSystem.maxEmitPower = 8;
   particleSystem.emitRate = 12;
-  particleSystem.minEmitPower = 10;
-  particleSystem.maxEmitPower = 20;
 
-  particleSystem.minEmitBox = new Vector3(-0.1, -0.1, -0.1);
-  particleSystem.maxEmitBox = new Vector3(0.1, 0.1, 0.1);
+  particleSystem.minEmitBox = new Vector3(-0.2, -0.3, -0.2);
+  particleSystem.maxEmitBox = new Vector3(0.2, 0.3, 0.2);
+
+  particleSystem.createDirectedCylinderEmitter(
+    0.25,
+    0.15,
+    0.1,
+    new Vector3(0, 1, 0),
+    new Vector3(0, 6, 0)
+  );
+
+  particleSystem.direction1 = new Vector3(-0.5, 1, -0.5);
+  particleSystem.direction2 = new Vector3(0.5, 1, 0.5);
 
   particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
   particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 1.0);
   particleSystem.colorDead = new Color4(color.r * 0.3, color.g * 0.3, color.b * 0.3, 0);
 
   particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
-
-  particleSystem.gravity = new Vector3(0, 0, 0);
 
   particleSystem.minAngularSpeed = -0.3;
   particleSystem.maxAngularSpeed = 0.3;
