@@ -10,17 +10,26 @@ interface ModalWrapperProps {
 export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children }) => {
   const { closeModal } = useModal();
 
+  const handleOverlayClick = () => {
+    console.log('Clicked outside the modal');
+    closeModal(modalName);
+  };
+
+  const handleModalClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+  };
+
   return (
-    <>
+    <div
+      className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex items-center justify-center z-50"
+      onClick={handleOverlayClick}
+    >
       <div
-        onClick={() => closeModal(modalName)}
-        className="fixed top-0 left-0 w-screen h-screen max-h-screen bg-black bg-opacity-20 z-40"
-      ></div>
-      <div className="fixed z-50 inset-0 flex justify-center items-center p-4">
-        <div className="rounded-xl shadow-lg max-w-md w-full h-full md:h-auto md:max-w-4xl overflow-hidden">
-          {children}
-        </div>
+        className="text-primary shadow-lg max-w-md w-full h-full md:h-auto md:max-w-4xl overflow-hidden"
+        onClick={handleModalClick}
+      >
+        {children}
       </div>
-    </>
+    </div>
   );
 };

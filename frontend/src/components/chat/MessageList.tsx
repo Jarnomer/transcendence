@@ -15,7 +15,7 @@ export const MessageList: React.FC<MessageListProps> = ({ user, friends }) => {
   console.log(friends);
   console.log(messages);
   return (
-    <div className="flex flex-col gap-2 overflow-y-auto grow p-2">
+    <div className="flex flex-col w-full max-h-full gap-2 overflow-y-scroll grow p-2">
       {messages.map((msg, i) => (
         <MessageBubble
           key={i}

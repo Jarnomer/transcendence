@@ -8,6 +8,7 @@ import { Footer } from './components/footer/Footer.tsx';
 import BackgroundGameProvider from './components/game/BackgroundGameProvider.tsx';
 import { Header } from './components/header/Header.tsx';
 import { ChatModal } from './components/modals/ChatModal.tsx';
+import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { ChatProvider } from './contexts/chatContext/ChatContext.tsx';
@@ -57,6 +58,7 @@ const App: React.FC = () => {
             </div>
           </GameOptionsProvider>
           <ChatModal></ChatModal>
+          <SettingsModal></SettingsModal>
         </ModalProvider>
       </ChatProvider>
     </WebSocketProvider>
