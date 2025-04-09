@@ -4,7 +4,7 @@ import { PowerUp } from './PowerUp';
 import PongGame from '../PongGame';
 
 export class SlowerPaddlePowerUp extends PowerUp {
-  private increase = defaultGameParams.powerUps.effects.paddleHeightIncrease;
+  private increase = defaultGameParams.powerUps.effects.paddleSpeedDecrease;
 
   constructor(id: number, x: number, y: number) {
     super(id, x, y);
@@ -29,3 +29,4 @@ export class SlowerPaddlePowerUp extends PowerUp {
     this.isSpent = true; // Mark the power-up as spent
   }
 }
+//

@@ -26,3 +26,4 @@ export class MoreSpinPowerUp extends PowerUp {
     this.isSpent = true; // Mark the power-up as spent
   }
 }
+// More
