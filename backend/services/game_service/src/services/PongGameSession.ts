@@ -46,10 +46,10 @@ export default class PongGameSession {
 
     // For testing tournaments, player moves not needed
     // Readystate is still needed from both players!
-    if (mode === '1v1') {
-      this.aiControllers.set(1, new AIController(this.difficulty, true));
-      this.aiControllers.set(2, new AIController(this.difficulty, false));
-    }
+    // if (mode === '1v1') {
+    //   this.aiControllers.set(1, new AIController(this.difficulty, true));
+    //   this.aiControllers.set(2, new AIController(this.difficulty, false));
+    // }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');

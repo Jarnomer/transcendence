@@ -13,7 +13,7 @@ export class SlowerPaddlePowerUp extends PowerUp {
   }
 
   applyEffect(game: PongGame, player: number): void {
-    game.setPaddleSpeed(player, game.getPaddleSpeed(player) - this.increase);
+    game.setPaddleSpeed(player, game.getPaddleSpeed(player) + this.increase);
     console.log(`Slower paddle effect applied to player ${player} with increase: ${this.increase}`);
     this.active = true;
     this.affectedPlayer = player;
@@ -21,7 +21,7 @@ export class SlowerPaddlePowerUp extends PowerUp {
   }
 
   removeEffect(game: PongGame, player: number): void {
-    game.setPaddleSpeed(player, game.getPaddleSpeed(player) + this.increase);
+    game.setPaddleSpeed(player, game.getPaddleSpeed(player) - this.increase);
     console.log(
       `Slower paddle effect removed from player ${player} with increase: ${this.increase}`
     );
