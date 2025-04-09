@@ -17,7 +17,7 @@ export const BoxDiv: React.FC<{ index: number; children: React.ReactNode }> = ({
 
   return (
     <motion.div
-      className="aspect-square overflow-hidden w-full h-full relative"
+      className="aspect-square overflow-hidden w-full h-full relative "
       variants={itemVariants}
     >
       <BackgroundGlow></BackgroundGlow>

@@ -101,7 +101,7 @@ export const Settings: React.FC = () => {
       <motion.div className="relative w-full h-full z-10 gap-5 md:gap-10 md:p-4">
         <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
 
-        <motion.div id="home-page-content" className=" h-full lg:px-20  gap-20">
+        <motion.div id="home-page-content" className="w-full h-full lg:px-20  gap-20">
           <AnimatePresence mode="wait">
             {activeTab === 'gameSettings' && (
               <motion.div

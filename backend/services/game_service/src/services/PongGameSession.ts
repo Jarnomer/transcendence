@@ -34,7 +34,8 @@ export default class PongGameSession {
     this.onEndCallback = onEndCallback;
     this.setGameResult = setGameResult;
 
-    this.game = new PongGame(mode, difficulty);
+    const powerUps = this.gameId === 'background_game' ? false : true;
+    this.game = new PongGame(mode, difficulty, powerUps);
     console.log(`Created game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
     this.previousGameStatus = this.game.getGameStatus();
 
@@ -45,10 +46,10 @@ export default class PongGameSession {
 
     // For testing tournaments, player moves not needed
     // Readystate is still needed from both players!
-    if (mode === '1v1') {
-      this.aiControllers.set(1, new AIController(this.difficulty, true));
-      this.aiControllers.set(2, new AIController(this.difficulty, false));
-    }
+    // if (mode === '1v1') {
+    //   this.aiControllers.set(1, new AIController(this.difficulty, true));
+    //   this.aiControllers.set(2, new AIController(this.difficulty, false));
+    // }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
