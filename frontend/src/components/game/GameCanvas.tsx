@@ -62,8 +62,9 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 
 const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
   const gameHeight = defaultGameParams.dimensions.gameHeight;
+  const ballSize = defaultGameParams.ball.size;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = newY === 0 || newY === gameHeight - 15;
+  const dyCollision = newY === 0 || newY === gameHeight - ballSize;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';

@@ -53,6 +53,54 @@ interface BackgroundGameCanvasProps {
   retroBaseParams?: RetroEffectsBaseParams;
 }
 
+const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipeline | null) => {
+  scene.getEngine().setHardwareScalingLevel(1.5);
+
+  scene.shadowsEnabled = true;
+  scene.lightsEnabled = true;
+  scene.skipFrustumClipping = true;
+  scene.skipPointerMovePicking = true;
+
+  if (pipeline) {
+    pipeline.bloomEnabled = false;
+    pipeline.depthOfFieldEnabled = false;
+    pipeline.chromaticAberrationEnabled = true;
+    pipeline.grainEnabled = true;
+    pipeline.fxaaEnabled = true;
+    pipeline.samples = 1;
+  }
+
+  // Enable occlusion culling
+  scene.autoClear = false;
+  scene.autoClearDepthAndStencil = false;
+  scene.blockMaterialDirtyMechanism = true;
+};
+
+const setupThrottledRenderLoop = (engine: Engine, scene: Scene) => {
+  const interval = 1000 / 30; // 30 fps
+
+  let lastTime = 0;
+
+  engine.runRenderLoop(() => {
+    const currentTime = performance.now();
+    if (currentTime - lastTime >= interval) {
+      lastTime = currentTime;
+      scene.render();
+    }
+  });
+};
+
+const optimizeShadowGenerators = (shadowGenerators: any[]) => {
+  shadowGenerators.forEach((generator) => {
+    generator.useBlurExponentialShadowMap = true;
+    generator.blurKernel = 8;
+    generator.bias = 0.01;
+    generator.mapSize = 512;
+    generator.forceBackFacesOnly = true;
+    generator.usePercentageCloserFiltering = false;
+  });
+};
+
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   const computedStyle = getComputedStyle(document.documentElement);
 
@@ -67,8 +115,9 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 
 const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
   const gameHeight = defaultGameParams.dimensions.gameHeight;
+  const ballSize = defaultGameParams.ball.size;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = newY === 0 || newY === gameHeight - 15;
+  const dyCollision = newY === 0 || newY === gameHeight - ballSize;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';
@@ -145,8 +194,12 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const { primaryColor, backgroundColor } = colors;
 
     const camera = setupSceneCamera(scene);
+
     const pipeline = setupPostProcessing(scene, camera, true);
+    applyLowQualitySettings(scene, pipeline);
+
     const { shadowGenerators } = setupScenelights(scene);
+    optimizeShadowGenerators(shadowGenerators);
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
@@ -198,19 +251,27 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     retroLevelsRef.current = retroLevels;
 
     if (isVisible) {
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
+      setupThrottledRenderLoop(engine, scene);
     }
 
     const handleResize = () => {
       engine.resize();
     };
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (engineRef.current) engineRef.current.renderEvenInBackground = false;
+      } else {
+        if (engineRef.current) engineRef.current.renderEvenInBackground = true;
+      }
+    };
+
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       if (cameraMoveTimerRef.current) {
@@ -233,13 +294,13 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     }
 
     if (!isVisible) {
-      engineRef.current.runRenderLoop(() => {
-        if (sceneRef.current) sceneRef.current.render();
-      });
-
-      retroEffectsRef.current.simulateCRTTurnOff(1800).then(() => {
+      if (retroEffectsRef.current) {
+        retroEffectsRef.current.simulateCRTTurnOff(1200).then(() => {
+          if (engineRef.current) engineRef.current.stopRenderLoop();
+        });
+      } else {
         if (engineRef.current) engineRef.current.stopRenderLoop();
-      });
+      }
     } else {
       const randomAngle = getRandomCameraAngle();
       const camera = cameraRef.current;
@@ -255,16 +316,16 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
           animateCamera(cameraRef.current, newAngle, postProcessingRef.current);
         }
-      }, 10000); // Change camera every 10 seconds
+      }, 10000);
 
-      engineRef.current.runRenderLoop(() => {
-        if (sceneRef.current) sceneRef.current.render();
-      });
+      if (engineRef.current && sceneRef.current) {
+        setupThrottledRenderLoop(engineRef.current, sceneRef.current);
+      }
 
       if (retroEffectsRef.current) {
         setTimeout(() => {
-          retroEffectsRef.current.simulateCRTTurnOn();
-        }, 500);
+          retroEffectsRef.current.simulateCRTTurnOn(1200); // Shortened duration
+        }, 300); // Reduced delay
       }
     }
 
