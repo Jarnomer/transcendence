@@ -31,6 +31,7 @@ import {
   cameraAngles,
   getRandomCameraAngle,
   setupSceneCamera,
+  parseColor,
 } from '@game/utils';
 
 import {
@@ -191,7 +192,9 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
-    scene.clearColor = new Color4(0.2, 0.2, 0.25, 1.0);
+
+    const bgColor = parseColor('#33353e');
+    scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
     const camera = setupSceneCamera(scene);
 
