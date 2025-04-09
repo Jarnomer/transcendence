@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { UserDataResponseType } from '../../../../shared/types';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { MessageInput } from './MessageInput';
@@ -23,6 +25,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   const [input, setInput] = useState('');
   const { messages } = useChatContext();
+  const navigate = useNavigate();
 
   return (
     <div className="w-full h-full flex flex-col flex-1">
@@ -31,9 +34,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           Back
         </button>
         <div className="text-lg font-semibold">
-          {selectedFriendId
-            ? friends.find((f) => f.user_id === selectedFriendId)?.display_name
-            : 'Room Chat'}
+          {selectedFriendId ? (
+            <span onClick={() => navigate(`/profile/${selectedFriendId}`)}>
+              {friends.find((f) => f.user_id === selectedFriendId)?.display_name}
+            </span>
+          ) : (
+            'Room Chat'
+          )}
         </div>
         <div />
       </div>

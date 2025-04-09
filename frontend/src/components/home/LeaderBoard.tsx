@@ -107,7 +107,7 @@ export const LeaderBoard: React.FC = () => {
             {!loading ? (
               <div className="text-center">
                 <motion.ul
-                  className="p-2"
+                  className="p-2 w-full h-full overflow-y-scroll"
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
