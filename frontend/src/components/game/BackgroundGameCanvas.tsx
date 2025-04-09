@@ -402,17 +402,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     };
   }, [gameState, isVisible]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        pointerEvents: 'none',
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#33353e',
-      }}
-    />
-  );
+  return <canvas ref={canvasRef} className="w-full h-full pointer-events-none bg-[#33353e]" />;
 };
 
 export default BackgroundGameCanvas;

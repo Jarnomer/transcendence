@@ -157,14 +157,8 @@ const BackgroundGameProvider: React.FC = () => {
 
   return (
     <div
-      className="background-game-container"
-      // aria-hidden="true"
-      style={{
-        position: 'absolute',
-        pointerEvents: 'none',
-        width: '100vw',
-        height: '100vh',
-      }}
+      className="background-game-container absolute pointer-events-none w-screen h-screen bg-[#33353e]"
+      aria-hidden="true"
     >
       <BackgroundGameCanvas
         gameState={gameState || initialGameState}
