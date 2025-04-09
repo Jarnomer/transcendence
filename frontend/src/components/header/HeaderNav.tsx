@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // import { logout } from "../auth";  // Ensure your logout function is correctly imported
+import { useModal } from '../../contexts/modalContext/ModalContext'; // Importing modal context
 import { useUser } from '../../contexts/user/UserContext';
-import { useModal } from '../modals/ModalContext'; // Importing modal context
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { Notifications } from '../UI/Notifications';
 

@@ -95,7 +95,7 @@ export default class PongGameSession {
 
   removeClient(playerId: string): void {
     this.clients.delete(playerId);
-    if (this.clients.size === 0 && this.gameId !== 'background_game') {
+    if (this.clients.size === 0) {
       this.endGame();
     } else {
       this.broadcast({ type: 'game_status', state: 'waiting' });
@@ -224,27 +224,6 @@ export default class PongGameSession {
     this.onEndCallback();
   }
 
-  // private handleAIMove(): void {
-  //   for (const [playerId, aiController] of this.aiControllers) {
-  //     const ball = this.game.getGameState().ball;
-  //     let aiPaddle;
-  //     if (playerId === 'player1') {
-  //       aiPaddle = this.game.getGameState().players.player1;
-  //     } else {
-  //       aiPaddle = this.game.getGameState().players.player2;
-  //     }
-  //     const paddleSpeed = this.game.getPaddleSpeed();
-  //     const paddleHeight = this.game.getPaddleHeight(playerId === 'player1' ? 1 : 2);
-
-  //     if (aiController.shouldUpdate(ball.dx)) {
-  //       aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed);
-  //     }
-
-  //     const aiMove = aiController.getNextMove();
-  //     this.game.updateGameState({ [playerId]: aiMove }); // Apply AI move
-  //   }
-  // }
-
   private handleAIMove(): void {
     for (const aiController of this.aiControllers.values()) {
       const ball = this.game.getGameState().ball;
@@ -252,11 +231,12 @@ export default class PongGameSession {
         ? this.game.getGameState().players.player1
         : this.game.getGameState().players.player2;
 
-      const paddleSpeed = this.game.getPaddleSpeed();
+      const paddleSpeed = this.game.getPaddleSpeed(aiController.isPlayer1 ? 1 : 2);
       const paddleHeight = this.game.getPaddleHeight(aiController.isPlayer1 ? 1 : 2);
+      const powerUps = this.game.getPowerUps();
 
       if (aiController.shouldUpdate(ball.dx)) {
-        aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed);
+        aiController.updateAIState(ball, aiPaddle, paddleHeight, paddleSpeed, powerUps);
       }
 
       const aiMove = aiController.getNextMove();

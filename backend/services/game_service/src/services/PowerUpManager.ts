@@ -2,7 +2,10 @@ import { GameParams, defaultGameParams } from '@shared/types';
 
 import PongGame from './PongGame';
 import { BiggerPaddlePowerUp } from './powerups/BiggerPaddlePowerUp';
+import { FasterPaddlePowerUp } from './powerups/FasterPaddlePowerUp';
+import { MoreSpinPowerUp } from './powerups/MoreSpinPowerUp';
 import { PowerUp } from './powerups/PowerUp';
+import { SlowerPaddlePowerUp } from './powerups/SlowerPaddlePowerUp';
 import { SmallerPaddlePowerUp } from './powerups/SmallerPaddlePowerUp';
 
 export class PowerUpManager {
@@ -39,13 +42,20 @@ export class PowerUpManager {
 
   private getRandomSpawnTime(): number {
     return (
-      Math.random() * (this.params.powerUpMaxSpawnInterval - this.params.powerUpMinSpawnInterval) +
-      this.params.powerUpMinSpawnInterval
+      Math.random() *
+        (this.params.powerUps.maxSpawnInterval - this.params.powerUps.minSpawnInterval) +
+      this.params.powerUps.minSpawnInterval
     );
   }
 
   private getRandomPowerUpType(): string {
-    const types = ['bigger_paddle', 'smaller_paddle'];
+    const types = [
+      'bigger_paddle',
+      'smaller_paddle',
+      'faster_paddle',
+      'slower_paddle',
+      'more_spin',
+    ];
     return types[Math.floor(Math.random() * types.length)];
   }
 
@@ -68,21 +78,42 @@ export class PowerUpManager {
       case 'smaller_paddle':
         PowerUpClass = SmallerPaddlePowerUp;
         break;
+      case 'faster_paddle':
+        PowerUpClass = FasterPaddlePowerUp;
+        break;
+      case 'slower_paddle':
+        PowerUpClass = SlowerPaddlePowerUp;
+        break;
+      case 'more_spin':
+        PowerUpClass = MoreSpinPowerUp;
+        break;
       default:
         console.error(`Unknown power-up type: ${powerUpType}`);
         return;
     }
 
-    // Don't spawn too close to the paddles
-    const minX = this.game.getWidth() * 0.2;
-    const maxX = this.game.getWidth() * 0.8;
+    // Don't spawn too close to the paddles or walls
+    const minX = this.game.getWidth() * 0.3;
+    const maxX = this.game.getWidth() * 0.7;
+    const minY = this.game.getHeight() * 0.2;
+    const maxY = this.game.getHeight() * 0.8;
     const x = Math.random() * (maxX - minX) + minX;
-    const y = Math.random() * this.game.getHeight();
+    const y = Math.random() * (maxY - minY) + minY;
 
     const powerUp = new PowerUpClass(id, x, y);
     this.powerUps.push(powerUp);
-    this.game.spawnPowerUp(id, x, y, false, 0, this.params.powerUpDuration, 0, powerUpType); // Add the power-up to the game state
-    //console.log(`Spawned power-up id: ${id}, type: ${powerUpType} at (${x}, ${y})`);
+    this.game.spawnPowerUp(
+      id,
+      x,
+      y,
+      0,
+      0,
+      powerUp.negativeEffect,
+      powerUp.timeToDespawn,
+      0,
+      powerUpType
+    ); // Add the power-up to the game state
+    console.log(`Spawned power-up id: ${id}, type: ${powerUp.type} at (${x}, ${y})`);
   }
 
   checkCollision(): void {
@@ -90,42 +121,71 @@ export class PowerUpManager {
     for (const powerUp of this.powerUps) {
       if (
         !powerUp.active &&
-        ball.x < powerUp.x + this.params.powerUpSize &&
-        ball.x + this.params.ballSize > powerUp.x &&
-        ball.y < powerUp.y + this.params.powerUpSize &&
-        ball.y + this.params.ballSize > powerUp.y
+        ball.x < powerUp.x + this.params.powerUps.size &&
+        ball.x + this.params.ball.size > powerUp.x &&
+        ball.y < powerUp.y + this.params.powerUps.size &&
+        ball.y + this.params.ball.size > powerUp.y
       ) {
-        const affectedPlayer = ball.dx > 0 ? 1 : 2; // Determine which player is affected based on ball direction
-        this.game.collectPowerUp(powerUp.id, affectedPlayer, powerUp.effectDuration);
-        console.log(`Power-up collected by player ${affectedPlayer}:`, powerUp.id);
-        powerUp.applyEffect(this.game, affectedPlayer);
+        const collectedBy = ball.dx > 0 ? 1 : 2; // Determine which player collected the power-up
+        let affectedPlayer = collectedBy;
+        if (powerUp.negativeEffect) {
+          // If the power-up has a negative effect, apply it to the other player
+          affectedPlayer = collectedBy === 1 ? 2 : 1;
+        }
+        // If player already has this power up type, just refresh timeToExpire
+        const existingPowerUp = this.powerUps.find(
+          (p) => p.type === powerUp.type && p.affectedPlayer === affectedPlayer
+        );
+        if (existingPowerUp) {
+          console.log(
+            `Power-up already collected by player ${affectedPlayer}:`,
+            existingPowerUp.id
+          );
+          existingPowerUp.resetcollectedTime();
+          this.game.resetPowerUpTimeToExpire(existingPowerUp.id, existingPowerUp.timeToExpire);
+          this.removePowerUp(powerUp.id);
+        } else {
+          // Otherwise, collect the power-up
+          this.game.collectPowerUp(powerUp.id, collectedBy, affectedPlayer, powerUp.timeToExpire);
+          console.log(`New power-up collected by player ${affectedPlayer}:`, powerUp.id);
+          powerUp.applyEffect(this.game, affectedPlayer);
+        }
       }
     }
   }
 
-  despawnExpiredPowerUps(): void {
+  removeExpiredPowerUps(): void {
     for (const powerUp of this.powerUps) {
-      if (powerUp.isSpent) {
-        // console.log('Power-up spent:', powerUp.id);
-        this.game.removePowerUp(powerUp.id);
-        this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
-      } else if (!powerUp.active && powerUp.isExpired()) {
-        // console.log('Despawning expired uncollected power-up id:', powerUp.id);
-        this.game.removePowerUp(powerUp.id);
-        this.powerUps.splice(this.powerUps.indexOf(powerUp), 1);
+      if (powerUp.shouldDespawn()) {
+        console.log('Despawning expired uncollected power-up id:', powerUp.id);
+        this.removePowerUp(powerUp.id);
+      }
+      if (powerUp.shouldExpire()) {
+        console.log('Removing expired power-up id:', powerUp.id);
+        powerUp.removeEffect(this.game, powerUp.affectedPlayer);
+        this.removePowerUp(powerUp.id);
       }
     }
   }
 
-  updatePowerUpTimers(): void {
+  resetPowerUps(): void {
     for (const powerUp of this.powerUps) {
-      if (powerUp.active) {
-        powerUp.effectDuration -= 1000 / 60; // Assuming 60 FPS
-        // if (powerUp.effectDuration <= 0) {
-        //   powerUp.removeEffect(this.game, powerUp.affectedPlayer);
-        //   powerUp.isSpent = true; // Mark the power-up as spent
-        // }
-      }
+      // if (!powerUp.active) {
+      //   console.log('Deleting uncollected power-up id:', powerUp.id);
+      //   this.removePowerUp(powerUp.id);
+      // }
+      this.removePowerUp(powerUp.id);
+    }
+  }
+
+  removePowerUp(id: number): void {
+    const powerUpIndex = this.powerUps.findIndex((powerUp) => powerUp.id === id);
+    if (powerUpIndex !== -1) {
+      this.game.removePowerUp(id);
+      this.powerUps.splice(powerUpIndex, 1);
+      console.log(`Power-up id ${id} removed from the game.`);
+    } else {
+      console.log(`Power-up id ${id} not found.`);
     }
   }
 }
