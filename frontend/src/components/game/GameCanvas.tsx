@@ -61,7 +61,7 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 };
 
 const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
-  const gameHeight = defaultGameParams.gameHeight;
+  const gameHeight = defaultGameParams.dimensions.gameHeight;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
   const dyCollision = newY === 0 || newY === gameHeight - 15;
 
@@ -126,8 +126,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
 
-  const gameWidth = defaultGameParams.gameWidth;
-  const gameHeight = defaultGameParams.gameHeight;
+  const gameWidth = defaultGameParams.dimensions.gameWidth;
+  const gameHeight = defaultGameParams.dimensions.gameHeight;
 
   // initial render setup
   useEffect(() => {
@@ -187,7 +187,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
       colors.primaryColor,
-      defaultGameParams.powerUpSize
+      colors.secondaryColor,
+      defaultGameParams.powerUps.size
     );
 
     setLastTheme(theme); // Save current theme
@@ -252,7 +253,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!canvasRef.current || !themeColors.current) return;
 
     const { players, ball, powerUps } = gameState;
-    const color = themeColors.current.primaryColor;
+    const primaryColor = themeColors.current.primaryColor;
+    const secondaryColor = themeColors.current.secondaryColor;
 
     // Convert coordinates to Babylon coordinate system
     player1Ref.current.position = new Vector3(
@@ -282,7 +284,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       ball.dx
     );
 
-    applyBallEffects(ballRef.current, speed, angle, ball.spin, color);
+    applyBallEffects(ballRef.current, speed, angle, ball.spin, primaryColor);
 
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
@@ -297,7 +299,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         collision,
         speed,
         ball.spin,
-        color,
+        primaryColor,
         true
       );
     }
@@ -311,7 +313,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         player2Ref.current,
         players,
         powerUps,
-        color
+        primaryColor,
+        secondaryColor
       );
     }
 

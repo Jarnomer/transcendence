@@ -14,35 +14,42 @@ import BackgroundGameCanvas from './BackgroundGameCanvas';
 const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+
   const location = useLocation();
-  const wsRef = useRef<WebSocket | null>(null);
+
   const reconnectTimeoutRef = useRef<number | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Initialize default values before WebSocket connects
   const initialGameState: GameState = {
     players: {
       player1: {
         id: 'player1',
-        y: defaultGameParams.gameHeight / 2 - defaultGameParams.paddleHeight / 2,
+        y: defaultGameParams.dimensions.gameHeight / 2 - defaultGameParams.paddle.height / 2,
         dy: 0,
-        paddleHeight: defaultGameParams.paddleHeight,
+        paddleHeight: defaultGameParams.paddle.height,
+        paddleSpeed: defaultGameParams.paddle.speed,
+        spinIntensity: defaultGameParams.spin.intensityFactor,
         score: 0,
       },
       player2: {
         id: 'player2',
-        y: defaultGameParams.gameHeight / 2 - defaultGameParams.paddleHeight / 2,
-        paddleHeight: defaultGameParams.paddleHeight,
+        y: defaultGameParams.dimensions.gameHeight / 2 - defaultGameParams.paddle.height / 2,
+        paddleHeight: defaultGameParams.paddle.height,
+        paddleSpeed: defaultGameParams.paddle.speed,
+        spinIntensity: defaultGameParams.spin.intensityFactor,
         dy: 0,
         score: 0,
       },
     },
     ball: {
-      x: defaultGameParams.gameWidth / 2,
-      y: defaultGameParams.gameHeight / 2,
+      x: defaultGameParams.dimensions.gameWidth / 2,
+      y: defaultGameParams.dimensions.gameHeight / 2,
       dx: 5,
       dy: 3,
       spin: 0,
     },
+    powerUps: [],
   };
 
   // Handle location changes to toggle visibility

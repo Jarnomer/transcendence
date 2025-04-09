@@ -1,7 +1,7 @@
 import { defaultGameParams } from '@shared/types';
 
-import { PowerUp } from './PowerUp';
 import PongGame from '../PongGame';
+import { PowerUp } from './PowerUp';
 
 // Makes the other player's paddle smaller
 export class SmallerPaddlePowerUp extends PowerUp {

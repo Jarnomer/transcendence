@@ -87,7 +87,7 @@ export interface GameObjectParams {
 export const defaultGameObjectParams: GameObjectParams = {
   distanceFromFloor: -0.2,
   ball: {
-    diameter: defaultGameParams.ballSize / defaultGameParams.scaleFactor,
+    diameter: defaultGameParams.ball.size / defaultGameParams.dimensions.scaleFactor,
     segments: 32,
     emissiveColorMultiplier: 1.2,
     emissiveIntensity: 2.0,
@@ -105,9 +105,9 @@ export const defaultGameObjectParams: GameObjectParams = {
     },
   },
   paddle: {
-    height: defaultGameParams.paddleHeight / defaultGameParams.scaleFactor,
-    width: defaultGameParams.paddleWidth / defaultGameParams.scaleFactor,
-    depth: (defaultGameParams.paddleWidth / defaultGameParams.scaleFactor) * 1.5,
+    height: defaultGameParams.paddle.height / defaultGameParams.dimensions.scaleFactor,
+    width: defaultGameParams.paddle.width / defaultGameParams.dimensions.scaleFactor,
+    depth: (defaultGameParams.paddle.width / defaultGameParams.dimensions.scaleFactor) * 1.5,
     emissiveColorMultiplier: 0.8,
     emissiveIntensity: 1.0,
     materialMetallic: 0.6,
@@ -124,7 +124,7 @@ export const defaultGameObjectParams: GameObjectParams = {
     },
   },
   edge: {
-    width: defaultGameParams.gameWidth / defaultGameParams.scaleFactor,
+    width: defaultGameParams.dimensions.gameWidth / defaultGameParams.dimensions.scaleFactor,
     radius: 0.15,
     numPoints: 90,
     tessellation: 16,
@@ -144,8 +144,11 @@ export const defaultGameObjectParams: GameObjectParams = {
     },
   },
   floor: {
-    width: (defaultGameParams.gameWidth / defaultGameParams.scaleFactor) * 1.5,
-    depth: ((defaultGameParams.gameWidth / defaultGameParams.scaleFactor) * 1.5) / 2,
+    width:
+      (defaultGameParams.dimensions.gameWidth / defaultGameParams.dimensions.scaleFactor) * 1.5,
+    depth:
+      ((defaultGameParams.dimensions.gameWidth / defaultGameParams.dimensions.scaleFactor) * 1.5) /
+      2,
     positionZ: 1.2,
     colorMultiplier: 0.25,
     emissiveColorMultiplier: 0.1,

@@ -1,7 +1,7 @@
 import { defaultGameParams } from '@shared/types';
 
-import { PowerUp } from './PowerUp';
 import PongGame from '../PongGame';
+import { PowerUp } from './PowerUp';
 
 export class BiggerPaddlePowerUp extends PowerUp {
   constructor(id: number, x: number, y: number) {
