@@ -68,7 +68,7 @@ export class PowerUpEffectsManager {
     const baseSize = gameToSceneSize(this.powerUpSize);
     const cubeSize = baseSize * 1.02;
 
-    const icon = this.createIconMesh(powerUp.type, baseSize);
+    const icon = this.createIconMesh(powerUp.type, baseSize, powerUp.negativeEffect);
 
     const x = gameToSceneX(powerUp.x, icon);
     const y = gameToSceneY(powerUp.y, icon);
@@ -76,7 +76,7 @@ export class PowerUpEffectsManager {
 
     icon.position = basePosition.clone();
 
-    const color = this.getPowerUpColor(powerUp.type);
+    const color = this.getPowerUpColor(powerUp.negativeEffect);
     const cube = this.createCubeMesh(powerUp.id, basePosition, cubeSize, 0.6, color);
     const particleSystem = this.createGlitterParticleSystem(powerUp.id, x, y, color);
 
@@ -92,15 +92,11 @@ export class PowerUpEffectsManager {
     this.animatePowerUpIcon(icon);
   }
 
-  private isNegativePowerUp(type: string): boolean {
-    return type === 'smaller_paddle' || type === 'slower_paddle';
+  private getPowerUpColor(isNegative: boolean): Color3 {
+    return isNegative ? this.secondaryColor : this.primaryColor;
   }
 
-  private getPowerUpColor(type: string): Color3 {
-    return this.isNegativePowerUp(type) ? this.secondaryColor : this.primaryColor;
-  }
-
-  private createIconMesh(type: string, size: number): Mesh {
+  private createIconMesh(type: string, size: number, isNegative: boolean): Mesh {
     const mesh = MeshBuilder.CreatePlane(
       `powerUpIcon-${type}`,
       { width: size, height: size },
@@ -111,7 +107,7 @@ export class PowerUpEffectsManager {
     const texture = new Texture(iconPath, this.scene);
 
     // Use secondaryColor for negative power-ups
-    const color = this.isNegativePowerUp(type) ? this.secondaryColor : this.primaryColor;
+    const color = isNegative ? this.secondaryColor : this.primaryColor;
     material.emissiveColor = color;
     material.disableLighting = true;
     material.diffuseTexture = texture;
@@ -378,7 +374,7 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
 
-    const baseColor = this.getPowerUpColor(effect.type);
+    const baseColor = (effect.icon.material as StandardMaterial).emissiveColor;
     const flashColor = new Color3(2, 1, 1);
     const emissiveKeys = [
       { frame: 0, value: baseColor },

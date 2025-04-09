@@ -66,7 +66,7 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 };
 
 const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
-  const gameHeight = defaultGameParams.gameHeight;
+  const gameHeight = defaultGameParams.dimensions.gameHeight;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
   const dyCollision = newY === 0 || newY === gameHeight - 15;
 
@@ -130,8 +130,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   const player2Ref = useRef<any>(null);
   const ballRef = useRef<any>(null);
 
-  const gameWidth = defaultGameParams.gameWidth;
-  const gameHeight = defaultGameParams.gameHeight;
+  const gameWidth = defaultGameParams.dimensions.gameWidth;
+  const gameHeight = defaultGameParams.dimensions.gameHeight;
 
   // Initial render setup
   useEffect(() => {

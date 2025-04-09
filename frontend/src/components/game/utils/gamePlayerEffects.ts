@@ -116,6 +116,7 @@ function applyPaddleEffects(
         scene,
         paddleMesh,
         latestPowerUp.type,
+        latestPowerUp.negativeEffect,
         primaryColor,
         secondaryColor,
         playerIndex
@@ -136,7 +137,14 @@ function applyPaddleEffects(
         paddleMesh.position.y = gameToSceneY(adjustedY, paddleMesh);
       }
 
-      applyPaddleMaterial(paddleMesh, latestPowerUp.type, primaryColor, secondaryColor, true);
+      applyPaddleMaterial(
+        paddleMesh,
+        latestPowerUp.type,
+        latestPowerUp.negativeEffect,
+        primaryColor,
+        secondaryColor,
+        true
+      );
       animatePaddleResize(scene, paddleMesh, player.paddleHeight);
     }
   }
@@ -146,7 +154,7 @@ function applyPaddleEffects(
     if (lastState.glowLayer) lastState.glowLayer.dispose();
 
     // Reset the paddle material
-    applyPaddleMaterial(paddleMesh, null, primaryColor, secondaryColor, false);
+    applyPaddleMaterial(paddleMesh, null, false, primaryColor, secondaryColor, false);
 
     lastAppliedPowerUps.set(playerIndex, {
       type: null,
@@ -171,11 +179,11 @@ function createPowerUpVisualEffects(
   scene: Scene,
   paddleMesh: Mesh,
   powerUpType: string,
+  isNegative: boolean,
   primaryColor: Color3,
   secondaryColor: Color3,
   playerIndex: number
 ): { particleSystem: ParticleSystem; glowLayer: GlowLayer } {
-  const isNegative = isNegativePowerUp(powerUpType);
   const effectColor = isNegative ? secondaryColor : primaryColor;
 
   const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}`, scene);
@@ -269,29 +277,10 @@ function createPowerUpParticles(
   return particleSystem;
 }
 
-function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
-  particleSystem.emitRate = 0;
-
-  const fadeOutDuration = 1000;
-  const startTime = Date.now();
-
-  const fadeInterval = setInterval(() => {
-    const elapsedTime = Date.now() - startTime;
-    const progress = Math.min(elapsedTime / fadeOutDuration, 1);
-
-    if (progress >= 1) {
-      clearInterval(fadeInterval);
-      particleSystem.dispose();
-    } else {
-      particleSystem.minSize *= 1 - progress;
-      particleSystem.maxSize *= 1 - progress;
-    }
-  }, 100);
-}
-
 function applyPaddleMaterial(
   paddleMesh: Mesh,
   powerUpType: string | null,
+  isNegative: boolean,
   primaryColor: Color3,
   secondaryColor: Color3,
   isPowerUpActive: boolean
@@ -302,8 +291,6 @@ function applyPaddleMaterial(
   const baseEmissive = defaultGameObjectParams.paddle.emissiveIntensity;
 
   if (isPowerUpActive && powerUpType) {
-    const isNegative = isNegativePowerUp(powerUpType);
-
     if (isNegative) {
       material.emissiveColor = secondaryColor;
     } else {
@@ -408,14 +395,30 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   scene.beginAnimation(paddleMesh, 0, 30, false, 1);
 }
 
-function isNegativePowerUp(type: string): boolean {
-  return type === 'smaller_paddle' || type === 'slower_paddle';
-}
-
 function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] {
   return powerUps.filter(
     (p) => p.collectedBy > 0 && p.affectedPlayer === playerIndex && p.timeToExpire > 0
   );
+}
+
+function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
+  particleSystem.emitRate = 0;
+
+  const fadeOutDuration = 1000;
+  const startTime = Date.now();
+
+  const fadeInterval = setInterval(() => {
+    const elapsedTime = Date.now() - startTime;
+    const progress = Math.min(elapsedTime / fadeOutDuration, 1);
+
+    if (progress >= 1) {
+      clearInterval(fadeInterval);
+      particleSystem.dispose();
+    } else {
+      particleSystem.minSize *= 1 - progress;
+      particleSystem.maxSize *= 1 - progress;
+    }
+  }, 100);
 }
 
 function logPlayerState(player1Data: { player: Player; mesh: Mesh; powerUps: PowerUp[] }): void {

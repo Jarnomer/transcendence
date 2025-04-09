@@ -6,10 +6,12 @@ export abstract class PowerUp {
   id: number;
   x: number;
   y: number;
-  duration: number = defaultGameParams.powerUpDuration;
-  effectDuration: number = 0;
+  type: string = 'no_type';
+  timeToDespawn: number = defaultGameParams.powerUps.despawnTime;
+  timeToExpire: number = defaultGameParams.powerUps.expireTime;
   active: boolean = false;
   spawnTime: number = Date.now();
+  collectedTime: number = 0;
   isSpent: boolean = false;
   affectedPlayer: number = 0;
   negativeEffect: boolean = false;
@@ -20,8 +22,24 @@ export abstract class PowerUp {
     this.y = y;
   }
 
-  isExpired(): boolean {
-    return Date.now() - this.spawnTime >= this.duration;
+  shouldDespawn(): boolean {
+    if (this.active) {
+      return false; // Don't despawn if the power-up has been collected
+    }
+    const currentTime = Date.now();
+    return currentTime - this.spawnTime >= this.timeToDespawn;
+  }
+
+  shouldExpire(): boolean {
+    if (!this.active) {
+      return false;
+    }
+    const currentTime = Date.now();
+    return currentTime - this.collectedTime >= this.timeToExpire;
+  }
+
+  resetcollectedTime(): void {
+    this.collectedTime = Date.now();
   }
 
   abstract applyEffect(game: PongGame, player: number): void;
