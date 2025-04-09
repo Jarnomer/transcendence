@@ -129,8 +129,8 @@ export const defaultGameParams: GameParams = {
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,
-      paddleSpeedIncrease: 5,
-      paddleSpeedDecrease: -5,
+      paddleSpeedIncrease: 3,
+      paddleSpeedDecrease: -3,
       spinIntensityIncrease: 0.5,
     },
   },
