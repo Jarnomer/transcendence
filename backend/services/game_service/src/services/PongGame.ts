@@ -22,12 +22,14 @@ export default class PongGame {
   private readyState = new Map<string, boolean>();
 
   private powerUpManager: PowerUpManager;
+  private powerUps: boolean;
 
-  constructor(mode: string, difficulty: string) {
+  constructor(mode: string, difficulty: string, powerUps: boolean) {
     this.params = structuredClone(defaultGameParams);
     this.powerUpManager = new PowerUpManager(this);
     this.mode = mode;
     this.difficulty = difficulty;
+    this.powerUps = powerUps;
     this.gameState = {
       players: {
         player1: {
@@ -564,7 +566,9 @@ export default class PongGame {
   setGameStatus(status: GameStatus): void {
     this.gameStatus = status;
     if (status === 'playing') {
-      this.powerUpManager.startSpawning();
+      if (this.powerUps) {
+        this.powerUpManager.startSpawning();
+      }
     } else {
       this.powerUpManager.stopSpawning();
     }
