@@ -60,6 +60,7 @@ export class QueueModel {
         q.mode,
         q.variant,
         q.created_at,
+        q.name,
         COALESCE
         (
           json_group_array

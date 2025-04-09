@@ -1,6 +1,4 @@
-import { Any } from '@sinclair/typebox';
-
-import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
+import { GameParams, GameState, GameStatus, defaultGameParams } from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
 
@@ -70,10 +68,10 @@ export default class PongGame {
 
   setReadyState(playerId: string, state: boolean): void {
     if (playerId === this.player1Id) {
-      //console.log('Setting player1 ready state:', state);
+      // console.log('Setting player1 ready state:', state);
       this.readyState.set('player1', state);
     } else if (playerId === this.player2Id) {
-      console.log('Setting player2 ready state:', state);
+      // console.log('Setting player2 ready state:', state);
       this.readyState.set('player2', state);
     }
     if (this.areAllPlayersReady()) {
@@ -81,13 +79,13 @@ export default class PongGame {
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
-      console.log('Player 1 ready:', this.readyState.get('player1'));
-      console.log('Player 2 ready:', this.readyState.get('player2'));
+      // console.log('Player 1 ready:', this.readyState.get('player1'));
+      // console.log('Player 2 ready:', this.readyState.get('player2'));
     }
   }
 
   areAllPlayersReady(): boolean {
-    console.log('Checking if all players are ready, mode:', this.mode);
+    // console.log('Checking if all players are ready, mode:', this.mode);
     if (this.mode === 'AIvsAI') {
       return true;
     } else if (
@@ -98,6 +96,10 @@ export default class PongGame {
         return true;
       }
     } else if (this.mode === '1v1' && this.difficulty === 'online') {
+      if (this.readyState.get('player1') && this.readyState.get('player2')) {
+        return true;
+      }
+    } else if (this.mode === 'tournament') {
       if (this.readyState.get('player1') && this.readyState.get('player2')) {
         return true;
       }
@@ -288,7 +290,7 @@ export default class PongGame {
     this.resetBall();
     this.resetPaddles();
 
-    console.log('Game starting with max score:', this.params.maxScore);
+    // console.log('Game starting with max score:', this.params.maxScore);
 
     setTimeout(() => {
       this.setGameStatus('playing');
@@ -297,7 +299,7 @@ export default class PongGame {
   }
 
   startGameLoop(): void {
-    console.log('Starting game loop...');
+    // console.log('Starting game loop...');
     // Prevent multiple intervals
     if (this.updateInterval) return;
     this.updateInterval = setInterval(() => {

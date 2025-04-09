@@ -123,6 +123,9 @@ export default class PongGameSession {
     } else if (this.clients.size === 2 && this.mode === '1v1') {
       console.log('Both players connected');
       return true;
+    } else if (this.clients.size === 2 && this.mode === 'tournament') {
+      // console.log('Both players connected for tournament');
+      return true;
     }
     console.log('Not all players connected');
     return false;
@@ -292,7 +295,7 @@ export default class PongGameSession {
       clearInterval(this.interval);
       this.interval = null;
     }
-    console.log('Starting updateGame interval');
+    // console.log('Starting updateGame interval');
     // this.updateGame();
     this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }

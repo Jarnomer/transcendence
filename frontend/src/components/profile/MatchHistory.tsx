@@ -26,7 +26,8 @@ interface MatchHistoryProps {
 }
 
 export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
-  console.log(user);
+  // console.log(user);
+  console.info('Match history mounted');
 
   const itemVariants = {
     hidden: { opacity: 0, x: -20 },

@@ -98,11 +98,6 @@ export const PlayerQueue: React.FC = () => {
           )}
         </ul>
       </div>
-      <div className="glass-box mt-5 p-5 w-full relative overflow-hidden">
-        <BackgroundGlow></BackgroundGlow>
-        <h2 className="font-heading text-3xl">Open Tournaments</h2>
-        <p className="text-gray-500 text-sm">No on going Tournaments</p>
-      </div>
     </>
   );
 };

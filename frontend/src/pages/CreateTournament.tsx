@@ -15,7 +15,7 @@ export const CreateTournament: React.FC = () => {
   const [enablePowerUps, setEnablePowerUps] = useState(false);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   const [tournamentName, setTournamentName] = useState('');
-  const { setTournamentOptions } = useGameOptionsContext();
+  const { setTournamentOptions, setDifficulty } = useGameOptionsContext();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,6 +29,7 @@ export const CreateTournament: React.FC = () => {
       // selectedPowerUps: enablePowerUps ? selectedPowerUps : [],
     };
     setTournamentOptions(formData);
+    setDifficulty(formData.playerCount.toString());
     navigate('/game');
     console.log('Submitting tournament data:', formData);
   };
@@ -46,7 +47,7 @@ export const CreateTournament: React.FC = () => {
             Player Count: {playerCount}
             <input
               type="range"
-              min={4}
+              min={2}
               max={16}
               step={2}
               value={playerCount}

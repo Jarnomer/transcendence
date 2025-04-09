@@ -67,7 +67,7 @@ export const LeaderBoard: React.FC = () => {
     setLoading(true);
     const res = await getUsersWithRank();
     if (res) {
-      console.log(res);
+      // console.log(res);
       setUsers(res);
     }
     setLoading(false);

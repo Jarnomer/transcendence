@@ -15,7 +15,7 @@ import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
   const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
-  const { gameId, mode, difficulty } = useGameOptionsContext();
+  const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
   // const location = useLocation();
   const { loadingStates } = useLoading();
   // const { mode, difficulty, lobby, queueId } = location.state || {};
@@ -26,6 +26,14 @@ export const GamePage: React.FC = () => {
   // const [gameId, setGameId] = useState<string | null>(null);
   // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('GamePage mounted');
+    console.log('mode: ', mode);
+    console.log('difficulty: ', difficulty);
+    console.log('gameId: ', gameId);
+    console.log('setTournamentOptions', tournamentOptions);
+  }, []);
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser();
   useMatchmaking(userId);
