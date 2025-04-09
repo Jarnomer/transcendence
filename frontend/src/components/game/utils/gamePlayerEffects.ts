@@ -224,45 +224,33 @@ function createPowerUpParticles(
   }
 
   const particleSystem = new ParticleSystem(`powerUpParticles-${playerIndex}`, 50, scene);
-
-  particleSystem.particleTexture = new Texture(particleTexturePath, scene);
-
   const paddlePosition = paddleMesh.position.clone();
 
-  const isPlayer1 = playerIndex === 1;
-  const xOffset = isPlayer1 ? 0.2 : -0.2;
+  particleSystem.emitter = new Vector3(paddlePosition.x, paddlePosition.y, paddlePosition.z);
+  particleSystem.particleTexture = new Texture(particleTexturePath, scene);
 
-  particleSystem.emitter = new Vector3(
-    paddlePosition.x + xOffset,
-    paddlePosition.y,
-    paddlePosition.z
-  );
+  particleSystem.minSize = 0.4;
+  particleSystem.maxSize = 1.2;
+  particleSystem.minLifeTime = 1.5;
+  particleSystem.maxLifeTime = 3.0;
+  particleSystem.emitRate = 12;
+  particleSystem.minEmitPower = 10;
+  particleSystem.maxEmitPower = 20;
 
-  const emitAngle = isPlayer1 ? Math.PI * (150 / 180) : Math.PI * (30 / 180);
-  const dirX = Math.cos(emitAngle);
-  const dirY = Math.sin(emitAngle);
-
-  particleSystem.direction1 = new Vector3(dirX - 0.2, dirY + 0.1, 0);
-  particleSystem.direction2 = new Vector3(dirX + 0.2, dirY + 0.3, 0);
+  particleSystem.minEmitBox = new Vector3(-0.1, -0.1, -0.1);
+  particleSystem.maxEmitBox = new Vector3(0.1, 0.1, 0.1);
 
   particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
-  particleSystem.color2 = new Color4(color.r * 1.2, color.g * 1.2, color.b * 1.2, 1.0);
+  particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 1.0);
   particleSystem.colorDead = new Color4(color.r * 0.3, color.g * 0.3, color.b * 0.3, 0);
 
-  particleSystem.minSize = 0.05;
-  particleSystem.maxSize = 0.15;
-  particleSystem.minLifeTime = 0.5;
-  particleSystem.maxLifeTime = 1.5;
-  particleSystem.emitRate = 8;
-  particleSystem.minEmitPower = 0.2;
-  particleSystem.maxEmitPower = 0.5;
+  particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
-  // Add small anti gravity effect and slight rotation
-  particleSystem.gravity = new Vector3(0, -0.05, 0);
-  particleSystem.minAngularSpeed = -0.5;
-  particleSystem.maxAngularSpeed = 0.5;
+  particleSystem.gravity = new Vector3(0, 0, 0);
 
-  // Make particles follow the paddle
+  particleSystem.minAngularSpeed = -0.3;
+  particleSystem.maxAngularSpeed = 0.3;
+
   scene.onBeforeRenderObservable.add(() => {
     (particleSystem.emitter as Vector3).y = paddleMesh.position.y;
   });
@@ -275,7 +263,7 @@ function createPowerUpParticles(
 function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
   particleSystem.emitRate = 0;
 
-  const fadeOutDuration = 400;
+  const fadeOutDuration = 1000;
   const startTime = Date.now();
 
   const fadeInterval = setInterval(() => {
@@ -286,8 +274,8 @@ function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
       clearInterval(fadeInterval);
       particleSystem.dispose();
     } else {
-      particleSystem.minSize *= 1 - progress * 0.1;
-      particleSystem.maxSize *= 1 - progress * 0.1;
+      particleSystem.minSize *= 1 - progress;
+      particleSystem.maxSize *= 1 - progress;
     }
   }, 100);
 }
