@@ -43,7 +43,7 @@ export const useGameResult = (userId: string | null) => {
     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
       console.log('Game finished, submitting result');
       dispatch({ type: 'GAME_RESET' });
-      navigate('/home');
+      // navigate('/home');
       resetGameOptions();
       hasSubmittedResult.current = true;
     }
@@ -88,7 +88,7 @@ export const useGameResult = (userId: string | null) => {
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
-        navigate('/home');
+        // navigate('/home');
         return;
       }
       console.log('Submitting game result:', gameIdRef.current);
@@ -118,7 +118,7 @@ export const useGameResult = (userId: string | null) => {
           console.error('Error submitting game result:', err);
         })
         .finally(() => {
-          navigate('/home');
+          // navigate('/home');
         });
     };
   }, []);

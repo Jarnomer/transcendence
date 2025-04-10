@@ -48,15 +48,15 @@ export const GamePage: React.FC = () => {
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
       setLoading(false);
     }
-  }, [animate, loadingStates]);
+  }, [animate, loadingStates, gameId]);
 
   useEffect(() => {
     if (!gameId || !localPlayerId) return;
-    if (!loading && gameStatus === 'waiting') {
+    if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
       console.log('sending player ready for player: ', localPlayerId);
       sendMessage('game', createReadyInputMessage(localPlayerId, true));
     }
-  }, [loading, gameStatus]);
+  }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 
   // TODO: Reconnection handler
   // TODO: Pause - Resume
@@ -69,15 +69,15 @@ export const GamePage: React.FC = () => {
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}
-      {connections.game === 'connected' && gameStatus !== 'finished' && !loading ? (
+      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
         <>
           <div className="w-full h-full relative overflow-hidden">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 
             <p className="text-xs text-gray-500">
-              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState.ball.spin} |
-              Player2_DY: {gameState.players.player2.dy}
+              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} |
+              Player2_DY: {gameState?.players.player2.dy}
             </p>
             <GameCanvas gameState={gameState} />
           </div>

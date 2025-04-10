@@ -154,8 +154,8 @@ class TournamentGame extends GameMode {
     if (!data || data.status !== 'waiting') {
       throw new Error('Problem with creating tournament game');
     }
-    this.matchMaker.setQueueId(data.queue_id);
     this.matchMaker.setMatchMakerState(MatchMakerState.WAITING_FOR_PLAYERS);
+    this.matchMaker.setQueueId(data.queue_id);
   }
 }
 

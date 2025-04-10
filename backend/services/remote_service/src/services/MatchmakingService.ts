@@ -245,6 +245,7 @@ class TournamentMatchmaking extends MatchmakingMode {
     while (stack.length >= 2) {
       const p1 = stack.pop()!;
       const p2 = stack.pop()!;
+      console.log(`Creating match for players: ${p1.user_id} vs ${p2.user_id}`);
       const gameId = await this.createMatch([p1.user_id, p2.user_id]);
       const match: TournamentMatch = {
         gameId,
@@ -260,7 +261,6 @@ class TournamentMatchmaking extends MatchmakingMode {
   }
 
   handleGameResult(gameId: string, winnerId: string) {
-    console.log(`Game result for game ${gameId}: ${winnerId} won`);
     const tournamentId = this.playerTournament.get(winnerId);
     console.log(`Tournament ID: ${tournamentId}`);
     if (!tournamentId) return;
@@ -270,7 +270,6 @@ class TournamentMatchmaking extends MatchmakingMode {
 
     const match = session.matches.find((m) => m.gameId === gameId);
     if (!match || match.isComplete) return;
-    console.log(`Match found: ${match.gameId}`);
     match.isComplete = true;
     session.completedMatches.push(match);
 
@@ -283,6 +282,7 @@ class TournamentMatchmaking extends MatchmakingMode {
       if (session.nextRoundPlayers.length === 1) {
         this.endTournament(tournamentId);
       } else {
+        console.log(`All matches completed for round ${session.currentRound}`);
         session.activePlayers = [...session.nextRoundPlayers];
         session.nextRoundPlayers = [];
         session.currentRound++;
@@ -375,11 +375,19 @@ export class MatchmakingService {
     this.matchmakers[mode].removePlayer(user_id);
   }
 
-  handleGameResult(gameId: string, winnerId: string) {
+  handleGameResult(gameId: string, winnerId: string, loserId: string) {
     console.log(`Game result for game ${gameId}: ${winnerId} won`);
     for (const matchmaker of Object.values(this.matchmakers)) {
       matchmaker.handleGameResult(gameId, winnerId);
     }
+    this.broadcast([winnerId], {
+      type: 'game_winner',
+      state: { game_id: gameId },
+    });
+    this.broadcast([loserId], {
+      type: 'game_loser',
+      state: { game_id: gameId },
+    });
   }
 
   /**
@@ -448,11 +456,11 @@ export class MatchmakingService {
       const connection = this.clients.get(playerId);
       if (!connection) {
         console.error('Player not found:', playerId);
-        break;
+        continue;
       }
       if (connection.readyState === connection.OPEN) {
         connection.send(JSON.stringify(message));
-        // console.log('Sent message:', message, 'to player:', connection.playerId);
+        console.log('Sent message:', message, 'to player:', playerId);
       }
     }
   }

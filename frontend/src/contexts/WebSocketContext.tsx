@@ -31,7 +31,7 @@ interface WebSocketContextType {
     matchmaking: ConnectionStatus;
   };
   gameStatus: GameStatus;
-  gameState: GameState;
+  gameState: GameState | null;
   gameEvent: GameEvent;
   dispatch: React.Dispatch<any>;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ const useMatchmaking = (userId: string | null) => {
     if (!mode || !difficulty || !lobby) return;
     console.log('Setting matchmaker:', mode, difficulty);
     matchmaker.current = new MatchMaker({ mode, difficulty, lobby, queueId, tournamentOptions });
-  }, [mode, difficulty, lobby, queueId]);
+  }, [mode, difficulty, lobby, tournamentOptions]);
 
   const handleFindMatch = () => {
     console.log('Finding match');
@@ -44,24 +44,44 @@ const useMatchmaking = (userId: string | null) => {
     gameSocket.connect(params.current);
   };
 
-  const handleMatchFound = (game: any) => {
+  const handleMatchFound = useCallback((game: any) => {
     if (!matchmaker.current) return;
     console.log('Match found:', game);
-    closeConnection('matchmaking');
+    // closeConnection('matchmaking');
     matchmaker.current.setMatchMakerState(MatchMakerState.MATCHED);
     setGameId(game.game_id);
-    params.current.append('game_id', game.game_id);
+    params.current.set('game_id', game.game_id);
     gameSocket.connect(params.current);
-  };
+  }, []);
 
-  const handleJoinMatch = () => {
+  const handleJoinMatch = useCallback(() => {
     if (!matchmaker.current) return;
     console.log('Joining match with queue ID:', matchmaker.current.getQueueId());
     sendMessage('matchmaking', {
       type: 'join_match',
       payload: { queue_id: matchmaker.current.getQueueId(), user_id: userId, mode: mode },
     });
-  };
+  }, [userId, mode, matchmaker.current]);
+
+  const handleGameWinner = useCallback(() => {
+    if (!matchmakingSocket) return;
+    console.log('Game winner');
+    if (mode === 'tournament') {
+      console.log('Tournament mode, no need to close connection');
+      matchmaker.current?.setMatchMakerState(MatchMakerState.MATCHED);
+    } else {
+      console.log('Closing game connection');
+      matchmaker.current?.setMatchMakerState(MatchMakerState.SEARCHING);
+      navigate('/home');
+    }
+  }, [mode, matchmakingSocket]);
+
+  const handleGameLoser = useCallback(() => {
+    if (!matchmakingSocket) return;
+    console.log('Game loser');
+    matchmaker.current?.setMatchMakerState(MatchMakerState.SEARCHING);
+    navigate('/home');
+  }, [matchmakingSocket]);
 
   useEffect(() => {
     if (!userId || !matchmaker.current) return;
@@ -107,6 +127,7 @@ const useMatchmaking = (userId: string | null) => {
 
   // sending a message when the matchmaking connection is established
   useEffect(() => {
+    console.log('Matchmaking connection state changed:', connections.matchmaking);
     if (connections.matchmaking !== 'connected') return;
     console.log('Matchmaking connected');
     if (!matchmaker.current) return;
@@ -124,11 +145,27 @@ const useMatchmaking = (userId: string | null) => {
         console.error('Invalid matchmaker state');
         break;
     }
-    matchmakingSocket.addEventListener('match_found', handleMatchFound);
-    return () => {
-      matchmakingSocket.removeEventListener('match_found', handleMatchFound);
-    };
   }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
-};
 
+  useEffect(() => {
+    console.log('Attaching matchmaking event listeners');
+    matchmakingSocket.addEventListener('match_found', handleMatchFound);
+    matchmakingSocket.addEventListener('game_winner', handleGameWinner);
+    matchmakingSocket.addEventListener('game_loser', handleGameLoser);
+
+    return () => {
+      console.log('Detaching matchmaking event listeners');
+      matchmakingSocket.removeEventListener('match_found', handleMatchFound);
+      matchmakingSocket.removeEventListener('game_winner', handleGameWinner);
+      matchmakingSocket.removeEventListener('game_loser', handleGameLoser);
+    };
+  }, []); // only depend on stable vars
+
+  useEffect(() => {
+    console.log('mounting');
+    return () => {
+      console.log('unmounting');
+    };
+  }, []);
+};
 export default useMatchmaking;
