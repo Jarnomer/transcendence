@@ -115,18 +115,37 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
   return (
     <>
       {requests && requests.length > 0 ? (
-        <ul className="">
+        <motion.ul
+          className="pl-5 w-full h-full overflow-y-scroll"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          transition={{ duration: 0.4 }}
+        >
           {requests.map((friend) => (
-            <li
+            <motion.li
+              className=""
+              variants={listItemVariants}
               key={friend.user_id}
               onClick={() => navigate(`/profile/${friend.user_id}`)}
-              className="cursor-pointer border-1 bg-green"
             >
-              <div className="flex items-center gap-3">
-                <img className="w-10 h-10 " src={friend.avatar_url} alt={friend.display_name} />
-                <span className="text-md font-medium">{friend.display_name}</span>
+              <div className="flex w-full h-full items-center gap-2 border-1 my-1 bg-primary/20 clipped-corner-bottom-right">
+                <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
+                  <img
+                    className="object-cover w-full h-full"
+                    src={
+                      friend.display_name.startsWith('AI')
+                        ? './src/assets/images/ai.png'
+                        : friend.avatar_url
+                    }
+                    alt={`${friend.display_name}'s profile picture`}
+                  />
+                </div>
 
-                <>
+                <span className="text-xs font-medium">{friend.display_name}</span>
+
+                <div className="ml-5 flex gap-1">
                   <NavIconButton
                     id={`accept-friend-${friend.user_id}`}
                     icon="checkCircle"
@@ -137,11 +156,11 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
                     icon="xCircle"
                     onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
                   />
-                </>
+                </div>
               </div>
-            </li>
+            </motion.li>
           ))}
-        </ul>
+        </motion.ul>
       ) : (
         <p className="text-gray-400 text-xs text-left">0 pending friend requests</p>
       )}
