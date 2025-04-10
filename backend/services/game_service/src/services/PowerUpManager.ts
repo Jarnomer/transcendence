@@ -1,4 +1,4 @@
-import { GameParams, defaultGameParams } from '@shared/types';
+import { GameParams, defaultGameParams, PowerUpType } from '@shared/types';
 
 import PongGame from './PongGame';
 import { BiggerPaddlePowerUp } from './powerups/BiggerPaddlePowerUp';
@@ -48,14 +48,8 @@ export class PowerUpManager {
     );
   }
 
-  private getRandomPowerUpType(): string {
-    const types = [
-      'bigger_paddle',
-      'smaller_paddle',
-      'faster_paddle',
-      'slower_paddle',
-      'more_spin',
-    ];
+  private getRandomPowerUpType(): PowerUpType {
+    const types = Object.values(PowerUpType);
     return types[Math.floor(Math.random() * types.length)];
   }
 
@@ -72,19 +66,19 @@ export class PowerUpManager {
 
     let PowerUpClass: new (id: number, x: number, y: number) => PowerUp;
     switch (powerUpType) {
-      case 'bigger_paddle':
+      case PowerUpType.BiggerPaddle:
         PowerUpClass = BiggerPaddlePowerUp;
         break;
-      case 'smaller_paddle':
+      case PowerUpType.SmallerPaddle:
         PowerUpClass = SmallerPaddlePowerUp;
         break;
-      case 'faster_paddle':
+      case PowerUpType.FasterPaddle:
         PowerUpClass = FasterPaddlePowerUp;
         break;
-      case 'slower_paddle':
+      case PowerUpType.SlowerPaddle:
         PowerUpClass = SlowerPaddlePowerUp;
         break;
-      case 'more_spin':
+      case PowerUpType.MoreSpin:
         PowerUpClass = MoreSpinPowerUp;
         break;
       default:

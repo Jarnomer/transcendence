@@ -16,6 +16,15 @@ export interface Ball {
   spin: number;
 }
 
+export enum PowerUpType {
+  NoType = 'no_type',
+  BiggerPaddle = 'bigger_paddle',
+  SmallerPaddle = 'smaller_paddle',
+  FasterPaddle = 'faster_paddle',
+  SlowerPaddle = 'slower_paddle',
+  MoreSpin = 'more_spin',
+}
+
 export interface PowerUp {
   id: number;
   x: number;
@@ -25,7 +34,7 @@ export interface PowerUp {
   negativeEffect: boolean; // If true, the power-up has a negative effect on the other player
   timeToDespawn: number; // Time to despawn if not collected
   timeToExpire: number; // Time to expire after being collected
-  type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
+  type: PowerUpType;
 }
 
 export interface GameState {

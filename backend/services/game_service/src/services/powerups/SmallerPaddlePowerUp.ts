@@ -1,4 +1,4 @@
-import { defaultGameParams } from '@shared/types';
+import { defaultGameParams, PowerUpType } from '@shared/types';
 
 import PongGame from '../PongGame';
 import { PowerUp } from './PowerUp';
@@ -9,7 +9,7 @@ export class SmallerPaddlePowerUp extends PowerUp {
 
   constructor(id: number, x: number, y: number) {
     super(id, x, y);
-    this.type = 'smaller_paddle';
+    this.type = PowerUpType.SmallerPaddle;
     this.negativeEffect = true; // This power-up has a negative effect on the other player
   }
 

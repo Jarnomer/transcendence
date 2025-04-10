@@ -1,6 +1,6 @@
 // import { Any } from '@sinclair/typebox';
 
-import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
+import { GameState, GameStatus, GameParams, defaultGameParams, PowerUpType } from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
 
@@ -150,7 +150,7 @@ export default class PongGame {
     negativeEffect: boolean;
     timeToDespawn: number;
     timeToExpire: number;
-    type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
+    type: PowerUpType;
   }> {
     return structuredClone(this.gameState.powerUps);
   }
@@ -164,7 +164,7 @@ export default class PongGame {
     negativeEffect: boolean,
     timeToDespawn: number,
     timeToExpire: number,
-    type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin'
+    type: PowerUpType
   ): void {
     this.gameState.powerUps.push({
       id,
@@ -217,7 +217,6 @@ export default class PongGame {
   }
 
   removePowerUp(id: number): void {
-    console.log('Removed power up id ${id}');
     this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
   }
 
