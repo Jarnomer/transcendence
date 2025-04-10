@@ -14,7 +14,7 @@ import {
   CubicEase,
 } from 'babylonjs';
 
-import { PowerUp, defaultGameObjectParams } from '@shared/types';
+import { PowerUp, PowerUpType, defaultGameObjectParams } from '@shared/types';
 
 import { createParticleTexture } from './gamePostProcess';
 import { gameToSceneSize, gameToSceneX, gameToSceneY } from './gameUtilities';
@@ -122,15 +122,15 @@ export class PowerUpEffectsManager {
 
   private getPowerUpIconPath(type: string): string {
     switch (type) {
-      case 'bigger_paddle':
+      case PowerUpType.BiggerPaddle:
         return '/power-up/paddle_bigger.png';
-      case 'smaller_paddle':
+      case PowerUpType.SmallerPaddle:
         return '/power-up/paddle_smaller.png';
-      case 'faster_paddle':
+      case PowerUpType.FasterPaddle:
         return '/power-up/paddle_faster.png';
-      case 'slower_paddle':
+      case PowerUpType.SlowerPaddle:
         return '/power-up/paddle_slower.png';
-      case 'more_spin':
+      case PowerUpType.MoreSpin:
         return '/power-up/paddle_spin.png';
       default:
         return '/power-up/unknown_powerup.png';

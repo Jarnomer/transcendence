@@ -13,9 +13,9 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { PowerUp, Player, defaultGameObjectParams } from '@shared/types';
+import { PowerUp, Player, defaultGameObjectParams, PowerUpType } from '@shared/types';
 
-import { gameToSceneY, gameToSceneSize } from './gameUtilities';
+import { gameToSceneSize } from './gameUtilities';
 
 const playerEffectsMap: Map<number, PlayerEffects> = new Map();
 
@@ -236,19 +236,19 @@ function createPowerUpParticles(
   let particleTexturePath = '';
 
   switch (powerUpType) {
-    case 'bigger_paddle':
+    case PowerUpType.BiggerPaddle:
       particleTexturePath = '/power-up/sign_plus.png';
       break;
-    case 'smaller_paddle':
+    case PowerUpType.SmallerPaddle:
       particleTexturePath = '/power-up/sign_minus.png';
       break;
-    case 'faster_paddle':
+    case PowerUpType.FasterPaddle:
       particleTexturePath = '/power-up/sign_fast.png';
       break;
-    case 'slower_paddle':
+    case PowerUpType.SlowerPaddle:
       particleTexturePath = '/power-up/sign_slow.png';
       break;
-    case 'more_spin':
+    case PowerUpType.MoreSpin:
       particleTexturePath = '/power-up/sign_spin.png';
       break;
     default:
