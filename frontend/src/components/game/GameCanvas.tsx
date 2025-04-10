@@ -251,7 +251,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Handle game object updates
   useEffect(() => {
-    if (!canvasRef.current || !themeColors.current) return;
+    if (!canvasRef.current || !sceneRef.current || !themeColors.current) return;
 
     const { players, ball, powerUps } = gameState;
     const primaryColor = themeColors.current.primaryColor;
@@ -307,17 +307,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (score) applyScoreEffects(retroEffectsRef.current);
 
-    if (sceneRef.current && powerUps && powerUps.length > 0) {
-      applyPlayerEffects(
-        sceneRef.current,
-        player1Ref.current,
-        player2Ref.current,
-        players,
-        powerUps,
-        primaryColor,
-        secondaryColor
-      );
-    }
+    applyPlayerEffects(
+      sceneRef.current,
+      player1Ref.current,
+      player2Ref.current,
+      players,
+      powerUps,
+      primaryColor,
+      secondaryColor
+    );
 
     prevBallState.current = {
       x: ball.x,

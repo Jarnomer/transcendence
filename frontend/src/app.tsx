@@ -35,9 +35,7 @@ const App: React.FC = () => {
       <ChatProvider>
         <ModalProvider>
           <GameOptionsProvider>
-            <div className="fixed inset-0 -z-10">
-              <BackgroundGameProvider />
-            </div>
+            <BackgroundGameProvider />
             <div
               id="app-container"
               className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}

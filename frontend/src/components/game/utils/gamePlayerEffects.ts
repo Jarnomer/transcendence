@@ -15,15 +15,21 @@ import {
 
 import { PowerUp, Player, defaultGameObjectParams } from '@shared/types';
 
-import { enforceBoundary, gameToSceneY, gameToSceneSize } from './gameUtilities';
+import { gameToSceneY, gameToSceneSize } from './gameUtilities';
 
-interface LastAppliedPowerUp {
-  type: string | null;
+const playerEffectsMap: Map<number, PlayerEffects> = new Map();
+
+interface PowerUpEffect {
+  type: string;
   timestamp: number;
-  height: number;
-  position: number;
   particleSystem: ParticleSystem | null;
   glowLayer: GlowLayer | null;
+}
+
+interface PlayerEffects {
+  paddleHeight: number;
+  position: number;
+  activeEffects: Map<string, PowerUpEffect>;
 }
 
 interface LogConfig {
@@ -37,8 +43,6 @@ const loggingConfig: LogConfig = {
 };
 
 let lastLogTime = 0;
-
-const lastAppliedPowerUps: Map<number, LastAppliedPowerUp> = new Map();
 
 export function applyPlayerEffects(
   scene: Scene,
@@ -92,87 +96,101 @@ function applyPaddleEffects(
   secondaryColor: Color3,
   playerIndex: number
 ): void {
-  const lastState = lastAppliedPowerUps.get(playerIndex) || {
-    type: null,
-    timestamp: 0,
-    height: player.paddleHeight,
-    position: player.y,
-    particleSystem: null,
-    glowLayer: null,
-  };
+  if (!playerEffectsMap.has(playerIndex)) {
+    playerEffectsMap.set(playerIndex, {
+      paddleHeight: player.paddleHeight,
+      position: player.y,
+      activeEffects: new Map(),
+    });
+  } else {
+    const playerEffects = playerEffectsMap.get(playerIndex)!;
 
-  // Get most recently applied power-up and apply new effects if needed
-  if (activePowerUps.length > 0) {
-    const latestPowerUp = activePowerUps.sort((a, b) => b.timeToExpire - a.timeToExpire)[0];
-    const isNewPowerUp = lastState.type !== latestPowerUp.type;
-    const hasHeightChanged = Math.abs(lastState.height - player.paddleHeight) > 0.1;
+    if (playerEffects.paddleHeight !== player.paddleHeight) {
+      playerEffects.paddleHeight = player.paddleHeight;
+      animatePaddleResize(scene, paddleMesh, player.paddleHeight);
+    }
+    playerEffects.position = player.y;
+  }
 
-    if (isNewPowerUp || hasHeightChanged) {
-      if (lastState.particleSystem) lastState.particleSystem.dispose();
-      if (lastState.glowLayer) lastState.glowLayer.dispose();
+  const playerEffects = playerEffectsMap.get(playerIndex)!;
 
-      // Create new effects
+  const hadEffects = playerEffects.activeEffects.size > 0;
+  const hasNoEffectsNow = activePowerUps.length === 0;
+
+  if (hadEffects && hasNoEffectsNow) {
+    clearAllPlayerEffects(scene, paddleMesh, playerEffects, primaryColor);
+    return;
+  }
+
+  const currentEffectTypes = new Set(activePowerUps.map((p) => p.type));
+
+  applyPaddleMaterial(paddleMesh, activePowerUps, primaryColor, secondaryColor);
+
+  for (const powerUp of activePowerUps) {
+    const effectKey = powerUp.type;
+
+    if (!playerEffects.activeEffects.has(effectKey)) {
       const { particleSystem, glowLayer } = createPowerUpVisualEffects(
         scene,
         paddleMesh,
-        latestPowerUp.type,
-        latestPowerUp.negativeEffect,
+        powerUp.type,
+        powerUp.negativeEffect,
         primaryColor,
         secondaryColor,
-        playerIndex
+        playerIndex,
+        // Use size to increment effects
+        playerEffects.activeEffects.size
       );
 
-      lastAppliedPowerUps.set(playerIndex, {
-        type: latestPowerUp.type,
+      playerEffects.activeEffects.set(effectKey, {
+        type: powerUp.type,
         timestamp: Date.now(),
-        height: player.paddleHeight,
-        position: player.y,
         particleSystem,
         glowLayer,
       });
-
-      // Check if position needs adjustment due to boundary constraints
-      const adjustedY = enforceBoundary(player.y, player.paddleHeight);
-      if (Math.abs(adjustedY - player.y) > 0.1) {
-        paddleMesh.position.y = gameToSceneY(adjustedY, paddleMesh);
-      }
-
-      applyPaddleMaterial(
-        paddleMesh,
-        latestPowerUp.type,
-        latestPowerUp.negativeEffect,
-        primaryColor,
-        secondaryColor,
-        true
-      );
-      animatePaddleResize(scene, paddleMesh, player.paddleHeight);
     }
   }
-  // No active power-ups but we had one before
-  else if (lastState.type !== null) {
-    if (lastState.particleSystem) disposeParticleWithAnimation(lastState.particleSystem);
-    if (lastState.glowLayer) lastState.glowLayer.dispose();
 
-    // Reset the paddle material
-    applyPaddleMaterial(paddleMesh, null, false, primaryColor, secondaryColor, false);
-
-    lastAppliedPowerUps.set(playerIndex, {
-      type: null,
-      timestamp: Date.now(),
-      height: player.paddleHeight,
-      position: player.y,
-      particleSystem: null,
-      glowLayer: null,
-    });
-
-    // Check if position needs adjustment when returning to normal size
-    const adjustedY = enforceBoundary(player.y, player.paddleHeight);
-    if (Math.abs(adjustedY - player.y) > 0.1) {
-      paddleMesh.position.y = gameToSceneY(adjustedY, paddleMesh);
+  const effectsToRemove: string[] = [];
+  playerEffects.activeEffects.forEach((effect, type) => {
+    if (!currentEffectTypes.has(type)) {
+      effectsToRemove.push(type);
     }
+  });
 
+  for (const typeToRemove of effectsToRemove) {
+    const effect = playerEffects.activeEffects.get(typeToRemove)!;
+    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem);
+    if (effect.glowLayer) effect.glowLayer.dispose();
+    playerEffects.activeEffects.delete(typeToRemove);
     animatePaddleResize(scene, paddleMesh, player.paddleHeight);
   }
+}
+
+function clearAllPlayerEffects(
+  scene: Scene,
+  paddleMesh: Mesh,
+  playerEffects: PlayerEffects,
+  primaryColor: Color3
+): void {
+  playerEffects.activeEffects.forEach((effect) => {
+    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem);
+    if (effect.glowLayer) effect.glowLayer.dispose();
+  });
+
+  playerEffects.activeEffects.clear();
+
+  if (paddleMesh.material) {
+    const baseEmissive = defaultGameObjectParams.paddle.emissiveIntensity;
+    animateMaterialTransition(paddleMesh, primaryColor, baseEmissive);
+  }
+
+  const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
+  const scaledHeight = gameToSceneSize(playerEffects.paddleHeight) / originalHeight;
+
+  paddleMesh.scaling.y = scaledHeight;
+
+  scene.stopAnimation(paddleMesh);
 }
 
 function createPowerUpVisualEffects(
@@ -182,12 +200,13 @@ function createPowerUpVisualEffects(
   isNegative: boolean,
   primaryColor: Color3,
   secondaryColor: Color3,
-  playerIndex: number
+  playerIndex: number,
+  effectIndex: number
 ): { particleSystem: ParticleSystem; glowLayer: GlowLayer } {
+  const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}-${powerUpType}`, scene);
   const effectColor = isNegative ? secondaryColor : primaryColor;
 
-  const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}`, scene);
-  glowLayer.intensity = 0.4;
+  glowLayer.intensity = Math.max(0.2, 0.4 - effectIndex * 0.05);
   glowLayer.blurKernelSize = 48;
   glowLayer.addIncludedOnlyMesh(paddleMesh);
 
@@ -196,7 +215,8 @@ function createPowerUpVisualEffects(
     paddleMesh,
     powerUpType,
     effectColor,
-    playerIndex
+    playerIndex,
+    effectIndex
   );
 
   return { particleSystem, glowLayer };
@@ -207,7 +227,8 @@ function createPowerUpParticles(
   paddleMesh: Mesh,
   powerUpType: string,
   color: Color3,
-  playerIndex: number
+  playerIndex: number,
+  effectIndex: number
 ): ParticleSystem {
   let particleTexturePath = '';
 
@@ -231,19 +252,25 @@ function createPowerUpParticles(
       particleTexturePath = '/power-up/sign_unknown.png';
   }
 
-  const particleSystem = new ParticleSystem(`powerUpParticles-${playerIndex}`, 40, scene);
   const paddlePosition = paddleMesh.position.clone();
+  const particleSystem = new ParticleSystem(
+    `powerUpParticles-${playerIndex}-${powerUpType}`,
+    40,
+    scene
+  );
 
-  particleSystem.emitter = new Vector3(paddlePosition.x, paddlePosition.y, paddlePosition.z);
+  particleSystem.emitter = paddlePosition.clone();
+
   particleSystem.particleTexture = new Texture(particleTexturePath, scene);
 
-  particleSystem.minSize = 0.5;
-  particleSystem.maxSize = 1.5;
+  particleSystem.emitRate = Math.max(6, 12 - effectIndex * 2);
+  particleSystem.minSize = 0.5 - effectIndex * 0.05;
+  particleSystem.maxSize = 1.5 - effectIndex * 0.1;
+
   particleSystem.minLifeTime = 3;
   particleSystem.maxLifeTime = 5;
   particleSystem.minEmitPower = 4;
   particleSystem.maxEmitPower = 8;
-  particleSystem.emitRate = 12;
 
   particleSystem.minEmitBox = new Vector3(-0.2, -0.3, -0.2);
   particleSystem.maxEmitBox = new Vector3(0.2, 0.3, 0.2);
@@ -279,46 +306,53 @@ function createPowerUpParticles(
 
 function applyPaddleMaterial(
   paddleMesh: Mesh,
-  powerUpType: string | null,
-  isNegative: boolean,
+  activePowerUps: PowerUp[],
   primaryColor: Color3,
-  secondaryColor: Color3,
-  isPowerUpActive: boolean
+  secondaryColor: Color3
 ): void {
   if (!paddleMesh.material) return;
 
-  const material = paddleMesh.material as PBRMaterial;
   const baseEmissive = defaultGameObjectParams.paddle.emissiveIntensity;
 
-  if (isPowerUpActive && powerUpType) {
-    if (isNegative) {
-      material.emissiveColor = secondaryColor;
-    } else {
-      material.emissiveColor = primaryColor;
-    }
-
-    material.emissiveIntensity = baseEmissive * 1.5;
-
-    animateMaterialTransition(paddleMesh, material.emissiveColor, baseEmissive * 1.5);
-  } else {
-    material.emissiveColor = primaryColor;
-    material.emissiveIntensity = baseEmissive;
-
+  if (activePowerUps.length === 0) {
     animateMaterialTransition(paddleMesh, primaryColor, baseEmissive);
+    return;
   }
+
+  const positiveEffects = activePowerUps.filter((p) => !p.negativeEffect).length;
+  const negativeEffects = activePowerUps.filter((p) => p.negativeEffect).length;
+
+  let effectColor: Color3 = primaryColor;
+
+  if (positiveEffects > 0 && negativeEffects > 0) {
+    const ratio = positiveEffects / (positiveEffects + negativeEffects);
+    effectColor = Color3.Lerp(secondaryColor, primaryColor, ratio);
+  } else if (negativeEffects > 0) {
+    effectColor = secondaryColor;
+  }
+
+  const totalEffects = positiveEffects + negativeEffects;
+  const intensityMultiplier = 1.2 + Math.min(totalEffects * 0.2, 0.8);
+  const targetIntensity = baseEmissive * intensityMultiplier;
+
+  animateMaterialTransition(paddleMesh, effectColor, targetIntensity);
 }
 
 function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntensity: number): void {
   if (!mesh.material) return;
 
+  const scene = mesh.getScene();
   const material = mesh.material as PBRMaterial;
+
   const startColor = material.emissiveColor.clone();
   const startIntensity = material.emissiveIntensity;
+
+  scene.stopAnimation(material);
 
   // Animate color
   const colorAnim = new Animation(
     'materialColorAnimation',
-    'material.emissiveColor',
+    'emissiveColor',
     30,
     Animation.ANIMATIONTYPE_COLOR3,
     Animation.ANIMATIONLOOPMODE_CONSTANT
@@ -332,7 +366,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
   // Animate intensity
   const intensityAnim = new Animation(
     'materialIntensityAnimation',
-    'material.emissiveIntensity',
+    'emissiveIntensity',
     30,
     Animation.ANIMATIONTYPE_FLOAT,
     Animation.ANIMATIONLOOPMODE_CONSTANT
@@ -348,22 +382,22 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
   colorAnim.setEasingFunction(easingFunction);
   intensityAnim.setEasingFunction(easingFunction);
 
-  mesh.animations = [colorAnim, intensityAnim];
+  material.animations = [colorAnim, intensityAnim];
 
-  mesh.getScene().beginAnimation(mesh, 0, 20, false);
+  scene.beginAnimation(material, 0, 20, false, 1, () => {
+    material.emissiveColor = targetColor.clone();
+    material.emissiveIntensity = targetIntensity;
+  });
 }
 
 function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: number): void {
-  const targetHeightInBabylonUnits = gameToSceneSize(targetHeight);
   const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
-  const targetScaleY = targetHeightInBabylonUnits / originalHeight;
-
-  if (Math.abs(paddleMesh.scaling.y - targetScaleY) < 0.05) return;
+  const scaledHeight = gameToSceneSize(targetHeight) / originalHeight;
 
   let overshootMultiplier: number;
   let dampingMultiplier: number;
 
-  if (paddleMesh.scaling.y < targetScaleY) {
+  if (paddleMesh.scaling.y < scaledHeight) {
     overshootMultiplier = 1.3;
     dampingMultiplier = 1.1;
   } else {
@@ -380,9 +414,9 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   );
   const scaleKeys = [
     { frame: 0, value: paddleMesh.scaling.y },
-    { frame: 5, value: targetScaleY * overshootMultiplier },
-    { frame: 15, value: targetScaleY * dampingMultiplier },
-    { frame: 30, value: targetScaleY },
+    { frame: 5, value: scaledHeight * overshootMultiplier },
+    { frame: 15, value: scaledHeight * dampingMultiplier },
+    { frame: 30, value: scaledHeight },
   ];
   scaleAnim.setKeys(scaleKeys);
 
@@ -392,7 +426,9 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
 
   paddleMesh.animations = [scaleAnim];
 
-  scene.beginAnimation(paddleMesh, 0, 30, false, 1);
+  scene.beginAnimation(paddleMesh, 0, 30, false, 1, () => {
+    paddleMesh.scaling.y = scaledHeight;
+  });
 }
 
 function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] {
@@ -404,7 +440,7 @@ function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] 
 function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
   particleSystem.emitRate = 0;
 
-  const fadeOutDuration = 1000;
+  const fadeOutDuration = 600;
   const startTime = Date.now();
 
   const fadeInterval = setInterval(() => {
