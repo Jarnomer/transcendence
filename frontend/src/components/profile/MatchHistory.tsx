@@ -42,23 +42,17 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
   };
 
   return (
-    <>
+    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
       <div className="clipped-corner w-full h-[20px] bg-primary text-black text-sm">
         Game History
       </div>
 
-      <motion.div
-        className=" w-full h-full p-4 glass-box text-sm"
-        variants={animationVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        <h3 className="text-lg font-semibold">Match History</h3>
+      <motion.div className=" w-full h-full p-4 glass-box text-sm">
+        <h3 className="text-md ">Match History</h3>
         {/* Stats */}
-        <div className="w-full text-center flex items-center justify-center gap-6 text-lg">
-          <span className="font-semibold">Wins: {user.stats?.wins}</span>
-          <span className="font-semibold">Losses: {user.stats?.losses}</span>
+        <div className="w-full text-center flex items-center justify-center gap-6">
+          <span className="">Wins: {user.stats?.wins}</span>
+          <span className="">Losses: {user.stats?.losses}</span>
         </div>
         <div className="flex min-h-full flex-col gap-2 mt-2">
           {user.games && user.games.length > 0 ? (
@@ -92,6 +86,6 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
           )}
         </div>
       </motion.div>
-    </>
+    </motion.div>
   );
 };

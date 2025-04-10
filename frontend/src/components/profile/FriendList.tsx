@@ -9,6 +9,38 @@ import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assumin
 import { useUser } from '../../contexts/user/UserContext';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 
+export const listAnimationVariants = {
+  initial: {
+    clipPath: 'inset(0 0 100% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut', delay: 0.5 },
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
+
+const containerVariants = {
+  visible: {
+    transition: {
+      staggerChildren: 0.1, // Stagger items
+      delay: 0.4,
+    },
+  },
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -10 },
+};
+
 type Friend = {
   user_id: string;
   display_name: string;
@@ -111,7 +143,7 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
           ))}
         </ul>
       ) : (
-        <p className="text-gray-400 ">0 pending friend requests</p>
+        <p className="text-gray-400 text-xs text-left">0 pending friend requests</p>
       )}
     </>
   );
@@ -120,24 +152,46 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
 export const Friends: React.FC<FriendListProps> = ({ friends }) => {
   const navigate = useNavigate();
   return friends && friends.length > 0 ? (
-    <ul className="flex w-full flex-wrap gap-2">
+    <motion.ul
+      className="pl-5 w-full h-full overflow-y-scroll"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      transition={{ duration: 0.4 }}
+    >
       {friends.map((friend) => (
-        <li
+        <motion.li
+          className=""
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
-          className="aspect-square w-[100px] cursor-pointer  bg-green"
+          variants={listItemVariants}
         >
-          <div className="flex flex-col  justify-centeritems-center gap-3">
+          <div className="flex w-full h-full items-center gap-2 border-1 my-1 bg-primary/20 clipped-corner-bottom-right">
+            <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
+              <img
+                className="object-cover w-full h-full"
+                src={
+                  friend.display_name.startsWith('AI')
+                    ? './src/assets/images/ai.png'
+                    : friend.avatar_url
+                }
+                alt={`${friend.display_name}'s profile picture`}
+              />
+            </div>
+            <span className="text-xs font-medium">{friend.display_name}</span>
+          </div>
+
+          {/* <div className="flex flex-col  justify-centeritems-center gap-3">
             <img
               className="w-full object-contain"
               src={friend.avatar_url}
               alt={friend.display_name}
             />
-          </div>
-          <span className="text-xs font-medium">{friend.display_name}</span>
-        </li>
+          </div> */}
+        </motion.li>
       ))}
-    </ul>
+    </motion.ul>
   ) : (
     <p className="text-gray-400 "></p>
   );
@@ -156,13 +210,11 @@ export const FriendList: React.FC<FriendListProps> = ({
   return (
     <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
       <div className="clipped-corner w-full h-[20px] bg-primary text-black text-sm">Friends</div>
-      <motion.div className=" p-4 glass-box">
-        <div className="flex gap-4 mb-4">
+      <motion.div className="">
+        <div className="flex gap-4 p-2">
           <button
             onClick={() => setActiveTab('friends')}
-            className={`pb-2 text-sm ${
-              activeTab === 'friends' ? 'border-b-2 border-primary' : 'text-gray-400'
-            }`}
+            className={`text-xs ${activeTab === 'friends' ? 'text-secondary' : ''}`}
           >
             {friends.length} Friends
           </button>
@@ -170,9 +222,7 @@ export const FriendList: React.FC<FriendListProps> = ({
             <>
               <button
                 onClick={() => setActiveTab('requests')}
-                className={`pb-2 text-sm ${
-                  activeTab === 'requests' ? 'border-b-2 border-primary' : 'text-gray-400'
-                }`}
+                className={` text-xs ${activeTab === 'requests' ? ' text-secondary' : ''}`}
               >
                 Requests
               </button>

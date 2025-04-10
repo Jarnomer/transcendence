@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Footer } from './components/footer/Footer.tsx';
+import BackgroundGameProvider from './components/game/BackgroundGameProvider.tsx';
 import { Header } from './components/header/Header.tsx';
 import { ChatModal } from './components/modals/ChatModal.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
@@ -30,9 +31,9 @@ const App: React.FC = () => {
   return (
     <>
       <GameOptionsProvider>
-        {/* <div className="fixed inset-0 -z-10">
-          <BackgroundGameProvider />
-        </div> */}
+        <div className="fixed inset-0 -z-10">
+          <BackgroundGameProvider></BackgroundGameProvider>
+        </div>
         <div
           id="app-container"
           className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}

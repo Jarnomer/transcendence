@@ -5,13 +5,13 @@ import { useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { FriendList } from '@components/profile/FriendList.tsx';
-import { MatchHistory } from '@components/profile/MatchHistory';
 import { RadialBackground } from '@components/profile/RadialBackground.tsx';
 
 import { getUserData } from '@services/userService';
 
 import { UserDataResponseType } from '@shared/types/userTypes';
 
+import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { UserInformationForm } from '../components/signUp/UserInformationForm';
 import { useUser } from '../contexts/user/UserContext';
@@ -101,29 +101,25 @@ export const ProfilePage: React.FC = () => {
         <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
-            <div>
-              <UserInformationForm
-                user={user}
-                setLoading={setLoading}
-                setEditProfile={setEditProfile}
-              ></UserInformationForm>
-            </div>
+            <UserInformationForm
+              user={user}
+              setLoading={setLoading}
+              setEditProfile={setEditProfile}
+            ></UserInformationForm>
           ) : (
             <>
-              <ProfileHeader
-                user={user}
-                isOwnProfile={isOwnProfile}
-                setLoading={setLoading}
-                setEditProfile={setEditProfile}
-                editProfile={editProfile}
-                sent={sent}
-              ></ProfileHeader>
-
-              <motion.div
-                key="defaultSection"
-                className="w-full md:w-[80%] h-1/2 flex flex-grow gap-4 flex-col md:flex-row items-center md:items-top justify-center text-center"
-              >
-                <motion.div className="w-full sm:w-1/2 h-full">
+              <div className="w-full h-full gap-3 sm:flex">
+                <div className="w-full sm:w-1/2">
+                  <ProfileHeader
+                    user={user}
+                    isOwnProfile={isOwnProfile}
+                    setLoading={setLoading}
+                    setEditProfile={setEditProfile}
+                    editProfile={editProfile}
+                    sent={sent}
+                  ></ProfileHeader>
+                </div>
+                <motion.div className="w-[80%] sm:w-1/2 h-full">
                   <FriendList
                     isOwnProfile={isOwnProfile}
                     friends={user.friends}
@@ -131,7 +127,12 @@ export const ProfilePage: React.FC = () => {
                     sents={sent}
                   />
                 </motion.div>
-                <motion.div className="w-full sm:w-1/2 h-full">
+              </div>
+              <motion.div
+                key="defaultSection"
+                className="w-full mt-10  h-1/2 flex gap-4 flex-col md:flex-row  md:items-top  text-center"
+              >
+                <motion.div className="w-[80%] sm:w-1/2 h-full">
                   <MatchHistory user={user} />
                 </motion.div>
               </motion.div>
