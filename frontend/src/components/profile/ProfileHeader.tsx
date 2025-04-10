@@ -78,7 +78,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className="flex flex-col text-xs">
               <p className="text-gray-400">@{user.username}</p>
               <span
-                className={`text-xs ${user.status == 'online' ? 'text-green-500' : 'text-gray-500'}`}
+                className={`text-xs ${user.status == 'online' ? 'text-secondary' : 'text-gray-500'}`}
               >
                 {user.status === 'online' ? 'Online' : 'Offline'}
               </span>

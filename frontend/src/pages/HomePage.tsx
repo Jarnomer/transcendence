@@ -68,7 +68,7 @@ export const HomePage: React.FC = () => {
         <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav>
         <motion.div id="home-page-content" className="flex h-full lg:px-20 gap-2 md:gap-10">
           {activeTab === 'leaderboard' && (
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key="leaderboard"
                 className="w-1/2 flex gap-10"
