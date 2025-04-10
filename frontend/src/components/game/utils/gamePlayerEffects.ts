@@ -80,8 +80,11 @@ export function applyPlayerEffects(
   if (loggingConfig.enabled && currentTime - lastLogTime > loggingConfig.logFrequency) {
     logPlayerState({
       player: players.player1,
-      mesh: player1Mesh,
       powerUps: player1PowerUps,
+    });
+    logPlayerState({
+      player: players.player2,
+      powerUps: player2PowerUps,
     });
     lastLogTime = currentTime;
   }
@@ -152,7 +155,7 @@ function applyPaddleEffects(
   }
 
   const effectsToRemove: string[] = [];
-  playerEffects.activeEffects.forEach((effect, type) => {
+  playerEffects.activeEffects.forEach((_, type) => {
     if (!currentEffectTypes.has(type)) {
       effectsToRemove.push(type);
     }
@@ -457,27 +460,20 @@ function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
   }, 100);
 }
 
-function logPlayerState(player1Data: { player: Player; mesh: Mesh; powerUps: PowerUp[] }): void {
-  const player1Log = formatPlayerLog(player1Data.player, player1Data.mesh, player1Data.powerUps);
+function logPlayerState(playerData: { player: Player; powerUps: PowerUp[] }): void {
+  const player1Log = formatPlayerLog(playerData.player, playerData.powerUps);
+  const player2Log = formatPlayerLog(playerData.player, playerData.powerUps);
 
   console.log(`${player1Log}`);
+  console.log(`${player2Log}`);
 
-  function formatPlayerLog(player: Player, mesh: Mesh, powerUps: PowerUp[]): string {
-    const sceneY = gameToSceneY(player.y, mesh);
-    const scenePaddleHeight = gameToSceneSize(player.paddleHeight);
-
+  function formatPlayerLog(player: Player, powerUps: PowerUp[]): string {
     const powerUpsInfo =
       powerUps.length > 0
         ? powerUps.map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`).join('\n')
         : '      - None';
-
-    return `    BACKEND
-    Position Y: ${player.y}
-    Paddle Height: ${player.paddleHeight}
-    FRONTEND
-    Mesh Y: ${sceneY}
-    Mesh Height: ${scenePaddleHeight}
-    Active Power-Ups:
+    return `    Player: ${player.id}
+    Power-Ups:
 ${powerUpsInfo}`;
   }
 }
