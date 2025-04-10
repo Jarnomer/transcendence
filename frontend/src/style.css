@@ -119,8 +119,7 @@ body {
 
   /* --color-primary: oklch(88.3% 0.1288 203.73); */
   --color-primary: #ea355a;
-  --color-secondary: oklch(8% 0% 0);
-  --color-creators-secondary: oklch(45.9% 0.0227 21.99);
+  --color-secondary: #76f7fd;
   --color-background: black;
   /* --font-primary: "Tomorrow", "sans-serif"; */
   --font-primary: 'JetBrains Mono', 'italic';

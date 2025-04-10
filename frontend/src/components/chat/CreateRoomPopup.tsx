@@ -39,8 +39,8 @@ export const CreateRoomPopup: React.FC<CreateRoomPopupProps> = ({
   return (
     <>
       {isVisible && (
-        <div className=" bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-4 rounded-lg w-96">
+        <div className="glass-box bg-opacity-50 flex justify-center items-center z-50">
+          <div className=" p-4 rounded-lg w-96">
             <h2>Create a Room</h2>
             <input
               type="text"
@@ -75,13 +75,10 @@ export const CreateRoomPopup: React.FC<CreateRoomPopupProps> = ({
               ))}
             </div>
             <div className="mt-4 flex justify-between">
-              <button onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
+              <button onClick={onClose} className="px-4 py-2 ">
                 Cancel
               </button>
-              <button
-                onClick={handleRoomCreation}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-              >
+              <button onClick={handleRoomCreation} className="px-4 py-2 ">
                 Create Room
               </button>
             </div>

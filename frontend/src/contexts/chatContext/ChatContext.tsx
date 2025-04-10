@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+import { toast } from 'react-hot-toast';
+
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 import {
   addMember,
@@ -10,6 +12,8 @@ import {
   getPublicChat,
 } from '@/services/chatService';
 
+import { MessageNotification } from '../../components/chat/MessageNotification';
+import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../user/UserContext';
 
 const ChatContext = createContext<any>(null);
@@ -26,9 +30,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [rooms, setRooms] = useState<any[]>([]);
   const [myRooms, setMyRooms] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<any>();
 
   const roomIdRef = useRef(roomId);
   const selectedFriendRef = useRef(selectedFriend);
+  const selectedRoomRef = useRef(selectedRoom);
+  const { openModal } = useModal();
 
   useEffect(() => {
     if (!user) return;
@@ -101,6 +108,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [roomId]);
 
+  useEffect(() => {
+    console.log('my rooms useEffect: ', myRooms);
+  }, [myRooms]);
+
   //get public chat rooms
   useEffect(() => {
     getPublicChat()
@@ -138,12 +149,54 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [connections.chat]);
 
+  const notifyMessage = (event: MessageEvent) => {
+    if (
+      (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
+      (selectedFriendRef.current &&
+        event.receiver_id &&
+        event.sender_id === selectedFriendRef.current)
+    ) {
+      return;
+    }
+    toast.custom((t) => (
+      <MessageNotification>
+        <div
+          className="h-full w-full flex items-center glass-box"
+          onClick={() => handleNotificationClick(event.sender_id)}
+        >
+          <div className="h-full aspect-square p-2">
+            <img
+              className="object-contain h-full w-full border-1"
+              src={event.sender_avatar_url || './src/assets/images/default_avatar.png'}
+            ></img>
+          </div>
+          <span className="text-xs">{event.message}</span>
+        </div>
+      </MessageNotification>
+    ));
+  };
+
+  const handleNotificationClick = (sender_id: string) => {
+    setSelectedFriend(sender_id);
+    setRoomId(null);
+    console.log('message notfication CLICKED: ', sender_id);
+    openModal('chatModal', {
+      user,
+      friends,
+      selectedFriendId: sender_id,
+      sendChatMessage,
+    });
+  };
+
   const handleChatMessage = (event: MessageEvent) => {
+    console.log('----- HANDLE MESSAGE -----');
     console.log('Chat message:', event);
     console.log('Chat room id:', event.room_id);
     console.log('chat receiver_id:', event.receiver_id);
     console.log('chat selected room id:', roomIdRef.current);
     console.log('chat selected friend id:', selectedFriendRef.current);
+
+    notifyMessage(event);
     if (
       (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
       (selectedFriendRef.current &&

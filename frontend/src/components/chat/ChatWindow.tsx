@@ -11,6 +11,7 @@ interface ChatWindowProps {
   user: UserDataResponseType;
   friends: UserDataResponseType[];
   selectedFriendId: string | null;
+  roomId: string | null;
   onBack: () => void;
   onSend: (text: string) => void;
 }
@@ -27,6 +28,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const { messages } = useChatContext();
   const navigate = useNavigate();
 
+  console.log(roomId);
   return (
     <div className="w-full h-full flex flex-col flex-1">
       <div className="p-2 border-b flex justify-between items-center ">
@@ -44,7 +46,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
         <div />
       </div>
-      <MessageList messages={messages} user={user} friends={friends} />
+      <MessageList messages={messages} user={user} />
       <div className="p-2 border-t flex gap-2">
         <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
       </div>

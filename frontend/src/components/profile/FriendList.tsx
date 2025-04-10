@@ -88,19 +88,15 @@ export const FriendList: React.FC<FriendListProps> = ({
 
   const renderList = (list: Friend[], emptyText: string, isRequestList: boolean) => {
     return list && list.length > 0 ? (
-      <ul>
+      <ul className="">
         {list.map((friend) => (
           <li
             key={friend.user_id}
             onClick={() => navigate(`/profile/${friend.user_id}`)}
-            className="cursor-pointer"
+            className="cursor-pointer border-1 bg-green"
           >
             <div className="flex items-center gap-3">
-              <img
-                className="w-10 h-10 rounded-full"
-                src={friend.avatar_url}
-                alt={friend.display_name}
-              />
+              <img className="w-10 h-10 " src={friend.avatar_url} alt={friend.display_name} />
               <span className="text-md font-medium">{friend.display_name}</span>
               {isRequestList && (
                 <>
@@ -152,14 +148,6 @@ export const FriendList: React.FC<FriendListProps> = ({
             >
               Requests
             </button>
-            <button
-              onClick={() => setActiveTab('sent')}
-              className={`pb-2 font-semibold ${
-                activeTab === 'sent' ? 'border-b-2 border-black' : 'text-gray-400'
-              }`}
-            >
-              Sent
-            </button>
           </>
         ) : null}
       </div>
@@ -169,9 +157,7 @@ export const FriendList: React.FC<FriendListProps> = ({
           ? renderList(friends, 'No friends yet', false)
           : activeTab === 'requests'
             ? renderList(requests, 'No requests yet', true)
-            : activeTab === 'sent'
-              ? renderList(sents, 'No requests sent yet', true)
-              : null}
+            : null}
       </div>
     </motion.div>
   );
