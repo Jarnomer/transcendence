@@ -1,6 +1,6 @@
 // import { Any } from '@sinclair/typebox';
 
-import { GameState, GameStatus, GameParams, defaultGameParams } from '@shared/types';
+import { GameState, GameStatus, GameParams, defaultGameParams, PowerUpType } from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
 
@@ -13,13 +13,10 @@ export default class PongGame {
   private gameStatus: GameStatus;
   private updateInterval: NodeJS.Timeout | null = null;
 
-  private player1Id: string | null = null;
-  private player2Id: string | null = null;
-
   private mode: string;
   private difficulty: string;
 
-  private readyState = new Map<string, boolean>();
+  private readyState = new Map<number, boolean>();
 
   private powerUpManager: PowerUpManager;
   private powerUps: boolean;
@@ -59,36 +56,34 @@ export default class PongGame {
   }
 
   addPlayer(playerId: string): void {
-    if (!this.player1Id) {
+    if (!this.gameState.players.player1.id) {
       console.log('Adding player1:', playerId);
-      this.player1Id = playerId;
       this.gameState.players.player1.id = playerId;
-      this.readyState.set('player1', false);
-    } else if (!this.player2Id) {
+      this.readyState.set(1, false);
+    } else if (!this.gameState.players.player2.id) {
       console.log('Adding player2:', playerId);
-      this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
-      this.readyState.set('player2', false);
+      this.readyState.set(2, false);
     } else {
       throw new Error('Cannot add more than 2 players');
     }
   }
 
   setReadyState(playerId: string, state: boolean): void {
-    if (playerId === this.player1Id) {
+    if (playerId === this.gameState.players.player1.id) {
       //console.log('Setting player1 ready state:', state);
-      this.readyState.set('player1', state);
-    } else if (playerId === this.player2Id) {
+      this.readyState.set(1, state);
+    } else if (playerId === this.gameState.players.player2.id) {
       console.log('Setting player2 ready state:', state);
-      this.readyState.set('player2', state);
+      this.readyState.set(2, state);
     }
     if (this.areAllPlayersReady()) {
       //console.log('All players are ready!');
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
-      console.log('Player 1 ready:', this.readyState.get('player1'));
-      console.log('Player 2 ready:', this.readyState.get('player2'));
+      console.log('Player 1 ready:', this.readyState.get(1));
+      console.log('Player 2 ready:', this.readyState.get(2));
     }
   }
 
@@ -100,11 +95,11 @@ export default class PongGame {
       this.mode === 'singleplayer' ||
       (this.mode === '1v1' && this.difficulty === 'local')
     ) {
-      if (this.readyState.get('player1')) {
+      if (this.readyState.get(1)) {
         return true;
       }
     } else if (this.mode === '1v1' && this.difficulty === 'online') {
-      if (this.readyState.get('player1') && this.readyState.get('player2')) {
+      if (this.readyState.get(1) && this.readyState.get(2)) {
         return true;
       }
     }
@@ -112,47 +107,38 @@ export default class PongGame {
   }
 
   getGameStatus(): GameStatus {
-    return structuredClone(this.gameStatus);
+    return this.gameStatus;
   }
   getGameState(): GameState {
+    // Return a deep copy of the game state since it is an object
     return structuredClone(this.gameState);
   }
   getPaddleSpeed(player: number): number {
-    if (player === 1) {
-      return structuredClone(this.gameState.players.player1.paddleSpeed);
-    } else {
-      return structuredClone(this.gameState.players.player2.paddleSpeed);
-    }
+    return player === 1
+      ? this.gameState.players.player1.paddleSpeed
+      : this.gameState.players.player2.paddleSpeed;
   }
 
   getSpinIntensity(player: number): number {
-    if (player === 1) {
-      return structuredClone(this.gameState.players.player1.spinIntensity);
-    } else {
-      return structuredClone(this.gameState.players.player2.spinIntensity);
-    }
+    return player === 1
+      ? this.gameState.players.player1.spinIntensity
+      : this.gameState.players.player2.spinIntensity;
   }
 
   getHeight() {
-    return structuredClone(this.params.dimensions.gameHeight);
+    return this.params.dimensions.gameHeight;
   }
   getWidth() {
-    return structuredClone(this.params.dimensions.gameWidth);
+    return this.params.dimensions.gameWidth;
   }
   getPaddleHeight(player: number): number {
-    if (player === 1) {
-      return structuredClone(this.gameState.players.player1.paddleHeight);
-    } else {
-      return structuredClone(this.gameState.players.player2.paddleHeight);
-    }
+    return player === 1
+      ? this.gameState.players.player1.paddleHeight
+      : this.gameState.players.player2.paddleHeight;
   }
 
   getPlayerId(player: number): string | null {
-    if (player === 1) {
-      return structuredClone(this.player1Id);
-    } else {
-      return structuredClone(this.player2Id);
-    }
+    return player === 1 ? this.gameState.players.player1.id : this.gameState.players.player2.id;
   }
 
   getPowerUps(): Array<{
@@ -164,7 +150,7 @@ export default class PongGame {
     negativeEffect: boolean;
     timeToDespawn: number;
     timeToExpire: number;
-    type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin';
+    type: PowerUpType;
   }> {
     return structuredClone(this.gameState.powerUps);
   }
@@ -178,7 +164,7 @@ export default class PongGame {
     negativeEffect: boolean,
     timeToDespawn: number,
     timeToExpire: number,
-    type: 'bigger_paddle' | 'smaller_paddle' | 'faster_paddle' | 'slower_paddle' | 'more_spin'
+    type: PowerUpType
   ): void {
     this.gameState.powerUps.push({
       id,
@@ -191,7 +177,6 @@ export default class PongGame {
       timeToExpire,
       type: type,
     });
-    // console.log(`Power-up spawned, id: ${id}, type: ${type}, position: (${x}, ${y})`);
   }
 
   collectPowerUp(
@@ -232,22 +217,19 @@ export default class PongGame {
   }
 
   removePowerUp(id: number): void {
-    console.log('Removed power up id ${id}');
     this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
   }
 
   setPlayerId(player: number, playerId: string): void {
     if (player === 1) {
-      this.player1Id = playerId;
       this.gameState.players.player1.id = playerId;
     } else {
-      this.player2Id = playerId;
       this.gameState.players.player2.id = playerId;
     }
   }
 
   setPaddleHeight(player: number, height: number): void {
-    this.repositionPaddleAfterHeightChange(player, height);
+    this.repositionPaddleForHeightChange(player, height);
     if (player === 1) {
       this.gameState.players.player1.paddleHeight = height;
     } else {
@@ -283,7 +265,7 @@ export default class PongGame {
     this.params.rules.countdown = duration;
   }
 
-  private repositionPaddleAfterHeightChange(player: number, height: number): void {
+  private repositionPaddleForHeightChange(player: number, height: number): void {
     // console.log('Correcting paddle position after height change:', player, height);
     if (player === 1) {
       if (height > this.gameState.players.player1.paddleHeight) {
@@ -298,7 +280,7 @@ export default class PongGame {
         this.gameState.players.player1.y +=
           (this.gameState.players.player1.paddleHeight - height) / 2;
       }
-    } else {
+    } else if (player === 2) {
       if (height > this.gameState.players.player2.paddleHeight) {
         this.gameState.players.player2.y -=
           (height - this.gameState.players.player2.paddleHeight) / 2;

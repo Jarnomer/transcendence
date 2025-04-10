@@ -1,4 +1,4 @@
-import { defaultGameParams } from '@shared/types';
+import { defaultGameParams, PowerUpType } from '@shared/types';
 
 import PongGame from '../PongGame';
 import { PowerUp } from './PowerUp';
@@ -8,7 +8,7 @@ export class BiggerPaddlePowerUp extends PowerUp {
 
   constructor(id: number, x: number, y: number) {
     super(id, x, y);
-    this.type = 'bigger_paddle';
+    this.type = PowerUpType.BiggerPaddle;
   }
 
   applyEffect(game: PongGame, player: number): void {

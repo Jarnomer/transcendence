@@ -1,4 +1,4 @@
-import { defaultGameParams } from '@shared/types';
+import { defaultGameParams, PowerUpType } from '@shared/types';
 
 import PongGame from '../PongGame';
 
@@ -6,7 +6,7 @@ export abstract class PowerUp {
   id: number;
   x: number;
   y: number;
-  type: string = 'no_type';
+  type: PowerUpType = PowerUpType.NoType;
   timeToDespawn: number = defaultGameParams.powerUps.despawnTime;
   timeToExpire: number = defaultGameParams.powerUps.expireTime;
   active: boolean = false;
