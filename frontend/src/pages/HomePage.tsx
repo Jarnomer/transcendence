@@ -66,12 +66,12 @@ export const HomePage: React.FC = () => {
           <HomePageBackgroundGlitch activeTab={activeTab} duration={1100} />
         </div>
         <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav>
-        <motion.div id="home-page-content" className="flex h-full lg:px-20  gap-20">
-          <AnimatePresence mode="wait">
-            {activeTab === 'leaderboard' && (
+        <motion.div id="home-page-content" className="flex h-full lg:px-20 gap-2 md:gap-10">
+          {activeTab === 'leaderboard' && (
+            <AnimatePresence mode="wait">
               <motion.div
                 key="leaderboard"
-                className="w-full"
+                className="w-1/2 flex gap-10"
                 variants={slideFromLeftVariants}
                 initial="initial"
                 animate="animate"
@@ -79,12 +79,9 @@ export const HomePage: React.FC = () => {
               >
                 <LeaderBoard />
               </motion.div>
-            )}
-
-            {activeTab === 'queue' && (
               <motion.div
                 key="playerQueue"
-                className="w-full h-full"
+                className="w-1/2 h-full"
                 variants={slideFromRightVariants}
                 initial="initial"
                 animate="animate"
@@ -93,8 +90,8 @@ export const HomePage: React.FC = () => {
               >
                 <Tournaments></Tournaments>
               </motion.div>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
+          )}
         </motion.div>
       </motion.div>
     </>

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { motion } from 'framer-motion';
+
 import { getUsersInQueue } from '../../services/userService';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
@@ -49,11 +51,24 @@ export const Tournaments: React.FC = () => {
 
   return (
     <>
-      <div className="glass-box p-5 w-full h-full relative overflow-hidden">
-        <BackgroundGlow></BackgroundGlow>
-        <h2 className="font-heading text-3xl">Open Tournaments</h2>
-        <p className="text-gray-500 text-sm">No on going Tournaments</p>
-      </div>
+      <motion.div className="w-full">
+        <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
+          <h2 className="">Open Tournaments</h2>
+        </div>
+        <motion.div
+          className=" w-full text-xs relative  text-sm"
+          // variants={animationVariants}
+          // initial="hidden"
+          // animate="visible"
+          // exit="hidden"
+        >
+          <div className="p-5 mt-1 border-1 w-full h-full relative overflow-hidden bg-primary/20 clipped-corner-bottom-right">
+            <BackgroundGlow></BackgroundGlow>
+
+            <p className="text-gray-500 text-xs">No on going Tournaments</p>
+          </div>
+        </motion.div>
+      </motion.div>
     </>
   );
 };

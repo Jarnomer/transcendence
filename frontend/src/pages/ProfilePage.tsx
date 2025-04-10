@@ -97,7 +97,7 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full h-full flex flex-col items-center text-center">
+      <motion.div className="w-full h-full pb-10 flex flex-col items-center text-center">
         <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
@@ -121,9 +121,9 @@ export const ProfilePage: React.FC = () => {
 
               <motion.div
                 key="defaultSection"
-                className="w-full flex gap-4 flex-col md:flex-row items-top justify-center text-center"
+                className="w-full md:w-[80%] h-1/2 flex flex-grow gap-4 flex-col md:flex-row items-center md:items-top justify-center text-center"
               >
-                <motion.div>
+                <motion.div className="w-full sm:w-1/2 h-full">
                   <FriendList
                     isOwnProfile={isOwnProfile}
                     friends={user.friends}
@@ -131,7 +131,7 @@ export const ProfilePage: React.FC = () => {
                     sents={sent}
                   />
                 </motion.div>
-                <motion.div>
+                <motion.div className="w-full sm:w-1/2 h-full">
                   <MatchHistory user={user} />
                 </motion.div>
               </motion.div>

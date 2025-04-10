@@ -52,13 +52,7 @@ const itemVariants = {
   }),
 };
 
-export const FriendList: React.FC<FriendListProps> = ({
-  isOwnProfile,
-  friends,
-  requests,
-  sents,
-}) => {
-  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
+export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
   const navigate = useNavigate();
   const { refetchUser } = useUser();
 
@@ -86,19 +80,20 @@ export const FriendList: React.FC<FriendListProps> = ({
       });
   };
 
-  const renderList = (list: Friend[], emptyText: string, isRequestList: boolean) => {
-    return list && list.length > 0 ? (
-      <ul className="">
-        {list.map((friend) => (
-          <li
-            key={friend.user_id}
-            onClick={() => navigate(`/profile/${friend.user_id}`)}
-            className="cursor-pointer border-1 bg-green"
-          >
-            <div className="flex items-center gap-3">
-              <img className="w-10 h-10 " src={friend.avatar_url} alt={friend.display_name} />
-              <span className="text-md font-medium">{friend.display_name}</span>
-              {isRequestList && (
+  return (
+    <>
+      {requests && requests.length > 0 ? (
+        <ul className="">
+          {requests.map((friend) => (
+            <li
+              key={friend.user_id}
+              onClick={() => navigate(`/profile/${friend.user_id}`)}
+              className="cursor-pointer border-1 bg-green"
+            >
+              <div className="flex items-center gap-3">
+                <img className="w-10 h-10 " src={friend.avatar_url} alt={friend.display_name} />
+                <span className="text-md font-medium">{friend.display_name}</span>
+
                 <>
                   <NavIconButton
                     id={`accept-friend-${friend.user_id}`}
@@ -111,54 +106,88 @@ export const FriendList: React.FC<FriendListProps> = ({
                     onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
                   />
                 </>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p className="text-gray-400 ">{emptyText}</p>
-    );
-  };
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-400 ">0 pending friend requests</p>
+      )}
+    </>
+  );
+};
+
+export const Friends: React.FC<FriendListProps> = ({ friends }) => {
+  const navigate = useNavigate();
+  return friends && friends.length > 0 ? (
+    <ul className="flex w-full flex-wrap gap-2">
+      {friends.map((friend) => (
+        <li
+          key={friend.user_id}
+          onClick={() => navigate(`/profile/${friend.user_id}`)}
+          className="aspect-square w-[100px] cursor-pointer  bg-green"
+        >
+          <div className="flex flex-col  justify-centeritems-center gap-3">
+            <img
+              className="w-full object-contain"
+              src={friend.avatar_url}
+              alt={friend.display_name}
+            />
+          </div>
+          <span className="text-xs font-medium">{friend.display_name}</span>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-gray-400 "></p>
+  );
+};
+
+export const FriendList: React.FC<FriendListProps> = ({
+  isOwnProfile,
+  friends,
+  requests,
+  sents,
+}) => {
+  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
+  const navigate = useNavigate();
+  const { refetchUser } = useUser();
 
   return (
-    <motion.div
-      className="w-full max-w-md p-4 glass-box"
-      variants={animationVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      <div className="flex gap-4 mb-4">
-        <button
-          onClick={() => setActiveTab('friends')}
-          className={`pb-2 font-semibold ${
-            activeTab === 'friends' ? 'border-b-2 border-black' : 'text-gray-400'
-          }`}
-        >
-          Friends
-        </button>
-        {isOwnProfile ? (
-          <>
-            <button
-              onClick={() => setActiveTab('requests')}
-              className={`pb-2 font-semibold ${
-                activeTab === 'requests' ? 'border-b-2 border-black' : 'text-gray-400'
-              }`}
-            >
-              Requests
-            </button>
-          </>
-        ) : null}
-      </div>
+    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
+      <div className="clipped-corner w-full h-[20px] bg-primary text-black text-sm">Friends</div>
+      <motion.div className=" p-4 glass-box">
+        <div className="flex gap-4 mb-4">
+          <button
+            onClick={() => setActiveTab('friends')}
+            className={`pb-2 text-sm ${
+              activeTab === 'friends' ? 'border-b-2 border-primary' : 'text-gray-400'
+            }`}
+          >
+            {friends.length} Friends
+          </button>
+          {isOwnProfile ? (
+            <>
+              <button
+                onClick={() => setActiveTab('requests')}
+                className={`pb-2 text-sm ${
+                  activeTab === 'requests' ? 'border-b-2 border-primary' : 'text-gray-400'
+                }`}
+              >
+                Requests
+              </button>
+            </>
+          ) : null}
+        </div>
 
-      <div className="flex flex-col gap-2">
-        {activeTab === 'friends'
-          ? renderList(friends, 'No friends yet', false)
-          : activeTab === 'requests'
-            ? renderList(requests, 'No requests yet', true)
-            : null}
-      </div>
+        <div className="flex flex-col gap-2">
+          {activeTab === 'friends' ? (
+            <Friends friends={friends}></Friends>
+          ) : activeTab === 'requests' ? (
+            <FriendRequests requests={requests}></FriendRequests>
+          ) : null}
+        </div>
+      </motion.div>
     </motion.div>
   );
 };
