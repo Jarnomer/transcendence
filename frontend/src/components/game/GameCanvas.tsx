@@ -236,7 +236,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   }, [retroLevels, retroPreset]);
 
-  // Handle power-up updates
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;
 

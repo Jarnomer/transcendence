@@ -13,14 +13,14 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { PowerUp, Player, defaultGameObjectParams, PowerUpType } from '@shared/types';
+import { playerPowerUp, Player, PowerUpType, defaultGameObjectParams } from '@shared/types';
 
 import { gameToSceneSize } from './gameUtilities';
 
 const playerEffectsMap: Map<number, PlayerEffects> = new Map();
 
 interface PowerUpEffect {
-  type: string;
+  type: PowerUpType;
   timestamp: number;
   particleSystem: ParticleSystem | null;
   glowLayer: GlowLayer | null;
@@ -53,39 +53,14 @@ export function applyPlayerEffects(
   primaryColor: Color3,
   secondaryColor: Color3
 ): void {
-  const player1PowerUps = getActivePowerUps(powerUps, 1);
-  const player2PowerUps = getActivePowerUps(powerUps, 2);
-
-  applyPaddleEffects(
-    scene,
-    player1Mesh,
-    players.player1,
-    player1PowerUps,
-    primaryColor,
-    secondaryColor,
-    1
-  );
-  applyPaddleEffects(
-    scene,
-    player2Mesh,
-    players.player2,
-    player2PowerUps,
-    primaryColor,
-    secondaryColor,
-    2
-  );
+  applyPaddleEffects(scene, player1Mesh, players.player1, primaryColor, secondaryColor, 1);
+  applyPaddleEffects(scene, player2Mesh, players.player2, primaryColor, secondaryColor, 2);
 
   // Logging player power ups and statistics every X second(s)
   const currentTime = Date.now();
   if (loggingConfig.enabled && currentTime - lastLogTime > loggingConfig.logFrequency) {
-    logPlayerState({
-      player: players.player1,
-      powerUps: player1PowerUps,
-    });
-    logPlayerState({
-      player: players.player2,
-      powerUps: player2PowerUps,
-    });
+    logPlayerState(players.player1);
+    logPlayerState(players.player2);
     lastLogTime = currentTime;
   }
 }
@@ -94,7 +69,6 @@ function applyPaddleEffects(
   scene: Scene,
   paddleMesh: Mesh,
   player: Player,
-  activePowerUps: PowerUp[],
   primaryColor: Color3,
   secondaryColor: Color3,
   playerIndex: number
@@ -118,18 +92,18 @@ function applyPaddleEffects(
   const playerEffects = playerEffectsMap.get(playerIndex)!;
 
   const hadEffects = playerEffects.activeEffects.size > 0;
-  const hasNoEffectsNow = activePowerUps.length === 0;
+  const hasNoEffectsNow = player.activePowerUps.length === 0;
 
   if (hadEffects && hasNoEffectsNow) {
     clearAllPlayerEffects(scene, paddleMesh, playerEffects, primaryColor);
     return;
   }
 
-  const currentEffectTypes = new Set(activePowerUps.map((p) => p.type));
+  const currentEffectTypes = new Set(player.activePowerUps.map((p) => p.type));
 
-  applyPaddleMaterial(paddleMesh, activePowerUps, primaryColor, secondaryColor);
+  applyPaddleMaterial(paddleMesh, player.activePowerUps, primaryColor, secondaryColor);
 
-  for (const powerUp of activePowerUps) {
+  for (const powerUp of player.activePowerUps) {
     const effectKey = powerUp.type;
 
     if (!playerEffects.activeEffects.has(effectKey)) {
@@ -137,7 +111,7 @@ function applyPaddleEffects(
         scene,
         paddleMesh,
         powerUp.type,
-        powerUp.negativeEffect,
+        powerUp.isNegative,
         primaryColor,
         secondaryColor,
         playerIndex,
@@ -199,7 +173,7 @@ function clearAllPlayerEffects(
 function createPowerUpVisualEffects(
   scene: Scene,
   paddleMesh: Mesh,
-  powerUpType: string,
+  powerUpType: PowerUpType,
   isNegative: boolean,
   primaryColor: Color3,
   secondaryColor: Color3,
@@ -228,7 +202,7 @@ function createPowerUpVisualEffects(
 function createPowerUpParticles(
   scene: Scene,
   paddleMesh: Mesh,
-  powerUpType: string,
+  powerUpType: PowerUpType,
   color: Color3,
   playerIndex: number,
   effectIndex: number
@@ -309,7 +283,7 @@ function createPowerUpParticles(
 
 function applyPaddleMaterial(
   paddleMesh: Mesh,
-  activePowerUps: PowerUp[],
+  activePowerUps: playerPowerUp[],
   primaryColor: Color3,
   secondaryColor: Color3
 ): void {
@@ -322,8 +296,8 @@ function applyPaddleMaterial(
     return;
   }
 
-  const positiveEffects = activePowerUps.filter((p) => !p.negativeEffect).length;
-  const negativeEffects = activePowerUps.filter((p) => p.negativeEffect).length;
+  const positiveEffects = activePowerUps.filter((p) => !p.isNegative).length;
+  const negativeEffects = activePowerUps.filter((p) => p.isNegative).length;
 
   let effectColor: Color3 = primaryColor;
 
@@ -434,12 +408,6 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   });
 }
 
-function getActivePowerUps(powerUps: PowerUp[], playerIndex: number): PowerUp[] {
-  return powerUps.filter(
-    (p) => p.collectedBy > 0 && p.affectedPlayer === playerIndex && p.timeToExpire > 0
-  );
-}
-
 function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
   particleSystem.emitRate = 0;
 
@@ -460,20 +428,15 @@ function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
   }, 100);
 }
 
-function logPlayerState(playerData: { player: Player; powerUps: PowerUp[] }): void {
-  const player1Log = formatPlayerLog(playerData.player, playerData.powerUps);
-  const player2Log = formatPlayerLog(playerData.player, playerData.powerUps);
+function logPlayerState(player: Player): void {
+  const powerUpsInfo =
+    player.activePowerUps.length > 0
+      ? player.activePowerUps
+          .map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`)
+          .join('\n')
+      : '      - None';
 
-  console.log(`${player1Log}`);
-  console.log(`${player2Log}`);
-
-  function formatPlayerLog(player: Player, powerUps: PowerUp[]): string {
-    const powerUpsInfo =
-      powerUps.length > 0
-        ? powerUps.map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`).join('\n')
-        : '      - None';
-    return `    Player: ${player.id}
+  console.log(`    Player: ${player.id}
     Power-Ups:
-${powerUpsInfo}`;
-  }
+${powerUpsInfo}`);
 }

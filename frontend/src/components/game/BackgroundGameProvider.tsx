@@ -31,6 +31,7 @@ const BackgroundGameProvider: React.FC = () => {
         paddleSpeed: defaultGameParams.paddle.speed,
         spinIntensity: defaultGameParams.spin.intensityFactor,
         score: 0,
+        activePowerUps: [],
       },
       player2: {
         id: 'player2',
@@ -40,6 +41,7 @@ const BackgroundGameProvider: React.FC = () => {
         spinIntensity: defaultGameParams.spin.intensityFactor,
         dy: 0,
         score: 0,
+        activePowerUps: [],
       },
     },
     ball: {

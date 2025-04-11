@@ -20,17 +20,17 @@ import { createParticleTexture } from './gamePostProcess';
 import { gameToSceneSize, gameToSceneX, gameToSceneY } from './gameUtilities';
 
 interface PowerUpEffect {
-  id: number;
+  powerUpId: number;
   particleSystem: ParticleSystem;
   icon: Mesh;
-  cubes: Mesh[];
-  type: string;
+  cube: Mesh;
+  type: PowerUpType;
   collected: boolean;
 }
 
 export class PowerUpEffectsManager {
   private scene: Scene;
-  private effects: Map<number, PowerUpEffect> = new Map();
+  private effects: Map<string, PowerUpEffect> = new Map();
   private primaryColor: Color3;
   private secondaryColor: Color3;
   private powerUpSize: number;
@@ -42,33 +42,40 @@ export class PowerUpEffectsManager {
     this.powerUpSize = powerUpSize;
   }
 
-  // Check for new, collected and removed power-ups
+  // Check for new and removed power-ups
   updatePowerUpEffects(powerUps: PowerUp[]): void {
+    // Create a map of current power-ups for quick lookup
+    const currentPowerUps = new Map<number, PowerUp>();
     for (const powerUp of powerUps) {
-      if (!this.effects.has(powerUp.id) && powerUp.collectedBy === 0) {
-        this.createPowerUpEffect(powerUp);
-      } else if (
+      currentPowerUps.set(powerUp.id, powerUp);
+
+      // Create visual effect for new power-ups that aren't collected
+      if (!this.effects.has(powerUp.id) && !powerUp.isCollected) {
+        this.createPowerUpEffect(powerUp, powerUp.id);
+      }
+      // Handle power-up collection animation if needed
+      else if (
         this.effects.has(powerUp.id) &&
-        powerUp.collectedBy > 0 &&
+        powerUp.isCollected &&
         !this.effects.get(powerUp.id)!.collected
       ) {
         this.collectPowerUpEffect(powerUp.id);
       }
     }
 
-    const currentIds = new Set(powerUps.map((p) => p.id));
+    // Check for power-ups that need to be removed (no longer in the array)
     for (const [id, effect] of this.effects.entries()) {
-      if (!currentIds.has(id) && !effect.collected) {
+      if (!currentPowerUps.has(id) && !effect.collected) {
         this.disposeEffectWithAnimation(id);
       }
     }
   }
 
-  private createPowerUpEffect(powerUp: PowerUp): void {
+  private createPowerUpEffect(powerUp: PowerUp, powerUpId: number): void {
     const baseSize = gameToSceneSize(this.powerUpSize);
     const cubeSize = baseSize * 1.02;
 
-    const icon = this.createIconMesh(powerUp.type, baseSize, powerUp.negativeEffect);
+    const icon = this.createIconMesh(powerUp.type, baseSize, powerUp.isNegative);
 
     const x = gameToSceneX(powerUp.x, icon);
     const y = gameToSceneY(powerUp.y, icon);
@@ -76,15 +83,15 @@ export class PowerUpEffectsManager {
 
     icon.position = basePosition.clone();
 
-    const color = this.getPowerUpColor(powerUp.negativeEffect);
-    const cube = this.createCubeMesh(powerUp.id, basePosition, cubeSize, 0.6, color);
-    const particleSystem = this.createGlitterParticleSystem(powerUp.id, x, y, color);
+    const color = this.getPowerUpColor(powerUp.isNegative);
+    const cube = this.createCubeMesh(powerUpId, basePosition, cubeSize, 0.6, color);
+    const particleSystem = this.createGlitterParticleSystem(powerUpId, x, y, color);
 
-    this.effects.set(powerUp.id, {
-      id: powerUp.id,
+    this.effects.set(powerUpId, {
+      powerUpId,
       particleSystem,
       icon: icon,
-      cubes: [cube],
+      cube,
       type: powerUp.type,
       collected: false,
     });
@@ -96,7 +103,7 @@ export class PowerUpEffectsManager {
     return isNegative ? this.secondaryColor : this.primaryColor;
   }
 
-  private createIconMesh(type: string, size: number, isNegative: boolean): Mesh {
+  private createIconMesh(type: PowerUpType, size: number, isNegative: boolean): Mesh {
     const mesh = MeshBuilder.CreatePlane(
       `powerUpIcon-${type}`,
       { width: size, height: size },
@@ -120,7 +127,7 @@ export class PowerUpEffectsManager {
     return mesh;
   }
 
-  private getPowerUpIconPath(type: string): string {
+  private getPowerUpIconPath(type: PowerUpType): string {
     switch (type) {
       case PowerUpType.BiggerPaddle:
         return '/power-up/paddle_bigger.png';
@@ -389,32 +396,30 @@ export class PowerUpEffectsManager {
 
     effect.icon.animations = [scaleAnim, emissiveAnim];
 
-    // Animate all rotation cubes
-    effect.cubes.forEach((cube) => {
-      // Animate cube scaling
-      const cubeScaleAnim = new Animation(
-        `powerUpCubeCollectAnimation`,
-        'scaling',
-        60,
-        Animation.ANIMATIONTYPE_VECTOR3,
-        Animation.ANIMATIONLOOPMODE_CONSTANT
-      );
-      const cubeScaleKeys = [
-        { frame: 0, value: cube.scaling.clone() },
-        { frame: 10, value: cube.scaling.scale(2) },
-        { frame: 30, value: new Vector3(0, 0, 0) },
-      ];
-      cubeScaleAnim.setKeys(cubeScaleKeys);
+    // Animate the cube
+    const cube = effect.cube;
+    const cubeScaleAnim = new Animation(
+      `powerUpCubeCollectAnimation`,
+      'scaling',
+      60,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const cubeScaleKeys = [
+      { frame: 0, value: cube.scaling.clone() },
+      { frame: 10, value: cube.scaling.scale(2) },
+      { frame: 30, value: new Vector3(0, 0, 0) },
+    ];
+    cubeScaleAnim.setKeys(cubeScaleKeys);
 
-      cube.animations = [cubeScaleAnim];
+    cube.animations = [cubeScaleAnim];
 
-      // Stop the orbit animation
-      if (cube.metadata && cube.metadata.observer) {
-        this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
-      }
+    // Stop the orbit animation
+    if (cube.metadata && cube.metadata.observer) {
+      this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
+    }
 
-      this.scene.beginAnimation(cube, 0, 20, false, 1);
-    });
+    this.scene.beginAnimation(cube, 0, 20, false, 1);
 
     // Handle particle fadeout
     if (effect.particleSystem) {
@@ -476,32 +481,31 @@ export class PowerUpEffectsManager {
 
     effect.icon.animations = [scaleAnim];
 
-    // Animate all rotation cubes
-    effect.cubes.forEach((cube) => {
-      // Animate cube scaling
-      const cubeScaleAnim = new Animation(
-        `powerUpCubeDisposeAnimation`,
-        'scaling',
-        60,
-        Animation.ANIMATIONTYPE_VECTOR3,
-        Animation.ANIMATIONLOOPMODE_CONSTANT
-      );
-      const cubeScaleKeys = [
-        { frame: 0, value: cube.scaling.clone() },
-        { frame: 15, value: new Vector3(0, 0, 0) },
-      ];
-      cubeScaleAnim.setKeys(cubeScaleKeys);
-      cubeScaleAnim.setEasingFunction(easingFunction);
+    // Animate the cube
+    const cube = effect.cube;
+    // Animate cube scaling
+    const cubeScaleAnim = new Animation(
+      `powerUpCubeDisposeAnimation`,
+      'scaling',
+      60,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const cubeScaleKeys = [
+      { frame: 0, value: cube.scaling.clone() },
+      { frame: 15, value: new Vector3(0, 0, 0) },
+    ];
+    cubeScaleAnim.setKeys(cubeScaleKeys);
+    cubeScaleAnim.setEasingFunction(easingFunction);
 
-      cube.animations = [cubeScaleAnim];
+    cube.animations = [cubeScaleAnim];
 
-      // Stop the orbit animation
-      if (cube.metadata && cube.metadata.observer) {
-        this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
-      }
+    // Stop the orbit animation
+    if (cube.metadata && cube.metadata.observer) {
+      this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
+    }
 
-      this.scene.beginAnimation(cube, 0, 15, false, 1);
-    });
+    this.scene.beginAnimation(cube, 0, 15, false, 1);
 
     // Animate the particle system
     if (effect.particleSystem) {
@@ -545,15 +549,15 @@ export class PowerUpEffectsManager {
     }
     effect.icon.dispose();
 
-    effect.cubes.forEach((cube) => {
-      if (cube.metadata && cube.metadata.observer) {
-        this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
-      }
-      if (cube.material) {
-        cube.material.dispose();
-      }
-      cube.dispose();
-    });
+    // Clean up the cube
+    const cube = effect.cube;
+    if (cube.metadata && cube.metadata.observer) {
+      this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
+    }
+    if (cube.material) {
+      cube.material.dispose();
+    }
+    cube.dispose();
 
     this.effects.delete(powerUpId);
   }
