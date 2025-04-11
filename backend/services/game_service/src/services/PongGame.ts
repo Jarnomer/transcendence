@@ -37,6 +37,7 @@ export default class PongGame {
           paddleSpeed: this.params.paddle.speed,
           spinIntensity: this.params.spin.intensityFactor,
           score: 0,
+          activePowerUps: [],
         },
         player2: {
           id: '',
@@ -46,6 +47,7 @@ export default class PongGame {
           paddleSpeed: this.params.paddle.speed,
           spinIntensity: this.params.spin.intensityFactor,
           score: 0,
+          activePowerUps: [],
         },
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
@@ -145,11 +147,9 @@ export default class PongGame {
     id: number;
     x: number;
     y: number;
-    collectedBy: number;
-    affectedPlayer: number;
-    negativeEffect: boolean;
+    isCollected: boolean;
+    isNegative: boolean;
     timeToDespawn: number;
-    timeToExpire: number;
     type: PowerUpType;
   }> {
     return structuredClone(this.gameState.powerUps);
@@ -159,57 +159,55 @@ export default class PongGame {
     id: number,
     x: number,
     y: number,
-    collectedBy: number,
-    affectedPlayer: number,
-    negativeEffect: boolean,
+    isCollected: boolean,
+    isNegative: boolean,
     timeToDespawn: number,
-    timeToExpire: number,
     type: PowerUpType
   ): void {
     this.gameState.powerUps.push({
       id,
       x,
       y,
-      collectedBy,
-      affectedPlayer,
-      negativeEffect,
+      isCollected,
+      isNegative,
       timeToDespawn,
-      timeToExpire,
       type: type,
     });
   }
 
   collectPowerUp(
-    id: number,
-    collectedBy: number,
+    type: PowerUpType,
     affectedPlayer: number,
-    effectDuration: number
+    timeToExpire: number,
+    isNegative: boolean
   ): void {
-    const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
-    if (powerUp) {
-      powerUp.collectedBy = collectedBy;
-      powerUp.affectedPlayer = affectedPlayer;
-      powerUp.timeToExpire = effectDuration;
-      console.log(
-        `Power-up ${id} collected by player ${collectedBy}, affected player: ${affectedPlayer}`
-      );
-    }
+    const player =
+      affectedPlayer === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
+    player.activePowerUps.push({
+      type,
+      timeToExpire,
+      isNegative,
+    });
+    console.log(`Power-up collected by player ${affectedPlayer}:`, type);
   }
 
-  resetPowerUpTimeToExpire(id: number, time: number): void {
-    const powerUp = this.gameState.powerUps.find((powerUp) => powerUp.id === id);
+  resetPowerUpTimeToExpire(player: number, type: PowerUpType, time: number): void {
+    const playerState =
+      player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
+    const powerUp = playerState.activePowerUps.find((p) => p.type === type);
     if (powerUp) {
       powerUp.timeToExpire = time;
-      console.log(`Power-up ${id} time to expire reset to ${time}`);
+      console.log(`Power-up time to expire reset for player ${player}:`, type);
     }
   }
 
   // Decrement timeToDespawn or timeToExpire for all power-ups
   updatePowerUpTimers(): void {
     for (const powerUp of this.gameState.powerUps) {
-      if (!powerUp.collectedBy) {
-        powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
-      } else {
+      powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
+    }
+    for (const player of Object.values(this.gameState.players)) {
+      for (const powerUp of player.activePowerUps) {
         powerUp.timeToExpire -= 1000 / 60; // Assuming 60 FPS
       }
     }
@@ -218,6 +216,13 @@ export default class PongGame {
 
   removePowerUp(id: number): void {
     this.gameState.powerUps = this.gameState.powerUps.filter((powerUp) => powerUp.id !== id);
+  }
+
+  removePlayerPowerUp(player: number, type: PowerUpType): void {
+    const playerState =
+      player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
+    playerState.activePowerUps = playerState.activePowerUps.filter((p) => p.type !== type);
+    console.log(`Power-up ${type} removed from player ${player}`);
   }
 
   setPlayerId(player: number, playerId: string): void {
@@ -336,6 +341,9 @@ export default class PongGame {
     this.resetBall();
     this.resetPaddles();
     this.powerUpManager.resetPowerUps();
+    this.gameState.players.player1.activePowerUps = [];
+    this.gameState.players.player2.activePowerUps = [];
+    this.gameState.powerUps = [];
 
     console.log('Game starting with max score:', this.params.rules.maxScore);
 

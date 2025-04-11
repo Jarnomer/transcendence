@@ -40,11 +40,7 @@ export interface PowerUp {
   y: number; // needed!
   isCollected: boolean; // Added this
   isNegative: boolean; // Added this
-  collectedBy: number; // delete?
-  affectedPlayer: number; // delete?
-  negativeEffect: boolean; // delete?
   timeToDespawn: number; // needed!
-  timeToExpire: number; // delete?
   type: PowerUpType; // needed!
 }
 
@@ -141,11 +137,11 @@ export const defaultGameParams: GameParams = {
     reductionFactor: 0.5, // Spin reduction on static surfaces
   },
   powerUps: {
-    minSpawnInterval: 4000, // Milliseconds
-    maxSpawnInterval: 6000,
+    minSpawnInterval: 5000, // Milliseconds
+    maxSpawnInterval: 10000,
     despawnTime: 10000,
     expireTime: 10000,
-    size: 300,
+    size: 80,
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,
