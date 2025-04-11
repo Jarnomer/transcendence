@@ -6,6 +6,7 @@ export interface Player {
   paddleSpeed: number;
   spinIntensity: number;
   score: number;
+  activePowerUps: playerPowerUp[]; // Added this
 }
 
 export interface Ball {
@@ -25,16 +26,26 @@ export enum PowerUpType {
   MoreSpin = 'more_spin',
 }
 
-export interface PowerUp {
-  id: number;
-  x: number;
-  y: number;
-  collectedBy: number;
-  affectedPlayer: number;
-  negativeEffect: boolean; // If true, the power-up has a negative effect on the other player
-  timeToDespawn: number; // Time to despawn if not collected
-  timeToExpire: number; // Time to expire after being collected
+// Added this interface for player power ups
+export interface playerPowerUp {
   type: PowerUpType;
+  timeToExpire: number;
+  isNegative: boolean;
+}
+
+// rename this to boardPowerUp?
+export interface PowerUp {
+  id: number; // needed!
+  x: number; // needed!
+  y: number; // needed!
+  isCollected: boolean; // Added this
+  isNegative: boolean; // Added this
+  collectedBy: number; // delete?
+  affectedPlayer: number; // delete?
+  negativeEffect: boolean; // delete?
+  timeToDespawn: number; // needed!
+  timeToExpire: number; // delete?
+  type: PowerUpType; // needed!
 }
 
 export interface GameState {
@@ -130,11 +141,11 @@ export const defaultGameParams: GameParams = {
     reductionFactor: 0.5, // Spin reduction on static surfaces
   },
   powerUps: {
-    minSpawnInterval: 8000, // Milliseconds
-    maxSpawnInterval: 16000,
+    minSpawnInterval: 4000, // Milliseconds
+    maxSpawnInterval: 6000,
     despawnTime: 10000,
     expireTime: 10000,
-    size: 40,
+    size: 300,
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,

@@ -31,6 +31,7 @@ const BackgroundGameProvider: React.FC = () => {
         paddleSpeed: defaultGameParams.paddle.speed,
         spinIntensity: defaultGameParams.spin.intensityFactor,
         score: 0,
+        activePowerUps: [],
       },
       player2: {
         id: 'player2',
@@ -40,6 +41,7 @@ const BackgroundGameProvider: React.FC = () => {
         spinIntensity: defaultGameParams.spin.intensityFactor,
         dy: 0,
         score: 0,
+        activePowerUps: [],
       },
     },
     ball: {
@@ -157,14 +159,8 @@ const BackgroundGameProvider: React.FC = () => {
 
   return (
     <div
-      className="background-game-container"
-      // aria-hidden="true"
-      style={{
-        position: 'absolute',
-        pointerEvents: 'none',
-        width: '100vw',
-        height: '100vh',
-      }}
+      className="background-game-container absolute pointer-events-none w-screen h-screen bg-[#33353e]"
+      aria-hidden="true"
     >
       <BackgroundGameCanvas
         gameState={gameState || initialGameState}
