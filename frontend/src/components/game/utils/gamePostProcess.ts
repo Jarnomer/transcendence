@@ -16,8 +16,18 @@ import {
   Vector3,
 } from 'babylonjs';
 
+function createCubeTexture(rootUrl: string, scene: Scene) {
+  const envTexture = new CubeTexture(rootUrl, scene);
+
+  envTexture.onLoadObservable.add(() => {
+    envTexture.updateSamplingMode(Texture.TRILINEAR_SAMPLINGMODE);
+  });
+
+  return envTexture;
+}
+
 export function setupEnvironmentMap(scene: Scene) {
-  const envTex = CubeTexture.CreateFromPrefilteredData(
+  const envTex = createCubeTexture(
     'https://assets.babylonjs.com/environments/environmentSpecular.env',
     scene
   );
@@ -26,6 +36,14 @@ export function setupEnvironmentMap(scene: Scene) {
   scene.imageProcessingConfiguration.contrast = 1.1;
   scene.imageProcessingConfiguration.exposure = 0.8;
   scene.createDefaultSkybox(envTex, true);
+
+  scene.useDelayedTextureLoading = true;
+  scene.autoClearDepthAndStencil = true;
+  scene.autoClear = true;
+
+  scene.executeWhenReady(() => {
+    scene.render();
+  });
 }
 
 export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boolean = false) {

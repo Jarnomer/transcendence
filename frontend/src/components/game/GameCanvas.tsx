@@ -30,6 +30,7 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
+  enableRequiredExtensions,
 } from '@game/utils';
 
 import {
@@ -136,6 +137,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const canvas = canvasRef.current;
     const engine = new Engine(canvas, true);
+    enableRequiredExtensions(engine);
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
