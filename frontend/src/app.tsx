@@ -13,7 +13,6 @@ import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { ChatProvider } from './contexts/chatContext/ChatContext.tsx';
 import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
-import { ModalProvider } from './contexts/modalContext/ModalContext.tsx';
 import { useUser } from './contexts/user/UserContext';
 import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
@@ -33,32 +32,30 @@ const App: React.FC = () => {
   return (
     <WebSocketProvider>
       <ChatProvider>
-        <ModalProvider>
-          <GameOptionsProvider>
-            <BackgroundGameProvider />
+        <GameOptionsProvider>
+          <BackgroundGameProvider />
+          <div
+            id="app-container"
+            className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
+          >
+            <Header />
             <div
-              id="app-container"
-              className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
+              id="app-content"
+              className="relative md:px-10 flex flex-grow flex-col w-full justify-center items-center"
             >
-              <Header />
-              <div
-                id="app-content"
-                className="relative md:px-10 flex flex-grow flex-col w-full justify-center items-center"
-              >
-                <AnimatePresence>
-                  <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
-                    <BackgroundGlitch duration={1100} />
-                  </motion.div>
-                </AnimatePresence>
+              <AnimatePresence>
+                <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
+                  <BackgroundGlitch duration={1100} />
+                </motion.div>
+              </AnimatePresence>
 
-                <AnimatedRoutes></AnimatedRoutes>
-              </div>
-              {location.pathname !== '/game' ? <Footer /> : null}
+              <AnimatedRoutes></AnimatedRoutes>
             </div>
-          </GameOptionsProvider>
-          <ChatModal></ChatModal>
-          <SettingsModal></SettingsModal>
-        </ModalProvider>
+            {location.pathname !== '/game' ? <Footer /> : null}
+          </div>
+        </GameOptionsProvider>
+        <ChatModal></ChatModal>
+        <SettingsModal></SettingsModal>
       </ChatProvider>
     </WebSocketProvider>
   );

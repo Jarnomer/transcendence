@@ -499,9 +499,7 @@ export function applyCollisionEffects(
     applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
   }
 
-  if (applyGlitch) speedFactor / 100;
-
-  if (retroEffectsRef) {
+  if (retroEffectsRef && applyGlitch) {
     retroEffectsRef.setGlitchAmount(speedFactor);
   }
 }

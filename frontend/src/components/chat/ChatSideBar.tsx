@@ -64,7 +64,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = () => {
                   setRoomId(null);
                 }}
                 className={`block w-full text-left p-1 rounded ${
-                  selectedFriend === user.user_id ? 'bg-primary/25' : ''
+                  selectedFriend === user.user_id ? 'text-secondary' : ''
                 }`}
               >
                 {user.display_name}
@@ -83,8 +83,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = () => {
                 setSelectedFriend(null);
                 setRoomId(room.chat_room_id);
               }}
-              className={`block w-full text-left p-1 rounded hover:bg-gray-100 ${
-                roomId === room.chat_room_id ? 'bg-gray-200' : ''
+              className={`block w-full text-left p-1 rounded hover:bg-secondary/20 ${
+                roomId === room.chat_room_id ? 'text-secondary' : ''
               }`}
             >
               {room.name}

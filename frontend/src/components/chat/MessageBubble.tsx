@@ -8,7 +8,7 @@ interface MessageBubbleProps {
   sender?: User;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn, sender }) => {
+export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }) => {
   console.log(isOwn);
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>

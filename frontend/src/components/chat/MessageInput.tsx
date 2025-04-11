@@ -18,8 +18,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({ selectedFriendId, ro
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="@container flex gap-2 w-full">
       <form
+        className="w-full"
         onSubmit={(e) => {
           e.preventDefault(); // Prevent page refresh
           handleSendMessage(); // Call the send message function
@@ -31,10 +32,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({ selectedFriendId, ro
         <input
           type="text"
           id="chat-input"
+          autoComplete="off"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 p-2 border-2 border-primary  rounded focus:outline-none"
+          className="flex-1 text-xs @md-text-2xl p-2 border-2 border-primary  rounded focus:outline-none"
         />
         <button type="submit" aria-label="send" className="ml-2 bg-primary/25 px-4 py-2 rounded">
           send

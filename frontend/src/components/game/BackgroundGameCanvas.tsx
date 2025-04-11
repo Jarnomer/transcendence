@@ -14,7 +14,6 @@ import {
   RetroEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
-  applyScoreEffects,
   createBall,
   createEdge,
   createFloor,
@@ -126,25 +125,6 @@ const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'd
   return null;
 };
 
-const detectScore = (
-  player1Score: number,
-  player2Score: number,
-  lastScoreRef: { value: number },
-  ballDx: number
-): 'player1' | 'player2' | null => {
-  const currentScore = player1Score + player2Score;
-
-  if (currentScore === lastScoreRef.value) return null;
-
-  if (ballDx < 0) {
-    lastScoreRef.value = currentScore;
-    return 'player2';
-  } else {
-    lastScoreRef.value = currentScore;
-    return 'player1';
-  }
-};
-
 const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   gameState,
   isVisible,
@@ -168,7 +148,6 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
-  const lastScoreRef = useRef<{ value: number }>({ value: 0 });
   const currentAngleIndexRef = useRef<number>(-1);
   const cameraMoveTimerRef = useRef<number | null>(null);
 
@@ -366,12 +345,6 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
     const collision = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
-    const score = detectScore(
-      players.player1.score,
-      players.player2.score,
-      lastScoreRef.current,
-      ball.dx
-    );
 
     applyBallEffects(ballRef.current, speed, angle, ball.spin, color);
 
@@ -390,8 +363,6 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
         false
       );
     }
-
-    if (score) applyScoreEffects(retroEffectsRef.current);
 
     prevBallState.current = {
       x: ball.x,
