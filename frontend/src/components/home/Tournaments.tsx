@@ -51,23 +51,63 @@ export const Tournaments: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full">
+      <motion.div className="w-full h-[100px]">
         <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
           <h2 className="">Open Tournaments</h2>
         </div>
-        <motion.div
-          className=" w-full text-xs relative  text-sm"
-          // variants={animationVariants}
-          // initial="hidden"
-          // animate="visible"
-          // exit="hidden"
-        >
-          <div className="p-5 mt-1 border-1 w-full h-full relative overflow-hidden bg-primary/20 clipped-corner-bottom-right">
-            <BackgroundGlow></BackgroundGlow>
+        <div className="flex gap-0    min-w-full h-[100px]">
+          <motion.div
+            className="w-full h-full border-1 border-x-0 bg-primary/20 relative p-0 m-0  text-sm"
+            // variants={animationVariants}
+            // initial="hidden"
+            // animate="visible"
+            // exit="hidden"
+          >
+            {/* <div className="absolute top-0 left-0 translate-y-[-50%]">
+              <svg
+                width="56"
+                height="7"
+                viewBox="0 0 56 7"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M55.5 5.35075L51.1493 1H1V6.5"
+                  stroke="currentColor"
+                  fillOpacity={0.5}
+                  fill="currentColor"
+                />
+              </svg>
+            </div> */}
 
-            <p className="text-gray-500 text-xs">No on going Tournaments</p>
+            {/* <div className="absolute bottom-0 right-0 w-full">
+              <svg
+                className="w-full"
+                viewBox="0 0 337 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M336.5 1L326 11.5H1V1" stroke="currentColor" />
+              </svg>
+            </div> */}
+            <div className="p-5 relative  w-full h-full relative overflow-hidden">
+              <BackgroundGlow></BackgroundGlow>
+
+              <p className="text-gray-500 text-xs">No on going Tournaments</p>
+            </div>
+          </motion.div>
+          <div className="h-full m-0 p-0">
+            <svg
+              className="h-full p-0"
+              viewBox="0 0 9 54"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M2 53H0V1H8V46L2 53Z" fill="currentColor" fillOpacity="0.2" />
+              <path d="M0 53H2L8 46V1H0" stroke="currentColor" strokeWidth="0.5" />
+            </svg>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </>
   );

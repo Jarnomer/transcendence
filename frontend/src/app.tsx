@@ -34,7 +34,7 @@ const App: React.FC = () => {
       <ChatProvider>
         <GameOptionsProvider>
           <div className="fixed inset-0 -z-10">
-            <BackgroundGameProvider />
+            <BackgroundGameProvider></BackgroundGameProvider>
           </div>
           <div
             id="app-container"
