@@ -66,6 +66,19 @@ export async function getUsersInQueue() {
   }
 }
 
+export async function getTournaments() {
+  try {
+    const res = await api.get(`/matchmaking/tournaments?page=1&pageSize=10`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch tournaments`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get tournaments:', err);
+    throw err;
+  }
+}
+
 export async function getUserImage() {
   try {
     const res = await api.get<UserResponseType>(

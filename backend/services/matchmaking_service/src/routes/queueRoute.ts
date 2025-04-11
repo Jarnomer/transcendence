@@ -6,8 +6,6 @@ import {
   CancelQueueResType,
   EnterQueueReqSchema,
   EnterQueueReqType,
-  EnterQueueResSchema,
-  EnterQueueResType,
   QueueJoinParamsSchema,
   QueueJoinParamsType,
   QueueResSchema,
@@ -29,6 +27,7 @@ export async function queueRoutes(fastify: FastifyInstance) {
     { schema: { response: { 200: QueueResSchema } } },
     queueController.getQueues.bind(queueController)
   );
+  fastify.get('/tournaments', queueController.getTournaments.bind(queueController));
   fastify.get<{ Reply: QueueStatusResType }>(
     '/status',
     { schema: { response: { 200: QueueStatusResSchema } } },

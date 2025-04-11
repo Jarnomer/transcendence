@@ -53,6 +53,13 @@ export class QueueController {
     reply.code(200).send(users);
   }
 
+  async getTournaments(request: FastifyRequest, reply: FastifyReply) {
+    const { page, pageSize } = request.query as { page: number; pageSize: number };
+    request.log.trace(`Getting all tournaments`);
+    const tournaments = await this.queueService.getTournaments(page, pageSize);
+    reply.code(200).send(tournaments);
+  }
+
   /**
    * get user status in match making queue by ID
    * @param request get: user_id as path parameter

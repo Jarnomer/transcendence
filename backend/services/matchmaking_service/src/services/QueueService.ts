@@ -40,6 +40,21 @@ export class QueueService {
     };
   }
 
+  async getTournaments(page: number, pageSize: number) {
+    const tournaments = await this.queueModel.getTournaments(page, pageSize);
+    const totalTournaments = await this.queueModel.getTotalTournaments();
+    console.log('totalTournaments', totalTournaments);
+    return {
+      tournaments,
+      pagination: {
+        page,
+        pageSize,
+        total: totalTournaments,
+        totalPages: Math.ceil(totalTournaments / pageSize),
+      },
+    };
+  }
+
   async getWaitingQueuesByMode(user_id: string, mode: string) {
     return await this.queueModel.getWaitingQueuesByMode(user_id, mode);
   }
