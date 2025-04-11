@@ -16,6 +16,7 @@ import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
+import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
   const { loading } = useUser(); // Retrieve user from context
@@ -107,6 +108,19 @@ export const AnimatedRoutes: React.FC = () => {
             user ? (
               <PageWrapper>
                 <Settings />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/tournamentLobby"
+          element={
+            user ? (
+              <PageWrapper>
+                <TournamentLobby />
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />

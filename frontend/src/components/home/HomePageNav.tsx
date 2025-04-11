@@ -33,7 +33,7 @@ export const HomePageNav: React.FC<{
   return (
     <motion.div
       id="home-page-nav"
-      className="flex m-2 relative overflow-hidden items-center justify-center font-heading text-lg sm:text-xl gap-3 md:text-2xl lg:text-4xl md:gap-6"
+      className="flex m-2 relative overflow-hidden items-center justify-center font-heading text-lg sm:text-xl gap-3 md:text-2xl  md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
@@ -46,17 +46,11 @@ export const HomePageNav: React.FC<{
         <button className="btn btn-primary" onClick={handleJoinGameClick}>
           Quick Join
         </button>
-        <button onClick={() => setActiveTab('queue')}>
-          <span
-            className={`${activeTab === 'queue' ? 'brightness-125 shadow-2xl shadow-primary' : ''}`}
-          >
-            Tournaments
-          </span>
-        </button>
+        {/* <button onClick={() => setActiveTab('queue')}>
+          <span className={`${activeTab === 'queue' ? 'text-secondary' : ''}`}>Tournaments</span>
+        </button> */}
         <button onClick={() => setActiveTab('leaderboard')}>
-          <span
-            className={`${activeTab === 'leaderboard' ? 'brightness-125 shadow-2xl shadow-primary' : ''}`}
-          >
+          <span className={`${activeTab === 'leaderboard' ? ' text-secondary' : ''}`}>
             Leaderboard
           </span>
         </button>

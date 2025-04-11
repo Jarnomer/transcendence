@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { motion } from 'framer-motion';
+
 import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { getTournaments } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
@@ -12,6 +14,7 @@ interface DataInQueue {
   isPrivate: boolean;
   mode: string;
   name: string;
+  j;
   variant: string;
 }
 
@@ -57,37 +60,44 @@ export const Tournaments: React.FC = () => {
 
   return (
     <>
-      <div className="glass-box p-5 w-full relative overflow-hidden">
-        <BackgroundGlow></BackgroundGlow>
-        <ul>
-          {dataInQueue.length === 0 ? (
-            <li className="text-muted text-gray-500 text-sm">No Tournaments in queue</li>
-          ) : (
-            dataInQueue.map((options, index) => (
-              <li key={index} className="my-2">
-                <div className="flex items-center gap-5">
-                  <p>{options.name || 'N/A'}</p>
-                  {Boolean(options.isPrivate) && (
-                    <input
-                      type="password"
-                      placeholder="Enter password"
-                      className="border border-gray-300 rounded p-1"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  )}
-                  <NavIconButton
-                    id="join-game-button"
-                    icon="arrowRight"
-                    onClick={(event) => handleJoinGameClick(event, options)}
-                  />
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
-      </div>
+      <motion.div className="w-full">
+        <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
+          <h2 className="">Open Tournaments</h2>
+        </div>
+        <motion.div className=" w-full text-xs relative  text-sm">
+          <div className="p-5 mt-1 border-1 w-full h-full relative overflow-hidden bg-primary/20 clipped-corner-bottom-right">
+            <BackgroundGlow></BackgroundGlow>
+            <ul>
+              {dataInQueue.length === 0 ? (
+                <li className="text-muted text-gray-500 text-sm">No Tournaments in queue</li>
+              ) : (
+                dataInQueue.map((options, index) => (
+                  <li key={index} className="my-2">
+                    <div className="flex items-center gap-5">
+                      <p>{options.name || 'N/A'}</p>
+                      {Boolean(options.isPrivate) && (
+                        <input
+                          type="password"
+                          placeholder="Enter password"
+                          className="border border-gray-300 rounded p-1"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                      )}
+                      <NavIconButton
+                        id="join-game-button"
+                        icon="arrowRight"
+                        onClick={(event) => handleJoinGameClick(event, options)}
+                      />
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </motion.div>
+      </motion.div>
     </>
   );
 };

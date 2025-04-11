@@ -53,6 +53,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch((err) => {
         console.error('Failed to fetch user data', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userID');
+        localStorage.removeItem('username');
         setUser(null);
       });
   }, []);

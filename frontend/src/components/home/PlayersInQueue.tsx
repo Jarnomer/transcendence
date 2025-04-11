@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
+import {motion} from 'framer-motion'
 
 import { getUsersInQueue } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
@@ -61,7 +62,17 @@ export const PlayerQueue: React.FC = () => {
 
   return (
     <>
-      <div className="glass-box p-5 w-full relative overflow-hidden">
+          <motion.div className="w-full md:w-1/2">
+      <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
+        Leaderboard
+      </div>
+      <motion.div
+        className="h-full w-full text-xs relative  text-sm"
+        variants={animationVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+      >
         <BackgroundGlow></BackgroundGlow>
         <ul>
           <h1 className="font-heading text-3xl w-full">Players looking for an opponent</h1>
@@ -98,6 +109,13 @@ export const PlayerQueue: React.FC = () => {
           )}
         </ul>
       </div>
+      <div className="glass-box mt-5 p-5 w-full relative overflow-hidden">
+        <BackgroundGlow></BackgroundGlow>
+        <h2 className="font-heading text-3xl">Open Tournaments</h2>
+        <p className="text-gray-500 text-sm">No on going Tournaments</p>
+      </div>
+      </motion.div>
+      </motion.div>
     </>
   );
 };

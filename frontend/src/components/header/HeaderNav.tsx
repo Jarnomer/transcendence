@@ -1,25 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
 // import { logout } from "../auth";  // Ensure your logout function is correctly imported
+import { useModal } from '../../contexts/modalContext/ModalContext'; // Importing modal context
 import { useUser } from '../../contexts/user/UserContext';
-import { useModal } from '../modals/ModalContext'; // Importing modal context
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { Notifications } from '../UI/Notifications';
 
 export const HeaderNav: React.FC = () => {
-  const { openModal } = useModal(); // Accessing openModal from modal context
+  const { openModal } = useModal();
   const navigate = useNavigate();
   const { user, setUser, refetchUser, checkAuth, logout } = useUser();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   const handleSettingsClick = () => {
-    // Open the settings modal with the desired content
     openModal('settingsModal');
   };
 
@@ -55,7 +73,7 @@ export const HeaderNav: React.FC = () => {
             onClick={() => toggleDropdown()}
           />
           {isDropdownOpen ? (
-            <div className="absolute right-0 top-10 glass-box p-2 opening">
+            <div ref={dropdownRef} className="absolute right-0 top-10 glass-box p-2 opening">
               <Notifications></Notifications>
             </div>
           ) : null}
@@ -69,7 +87,7 @@ export const HeaderNav: React.FC = () => {
             id="nav-settings-button"
             ariaLabel="Settings"
             icon="settings"
-            onClick={() => navigate('/settings')}
+            onClick={() => openModal('settings')}
           />
           {user ? (
             <button
