@@ -49,7 +49,6 @@ export function applyPlayerEffects(
   player1Mesh: Mesh,
   player2Mesh: Mesh,
   players: { player1: Player; player2: Player },
-  powerUps: PowerUp[],
   primaryColor: Color3,
   secondaryColor: Color3
 ): void {
@@ -90,6 +89,7 @@ function applyPaddleEffects(
   }
 
   const playerEffects = playerEffectsMap.get(playerIndex)!;
+  const currentEffectTypes = new Set(player.activePowerUps.map((p) => p.type));
 
   const hadEffects = playerEffects.activeEffects.size > 0;
   const hasNoEffectsNow = player.activePowerUps.length === 0;
@@ -99,10 +99,7 @@ function applyPaddleEffects(
     return;
   }
 
-  const currentEffectTypes = new Set(player.activePowerUps.map((p) => p.type));
-
-  applyPaddleMaterial(paddleMesh, player.activePowerUps, primaryColor, secondaryColor);
-
+  // Check for new power up effects
   for (const powerUp of player.activePowerUps) {
     const effectKey = powerUp.type;
 
@@ -125,49 +122,26 @@ function applyPaddleEffects(
         particleSystem,
         glowLayer,
       });
+
+      applyPaddleMaterial(paddleMesh, player.activePowerUps, primaryColor, secondaryColor);
     }
   }
 
-  const effectsToRemove: string[] = [];
+  // Check and dispose expired effects
+  const expiredEffects: string[] = [];
   playerEffects.activeEffects.forEach((_, type) => {
     if (!currentEffectTypes.has(type)) {
-      effectsToRemove.push(type);
+      expiredEffects.push(type);
     }
   });
 
-  for (const typeToRemove of effectsToRemove) {
-    const effect = playerEffects.activeEffects.get(typeToRemove)!;
+  for (const expiredEffect of expiredEffects) {
+    const effect = playerEffects.activeEffects.get(expiredEffect)!;
     if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem, paddleMesh);
     if (effect.glowLayer) effect.glowLayer.dispose();
-    playerEffects.activeEffects.delete(typeToRemove);
+    playerEffects.activeEffects.delete(expiredEffect);
     animatePaddleResize(scene, paddleMesh, player.paddleHeight);
   }
-}
-
-function clearAllPlayerEffects(
-  scene: Scene,
-  paddleMesh: Mesh,
-  playerEffects: PlayerEffects,
-  primaryColor: Color3
-): void {
-  playerEffects.activeEffects.forEach((effect) => {
-    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem, paddleMesh);
-    if (effect.glowLayer) effect.glowLayer.dispose();
-  });
-
-  playerEffects.activeEffects.clear();
-
-  if (paddleMesh.material) {
-    const baseEmissive = defaultGameObjectParams.paddle.emissiveIntensity;
-    animateMaterialTransition(paddleMesh, primaryColor, baseEmissive);
-  }
-
-  const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
-  const scaledHeight = gameToSceneSize(playerEffects.paddleHeight) / originalHeight;
-
-  paddleMesh.scaling.y = scaledHeight;
-
-  scene.stopAnimation(paddleMesh);
 }
 
 function createPowerUpVisualEffects(
@@ -207,28 +181,7 @@ function createPowerUpParticles(
   playerIndex: number,
   effectIndex: number
 ): ParticleSystem {
-  let particleTexturePath = '';
-
-  switch (powerUpType) {
-    case PowerUpType.BiggerPaddle:
-      particleTexturePath = '/power-up/sign_plus.png';
-      break;
-    case PowerUpType.SmallerPaddle:
-      particleTexturePath = '/power-up/sign_minus.png';
-      break;
-    case PowerUpType.FasterPaddle:
-      particleTexturePath = '/power-up/sign_fast.png';
-      break;
-    case PowerUpType.SlowerPaddle:
-      particleTexturePath = '/power-up/sign_slow.png';
-      break;
-    case PowerUpType.MoreSpin:
-      particleTexturePath = '/power-up/sign_spin.png';
-      break;
-    default:
-      particleTexturePath = '/power-up/sign_unknown.png';
-  }
-
+  const particleTexturePath = getPowerUpIconPath(powerUpType);
   const paddlePosition = paddleMesh.position.clone();
   const particleSystem = new ParticleSystem(
     `powerUpParticles-${playerIndex}-${powerUpType}`,
@@ -336,7 +289,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
   );
   const colorKeys = [
     { frame: 0, value: startColor },
-    { frame: 90, value: targetColor },
+    { frame: 60, value: targetColor },
   ];
   colorAnim.setKeys(colorKeys);
 
@@ -350,7 +303,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
   );
   const intensityKeys = [
     { frame: 0, value: startIntensity },
-    { frame: 90, value: targetIntensity },
+    { frame: 60, value: targetIntensity },
   ];
   intensityAnim.setKeys(intensityKeys);
 
@@ -361,7 +314,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
 
   material.animations = [colorAnim, intensityAnim];
 
-  scene.beginAnimation(material, 0, 90, false, 1, () => {
+  scene.beginAnimation(material, 0, 60, false, 1, () => {
     material.emissiveColor = targetColor.clone();
     material.emissiveIntensity = targetIntensity;
   });
@@ -371,65 +324,105 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
   const scaledHeight = gameToSceneSize(targetHeight) / originalHeight;
 
+  const isGrowing = paddleMesh.scaling.y < scaledHeight;
+
+  const originalScaleX = paddleMesh.scaling.x;
+  const originalScaleZ = paddleMesh.scaling.z;
+
   let overshootMultiplier: number;
   let dampingMultiplier: number;
+  let xzMultiplier: number;
 
-  if (paddleMesh.scaling.y < scaledHeight) {
+  if (isGrowing) {
     overshootMultiplier = 1.3;
     dampingMultiplier = 1.1;
+    xzMultiplier = 1.3;
   } else {
     overshootMultiplier = 0.7;
     dampingMultiplier = 0.9;
+    xzMultiplier = 0.7;
   }
 
-  const scaleAnim = new Animation(
-    'paddleResizeAnimation',
+  // Animate height
+  const scaleYAnim = new Animation(
+    'paddleResizeAnimationY',
     'scaling.y',
     30,
     Animation.ANIMATIONTYPE_FLOAT,
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
-  const scaleKeys = [
+  const scaleYKeys = [
     { frame: 0, value: paddleMesh.scaling.y },
     { frame: 5, value: scaledHeight * overshootMultiplier },
     { frame: 15, value: scaledHeight * dampingMultiplier },
     { frame: 30, value: scaledHeight },
   ];
-  scaleAnim.setKeys(scaleKeys);
+  scaleYAnim.setKeys(scaleYKeys);
+
+  // Animate width
+  const scaleXAnim = new Animation(
+    'paddleResizeAnimationX',
+    'scaling.x',
+    30,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const scaleXKeys = [
+    { frame: 0, value: originalScaleX },
+    { frame: 5, value: originalScaleX * xzMultiplier },
+    { frame: 15, value: originalScaleX * (xzMultiplier * 0.8 + 0.2) },
+    { frame: 30, value: originalScaleX },
+  ];
+  scaleXAnim.setKeys(scaleXKeys);
+
+  // Animate depth
+  const scaleZAnim = new Animation(
+    'paddleResizeAnimationZ',
+    'scaling.z',
+    30,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const scaleZKeys = [
+    { frame: 0, value: originalScaleZ },
+    { frame: 5, value: originalScaleZ * xzMultiplier },
+    { frame: 15, value: originalScaleZ * (xzMultiplier * 0.8 + 0.2) },
+    { frame: 30, value: originalScaleZ },
+  ];
+  scaleZAnim.setKeys(scaleZKeys);
 
   const easingFunction = new CubicEase();
   easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-  scaleAnim.setEasingFunction(easingFunction);
+  scaleYAnim.setEasingFunction(easingFunction);
+  scaleXAnim.setEasingFunction(easingFunction);
+  scaleZAnim.setEasingFunction(easingFunction);
 
-  paddleMesh.animations = [scaleAnim];
+  paddleMesh.animations = [scaleYAnim, scaleXAnim, scaleZAnim];
 
   scene.beginAnimation(paddleMesh, 0, 30, false, 1, () => {
     paddleMesh.scaling.y = scaledHeight;
+    paddleMesh.scaling.x = originalScaleX;
+    paddleMesh.scaling.z = originalScaleZ;
   });
 }
 
 function disposeParticleWithAnimation(particleSystem: ParticleSystem, paddleMesh: Mesh): void {
   if (!particleSystem || !particleSystem.emitter) return;
 
-  // Stop emitting new particles
   particleSystem.emitRate = 0;
 
-  const fadeOutDuration = 800; // Slightly longer for better visual effect
+  const fadeOutDuration = 800;
   const startTime = Date.now();
 
-  // Find associated paddle mesh (emitter is usually positioned relative to the paddle)
-  const emitter = particleSystem.emitter as Vector3;
   const scene = particleSystem.getScene();
 
-  // Store original update function if it exists
+  if (!scene) return;
+
   const originalUpdateFunction = particleSystem.updateFunction;
 
-  // Create new update function for gathering effect
   particleSystem.updateFunction = (particles) => {
     // Call original update function if it exists
-    if (originalUpdateFunction) {
-      originalUpdateFunction(particles);
-    }
+    if (originalUpdateFunction) originalUpdateFunction(particles);
 
     const elapsedTime = Date.now() - startTime;
     const progress = Math.min(elapsedTime / fadeOutDuration, 1);
@@ -440,23 +433,18 @@ function disposeParticleWithAnimation(particleSystem: ParticleSystem, paddleMesh
     for (let i = 0; i < particles.length; i++) {
       const particle = particles[i];
 
-      // Get current paddle position (it might be moving)
       const targetX = paddleMesh.position.x;
       const targetY = paddleMesh.position.y;
       const targetZ = paddleMesh.position.z;
 
-      // Gradually move particles toward the paddle
       const directionX = targetX - particle.position.x;
       const directionY = targetY - particle.position.y;
       const directionZ = targetZ - particle.position.z;
 
-      // Calculate distance to paddle
       const distance = Math.sqrt(
         directionX * directionX + directionY * directionY + directionZ * directionZ
       );
 
-      // Speed increases as progress increases (particles accelerate toward paddle)
-      // Also make particles move faster when they're farther away
       const speedFactor = 0.01 + easedProgress * 0.1 + distance * 0.01;
 
       // Move particles toward paddle with increasing speed
@@ -470,44 +458,73 @@ function disposeParticleWithAnimation(particleSystem: ParticleSystem, paddleMesh
       particle.position.x += Math.cos(spiralAngle) * spiralRadius * (1 - progress);
       particle.position.y += Math.sin(spiralAngle) * spiralRadius * (1 - progress);
 
-      // Make particles smaller as they get closer to the paddle
-      // Combine time-based and distance-based scaling
-      const distanceScaleFactor = Math.min(1, distance / 2); // Scale down more when closer
+      const distanceScaleFactor = Math.min(1, distance / 2);
       const timeScaleFactor = 1 - 0.3 * easedProgress;
       particle.size = particle.size * distanceScaleFactor * timeScaleFactor;
 
-      // Decrease alpha based on progress and also when they get very close to paddle
       if (distance < 0.3) {
-        // Fade out quickly when very close to paddle
         particle.color.a *= 1 - (0.3 - distance) / 0.3;
       } else {
-        // Normal fade out based on time
         particle.color.a = Math.max(0.1, 1 - easedProgress * 1.2);
       }
     }
 
-    // If animation complete, dispose of particle system
-    if (progress >= 1) {
-      if (particleSystem) {
-        particleSystem.dispose();
-      }
-    }
+    if (progress >= 1) particleSystem.dispose();
   };
 
-  // Ensure we clean up if the scene is disposed before animation completes
   const disposeObserver = scene.onDisposeObservable.add(() => {
-    if (particleSystem) {
-      particleSystem.dispose();
-    }
+    if (particleSystem) particleSystem.dispose();
   });
 
-  // Set a backup timeout to ensure disposal happens even if render loop pauses
   setTimeout(() => {
     if (particleSystem) {
       scene.onDisposeObservable.remove(disposeObserver);
       particleSystem.dispose();
     }
   }, fadeOutDuration + 100);
+}
+
+function clearAllPlayerEffects(
+  scene: Scene,
+  paddleMesh: Mesh,
+  playerEffects: PlayerEffects,
+  primaryColor: Color3
+): void {
+  playerEffects.activeEffects.forEach((effect) => {
+    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem, paddleMesh);
+    if (effect.glowLayer) effect.glowLayer.dispose();
+  });
+
+  playerEffects.activeEffects.clear();
+
+  if (paddleMesh.material) {
+    const baseEmissive = defaultGameObjectParams.paddle.emissiveIntensity;
+    animateMaterialTransition(paddleMesh, primaryColor, baseEmissive);
+  }
+
+  const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
+  const scaledHeight = gameToSceneSize(playerEffects.paddleHeight) / originalHeight;
+
+  paddleMesh.scaling.y = scaledHeight;
+
+  scene.stopAnimation(paddleMesh);
+}
+
+function getPowerUpIconPath(powerUpType: PowerUpType) {
+  switch (powerUpType) {
+    case PowerUpType.BiggerPaddle:
+      return '/power-up/sign_plus.png';
+    case PowerUpType.SmallerPaddle:
+      return '/power-up/sign_minus.png';
+    case PowerUpType.FasterPaddle:
+      return '/power-up/sign_fast.png';
+    case PowerUpType.SlowerPaddle:
+      return '/power-up/sign_slow.png';
+    case PowerUpType.MoreSpin:
+      return '/power-up/sign_spin.png';
+    default:
+      return '/power-up/sign_unknown.png';
+  }
 }
 
 function logPlayerState(player: Player): void {

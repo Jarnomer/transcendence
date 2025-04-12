@@ -313,7 +313,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       player1Ref.current,
       player2Ref.current,
       players,
-      powerUps,
       primaryColor,
       secondaryColor
     );
