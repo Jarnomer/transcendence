@@ -137,7 +137,7 @@ function applyPaddleEffects(
 
   for (const typeToRemove of effectsToRemove) {
     const effect = playerEffects.activeEffects.get(typeToRemove)!;
-    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem);
+    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem, paddleMesh);
     if (effect.glowLayer) effect.glowLayer.dispose();
     playerEffects.activeEffects.delete(typeToRemove);
     animatePaddleResize(scene, paddleMesh, player.paddleHeight);
@@ -151,7 +151,7 @@ function clearAllPlayerEffects(
   primaryColor: Color3
 ): void {
   playerEffects.activeEffects.forEach((effect) => {
-    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem);
+    if (effect.particleSystem) disposeParticleWithAnimation(effect.particleSystem, paddleMesh);
     if (effect.glowLayer) effect.glowLayer.dispose();
   });
 
@@ -408,24 +408,106 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   });
 }
 
-function disposeParticleWithAnimation(particleSystem: ParticleSystem): void {
+function disposeParticleWithAnimation(particleSystem: ParticleSystem, paddleMesh: Mesh): void {
+  if (!particleSystem || !particleSystem.emitter) return;
+
+  // Stop emitting new particles
   particleSystem.emitRate = 0;
 
-  const fadeOutDuration = 600;
+  const fadeOutDuration = 800; // Slightly longer for better visual effect
   const startTime = Date.now();
 
-  const fadeInterval = setInterval(() => {
+  // Find associated paddle mesh (emitter is usually positioned relative to the paddle)
+  const emitter = particleSystem.emitter as Vector3;
+  const scene = particleSystem.getScene();
+
+  // Store original update function if it exists
+  const originalUpdateFunction = particleSystem.updateFunction;
+
+  // Create new update function for gathering effect
+  particleSystem.updateFunction = (particles) => {
+    // Call original update function if it exists
+    if (originalUpdateFunction) {
+      originalUpdateFunction(particles);
+    }
+
     const elapsedTime = Date.now() - startTime;
     const progress = Math.min(elapsedTime / fadeOutDuration, 1);
 
-    if (progress >= 1) {
-      clearInterval(fadeInterval);
-      particleSystem.dispose();
-    } else {
-      particleSystem.minSize *= 1 - progress;
-      particleSystem.maxSize *= 1 - progress;
+    // Cubic ease-in for smooth acceleration toward paddle
+    const easedProgress = progress * progress * progress;
+
+    for (let i = 0; i < particles.length; i++) {
+      const particle = particles[i];
+
+      // Get current paddle position (it might be moving)
+      const targetX = paddleMesh.position.x;
+      const targetY = paddleMesh.position.y;
+      const targetZ = paddleMesh.position.z;
+
+      // Gradually move particles toward the paddle
+      const directionX = targetX - particle.position.x;
+      const directionY = targetY - particle.position.y;
+      const directionZ = targetZ - particle.position.z;
+
+      // Calculate distance to paddle
+      const distance = Math.sqrt(
+        directionX * directionX + directionY * directionY + directionZ * directionZ
+      );
+
+      // Speed increases as progress increases (particles accelerate toward paddle)
+      // Also make particles move faster when they're farther away
+      const speedFactor = 0.01 + easedProgress * 0.1 + distance * 0.01;
+
+      // Move particles toward paddle with increasing speed
+      particle.position.x += directionX * speedFactor;
+      particle.position.y += directionY * speedFactor;
+      particle.position.z += directionZ * speedFactor;
+
+      // Create a spiral effect by adding circular motion
+      const spiralAngle = progress * 10 + i * 0.1;
+      const spiralRadius = (1 - easedProgress) * 0.2;
+      particle.position.x += Math.cos(spiralAngle) * spiralRadius * (1 - progress);
+      particle.position.y += Math.sin(spiralAngle) * spiralRadius * (1 - progress);
+
+      // Make particles smaller as they get closer to the paddle
+      // Combine time-based and distance-based scaling
+      const distanceScaleFactor = Math.min(1, distance / 2); // Scale down more when closer
+      const timeScaleFactor = 1 - 0.3 * easedProgress;
+      particle.size = particle.size * distanceScaleFactor * timeScaleFactor;
+
+      // Decrease alpha based on progress and also when they get very close to paddle
+      if (distance < 0.3) {
+        // Fade out quickly when very close to paddle
+        particle.color.a *= 1 - (0.3 - distance) / 0.3;
+      } else {
+        // Normal fade out based on time
+        particle.color.a = Math.max(0.1, 1 - easedProgress * 1.2);
+      }
     }
-  }, 100);
+
+    // If animation complete, dispose of particle system
+    if (progress >= 1) {
+      if (particleSystem) {
+        particleSystem.dispose();
+      }
+    }
+  };
+
+  // Ensure we clean up if the scene is disposed before animation completes
+  const disposeObserver = scene.onDisposeObservable.add(() => {
+    if (particleSystem) {
+      particleSystem.dispose();
+    }
+  });
+
+  // Set a backup timeout to ensure disposal happens even if render loop pauses
+  setTimeout(() => {
+    if (particleSystem) {
+      scene.onDisposeObservable.remove(disposeObserver);
+      particleSystem.dispose();
+    }
+  }, fadeOutDuration + 100);
 }
 
 function logPlayerState(player: Player): void {
