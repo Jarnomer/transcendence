@@ -116,10 +116,11 @@ export class PowerUpEffectsManager {
     // Use secondaryColor for negative power-ups
     const color = isNegative ? this.secondaryColor : this.primaryColor;
     material.emissiveColor = color;
-    material.disableLighting = true;
     material.diffuseTexture = texture;
     material.opacityTexture = texture;
+
     material.useAlphaFromDiffuseTexture = true;
+    material.disableLighting = true;
 
     mesh.scaling = new Vector3(1, 1, 1);
     mesh.material = material;

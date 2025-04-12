@@ -9,6 +9,7 @@ import {
   MeshBuilder,
   ParticleSystem,
   PBRMaterial,
+  StandardMaterial,
   Scene,
   Texture,
   Vector3,
@@ -206,24 +207,23 @@ function createPowerUpIconMesh(
   effectColor: Color3,
   suffix: string
 ): Mesh {
-  const iconPath = getPowerUpIconPath(powerUpType);
   const iconSize = 3;
-
   const mesh = MeshBuilder.CreatePlane(
     `powerUpIcon-${powerUpType}-${suffix}`,
     { width: iconSize, height: iconSize },
     scene
   );
 
-  const material = new PBRMaterial(`powerUpIconMaterial-${powerUpType}-${suffix}`, scene);
+  const material = new StandardMaterial(`powerUpIconMaterial-${powerUpType}-${suffix}`, scene);
+  const iconPath = getPowerUpIconPath(powerUpType);
   const texture = new Texture(iconPath, scene);
 
   material.emissiveColor = effectColor;
-  material.emissiveTexture = texture;
+  material.diffuseTexture = texture;
   material.opacityTexture = texture;
-  material.backFaceCulling = false;
+
+  material.useAlphaFromDiffuseTexture = true;
   material.disableLighting = true;
-  material.albedoColor = Color3.Black();
 
   mesh.material = material;
   mesh.isPickable = false;
@@ -318,7 +318,7 @@ function animatePowerUpIcons(scene: Scene, icons: Mesh[], paddleMesh: Mesh): voi
   ];
   opacityAnim.setKeys(opacityKeys);
 
-  // Animate color flash
+  // Animate color
   const colorAnim = new Animation(
     'iconColorAnimation',
     'material.emissiveColor',
