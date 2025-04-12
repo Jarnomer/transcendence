@@ -112,7 +112,7 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     nonSquareRatio: 0.2,
   },
   crtDistortion: {
-    curvatureAmount: 0,
+    curvatureAmount: 0.2,
     scanlineIntensity: 0.05,
     vignette: 1.2,
     colorBleed: 0.0,
@@ -137,7 +137,7 @@ export const retroEffectsPresets = {
   cinematic: {
     scanlines: 5,
     phosphor: 5,
-    curvature: 0,
+    curvature: 5,
     glitch: 5,
     colorBleed: 5,
     flicker: 5,

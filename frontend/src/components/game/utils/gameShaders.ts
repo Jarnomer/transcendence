@@ -76,6 +76,124 @@ export function registerRetroShaders() {
     }
   `;
 
+  Effect.ShadersStore['glitchEffectVertexShader'] = `
+  precision highp float;
+  attribute vec2 position;
+  varying vec2 vUV;
+  void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    vUV = position * 0.5 + 0.5;
+  }
+`;
+
+  Effect.ShadersStore['glitchEffectFragmentShader'] = `
+  precision highp float;
+  varying vec2 vUV;
+  uniform sampler2D textureSampler;
+  uniform float time;
+  uniform float trackingNoiseAmount;
+  uniform float staticNoiseAmount;
+  uniform float distortionAmount;
+  uniform float colorBleedAmount;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  void main() {
+    // Calculate timing for various effects
+    float glitchTime = time * 2.0;
+    float jitterTime = floor(time * 4.0);
+
+    // Base UV coordinates
+    vec2 uv = vUV;
+
+    // ------------ DISTORTION ------------
+    if (distortionAmount > 0.0) {
+      // Create horizontal jitter with higher intensity
+      float jitterNoise = rand(vec2(jitterTime, 2.0));
+      float jitterAmount = rand(vec2(jitterTime, uv.y * 100.0)) * distortionAmount * 0.1;
+      uv.x += jitterAmount * sin(time * 50.0);
+
+      // Add vertical distortion
+      float verticalDistortion = sin(uv.y * 20.0 + time * 5.0) * distortionAmount * 0.05;
+      uv.y += verticalDistortion;
+
+      // Large glitch jumps at random intervals
+      float bigGlitchTime = floor(time);
+      float bigGlitch = rand(vec2(bigGlitchTime, 5.0));
+      if (bigGlitch > 0.8) {
+        float jumpOffset = rand(vec2(bigGlitchTime, 8.0)) * distortionAmount * 0.2;
+        uv.x += (rand(vec2(uv.y, bigGlitchTime)) - 0.5) * jumpOffset;
+
+        // Create block shifts
+        float blockSize = 0.1;
+        float blockY = floor(uv.y / blockSize) * blockSize;
+        float blockShift = (rand(vec2(blockY, bigGlitchTime)) - 0.5) * jumpOffset * 2.0;
+
+        if (rand(vec2(blockY, bigGlitchTime + 1.0)) > 0.7) {
+          uv.x += blockShift;
+        }
+      }
+    }
+
+    // ------------ TRACKING NOISE ------------
+    if (trackingNoiseAmount > 0.0) {
+      // Create more intense tracking noise
+      float trackingPos = fract(glitchTime + uv.y * 5.0);
+
+      // Add tracking noise bands with higher density
+      if (trackingPos < 0.2) {
+        float trackingNoise = smoothstep(0.0, 0.2, trackingPos) * trackingNoiseAmount;
+        float yOffset = pow(1.0 - trackingPos * 5.0, 2.0) * 0.02 * trackingNoiseAmount;
+        float xOffset = (rand(vec2(time, floor(uv.y * 200.0))) * 2.0 - 1.0) * 0.04 * trackingNoiseAmount;
+
+        uv.y += yOffset;
+        uv.x += xOffset;
+      }
+    }
+
+    // ------------ COLOR SAMPLING ------------
+    vec4 color;
+
+    // Check if UV coordinates are still valid
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+      color = vec4(0.0, 0.0, 0.0, 1.0);
+    } else {
+      // Apply stronger RGB color shift/bleeding
+      if (colorBleedAmount > 0.0) {
+        float bleedOffset = 0.004 * colorBleedAmount;
+        color.r = texture2D(textureSampler, vec2(uv.x + bleedOffset, uv.y - bleedOffset)).r;
+        color.g = texture2D(textureSampler, uv).g;
+        color.b = texture2D(textureSampler, vec2(uv.x - bleedOffset, uv.y + bleedOffset)).b;
+        color.a = 1.0;
+      } else {
+        color = texture2D(textureSampler, uv);
+      }
+
+      // ------------ STATIC NOISE ------------
+      if (staticNoiseAmount > 0.0) {
+        float staticNoise = rand(vec2(uv.x * time * 10.0, uv.y * time * 10.0)) * staticNoiseAmount;
+        color.rgb = mix(color.rgb, vec3(staticNoise), staticNoiseAmount * 0.4);
+
+        // Add scan lines with noise
+        float scanline = sin(uv.y * 200.0 + time * 30.0) * 0.1 * staticNoiseAmount;
+        color.rgb *= (1.0 - scanline);
+      }
+
+      // Create more white noise lines
+      if (staticNoiseAmount > 0.0) {
+        float lineNoise = rand(vec2(floor(time * 15.0), floor(uv.y * 200.0)));
+        if (lineNoise > 0.93) {
+          color.rgb += vec3(0.2) * staticNoiseAmount;
+        }
+      }
+    }
+
+    gl_FragColor = color;
+  }
+`;
+
   // VHS tracking and distortion effect
   Effect.ShadersStore['vhsEffectVertexShader'] = `
     precision highp float;

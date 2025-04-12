@@ -207,8 +207,8 @@ export function createGlitchEffect(
   };
 
   const glitchEffect = new PostProcess(
-    'vhsEffect',
-    'vhsEffect',
+    'glitchEffect',
+    'glitchEffect',
     ['time', 'trackingNoiseAmount', 'staticNoiseAmount', 'distortionAmount', 'colorBleedAmount'],
     null,
     1.0,
