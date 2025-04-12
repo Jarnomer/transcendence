@@ -336,7 +336,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
   );
   const colorKeys = [
     { frame: 0, value: startColor },
-    { frame: 20, value: targetColor },
+    { frame: 90, value: targetColor },
   ];
   colorAnim.setKeys(colorKeys);
 
@@ -350,7 +350,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
   );
   const intensityKeys = [
     { frame: 0, value: startIntensity },
-    { frame: 20, value: targetIntensity },
+    { frame: 90, value: targetIntensity },
   ];
   intensityAnim.setKeys(intensityKeys);
 
@@ -361,7 +361,7 @@ function animateMaterialTransition(mesh: Mesh, targetColor: Color3, targetIntens
 
   material.animations = [colorAnim, intensityAnim];
 
-  scene.beginAnimation(material, 0, 20, false, 1, () => {
+  scene.beginAnimation(material, 0, 90, false, 1, () => {
     material.emissiveColor = targetColor.clone();
     material.emissiveIntensity = targetIntensity;
   });
