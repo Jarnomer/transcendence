@@ -6,6 +6,7 @@ import {
   EasingFunction,
   GlowLayer,
   Mesh,
+  MeshBuilder,
   ParticleSystem,
   PBRMaterial,
   Scene,
@@ -24,6 +25,7 @@ interface PowerUpEffect {
   timestamp: number;
   particleSystem: ParticleSystem | null;
   glowLayer: GlowLayer | null;
+  icons: Mesh[];
 }
 
 interface PlayerEffects {
@@ -104,7 +106,7 @@ function applyPaddleEffects(
     const effectKey = powerUp.type;
 
     if (!playerEffects.activeEffects.has(effectKey)) {
-      const { particleSystem, glowLayer } = createPowerUpVisualEffects(
+      const { particleSystem, glowLayer, icons } = createPowerUpVisualEffects(
         scene,
         paddleMesh,
         powerUp.type,
@@ -121,6 +123,7 @@ function applyPaddleEffects(
         timestamp: Date.now(),
         particleSystem,
         glowLayer,
+        icons,
       });
 
       applyPaddleMaterial(paddleMesh, player.activePowerUps, primaryColor, secondaryColor);
@@ -153,7 +156,7 @@ function createPowerUpVisualEffects(
   secondaryColor: Color3,
   playerIndex: number,
   effectIndex: number
-): { particleSystem: ParticleSystem; glowLayer: GlowLayer } {
+): { particleSystem: ParticleSystem; glowLayer: GlowLayer; icons: Mesh[] } {
   const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}-${powerUpType}`, scene);
   const effectColor = isNegative ? secondaryColor : primaryColor;
 
@@ -170,7 +173,186 @@ function createPowerUpVisualEffects(
     effectIndex
   );
 
-  return { particleSystem, glowLayer };
+  const icons = createPowerUpIconEffects(scene, paddleMesh, powerUpType, effectColor, playerIndex);
+
+  return { particleSystem, glowLayer, icons };
+}
+
+function createPowerUpIconEffects(
+  scene: Scene,
+  paddleMesh: Mesh,
+  powerUpType: PowerUpType,
+  effectColor: Color3,
+  playerIndex: number
+): Mesh[] {
+  const xOffset = playerIndex === 1 ? 2.5 : -2.5;
+
+  const iconUp = createPowerUpIconMesh(scene, powerUpType, effectColor, `up-${playerIndex}`);
+
+  const iconDown = createPowerUpIconMesh(scene, powerUpType, effectColor, `down-${playerIndex}`);
+
+  const icons = [iconUp, iconDown];
+
+  positionIconsInFrontOfPaddle(paddleMesh, icons, xOffset);
+
+  animatePowerUpIcons(scene, icons, paddleMesh);
+
+  return icons;
+}
+
+function createPowerUpIconMesh(
+  scene: Scene,
+  powerUpType: PowerUpType,
+  effectColor: Color3,
+  suffix: string
+): Mesh {
+  const iconPath = getPowerUpIconPath(powerUpType);
+  const iconSize = 3;
+
+  const mesh = MeshBuilder.CreatePlane(
+    `powerUpIcon-${powerUpType}-${suffix}`,
+    { width: iconSize, height: iconSize },
+    scene
+  );
+
+  const material = new PBRMaterial(`powerUpIconMaterial-${powerUpType}-${suffix}`, scene);
+  const texture = new Texture(iconPath, scene);
+
+  material.emissiveColor = effectColor;
+  material.emissiveTexture = texture;
+  material.opacityTexture = texture;
+  material.backFaceCulling = false;
+  material.disableLighting = true;
+  material.albedoColor = Color3.Black();
+
+  mesh.material = material;
+  mesh.isPickable = false;
+
+  return mesh;
+}
+
+function positionIconsInFrontOfPaddle(paddleMesh: Mesh, icons: Mesh[], xOffset: number): void {
+  const paddlePosition = paddleMesh.position.clone();
+
+  icons.forEach((icon, index) => {
+    icon.position = new Vector3(
+      paddlePosition.x + xOffset,
+      paddlePosition.y,
+      paddlePosition.z + (index === 0 ? 0.5 : -0.5)
+    );
+
+    icon.scaling = new Vector3(0, 0, 0);
+  });
+}
+
+function animatePowerUpIcons(scene: Scene, icons: Mesh[], paddleMesh: Mesh): void {
+  if (icons.length !== 2) return;
+
+  const [iconUp, iconDown] = icons;
+  const paddlePosition = paddleMesh.position.clone();
+  const baseColor = (iconUp.material as PBRMaterial).emissiveColor.clone();
+
+  // Position animation for up icon
+  const posUpAnim = new Animation(
+    'iconUpPositionAnimation',
+    'position',
+    30,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const upPosKeys = [
+    { frame: 0, value: new Vector3(iconUp.position.x, paddlePosition.y, iconUp.position.z) },
+    { frame: 60, value: new Vector3(iconUp.position.x, paddlePosition.y + 2, iconUp.position.z) },
+  ];
+
+  posUpAnim.setKeys(upPosKeys);
+
+  // Animate position
+  const posDownAnim = new Animation(
+    'iconDownPositionAnimation',
+    'position',
+    30,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+
+  const downPosKeys = [
+    { frame: 0, value: new Vector3(iconDown.position.x, paddlePosition.y, iconDown.position.z) },
+    {
+      frame: 60,
+      value: new Vector3(iconDown.position.x, paddlePosition.y - 2, iconDown.position.z),
+    },
+  ];
+
+  posDownAnim.setKeys(downPosKeys);
+
+  // Animate scaling
+  const scaleAnim = new Animation(
+    'iconScaleAnimation',
+    'scaling',
+    30,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const scaleKeys = [
+    { frame: 0, value: new Vector3(0, 0, 0) },
+    { frame: 15, value: new Vector3(1.5, 1.5, 1.5) },
+    { frame: 30, value: new Vector3(1, 1, 1) },
+  ];
+  scaleAnim.setKeys(scaleKeys);
+
+  // Animate opacity
+  const opacityAnim = new Animation(
+    'iconOpacityAnimation',
+    'material.alpha',
+    30,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const opacityKeys = [
+    { frame: 0, value: 0 },
+    { frame: 15, value: 1 },
+    { frame: 45, value: 1 },
+    { frame: 60, value: 0 },
+  ];
+  opacityAnim.setKeys(opacityKeys);
+
+  // Animate color flash
+  const colorAnim = new Animation(
+    'iconColorAnimation',
+    'material.emissiveColor',
+    30,
+    Animation.ANIMATIONTYPE_COLOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const colorKeys = [
+    { frame: 0, value: baseColor },
+    { frame: 10, value: Color3.White() },
+    { frame: 20, value: baseColor },
+  ];
+  colorAnim.setKeys(colorKeys);
+
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+  scaleAnim.setEasingFunction(easingFunction);
+  posUpAnim.setEasingFunction(easingFunction);
+  posDownAnim.setEasingFunction(easingFunction);
+  opacityAnim.setEasingFunction(easingFunction);
+
+  iconUp.animations = [scaleAnim.clone(), posUpAnim, opacityAnim.clone(), colorAnim.clone()];
+  iconDown.animations = [scaleAnim.clone(), posDownAnim, opacityAnim.clone(), colorAnim.clone()];
+
+  scene.beginAnimation(iconUp, 0, 60, false, 1, () => {
+    if (iconUp.material) iconUp.material.dispose();
+    iconUp.dispose();
+  });
+
+  scene.beginAnimation(iconDown, 0, 60, false, 1, () => {
+    if (iconDown.material) iconDown.material.dispose();
+    iconDown.dispose();
+  });
 }
 
 function createPowerUpParticles(
@@ -181,7 +363,7 @@ function createPowerUpParticles(
   playerIndex: number,
   effectIndex: number
 ): ParticleSystem {
-  const particleTexturePath = getPowerUpIconPath(powerUpType);
+  const particleTexturePath = getPowerUpSignPath(powerUpType);
   const paddlePosition = paddleMesh.position.clone();
   const particleSystem = new ParticleSystem(
     `powerUpParticles-${playerIndex}-${powerUpType}`,
@@ -511,6 +693,23 @@ function clearAllPlayerEffects(
 }
 
 function getPowerUpIconPath(powerUpType: PowerUpType) {
+  switch (powerUpType) {
+    case PowerUpType.BiggerPaddle:
+      return '/power-up/paddle_bigger.png';
+    case PowerUpType.SmallerPaddle:
+      return '/power-up/paddle_smaller.png';
+    case PowerUpType.FasterPaddle:
+      return '/power-up/paddle_faster.png';
+    case PowerUpType.SlowerPaddle:
+      return '/power-up/paddle_slower.png';
+    case PowerUpType.MoreSpin:
+      return '/power-up/paddle_spin.png';
+    default:
+      return '/power-up/unknown_powerup.png';
+  }
+}
+
+function getPowerUpSignPath(powerUpType: PowerUpType) {
   switch (powerUpType) {
     case PowerUpType.BiggerPaddle:
       return '/power-up/sign_plus.png';
