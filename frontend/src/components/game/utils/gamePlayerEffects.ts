@@ -1,3 +1,5 @@
+import { off } from 'node:process';
+
 import {
   Animation,
   Color3,
@@ -104,6 +106,7 @@ function applyPaddleEffects(
 
   // Check for new power up effects
   for (const powerUp of player.activePowerUps) {
+    const effectColor = powerUp.isNegative ? secondaryColor : primaryColor;
     const effectKey = powerUp.type;
 
     if (!playerEffects.activeEffects.has(effectKey)) {
@@ -111,9 +114,7 @@ function applyPaddleEffects(
         scene,
         paddleMesh,
         powerUp.type,
-        powerUp.isNegative,
-        primaryColor,
-        secondaryColor,
+        effectColor,
         playerIndex,
         // Use size to increment effects
         playerEffects.activeEffects.size
@@ -152,14 +153,11 @@ function createPowerUpVisualEffects(
   scene: Scene,
   paddleMesh: Mesh,
   powerUpType: PowerUpType,
-  isNegative: boolean,
-  primaryColor: Color3,
-  secondaryColor: Color3,
+  effectColor: Color3,
   playerIndex: number,
   effectIndex: number
 ): { particleSystem: ParticleSystem; glowLayer: GlowLayer; icons: Mesh[] } {
   const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}-${powerUpType}`, scene);
-  const effectColor = isNegative ? secondaryColor : primaryColor;
 
   glowLayer.intensity = Math.max(0.2, 0.4 - effectIndex * 0.05);
   glowLayer.blurKernelSize = 48;
@@ -186,17 +184,30 @@ function createPowerUpIconEffects(
   effectColor: Color3,
   playerIndex: number
 ): Mesh[] {
-  const xOffset = playerIndex === 1 ? 2.5 : -2.5;
+  const offset = 2.5;
+  const xOffset = playerIndex === 1 ? offset : -offset;
 
-  const iconUp = createPowerUpIconMesh(scene, powerUpType, effectColor, `up-${playerIndex}`);
+  const iconUp = createPowerUpIconMesh(
+    scene,
+    powerUpType,
+    paddleMesh,
+    effectColor,
+    xOffset,
+    `up-${playerIndex}`
+  );
 
-  const iconDown = createPowerUpIconMesh(scene, powerUpType, effectColor, `down-${playerIndex}`);
+  const iconDown = createPowerUpIconMesh(
+    scene,
+    powerUpType,
+    paddleMesh,
+    effectColor,
+    xOffset,
+    `down-${playerIndex}`
+  );
 
   const icons = [iconUp, iconDown];
 
-  positionIconsInFrontOfPaddle(paddleMesh, icons, xOffset);
-
-  animatePowerUpIcons(scene, icons, paddleMesh);
+  animatePowerUpIcons(scene, icons, paddleMesh, effectColor);
 
   return icons;
 }
@@ -204,7 +215,9 @@ function createPowerUpIconEffects(
 function createPowerUpIconMesh(
   scene: Scene,
   powerUpType: PowerUpType,
+  paddleMesh: Mesh,
   effectColor: Color3,
+  xOffset: number,
   suffix: string
 ): Mesh {
   const iconSize = 3;
@@ -217,6 +230,7 @@ function createPowerUpIconMesh(
   const material = new StandardMaterial(`powerUpIconMaterial-${powerUpType}-${suffix}`, scene);
   const iconPath = getPowerUpIconPath(powerUpType);
   const texture = new Texture(iconPath, scene);
+  const paddlePosition = paddleMesh.position.clone();
 
   material.emissiveColor = effectColor;
   material.diffuseTexture = texture;
@@ -228,31 +242,27 @@ function createPowerUpIconMesh(
   mesh.material = material;
   mesh.isPickable = false;
 
+  mesh.position = new Vector3(paddlePosition.x + xOffset, paddlePosition.y, paddlePosition.z);
+  mesh.scaling = new Vector3(0, 0, 0);
+
   return mesh;
 }
 
-function positionIconsInFrontOfPaddle(paddleMesh: Mesh, icons: Mesh[], xOffset: number): void {
-  const paddlePosition = paddleMesh.position.clone();
-
-  icons.forEach((icon, index) => {
-    icon.position = new Vector3(
-      paddlePosition.x + xOffset,
-      paddlePosition.y,
-      paddlePosition.z + (index === 0 ? 0.5 : -0.5)
-    );
-
-    icon.scaling = new Vector3(0, 0, 0);
-  });
-}
-
-function animatePowerUpIcons(scene: Scene, icons: Mesh[], paddleMesh: Mesh): void {
+function animatePowerUpIcons(
+  scene: Scene,
+  icons: Mesh[],
+  paddleMesh: Mesh,
+  effectColor: Color3
+): void {
   if (icons.length !== 2) return;
 
   const [iconUp, iconDown] = icons;
   const paddlePosition = paddleMesh.position.clone();
-  const baseColor = (iconUp.material as PBRMaterial).emissiveColor.clone();
 
-  // Position animation for up icon
+  const startPosition = new Vector3(iconUp.position.x, paddlePosition.y, iconUp.position.z);
+  let endPosition;
+
+  // Animate up position
   const posUpAnim = new Animation(
     'iconUpPositionAnimation',
     'position',
@@ -260,15 +270,14 @@ function animatePowerUpIcons(scene: Scene, icons: Mesh[], paddleMesh: Mesh): voi
     Animation.ANIMATIONTYPE_VECTOR3,
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
-
+  endPosition = new Vector3(iconUp.position.x, paddlePosition.y + 2, iconUp.position.z);
   const upPosKeys = [
-    { frame: 0, value: new Vector3(iconUp.position.x, paddlePosition.y, iconUp.position.z) },
-    { frame: 60, value: new Vector3(iconUp.position.x, paddlePosition.y + 2, iconUp.position.z) },
+    { frame: 0, value: startPosition },
+    { frame: 60, value: endPosition },
   ];
-
   posUpAnim.setKeys(upPosKeys);
 
-  // Animate position
+  // Animate down position
   const posDownAnim = new Animation(
     'iconDownPositionAnimation',
     'position',
@@ -276,15 +285,11 @@ function animatePowerUpIcons(scene: Scene, icons: Mesh[], paddleMesh: Mesh): voi
     Animation.ANIMATIONTYPE_VECTOR3,
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
-
+  endPosition = new Vector3(iconUp.position.x, paddlePosition.y - 2, iconUp.position.z);
   const downPosKeys = [
-    { frame: 0, value: new Vector3(iconDown.position.x, paddlePosition.y, iconDown.position.z) },
-    {
-      frame: 60,
-      value: new Vector3(iconDown.position.x, paddlePosition.y - 2, iconDown.position.z),
-    },
+    { frame: 0, value: startPosition },
+    { frame: 60, value: endPosition },
   ];
-
   posDownAnim.setKeys(downPosKeys);
 
   // Animate scaling
@@ -327,9 +332,9 @@ function animatePowerUpIcons(scene: Scene, icons: Mesh[], paddleMesh: Mesh): voi
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
   const colorKeys = [
-    { frame: 0, value: baseColor },
+    { frame: 0, value: effectColor },
     { frame: 10, value: Color3.White() },
-    { frame: 20, value: baseColor },
+    { frame: 20, value: effectColor },
   ];
   colorAnim.setKeys(colorKeys);
 
