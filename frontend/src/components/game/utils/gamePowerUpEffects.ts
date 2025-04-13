@@ -14,7 +14,7 @@ import {
   CubicEase,
 } from 'babylonjs';
 
-import { PowerUp, PowerUpType, defaultGameObjectParams } from '@shared/types';
+import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
 
 import { createParticleTexture } from './gamePostProcess';
 import { gameToSceneSize, gameToSceneX, gameToSceneY } from './gameUtilities';
@@ -30,7 +30,7 @@ interface PowerUpEffect {
 
 export class PowerUpEffectsManager {
   private scene: Scene;
-  private effects: Map<string, PowerUpEffect> = new Map();
+  private effects: Map<number, PowerUpEffect> = new Map();
   private primaryColor: Color3;
   private secondaryColor: Color3;
   private powerUpSize: number;
@@ -42,18 +42,17 @@ export class PowerUpEffectsManager {
     this.powerUpSize = powerUpSize;
   }
 
-  // Check for new and removed power-ups
+  // Check for new and collected power-ups
   updatePowerUpEffects(powerUps: PowerUp[]): void {
-    // Create a map of current power-ups for quick lookup
     const currentPowerUps = new Map<number, PowerUp>();
     for (const powerUp of powerUps) {
       currentPowerUps.set(powerUp.id, powerUp);
 
-      // Create visual effect for new power-ups that aren't collected
+      // Create visual effect for new power-ups
       if (!this.effects.has(powerUp.id) && !powerUp.isCollected) {
         this.createPowerUpEffect(powerUp, powerUp.id);
       }
-      // Handle power-up collection animation if needed
+      // Handle collection animation
       else if (
         this.effects.has(powerUp.id) &&
         powerUp.isCollected &&
@@ -63,7 +62,7 @@ export class PowerUpEffectsManager {
       }
     }
 
-    // Check for power-ups that need to be removed (no longer in the array)
+    // Remove expired power-ups
     for (const [id, effect] of this.effects.entries()) {
       if (!currentPowerUps.has(id) && !effect.collected) {
         this.disposeEffectWithAnimation(id);
@@ -109,12 +108,11 @@ export class PowerUpEffectsManager {
       { width: size, height: size },
       this.scene
     );
+    const color = isNegative ? this.secondaryColor : this.primaryColor;
     const material = new StandardMaterial(`powerUpMaterial-${type}`, this.scene);
     const iconPath = this.getPowerUpIconPath(type);
     const texture = new Texture(iconPath, this.scene);
 
-    // Use secondaryColor for negative power-ups
-    const color = isNegative ? this.secondaryColor : this.primaryColor;
     material.emissiveColor = color;
     material.diffuseTexture = texture;
     material.opacityTexture = texture;
@@ -235,7 +233,7 @@ export class PowerUpEffectsManager {
     particleSystem.direction2 = new Vector3(0.5, 0.5, 0.25);
 
     const creationTime = Date.now();
-    const maxLifetime = 8000;
+    const maxLifetime = defaultGameParams.powerUps.despawnTime;
 
     const cubeSize = gameToSceneSize(this.powerUpSize) * 1.01;
 
@@ -386,7 +384,8 @@ export class PowerUpEffectsManager {
     const flashColor = new Color3(2, 1, 1);
     const emissiveKeys = [
       { frame: 0, value: baseColor },
-      { frame: 5, value: flashColor },
+      { frame: 5, value: baseColor },
+      { frame: 10, value: flashColor },
       { frame: 15, value: baseColor },
     ];
     emissiveAnim.setKeys(emissiveKeys);
@@ -482,9 +481,8 @@ export class PowerUpEffectsManager {
 
     effect.icon.animations = [scaleAnim];
 
-    // Animate the cube
-    const cube = effect.cube;
     // Animate cube scaling
+    const cube = effect.cube;
     const cubeScaleAnim = new Animation(
       `powerUpCubeDisposeAnimation`,
       'scaling',

@@ -1,5 +1,3 @@
-import { off } from 'node:process';
-
 import {
   Animation,
   Color3,
@@ -25,7 +23,6 @@ const playerEffectsMap: Map<number, PlayerEffects> = new Map();
 
 interface PowerUpEffect {
   type: PowerUpType;
-  timestamp: number;
   particleSystem: ParticleSystem | null;
   glowLayer: GlowLayer | null;
   icons: Mesh[];
@@ -33,21 +30,8 @@ interface PowerUpEffect {
 
 interface PlayerEffects {
   paddleHeight: number;
-  position: number;
   activeEffects: Map<string, PowerUpEffect>;
 }
-
-interface LogConfig {
-  enabled: boolean;
-  logFrequency: number;
-}
-
-const loggingConfig: LogConfig = {
-  enabled: true,
-  logFrequency: 3000, // ms
-};
-
-let lastLogTime = 0;
 
 export function applyPlayerEffects(
   scene: Scene,
@@ -59,14 +43,6 @@ export function applyPlayerEffects(
 ): void {
   applyPaddleEffects(scene, player1Mesh, players.player1, primaryColor, secondaryColor, 1);
   applyPaddleEffects(scene, player2Mesh, players.player2, primaryColor, secondaryColor, 2);
-
-  // Logging player power ups and statistics every X second(s)
-  const currentTime = Date.now();
-  if (loggingConfig.enabled && currentTime - lastLogTime > loggingConfig.logFrequency) {
-    logPlayerState(players.player1);
-    logPlayerState(players.player2);
-    lastLogTime = currentTime;
-  }
 }
 
 function applyPaddleEffects(
@@ -77,10 +53,10 @@ function applyPaddleEffects(
   secondaryColor: Color3,
   playerIndex: number
 ): void {
+  // Initialize the map if it doesn't exist
   if (!playerEffectsMap.has(playerIndex)) {
     playerEffectsMap.set(playerIndex, {
       paddleHeight: player.paddleHeight,
-      position: player.y,
       activeEffects: new Map(),
     });
   } else {
@@ -90,7 +66,6 @@ function applyPaddleEffects(
       playerEffects.paddleHeight = player.paddleHeight;
       animatePaddleResize(scene, paddleMesh, player.paddleHeight);
     }
-    playerEffects.position = player.y;
   }
 
   const playerEffects = playerEffectsMap.get(playerIndex)!;
@@ -122,7 +97,6 @@ function applyPaddleEffects(
 
       playerEffects.activeEffects.set(effectKey, {
         type: powerUp.type,
-        timestamp: Date.now(),
         particleSystem,
         glowLayer,
         icons,
@@ -221,7 +195,7 @@ function createPowerUpIconMesh(
   suffix: string
 ): Mesh {
   const iconSize = 3;
-  const mesh = MeshBuilder.CreatePlane(
+  const icon = MeshBuilder.CreatePlane(
     `powerUpIcon-${powerUpType}-${suffix}`,
     { width: iconSize, height: iconSize },
     scene
@@ -239,13 +213,13 @@ function createPowerUpIconMesh(
   material.useAlphaFromDiffuseTexture = true;
   material.disableLighting = true;
 
-  mesh.material = material;
-  mesh.isPickable = false;
+  icon.material = material;
+  icon.isPickable = false;
 
-  mesh.position = new Vector3(paddlePosition.x + xOffset, paddlePosition.y, paddlePosition.z);
-  mesh.scaling = new Vector3(0, 0, 0);
+  icon.position = new Vector3(paddlePosition.x + xOffset, paddlePosition.y, paddlePosition.z);
+  icon.scaling = new Vector3(0, 0, 0);
 
-  return mesh;
+  return icon;
 }
 
 function animatePowerUpIcons(
@@ -511,23 +485,18 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   const originalHeight = paddleMesh.getBoundingInfo().boundingBox.extendSize.y * 2;
   const scaledHeight = gameToSceneSize(targetHeight) / originalHeight;
 
-  const isGrowing = paddleMesh.scaling.y < scaledHeight;
-
   const originalScaleX = paddleMesh.scaling.x;
   const originalScaleZ = paddleMesh.scaling.z;
 
   let overshootMultiplier: number;
   let dampingMultiplier: number;
-  let xzMultiplier: number;
 
-  if (isGrowing) {
+  if (paddleMesh.scaling.y < scaledHeight) {
     overshootMultiplier = 1.3;
     dampingMultiplier = 1.1;
-    xzMultiplier = 1.3;
   } else {
     overshootMultiplier = 0.7;
     dampingMultiplier = 0.9;
-    xzMultiplier = 0.7;
   }
 
   // Animate height
@@ -556,8 +525,8 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   );
   const scaleXKeys = [
     { frame: 0, value: originalScaleX },
-    { frame: 5, value: originalScaleX * xzMultiplier },
-    { frame: 15, value: originalScaleX * (xzMultiplier * 0.8 + 0.2) },
+    { frame: 5, value: originalScaleX * overshootMultiplier },
+    { frame: 15, value: originalScaleX * dampingMultiplier },
     { frame: 30, value: originalScaleX },
   ];
   scaleXAnim.setKeys(scaleXKeys);
@@ -572,8 +541,8 @@ function animatePaddleResize(scene: Scene, paddleMesh: Mesh, targetHeight: numbe
   );
   const scaleZKeys = [
     { frame: 0, value: originalScaleZ },
-    { frame: 5, value: originalScaleZ * xzMultiplier },
-    { frame: 15, value: originalScaleZ * (xzMultiplier * 0.8 + 0.2) },
+    { frame: 5, value: originalScaleZ * overshootMultiplier },
+    { frame: 15, value: originalScaleZ * dampingMultiplier },
     { frame: 30, value: originalScaleZ },
   ];
   scaleZAnim.setKeys(scaleZKeys);
@@ -731,15 +700,36 @@ function getPowerUpSignPath(powerUpType: PowerUpType) {
   }
 }
 
-function logPlayerState(player: Player): void {
-  const powerUpsInfo =
-    player.activePowerUps.length > 0
-      ? player.activePowerUps
-          .map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`)
-          .join('\n')
-      : '      - None';
+// import { off } from 'node:process';
 
-  console.log(`    Player: ${player.id}
-    Power-Ups:
-${powerUpsInfo}`);
-}
+// interface LogConfig {
+//   enabled: boolean;
+//   logFrequency: number;
+// }
+
+// const loggingConfig: LogConfig = {
+//   enabled: true,
+//   logFrequency: 3000, // ms
+// };
+
+// let lastLogTime = 0;
+
+// const currentTime = Date.now();
+// if (loggingConfig.enabled && currentTime - lastLogTime > loggingConfig.logFrequency) {
+//   logPlayerState(players.player1);
+//   logPlayerState(players.player2);
+//   lastLogTime = currentTime;
+// }
+
+// function logPlayerState(player: Player): void {
+//   const powerUpsInfo =
+//     player.activePowerUps.length > 0
+//       ? player.activePowerUps
+//           .map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`)
+//           .join('\n')
+//       : '      - None';
+
+//   console.log(`    Player: ${player.id}
+//     Power-Ups:
+// ${powerUpsInfo}`);
+// }
