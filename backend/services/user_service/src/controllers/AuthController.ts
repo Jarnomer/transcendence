@@ -94,6 +94,7 @@ export class AuthController {
    */
   async logout(request: FastifyRequest, reply: FastifyReply) {
     const { user_id } = request.body as { user_id: string };
+    console.log('Logging out user', user_id);
     await this.authService.deleteRefreshToken(user_id);
     request.log.trace(`Logging out user ${user_id}`);
     reply.clearCookie('refresh_token', {

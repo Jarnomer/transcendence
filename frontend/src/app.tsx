@@ -18,7 +18,7 @@ import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
 const App: React.FC = () => {
   const location = useLocation();
-  const { user, checkAuth } = useUser();
+  const { checkAuth } = useUser();
 
   console.log('app rendered');
 

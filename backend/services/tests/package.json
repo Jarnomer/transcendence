@@ -1,0 +1,31 @@
+{
+  "name": "@my-backend/tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:create-users": "ts-node --transpile-only index.ts create-users",
+    "test:create-tournaments": "ts-node --transpile-only index.ts create-tournaments",
+    "test:run-all": "ts-node --transpile-only index.ts run-all"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@my-backend/game_service": "workspace:*",
+    "@my-backend/matchmaking_service": "workspace:*",
+    "@my-backend/remote_service": "workspace:*",
+    "@my-backend/user_service": "workspace:*",
+    "module-alias": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.9.36",
+    "@types/yargs": "^17.0.33",
+    "axios": "^1.8.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3",
+    "yargs": "^17.7.2"
+  }
+}

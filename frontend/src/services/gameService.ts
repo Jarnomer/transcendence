@@ -9,10 +9,19 @@ import {
 
 import { api } from './api';
 
-export async function createQueue(mode: string, difficulty: string) {
+type CreateQueueParams = {
+  mode: string;
+  difficulty: string;
+  name: string;
+  password: string | null;
+};
+
+export async function createQueue(options: CreateQueueParams) {
+  const { mode, difficulty, name, password } = options;
   try {
     const res = await api.post<QueueStatusResType>(
-      `/matchmaking/createQueue?mode=${mode}&difficulty=${difficulty}`
+      `/matchmaking/createQueue?mode=${mode}&difficulty=${difficulty}&name=${name}`,
+      { password }
     );
     console.log(res.data);
     return res.data;
@@ -33,10 +42,18 @@ export async function cancelQueue() {
   }
 }
 
-export async function joinQueue(queueID: string, mode: string, difficulty: string) {
+type joinQueueParams = {
+  queueId: string;
+  mode: string;
+  difficulty: string;
+  password: string | null;
+};
+export async function joinQueue(options: joinQueueParams) {
+  const { queueId, mode, difficulty, password } = options;
   try {
     const res = await api.post<QueueStatusResType>(
-      `/matchmaking/joinQueue/${queueID}?mode=${mode}&difficulty=${difficulty}`
+      `/matchmaking/joinQueue/${queueId}?mode=${mode}&difficulty=${difficulty}`,
+      { password }
     );
     console.log(res.data);
     return res.data;

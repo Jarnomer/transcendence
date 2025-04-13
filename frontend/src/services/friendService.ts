@@ -51,7 +51,7 @@ export async function getRequestsSent() {
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to get sent friend requests`);
     }
-    console.log(res.data);
+    // console.log(res.data);
     return res.data;
   } catch (err) {
     console.error('Failed to get sent friend requests:', err);

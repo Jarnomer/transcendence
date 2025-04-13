@@ -66,6 +66,10 @@ export const ProfilePage: React.FC = () => {
   }, [userId, loggedInUser]);
 
   useEffect(() => {
+    console.log('User data updated:', user);
+  }, [user]);
+
+  useEffect(() => {
     setLoading(true);
     if (!userId) return;
     getRequestsSent()

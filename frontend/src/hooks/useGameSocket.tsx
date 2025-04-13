@@ -12,6 +12,7 @@ export const useGameSocket = (
     if (!gameSocket) {
       return;
     }
+    console.log('Game socket attaching listeners');
     const handleOpen = () => dispatch({ type: 'CONNECTED', socket: 'game' });
     const handleError = () => dispatch({ type: 'ERROR', socket: 'game' });
     const handleReconnecting = () => dispatch({ type: 'RECONNECTING', socket: 'game' });
@@ -39,6 +40,7 @@ export const useGameSocket = (
       if (!gameSocket) {
         return;
       }
+      console.log('Game socket detaching listeners');
       gameSocket.close();
       gameSocket.removeEventListener('open', handleOpen);
       gameSocket.removeEventListener('close', handleClose);

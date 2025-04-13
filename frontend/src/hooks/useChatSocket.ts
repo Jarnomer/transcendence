@@ -10,6 +10,7 @@ export const useChatSocket = (
     if (!chatSocket) {
       return;
     }
+    console.log('Chat socket attaching listeners');
     const handleOpen = () => dispatch({ type: 'CONNECTED', socket: 'chat' });
     const handleError = () => dispatch({ type: 'ERROR', socket: 'chat' });
     const handleReconnecting = () => dispatch({ type: 'RECONNECTING', socket: 'chat' });
@@ -28,6 +29,7 @@ export const useChatSocket = (
       if (!chatSocket) {
         return;
       }
+      console.log('Chat socket detaching listeners');
       chatSocket.close();
       chatSocket.removeEventListener('open', handleOpen);
       chatSocket.removeEventListener('close', handleClose);

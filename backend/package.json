@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "pnpm --filter @my-backend/main_server run dev"
+    "dev": "pnpm --filter @my-backend/main_server run dev",
+    "test:create-users": "pnpm --filter @my-backend/tests run test:create-users",
+    "test:create-tournaments": "pnpm --filter @my-backend/tests run test:create-tournaments",
+    "test:run-all": "pnpm --filter @my-backend/tests run test:run-all"
   },
   "keywords": [],
   "author": "",

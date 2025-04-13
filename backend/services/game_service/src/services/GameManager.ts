@@ -73,6 +73,7 @@ export class GameManager {
     const winner_score = sortedPlayers[0].score;
     const loser_score = sortedPlayers[1].score;
     await this.gameService.resultGame(game_id, winner_id, loser_id, winner_score, loser_score);
+    this.matchmakingService.handleGameResult(game_id, winner_id, loser_id);
 
     console.log('Game result submitted:', gameResult);
   }
