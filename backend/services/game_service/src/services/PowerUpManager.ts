@@ -143,12 +143,15 @@ export class PowerUpManager {
         } else {
           // Otherwise, collect the power-up
           this.game.collectPowerUp(
+            powerUp.id,
             powerUp.type,
             affectedPlayer,
             powerUp.timeToExpire,
             powerUp.negativeEffect
           );
-          this.game.removePowerUp(powerUp.id);
+          setTimeout(() => {
+            this.game.removePowerUp(powerUp.id);
+          }, 500); // Delay the removal, so frontend can animate the pickup
           console.log(`New power-up collected by player ${affectedPlayer}:`, powerUp.id);
           powerUp.applyEffect(this.game, affectedPlayer);
         }
