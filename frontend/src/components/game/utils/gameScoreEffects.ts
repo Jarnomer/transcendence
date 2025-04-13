@@ -1,6 +1,8 @@
-import { Animation, Mesh, Color3, GlowLayer, PBRMaterial, Scene } from 'babylonjs';
+import { Animation, Mesh, Color3, GlowLayer, PBRMaterial, Scene, Vector3 } from 'babylonjs';
 
-import { defaultGameParams } from '@shared/types';
+import { gameToSceneX, gameToSceneY } from '@game/utils';
+
+import { Ball, Player, defaultGameParams, defaultGameObjectParams } from '@shared/types';
 
 export function applyNeonEdgeFlicker(
   scene: Scene,
@@ -154,14 +156,120 @@ export function applyNeonEdgeFlicker(
   }, duration);
 }
 
+export function applyPaddleRecoil(
+  scene: Scene,
+  paddle: Mesh,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  ballY: number,
+  paddleY: number,
+  paddleHeight: number,
+  duration: number = 1000
+): void {
+  const originalPosition = paddle.position.clone();
+  const originalRotation = paddle.rotation.clone();
+
+  const frameRate = 60;
+  const frameCount = frameRate * (duration / 1000);
+  const paddleCenter = paddleY + paddleHeight / 2;
+
+  const xDirectionMultiplier = scoringDirection === 'right' ? -1 : 1;
+  const zDirectionMultiplier = ballY < paddleCenter ? -1 : 1;
+
+  const positionAnimation = new Animation(
+    'paddleRecoilPosition',
+    'position',
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+  const rotationAnimation = new Animation(
+    'paddleRecoilRotation',
+    'rotation',
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const offsetAmount = 2 + intensity * 2;
+  const finalOffset = offsetAmount * xDirectionMultiplier;
+  const finalRotation = (Math.PI / 12) * intensity * 2;
+
+  const offsetPosition = originalPosition.clone();
+  offsetPosition.x += finalOffset;
+
+  const maxRotVector = originalRotation.clone();
+  maxRotVector.z += finalRotation * zDirectionMultiplier;
+
+  // Generate keyframes for position
+  const positionKeys = [];
+  positionKeys.push({
+    frame: 0,
+    value: originalPosition.clone(),
+  });
+  positionKeys.push({
+    frame: frameCount * 0.25,
+    value: offsetPosition,
+  });
+  positionKeys.push({
+    frame: frameCount,
+    value: originalPosition.clone(),
+  });
+
+  // Generate keyframes for rotation
+  const rotationKeys = [];
+  rotationKeys.push({
+    frame: 0,
+    value: originalRotation.clone(),
+  });
+  rotationKeys.push({
+    frame: frameCount * 0.25,
+    value: maxRotVector,
+  });
+  rotationKeys.push({
+    frame: frameCount,
+    value: originalRotation.clone(),
+  });
+
+  positionAnimation.setKeys(positionKeys);
+  rotationAnimation.setKeys(rotationKeys);
+
+  paddle.animations = [positionAnimation, rotationAnimation];
+
+  scene.beginAnimation(paddle, 0, frameCount, false);
+
+  setTimeout(() => {
+    paddle.rotation = originalRotation.clone();
+
+    const gameWidth = defaultGameParams.dimensions.gameWidth;
+    const gameHeight = defaultGameParams.dimensions.gameHeight;
+    const middleY = gameHeight / 2 - paddleHeight / 2;
+    const isPlayer1 = originalPosition.x < 0;
+
+    if (isPlayer1) {
+      paddle.position = new Vector3(
+        gameToSceneX(0, paddle),
+        gameToSceneY(middleY, paddle),
+        defaultGameObjectParams.distanceFromFloor
+      );
+    } else {
+      paddle.position = new Vector3(
+        gameToSceneX(gameWidth, paddle),
+        gameToSceneY(middleY, paddle),
+        defaultGameObjectParams.distanceFromFloor
+      );
+    }
+  }, duration);
+}
+
 function calculateScoreEffectIntensity(
   playerScore: number,
   ballSpeed: number,
   ballSpin: number
 ): number {
-  // Base intensity from player's current score (0.1 to 0.4)
+  // Base intensity from player's current score (0.1 to 0.3)
   const maxScore = defaultGameParams.rules.maxScore;
-  const scoreIntensity = Math.min(0.1 + (playerScore / maxScore) * 0.3, 0.4);
+  const scoreIntensity = Math.min(0.1 + (playerScore / maxScore) * 0.3, 0.3);
 
   // Add intensity based on how close the game is to ending (0.1 to 0.3)
   const remainingPoints = maxScore - playerScore;
@@ -181,9 +289,11 @@ export function applyScoreEffects(
   scene: Scene,
   topEdge: Mesh,
   bottomEdge: Mesh,
+  scoringPlayerPaddle: Mesh,
+  scoredAgainstPaddle: Mesh,
   playerScore: number,
-  ballSpeed: number = 0,
-  ballSpin: number = 0,
+  players: { player1: Player; player2: Player },
+  ball: Ball,
   primaryColor: Color3
 ) {
   if (retroEffectsRef) {
@@ -192,7 +302,25 @@ export function applyScoreEffects(
     }, 300);
   }
 
-  const intensity = calculateScoreEffectIntensity(playerScore, ballSpeed, ballSpin);
+  const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+  const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
+  const intensity = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensity);
+
+  if (scene && scoredAgainstPaddle && players) {
+    const scoredAgainstPlayer = ballDirection === 'right' ? 'player1' : 'player2';
+    const paddleY = players[scoredAgainstPlayer].y;
+    const paddleHeight = players[scoredAgainstPlayer].paddleHeight;
+
+    applyPaddleRecoil(
+      scene,
+      scoredAgainstPaddle,
+      intensity,
+      ballDirection,
+      ball.y,
+      paddleY,
+      paddleHeight
+    );
+  }
 }

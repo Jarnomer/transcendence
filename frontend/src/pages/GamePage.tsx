@@ -52,9 +52,22 @@ export const GamePage: React.FC = () => {
 
   useEffect(() => {
     if (!gameId || !localPlayerId) return;
+
+    let isMounted = true; // Track if component is mounted
+
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
-      console.log('sending player ready for player: ', localPlayerId);
-      sendMessage('game', createReadyInputMessage(localPlayerId, true));
+      const readyMessageDelay = setTimeout(() => {
+        if (isMounted) {
+          console.log('Sending delayed player ready for player:', localPlayerId);
+          sendMessage('game', createReadyInputMessage(localPlayerId, true));
+        }
+      }, 2000); // 2000ms delay
+
+      // Clean up the timeout if component unmounts
+      return () => {
+        isMounted = false;
+        clearTimeout(readyMessageDelay);
+      };
     }
   }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 

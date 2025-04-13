@@ -293,6 +293,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     if (collision) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
       const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
+
       applyCollisionEffects(
         retroEffectsRef.current,
         ballRef.current,
@@ -306,17 +307,24 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       );
     }
 
-    if (score)
+    if (score) {
+      // const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
+      const scoringPlayerPaddle = score === 'player1' ? player1Ref.current : player2Ref.current;
+      const scoredAgainstPaddle = score === 'player1' ? player2Ref.current : player1Ref.current;
+
       applyScoreEffects(
         retroEffectsRef.current,
         sceneRef.current,
         topEdgeRef.current,
         bottomEdgeRef.current,
+        scoringPlayerPaddle,
+        scoredAgainstPaddle,
         players[score].score,
-        speed,
-        ball.spin,
+        players,
+        ball,
         primaryColor
       );
+    }
 
     applyPlayerEffects(
       sceneRef.current,
