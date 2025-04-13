@@ -1,137 +1,198 @@
-export function applyScoreEffects(retroEffectsRef: any) {
+import { Animation, Mesh, Color3, GlowLayer, PBRMaterial, Scene } from 'babylonjs';
+
+import { defaultGameParams } from '@shared/types';
+
+export function applyNeonEdgeFlicker(
+  scene: Scene,
+  topEdgeMesh: Mesh,
+  bottomEdgeMesh: Mesh,
+  playerColor: Color3,
+  effectIntensity: number,
+  duration: number = 1500
+): void {
+  const edgeMaterial = topEdgeMesh.material as PBRMaterial;
+  const originalEmissiveColor = edgeMaterial.emissiveColor.clone();
+  const originalEmissiveIntensity = edgeMaterial.emissiveIntensity;
+
+  const tempGlowLayer = new GlowLayer('scoreGlowLayer', scene);
+  tempGlowLayer.intensity = 0;
+  tempGlowLayer.blurKernelSize = 16;
+  tempGlowLayer.addIncludedOnlyMesh(topEdgeMesh);
+  tempGlowLayer.addIncludedOnlyMesh(bottomEdgeMesh);
+
+  const frameRate = 60;
+  const frameCount = frameRate * (duration / 1000);
+
+  const glowAnimation = new Animation(
+    'glowAnimation',
+    'intensity',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const topEmissiveAnimation = new Animation(
+    'topEmissiveAnimation',
+    'emissiveIntensity',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+  const bottomEmissiveAnimation = new Animation(
+    'bottomEmissiveAnimation',
+    'emissiveIntensity',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const topColorAnimation = new Animation(
+    'topColorAnimation',
+    'emissiveColor',
+    frameRate,
+    Animation.ANIMATIONTYPE_COLOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+  const bottomColorAnimation = new Animation(
+    'bottomColorAnimation',
+    'emissiveColor',
+    frameRate,
+    Animation.ANIMATIONTYPE_COLOR3,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  // More flickers with higher intensity
+  const numFlickers = Math.floor(15 + effectIntensity * 15);
+
+  const topKeyframes = [];
+  const bottomKeyframes = [];
+  const topColorKeyframes = [];
+  const bottomColorKeyframes = [];
+
+  // Generate all of the flickering patterns
+  for (let i = 0; i <= numFlickers; i++) {
+    const frame = (i / numFlickers) * frameCount;
+
+    // Use random seed factor with small variation
+    const randomFactor = Math.random() * 2 - 0.5;
+    const topRandomFactor = randomFactor + (Math.random() * 0.5 - 0.25);
+    const bottomRandomFactor = randomFactor + (Math.random() * 0.5 - 0.25);
+
+    // Calculate flicker intensities with natural sine wave pattern and randomness
+    let topFlickerIntensity =
+      3 + Math.sin(i * (0.5 + effectIntensity)) * 3 * effectIntensity * topRandomFactor;
+    let bottomFlickerIntensity =
+      3 + Math.sin(i * (0.5 + effectIntensity)) * 3 * effectIntensity * bottomRandomFactor;
+
+    const baseIntensity = effectIntensity * 2;
+    topFlickerIntensity += baseIntensity;
+    bottomFlickerIntensity += baseIntensity;
+
+    topKeyframes.push({ frame, value: topFlickerIntensity });
+    bottomKeyframes.push({ frame, value: bottomFlickerIntensity });
+
+    const topColorMultiplier = 0.1 + Math.random() * 0.3;
+    const topAnimatedColor = new Color3(
+      Math.min(playerColor.r * topColorMultiplier, 1),
+      Math.min(playerColor.g * topColorMultiplier, 1),
+      Math.min(playerColor.b * topColorMultiplier, 1)
+    );
+
+    const bottomColorMultiplier = 0.1 + Math.random() * 0.3;
+    const bottomAnimatedColor = new Color3(
+      Math.min(playerColor.r * bottomColorMultiplier, 1),
+      Math.min(playerColor.g * bottomColorMultiplier, 1),
+      Math.min(playerColor.b * bottomColorMultiplier, 1)
+    );
+
+    topColorKeyframes.push({ frame, value: topAnimatedColor });
+    bottomColorKeyframes.push({ frame, value: bottomAnimatedColor });
+  }
+
+  // Add final keyframes to return to original
+  topKeyframes.push({ frame: frameCount, value: originalEmissiveIntensity });
+  bottomKeyframes.push({ frame: frameCount, value: originalEmissiveIntensity });
+  topColorKeyframes.push({ frame: frameCount, value: originalEmissiveColor });
+  bottomColorKeyframes.push({ frame: frameCount, value: originalEmissiveColor });
+
+  topEmissiveAnimation.setKeys(topKeyframes);
+  bottomEmissiveAnimation.setKeys(bottomKeyframes);
+  topColorAnimation.setKeys(topColorKeyframes);
+  bottomColorAnimation.setKeys(bottomColorKeyframes);
+
+  const topMaterial = topEdgeMesh.material as PBRMaterial;
+  const bottomMaterial = bottomEdgeMesh.material as PBRMaterial;
+  topMaterial.animations = [topEmissiveAnimation, topColorAnimation];
+  bottomMaterial.animations = [bottomEmissiveAnimation, bottomColorAnimation];
+
+  const glowKeyframes = [];
+  for (let i = 0; i <= numFlickers; i++) {
+    const frame = (i / numFlickers) * frameCount;
+    const baseIntensity = 0.5 + effectIntensity;
+    const randomFactor = Math.random() * 0.5;
+
+    const flickerIntensity =
+      baseIntensity + Math.sin(i * (0.5 + effectIntensity)) * effectIntensity * randomFactor;
+
+    glowKeyframes.push({ frame, value: flickerIntensity });
+  }
+
+  // Add final keyframe to return to original
+  glowKeyframes.push({ frame: frameCount, value: 0 });
+  glowAnimation.setKeys(glowKeyframes);
+
+  scene.beginAnimation(topMaterial, 0, frameCount, false);
+  scene.beginAnimation(bottomMaterial, 0, frameCount, false);
+  scene.beginDirectAnimation(tempGlowLayer, [glowAnimation], 0, frameCount, false);
+
+  setTimeout(() => {
+    topMaterial.emissiveColor = originalEmissiveColor;
+    topMaterial.emissiveIntensity = originalEmissiveIntensity;
+    bottomMaterial.emissiveColor = originalEmissiveColor;
+    bottomMaterial.emissiveIntensity = originalEmissiveIntensity;
+    tempGlowLayer.dispose();
+  }, duration);
+}
+
+function calculateScoreEffectIntensity(
+  playerScore: number,
+  ballSpeed: number,
+  ballSpin: number
+): number {
+  // Base intensity from player's current score (0.1 to 0.4)
+  const maxScore = defaultGameParams.rules.maxScore;
+  const scoreIntensity = Math.min(0.1 + (playerScore / maxScore) * 0.3, 0.4);
+
+  // Add intensity based on how close the game is to ending (0.1 to 0.3)
+  const remainingPoints = maxScore - playerScore;
+  const endgameIntensity = Math.max(0.1, 0.3 * (1 - remainingPoints / maxScore));
+
+  // Add intensity based on ball physics (0 to 0.4)
+  const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
+  const normalizedSpin = Math.min(Math.abs(ballSpin) / 10, 1);
+  const physicsIntensity = normalizedSpeed * 0.2 + normalizedSpin * 0.2;
+
+  // Return combined factor (ensure result is between 0.1 and 1.0)
+  return Math.min(scoreIntensity + endgameIntensity + physicsIntensity, 1.0);
+}
+
+export function applyScoreEffects(
+  retroEffectsRef: any,
+  scene: Scene,
+  topEdge: Mesh,
+  bottomEdge: Mesh,
+  playerScore: number,
+  ballSpeed: number = 0,
+  ballSpin: number = 0,
+  primaryColor: Color3
+) {
   if (retroEffectsRef) {
     setTimeout(() => {
       retroEffectsRef?.changeChannel(1200).then(() => {});
     }, 300);
   }
+
+  const intensity = calculateScoreEffectIntensity(playerScore, ballSpeed, ballSpin);
+
+  applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensity);
 }
-
-// export function applyScoreEffects(
-//   scene: Scene,
-//   pipeline: DefaultRenderingPipeline,
-//   scorePosition: Vector3,
-//   duration: number = 1500
-// ) {
-//   // Store original values to restore later
-//   const originalTimeScale = scene.getAnimationRatio;
-//   const originalBloomScale = pipeline.bloomScale;
-//   const originalBloomWeight = pipeline.bloomWeight;
-//   const originalBloomKernel = pipeline.bloomKernel;
-//   const originalChromaticAmount = pipeline.chromaticAberration.aberrationAmount;
-//   const wasVignetteEnabled = pipeline.imageProcessing.vignetteEnabled;
-//   const originalVignetteWeight = pipeline.imageProcessing.vignetteWeight;
-//   const wasDofEnabled = pipeline.depthOfFieldEnabled;
-
-//   const frameRate = 60;
-
-//   // Enable and intensify vignette
-//   pipeline.imageProcessing.vignetteEnabled = true;
-//   pipeline.imageProcessing.vignetteColor = new Color4(0, 0, 0, 1);
-//   pipeline.imageProcessing.vignetteWeight = 2.5;
-
-//   // Enable and configure depth of field focused on the score position
-//   pipeline.depthOfFieldEnabled = true;
-//   pipeline.depthOfField.focalLength = 150; // Increased for stronger effect
-//   pipeline.depthOfField.fStop = 1.4; // Lower f-stop = more background blur
-//   pipeline.depthOfField.focusDistance = Vector3.Distance(
-//     scene.activeCamera!.position,
-//     scorePosition
-//   );
-
-//   // Increase bloom
-//   pipeline.bloomScale = 1.0;
-//   pipeline.bloomWeight = 1.5;
-//   pipeline.bloomKernel = 128;
-
-//   // Increase chromatic aberration
-//   pipeline.chromaticAberration.aberrationAmount = 30.0;
-
-//   // Add color grading - slight desaturation
-//   pipeline.imageProcessing.colorCurvesEnabled = true;
-//   const colorCurves = new ColorCurves();
-//   colorCurves.globalSaturation = 0.5; // Reduce saturation
-//   colorCurves.globalExposure = 1.2; // Slightly brighter
-//   pipeline.imageProcessing.colorCurves = colorCurves;
-
-//   scene.getAnimationRatio = () => 0.2; // Slow motion
-
-//   // Create animations to smoothly restore effects
-//   const slowmoAnimation = new Animation(
-//     'timeScaleAnimation',
-//     'value',
-//     frameRate,
-//     Animation.ANIMATIONTYPE_FLOAT,
-//     Animation.ANIMATIONLOOPMODE_CONSTANT
-//   );
-
-//   const slowmoKeys = [];
-//   slowmoKeys.push({ frame: 0, value: 0.2 });
-//   slowmoKeys.push({ frame: frameRate * (duration / 1000) * 0.5, value: 0.4 });
-//   slowmoKeys.push({ frame: frameRate * (duration / 1000), value: 1.0 });
-//   slowmoAnimation.setKeys(slowmoKeys);
-
-//   // Create a dummy object to animate and capture values
-//   const animationTarget = { value: 0.2 };
-
-//   scene.beginDirectAnimation(
-//     animationTarget,
-//     [slowmoAnimation],
-//     0,
-//     frameRate * (duration / 1000),
-//     false,
-//     1,
-//     () => {
-//       // Reset everything when animation completes
-//       scene.getAnimationRatio = originalTimeScale;
-//       pipeline.bloomScale = originalBloomScale;
-//       pipeline.bloomWeight = originalBloomWeight;
-//       pipeline.bloomKernel = originalBloomKernel;
-//       pipeline.chromaticAberration.aberrationAmount = originalChromaticAmount;
-//       pipeline.imageProcessing.vignetteEnabled = wasVignetteEnabled;
-//       pipeline.imageProcessing.vignetteWeight = originalVignetteWeight;
-//       pipeline.depthOfFieldEnabled = wasDofEnabled;
-//       pipeline.imageProcessing.colorCurvesEnabled = false;
-//     }
-//   );
-
-//   // Update time scale each frame during the animation
-//   const observer = scene.onBeforeRenderObservable.add(() => {
-//     scene.getAnimationRatio = () => animationTarget.value;
-
-//     // Gradually reduce effects as we approach the end of the duration
-//     const progress = 1 - (animationTarget.value - 0.2) / 0.8;
-//     if (progress < 0) {
-//       scene.onBeforeRenderObservable.remove(observer);
-//       return;
-//     }
-
-//     // Gradually reduce bloom
-//     pipeline.bloomScale = originalBloomScale + (1.0 - originalBloomScale) * progress;
-//     pipeline.bloomWeight = originalBloomWeight + (1.5 - originalBloomWeight) * progress;
-
-//     // Gradually reduce vignette
-//     pipeline.imageProcessing.vignetteWeight =
-//       originalVignetteWeight + (2.5 - originalVignetteWeight) * progress;
-
-//     // Gradually reduce chromatic aberration
-//     pipeline.chromaticAberration.aberrationAmount =
-//       originalChromaticAmount + (30.0 - originalChromaticAmount) * progress;
-//   });
-// }
-
-// export function applyCollisionFlash(
-//   pipeline: DefaultRenderingPipeline,
-//   intensity: number = 0.5,
-//   duration: number = 200
-// ) {
-//   // Store original values
-//   const originalExposure = pipeline.imageProcessing.exposure;
-
-//   // Increase exposure for flash effect
-//   pipeline.imageProcessing.exposure = 1 + intensity;
-
-//   // Reset after duration
-//   setTimeout(() => {
-//     pipeline.imageProcessing.exposure = originalExposure;
-//   }, duration);
-// }

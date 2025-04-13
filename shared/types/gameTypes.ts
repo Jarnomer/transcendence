@@ -127,7 +127,7 @@ export const defaultGameParams: GameParams = {
     minDX: 7,
     speedMultiplier: 1,
     maxSpeedMultiplier: 3,
-    speedIncreaseFactor: 1.01, // Ball speed increase on paddle hit
+    speedIncreaseFactor: 1.03, // Ball speed increase on paddle hit
   },
   spin: {
     maxSpin: 15,
@@ -141,7 +141,7 @@ export const defaultGameParams: GameParams = {
     maxSpawnInterval: 10000,
     despawnTime: 10000,
     expireTime: 10000,
-    size: 80,
+    size: 40,
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,

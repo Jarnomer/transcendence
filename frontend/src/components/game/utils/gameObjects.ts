@@ -7,7 +7,6 @@ import {
   PBRMaterial,
   Scene,
   Path3D,
-  // Texture,
 } from 'babylonjs';
 
 import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
