@@ -276,7 +276,8 @@ function animatePowerUpIcons(
   );
   const scaleKeys = [
     { frame: 0, value: new Vector3(0, 0, 0) },
-    { frame: 15, value: new Vector3(1.5, 1.5, 1.5) },
+    { frame: 10, value: new Vector3(0.5, 0.5, 0.5) },
+    { frame: 20, value: new Vector3(1.2, 1.2, 1.2) },
     { frame: 30, value: new Vector3(1, 1, 1) },
   ];
   scaleAnim.setKeys(scaleKeys);
@@ -291,13 +292,14 @@ function animatePowerUpIcons(
   );
   const opacityKeys = [
     { frame: 0, value: 0 },
-    { frame: 15, value: 1 },
-    { frame: 45, value: 1 },
-    { frame: 60, value: 0 },
+    { frame: 20, value: 1 },
+    { frame: 30, value: 1 },
+    { frame: 40, value: 0 },
   ];
   opacityAnim.setKeys(opacityKeys);
 
   // Animate color
+  const flashColor = new Color3(2, 1, 1);
   const colorAnim = new Animation(
     'iconColorAnimation',
     'material.emissiveColor',
@@ -307,8 +309,9 @@ function animatePowerUpIcons(
   );
   const colorKeys = [
     { frame: 0, value: effectColor },
-    { frame: 10, value: Color3.White() },
     { frame: 20, value: effectColor },
+    { frame: 25, value: flashColor },
+    { frame: 30, value: effectColor },
   ];
   colorAnim.setKeys(colorKeys);
 
