@@ -43,6 +43,8 @@ import {
   defaultGameParams,
   retroEffectsPresets,
   defaultRetroCinematicBaseParams,
+  defaultRetroEffectTimings,
+  defaultCameraTimings,
 } from '@shared/types';
 
 interface BackgroundGameCanvasProps {
@@ -277,9 +279,11 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     if (!isVisible) {
       if (retroEffectsRef.current) {
-        retroEffectsRef.current.simulateCRTTurnOff(1800).then(() => {
-          if (engineRef.current) engineRef.current.stopRenderLoop();
-        });
+        retroEffectsRef.current
+          .simulateCRTTurnOff(defaultRetroEffectTimings.crtTurnOffDuration)
+          .then(() => {
+            if (engineRef.current) engineRef.current.stopRenderLoop();
+          });
       } else {
         if (engineRef.current) engineRef.current.stopRenderLoop();
       }
@@ -298,7 +302,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
           animateCamera(cameraRef.current, newAngle, postProcessingRef.current);
         }
-      }, 10000);
+      }, defaultCameraTimings.cameraMoveInterval);
 
       if (engineRef.current && sceneRef.current) {
         setupThrottledRenderLoop(engineRef.current, sceneRef.current);
@@ -306,8 +310,8 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
       if (retroEffectsRef.current) {
         setTimeout(() => {
-          retroEffectsRef.current.simulateCRTTurnOn(1800);
-        }, 500);
+          retroEffectsRef.current.simulateCRTTurnOn(defaultRetroEffectTimings.crtTurnOnDuration);
+        }, defaultRetroEffectTimings.crtTurnOnDelay);
       }
     }
 

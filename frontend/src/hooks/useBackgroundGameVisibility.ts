@@ -1,15 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+
+import { defaultRetroEffectTimings } from '@shared/types';
+
+type VisibilityState = {
+  isActive: boolean;
+  isVisible: boolean;
+};
 
 const backgroundGameState = {
-  isVisible: true,
-  listeners: new Set<(isVisible: boolean) => void>(),
+  state: { isActive: true, isVisible: true } as VisibilityState,
+  listeners: new Set<(state: VisibilityState) => void>(),
 
-  setVisibility(value: boolean) {
-    this.isVisible = value;
-    this.listeners.forEach((listener) => listener(value));
+  setActive(value: boolean) {
+    const newState = { ...this.state, isActive: value };
+
+    if (!value && this.state.isVisible) {
+      setTimeout(() => {
+        this.setVisibility(false);
+      }, defaultRetroEffectTimings.crtTurnOffDuration);
+    }
+
+    this.state = newState;
+    this.listeners.forEach((listener) => listener(newState));
   },
 
-  subscribe(listener: (isVisible: boolean) => void) {
+  setVisibility(value: boolean) {
+    const newState = { ...this.state, isVisible: value };
+
+    if (value && !this.state.isActive) newState.isActive = true;
+
+    this.state = newState;
+    this.listeners.forEach((listener) => listener(newState));
+  },
+
+  subscribe(listener: (state: VisibilityState) => void) {
     this.listeners.add(listener);
     return () => {
       this.listeners.delete(listener);
@@ -18,17 +42,18 @@ const backgroundGameState = {
 };
 
 export const useBackgroundGameVisibility = () => {
-  const [isVisible, setIsVisible] = useState(backgroundGameState.isVisible);
+  const [state, setState] = useState(backgroundGameState.state);
 
   useEffect(() => {
-    const unsubscribe = backgroundGameState.subscribe(setIsVisible);
+    const unsubscribe = backgroundGameState.subscribe(setState);
     return unsubscribe;
   }, []);
 
   return {
-    isBackgroundGameVisible: isVisible,
-    setBackgroundGameVisible: (value: boolean) => backgroundGameState.setVisibility(value),
-    hideBackgroundGame: () => backgroundGameState.setVisibility(false),
+    isBackgroundGameActive: state.isActive,
+    isBackgroundGameVisible: state.isVisible,
+
+    hideBackgroundGame: () => backgroundGameState.setActive(false),
     showBackgroundGame: () => backgroundGameState.setVisibility(true),
   };
 };

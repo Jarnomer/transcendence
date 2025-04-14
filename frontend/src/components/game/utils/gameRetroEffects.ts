@@ -7,6 +7,7 @@ import {
   RetroEffectsBaseParams,
   defaultRetroEffectsLevels,
   defaultRetroEffectsBaseParams,
+  defaultRetroEffectTimings,
   retroEffectsPresets,
 } from '@shared/types';
 
@@ -543,7 +544,9 @@ export class RetroEffectsManager {
     return this;
   }
 
-  async changeChannel(durationMs: number = 1200): Promise<void> {
+  async changeChannel(
+    durationMs: number = defaultRetroEffectTimings.channelChangeDuration
+  ): Promise<void> {
     if (!this._effects.tvSwitch) this.enableTVSwitch();
     if (!this._effects.glitch) this.enableGlitch();
 
@@ -581,7 +584,9 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
-  async simulateCRTTurnOn(durationMs: number = 1800): Promise<void> {
+  async simulateCRTTurnOn(
+    durationMs: number = defaultRetroEffectTimings.crtTurnOnDuration
+  ): Promise<void> {
     if (this._levels.crtTurnOnEffect === 0) return Promise.resolve();
     if (!this._turnOnEffect) this.enableTurnOnEffect();
 
@@ -602,11 +607,11 @@ export class RetroEffectsManager {
           this._turnOnEffect?.setTurnOnProgress(progress);
 
           if (this._effects.glitch) {
-            if (progress < 0.6) {
+            if (progress < defaultRetroEffectTimings.turnOnPhase1Duration) {
               const pulseIntensity = Math.sin(progress * 40) * 2;
               const intensity = (0.8 - progress) * 10 * pulseIntensity;
               this._effects.glitch.setGlitchAmount(Math.abs(intensity));
-            } else if (progress < 0.8) {
+            } else if (progress < defaultRetroEffectTimings.turnOnPhase2Duration) {
               const randomIntensity = Math.sin(progress * 30) * 2;
               this._effects.glitch.setGlitchAmount(Math.abs(randomIntensity));
             } else {
@@ -643,7 +648,9 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
-  async simulateCRTTurnOff(durationMs: number = 1800): Promise<void> {
+  async simulateCRTTurnOff(
+    durationMs: number = defaultRetroEffectTimings.crtTurnOffDuration
+  ): Promise<void> {
     if (this._levels.crtTurnOffEffect === 0) return Promise.resolve();
     if (!this._turnOffEffect) this.enableTurnOffEffect();
 
@@ -663,13 +670,13 @@ export class RetroEffectsManager {
           this._turnOffEffect?.setTurnOffProgress(progress);
 
           if (this._effects.glitch) {
-            if (progress < 0.2) {
+            if (progress < defaultRetroEffectTimings.turnOffPhase1Duration) {
               const initialGlitch = progress * 2;
               this._effects.glitch.setGlitchAmount(initialGlitch);
-            } else if (progress < 0.5) {
+            } else if (progress < defaultRetroEffectTimings.turnOffPhase2Duration) {
               const collapseGlitch = 0.4 + (progress - 0.2) * 3;
               this._effects.glitch.setGlitchAmount(collapseGlitch);
-            } else if (progress < 0.7) {
+            } else if (progress < defaultRetroEffectTimings.turnOffPhase3Duration) {
               const finalCollapseGlitch = 1.3 + Math.sin(progress * 40) * 1.5;
               this._effects.glitch.setGlitchAmount(finalCollapseGlitch);
             } else {
@@ -700,7 +707,10 @@ export class RetroEffectsManager {
     return Promise.resolve();
   }
 
-  simulateTrackingDistortion(intensity: number = 5.0, durationMs: number = 800): void {
+  simulateTrackingDistortion(
+    intensity: number = 5.0,
+    durationMs: number = defaultRetroEffectTimings.trackingDistortionDuration
+  ): void {
     if (this._levels.glitch === 0) return;
     if (!this._effects.glitch) this.enableGlitch();
 
