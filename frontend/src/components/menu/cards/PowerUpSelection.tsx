@@ -37,7 +37,7 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
         <span
           key={powerUp}
           onClick={() => handlePowerUpToggle(powerUp)}
-          className={`aspect-square text-center cursor-pointer ${selectedPowerUps.includes(powerUp) ? 'text-primary' : ' opacity-40'}`}
+          className={`aspect-square text-center cursor-pointer ${selectedPowerUps.includes(powerUp) ? 'text-secondary' : ' opacity-60'}`}
         >
           <BoxDiv index={index} key={powerUp}>
             <div
