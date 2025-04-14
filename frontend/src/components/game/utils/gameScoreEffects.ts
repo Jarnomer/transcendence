@@ -11,7 +11,7 @@ import {
 
 import { gameToSceneX, gameToSceneY } from '@game/utils';
 
-import { Ball, Player, defaultGameParams, defaultGameObjectParams } from '@shared/types';
+import { Ball, Player, defaultGameParams } from '@shared/types';
 
 export function applyPaddleExplosion(
   scene: Scene,
@@ -19,8 +19,6 @@ export function applyPaddleExplosion(
   intensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  paddleY: number,
-  paddleHeight: number,
   duration: number = 1000
 ): void {
   const originalPosition = paddle.position.clone();
@@ -28,17 +26,7 @@ export function applyPaddleExplosion(
 
   paddle.visibility = 0;
 
-  animateFragments(
-    scene,
-    fragments,
-    paddle,
-    intensity,
-    scoringDirection,
-    ballY,
-    paddleY,
-    paddleHeight,
-    duration
-  );
+  animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY, duration);
 
   setTimeout(() => {
     const gameWidth = defaultGameParams.dimensions.gameWidth;
@@ -48,11 +36,11 @@ export function applyPaddleExplosion(
     paddle.visibility = 1;
     paddle.position.x = gameToSceneX(x, paddle);
     paddle.position.y = gameToSceneY(y, paddle);
-  }, duration * 0.9); // Show paddle sooner
+  }, duration);
 }
 
 function createPaddleFragments(scene: Scene, paddle: Mesh, intensity: number): Mesh[] {
-  const numFragments = Math.min(15 + Math.floor(intensity * 10), 25);
+  const numFragments = Math.min(25 + Math.floor(intensity * 15), 40);
 
   const paddleWidth = paddle.getBoundingInfo().boundingBox.extendSize.x * 2 * paddle.scaling.x;
   const paddleHeight = paddle.getBoundingInfo().boundingBox.extendSize.y * 2 * paddle.scaling.y;
@@ -130,45 +118,57 @@ function createPaddleFragments(scene: Scene, paddle: Mesh, intensity: number): M
   return fragments;
 }
 
-function animateFragments(
+function animatePaddleFragments(
   scene: Scene,
   fragments: Mesh[],
   paddle: Mesh,
   intensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  paddleY: number,
-  paddleHeight: number,
-  duration: number
+  duration: number = 1000
 ): void {
-  // Calculate direction based on scoring direction
-  const xDirectionMultiplier = scoringDirection === 'right' ? -1 : 1;
+  const ballAbovePaddle = ballY < defaultGameParams.dimensions.gameHeight / 2;
+  const baseDirection = scoringDirection === 'right' ? Math.PI : 0;
 
-  // Calculate vertical direction based on ball and paddle positions
-  const paddleCenter = paddleY + paddleHeight / 2;
-  const verticalBias = (ballY - paddleCenter) / paddleHeight; // -0.5 to 0.5
+  const coneTilt = ballAbovePaddle ? -Math.PI / 6 : Math.PI / 6; // 30 degrees
+  const coneAngleRange = (Math.PI * 150) / 180; // 150 degrees
 
-  // Set floor level for fragment disappearance
-  const floorLevel = -10; // Fragments will disappear below this Y coordinate
-
-  // Prepare animation parameters
   const endTime = Date.now() + duration;
-
-  // Calculate cone direction parameters
-  // Base angle directly toward the opposing player
-  const baseAngle = scoringDirection === 'right' ? Math.PI : 0;
-  // Wider cone - 140-degree cone (70 degrees on each side of the base angle)
-  const coneAngleRange = Math.PI * 0.8; // 140 degrees in radians
-
-  // Calculate center of direction based on ball position relative to paddle
-  const verticalAngleAdjustment = (-verticalBias * Math.PI) / 4; // Up to 45 degrees up or down
-
   const animationObserver = scene.onBeforeRenderObservable.add(() => {
     const deltaTime = scene.getEngine().getDeltaTime() / 1000;
     const currentTime = Date.now();
+    const timeRemaining = endTime - currentTime;
 
-    let allFragmentsDisposed = true;
+    if (timeRemaining <= 0) {
+      // Dispose all fragments and stop the animation if time is up
+      for (let i = 0; i < fragments.length; i++) {
+        const fragment = fragments[i];
+        if (fragment) {
+          // Only dispose the shared glow layer when the first fragment is disposed
+          if (fragment.metadata?.isFirstFragment && fragment.metadata?.glowLayer) {
+            fragment.metadata.glowLayer.dispose();
+          }
 
+          if (fragment.material) fragment.material.dispose();
+
+          fragment.dispose();
+          fragments[i] = null as unknown as Mesh;
+        }
+      }
+
+      const gameWidth = defaultGameParams.dimensions.gameWidth;
+      const x = scoringDirection === 'right' ? 0 : gameWidth;
+      const y = defaultGameParams.dimensions.gameHeight / 2;
+
+      paddle.visibility = 1;
+      paddle.position.x = gameToSceneX(x, paddle);
+      paddle.position.y = gameToSceneY(y, paddle);
+
+      scene.onBeforeRenderObservable.remove(animationObserver);
+      return;
+    }
+
+    // Process fragment animations
     for (let i = 0; i < fragments.length; i++) {
       const fragment = fragments[i];
 
@@ -176,40 +176,26 @@ function animateFragments(
       if (!fragment || !fragment.metadata) continue;
 
       if (!fragment.metadata.initialized) {
-        // Generate a random angle within the cone
-        const horizontalAngle = baseAngle + (Math.random() - 0.5) * coneAngleRange;
-
-        // Calculate fragment index as percentage of total fragments
         const fragmentPercentage = i / fragments.length;
+        const conePosition = fragmentPercentage * 2 - 1;
 
-        // Distribute fragments more evenly across the cone
-        // Center fragments go more directly toward opposing player
-        // Edge fragments have more extreme angles
-        const distributedHorizontalAngle =
-          baseAngle + (fragmentPercentage * 2 - 1) * (coneAngleRange * 0.9);
+        const horizontalAngle = baseDirection + conePosition * (coneAngleRange / 2);
+        const verticalAngle = coneTilt;
 
-        // Adjust vertical angle based on where the ball hit the paddle, with some randomness
-        // Use fragmentPercentage to create a fan pattern
-        const verticalAngle =
-          verticalAngleAdjustment + (fragmentPercentage * 2 - 1) * (Math.PI / 5);
+        const xVariabilityFactor = 0.5 + Math.random() * 5.5;
+        const yVariabilityFactor = 0.5 + Math.random() * 5.5;
+        const zVariabilityFactor = 0.5 + Math.random() * 1.5;
 
         // Calculate 3D direction from angles
-        // Increase X component for more horizontal movement
-        const dirX = Math.cos(distributedHorizontalAngle) * Math.cos(verticalAngle) * 3;
-        const dirY = Math.sin(verticalAngle);
-        const dirZ = Math.sin(distributedHorizontalAngle) * Math.cos(verticalAngle);
+        const dirX = Math.cos(horizontalAngle) * Math.cos(verticalAngle) * xVariabilityFactor;
+        const dirY = Math.sin(verticalAngle) * yVariabilityFactor;
+        const dirZ = Math.sin(horizontalAngle) * Math.cos(verticalAngle) * zVariabilityFactor;
 
-        // Create direction vector and normalize
+        // Normalize to ensure consistent direction regardless of magnitude
         const direction = new Vector3(dirX, dirY, dirZ).normalize();
 
-        // Scale by speed based on intensity and add some randomness
-        // Significantly increase the overall speed
-        const speed = (5 + Math.random() * 3) * intensity;
-
-        // Initial velocity with direction applied
+        const speed = (10 + Math.random() * 5) * intensity * 5;
         const initialVelocity = direction.scale(speed);
-
-        // Initial angular velocity (rotation)
         const angularVelocity = new Vector3(
           (Math.random() - 0.5) * Math.PI * 2 * intensity,
           (Math.random() - 0.5) * Math.PI * 2 * intensity,
@@ -222,92 +208,31 @@ function animateFragments(
         fragment.metadata.lifeTime = 0;
       }
 
-      // Apply velocity and gravity
       fragment.position.x += fragment.metadata.velocity.x * deltaTime;
       fragment.position.y += fragment.metadata.velocity.y * deltaTime;
       fragment.position.z += fragment.metadata.velocity.z * deltaTime;
 
-      // Apply very reduced gravity - much less influence
-      fragment.metadata.velocity.y -= 3 * deltaTime;
-
-      // Apply rotation
       fragment.rotation.x += fragment.metadata.angularVelocity.x * deltaTime;
       fragment.rotation.y += fragment.metadata.angularVelocity.y * deltaTime;
       fragment.rotation.z += fragment.metadata.angularVelocity.z * deltaTime;
 
-      // Track lifetime of fragment
-      fragment.metadata.lifeTime += deltaTime;
+      fragment.metadata.lifeTime += deltaTime; // Track lifetime of fragment
 
-      // Apply fade out after 50% of duration
-      if (fragment.metadata.lifeTime > (duration * 0.6) / 1000) {
-        const fadeProgress = Math.min(
-          (fragment.metadata.lifeTime - (duration * 0.6) / 1000) / ((duration * 0.4) / 1000),
-          1
-        );
-        (fragment.material as PBRMaterial).alpha = Math.max(0, 1 - fadeProgress);
+      const timeRatio = timeRemaining / duration;
+      const fadeProgressPhase = 0.3;
+      let velocityScaleFactor = 1;
+
+      if (timeRatio < fadeProgressPhase) {
+        const fadeProgress = Math.min((fadeProgressPhase - timeRatio) / fadeProgressPhase, 1);
+        const material = fragment.material as PBRMaterial;
+        if (material) material.alpha = Math.max(0, 1 - fadeProgress);
+        velocityScaleFactor = 0.99 - fadeProgress * 0.1;
       }
 
-      // Reduced air resistance - fragments keep more of their momentum
-      fragment.metadata.velocity.scaleInPlace(0.99);
-      fragment.metadata.angularVelocity.scaleInPlace(0.99);
-
-      // Check if fragment is far out of bounds in any direction
-      const isOutOfBounds =
-        Math.abs(fragment.position.x) > 30 ||
-        Math.abs(fragment.position.y) > 20 ||
-        Math.abs(fragment.position.z) > 20 ||
-        fragment.position.y < floorLevel ||
-        (fragment.material as PBRMaterial).alpha <= 0.05;
-
-      if (isOutOfBounds) {
-        // Dispose material and fragment
-        if (fragment.material) {
-          fragment.material.dispose();
-        }
-
-        // Only dispose the shared glow layer when the first fragment is disposed
-        if (fragment.metadata.isFirstFragment && fragment.metadata.glowLayer) {
-          fragment.metadata.glowLayer.dispose();
-        }
-
-        fragment.dispose();
-        fragments[i] = null;
-      } else {
-        allFragmentsDisposed = false; // At least one fragment is still active
-      }
-    }
-
-    // If all fragments are disposed or time is up, show the paddle again and clean up
-    if (allFragmentsDisposed || currentTime >= endTime) {
-      // Restore paddle visibility
-      paddle.visibility = 1;
-
-      // Remove the animation observer
-      scene.onBeforeRenderObservable.remove(animationObserver);
-
-      // Clean up any remaining fragments
-      for (let i = 0; i < fragments.length; i++) {
-        if (fragments[i]) {
-          if (fragments[i].material) {
-            fragments[i].material.dispose();
-          }
-          fragments[i].dispose();
-        }
-      }
+      fragment.metadata.velocity.scaleInPlace(velocityScaleFactor);
+      fragment.metadata.angularVelocity.scaleInPlace(velocityScaleFactor);
     }
   });
-
-  setTimeout(() => {
-    const gameWidth = defaultGameParams.dimensions.gameWidth;
-    const x: number = xDirectionMultiplier === -1 ? 0 : gameWidth;
-    const y = defaultGameParams.dimensions.gameHeight / 2;
-
-    paddle.visibility = 1;
-    paddle.position.x = gameToSceneX(x, paddle);
-    paddle.position.y = gameToSceneY(y, paddle);
-
-    scene.onBeforeRenderObservable.remove(animationObserver);
-  }, duration);
 }
 
 export function applyNeonEdgeFlicker(
@@ -507,22 +432,7 @@ export function applyScoreEffects(
   const intensity = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensity);
-
-  if (scene && scoredAgainstPaddle && players) {
-    const scoredAgainstPlayer = ballDirection === 'right' ? 'player1' : 'player2';
-    const paddleY = players[scoredAgainstPlayer].y;
-    const paddleHeight = players[scoredAgainstPlayer].paddleHeight;
-
-    applyPaddleExplosion(
-      scene,
-      scoredAgainstPaddle,
-      intensity,
-      ballDirection,
-      ball.y,
-      paddleY,
-      paddleHeight
-    );
-  }
+  applyPaddleExplosion(scene, scoredAgainstPaddle, intensity, ballDirection, ball.y);
 }
 
 /*
