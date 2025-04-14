@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { ChatWindow } from '../components/chat/ChatWindow';
 import { PowerUpSelection } from '../components/menu/cards/PowerUpSelection';
+import TournamentBracket from '../components/tournament/TournamentBracket';
 import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -158,9 +159,9 @@ export const TournamentLobby: React.FC = () => {
 
   const { createRoom } = useChatContext();
 
-  useEffect(() => {
-    setPlayers([user?.user_id]);
-  }, [user]);
+  // useEffect(() => {
+  //   setPlayers([user?.user_id]);
+  // }, [user]);
 
   useEffect(() => {
     if (!user || !players) return;
@@ -180,7 +181,12 @@ export const TournamentLobby: React.FC = () => {
     setupChat();
   }, [players]);
 
+  useEffect(() => {
+    setPlayers(Array.from({ length: 8 }, (_, i) => `Competitor ${i + 1}`));
+  }, []);
+
   console.log(selectedFriendId);
+
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
@@ -192,8 +198,8 @@ export const TournamentLobby: React.FC = () => {
           <span className="text-secondary">X/X Players</span>
         </header>
 
-        <div className="flex flex-col md:flex-row gap-2 w-full h-full flex-grow">
-          <motion.div className="flex flex-col md:flex-row md:w-3/5 h-full w-full gap-2 md:gap-10">
+        <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
+          <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">
               {activeTab === 'settings' ? (
                 <motion.div
@@ -209,18 +215,19 @@ export const TournamentLobby: React.FC = () => {
               ) : (
                 <motion.div
                   key="tournamentPlayerList"
-                  className="w-full h-full"
+                  className="w-full h-full "
                   variants={slideFromRightVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
                 >
-                  <TournamentPlayerList></TournamentPlayerList>
+                  <TournamentBracket players={players}></TournamentBracket>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
-          <div className="@container glass-box h-[200px] w-2/5">
+          <div className="@container glass-box h-[200px] w-full">
+            <p>chat</p>
             {user && players && tournamentChatId && (
               <ChatWindow
                 selectedFriendId={selectedFriendId}
