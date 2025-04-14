@@ -232,10 +232,7 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
           <ListSvgContainer>
             <div className="flex w-full h-full items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-                <img
-                  className="object-cover w-full h-full"
-                  src={'./src/assets/images/default_avatar.png'}
-                />
+                <img className="object-cover w-full h-full grayscale" src={``} />
               </div>
               <span className="text-xs font-medium">mystery man</span>
             </div>

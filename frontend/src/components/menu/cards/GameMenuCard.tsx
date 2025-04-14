@@ -10,7 +10,10 @@ interface GameMenuCardProps {
 }
 
 const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInfo, onClick }) => {
-  return (
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  console.log('is safari:', isSafari);
+
+  return !isSafari ? (
     <div
       className="game-mode-modal @container-normal p-0 m-0 relative inline-block overflow-hidden"
       onClick={onClick}
@@ -86,6 +89,31 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
         </div>
       </div>
       <BackgroundGlow></BackgroundGlow>
+    </div>
+  ) : (
+    <div
+      className="game-mode-modal relative  p-5 m-0 w-full h-full glass-box overflow-hidden"
+      onClick={onClick}
+    >
+      <BackgroundGlow></BackgroundGlow>
+      <div className="w-full h-full relative mb-2">
+        <div className="" style={{ width: '100%', height: '100%' }}>
+          <img src={imageUrl} alt="" role="presentation" className="object-cover border-1" />
+        </div>
+        <div className="absolute top-0 left-0" style={{ width: '100%', height: '100%' }}>
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundColor: 'currentColor',
+              mixBlendMode: 'color',
+            }}
+          ></div>
+        </div>
+      </div>
+      {/* Content positioned at the bottom of the card */}
+      <div className="content">
+        <h2 className="text-3xl font-heading pb-0">{content}</h2>
+      </div>
     </div>
   );
 };
