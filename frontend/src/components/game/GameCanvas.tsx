@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import {
-  ArcRotateCamera,
-  Color3,
-  DefaultRenderingPipeline,
-  Engine,
-  Scene,
-  Vector3,
-} from 'babylonjs';
+import { ArcRotateCamera, Color3, DefaultRenderingPipeline, Engine, Scene } from 'babylonjs';
 
 import {
   PowerUpEffectsManager,
@@ -37,7 +30,6 @@ import {
   GameState,
   PowerUp,
   RetroEffectsLevels,
-  defaultGameObjectParams,
   defaultGameParams,
   defaultRetroEffectsLevels,
 } from '@shared/types';
@@ -177,9 +169,9 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     postProcessingRef.current = pipeline;
 
     topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
-    topEdgeRef.current.position.y = gameToSceneY(-1, topEdgeRef.current);
+    topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
-    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 1, bottomEdgeRef.current);
+    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
 
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,

@@ -7,7 +7,6 @@ import {
   DefaultRenderingPipeline,
   Engine,
   Scene,
-  Vector3,
 } from 'babylonjs';
 
 import {
@@ -40,7 +39,6 @@ import {
   RetroEffectsLevels,
   defaultCameraTimings,
   defaultCinematicGlitchTimings,
-  defaultGameObjectParams,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
   defaultRetroEffectTimings,
@@ -220,9 +218,9 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     postProcessingRef.current = pipeline;
 
     topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
-    topEdgeRef.current.position.y = gameToSceneY(0, topEdgeRef.current);
+    topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
-    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight, bottomEdgeRef.current);
+    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
 
     retroEffectsRef.current = createPongRetroEffects(
       scene,
