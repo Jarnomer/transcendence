@@ -11,28 +11,6 @@ import {
   retroEffectsPresets,
 } from '@shared/types';
 
-export function safelySetUniforms(
-  effect: BABYLON.PostProcess | null,
-  setUniforms: (effectInstance: BABYLON.Effect) => void
-): void {
-  if (!effect || !effect.isEnabled || effect._isDisposed) {
-    return;
-  }
-
-  try {
-    // Get the effect instance
-    const effectInstance = effect.getEffect();
-    if (!effectInstance || !effectInstance._program) {
-      return;
-    }
-
-    // Set the uniforms safely
-    setUniforms(effectInstance);
-  } catch (error) {
-    console.warn('Error setting shader uniforms:', error);
-  }
-}
-
 export function setRetroEffectLevel(level: number, baseValue: number): number {
   if (level === 0) return 0;
 
@@ -84,16 +62,22 @@ export function createScanlinesEffect(
   let time = 0;
 
   scanlinesEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    effect.setFloat2('screenSize', engine.getRenderWidth(), engine.getRenderHeight());
-    effect.setFloat('scanlineIntensity', options.intensity);
-    effect.setFloat('scanlineDensity', options.density);
-    effect.setFloat('scanlineSpeed', options.speed);
-    effect.setFloat('noise', options.noise);
-    effect.setFloat('vignette', options.vignette);
-    effect.setFloat('flickerAmount', options.flicker);
-    effect.setFloat('colorBleed', options.colorBleed);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      effect.setFloat2('screenSize', engine.getRenderWidth(), engine.getRenderHeight());
+      effect.setFloat('scanlineIntensity', options.intensity);
+      effect.setFloat('scanlineDensity', options.density);
+      effect.setFloat('scanlineSpeed', options.speed);
+      effect.setFloat('noise', options.noise);
+      effect.setFloat('vignette', options.vignette);
+      effect.setFloat('flickerAmount', options.flicker);
+      effect.setFloat('colorBleed', options.colorBleed);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   return scanlinesEffect;
@@ -123,10 +107,16 @@ export function createPhosphorDotsEffect(
   const engine = scene.getEngine();
 
   phosphorEffect.onApply = (effect) => {
-    effect.setFloat2('screenSize', engine.getRenderWidth(), engine.getRenderHeight());
-    effect.setFloat('dotSize', options.dotSize);
-    effect.setFloat('dotIntensity', options.dotIntensity);
-    effect.setFloat2('dotScale', 1.0, options.nonSquareRatio);
+    try {
+      if (!effect) return;
+
+      effect.setFloat2('screenSize', engine.getRenderWidth(), engine.getRenderHeight());
+      effect.setFloat('dotSize', options.dotSize);
+      effect.setFloat('dotIntensity', options.dotIntensity);
+      effect.setFloat2('dotScale', 1.0, options.nonSquareRatio);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   return phosphorEffect;
@@ -158,12 +148,18 @@ export function createCRTEffect(
   let time = 0;
 
   crtEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat2('curvature', options.curvatureAmount, options.curvatureAmount);
-    effect.setFloat('scanlineIntensity', options.scanlineIntensity);
-    effect.setFloat('vignette', options.vignette);
-    effect.setFloat('colorBleed', options.colorBleed);
-    effect.setFloat('time', time);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat2('curvature', options.curvatureAmount, options.curvatureAmount);
+      effect.setFloat('scanlineIntensity', options.scanlineIntensity);
+      effect.setFloat('vignette', options.vignette);
+      effect.setFloat('colorBleed', options.colorBleed);
+      effect.setFloat('time', time);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   return crtEffect;
@@ -195,12 +191,18 @@ export function createVHSEffect(
   let time = 0;
 
   vhsEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    effect.setFloat('trackingNoiseAmount', options.trackingNoise);
-    effect.setFloat('staticNoiseAmount', options.staticNoise);
-    effect.setFloat('distortionAmount', options.distortion);
-    effect.setFloat('colorBleedAmount', options.colorBleed);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      effect.setFloat('trackingNoiseAmount', options.trackingNoise);
+      effect.setFloat('staticNoiseAmount', options.staticNoise);
+      effect.setFloat('distortionAmount', options.distortion);
+      effect.setFloat('colorBleedAmount', options.colorBleed);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   return vhsEffect;
@@ -248,12 +250,18 @@ export function createGlitchEffect(
   let currentColorBleed = options.colorBleed;
 
   glitchEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    effect.setFloat('trackingNoiseAmount', currentTrackingNoise);
-    effect.setFloat('staticNoiseAmount', currentStaticNoise);
-    effect.setFloat('distortionAmount', currentDistortion);
-    effect.setFloat('colorBleedAmount', currentColorBleed);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      effect.setFloat('trackingNoiseAmount', currentTrackingNoise);
+      effect.setFloat('staticNoiseAmount', currentStaticNoise);
+      effect.setFloat('distortionAmount', currentDistortion);
+      effect.setFloat('colorBleedAmount', currentColorBleed);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   const intensityMultiplier = levels.glitch / 5;
@@ -298,11 +306,17 @@ export function createTVSwitchingEffect(
   let time = 0;
 
   tvSwitchEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    const scaledProgress = switchProgress * (levels.crtChannelSwitchEffect / 5);
-    effect.setFloat('switchProgress', scaledProgress);
-    effect.setFloat4('transitionColor', 0, 0, 0, 1);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      const scaledProgress = switchProgress * (levels.crtChannelSwitchEffect / 5);
+      effect.setFloat('switchProgress', scaledProgress);
+      effect.setFloat4('transitionColor', 0, 0, 0, 1);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   const setSwitchingProgress = (progress: number) => {
@@ -344,12 +358,18 @@ export function createCRTTurnOnEffect(
   const flickerAmount = setRetroEffectLevel(levels.flicker, 0.3);
 
   turnOnEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    effect.setFloat('turnOnProgress', turnOnProgress);
-    effect.setFloat('noise', noiseIntensity);
-    effect.setFloat('scanlineIntensity', scanlineIntensity);
-    effect.setFloat('flickerAmount', flickerAmount);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      effect.setFloat('turnOnProgress', turnOnProgress);
+      effect.setFloat('noise', noiseIntensity);
+      effect.setFloat('scanlineIntensity', scanlineIntensity);
+      effect.setFloat('flickerAmount', flickerAmount);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   const setTurnOnProgress = (progress: number) => {
@@ -388,10 +408,16 @@ export function createCRTTurnOffEffect(
   const noiseIntensity = setRetroEffectLevel(levels.noise, 0.6);
 
   turnOffEffect.onApply = (effect) => {
-    time += engine.getDeltaTime() / 1000.0;
-    effect.setFloat('time', time);
-    effect.setFloat('turnOffProgress', turnOffProgress);
-    effect.setFloat('noise', noiseIntensity);
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      effect.setFloat('turnOffProgress', turnOffProgress);
+      effect.setFloat('noise', noiseIntensity);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
   };
 
   const setTurnOffProgress = (progress: number) => {
@@ -552,7 +578,7 @@ export class RetroEffectsManager {
   setGlitchAmount(amount: number = 1, durationMs: number = 200): RetroEffectsManager {
     if (!this._effects.glitch) this.enableGlitch();
 
-    if (this._effects.glitch) {
+    if (this._effects.glitch && this._effects.glitch.effect) {
       this._effects.glitch.setGlitchAmount(amount);
 
       if (durationMs > 0) {
@@ -578,21 +604,27 @@ export class RetroEffectsManager {
     const adjustedDuration = durationMs * (this._levels.crtChannelSwitchEffect / 5);
 
     if (this._effects.tvSwitch && this._effects.tvSwitch.effect) {
-      if (this._effects.glitch) {
+      if (this._effects.glitch && this._effects.glitch.effect) {
         const glitchIntensity = setRetroEffectLevel(this._levels.glitch, 2.0);
 
         this._effects.glitch.setGlitchAmount(glitchIntensity);
 
         setTimeout(() => {
-          if (this._effects.glitch) this._effects.glitch.setGlitchAmount(glitchIntensity * 1.5);
+          if (this._effects.glitch && this._effects.glitch.effect) {
+            this._effects.glitch.setGlitchAmount(glitchIntensity * 1.5);
+          }
         }, adjustedDuration * 0.3);
 
         setTimeout(() => {
-          if (this._effects.glitch) this._effects.glitch.setGlitchAmount(glitchIntensity * 2.5);
+          if (this._effects.glitch && this._effects.glitch.effect) {
+            this._effects.glitch.setGlitchAmount(glitchIntensity * 2.5);
+          }
         }, adjustedDuration * 0.6);
 
         setTimeout(() => {
-          if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+          if (this._effects.glitch && this._effects.glitch.effect) {
+            this._effects.glitch.setGlitchAmount(0);
+          }
         }, adjustedDuration);
       }
 
@@ -613,6 +645,12 @@ export class RetroEffectsManager {
     if (!this._turnOnEffect) this.enableTurnOnEffect();
 
     if (this._turnOnEffect && this._turnOnEffect.effect && !this._isPlayingTurnOnEffect) {
+      // Ensure turn off effect isn't running
+      this._isPlayingTurnOffEffect = false;
+      if (this._turnOffEffect && this._turnOffEffect.effect) {
+        (this._turnOffEffect.effect as any).enabled = false;
+      }
+
       if (!this._effects.scanlines) this.enableScanlines();
       if (!this._effects.glitch) this.enableGlitch();
 
@@ -621,14 +659,26 @@ export class RetroEffectsManager {
 
       return new Promise((resolve) => {
         const startTime = performance.now();
+        let animationFrame: number | null = null;
 
         const updateProgress = () => {
+          // Safely check if effect is still valid
+          if (!this._turnOnEffect || !this._turnOnEffect.effect) {
+            if (animationFrame !== null) {
+              cancelAnimationFrame(animationFrame);
+              animationFrame = null;
+            }
+            this._isPlayingTurnOnEffect = false;
+            resolve();
+            return;
+          }
+
           const elapsedTime = performance.now() - startTime;
           const progress = Math.min(elapsedTime / durationMs, 1.0);
 
-          this._turnOnEffect?.setTurnOnProgress(progress);
+          this._turnOnEffect.setTurnOnProgress(progress);
 
-          if (this._effects.glitch) {
+          if (this._effects.glitch && this._effects.glitch.effect) {
             if (progress < defaultRetroEffectTimings.turnOnPhase1Duration) {
               const pulseIntensity = Math.sin(progress * 40) * 2;
               const intensity = (0.8 - progress) * 10 * pulseIntensity;
@@ -642,17 +692,26 @@ export class RetroEffectsManager {
             }
           }
 
-          if (this._effects.scanlines) {
-            const effect = this._effects.scanlines.getEffect();
-            const intensity = setRetroEffectLevel(this._levels.scanlines, 5 - progress * 5);
-            effect.setFloat('scanlineIntensity', intensity);
+          if (this._effects.scanlines && this._effects.scanlines.getEffect) {
+            try {
+              const effect = this._effects.scanlines.getEffect();
+              if (effect) {
+                const intensity = setRetroEffectLevel(this._levels.scanlines, 5 - progress * 5);
+                effect.setFloat('scanlineIntensity', intensity);
+              }
+            } catch (error) {
+              // Ignore errors when setting uniforms during animation
+            }
           }
 
           if (progress < 1.0) {
-            requestAnimationFrame(updateProgress);
+            animationFrame = requestAnimationFrame(updateProgress);
           } else {
+            animationFrame = null;
             setTimeout(() => {
-              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+              if (this._effects.glitch && this._effects.glitch.effect) {
+                this._effects.glitch.setGlitchAmount(0);
+              }
               if (this._turnOnEffect && this._turnOnEffect.effect) {
                 (this._turnOnEffect.effect as any).enabled = false;
               }
@@ -677,6 +736,12 @@ export class RetroEffectsManager {
     if (!this._turnOffEffect) this.enableTurnOffEffect();
 
     if (this._turnOffEffect && this._turnOffEffect.effect && !this._isPlayingTurnOffEffect) {
+      // Ensure turn on effect isn't running
+      this._isPlayingTurnOnEffect = false;
+      if (this._turnOnEffect && this._turnOnEffect.effect) {
+        (this._turnOnEffect.effect as any).enabled = false;
+      }
+
       if (!this._effects.glitch) this.enableGlitch();
 
       (this._turnOffEffect.effect as any).enabled = true;
@@ -684,14 +749,26 @@ export class RetroEffectsManager {
 
       return new Promise((resolve) => {
         const startTime = performance.now();
+        let animationFrame: number | null = null;
 
         const updateProgress = () => {
+          // Safely check if effect is still valid
+          if (!this._turnOffEffect || !this._turnOffEffect.effect) {
+            if (animationFrame !== null) {
+              cancelAnimationFrame(animationFrame);
+              animationFrame = null;
+            }
+            this._isPlayingTurnOffEffect = false;
+            resolve();
+            return;
+          }
+
           const elapsedTime = performance.now() - startTime;
           const progress = Math.min(elapsedTime / durationMs, 1.0);
 
-          this._turnOffEffect?.setTurnOffProgress(progress);
+          this._turnOffEffect.setTurnOffProgress(progress);
 
-          if (this._effects.glitch) {
+          if (this._effects.glitch && this._effects.glitch.effect) {
             if (progress < defaultRetroEffectTimings.turnOffPhase1Duration) {
               const initialGlitch = progress * 2;
               this._effects.glitch.setGlitchAmount(initialGlitch);
@@ -708,10 +785,13 @@ export class RetroEffectsManager {
           }
 
           if (progress < 1.0) {
-            requestAnimationFrame(updateProgress);
+            animationFrame = requestAnimationFrame(updateProgress);
           } else {
+            animationFrame = null;
             setTimeout(() => {
-              if (this._effects.glitch) this._effects.glitch.setGlitchAmount(0);
+              if (this._effects.glitch && this._effects.glitch.effect) {
+                this._effects.glitch.setGlitchAmount(0);
+              }
               if (this._turnOffEffect && this._turnOffEffect.effect) {
                 (this._turnOffEffect.effect as any).enabled = false;
               }
@@ -736,11 +816,11 @@ export class RetroEffectsManager {
     if (this._levels.glitch === 0) return;
     if (!this._effects.glitch) this.enableGlitch();
 
-    if (this._effects.glitch) {
+    if (this._effects.glitch && this._effects.glitch.effect) {
       this._effects.glitch.setGlitchAmount(intensity);
 
       setTimeout(() => {
-        if (this._effects.glitch) {
+        if (this._effects.glitch && this._effects.glitch.effect) {
           this._effects.glitch.setGlitchAmount(0);
         }
       }, durationMs);
@@ -748,18 +828,28 @@ export class RetroEffectsManager {
   }
 
   dispose(): void {
+    // Safely dispose of each effect
     Object.values(this._effects).forEach((effect) => {
       if (effect && typeof effect === 'object') {
-        if ('effect' in effect && effect.effect && typeof effect.effect.dispose === 'function') {
-          effect.effect.dispose();
+        if ('effect' in effect && effect.effect) {
+          if (typeof effect.effect.dispose === 'function') {
+            effect.effect.dispose();
+          }
         } else if (typeof (effect as any).dispose === 'function') {
-          (effect as any).dispose();
+          (effect as any).dispose(); // Direct effect objects
         }
       }
     });
 
-    if (this._turnOnEffect && this._turnOnEffect.effect) this._turnOnEffect.effect.dispose();
-    if (this._turnOffEffect && this._turnOffEffect.effect) this._turnOffEffect.effect.dispose();
+    if (this._turnOnEffect && this._turnOnEffect.effect) {
+      this._turnOnEffect.effect.dispose();
+      this._turnOnEffect = undefined;
+    }
+
+    if (this._turnOffEffect && this._turnOffEffect.effect) {
+      this._turnOffEffect.effect.dispose();
+      this._turnOffEffect = undefined;
+    }
 
     this._effects = {};
   }
