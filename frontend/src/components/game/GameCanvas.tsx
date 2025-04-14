@@ -62,8 +62,9 @@ const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
 
 const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
   const gameHeight = defaultGameParams.dimensions.gameHeight;
+  const ballSize = defaultGameParams.ball.size;
   const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = newY === 0 || newY === gameHeight - 15;
+  const dyCollision = newY === 0 || newY === gameHeight - ballSize;
 
   if (dxCollision) return 'dx';
   if (dyCollision) return 'dy';
@@ -235,7 +236,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   }, [retroLevels, retroPreset]);
 
-  // Handle power-up updates
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;
 
@@ -250,7 +250,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Handle game object updates
   useEffect(() => {
-    if (!canvasRef.current || !themeColors.current) return;
+    if (!canvasRef.current || !sceneRef.current || !themeColors.current) return;
 
     const { players, ball, powerUps } = gameState;
     const primaryColor = themeColors.current.primaryColor;
@@ -306,17 +306,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (score) applyScoreEffects(retroEffectsRef.current);
 
-    if (sceneRef.current && powerUps && powerUps.length > 0) {
-      applyPlayerEffects(
-        sceneRef.current,
-        player1Ref.current,
-        player2Ref.current,
-        players,
-        powerUps,
-        primaryColor,
-        secondaryColor
-      );
-    }
+    applyPlayerEffects(
+      sceneRef.current,
+      player1Ref.current,
+      player2Ref.current,
+      players,
+      powerUps,
+      primaryColor,
+      secondaryColor
+    );
 
     prevBallState.current = {
       x: ball.x,

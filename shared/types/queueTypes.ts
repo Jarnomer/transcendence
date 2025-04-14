@@ -6,6 +6,7 @@ export const QueueResSchema = Type.Object({
       queue_id: Type.String(),
       mode: Type.String(),
       variant: Type.String(),
+      name: Type.String(),
       players: Type.Array(
         Type.Object({
           user_id: Type.String(),

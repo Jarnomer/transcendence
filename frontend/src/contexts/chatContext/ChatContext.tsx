@@ -51,6 +51,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [selectedFriend]);
 
   useEffect(() => {
+    console.log('chat context:', connections);
     const userId = localStorage.getItem('userID');
     if (!userId) return;
     const user_id = localStorage.getItem('userID')!;
@@ -139,15 +140,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (connections.chat === 'connected') {
-      console.log('Chat socket is already connected');
-      chatSocket.addEventListener('message', handleChatMessage);
-    }
+    console.log('Chat socket is already connected');
+    chatSocket.addEventListener('message', handleChatMessage);
     return () => {
       console.log('Cleaning up chat socket');
       chatSocket.removeEventListener('message', handleChatMessage);
     };
-  }, [connections.chat]);
+  }, []);
 
   const notifyMessage = (event: MessageEvent) => {
     if (
@@ -218,6 +217,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         type: selectedFriend ? 'dm' : 'room',
         payload: {
           sender_id: userId,
+          avatar_url: user?.avatar_url,
+          display_name: user?.display_name,
           receiver_id: selectedFriend,
           room_id: roomId,
           message: newMessage,

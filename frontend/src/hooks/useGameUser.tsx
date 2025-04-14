@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 
-const useGameUser = (
-  difficulty: string | null
-  //setUserId: React.Dispatch<React.SetStateAction<string | null>>,
-  //setLocalPlayerId: React.Dispatch<React.SetStateAction<string | null>>,
-  //setRemotePlayerId: React.Dispatch<React.SetStateAction<string | null>>
-) => {
+import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+
+const useGameUser = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
+  const { difficulty } = useGameOptionsContext();
+
   useEffect(() => {
     setUserId(localStorage.getItem('userID'));
   }, []);

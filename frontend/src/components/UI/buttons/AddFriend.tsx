@@ -48,6 +48,7 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
 
   return (
     <button
+      className="hover:text-secondary"
       onClick={handleAddFriendClick}
       disabled={loading}
       aria-label={`${isPending ? 'delete friend' : 'add friend'}`}

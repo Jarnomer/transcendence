@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
 
 import { motion } from 'framer-motion';
 
@@ -177,7 +177,7 @@ export const GameMenu: React.FC = () => {
   return (
     <motion.div
       id="home-container"
-      className="flex flex-wrap justify-center gap-4 px-3 items-center p-10"
+      className="flex flex-wrap w-full h-full justify-center gap-4 items-center p-0"
     >
       {renderMenu()}
       {/* <div className="container noselect">

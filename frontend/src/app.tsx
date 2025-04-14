@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 
+import { Toaster } from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
@@ -18,7 +19,7 @@ import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
 const App: React.FC = () => {
   const location = useLocation();
-  const { user, checkAuth } = useUser();
+  const { checkAuth } = useUser();
 
   console.log('app rendered');
 
@@ -34,17 +35,14 @@ const App: React.FC = () => {
       <ChatProvider>
         <GameOptionsProvider>
           <div className="fixed inset-0 -z-10">
-            <BackgroundGameProvider></BackgroundGameProvider>
+            <BackgroundGameProvider />
           </div>
           <div
             id="app-container"
             className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
           >
             <Header />
-            <div
-              id="app-content"
-              className="relative md:px-10 flex flex-grow flex-col w-full justify-center items-center"
-            >
+            <div id="app-content" className="relative md:px-10 p-5 w-full ">
               <AnimatePresence>
                 <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
                   <BackgroundGlitch duration={1100} />
@@ -58,6 +56,7 @@ const App: React.FC = () => {
         </GameOptionsProvider>
         <ChatModal></ChatModal>
         <SettingsModal></SettingsModal>
+        <Toaster position="bottom-right" />
       </ChatProvider>
     </WebSocketProvider>
   );

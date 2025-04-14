@@ -122,6 +122,7 @@ CREATE INDEX IF NOT EXISTS idx_direct_messages_users ON direct_messages(sender_i
 CREATE TABLE  IF NOT EXISTS queues (
   queue_id TEXT PRIMARY KEY,
   password TEXT DEFAULT NULL,
+  isPrivate BOOLEAN DEFAULT FALSE,
   mode TEXT NOT NULL DEFAULT '1v1',
   name TEXT NOT NULL DEFAULT 'default',
   variant TEXT NOT NULL DEFAULT 'online',

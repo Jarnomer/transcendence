@@ -53,6 +53,13 @@ export class QueueController {
     reply.code(200).send(users);
   }
 
+  async getTournaments(request: FastifyRequest, reply: FastifyReply) {
+    const { page, pageSize } = request.query as { page: number; pageSize: number };
+    request.log.trace(`Getting all tournaments`);
+    const tournaments = await this.queueService.getTournaments(page, pageSize);
+    reply.code(200).send(tournaments);
+  }
+
   /**
    * get user status in match making queue by ID
    * @param request get: user_id as path parameter
@@ -92,14 +99,15 @@ export class QueueController {
    */
   async createQueue(request: FastifyRequest, reply: FastifyReply) {
     const { user_id } = request.user as { user_id: string };
-    const { mode, difficulty, password } = request.query as {
+    const { mode, difficulty, name } = request.query as {
       mode: string;
       difficulty: string;
-      password: string;
+      name: string;
     };
+    const { password } = request.body as { password: string };
     request.log.trace(`Joining user ${user_id}`);
     console.log(user_id, mode, difficulty);
-    const queue = await this.queueService.createQueue(user_id, mode, difficulty, password);
+    const queue = await this.queueService.createQueue(user_id, mode, difficulty, name, password);
     request.log.trace(`status: ${queue.status}`);
     console.log(queue);
     reply.code(200).send(queue);
@@ -124,11 +132,11 @@ export class QueueController {
 
   async joinQueue(request: FastifyRequest, reply: FastifyReply) {
     const { queue_id } = request.params as { queue_id: string };
-    const { mode, difficulty, password } = request.query as {
+    const { mode, difficulty } = request.query as {
       mode: string;
       difficulty: string;
-      password: string | null;
     };
+    const { password } = request.body as { password: string };
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Joining queue ${queue_id}`);
     const passwordCheck = await this.queueService.getQueueByID(queue_id);

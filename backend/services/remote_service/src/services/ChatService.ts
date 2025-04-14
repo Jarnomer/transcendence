@@ -11,6 +11,8 @@ interface BroadcastMessage {
     sender_id: string;
     message: string;
     room_id: string;
+    avatar_url: string;
+    display_name: string;
     receiver_id: string;
     created_at: string;
   };
@@ -116,6 +118,8 @@ export class ChatService {
       state: {
         sender_id: payload.sender_id,
         message: payload.message,
+        display_name: payload.display_name || '',
+        avatar_url: payload.avatar_url || '',
         room_id: payload.room_id || '',
         receiver_id: payload.receiver_id || '',
         created_at: new Date().toISOString(),

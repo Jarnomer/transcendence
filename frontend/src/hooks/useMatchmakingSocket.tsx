@@ -10,6 +10,7 @@ export const useMatchmakingSocket = (
     if (!matchmakingSocket) {
       return;
     }
+    console.log('Matchmaking socket attaching listeners');
     const handleOpen = () => dispatch({ type: 'CONNECTED', socket: 'matchmaking' });
     const handleError = () => dispatch({ type: 'ERROR', socket: 'matchmaking' });
     const handleReconnecting = () => dispatch({ type: 'RECONNECTING', socket: 'matchmaking' });
@@ -32,6 +33,7 @@ export const useMatchmakingSocket = (
       if (!matchmakingSocket) {
         return;
       }
+      console.log('Matchmaking socket detaching listeners');
       matchmakingSocket.close();
       matchmakingSocket.removeEventListener('open', handleOpen);
       matchmakingSocket.removeEventListener('close', handleClose);

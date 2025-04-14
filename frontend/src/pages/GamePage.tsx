@@ -14,9 +14,8 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, dispatch, sendMessage, gameEvent } =
-    useWebSocketContext();
-  const { gameId, mode, difficulty, lobby, queueId, setGameId } = useGameOptionsContext();
+  const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
+  const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
   // const location = useLocation();
   const { loadingStates } = useLoading();
   // const { mode, difficulty, lobby, queueId } = location.state || {};
@@ -28,23 +27,19 @@ export const GamePage: React.FC = () => {
   // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
 
-  const { userId, localPlayerId, remotePlayerId } = useGameUser(difficulty);
-  useMatchmaking(mode, difficulty, lobby, queueId, setGameId, userId);
-  useGameResult(gameStatus, gameId, gameState, dispatch, userId);
-  useGameControls(localPlayerId, remotePlayerId);
-
-  const playersData = useFetchPlayerData({
-    gameState,
-    gameId,
-    mode,
-    difficulty,
-    connectionStatus: connections.game,
-    gameStatus,
-  });
-
   useEffect(() => {
-    console.log('game event', gameEvent);
-  }, [gameEvent]);
+    console.log('GamePage mounted');
+    console.log('mode: ', mode);
+    console.log('difficulty: ', difficulty);
+    console.log('gameId: ', gameId);
+    console.log('setTournamentOptions', tournamentOptions);
+  }, []);
+
+  const { userId, localPlayerId, remotePlayerId } = useGameUser();
+  useMatchmaking(userId);
+  useGameResult(userId);
+  useGameControls(localPlayerId, remotePlayerId);
+  const playersData = useFetchPlayerData();
 
   // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED
   // SET LOADING TO FALSE TO RENDER THE GAMECANVAS
@@ -53,15 +48,15 @@ export const GamePage: React.FC = () => {
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
       setLoading(false);
     }
-  }, [animate, loadingStates]);
+  }, [animate, loadingStates, gameId]);
 
   useEffect(() => {
     if (!gameId || !localPlayerId) return;
-    if (!loading && gameStatus === 'waiting') {
+    if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
       console.log('sending player ready for player: ', localPlayerId);
       sendMessage('game', createReadyInputMessage(localPlayerId, true));
     }
-  }, [loading, gameStatus]);
+  }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 
   // TODO: Reconnection handler
   // TODO: Pause - Resume
@@ -74,21 +69,21 @@ export const GamePage: React.FC = () => {
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}
-      {connections.game === 'connected' && gameStatus !== 'finished' && !loading ? (
+      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
         <>
           <div className="w-full h-full relative overflow-hidden">
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 
             <p className="text-xs text-gray-500">
-              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState.ball.spin} |
-              Player2_DY: {gameState.players.player2.dy}
+              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} |
+              Player2_DY: {gameState?.players.player2.dy}
             </p>
             <GameCanvas gameState={gameState} />
           </div>
         </>
       ) : (
-        <MatchMakingCarousel setAnimate={setAnimate} gameId={gameId} playersData={playersData} />
+        <MatchMakingCarousel playersData={playersData} />
       )}
     </div>
   );
