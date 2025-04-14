@@ -1,3 +1,5 @@
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+
 import { motion } from 'framer-motion';
 
 import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
@@ -43,7 +45,7 @@ const Round: React.FC<{
   return (
     <>
       <div style={{ gridColumnStart: roundIndex + 1, gridRowStart: 1 }}>
-        <ol className="flex flex-col justify-around">
+        <ol className="flex h-full flex-col justify-around">
           {leftCompetitors.map((name, idx) => (
             <div key={`left-${idx}`}>
               <Competitor name={name} />
@@ -53,7 +55,7 @@ const Round: React.FC<{
       </div>
 
       <div style={{ gridColumnStart: maxRounds - roundIndex, gridRowStart: 1 }}>
-        <ol className="flex flex-col justify-around">
+        <ol className="flex h-full flex-col justify-around">
           {rightCompetitors.map((name, idx) => (
             <div key={`right-${idx}`}>
               <Competitor name={name} />
@@ -89,17 +91,37 @@ const TournamentBracket: React.FC = ({ players }) => {
   console.log('Grid cols: ', gridCols);
 
   return (
-    <div className=" w-full">
-      <div className={`w-full h-full  grid grid-rows-1 grid-cols-[${gridCols}] `}>
-        {rounds.map((round, index) => (
-          <Round
-            key={round.id}
-            roundIndex={index}
-            competitors={round.competitors}
-            maxRounds={gridCols}
-          />
-        ))}
-      </div>
+    <div className=" w-full flex items-center justify-center">
+      <TransformWrapper
+        initialScale={1}
+        minScale={1}
+        maxScale={4}
+        wheel={{
+          wheelEnabled: true,
+          touchPadEnabled: true, // this is important
+          step: 0.1,
+        }}
+        doubleClick={{ disabled: true }}
+      >
+        <TransformComponent>
+          <div
+            className=" grid grid-rows-1"
+            style={{
+              gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+              minWidth: `${gridCols * 150}px`,
+            }}
+          >
+            {rounds.map((round, index) => (
+              <Round
+                key={round.id}
+                roundIndex={index}
+                competitors={round.competitors}
+                maxRounds={gridCols}
+              />
+            ))}
+          </div>
+        </TransformComponent>
+      </TransformWrapper>
     </div>
   );
 };
