@@ -166,10 +166,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <div className="h-full aspect-square p-2">
             <img
               className="object-contain h-full w-full border-1"
-              src={event.sender_avatar_url || './src/assets/images/default_avatar.png'}
+              src={event.avatar_url || './src/assets/images/default_avatar.png'}
             ></img>
           </div>
-          <span className="text-xs">{event.message}</span>
+          <div className="text-xs">
+            <p className="text-xs">{event.display_name}</p>
+            <p className="text-xs">{event.message}</p>
+          </div>
         </div>
       </MessageNotification>
     ));
