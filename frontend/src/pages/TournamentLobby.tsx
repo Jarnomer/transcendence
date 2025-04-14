@@ -167,8 +167,14 @@ export const TournamentLobby: React.FC = () => {
 
     const setupChat = async () => {
       console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', players);
-      const chatId = await createRoom('tournamentChat', true, players);
-      setTournamentChatId(chatId);
+      const chatId = await createRoom(
+        'tournamentChat_' + Math.floor(Math.random() * 50),
+        true,
+        null
+      );
+      if (chatId) {
+        setTournamentChatId(chatId);
+      }
     };
 
     setupChat();

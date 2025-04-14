@@ -130,6 +130,8 @@ export const ProfilePage: React.FC = () => {
                     friends={user.friends}
                     requests={user.friend_requests}
                     sents={sent}
+                    loading={loading}
+                    setLoading={setLoading}
                   />
                 </motion.div>
               </div>

@@ -246,8 +246,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const createRoom = async (roomName: string, isPrivate: boolean, memberList: string[]) => {
+    console.log('roomName: ', roomName, ' isPrivate: ', isPrivate, 'memberList: ', memberList);
     const data = await createChatRoom(roomName, isPrivate ? 'private' : 'public');
     if (data) {
+      console.log('create room data: ', data);
       await addMember(data.chat_room_id, memberList);
       setRooms((prev) => [...prev, data]);
     }

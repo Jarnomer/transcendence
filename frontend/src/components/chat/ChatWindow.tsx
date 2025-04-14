@@ -26,7 +26,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [input, setInput] = useState('');
   const { messages } = useChatContext();
   const navigate = useNavigate();
-  const user = useUser();
+  const { user } = useUser();
 
   console.log(roomId);
   return (
