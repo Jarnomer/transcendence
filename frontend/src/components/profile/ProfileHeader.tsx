@@ -98,7 +98,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           </div>
           {isOwnProfile ? (
             !editProfile ? (
-              <button className="text-xs" onClick={() => setEditProfile(true)}>
+              <button className="text-xs hover:text-secondary" onClick={() => setEditProfile(true)}>
                 Edit Profile
               </button>
             ) : null
