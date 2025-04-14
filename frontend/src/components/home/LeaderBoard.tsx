@@ -127,7 +127,7 @@ export const LeaderBoard: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
                             <img
-                              className="object-cover w-full h-full grayscale"
+                              className="object-cover w-full h-full "
                               src={
                                 user.display_name.startsWith('AI')
                                   ? './src/assets/images/ai.png'
@@ -135,14 +135,6 @@ export const LeaderBoard: React.FC = () => {
                               }
                               alt={`${user.display_name}'s profile picture`}
                             />
-                            <div
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                backgroundColor: 'currentColor',
-                                mixBlendMode: 'color',
-                              }}
-                            ></div>
                           </div>
                           <p className="text-xs">
                             {user.display_name || 'N/A'} <br />
