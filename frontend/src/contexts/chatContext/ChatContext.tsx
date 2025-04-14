@@ -252,6 +252,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRooms((prev) => [...prev, data]);
     }
     setRoomId(data.chat_room_id);
+    return roomId;
   };
 
   return (

@@ -27,7 +27,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }) 
             <img src={message.avatar_url} alt="" className="object-contain w-full h-full" />
           </div>
         )}
-        <div className={`p-2 rounded-xl max-w-xs border ${isOwn ? 'bg-primary/25' : ''}`}>
+        <div className={`p-2 relative  max-w-xs border ${isOwn ? 'bg-primary/25' : ''}`}>
           <div>{message.message}</div>
         </div>
       </div>

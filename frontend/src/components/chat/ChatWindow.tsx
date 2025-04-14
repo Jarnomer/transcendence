@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { UserDataResponseType } from '../../../../shared/types';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
+import { useUser } from '../../contexts/user/UserContext';
 import { MessageInput } from './MessageInput';
 import { MessageList } from './MessageList';
 
 interface ChatWindowProps {
-  user: UserDataResponseType;
   friends: UserDataResponseType[];
   selectedFriendId: string | null;
   roomId: string | null;
@@ -17,7 +17,6 @@ interface ChatWindowProps {
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
-  user,
   friends,
   selectedFriendId,
   roomId,
@@ -27,6 +26,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [input, setInput] = useState('');
   const { messages } = useChatContext();
   const navigate = useNavigate();
+  const user = useUser();
 
   console.log(roomId);
   return (
@@ -41,7 +41,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               {friends.find((f) => f.user_id === selectedFriendId)?.display_name}
             </span>
           ) : (
-            'Room Chat'
+            roomId
           )}
         </div>
         <div />
