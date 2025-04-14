@@ -176,16 +176,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
 
-    topEdgeRef.current.position = new Vector3(
-      0,
-      gameToSceneY(0, bottomEdgeRef.current) + 0.5,
-      defaultGameObjectParams.distanceFromFloor
-    );
-    bottomEdgeRef.current.position = new Vector3(
-      0,
-      gameToSceneY(gameHeight, bottomEdgeRef.current) - 0.5,
-      defaultGameObjectParams.distanceFromFloor
-    );
+    topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
+    topEdgeRef.current.position.y = gameToSceneY(-1, topEdgeRef.current);
+    bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
+    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 1, bottomEdgeRef.current);
 
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
