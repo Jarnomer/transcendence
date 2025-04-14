@@ -171,8 +171,8 @@ body {
 }
 
 @layer components {
-  .glass-box {
-    @apply border-1 bg-current/15 border-current shadow-[0_0_3px] shadow-current/80 inset-shadow-[0_0_3px] inset-shadow-current/80;
+  .glow-container {
+    @apply relative w-[190px] h-[254px] transition-[200ms];
   }
 }
 
@@ -284,12 +284,12 @@ body {
 
 /* BACKGROUND GLOW SCANLINE ANIMATION  */
 
-.glow-container {
+/* .glow-container {
   position: relative;
   width: 190px;
   height: 254px;
   transition: 200ms;
-}
+} */
 
 .cyber-lines span {
   position: absolute;

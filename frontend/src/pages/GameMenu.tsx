@@ -180,19 +180,6 @@ export const GameMenu: React.FC = () => {
       className="flex flex-wrap w-full h-full justify-center gap-4 items-center p-0"
     >
       {renderMenu()}
-      {/* <div className="container noselect">
-  			<div className="canvas">
-    			<div id="card">
-      				<div className="card-content">
-                <h1>adad</h1>
-        				<div className="cyber-lines">
-          					<span></span><span></span><span></span><span></span>
-        				<div className="scan-line"></div>
-						</div>
-      				</div>
-    			</div>
-  			</div>
-		</div> */}
     </motion.div>
   );
 };
