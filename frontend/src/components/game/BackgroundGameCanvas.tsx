@@ -4,48 +4,48 @@ import {
   ArcRotateCamera,
   Color3,
   Color4,
-  Vector3,
   DefaultRenderingPipeline,
   Engine,
   Scene,
+  Vector3,
 } from 'babylonjs';
 
 import {
   RetroEffectsManager,
+  animateCamera,
   applyBallEffects,
+  applyCameraAngle,
   applyCollisionEffects,
+  cameraAngles,
   createBall,
   createEdge,
   createFloor,
   createPaddle,
   createPongRetroEffects,
-  getThemeColors,
+  enableRequiredExtensions,
   gameToSceneX,
   gameToSceneY,
+  getRandomCameraAngle,
+  getThemeColors,
+  parseColor,
   setupPostProcessing,
   setupReflections,
-  setupScenelights,
-  animateCamera,
-  applyCameraAngle,
-  cameraAngles,
-  getRandomCameraAngle,
   setupSceneCamera,
-  parseColor,
-  enableRequiredExtensions,
+  setupScenelights,
 } from '@game/utils';
 
 import {
   GameState,
-  RetroEffectsLevels,
   RetroEffectsBaseParams,
+  RetroEffectsLevels,
+  defaultCameraTimings,
+  defaultCinematicGlitchTimings,
   defaultGameObjectParams,
-  defaultRetroEffectsLevels,
   defaultGameParams,
-  retroEffectsPresets,
   defaultRetroCinematicBaseParams,
   defaultRetroEffectTimings,
-  defaultCinematicGlitchTimings,
-  defaultCameraTimings,
+  defaultRetroEffectsLevels,
+  retroEffectsPresets,
 } from '@shared/types';
 
 interface BackgroundGameCanvasProps {
@@ -373,21 +373,12 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const color = themeColors.current.primaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    player1Ref.current.position = new Vector3(
-      gameToSceneX(0, player1Ref.current),
-      gameToSceneY(players.player1.y, player1Ref.current),
-      defaultGameObjectParams.distanceFromFloor
-    );
-    player2Ref.current.position = new Vector3(
-      gameToSceneX(gameWidth, player2Ref.current),
-      gameToSceneY(players.player2.y, player2Ref.current),
-      defaultGameObjectParams.distanceFromFloor
-    );
-    ballRef.current.position = new Vector3(
-      gameToSceneX(ball.x, ballRef.current),
-      gameToSceneY(ball.y, ballRef.current),
-      defaultGameObjectParams.distanceFromFloor
-    );
+    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+    player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
+    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+    player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
+    ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+    ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
 
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
