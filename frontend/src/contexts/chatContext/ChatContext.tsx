@@ -25,7 +25,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Record<string, any[]>>({});
+  const [messageList, setMessageList] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
   const [myRooms, setMyRooms] = useState<any[]>([]);
@@ -70,20 +71,31 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   //fetching DM chat history
   useEffect(() => {
-    if (selectedFriend !== null) {
-      console.log('Selected friend:', selectedFriend);
-      // fetch DM messages
-      getDm(selectedFriend)
-        .then((data) => {
-          console.log('Chat history:', data);
-          setMessages(data);
-
-          // setMessages(...messages, data);
-        })
-        .catch((error) => {
-          console.error('Failed to fetch chat history:', error);
-        });
+    if (!selectedFriend) return;
+    console.log('Selected friend:', selectedFriend);
+    if (messages[selectedFriend]?.length > 0) {
+      console.log('Already have messages for this friend:', selectedFriend);
+      setMessages((prev) => ({
+        ...prev,
+        [selectedFriend]: prev[selectedFriend],
+      }));
+      setMessageList(messages[selectedFriend]);
+      return;
     }
+    // fetch DM messages
+    getDm(selectedFriend)
+      .then((data: any) => {
+        console.log('Chat history:', data);
+        setMessages((prev) => ({
+          ...prev,
+          [selectedFriend]: data,
+        }));
+        setMessageList(data);
+        // setMessages(...messages, data);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch chat history:', error);
+      });
   }, [selectedFriend]);
 
   useEffect(() => {
@@ -94,13 +106,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (roomId !== null) {
       console.log('Room ID:', roomId);
+      if (messages[roomId]?.length > 0) {
+        console.log('Already have messages for this room:', roomId);
+        setMessages((prev) => ({
+          ...prev,
+          [roomId]: prev[roomId],
+        }));
+        setMessageList(messages[roomId]);
+        return;
+      }
       // fetch chat messages
       getChat(roomId)
-        .then((data) => {
+        .then((data: any) => {
           console.log('Chat history:', data);
-          setMessages(data);
-
+          setMessages((prev) => ({
+            ...prev,
+            [roomId]: data,
+          }));
           // setMessages(...messages, data);
+          setMessageList(data);
           console.log('messages:', messages);
         })
         .catch((error) => {
@@ -108,10 +132,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }
   }, [roomId]);
-
-  useEffect(() => {
-    console.log('my rooms useEffect: ', myRooms);
-  }, [myRooms]);
 
   //get public chat rooms
   useEffect(() => {
@@ -196,14 +216,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('chat selected friend id:', selectedFriendRef.current);
 
     notifyMessage(event);
+    if (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) {
+      console.log('Adding message:', event);
+      setMessages((prev) => ({
+        ...prev,
+        [event.room_id]: [...(prev[event.room_id] || []), event],
+      }));
+      setMessageList((prev) => [...prev, event]);
+    }
+
     if (
-      (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
-      (selectedFriendRef.current &&
-        event.receiver_id &&
-        event.sender_id === selectedFriendRef.current)
+      selectedFriendRef.current &&
+      event.receiver_id &&
+      event.sender_id === selectedFriendRef.current
     ) {
       console.log('Adding message:', event);
-      setMessages((prev) => [...prev, event]);
+      setMessages((prev) => ({
+        ...prev,
+        [event.sender_id]: [...(prev[event.sender_id] || []), event],
+      }));
     }
   };
 
@@ -227,7 +258,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Sending message:', messageData);
       sendMessage('chat', messageData);
-      setMessages((prev) => [...prev, { ...messageData.payload, sender_id: userId }]);
+      setMessages((prev) => ({
+        ...prev,
+        [selectedFriend || roomId]: [
+          ...(prev[selectedFriend || roomId] || []),
+          messageData.payload,
+        ],
+      }));
     }
   };
 
@@ -257,6 +294,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         friends,
         messages,
+        messageList,
         selectedFriend,
         roomId,
         rooms,

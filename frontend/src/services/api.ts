@@ -2,8 +2,6 @@ import axios from 'axios';
 
 import { RefreshResponseType } from '@types';
 
-const API_URL = '/api/auth';
-
 export const api = axios.create({
   baseURL: '/api',
   headers: {
@@ -38,7 +36,6 @@ api.interceptors.response.use(
       // If token expired, attempt refresh
       if (errorMessage === 'TOKEN_EXPIRED' && !originalRequest._retry) {
         originalRequest._retry = true; // Prevent infinite loop
-
         const newToken = await refreshToken();
         if (newToken) {
           api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;

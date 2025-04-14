@@ -13,7 +13,7 @@ import { useUser } from '../contexts/user/UserContext';
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, setUser, refetchUser, checkAuth, logout } = useUser();
+  const { user, setUser, refetchUser, checkAuth, logout, setToken } = useUser();
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState<string>('');
@@ -40,7 +40,8 @@ export const LoginPage: React.FC = () => {
 
       // THEN LOG IN THE USER
       try {
-        await login(username, password);
+        const token = await login(username, password);
+        // setToken(token.token); // Update the token in the context
         if (isRegistering) {
           navigate(`/signUp`);
         } else {

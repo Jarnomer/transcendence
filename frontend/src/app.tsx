@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 
+import { Toaster } from 'react-hot-toast';
 import { useLocation } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
@@ -57,6 +58,7 @@ const App: React.FC = () => {
         </GameOptionsProvider>
         <ChatModal></ChatModal>
         <SettingsModal></SettingsModal>
+        <Toaster position="bottom-right" />
       </ChatProvider>
     </WebSocketProvider>
   );
