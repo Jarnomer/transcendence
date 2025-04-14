@@ -89,6 +89,10 @@ export const TournamentLobbyNav: React.FC<{
         <button onClick={() => setActiveTab('players')}>
           <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
         </button>
+
+        <button onClick={() => setActiveTab('matches')}>
+          <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
+        </button>
       </span>
     </motion.div>
   );
@@ -116,32 +120,23 @@ export const TournamentPlayerList: React.FC = () => {
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   return (
     <div className="h-full w-full">
-      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2 overflow-y-scroll">
+      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2overflow-y-scroll">
         <motion.li
-          className=" w-full h-full flex gap-3 hover:scale-[1.05] hover:text-secondary"
+          className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.02] p-1 hover:text-secondary"
           // onClick={() => navigate(`/profile/${user.user_id}`)}
         >
           <ListSvgContainer>
             <div className="flex items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
                 <img
-                  className="object-cover w-full h-full grayscale"
+                  className="object-cover w-full h-full"
                   src={'./src/assets/images/default_avatar.png'}
                   alt={`users's profile picture`}
                 />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundColor: 'currentColor',
-                    mixBlendMode: 'color',
-                  }}
-                ></div>
               </div>
               <p className="text-xs">
                 dummy user <br />
               </p>
-              <p>Rank: 900</p>
             </div>
           </ListSvgContainer>
         </motion.li>
@@ -212,16 +207,27 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
-              ) : (
+              ) : activeTab == 'matches' ? (
                 <motion.div
                   key="tournamentPlayerList"
-                  className="w-full h-full "
+                  className="w-full h-full  border-1 border-primary"
                   variants={slideFromRightVariants}
                   initial="initial"
                   animate="animate"
                   exit="exit"
                 >
                   <TournamentBracket players={players}></TournamentBracket>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="tournamentPlayerList"
+                  className="w-full h-full"
+                  variants={slideFromRightVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <TournamentPlayerList></TournamentPlayerList>
                 </motion.div>
               )}
             </AnimatePresence>
