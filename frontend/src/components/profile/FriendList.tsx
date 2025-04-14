@@ -185,7 +185,7 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
     >
       {friends.map((friend) => (
         <motion.li
-          className="my-1 hover:text-secondary"
+          className="my-1 hover:text-secondary h-[57px] min-w-[282px]"
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
           variants={listItemVariants}
@@ -228,7 +228,10 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
         exit="hidden"
         transition={{ duration: 0.4 }}
       >
-        <motion.li className="my-1 text-gray-500" variants={listItemVariants}>
+        <motion.li
+          className="my-1 text-gray-500 h-[57px] min-w-[282px]"
+          variants={listItemVariants}
+        >
           <ListSvgContainer>
             <div className="flex w-full h-full items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">

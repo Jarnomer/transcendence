@@ -116,7 +116,7 @@ export const LeaderBoard: React.FC = () => {
                   {filteredUsers.map((user, index) => (
                     <motion.li
                       key={user.user_id}
-                      className=" w-full h-full flex gap-3 hover:scale-[1.05] hover:text-secondary"
+                      className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
                       onClick={() => navigate(`/profile/${user.user_id}`)}
                       variants={itemVariants}
                     >
