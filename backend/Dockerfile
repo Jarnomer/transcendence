@@ -13,6 +13,7 @@ COPY backend/services/game_service/package.json ./backend/services/game_service/
 COPY backend/services/matchmaking_service/package.json ./backend/services/matchmaking_service/
 COPY backend/services/user_service/package.json ./backend/services/user_service/
 COPY backend/services/remote_service/package.json ./backend/services/remote_service/
+COPY backend/services/tests/package.json ./backend/services/tests/
 
 COPY backend/package.json ./backend/
 

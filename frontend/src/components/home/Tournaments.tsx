@@ -4,32 +4,34 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { getUsersInQueue } from '../../services/userService';
+import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
+import { getTournaments } from '../../services/userService';
+import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
+
+interface DataInQueue {
+  queue_id: string;
+  isPrivate: boolean;
+  mode: string;
+  name: string;
+  j;
+  variant: string;
+}
 
 export const Tournaments: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [usersInQueue, setUsersInQueue] = useState<any[]>([]);
+  const [password, setPassword] = useState('');
+  const [dataInQueue, setDataInQueue] = useState<DataInQueue[]>([]);
   const navigate = useNavigate();
+  const { setMode, setDifficulty, setLobby, setQueueId, setTournamentOptions } =
+    useGameOptionsContext();
 
   async function fetchData() {
     setLoading(true);
-    const fetchedQueueData = await getUsersInQueue();
+    const fetchedQueueData = await getTournaments();
     console.log(fetchedQueueData);
-    if (fetchedQueueData.queues) {
-      console.log('fetched:', fetchedQueueData);
-      const enrichedUsers = fetchedQueueData.queues.flatMap((queue) =>
-        queue.players.map((player) => ({
-          display_name: player.display_name || 'Unknown',
-          avatar_url: player.avatar_url || '',
-          user_id: player.user_id,
-          queue_id: queue.queue_id,
-        }))
-      );
-      console.log('enriched:', enrichedUsers);
-      setUsersInQueue(enrichedUsers);
-    }
+    setDataInQueue(fetchedQueueData.tournaments);
     setLoading(false);
   }
 
@@ -38,15 +40,22 @@ export const Tournaments: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log('users in queue:', usersInQueue);
-  }, [usersInQueue]);
+    console.log('users in queue:', dataInQueue);
+  }, [dataInQueue]);
 
-  const handleJoinGameClick = (event, user) => {
+  const handleJoinGameClick = (event, options: DataInQueue) => {
     event.stopPropagation();
-    console.log('join game against: ', user);
-    navigate('/game', {
-      state: { mode: '1v1', difficulty: 'online', lobby: 'join', queueId: user.queue_id },
+    setMode(options.mode);
+    setDifficulty(options.variant);
+    setTournamentOptions({
+      playerCount: 2,
+      tournamentName: options.name,
+      isPrivate: options.isPrivate,
+      password: options.isPrivate ? password : null,
     });
+    setLobby('join');
+    setQueueId(options.queue_id);
+    navigate('/game');
   };
 
   return (

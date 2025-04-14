@@ -12,7 +12,7 @@ interface GameMenuCardProps {
 const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInfo, onClick }) => {
   return (
     <div
-      className="game-mode-modal p-0 m-0 relative inline-block overflow-hidden"
+      className="game-mode-modal @container-normal p-0 m-0 relative inline-block overflow-hidden"
       onClick={onClick}
     >
       <div className="w-full h-full flex flex-col p-0 m-0 items-center text-center gap-5">
@@ -68,14 +68,13 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
                   WebkitClipPath: 'url(#image-mask)',
                 }}
               ></div>
+              {/* Content positioned at the bottom of the card */}
+              <div className="content @sm:text-xs absolute bottom-0 w-full flex flex-col items-center gap-10 p-5">
+                <h2 className="text-3xl  font-heading">{content}</h2>
+              </div>
             </foreignObject>
           </g>
         </svg>
-
-        {/* Content positioned at the bottom of the card */}
-        <div className="content absolute bottom-0 w-full max-w-full flex flex-col items-center gap-10 p-5">
-          <h2 className="text-3xl font-heading">{content}</h2>
-        </div>
       </div>
 
       <div

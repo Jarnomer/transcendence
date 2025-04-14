@@ -1,9 +1,9 @@
 import { isPlayerInputMessage } from '@shared/messages';
 import { GameStatus } from '@shared/types';
 
-import PongGame from './PongGame';
 import { AIController } from '../controllers/AIController';
 import { handlePlayerInputMessage } from '../handlers/playerInputHandler';
+import PongGame from './PongGame';
 
 export default class PongGameSession {
   private gameId: string;
@@ -46,10 +46,10 @@ export default class PongGameSession {
 
     // For testing tournaments, player moves not needed
     // Readystate is still needed from both players!
-    if (mode === '1v1') {
-      this.aiControllers.set(1, new AIController(this.difficulty, true));
-      this.aiControllers.set(2, new AIController(this.difficulty, false));
-    }
+    // if (mode === '1v1') {
+    //   this.aiControllers.set(1, new AIController(this.difficulty, true));
+    //   this.aiControllers.set(2, new AIController(this.difficulty, false));
+    // }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
@@ -123,6 +123,9 @@ export default class PongGameSession {
       return true;
     } else if (this.clients.size === 2 && this.mode === '1v1') {
       console.log('Both players connected');
+      return true;
+    } else if (this.clients.size === 2 && this.mode === 'tournament') {
+      // console.log('Both players connected for tournament');
       return true;
     }
     console.log('Not all players connected');
@@ -273,7 +276,7 @@ export default class PongGameSession {
       clearInterval(this.interval);
       this.interval = null;
     }
-    console.log('Starting updateGame interval');
+    // console.log('Starting updateGame interval');
     // this.updateGame();
     this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }

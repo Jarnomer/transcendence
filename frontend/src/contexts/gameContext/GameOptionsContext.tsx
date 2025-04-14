@@ -13,16 +13,24 @@ type GameOptionsContextType = {
   gameId: string | null;
   setGameId: React.Dispatch<React.SetStateAction<string | null>>;
   resetGameOptions: () => void;
-  tournamentOptions: tournamentOptionsType | null;
-  setTournamentOptions: React.Dispatch<React.SetStateAction<tournamentOptionsType | null>>;
+  tournamentOptions: TournamentOptionsType | null;
+  setTournamentOptions: React.Dispatch<React.SetStateAction<TournamentOptionsType | null>>;
 };
 
-type tournamentOptionsType = {
+export type TournamentOptionsType = {
   playerCount: number;
   tournamentName: string;
   isPrivate: boolean;
   password: string | null;
-}
+};
+
+export type GameOptionsType = {
+  mode: string;
+  difficulty: string;
+  lobby: string;
+  queueId: string | null;
+  tournamentOptions: TournamentOptionsType | null;
+};
 
 const GameOptionsContext = createContext<GameOptionsContextType | undefined>(undefined);
 
@@ -32,7 +40,7 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
   const [lobby, setLobby] = useState<string | null>(null);
   const [queueId, setQueueId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
-  const [tournamentOptions, setTournamentOptions] = useState<tournamentOptionsType | null>(null);
+  const [tournamentOptions, setTournamentOptions] = useState<TournamentOptionsType | null>(null);
 
   const resetGameOptions = () => {
     setMode(null);

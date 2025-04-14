@@ -6,6 +6,7 @@ import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { GameState } from '@shared/types';
 
+import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import PlayerCard from './PlayerScoreCard';
 
@@ -44,19 +45,20 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   const player2Ref = useRef<Player | null>(null);
 
   const location = useLocation();
-  const { mode, difficulty } = location.state || {};
+  const { mode, difficulty } = useGameOptionsContext();
+
   const { gameStatus, connections, gameState, gameId } = useWebSocketContext();
   const { setLoadingState, loadingStates } = useLoading();
 
   const playerScores = useRef({
-    player1Score: gameState.players.player1?.score || 0,
-    player2Score: gameState.players.player2?.score || 0,
+    player1Score: gameState?.players.player1?.score || 0,
+    player2Score: gameState?.players.player2?.score || 0,
   });
 
   useEffect(() => {
     setLoadingState('scoreBoardLoading', true);
     console.log('playerScoreBoard useEffect playerdata: ', playersData);
-    if (!playersData.player1) {
+    if (!playersData?.player1) {
       console.log('playerdata null, returning');
       return;
     }
@@ -67,11 +69,13 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
       };
 
       if (mode === 'singleplayer') {
+        console.log('singleplayer mode');
         player2Ref.current = {
           display_name: aiOptions[difficulty].name,
           avatar_url: aiOptions[difficulty].avatar,
         };
       } else {
+        console.log('multiplayer mode');
         player2Ref.current = {
           display_name: playersData.player2?.display_name,
           avatar_url: playersData.player2?.avatar_url,
@@ -81,8 +85,8 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
     }
   }, [playersData]);
 
-  playerScores.current.player1Score = gameState.players.player1?.score || 0;
-  playerScores.current.player2Score = gameState.players.player2?.score || 0;
+  playerScores.current.player1Score = gameState?.players.player1?.score || 0;
+  playerScores.current.player2Score = gameState?.players.player2?.score || 0;
 
   if (connections.game !== 'connected') {
     return null;

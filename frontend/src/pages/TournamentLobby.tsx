@@ -72,6 +72,7 @@ export const TournamentLobby: React.FC = () => {
     <>
       <motion.div className="w-full h-full bg-amber-400 flex flex-col justify-between relative z-10 gap-5 md:gap-10 md:p-4">
         <h1>TOURNAMENT LOBBY</h1>
+        <p>X/16 Players</p>
         <div className="@container glass-box h-[200px] w-full">
           <ChatWindow
             selectedFriendId={selectedFriendId}

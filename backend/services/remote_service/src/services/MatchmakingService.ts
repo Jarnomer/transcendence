@@ -34,6 +34,7 @@ abstract class MatchmakingMode {
   protected queue: Player[]; // Player IDs key bin for matchmaking for 1v1
   protected queueMatches: Map<string, Player[]>; // Queue ID to Player IDs for joining matches for 1v1
   protected tournaments: Map<string, TournamentSession>; // Tournament sessions
+  protected playerTournament: Map<string, string>; // Player ID to Tournament ID
   protected gameService: GameService;
   protected queueService: QueueService;
   protected matchmaking: MatchmakingService;
@@ -45,6 +46,7 @@ abstract class MatchmakingMode {
     this.queue = [];
     this.queueMatches = new Map();
     this.tournaments = new Map();
+    this.playerTournament = new Map();
   }
 
   abstract addPlayer(player: Player): void;
@@ -58,6 +60,7 @@ abstract class MatchmakingMode {
     if (!this.queueMatches.has(queueKey)) {
       this.queueMatches.set(queueKey, []);
     }
+    console.log(`Adding player ${player.user_id} to queue ${queueKey}`);
     const users = this.queueMatches.get(queueKey)!; // Use the "!" to assert non-null
     users.push(player);
 
@@ -205,6 +208,7 @@ class OneVOneMatchmaking extends MatchmakingMode {
 
   handleGameResult(gameId: string, winnerId: string) {}
 }
+
 class TournamentMatchmaking extends MatchmakingMode {
   constructor(matchmaking: MatchmakingService) {
     super(matchmaking);
@@ -241,6 +245,7 @@ class TournamentMatchmaking extends MatchmakingMode {
     while (stack.length >= 2) {
       const p1 = stack.pop()!;
       const p2 = stack.pop()!;
+      console.log(`Creating match for players: ${p1.user_id} vs ${p2.user_id}`);
       const gameId = await this.createMatch([p1.user_id, p2.user_id]);
       const match: TournamentMatch = {
         gameId,
@@ -256,13 +261,8 @@ class TournamentMatchmaking extends MatchmakingMode {
   }
 
   handleGameResult(gameId: string, winnerId: string) {
-    let tournamentId: string | null = null;
-    for (const [queueId, players] of this.queueMatches.entries()) {
-      if (players.findIndex((p) => p.user_id === winnerId)) {
-        tournamentId = queueId;
-        break;
-      }
-    }
+    const tournamentId = this.playerTournament.get(winnerId);
+    console.log(`Tournament ID: ${tournamentId}`);
     if (!tournamentId) return;
     if (!this.tournaments.has(tournamentId)) return;
     const session = this.tournaments.get(tournamentId);
@@ -270,7 +270,6 @@ class TournamentMatchmaking extends MatchmakingMode {
 
     const match = session.matches.find((m) => m.gameId === gameId);
     if (!match || match.isComplete) return;
-
     match.isComplete = true;
     session.completedMatches.push(match);
 
@@ -283,6 +282,7 @@ class TournamentMatchmaking extends MatchmakingMode {
       if (session.nextRoundPlayers.length === 1) {
         this.endTournament(tournamentId);
       } else {
+        console.log(`All matches completed for round ${session.currentRound}`);
         session.activePlayers = [...session.nextRoundPlayers];
         session.nextRoundPlayers = [];
         session.currentRound++;
@@ -324,18 +324,17 @@ class TournamentMatchmaking extends MatchmakingMode {
   async findRandomMatch(player: Player) {}
 
   async joinQueue(queueId: string, player: Player) {
+    console.log(`Joining tournament queue: ${queueId}`);
     const count = this.addUserToQueue(queueId, player);
+    this.playerTournament.set(player.user_id, queueId);
     const minPlayers = await this.queueService.getQueueVariant(queueId);
     const size = parseInt(minPlayers.variant);
     console.log(`Queue size: ${size}`);
     console.log(`Players in queue: ${count}`);
     if (count >= size) {
-      this.createTournament(
-        queueId,
-        `Tournament ${queueId}`,
-        size,
-        this.queueMatches.get(queueId)!
-      );
+      this.createTournament(queueId, `Tournament ${queueId}`, size, [
+        ...this.queueMatches.get(queueId)!,
+      ]);
     }
   }
 }
@@ -376,11 +375,19 @@ export class MatchmakingService {
     this.matchmakers[mode].removePlayer(user_id);
   }
 
-  handleGameResult(gameId: string, winnerId: string) {
+  handleGameResult(gameId: string, winnerId: string, loserId: string) {
     console.log(`Game result for game ${gameId}: ${winnerId} won`);
     for (const matchmaker of Object.values(this.matchmakers)) {
       matchmaker.handleGameResult(gameId, winnerId);
     }
+    this.broadcast([winnerId], {
+      type: 'game_winner',
+      state: { game_id: gameId },
+    });
+    this.broadcast([loserId], {
+      type: 'game_loser',
+      state: { game_id: gameId },
+    });
   }
 
   /**
@@ -449,11 +456,11 @@ export class MatchmakingService {
       const connection = this.clients.get(playerId);
       if (!connection) {
         console.error('Player not found:', playerId);
-        break;
+        continue;
       }
       if (connection.readyState === connection.OPEN) {
         connection.send(JSON.stringify(message));
-        // console.log('Sent message:', message, 'to player:', connection.playerId);
+        console.log('Sent message:', message, 'to player:', playerId);
       }
     }
   }

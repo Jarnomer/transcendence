@@ -65,19 +65,19 @@ export const LeaderBoard: React.FC = () => {
     setLoading(true);
     const res = await getUsersWithRank();
     if (res) {
-      console.log(res);
+      // console.log(res);
       setUsers(res);
     }
     setLoading(false);
   }
 
   return (
-    <motion.div className="w-full">
+    <motion.div className="w-full h-full">
       <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
         Leaderboard
       </div>
       <motion.div
-        className="h-full w-full text-xs relative  text-sm"
+        className="h-full w-full text-xs relative overflow-hidden text-sm"
         variants={animationVariants}
         initial="hidden"
         animate="visible"
@@ -96,7 +96,7 @@ export const LeaderBoard: React.FC = () => {
               />
             </div> */}
             {/* <h1 className="font-heading text-2xl sm:text-3xl text-center w-full">Leaderboard</h1> */}
-            <div className="w-full md:w-full flex items-center justify-center">
+            <div className="w-full md:w-1/2 flex items-center justify-center">
               <SearchBar
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -116,7 +116,7 @@ export const LeaderBoard: React.FC = () => {
                   {filteredUsers.map((user, index) => (
                     <motion.li
                       key={user.user_id}
-                      className="my-2 w-full h-full flex gap-3"
+                      className=" w-full h-full flex gap-3 hover:scale-[1.05] hover:text-secondary"
                       onClick={() => navigate(`/profile/${user.user_id}`)}
                       variants={itemVariants}
                     >
@@ -125,9 +125,9 @@ export const LeaderBoard: React.FC = () => {
                       </div>
                       <ListSvgContainer>
                         <div className="flex items-center gap-2">
-                          <div className="opacity relative h-[50px] w-[50px] border-1 border-primary overflow-hidden">
+                          <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
                             <img
-                              className="object-cover w-full h-full"
+                              className="object-cover w-full h-full grayscale"
                               src={
                                 user.display_name.startsWith('AI')
                                   ? './src/assets/images/ai.png'
@@ -135,6 +135,14 @@ export const LeaderBoard: React.FC = () => {
                               }
                               alt={`${user.display_name}'s profile picture`}
                             />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                backgroundColor: 'currentColor',
+                                mixBlendMode: 'color',
+                              }}
+                            ></div>
                           </div>
                           <p className="text-xs">
                             {user.display_name || 'N/A'} <br />

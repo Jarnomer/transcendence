@@ -60,6 +60,7 @@ export class QueueModel {
         q.mode,
         q.variant,
         q.created_at,
+        q.name,
         COALESCE
         (
           json_group_array
@@ -94,6 +95,30 @@ export class QueueModel {
    */
   async getTotalQueues() {
     const total = await this.db.get(`SELECT COUNT(*) AS total FROM queues`);
+    return total.total;
+  }
+
+  async getTournaments(page: number, pageSize: number) {
+    const offset = (page - 1) * pageSize;
+    return await this.db.all(
+      `
+      SELECT
+      q.queue_id,
+      q.mode,
+      q.variant,
+      q.created_at,
+      q.name,
+      q.isPrivate
+      FROM queues q WHERE mode = 'tournament'
+      ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      [pageSize, offset]
+    );
+  }
+
+  async getTotalTournaments() {
+    const total = await this.db.get(
+      `SELECT COUNT(*) AS total FROM queues WHERE mode = 'tournament'`
+    );
     return total.total;
   }
 
@@ -248,12 +273,14 @@ export class QueueModel {
     user_id: string,
     mode: string,
     variant: string,
+    name: string,
     password: string | null
   ) {
     const id = uuidv4();
+    const isPrivate = password ? 1 : 0;
     await this.db.get(
-      `INSERT INTO queues (queue_id, mode, variant, password) VALUES (?, ?, ?, ?) RETURNING *`,
-      [id, mode, variant, password]
+      `INSERT INTO queues (queue_id, mode, variant,name, password, isPrivate) VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
+      [id, mode, variant, name, password, isPrivate]
     );
     const queue = await this.db.get(
       `INSERT INTO queue_players (queue_id, user_id, status) VALUES (?, ?, 'waiting') RETURNING *`,

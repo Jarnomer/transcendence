@@ -100,11 +100,9 @@ export class PowerUpManager {
       id,
       x,
       y,
-      0,
-      0,
+      false,
       powerUp.negativeEffect,
       powerUp.timeToDespawn,
-      0,
       powerUpType
     ); // Add the power-up to the game state
     console.log(`Spawned power-up id: ${id}, type: ${powerUp.type} at (${x}, ${y})`);
@@ -136,11 +134,21 @@ export class PowerUpManager {
             existingPowerUp.id
           );
           existingPowerUp.resetcollectedTime();
-          this.game.resetPowerUpTimeToExpire(existingPowerUp.id, existingPowerUp.timeToExpire);
+          this.game.resetPowerUpTimeToExpire(
+            affectedPlayer,
+            powerUp.type,
+            existingPowerUp.timeToExpire
+          );
           this.removePowerUp(powerUp.id);
         } else {
           // Otherwise, collect the power-up
-          this.game.collectPowerUp(powerUp.id, collectedBy, affectedPlayer, powerUp.timeToExpire);
+          this.game.collectPowerUp(
+            powerUp.type,
+            affectedPlayer,
+            powerUp.timeToExpire,
+            powerUp.negativeEffect
+          );
+          this.game.removePowerUp(powerUp.id);
           console.log(`New power-up collected by player ${affectedPlayer}:`, powerUp.id);
           powerUp.applyEffect(this.game, affectedPlayer);
         }
@@ -157,7 +165,7 @@ export class PowerUpManager {
       if (powerUp.shouldExpire()) {
         console.log('Removing expired power-up id:', powerUp.id);
         powerUp.removeEffect(this.game, powerUp.affectedPlayer);
-        this.removePowerUp(powerUp.id);
+        this.game.removePlayerPowerUp(powerUp.affectedPlayer, powerUp.type);
       }
     }
   }

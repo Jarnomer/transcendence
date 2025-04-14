@@ -46,7 +46,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
   return (
     <>
       <div>
-        <div className="clipped-corner-bottom-right overflow-hidden relative w-[150px] h-[150px] border-1 border-primary">
+        <div className="clipped-corner-bottom-right overflow-hidden relative w-[100px] h-[100px] md:w-[150px] md:h-[150px] border-1 border-primary">
           {/* Profile Picture */}
           <img
             className="object-cover w-full h-full z-10"
