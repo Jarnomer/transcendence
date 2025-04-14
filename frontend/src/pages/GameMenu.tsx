@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
 
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx'; // Import the GameOptionsContext
 
@@ -20,6 +20,24 @@ interface SelectedMode {
   mode: string;
   difficulty?: string;
 }
+
+export const pageVariants = {
+  initial: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0% 0 0% 0)',
+    opacity: 1,
+    transition: { duration: 0.2, ease: 'easeInOut' },
+  },
+  exit: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+    transition: { duration: 0.2, ease: 'easeInOut' },
+    delay: 0.4,
+  },
+};
 
 export const GameMenu: React.FC = () => {
   // const [selectedMode, setSelectedMode] = useState<string | null>(null);
@@ -101,33 +119,12 @@ export const GameMenu: React.FC = () => {
     ],
   };
 
-  const animateCardChange = (
-    newValue: string | null,
-    setValue: React.Dispatch<React.SetStateAction<string | null>>
-  ) => {
-    const appDiv = document.getElementById('home-container');
-    if (!appDiv) return;
-
-    appDiv.classList.add('closing');
-
-    setTimeout(() => {
-      appDiv.classList.remove('closing');
-      appDiv.classList.add('opening');
-
-      setValue(newValue); // Update the selected mode or difficulty
-
-      setTimeout(() => {
-        appDiv.classList.remove('opening');
-      }, 250);
-    }, 250);
-  };
-
   const handleModeClick = (mode: string | null) => {
-    animateCardChange(mode, setMode);
+    setMode(mode);
   };
 
   const handleDifficultyClick = (difficulty: string | null) => {
-    animateCardChange(difficulty, setDifficulty);
+    setDifficulty(difficulty);
   };
 
   // Effect to navigate once both mode and difficulty are
@@ -138,48 +135,47 @@ export const GameMenu: React.FC = () => {
     }
   }, [mode, difficulty]); // Trigger navigation when both values are set
 
-  const renderMenu = () => {
-    if (mode && !difficulty) {
-      // Render the submenu for the  mode
-      return (
-        <>
-          <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
-          {subMenus[mode].map((option, index) => (
-            <div key={index} style={{ flexBasis: '300px' }}>
-              <GameMenuCard
-                content={option.content}
-                imageUrl={option.imageUrl}
-                hoverInfo={option.hoverInfo}
-                onClick={option.onClick}
-              />
-            </div>
-          ))}
-        </>
-      );
-    }
-
-    return (
-      <>
-        {modes.map((mode, index) => (
-          <div key={index} style={{ flexBasis: '300px' }}>
-            <GameMenuCard
-              content={mode.content}
-              imageUrl={mode.imageUrl}
-              hoverInfo={mode.hoverInfo}
-              onClick={mode.onClick}
-            />
-          </div>
-        ))}
-      </>
-    );
-  };
-
   return (
-    <motion.div
-      id="home-container"
-      className="flex flex-wrap w-full h-full justify-center gap-4 items-center p-0"
-    >
-      {renderMenu()}
-    </motion.div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={mode && !difficulty ? `${mode}-submenu` : 'main-menu'}
+        id="game-menu-container"
+        className="flex flex-wrap w-full h-full justify-center gap-4 items-center p-0"
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        {mode && !difficulty ? (
+          <>
+            <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
+
+            {subMenus[mode].map((option, index) => (
+              <motion.div key={index} style={{ flexBasis: '300px' }}>
+                <GameMenuCard
+                  content={option.content}
+                  imageUrl={option.imageUrl}
+                  hoverInfo={option.hoverInfo}
+                  onClick={option.onClick}
+                />
+              </motion.div>
+            ))}
+          </>
+        ) : (
+          <>
+            {modes.map((mode, index) => (
+              <motion.div key={index} style={{ flexBasis: '300px' }}>
+                <GameMenuCard
+                  content={mode.content}
+                  imageUrl={mode.imageUrl}
+                  hoverInfo={mode.hoverInfo}
+                  onClick={mode.onClick}
+                />
+              </motion.div>
+            ))}
+          </>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 };
