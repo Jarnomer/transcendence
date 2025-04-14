@@ -11,6 +11,28 @@ import {
   retroEffectsPresets,
 } from '@shared/types';
 
+export function safelySetUniforms(
+  effect: BABYLON.PostProcess | null,
+  setUniforms: (effectInstance: BABYLON.Effect) => void
+): void {
+  if (!effect || !effect.isEnabled || effect._isDisposed) {
+    return;
+  }
+
+  try {
+    // Get the effect instance
+    const effectInstance = effect.getEffect();
+    if (!effectInstance || !effectInstance._program) {
+      return;
+    }
+
+    // Set the uniforms safely
+    setUniforms(effectInstance);
+  } catch (error) {
+    console.warn('Error setting shader uniforms:', error);
+  }
+}
+
 export function setRetroEffectLevel(level: number, baseValue: number): number {
   if (level === 0) return 0;
 
@@ -708,7 +730,7 @@ export class RetroEffectsManager {
   }
 
   simulateTrackingDistortion(
-    intensity: number = 5.0,
+    intensity: number = defaultRetroEffectTimings.trackingDistortionIntensity,
     durationMs: number = defaultRetroEffectTimings.trackingDistortionDuration
   ): void {
     if (this._levels.glitch === 0) return;

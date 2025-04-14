@@ -4,6 +4,7 @@ export interface RetroEffectTimings {
   crtTurnOnDelay: number;
 
   channelChangeDuration: number;
+  trackingDistortionIntensity: number;
   trackingDistortionDuration: number;
 
   // Glitch effect durations
@@ -27,6 +28,15 @@ export interface CameraTimings {
   cameraInitialDelay: number;
 }
 
+export interface CinematicGlitchTimings {
+  baseEffectInterval: number;
+  additiveEffectInterval: number;
+  baseIntensity: number;
+  randomIntensityMultiplier: number;
+  baseDuration: number;
+  randomDurationMultiplier: number;
+}
+
 export interface GameAnimationTimings {
   retroEffects: RetroEffectTimings;
   camera: CameraTimings;
@@ -46,6 +56,7 @@ export const defaultRetroEffectTimings: RetroEffectTimings = {
   crtTurnOnDelay: 500,
 
   channelChangeDuration: 1200,
+  trackingDistortionIntensity: 5,
   trackingDistortionDuration: 800,
 
   standardGlitchDuration: 200,
@@ -68,6 +79,15 @@ export const defaultCameraTimings: CameraTimings = {
   cameraInitialDelay: 500,
 };
 
+export const defaultCinematicGlitchTimings: CinematicGlitchTimings = {
+  baseEffectInterval: 2000,
+  additiveEffectInterval: 5000,
+  baseIntensity: 0.5,
+  randomIntensityMultiplier: 1.0,
+  baseDuration: 200,
+  randomDurationMultiplier: 200,
+};
+
 export const defaultGameAnimationTimings: GameAnimationTimings = {
   retroEffects: defaultRetroEffectTimings,
   camera: defaultCameraTimings,
@@ -78,46 +98,4 @@ export const defaultGameAnimationTimings: GameAnimationTimings = {
   countdownDuration: 3000,
   scoreDisplayDuration: 5000,
   gameOverAnimationDuration: 5000,
-};
-
-export const fastGameAnimationTimings: GameAnimationTimings = {
-  retroEffects: {
-    ...defaultRetroEffectTimings,
-    crtTurnOnDuration: 1200,
-    crtTurnOffDuration: 1200,
-    channelChangeDuration: 800,
-  },
-  camera: {
-    ...defaultCameraTimings,
-    cameraMoveInterval: 15000,
-  },
-
-  fadeInDuration: 500,
-  fadeOutDuration: 500,
-  matchmakingAnimationDuration: 2000,
-  countdownDuration: 2000,
-  scoreDisplayDuration: 3000,
-  gameOverAnimationDuration: 3000,
-};
-
-export const cinematicGameAnimationTimings: GameAnimationTimings = {
-  retroEffects: {
-    ...defaultRetroEffectTimings,
-    crtTurnOnDuration: 2400,
-    crtTurnOffDuration: 2400,
-    crtTurnOnDelay: 800,
-    channelChangeDuration: 1800,
-  },
-  camera: {
-    ...defaultCameraTimings,
-    cameraMoveInterval: 12000,
-    cameraTransitionDuration: 3000,
-  },
-
-  fadeInDuration: 1500,
-  fadeOutDuration: 1500,
-  matchmakingAnimationDuration: 4000,
-  countdownDuration: 3000,
-  scoreDisplayDuration: 7000,
-  gameOverAnimationDuration: 7000,
 };

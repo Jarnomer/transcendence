@@ -44,6 +44,7 @@ import {
   retroEffectsPresets,
   defaultRetroCinematicBaseParams,
   defaultRetroEffectTimings,
+  defaultCinematicGlitchTimings,
   defaultCameraTimings,
 } from '@shared/types';
 
@@ -54,6 +55,7 @@ interface BackgroundGameCanvasProps {
   retroPreset?: 'default' | 'cinematic';
   retroLevels?: RetroEffectsLevels;
   retroBaseParams?: RetroEffectsBaseParams;
+  randomGlitchEnabled?: boolean;
 }
 
 const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipeline | null) => {
@@ -135,6 +137,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   retroPreset = 'cinematic',
   retroLevels = retroEffectsPresets.cinematic,
   retroBaseParams = defaultRetroCinematicBaseParams,
+  randomGlitchEnabled = true,
 }) => {
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
@@ -153,6 +156,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
   const currentAngleIndexRef = useRef<number>(-1);
   const cameraMoveTimerRef = useRef<number | null>(null);
+  const randomGlitchTimerRef = useRef<number | null>(null);
 
   const floorRef = useRef<any>(null);
   const topEdgeRef = useRef<any>(null);
@@ -310,7 +314,9 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
       if (retroEffectsRef.current) {
         setTimeout(() => {
-          retroEffectsRef.current.simulateCRTTurnOn(defaultRetroEffectTimings.crtTurnOnDuration);
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.simulateCRTTurnOn(defaultRetroEffectTimings.crtTurnOnDuration);
+          }
         }, defaultRetroEffectTimings.crtTurnOnDelay);
       }
     }
@@ -322,6 +328,42 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
       }
     };
   }, [isVisible]);
+
+  // Random glitch effects
+  useEffect(() => {
+    if (!isVisible || !retroEffectsRef.current || !randomGlitchEnabled) return;
+
+    if (randomGlitchTimerRef.current) {
+      window.clearTimeout(randomGlitchTimerRef.current);
+      randomGlitchTimerRef.current = null;
+    }
+
+    const scheduleNextGlitch = () => {
+      const params = defaultCinematicGlitchTimings;
+      const nextDelay =
+        Math.floor(Math.random() * params.additiveEffectInterval) + params.baseEffectInterval;
+
+      randomGlitchTimerRef.current = window.setTimeout(() => {
+        if (!retroEffectsRef.current || !isVisible) return;
+
+        const intensity = params.baseIntensity + Math.random() * params.randomIntensityMultiplier;
+        const duration = params.baseDuration + Math.random() * params.randomDurationMultiplier;
+
+        retroEffectsRef.current.setGlitchAmount(intensity, duration);
+
+        scheduleNextGlitch();
+      }, nextDelay);
+    };
+
+    scheduleNextGlitch();
+
+    return () => {
+      if (randomGlitchTimerRef.current) {
+        window.clearTimeout(randomGlitchTimerRef.current);
+        randomGlitchTimerRef.current = null;
+      }
+    };
+  }, [isVisible, randomGlitchEnabled]);
 
   // Update game objects
   useEffect(() => {
