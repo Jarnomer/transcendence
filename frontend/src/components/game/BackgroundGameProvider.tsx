@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import {
   GameState,
   defaultGameParams,
@@ -10,12 +8,11 @@ import {
 } from '@shared/types';
 
 import BackgroundGameCanvas from './BackgroundGameCanvas';
+import { useBackgroundGameVisibility } from '../../hooks/useBackgroundGameVisibility';
 
 const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
-
-  const location = useLocation();
+  const { isBackgroundGameVisible } = useBackgroundGameVisibility();
 
   const reconnectTimeoutRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -53,16 +50,6 @@ const BackgroundGameProvider: React.FC = () => {
     },
     powerUps: [],
   };
-
-  // Handle location changes to toggle visibility
-  useEffect(() => {
-    console.log('Location changed:', location.pathname);
-    if (location.pathname.includes('/game')) {
-      setIsVisible(false);
-    } else {
-      setIsVisible(true);
-    }
-  }, [location.pathname]);
 
   // Create a stable setupWebSocket function with useCallback
   const setupWebSocket = useCallback(() => {
@@ -104,13 +91,11 @@ const BackgroundGameProvider: React.FC = () => {
 
     ws.onclose = () => {
       console.log('Background game connection closed');
-      // Use current check of isVisible state for reconnection logic
-      // This will be re-evaluated each time the connection closes
-      if (isVisible) {
+      if (isBackgroundGameVisible) {
         console.log('Attempting to reconnect...');
         reconnectTimeoutRef.current = window.setTimeout(() => {
           reconnectTimeoutRef.current = null;
-          if (isVisible) {
+          if (isBackgroundGameVisible) {
             setupWebSocket();
           }
         }, 2000);
@@ -118,13 +103,13 @@ const BackgroundGameProvider: React.FC = () => {
     };
 
     wsRef.current = ws;
-  }, [isVisible]);
+  }, [isBackgroundGameVisible]);
 
   // Setup and manage WebSocket connection
   useEffect(() => {
-    console.log('isVisible changed:', isVisible);
+    console.log('isBackgroundGameVisible changed:', isBackgroundGameVisible);
 
-    if (isVisible) {
+    if (isBackgroundGameVisible) {
       setupWebSocket();
     } else {
       // Clean up when becoming invisible
@@ -155,16 +140,18 @@ const BackgroundGameProvider: React.FC = () => {
         wsRef.current.close();
       }
     };
-  }, [isVisible, setupWebSocket]);
+  }, [isBackgroundGameVisible, setupWebSocket]);
 
   return (
     <div
-      className="background-game-container absolute pointer-events-none w-screen h-screen bg-[#33353e]"
+      className={`background-game-container absolute pointer-events-none w-screen h-screen bg-[#33353e] ${
+        !isBackgroundGameVisible ? 'opacity-0' : 'opacity-100'
+      } transition-opacity duration-1000`}
       aria-hidden="true"
     >
       <BackgroundGameCanvas
         gameState={gameState || initialGameState}
-        isVisible={isVisible}
+        isVisible={isBackgroundGameVisible}
         retroPreset="cinematic"
         retroLevels={retroEffectsPresets.cinematic}
         retroBaseParams={defaultRetroCinematicBaseParams}

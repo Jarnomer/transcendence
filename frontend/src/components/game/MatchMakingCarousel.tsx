@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useLoading } from '../../contexts/gameContext/LoadingContextProvider';
 import { useUser } from '../../contexts/user/UserContext';
+import { useBackgroundGameVisibility } from '../../hooks/useBackgroundGameVisibility';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 interface PlayerData {
@@ -56,11 +57,13 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const { mode, difficulty } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const { user: loggedInUser } = useUser();
+  const { hideBackgroundGame } = useBackgroundGameVisibility();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
     if (opponentFound) {
+      hideBackgroundGame();
       setTimeout(() => {
         setLoadingState('matchMakingAnimationLoading', false);
       }, 3000);
@@ -100,7 +103,10 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
 
   useEffect(() => {
     setLoadingState('matchMakingAnimationLoading', true);
-    if (mode === 'singleplayer' || difficulty === 'local') setOpponentFound(true);
+    if (mode === 'singleplayer' || difficulty === 'local') {
+      setOpponentFound(true);
+      hideBackgroundGame();
+    }
     if (loggedInUser) {
       setUser(loggedInUser);
     }
