@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 
 import { useModal } from '../../contexts/modalContext/ModalContext';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
 
 interface ModalWrapperProps {
   modalName: string;
@@ -30,14 +29,14 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
         className="text-primary relative shadow-lg flex flex-col justify-center items-center overflow-hidden"
         onClick={handleModalClick}
       >
-        <span className="absolute right-0 top-0">
+        {/* <span className="absolute right-0 top-0">
           <NavIconButton
             id="settings-modal-close-button"
             ariaLabel="Close settings modal"
             icon="close"
             onClick={handleOverlayClick}
           />
-        </span>
+        </span> */}
 
         {children}
       </div>
