@@ -326,6 +326,62 @@ export function createTVSwitchingEffect(
   return { effect: tvSwitchEffect, setSwitchingProgress };
 }
 
+export function createDustScratchEffect(
+  scene: Scene,
+  camera: Camera,
+  levels: RetroEffectsLevels = defaultRetroEffectsLevels,
+  baseParams = defaultRetroEffectsBaseParams.dustScratch
+): PostProcess | null {
+  if (levels.dust === 0) return null;
+
+  const options = {
+    dustAmount: setRetroEffectLevel(levels.dust, baseParams.dustAmount),
+    scratchAmount: setRetroEffectLevel(levels.dust, baseParams.scratchAmount),
+    dustSize: setRetroEffectLevel(levels.dust, baseParams.dustSize),
+    edgeIntensity: setRetroEffectLevel(levels.dust, baseParams.edgeIntensity),
+    movementSpeed: setRetroEffectLevel(levels.dust, baseParams.movementSpeed),
+  };
+
+  const dustScratchEffect = new PostProcess(
+    'dustScratch',
+    'dustScratch',
+    [
+      'time',
+      'dustAmount',
+      'scratchAmount',
+      'dustSize',
+      'edgeIntensity',
+      'screenSize',
+      'movementSpeed',
+    ],
+    null,
+    1.0,
+    camera
+  );
+
+  const engine = scene.getEngine();
+  let time = 0;
+
+  dustScratchEffect.onApply = (effect) => {
+    try {
+      if (!effect) return;
+
+      time += engine.getDeltaTime() / 1000.0;
+      effect.setFloat('time', time);
+      effect.setFloat('dustAmount', options.dustAmount);
+      effect.setFloat('scratchAmount', options.scratchAmount);
+      effect.setFloat('dustSize', options.dustSize);
+      effect.setFloat('edgeIntensity', options.edgeIntensity);
+      effect.setFloat2('screenSize', engine.getRenderWidth(), engine.getRenderHeight());
+      effect.setFloat('movementSpeed', options.movementSpeed);
+    } catch (error) {
+      // Silently catch errors when setting uniforms
+    }
+  };
+
+  return dustScratchEffect;
+}
+
 export function createCRTTurnOnEffect(
   scene: Scene,
   camera: Camera,
@@ -444,6 +500,7 @@ export class RetroEffectsManager {
       effect: PostProcess | null;
       setGlitchAmount: (amount: number) => void;
     };
+    dustScratch?: PostProcess | null;
   } = {};
 
   private _turnOnEffect?: {
@@ -556,6 +613,16 @@ export class RetroEffectsManager {
 
     if (glitchEffect.effect) this._effects.glitch = glitchEffect;
 
+    return this;
+  }
+
+  enableDustScratch(): RetroEffectsManager {
+    this._effects.dustScratch = createDustScratchEffect(
+      this._scene,
+      this._camera,
+      this._levels,
+      this._baseParams.dustScratch
+    );
     return this;
   }
 
@@ -899,7 +966,8 @@ export function createPongRetroEffects(
         .enablePhosphorDots()
         .enableVHS()
         .enableTurnOnEffect()
-        .enableTurnOffEffect();
+        .enableTurnOffEffect()
+        .enableDustScratch();
       break;
   }
 
