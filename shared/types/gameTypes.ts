@@ -101,6 +101,32 @@ export interface GameRules {
   countdown: number;
 }
 
+export interface GameSettings {
+  mode: '1v1' | 'singleplayer' | 'AIvsAI';
+  difficulty: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
+  maxScore: number;
+  ballSpeed: number;
+  enableSpin: boolean;
+  enablePowerUps: boolean;
+  powerUpTypes: Partial<Record<PowerUpType, boolean>>;
+}
+
+export const defaultGameSettings: GameSettings = {
+  mode: '1v1',
+  difficulty: 'online',
+  maxScore: 5,
+  ballSpeed: 7,
+  enableSpin: true,
+  enablePowerUps: true,
+  powerUpTypes: {
+    [PowerUpType.BiggerPaddle]: true,
+    [PowerUpType.SmallerPaddle]: true,
+    [PowerUpType.FasterPaddle]: true,
+    [PowerUpType.SlowerPaddle]: true,
+    [PowerUpType.MoreSpin]: true,
+  },
+};
+
 export interface GameParams {
   dimensions: GameDimensions;
   paddle: PaddleParams;
