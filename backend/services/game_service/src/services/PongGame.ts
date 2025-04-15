@@ -209,6 +209,8 @@ export default class PongGame {
 
   // Decrement timeToDespawn or timeToExpire for all power-ups
   updatePowerUpTimers(): void {
+    if (!this.powerUps || this.gameStatus !== 'playing') return;
+
     for (const powerUp of this.gameState.powerUps) {
       powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
     }
@@ -341,15 +343,16 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
+    this.powerUpManager.resetPowerUps();
+    this.gameState.players.player1.activePowerUps = [];
+    this.gameState.players.player2.activePowerUps = [];
+    this.gameState.powerUps = [];
+
     console.log('Starting countdown...');
     console.log('Countdown length:', this.params.rules.countdown);
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
-    this.powerUpManager.resetPowerUps();
-    this.gameState.players.player1.activePowerUps = [];
-    this.gameState.players.player2.activePowerUps = [];
-    this.gameState.powerUps = [];
 
     console.log('Game starting with max score:', this.params.rules.maxScore);
 
