@@ -3,17 +3,76 @@ import {
   MeshBuilder,
   Mesh,
   Color3,
+  Color4,
   GlowLayer,
   PBRMaterial,
+  ParticleSystem,
   Scene,
+  Texture,
   Vector3,
 } from 'babylonjs';
 
-import { gameToSceneX, gameToSceneY } from '@game/utils';
-
 import { Ball, Player, defaultGameParams } from '@shared/types';
 
-import { getGameSoundManager } from './gameSoundEffects';
+import { createParticleTexture } from './gamePostProcess';
+import { gameToSceneX, gameToSceneY } from './gameUtilities';
+
+function applyBallParticles(
+  scene: Scene,
+  paddle: Mesh,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  ball: Ball,
+  effectDelay: number,
+  primaryColor: Color3,
+  duration: number = 3000
+): void {
+  const ballSceneX = gameToSceneX(ball.x, paddle);
+  const ballSceneY = gameToSceneY(ball.y, paddle);
+  const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
+
+  const particleSystem = new ParticleSystem('ballExplosionParticles', 150, scene);
+
+  // particleSystem.particleTexture = createParticleTexture(scene, primaryColor);
+  particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
+  particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
+
+  particleSystem.color1 = new Color4(primaryColor.r, primaryColor.g, primaryColor.b, 1.0);
+  particleSystem.color2 = new Color4(1, 1, 1, 1.0);
+  particleSystem.colorDead = new Color4(
+    primaryColor.r * 0.5,
+    primaryColor.g * 0.5,
+    primaryColor.b * 0.5,
+    0
+  );
+
+  particleSystem.minSize = 0.2 + intensity * 0.5;
+  particleSystem.maxSize = 0.8 + intensity * 1.5;
+  particleSystem.minLifeTime = 1.5 + intensity * 1.5;
+  particleSystem.maxLifeTime = 3.0 + intensity * 2.0;
+  particleSystem.minEmitPower = 2 + intensity * 2.0;
+  particleSystem.maxEmitPower = 6 + intensity * 4.0;
+
+  particleSystem.manualEmitCount = 100 + Math.floor(intensity * 100);
+  particleSystem.emitRate = 0; // Emit all at once
+
+  particleSystem.minEmitBox = new Vector3(-0.5, -0.5, -0.5);
+  particleSystem.maxEmitBox = new Vector3(0.5, 0.5, 0.5);
+  particleSystem.direction1 = new Vector3(5, 5, 5);
+  particleSystem.direction2 = new Vector3(-5, -5, -5);
+
+  particleSystem.minAngularSpeed = -3.0;
+  particleSystem.maxAngularSpeed = 3.0;
+
+  particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
+
+  setTimeout(() => {
+    particleSystem.start();
+    setTimeout(() => {
+      particleSystem.dispose();
+    }, duration);
+  }, effectDelay);
+}
 
 export function applyPaddleExplosion(
   scene: Scene,
@@ -21,14 +80,16 @@ export function applyPaddleExplosion(
   intensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  duration: number = 1000
+  effectDelay: number,
+  duration: number = 2000
 ): void {
   const originalPosition = paddle.position.clone();
-  const fragments = createPaddleFragments(scene, paddle, intensity);
 
-  paddle.visibility = 0;
-
-  animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY, duration);
+  setTimeout(() => {
+    paddle.visibility = 0;
+    const fragments = createPaddleFragments(scene, paddle, intensity);
+    animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY, duration);
+  }, effectDelay);
 
   setTimeout(() => {
     const gameWidth = defaultGameParams.dimensions.gameWidth;
@@ -127,7 +188,7 @@ function animatePaddleFragments(
   intensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  duration: number = 1000
+  duration: number = 2000
 ): void {
   const ballAbovePaddle = ballY < defaultGameParams.dimensions.gameHeight / 2;
   const baseDirection = scoringDirection === 'right' ? Math.PI : 0;
@@ -196,7 +257,7 @@ function animatePaddleFragments(
         // Normalize to ensure consistent direction regardless of magnitude
         const direction = new Vector3(dirX, dirY, dirZ).normalize();
 
-        const speed = (10 + Math.random() * 5) * intensity * 5;
+        const speed = (5 + Math.random() * 3) * intensity * 3;
         const initialVelocity = direction.scale(speed);
         const angularVelocity = new Vector3(
           (Math.random() - 0.5) * Math.PI * 2 * intensity,
@@ -221,7 +282,7 @@ function animatePaddleFragments(
       fragment.metadata.lifeTime += deltaTime; // Track lifetime of fragment
 
       const timeRatio = timeRemaining / duration;
-      const fadeProgressPhase = 0.3;
+      const fadeProgressPhase = 0.4;
       let velocityScaleFactor = 1;
 
       if (timeRatio < fadeProgressPhase) {
@@ -243,7 +304,7 @@ export function applyNeonEdgeFlicker(
   bottomEdgeMesh: Mesh,
   playerColor: Color3,
   effectIntensity: number,
-  duration: number = 1500
+  duration: number = 1800
 ): void {
   const edgeMaterial = topEdgeMesh.material as PBRMaterial;
   const originalEmissiveColor = edgeMaterial.emissiveColor.clone();
@@ -297,7 +358,7 @@ export function applyNeonEdgeFlicker(
   );
 
   // More flickers with higher intensity
-  const numFlickers = Math.floor(15 + effectIntensity * 15);
+  const numFlickers = Math.floor(20 + effectIntensity * 20);
 
   const topKeyframes = [];
   const bottomKeyframes = [];
@@ -389,6 +450,15 @@ export function applyNeonEdgeFlicker(
   }, duration);
 }
 
+function calculateEffectDelay(ballSpeed: number): number {
+  const minDelay = 50;
+  const maxDelay = 400;
+  const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
+  const delay = maxDelay - normalizedSpeed * (maxDelay - minDelay);
+
+  return delay;
+}
+
 function calculateScoreEffectIntensity(
   playerScore: number,
   ballSpeed: number,
@@ -427,10 +497,27 @@ export function applyScoreEffects(
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
+  const effectDelay = calculateEffectDelay(ballSpeed);
   const volumeFactor = intensityFactor * 1.2;
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
-  applyPaddleExplosion(scene, scoredAgainstPaddle, intensityFactor, ballDirection, ball.y);
+  applyPaddleExplosion(
+    scene,
+    scoredAgainstPaddle,
+    intensityFactor,
+    ballDirection,
+    ball.y,
+    effectDelay
+  );
+  applyBallParticles(
+    scene,
+    scoredAgainstPaddle,
+    intensityFactor,
+    ballDirection,
+    ball,
+    effectDelay,
+    primaryColor
+  );
   soundManagerRef.playScoreSound(volumeFactor);
 
   if (retroEffectsRef) {
@@ -439,61 +526,3 @@ export function applyScoreEffects(
     }, 300);
   }
 }
-
-/*
-function createExplosionParticles(
-  scene: Scene,
-  paddle: Mesh,
-  intensity: number,
-  scoringDirection: 'left' | 'right'
-): void {
-  const particleSystem = new ParticleSystem("paddleExplosionParticles", 100, scene);
-
-  // Use a particle texture that looks like a small light burst
-  particleSystem.particleTexture = new Texture("/textures/flare.png", scene);
-
-  // Set emitter at paddle position
-  particleSystem.emitter = paddle.position.clone();
-
-  // Get color from paddle material
-  const paddleMaterial = paddle.material as PBRMaterial;
-  const particleColor = paddleMaterial.emissiveColor.clone();
-
-  // Particle colors
-  particleSystem.color1 = new Color4(particleColor.r, particleColor.g, particleColor.b, 1.0);
-  particleSystem.color2 = new Color4(1, 1, 1, 1.0);
-  particleSystem.colorDead = new Color4(particleColor.r * 0.5, particleColor.g * 0.5, particleColor.b * 0.5, 0);
-
-  // Set emission properties
-  particleSystem.minEmitBox = new Vector3(-1, -1, -1);
-  particleSystem.maxEmitBox = new Vector3(1, 1, 1);
-
-  // Size of each particle
-  particleSystem.minSize = 0.1;
-  particleSystem.maxSize = 0.5;
-
-  // Emission rate and lifetime
-  particleSystem.emitRate = 0; // We'll emit all at once
-  particleSystem.manualEmitCount = 50 + Math.floor(intensity * 50);
-  particleSystem.minLifeTime = 0.2;
-  particleSystem.maxLifeTime = 0.5;
-
-  // Emission power
-  const directionMultiplier = scoringDirection === 'right' ? -1 : 1;
-  particleSystem.direction1 = new Vector3(directionMultiplier * 5, 5, 5);
-  particleSystem.direction2 = new Vector3(directionMultiplier * 5, -5, -5);
-  particleSystem.minEmitPower = 5;
-  particleSystem.maxEmitPower = 15;
-
-  // Blending mode for glow effect
-  particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
-
-  // Start the effect
-  particleSystem.start();
-
-  // Dispose after effect completes
-  setTimeout(() => {
-    particleSystem.dispose();
-  }, 1000);
-}
-*/
