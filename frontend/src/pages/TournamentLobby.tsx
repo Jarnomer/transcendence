@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { ChatWindow } from '../components/chat/ChatWindow';
 import { PowerUpSelection } from '../components/menu/cards/PowerUpSelection';
+import TournamentBracket from '../components/tournament/TournamentBracket';
 import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -88,6 +89,10 @@ export const TournamentLobbyNav: React.FC<{
         <button onClick={() => setActiveTab('players')}>
           <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
         </button>
+
+        <button onClick={() => setActiveTab('matches')}>
+          <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
+        </button>
       </span>
     </motion.div>
   );
@@ -115,32 +120,23 @@ export const TournamentPlayerList: React.FC = () => {
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   return (
     <div className="h-full w-full">
-      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2 overflow-y-scroll">
+      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2overflow-y-scroll">
         <motion.li
-          className=" w-full h-full flex gap-3 hover:scale-[1.05] hover:text-secondary"
+          className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.02] p-1 hover:text-secondary"
           // onClick={() => navigate(`/profile/${user.user_id}`)}
         >
           <ListSvgContainer>
             <div className="flex items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
                 <img
-                  className="object-cover w-full h-full grayscale"
+                  className="object-cover w-full h-full"
                   src={'./src/assets/images/default_avatar.png'}
                   alt={`users's profile picture`}
                 />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundColor: 'currentColor',
-                    mixBlendMode: 'color',
-                  }}
-                ></div>
               </div>
               <p className="text-xs">
                 dummy user <br />
               </p>
-              <p>Rank: 900</p>
             </div>
           </ListSvgContainer>
         </motion.li>
@@ -158,23 +154,34 @@ export const TournamentLobby: React.FC = () => {
 
   const { createRoom } = useChatContext();
 
-  useEffect(() => {
-    setPlayers([user?.user_id]);
-  }, [user]);
+  // useEffect(() => {
+  //   setPlayers([user?.user_id]);
+  // }, [user]);
 
   useEffect(() => {
     if (!user || !players) return;
 
     const setupChat = async () => {
       console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', players);
-      const chatId = await createRoom('tournamentChat', true, players);
-      setTournamentChatId(chatId);
+      const chatId = await createRoom(
+        'tournamentChat_' + Math.floor(Math.random() * 50),
+        true,
+        null
+      );
+      if (chatId) {
+        setTournamentChatId(chatId);
+      }
     };
 
     setupChat();
   }, [players]);
 
+  useEffect(() => {
+    setPlayers(Array.from({ length: 8 }, (_, i) => `Competitor ${i + 1}`));
+  }, []);
+
   console.log(selectedFriendId);
+
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
@@ -186,8 +193,8 @@ export const TournamentLobby: React.FC = () => {
           <span className="text-secondary">X/X Players</span>
         </header>
 
-        <div className="flex flex-col md:flex-row gap-2 w-full h-full flex-grow">
-          <motion.div className="flex flex-col md:flex-row md:w-3/5 h-full w-full gap-2 md:gap-10">
+        <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
+          <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">
               {activeTab === 'settings' ? (
                 <motion.div
@@ -199,6 +206,17 @@ export const TournamentLobby: React.FC = () => {
                   exit="exit"
                 >
                   <TournamentSettings></TournamentSettings>
+                </motion.div>
+              ) : activeTab == 'matches' ? (
+                <motion.div
+                  key="tournamentPlayerList"
+                  className="w-full h-full  border-1 border-primary"
+                  variants={slideFromRightVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <TournamentBracket players={players}></TournamentBracket>
                 </motion.div>
               ) : (
                 <motion.div
@@ -214,7 +232,8 @@ export const TournamentLobby: React.FC = () => {
               )}
             </AnimatePresence>
           </motion.div>
-          <div className="@container glass-box h-[200px] w-2/5">
+          <div className="@container glass-box h-[200px] w-full">
+            <p>chat</p>
             {user && players && tournamentChatId && (
               <ChatWindow
                 selectedFriendId={selectedFriendId}

@@ -10,9 +10,9 @@ interface ProfilePictureProps {
 }
 
 export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfile }) => {
-  const [loading, setLoading] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setUser } = useUser();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

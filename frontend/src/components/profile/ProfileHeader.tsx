@@ -124,7 +124,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             </div>
           )}
         </div>
-        <ProfilePicture user={user} isOwnProfile={isOwnProfile}></ProfilePicture>
+        <ProfilePicture
+          user={user}
+          isOwnProfile={isOwnProfile}
+          setLoading={setLoading}
+        ></ProfilePicture>
       </div>
     </div>
   );

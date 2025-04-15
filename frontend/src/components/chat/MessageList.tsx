@@ -22,7 +22,6 @@ export const MessageList: React.FC<MessageListProps> = ({ user }) => {
             message={msg}
             isOwn={msg.sender_id === user.user_id}
             sender={msg.sender_id}
-            
           />
         </div>
       ))}

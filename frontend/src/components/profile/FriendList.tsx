@@ -53,6 +53,8 @@ type FriendListProps = {
   requests: Friend[];
   sents: Friend[];
   isOwnProfile: boolean;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const animationVariants = {
@@ -85,7 +87,7 @@ const itemVariants = {
   }),
 };
 
-export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
+export const FriendRequests: React.FC<FriendListProps> = ({ requests, loading, setLoading }) => {
   const navigate = useNavigate();
   const { refetchUser } = useUser();
 
@@ -171,6 +173,7 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests }) => {
 
 export const Friends: React.FC<FriendListProps> = ({ friends }) => {
   const navigate = useNavigate();
+  console.log('FRIENDS FROM FRIENDLIST: ', friends);
   return friends && friends.length > 0 ? (
     <motion.ul
       className="pl-5 w-full h-full gap-3 overflow-y-scroll"
@@ -182,7 +185,7 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
     >
       {friends.map((friend) => (
         <motion.li
-          className="my-1 hover:text-secondary"
+          className="my-1 hover:text-secondary h-[57px] min-w-[282px]"
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
           variants={listItemVariants}
@@ -225,14 +228,14 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
         exit="hidden"
         transition={{ duration: 0.4 }}
       >
-        <motion.li className="my-1 text-gray-500" variants={listItemVariants}>
+        <motion.li
+          className="my-1 text-gray-500 h-[57px] min-w-[282px]"
+          variants={listItemVariants}
+        >
           <ListSvgContainer>
             <div className="flex w-full h-full items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-                <img
-                  className="object-cover w-full h-full"
-                  src={'./src/assets/images/default_avatar.png'}
-                />
+                <img className="object-cover w-full h-full grayscale" src={``} />
               </div>
               <span className="text-xs font-medium">mystery man</span>
             </div>
@@ -248,10 +251,17 @@ export const FriendList: React.FC<FriendListProps> = ({
   friends,
   requests,
   sents,
+  loading,
+  setLoading,
 }) => {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
   const navigate = useNavigate();
   const { refetchUser } = useUser();
+  console.log('LOADING FROM FRIENDLIST: ', loading);
+
+  if (loading) {
+    return <h1>loading asd</h1>;
+  }
 
   return (
     <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
@@ -262,7 +272,7 @@ export const FriendList: React.FC<FriendListProps> = ({
             onClick={() => setActiveTab('friends')}
             className={`text-xs ${activeTab === 'friends' ? 'text-secondary' : ''}`}
           >
-            {friends.length} Friends
+            {(friends && friends.length) || '0'} Friends
           </button>
           {isOwnProfile ? (
             <>
