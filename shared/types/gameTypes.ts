@@ -101,6 +101,12 @@ export interface GameRules {
   countdown: number;
 }
 
+export interface GameSoundOptions {
+  enabled?: boolean;
+  muted?: boolean;
+  volume?: number;
+}
+
 export interface GameParams {
   dimensions: GameDimensions;
   paddle: PaddleParams;
@@ -108,6 +114,7 @@ export interface GameParams {
   spin: SpinParams;
   powerUps: PowerUpParams;
   rules: GameRules;
+  sounds: GameSoundOptions;
 }
 
 export const defaultGameParams: GameParams = {
@@ -154,6 +161,11 @@ export const defaultGameParams: GameParams = {
     maxScore: 5,
     countdown: 3, // Seconds
   },
+  sound: {
+    enabled: true,
+    muted: false,
+    volume: 1.0,
+  } as GameSoundOptions,
 };
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';

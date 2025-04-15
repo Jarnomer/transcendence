@@ -14,10 +14,6 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import collisionSound from '@/assets/sounds/collision.wav';
-import powerUpSound from '@/assets/sounds/powerup.wav';
-import { useSound } from '@/hooks/useSound';
-
 import {
   PowerUpEffectsManager,
   RetroEffectsManager,
@@ -32,6 +28,7 @@ import {
   createPaddle,
   createPongRetroEffects,
   enableRequiredExtensions,
+  getGameSoundManager,
   gameToSceneX,
   gameToSceneY,
   getThemeColors,
@@ -40,6 +37,7 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
+  GameSoundManager,
 } from '@game/utils';
 
 import {
@@ -121,6 +119,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
+  const soundManagerRef = useRef<GameSoundManager>(null);
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
@@ -140,10 +139,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
-
-  const playCollisionSound = useSound(collisionSound);
-  const playPowerUpSound = useSound(powerUpSound);
-  // call playHoverSound on ball collision
 
   const animateBallAfterScore = (
     scene: Scene,
@@ -275,17 +270,18 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     cameraRef.current = camera;
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
+    soundManagerRef.current = getGameSoundManager();
 
     topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
     topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
-
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
       colors.primaryColor,
       colors.secondaryColor,
-      defaultGameParams.powerUps.size
+      defaultGameParams.powerUps.size,
+      soundManagerRef.current
     );
 
     setLastTheme(theme); // Save current theme
@@ -375,7 +371,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         speed,
         ball.spin,
         primaryColor,
-        true
+        true,
+        soundManagerRef.current
       );
     }
 
@@ -393,9 +390,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         scoringPlayerPaddle,
         scoredAgainstPaddle,
         players[score].score,
+        speed,
         players,
         ball,
-        primaryColor
+        primaryColor,
+        soundManagerRef.current
       );
     }
 
