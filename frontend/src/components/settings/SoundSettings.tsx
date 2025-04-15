@@ -163,11 +163,6 @@ const UISoundSetting: React.FC<soundSettingsProps> = ({
       >
         <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
       </label>
-
-      {/* Display Values */}
-      <div className="mt-4 text-center">
-        <p className="text-sm"></p>
-      </div>
     </div>
   );
 };
