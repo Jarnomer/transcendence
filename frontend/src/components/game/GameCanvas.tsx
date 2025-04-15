@@ -394,7 +394,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         players,
         ball,
         primaryColor,
-        soundManagerRef.current
+        soundManagerRef.current,
+        cameraRef.current
       );
     }
 

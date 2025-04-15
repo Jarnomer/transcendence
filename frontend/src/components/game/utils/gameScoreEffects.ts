@@ -1,5 +1,6 @@
 import {
   Animation,
+  ArcRotateCamera,
   MeshBuilder,
   Mesh,
   Color3,
@@ -14,6 +15,7 @@ import {
 
 import { Ball, Player, defaultGameParams } from '@shared/types';
 
+import { applyCameraShake } from './gameCamera';
 import { createParticleTexture } from './gamePostProcess';
 import { gameToSceneX, gameToSceneY } from './gameUtilities';
 
@@ -493,7 +495,8 @@ export function applyScoreEffects(
   players: { player1: Player; player2: Player },
   ball: Ball,
   primaryColor: Color3,
-  soundManagerRef?: any | null
+  soundManagerRef?: any | null,
+  camera?: ArcRotateCamera
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
@@ -518,7 +521,14 @@ export function applyScoreEffects(
     effectDelay,
     primaryColor
   );
+
   soundManagerRef.playScoreSound(volumeFactor);
+
+  if (camera) {
+    const shakeIntensity = 0.5 + intensityFactor * 1.0;
+    const shakeDuration = 300 + intensityFactor * 500;
+    applyCameraShake(scene, camera, shakeIntensity, effectDelay, shakeDuration);
+  }
 
   if (retroEffectsRef) {
     setTimeout(() => {

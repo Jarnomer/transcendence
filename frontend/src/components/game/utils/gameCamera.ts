@@ -67,6 +67,45 @@ export function updateMotionBlur(speed: number, camera: Camera) {
   }
 }
 
+export function applyCameraShake(
+  scene: Scene,
+  camera: ArcRotateCamera,
+  intensity: number,
+  effectDelay: number,
+  duration: number = 500,
+  decayFactor: number = 0.95
+): void {
+  const initialTarget = camera.target.clone();
+  const maxShakeAmount = intensity * 0.2;
+
+  setTimeout(() => {
+    let shakeTime = 0;
+    const startTime = Date.now();
+    const endTime = startTime + duration;
+
+    const shakeObserver = scene.onBeforeRenderObservable.add(() => {
+      const currentTime = Date.now();
+      shakeTime = currentTime - startTime;
+
+      if (currentTime >= endTime) {
+        // Restore camera position and remove observer
+        camera.target = initialTarget.clone();
+        scene.onBeforeRenderObservable.remove(shakeObserver);
+        return;
+      }
+
+      const timeRatio = shakeTime / duration; // Calculate decay over time
+      const currentIntensity = intensity * Math.pow(1 - timeRatio, decayFactor);
+
+      const randomX = (Math.random() * 2 - 1) * maxShakeAmount * currentIntensity;
+      const randomY = (Math.random() * 2 - 1) * maxShakeAmount * currentIntensity;
+      const randomZ = (Math.random() * 2 - 1) * maxShakeAmount * currentIntensity * 0.5;
+
+      camera.target = initialTarget.clone().add(new Vector3(randomX, randomY, randomZ));
+    });
+  }, effectDelay);
+}
+
 export const animateCamera = (
   camera: ArcRotateCamera,
   targetAngle: CameraAngle,
