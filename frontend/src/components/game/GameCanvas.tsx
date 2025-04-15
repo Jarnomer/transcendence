@@ -27,18 +27,11 @@ import {
   createFloor,
   createPaddle,
   createPongRetroEffects,
-<<<<<<< HEAD
-  gameToSceneX,
-  gameToSceneY,
-  getThemeColors,
-  setupEnvironmentMap,
-=======
   enableRequiredExtensions,
   gameToSceneX,
   gameToSceneY,
   getThemeColors,
   parseColor,
->>>>>>> origin/frontend-game
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
@@ -50,10 +43,6 @@ import {
   GameState,
   PowerUp,
   RetroEffectsLevels,
-<<<<<<< HEAD
-  defaultGameObjectParams,
-=======
->>>>>>> origin/frontend-game
   defaultGameParams,
   defaultRetroEffectsLevels,
 } from '@shared/types';

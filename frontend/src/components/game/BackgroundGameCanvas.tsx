@@ -7,7 +7,6 @@ import {
   DefaultRenderingPipeline,
   Engine,
   Scene,
-  Vector3,
 } from 'babylonjs';
 
 import {
@@ -16,20 +15,13 @@ import {
   applyBallEffects,
   applyCameraAngle,
   applyCollisionEffects,
-<<<<<<< HEAD
-  applyScoreEffects,
-=======
->>>>>>> origin/frontend-game
   cameraAngles,
   createBall,
   createEdge,
   createFloor,
   createPaddle,
   createPongRetroEffects,
-<<<<<<< HEAD
-=======
   enableRequiredExtensions,
->>>>>>> origin/frontend-game
   gameToSceneX,
   gameToSceneY,
   getRandomCameraAngle,
@@ -45,17 +37,11 @@ import {
   GameState,
   RetroEffectsBaseParams,
   RetroEffectsLevels,
-<<<<<<< HEAD
-  defaultGameObjectParams,
-  defaultGameParams,
-  defaultRetroCinematicBaseParams,
-=======
   defaultCameraTimings,
   defaultCinematicGlitchTimings,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
   defaultRetroEffectTimings,
->>>>>>> origin/frontend-game
   defaultRetroEffectsLevels,
   retroEffectsPresets,
 } from '@shared/types';
@@ -71,11 +57,7 @@ interface BackgroundGameCanvasProps {
 }
 
 const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipeline | null) => {
-<<<<<<< HEAD
-  scene.getEngine().setHardwareScalingLevel(1.5);
-=======
   scene.getEngine().setHardwareScalingLevel(2.0);
->>>>>>> 09619f4a56593d60b414f32d17b5755ea5ed168b
 
   scene.shadowsEnabled = true;
   scene.lightsEnabled = true;
@@ -271,10 +253,6 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-<<<<<<< HEAD
-      if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
-=======
->>>>>>> 09619f4a56593d60b414f32d17b5755ea5ed168b
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       if (cameraMoveTimerRef.current) {
         window.clearInterval(cameraMoveTimerRef.current);
@@ -297,21 +275,11 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     if (!isVisible) {
       if (retroEffectsRef.current) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-        retroEffectsRef.current.simulateCRTTurnOff(1200).then(() => {
-=======
-        retroEffectsRef.current.simulateCRTTurnOff(1800).then(() => {
->>>>>>> 09619f4a56593d60b414f32d17b5755ea5ed168b
-          if (engineRef.current) engineRef.current.stopRenderLoop();
-        });
-=======
         retroEffectsRef.current
           .simulateCRTTurnOff(defaultRetroEffectTimings.crtTurnOffDuration)
           .then(() => {
             if (engineRef.current) engineRef.current.stopRenderLoop();
           });
->>>>>>> origin/frontend-game
       } else {
         if (engineRef.current) engineRef.current.stopRenderLoop();
       }
