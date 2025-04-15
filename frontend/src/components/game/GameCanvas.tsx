@@ -4,6 +4,7 @@ import {
   Animation,
   ArcRotateCamera,
   Color3,
+  Color4,
   CubicEase,
   DefaultRenderingPipeline,
   Engine,
@@ -30,7 +31,7 @@ import {
   gameToSceneX,
   gameToSceneY,
   getThemeColors,
-  setupEnvironmentMap,
+  parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
@@ -233,7 +234,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
 
-    setupEnvironmentMap(scene);
+    const bgColor = parseColor('#33353e');
+    scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera, false);

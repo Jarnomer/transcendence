@@ -95,10 +95,11 @@ export const GamePage: React.FC = () => {
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 
-            <p className="text-xs text-gray-500">
-              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} |
-              Player2_DY: {gameState?.players.player2.dy}
-            </p>
+            {/* SHOW GAME INFORMATION */}
+            {/* <p className="text-xs text-gray-500"> */}
+            {/*   Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} | */}
+            {/*   Player2_DY: {gameState?.players.player2.dy} */}
+            {/* </p> */}
             <GameCanvas gameState={gameState} />
           </div>
         </>
