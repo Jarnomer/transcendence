@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 
 import { useModal } from '../../contexts/modalContext/ModalContext';
+import { NavIconButton } from '../UI/buttons/NavIconButton';
 
 interface ModalWrapperProps {
   modalName: string;
@@ -17,6 +18,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
 
   const handleModalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    console.log('modal clicked');
   };
 
   return (
@@ -28,6 +30,14 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
         className="text-primary shadow-lg max-w-md w-full h-full md:h-auto md:max-w-4xl overflow-hidden"
         onClick={handleModalClick}
       >
+        <span className="">
+          <NavIconButton
+            id="settings-modal-close-button"
+            ariaLabel="Close settings modal"
+            icon="close"
+            onClick={handleOverlayClick}
+          />
+        </span>
         {children}
       </div>
     </div>
