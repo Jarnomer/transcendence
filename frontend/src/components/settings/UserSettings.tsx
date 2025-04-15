@@ -2,8 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { SvgBorderBig } from '@components/visual/svg/borders/SvgBorderBig';
-
+import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 export const animationVariants = {
@@ -24,12 +23,10 @@ export const animationVariants = {
 };
 
 export const UserSettings: React.FC = () => {
-  const handleColorChange = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const selectedColor = event.currentTarget.getAttribute('data-color');
-    if (selectedColor) {
-      document.documentElement.style.setProperty('--color-primary', selectedColor);
-    }
+  const handleSaveSettings = () => {
+    console.log('---- Saving User settings -------');
   };
+
   return (
     <motion.div
       className="h-full min-h-[450px] relative glass-box mt-10 text-sm"
@@ -38,46 +35,25 @@ export const UserSettings: React.FC = () => {
       animate="visible"
       exit="hidden"
     >
-      <span className="absolute top-0 left-0 translate-y-[-50%] w-full" aria-hidden="true">
-        <SvgBorderBig></SvgBorderBig>
+      <span
+        aria-hidden="true"
+        className="absolute top-0 left-0 bg-primary text-black w-full pointer-events-none"
+      >
+        <h1>User settings</h1>
       </span>
       <div className="w-full h-full relative overflow-hidden">
         <BackgroundGlow></BackgroundGlow>
         <div className="w-full h-full p-10">
-          <h1 className="font-heading text-4xl">User Settings</h1>
-
-          <h2>Color scheme</h2>
-          <div id="colorPickerContainer" className="mt-3 gap-0">
-            <button
-              className="color-option border-black border-2 w-8 h-8 mx-0"
-              aria-label="Switch theme to light blue"
-              data-color="#76f7fd"
-              style={{ backgroundColor: '#76f7fd' }}
-              onClick={handleColorChange}
-            ></button>
-            <button
-              className="color-option border-black border-2 w-8 h-8 mx-0"
-              aria-label="Switch theme to yellow"
-              data-color="#d6ec6f"
-              style={{ backgroundColor: '#d6ec6f' }}
-              onClick={handleColorChange}
-            ></button>
-            <button
-              className="color-option border-black border-2 w-8 h-8 mx-0"
-              data-color="#61d27e"
-              aria-label="Switch theme to green"
-              style={{ backgroundColor: '#61d27e' }}
-              onClick={handleColorChange}
-            ></button>
-            <button
-              className="color-option border-black border-2 w-8 h-8 mx-0"
-              data-color="#ea355a"
-              aria-label="Switch theme to red"
-              style={{ backgroundColor: '#ea355a' }}
-              onClick={handleColorChange}
-            ></button>
+          <div>
+            <button>Delete user ?</button>
+          </div>
+          <div>
+            <button>Blocked users ?</button>
           </div>
         </div>
+      </div>
+      <div className="absolute bottom-0 right-0 p-4">
+        <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
       </div>
     </motion.div>
   );
