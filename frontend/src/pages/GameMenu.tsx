@@ -151,7 +151,7 @@ export const GameMenu: React.FC = () => {
             <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
 
             {subMenus[mode].map((option, index) => (
-              <motion.div key={index} style={{ flexBasis: '300px' }}>
+              <motion.div key={index} style={{ flexBasis: '250px' }}>
                 <GameMenuCard
                   content={option.content}
                   imageUrl={option.imageUrl}
@@ -164,7 +164,7 @@ export const GameMenu: React.FC = () => {
         ) : (
           <>
             {modes.map((mode, index) => (
-              <motion.div key={index} style={{ flexBasis: '300px' }}>
+              <motion.div key={index} style={{ flexBasis: '250px' }}>
                 <GameMenuCard
                   content={mode.content}
                   imageUrl={mode.imageUrl}
