@@ -13,6 +13,8 @@ import { gameToSceneX, gameToSceneY } from '@game/utils';
 
 import { Ball, Player, defaultGameParams } from '@shared/types';
 
+import { getGameSoundManager } from './gameSoundEffects';
+
 export function applyPaddleExplosion(
   scene: Scene,
   paddle: Mesh,
@@ -411,28 +413,31 @@ function calculateScoreEffectIntensity(
 
 export function applyScoreEffects(
   retroEffectsRef: any,
+  soundManagerRef: any,
   scene: Scene,
   topEdge: Mesh,
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
   scoredAgainstPaddle: Mesh,
+  ballSpeed: number,
   playerScore: number,
   players: { player1: Player; player2: Player },
   ball: Ball,
   primaryColor: Color3
 ) {
+  const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
+  const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
+  const volumeFactor = intensityFactor * 1.2;
+
+  applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
+  applyPaddleExplosion(scene, scoredAgainstPaddle, intensityFactor, ballDirection, ball.y);
+  soundManagerRef.playScoreSound(volumeFactor);
+
   if (retroEffectsRef) {
     setTimeout(() => {
       retroEffectsRef?.changeChannel(1200).then(() => {});
     }, 300);
   }
-
-  const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-  const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
-  const intensity = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
-
-  applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensity);
-  applyPaddleExplosion(scene, scoredAgainstPaddle, intensity, ballDirection, ball.y);
 }
 
 /*

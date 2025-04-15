@@ -2,6 +2,7 @@ import {
   Animation,
   Color3,
   Color4,
+  Mesh,
   MeshBuilder,
   ParticleSystem,
   PointLight,
@@ -470,9 +471,10 @@ function applyEdgeDeformEffect(
 
 export function applyCollisionEffects(
   retroEffectsRef: any,
-  ballMesh: any,
-  paddleMesh: any,
-  edgeMesh: any,
+  soundManagerRef: any,
+  ballMesh: Mesh,
+  paddleMesh: Mesh,
+  edgeMesh: Mesh,
   collisionType: 'dx' | 'dy',
   speed: number,
   spin: number,
@@ -482,6 +484,7 @@ export function applyCollisionEffects(
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);
   const combinedFactor = speedFactor + spinFactor;
+  const volumeFactor = Math.min(0.5 + combinedFactor * 0.1, 1.2);
   const scene = ballMesh.getScene();
 
   applySquishEffect(ballMesh, collisionType, speedFactor, scene);
@@ -491,8 +494,10 @@ export function applyCollisionEffects(
 
   if (collisionType === 'dx') {
     applyPaddleRecoil(paddleMesh, speedFactor, scene);
+    if (soundManagerRef && applyGlitch) soundManagerRef.playPaddleSound(volumeFactor);
   } else if (collisionType === 'dy') {
     applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
+    if (soundManagerRef && applyGlitch) soundManagerRef.playEdgeSound(volumeFactor);
   }
 
   if (retroEffectsRef && applyGlitch) {

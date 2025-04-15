@@ -145,10 +145,9 @@ export const defaultGameObjectParams: GameObjectParams = {
   },
   floor: {
     width:
-      (defaultGameParams.dimensions.gameWidth / defaultGameParams.dimensions.scaleFactor) * 1.5,
+      (defaultGameParams.dimensions.gameWidth / defaultGameParams.dimensions.scaleFactor) * 1.55,
     depth:
-      ((defaultGameParams.dimensions.gameWidth / defaultGameParams.dimensions.scaleFactor) * 1.5) /
-      2,
+      (defaultGameParams.dimensions.gameHeight / defaultGameParams.dimensions.scaleFactor) * 1.55,
     positionZ: 1.2,
     colorMultiplier: 0.25,
     emissiveColorMultiplier: 0.1,
