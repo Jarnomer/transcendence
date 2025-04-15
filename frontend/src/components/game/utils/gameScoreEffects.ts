@@ -413,7 +413,6 @@ function calculateScoreEffectIntensity(
 
 export function applyScoreEffects(
   retroEffectsRef: any,
-  soundManagerRef: any,
   scene: Scene,
   topEdge: Mesh,
   bottomEdge: Mesh,
@@ -423,7 +422,8 @@ export function applyScoreEffects(
   playerScore: number,
   players: { player1: Player; player2: Player },
   ball: Ball,
-  primaryColor: Color3
+  primaryColor: Color3,
+  soundManagerRef?: any | null
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);

@@ -364,7 +364,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
       applyCollisionEffects(
         retroEffectsRef.current,
-        soundManagerRef.current,
         ballRef.current,
         paddleToRecoil,
         edgeToDeform,
@@ -372,7 +371,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         speed,
         ball.spin,
         primaryColor,
-        true
+        true,
+        soundManagerRef.current
       );
     }
 
@@ -384,7 +384,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
       applyScoreEffects(
         retroEffectsRef.current,
-        soundManagerRef.current,
         sceneRef.current,
         topEdgeRef.current,
         bottomEdgeRef.current,
@@ -394,7 +393,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         speed,
         players,
         ball,
-        primaryColor
+        primaryColor,
+        soundManagerRef.current
       );
     }
 
