@@ -58,7 +58,9 @@ const RetroEffectSettings: React.FC = ({ level, setLevel, isEnabled, setIsEnable
         }`}
       />
       <label htmlFor="effectLevel" className="block text-sm font-medium text-gray-700">
-        <span className="font-semibold">{isEnabled ? level : 'Disabled'}</span>
+        <span className={`${isEnabled ? 'text-secondary' : 'text-gray-400'}`}>
+          {isEnabled ? level : 'Disabled'}
+        </span>
       </label>
 
       {/* Display Values */}

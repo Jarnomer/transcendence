@@ -38,22 +38,8 @@ export const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="p-2 w-full h-full">
-      {/* {isChatPage ? (
-        <>
-          <CreateRoomPopup
-            isVisible={isRoomPopupVisible}
-            onClose={() => setRoomPopupVisible(false)}
-            friends={friends}
-            onRoomCreated={(roomId) => {
-              setRoomId(roomId);
-              setRoomPopupVisible(false);
-            }}
-          />
-        </>
-      ) : null} */}
-
-      <div className="flex h-[600px] glass-box overflow-hidden relative">
+    <div className="p-2 h-full flex items-center justify-center">
+      <div className="flex h-[600px] w-3xl  glass-box overflow-hidden relative">
         <BackgroundGlow />
         <div
           className={` w-full h-full ${!selectedFriend && !roomId ? 'w-full md:block' : 'hidden lg:block md:w-1/3 lg:1/5'} overflow-y-auto`}

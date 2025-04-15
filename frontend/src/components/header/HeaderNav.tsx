@@ -30,7 +30,7 @@ export const animationVariants = {
 export const HeaderNav: React.FC = () => {
   const { openModal } = useModal();
   const navigate = useNavigate();
-  const { user, setUser, refetchUser, checkAuth, logout } = useUser();
+  const { user, logout } = useUser();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -55,19 +55,6 @@ export const HeaderNav: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isDropdownOpen]);
-
-  const handleSettingsClick = () => {
-    openModal('settingsModal');
-  };
-
-  const handleProfileClick = () => {
-    console.log('handle profile click!');
-    if (user) {
-      openModal('profileModal');
-    } else {
-      navigate('/login');
-    }
-  };
 
   return (
     <>

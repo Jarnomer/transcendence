@@ -8,6 +8,7 @@ import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assumin
 
 import { useUser } from '../../contexts/user/UserContext';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
+import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
 import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
 
 export const listAnimationVariants = {
@@ -134,17 +135,7 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests, loading, s
               onClick={() => navigate(`/profile/${friend.user_id}`)}
             >
               <div className="flex w-full h-full items-center gap-2 border-1 my-1 bg-primary/20 clipped-corner-bottom-right">
-                <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-                  <img
-                    className="object-cover w-full h-full"
-                    src={
-                      friend.display_name.startsWith('AI')
-                        ? './src/assets/images/ai.png'
-                        : friend.avatar_url
-                    }
-                    alt={`${friend.display_name}'s profile picture`}
-                  />
-                </div>
+                <ProfilePictureMedium user={friend}></ProfilePictureMedium>
 
                 <span className="text-xs font-medium">{friend.display_name}</span>
 
@@ -185,35 +176,17 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
     >
       {friends.map((friend) => (
         <motion.li
-          className="my-1 hover:text-secondary h-[57px] min-w-[282px]"
+          className="my-1 hover:text-secondary h-[57px] w-[282px]"
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
           variants={listItemVariants}
         >
           <ListSvgContainer>
             <div className="flex w-full h-full items-center gap-2">
-              <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-                <img
-                  className="object-cover w-full h-full"
-                  src={
-                    friend.display_name.startsWith('AI')
-                      ? './src/assets/images/ai.png'
-                      : friend.avatar_url
-                  }
-                  alt={`${friend.display_name}'s profile picture`}
-                />
-              </div>
+              <ProfilePictureMedium user={friend}></ProfilePictureMedium>
               <span className="text-xs font-medium">{friend.display_name}</span>
             </div>
           </ListSvgContainer>
-
-          {/* <div className="flex flex-col  justify-centeritems-center gap-3">
-            <img
-              className="w-full object-contain"
-              src={friend.avatar_url}
-              alt={friend.display_name}
-            />
-          </div> */}
         </motion.li>
       ))}
     </motion.ul>
@@ -265,7 +238,9 @@ export const FriendList: React.FC<FriendListProps> = ({
 
   return (
     <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
-      <div className="clipped-corner w-full h-[20px] bg-primary text-black text-sm">Friends</div>
+      <div className="clipped-corner w-full lg:w-1/2 h-[20px] bg-primary text-black text-sm">
+        Friends
+      </div>
       <motion.div className="">
         <div className="flex gap-4 p-2">
           <button

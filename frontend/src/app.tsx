@@ -34,15 +34,21 @@ const App: React.FC = () => {
     <WebSocketProvider>
       <ChatProvider>
         <GameOptionsProvider>
-          <BackgroundGameProvider />
+          <div className="fixed">
+            <BackgroundGameProvider />
+          </div>
           <div
-            id="app-container"
-            className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
+            id="app-main-container"
+            className={`flex flex-col relative items-center min-h-screen w-full overflow-hidden text-primary p-2 `}
           >
-            <Header />
-            <div id="app-content" className="relative md:px-10 p-5 w-full ">
+            <div id="app-content" className="relative p-5 w-full h-full max-w-screen-lg">
+              <Header />
               <AnimatePresence>
-                <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
+                <motion.div
+                  id="backgroundGlitch"
+                  aria-hidden="true"
+                  className="absolute w-full h-full"
+                >
                   <BackgroundGlitch duration={1100} />
                 </motion.div>
               </AnimatePresence>
