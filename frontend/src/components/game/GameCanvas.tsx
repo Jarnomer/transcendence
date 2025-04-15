@@ -7,12 +7,16 @@ import {
   Color4,
   CubicEase,
   DefaultRenderingPipeline,
-  Engine,
   EasingFunction,
+  Engine,
   Mesh,
   Scene,
   Vector3,
 } from 'babylonjs';
+
+import collisionSound from '@/assets/sounds/collision.wav';
+import powerUpSound from '@/assets/sounds/powerup.wav';
+import { useSound } from '@/hooks/useSound';
 
 import {
   PowerUpEffectsManager,
@@ -136,6 +140,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
+
+  const playCollisionSound = useSound(collisionSound);
+  const playPowerUpSound = useSound(powerUpSound);
+  // call playHoverSound on ball collision
 
   const animateBallAfterScore = (
     scene: Scene,
