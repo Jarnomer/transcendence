@@ -908,4 +908,249 @@ export function registerRetroShaders() {
     gl_FragColor = color;
   }
 `;
+
+  // Dust and scratch effect shader
+  Effect.ShadersStore['dustScratchVertexShader'] = `
+  precision highp float;
+  attribute vec2 position;
+  varying vec2 vUV;
+  void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    vUV = position * 0.5 + 0.5;
+  }
+`;
+
+  Effect.ShadersStore['dustScratchFragmentShader'] = `
+  precision highp float;
+  varying vec2 vUV;
+  uniform sampler2D textureSampler;
+  uniform float time;
+  uniform float dustAmount;
+  uniform float scratchAmount;
+  uniform float dustSize;
+  uniform float edgeIntensity;
+  uniform vec2 screenSize;
+  uniform float movementSpeed;
+
+  // Random function
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  // Better hash function for more dynamic patterns
+  float hash(vec2 p) {
+    p = 50.0*fract(p*0.3183099 + vec2(0.71,0.113));
+    return -1.0+2.0*fract(p.x*p.y*(p.x+p.y));
+  }
+
+  // Improved noise function for more natural patterns
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f*f*(3.0-2.0*f);
+
+    return mix(mix(hash(i + vec2(0.0,0.0)),
+                   hash(i + vec2(1.0,0.0)), u.x),
+               mix(hash(i + vec2(0.0,1.0)),
+                   hash(i + vec2(1.0,1.0)), u.x), u.y);
+  }
+
+  // Curved line function that creates more natural-looking scratches
+  float curvedLine(vec2 uv, vec2 start, vec2 control, vec2 end, float width) {
+    // Parametric time
+    float t = 0.0;
+    float minDist = 1.0;
+    vec2 pt = vec2(0.0);
+
+    // Test multiple points along the curve (quadratic bezier)
+    for (int i = 0; i < 25; i++) {
+      t = float(i) / 24.0; // 0 to 1
+
+      // Quadratic bezier formula
+      vec2 q0 = mix(start, control, t);
+      vec2 q1 = mix(control, end, t);
+      pt = mix(q0, q1, t);
+
+      // Calculate distance to the current point
+      float dist = length(uv - pt);
+      minDist = min(minDist, dist);
+    }
+
+    // Create a smooth line with variable alpha
+    float line = smoothstep(width, width * 0.5, minDist);
+
+    // Add some variation in intensity along the line
+    float variation = 0.7 + 0.3 * noise(pt * 50.0 + time * 2.0);
+
+    return line * variation;
+  }
+
+  void main() {
+    vec2 uv = vUV;
+    vec4 color = texture2D(textureSampler, uv);
+
+    // Faster time progression for more dynamic effect
+    float fastTime = time * movementSpeed * 3.0;
+
+    // ---------- DUST PARTICLES ----------
+    float dust = 0.0;
+    if (dustAmount > 0.0) {
+      // Generate multiple layers of dust with various properties
+      for (int i = 0; i < 4; i++) {
+        // Each layer has different parameters
+        float sizeMod = (float(i) * 0.5 + 1.0) * dustSize;
+        float speedMod = 0.2 + float(i) * 0.2;
+
+        // Faster movement with more erratic patterns
+        vec2 movement = vec2(
+          fastTime * speedMod * (0.5 + 0.5 * sin(fastTime * 0.1 + float(i))),
+          fastTime * speedMod * 0.7 * (0.5 + 0.5 * cos(fastTime * 0.13 + float(i)))
+        );
+
+        // Base noise for this dust layer
+        vec2 dustUV = uv * screenSize / (sizeMod * 8.0);
+        float n1 = noise((dustUV + movement) * (1.0 + float(i) * 0.2));
+        float n2 = noise((dustUV * 2.3 - movement * 0.8) * (1.2 + float(i) * 0.3));
+
+        // Combine noise patterns for more varied dust
+        float combined = n1 * n2 * 0.5 + 0.5;
+
+        // Create dust with various thresholds for different sizes
+        float baseThreshold = 0.95 - (float(i) * 0.02); // Larger particles for higher i
+        float dustThreshold = baseThreshold + 0.02 * sin(dustUV.x * 10.0 + fastTime);
+
+        // Create the dust effect with a sharp falloff
+        float layerDust = smoothstep(dustThreshold, dustThreshold + 0.01, combined);
+
+        // More dust toward edges
+        float edgeFactor = length(vec2(0.5, 0.5) - uv);
+        layerDust *= mix(0.8, 1.0 + edgeFactor * 2.0 * edgeIntensity, edgeIntensity);
+
+        // Layer-specific intensity
+        float intensity = 0.3 - float(i) * 0.05;
+        dust += layerDust * intensity;
+      }
+
+      // Additional very small dust particles with faster movement
+      vec2 microDustUV = uv * screenSize / (dustSize * 2.0);
+      vec2 microMovement = vec2(fastTime * 0.3, fastTime * 0.25);
+      float microNoise = noise(microDustUV * 5.0 + microMovement);
+
+      float microDust = step(0.985, microNoise) * 0.15;
+      dust += microDust;
+
+      // Scale dust by amount parameter
+      dust *= dustAmount;
+    }
+
+    // ---------- SCRATCHES ----------
+    float scratches = 0.0;
+    if (scratchAmount > 0.0) {
+      // Remove long vertical scratches, replace with shorter segments
+      for (int i = 0; i < 8; i++) {
+        // Change scratch parameters with time
+        float scratchTime = floor(fastTime * 0.8 + float(i * 3));
+        float seed = float(i) * 10.0 + scratchTime * 0.1;
+
+        // Random parameters for this scratch - no edge-to-edge lines
+        float xPos = 0.2 + rand(vec2(seed, 2.0)) * 0.6; // Keep away from edges
+
+        // Shorter scratch segments - only partial height
+        float yStart = 0.2 + rand(vec2(seed, 3.0)) * 0.3; // Start in middle section
+        float yEnd = yStart + 0.1 + rand(vec2(seed, 4.0)) * 0.3; // Never full height
+
+        // Some curve but not too extreme
+        float xControl = xPos + (rand(vec2(seed, 5.0)) * 2.0 - 1.0) * 0.05;
+        float xEnd = xPos + (rand(vec2(seed, 6.0)) * 2.0 - 1.0) * 0.08;
+
+        // Width varies along the scratch
+        float baseWidth = (0.0008 + rand(vec2(seed, 7.0)) * 0.002) * scratchAmount;
+
+        // Only show scratch if random value is high enough
+        float scratchChance = rand(vec2(seed, 8.0));
+        if (scratchChance > 0.6) {
+          // Draw curved scratch
+          float scratch = curvedLine(
+            uv,
+            vec2(xPos, yStart),
+            vec2(xControl, (yStart + yEnd) * 0.5),
+            vec2(xEnd, yEnd),
+            baseWidth
+          );
+
+          // Vary intensity along the scratch
+          float intensity = 0.6 + 0.4 * noise(vec2(uv.y * 20.0, fastTime));
+          scratches += scratch * intensity;
+        }
+      }
+
+      // Remove long horizontal scratches, replace with shorter segments
+      for (int i = 0; i < 5; i++) {
+        float scratchTime = floor(fastTime * 0.5 + float(i * 4));
+        float seed = float(i) * 25.0 + scratchTime * 0.1;
+
+        float yPos = 0.2 + rand(vec2(seed, 12.0)) * 0.6; // Keep away from top/bottom edges
+
+        // Shorter scratch segments - only partial width
+        float xStart = 0.2 + rand(vec2(seed, 13.0)) * 0.3; // Start in middle section
+        float xEnd = xStart + 0.1 + rand(vec2(seed, 14.0)) * 0.3; // Never full width
+
+        // Some curve but not extreme
+        float yControl = yPos + (rand(vec2(seed, 15.0)) * 2.0 - 1.0) * 0.05;
+        float yEnd = yPos + (rand(vec2(seed, 16.0)) * 2.0 - 1.0) * 0.08;
+
+        float baseWidth = (0.0004 + rand(vec2(seed, 17.0)) * 0.001) * scratchAmount;
+
+        float scratchChance = rand(vec2(seed, 18.0));
+        if (scratchChance > 0.7) {
+          float scratch = curvedLine(
+            uv,
+            vec2(xStart, yPos),
+            vec2((xStart + xEnd) * 0.5, yControl),
+            vec2(xEnd, yEnd),
+            baseWidth
+          );
+
+          float intensity = 0.5 + 0.5 * noise(vec2(uv.x * 20.0, fastTime * 0.5));
+          scratches += scratch * intensity;
+        }
+      }
+
+      // Keep the short "dash" scratches - these are good
+      for (int i = 0; i < 15; i++) { // Increased count to compensate for removed long scratches
+        float scratchTime = floor(fastTime + float(i * 2));
+        float seed = float(i) * 30.0 + scratchTime * 0.2;
+
+        float xPos = 0.1 + rand(vec2(seed, 20.0)) * 0.8;
+        float yPos = 0.1 + rand(vec2(seed, 21.0)) * 0.8;
+
+        // Random length and direction but always short
+        float angle = rand(vec2(seed, 22.0)) * 3.14159 * 2.0;
+        float length = 0.02 + rand(vec2(seed, 23.0)) * 0.08; // Keep these shorter
+
+        vec2 dir = vec2(cos(angle), sin(angle));
+        vec2 start = vec2(xPos, yPos);
+        vec2 control = start + dir * length * 0.5 + vec2(rand(vec2(seed, 24.0)), rand(vec2(seed, 25.0))) * 0.03;
+        vec2 end = start + dir * length;
+
+        float width = (0.0002 + rand(vec2(seed, 26.0)) * 0.0008) * scratchAmount;
+
+        float scratchChance = rand(vec2(seed, 27.0));
+        if (scratchChance > 0.4) { // Increased frequency
+          float scratch = curvedLine(uv, start, control, end, width);
+          scratches += scratch * 0.4;
+        }
+      }
+
+      // Scale scratches by amount parameter
+      scratches *= scratchAmount;
+    }
+
+    // ---------- COMBINED EFFECT ----------
+    // Add dust and scratches to original image with a slight glow
+    color.rgb += vec3(dust + scratches) * 1.2;
+
+    gl_FragColor = color;
+  }
+`;
 }
