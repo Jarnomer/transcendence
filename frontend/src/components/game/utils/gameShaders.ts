@@ -588,7 +588,7 @@ export function registerRetroShaders() {
       p2 = p2 + p2 * offset * offset;
 
       // Convert back to 0.0 to 1.0 range
-      return p2 * 0.5 + 0.5;
+      return p2 * 0.5 * 1.01 + 0.5;
     }
 
     void main() {
