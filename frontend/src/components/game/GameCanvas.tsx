@@ -237,7 +237,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera, false);
-    const { shadowGenerators } = setupScenelights(scene);
+    const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);

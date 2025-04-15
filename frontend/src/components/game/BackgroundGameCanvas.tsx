@@ -186,7 +186,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     const pipeline = setupPostProcessing(scene, camera, true);
     applyLowQualitySettings(scene, pipeline);
 
-    const { shadowGenerators } = setupScenelights(scene);
+    const { shadowGenerators } = setupScenelights(scene, primaryColor);
     optimizeShadowGenerators(shadowGenerators);
 
     floorRef.current = createFloor(scene, backgroundColor);
