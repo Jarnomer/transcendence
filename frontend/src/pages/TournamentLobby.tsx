@@ -145,6 +145,39 @@ export const TournamentPlayerList: React.FC = () => {
   );
 };
 
+export const TournamentMatchList: React.FC = ({ players }) => {
+  const [activeTab, setActiveTab] = useState('bracket');
+
+  return (
+    <motion.div>
+      <div className="flex gap-3">
+        <button className="text-xs" onClick={() => setActiveTab('bracket')}>
+          bracket
+        </button>
+        <button className="text-xs" onClick={() => setActiveTab('list')}>
+          list
+        </button>
+      </div>
+      <motion.div
+        key="tournamentBracket"
+        className="w-full h-full  border-1 border-primary bg-black/30"
+        variants={slideFromRightVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        {activeTab == 'bracket' ? (
+          <TournamentBracket players={players}></TournamentBracket>
+        ) : (
+          <>
+            <h1>not implemented :)</h1>
+          </>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+};
+
 export const TournamentLobby: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
@@ -159,10 +192,10 @@ export const TournamentLobby: React.FC = () => {
   // }, [user]);
 
   useEffect(() => {
-    if (!user || !players) return;
+    if (!user) return;
 
     const setupChat = async () => {
-      console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', players);
+      console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
       const chatId = await createRoom(
         'tournamentChat_' + Math.floor(Math.random() * 50),
         true,
@@ -174,7 +207,9 @@ export const TournamentLobby: React.FC = () => {
     };
 
     setupChat();
-  }, [players]);
+  }, [user]);
+
+  useEffect(() => {}, [tournamentChatId]);
 
   useEffect(() => {
     setPlayers(Array.from({ length: 8 }, (_, i) => `Competitor ${i + 1}`));
@@ -208,16 +243,7 @@ export const TournamentLobby: React.FC = () => {
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
               ) : activeTab == 'matches' ? (
-                <motion.div
-                  key="tournamentPlayerList"
-                  className="w-full h-full  border-1 border-primary"
-                  variants={slideFromRightVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                >
-                  <TournamentBracket players={players}></TournamentBracket>
-                </motion.div>
+                <TournamentMatchList players={players}></TournamentMatchList>
               ) : (
                 <motion.div
                   key="tournamentPlayerList"
@@ -234,7 +260,7 @@ export const TournamentLobby: React.FC = () => {
           </motion.div>
           <div className="@container glass-box h-[200px] w-full">
             <p>chat</p>
-            {user && players && tournamentChatId && (
+            {user && tournamentChatId && (
               <ChatWindow
                 selectedFriendId={selectedFriendId}
                 friends={friends}
