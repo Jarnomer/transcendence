@@ -458,6 +458,8 @@ export default class PongGame {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
+        this.resetPaddles();
+        // this.resetBall();
       }
     } else if (ball.x + this.params.ball.size >= this.params.dimensions.gameWidth) {
       players.player1.score++;
@@ -466,6 +468,8 @@ export default class PongGame {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
+        this.resetPaddles();
+        // this.resetBall();
       }
     }
   }

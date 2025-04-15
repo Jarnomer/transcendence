@@ -174,13 +174,7 @@ export class PowerUpManager {
   }
 
   resetPowerUps(): void {
-    for (const powerUp of this.powerUps) {
-      // if (!powerUp.active) {
-      //   console.log('Deleting uncollected power-up id:', powerUp.id);
-      //   this.removePowerUp(powerUp.id);
-      // }
-      this.removePowerUp(powerUp.id);
-    }
+    this.powerUps = [];
   }
 
   removePowerUp(id: number): void {
