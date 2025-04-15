@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
+  Animation,
   ArcRotateCamera,
   Color3,
+  Color4,
+  CubicEase,
   DefaultRenderingPipeline,
   Engine,
+  EasingFunction,
+  Mesh,
   Scene,
   Vector3,
 } from 'babylonjs';
@@ -22,10 +27,18 @@ import {
   createFloor,
   createPaddle,
   createPongRetroEffects,
+<<<<<<< HEAD
   gameToSceneX,
   gameToSceneY,
   getThemeColors,
   setupEnvironmentMap,
+=======
+  enableRequiredExtensions,
+  gameToSceneX,
+  gameToSceneY,
+  getThemeColors,
+  parseColor,
+>>>>>>> origin/frontend-game
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
@@ -33,10 +46,14 @@ import {
 } from '@game/utils';
 
 import {
+  Ball,
   GameState,
   PowerUp,
   RetroEffectsLevels,
+<<<<<<< HEAD
   defaultGameObjectParams,
+=======
+>>>>>>> origin/frontend-game
   defaultGameParams,
   defaultRetroEffectsLevels,
 } from '@shared/types';
@@ -116,6 +133,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(retroLevels);
 
+  const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
   const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
   const prevPowerUpsRef = useRef<PowerUp[]>([]);
@@ -130,22 +148,109 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
 
+  const animateBallAfterScore = (
+    scene: Scene,
+    ballMesh: Mesh,
+    ballState: Ball,
+    camera: ArcRotateCamera,
+    scoringPlayer: 'player1' | 'player2',
+    gameWidth: number = defaultGameParams.dimensions.gameWidth,
+    gameHeight: number = defaultGameParams.dimensions.gameHeight,
+    scaleFactor: number = defaultGameParams.dimensions.scaleFactor
+  ) => {
+    isAnimatingBallRef.current = true;
+
+    const ballX = ballMesh.position.x;
+    const ballY = ballMesh.position.y;
+    const ballZ = ballMesh.position.z;
+
+    const ballDx = ballState.dx / scaleFactor;
+    const ballDy = -ballState.dy / scaleFactor;
+
+    const frameRate = 30;
+
+    const continueStartPos = new Vector3(ballX, ballY, ballZ);
+    const continueFinalPos = new Vector3(
+      ballX + ballDx * frameRate,
+      ballY + ballDy * frameRate,
+      ballZ
+    );
+
+    const continueAnim = new Animation(
+      'ballContinueMovement',
+      'position',
+      frameRate,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const continueKeys = [
+      { frame: 0, value: continueStartPos },
+      { frame: frameRate, value: continueFinalPos },
+    ];
+    continueAnim.setKeys(continueKeys);
+
+    const cameraPos = camera.position.clone();
+    const cameraTarget = camera.target.clone();
+    const centerX = gameToSceneX(gameWidth / 2, ballMesh);
+    const centerY = gameToSceneY(gameHeight / 2, ballMesh);
+
+    const distanceBehindCamera = 8;
+    const xOffsetAmount = 3;
+
+    const xOffset = scoringPlayer === 'player1' ? xOffsetAmount : -xOffsetAmount;
+    const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
+    const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
+    const dropFinalPos = new Vector3(centerX, centerY, ballZ);
+
+    dropStartPos.x = centerX + xOffset;
+    dropStartPos.z += 5;
+
+    const dropAnim = new Animation(
+      'ballDropAnimation',
+      'position',
+      frameRate,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const dropKeys = [
+      { frame: 0, value: dropStartPos },
+      { frame: frameRate, value: dropFinalPos },
+    ];
+    dropAnim.setKeys(dropKeys);
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+    dropAnim.setEasingFunction(easingFunction);
+
+    // Execute animations in sequence
+    ballMesh.animations = [continueAnim];
+    scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
+      ballMesh.position = dropStartPos;
+      ballMesh.animations = [dropAnim];
+      scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
+        isAnimatingBallRef.current = false;
+      });
+    });
+  };
+
   // initial render setup
   useEffect(() => {
     if (!canvasRef.current || !gameState) return;
 
     const canvas = canvasRef.current;
     const engine = new Engine(canvas, true);
+    enableRequiredExtensions(engine);
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, backgroundColor } = colors;
 
-    setupEnvironmentMap(scene);
+    const bgColor = parseColor('#33353e');
+    scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
     const camera = setupSceneCamera(scene);
     const pipeline = setupPostProcessing(scene, camera, false);
-    const { shadowGenerators } = setupScenelights(scene);
+    const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
@@ -174,16 +279,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
 
-    topEdgeRef.current.position = new Vector3(
-      0,
-      gameToSceneY(0, bottomEdgeRef.current) + 0.5,
-      defaultGameObjectParams.distanceFromFloor
-    );
-    bottomEdgeRef.current.position = new Vector3(
-      0,
-      gameToSceneY(gameHeight, bottomEdgeRef.current) - 0.5,
-      defaultGameObjectParams.distanceFromFloor
-    );
+    topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
+    topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
+    bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
+    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
 
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
@@ -218,24 +317,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
   }, []);
 
-  // Update effect levels
-  useEffect(() => {
-    if (!retroEffectsRef.current) return;
-
-    try {
-      if (retroLevels !== retroLevelsRef.current) {
-        retroEffectsRef.current.updateLevels(retroLevels);
-        retroLevelsRef.current = retroLevels;
-      }
-
-      if (retroPreset === 'cinematic' || retroPreset === 'default') {
-        retroEffectsRef.current.applyPreset(retroPreset);
-      }
-    } catch (error) {
-      console.error('Error updating retro effects:', error);
-    }
-  }, [retroLevels, retroPreset]);
-
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;
 
@@ -250,28 +331,24 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Handle game object updates
   useEffect(() => {
-    if (!canvasRef.current || !sceneRef.current || !themeColors.current) return;
+    if (!canvasRef.current || !sceneRef.current || !cameraRef.current || !themeColors.current)
+      return;
 
-    const { players, ball, powerUps } = gameState;
+    const { players, ball } = gameState;
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
 
     // Convert coordinates to Babylon coordinate system
-    player1Ref.current.position = new Vector3(
-      gameToSceneX(0, player1Ref.current),
-      gameToSceneY(players.player1.y, player1Ref.current),
-      defaultGameObjectParams.distanceFromFloor
-    );
-    player2Ref.current.position = new Vector3(
-      gameToSceneX(gameWidth, player2Ref.current),
-      gameToSceneY(players.player2.y, player2Ref.current),
-      defaultGameObjectParams.distanceFromFloor
-    );
-    ballRef.current.position = new Vector3(
-      gameToSceneX(ball.x, ballRef.current),
-      gameToSceneY(ball.y, ballRef.current),
-      defaultGameObjectParams.distanceFromFloor
-    );
+    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+    player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
+    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+    player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
+
+    // Only update ball position if not in custom animation
+    if (!isAnimatingBallRef.current) {
+      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
+    }
 
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
@@ -291,6 +368,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     if (collision) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
       const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
+
       applyCollisionEffects(
         retroEffectsRef.current,
         ballRef.current,
@@ -304,14 +382,31 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       );
     }
 
-    if (score) applyScoreEffects(retroEffectsRef.current);
+    if (score) {
+      const scoringPlayerPaddle = score === 'player1' ? player1Ref.current : player2Ref.current;
+      const scoredAgainstPaddle = score === 'player1' ? player2Ref.current : player1Ref.current;
+
+      animateBallAfterScore(sceneRef.current, ballRef.current, ball, cameraRef.current, score);
+
+      applyScoreEffects(
+        retroEffectsRef.current,
+        sceneRef.current,
+        topEdgeRef.current,
+        bottomEdgeRef.current,
+        scoringPlayerPaddle,
+        scoredAgainstPaddle,
+        players[score].score,
+        players,
+        ball,
+        primaryColor
+      );
+    }
 
     applyPlayerEffects(
       sceneRef.current,
       player1Ref.current,
       player2Ref.current,
       players,
-      powerUps,
       primaryColor,
       secondaryColor
     );

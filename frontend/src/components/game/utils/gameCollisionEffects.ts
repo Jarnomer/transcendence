@@ -1,8 +1,8 @@
 import {
   Animation,
   Color3,
-  MeshBuilder,
   Color4,
+  MeshBuilder,
   ParticleSystem,
   PointLight,
   Scene,
@@ -21,7 +21,8 @@ function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
 
   const isLeftPaddle = paddleMesh.position.x < 0;
   const recoilDirection = isLeftPaddle ? -1 : 1;
-  const recoilDistance = 0.05 * (speedFactor * 3);
+  const recoilDistance = 0.05 * (speedFactor * 5);
+  const originalX = paddleMesh.originalPosition.x;
 
   // Create position animation with keyframes
   const frameRate = 60;
@@ -35,7 +36,6 @@ function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
 
   // Define keyframes for the recoil motion
   const keys = [];
-  const originalX = paddleMesh.originalPosition.x;
   keys.push({ frame: 0, value: originalX });
   keys.push({ frame: 5, value: originalX + recoilDirection * recoilDistance });
   keys.push({ frame: 15, value: originalX - recoilDirection * recoilDistance * 0.2 });
@@ -43,15 +43,10 @@ function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
 
   recoilAnimation.setKeys(keys);
 
-  // Stop any existing animations to prevent conflicts
-  scene.stopAnimation(paddleMesh);
-  paddleMesh.animations = [];
-  paddleMesh.animations.push(recoilAnimation);
-
-  // Adjust animation speed based on speedFactor
   const animationSpeed = Math.max(1, speedFactor * 0.7);
 
-  // Add a callback to ensure the restoration of origial position
+  scene.stopAnimation(paddleMesh, 'position.x');
+
   scene.beginDirectAnimation(paddleMesh, [recoilAnimation], 0, 30, false, animationSpeed, () => {
     paddleMesh.position.x = originalX;
   });
@@ -486,6 +481,7 @@ export function applyCollisionEffects(
 ) {
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);
+  const combinedFactor = speedFactor + spinFactor;
   const scene = ballMesh.getScene();
 
   applySquishEffect(ballMesh, collisionType, speedFactor, scene);
@@ -499,9 +495,7 @@ export function applyCollisionEffects(
     applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
   }
 
-  if (applyGlitch) speedFactor / 100;
-
-  if (retroEffectsRef) {
-    retroEffectsRef.setGlitchAmount(speedFactor);
+  if (retroEffectsRef && applyGlitch) {
+    retroEffectsRef.setGlitchAmount(combinedFactor / 8);
   }
 }

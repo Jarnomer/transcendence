@@ -26,6 +26,20 @@ export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   crtChannelSwitchEffect: 1,
 };
 
+export const cinematicRetroEffectsLevels: RetroEffectsLevels = {
+  scanlines: 5,
+  phosphor: 5,
+  curvature: 5,
+  glitch: 5,
+  colorBleed: 5,
+  flicker: 5,
+  vignette: 5,
+  noise: 5,
+  crtTurnOnEffect: 1,
+  crtTurnOffEffect: 1,
+  crtChannelSwitchEffect: 1,
+};
+
 export interface RetroEffectsBaseParams {
   scanlines: {
     intensity: number;
@@ -112,7 +126,7 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     nonSquareRatio: 0.2,
   },
   crtDistortion: {
-    curvatureAmount: 0,
+    curvatureAmount: 0.2,
     scanlineIntensity: 0.05,
     vignette: 1.2,
     colorBleed: 0.0,
@@ -133,18 +147,5 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
 
 export const retroEffectsPresets = {
   default: defaultRetroEffectsLevels,
-
-  cinematic: {
-    scanlines: 5,
-    phosphor: 5,
-    curvature: 0,
-    glitch: 5,
-    colorBleed: 5,
-    flicker: 5,
-    vignette: 5,
-    noise: 5,
-    crtTurnOnEffect: 1,
-    crtTurnOffEffect: 1,
-    crtChannelSwitchEffect: 1,
-  } as RetroEffectsLevels,
+  cinematic: cinematicRetroEffectsLevels,
 };

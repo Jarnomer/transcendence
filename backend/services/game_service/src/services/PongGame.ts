@@ -176,6 +176,7 @@ export default class PongGame {
   }
 
   collectPowerUp(
+    id: number,
     type: PowerUpType,
     affectedPlayer: number,
     timeToExpire: number,
@@ -188,6 +189,11 @@ export default class PongGame {
       timeToExpire,
       isNegative,
     });
+    for (const powerUp of this.gameState.powerUps) {
+      if (powerUp.id === id) {
+        powerUp.isCollected = true;
+      }
+    }
     console.log(`Power-up collected by player ${affectedPlayer}:`, type);
   }
 
