@@ -61,7 +61,7 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick,
   };
 
   return (
-    <button className="" id={id} onClick={onClick} aria-label={ariaLabel}>
+    <button className="hover:text-secondary" id={id} onClick={onClick} aria-label={ariaLabel}>
       {icons[icon]}
     </button>
   );

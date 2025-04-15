@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+import { toast } from 'react-hot-toast';
+
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 import {
   addMember,
@@ -10,6 +12,8 @@ import {
   getPublicChat,
 } from '@/services/chatService';
 
+import { MessageNotification } from '../../components/chat/MessageNotification';
+import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../user/UserContext';
 
 const ChatContext = createContext<any>(null);
@@ -26,9 +30,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [rooms, setRooms] = useState<any[]>([]);
   const [myRooms, setMyRooms] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<any>();
 
   const roomIdRef = useRef(roomId);
   const selectedFriendRef = useRef(selectedFriend);
+  const selectedRoomRef = useRef(selectedRoom);
+  const { openModal } = useModal();
 
   useEffect(() => {
     if (!user) return;
@@ -44,6 +51,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [selectedFriend]);
 
   useEffect(() => {
+    console.log('chat context:', connections);
     const userId = localStorage.getItem('userID');
     if (!userId) return;
     const user_id = localStorage.getItem('userID')!;
@@ -101,6 +109,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [roomId]);
 
+  useEffect(() => {
+    console.log('my rooms useEffect: ', myRooms);
+  }, [myRooms]);
+
   //get public chat rooms
   useEffect(() => {
     getPublicChat()
@@ -128,22 +140,65 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (connections.chat === 'connected') {
-      console.log('Chat socket is already connected');
-      chatSocket.addEventListener('message', handleChatMessage);
-    }
+    console.log('Chat socket is already connected');
+    chatSocket.addEventListener('message', handleChatMessage);
     return () => {
       console.log('Cleaning up chat socket');
       chatSocket.removeEventListener('message', handleChatMessage);
     };
-  }, [connections.chat]);
+  }, []);
+
+  const notifyMessage = (event: MessageEvent) => {
+    if (
+      (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
+      (selectedFriendRef.current &&
+        event.receiver_id &&
+        event.sender_id === selectedFriendRef.current)
+    ) {
+      return;
+    }
+    toast.custom((t) => (
+      <MessageNotification>
+        <div
+          className="h-full w-full flex items-center glass-box"
+          onClick={() => handleNotificationClick(event.sender_id)}
+        >
+          <div className="h-full aspect-square p-2">
+            <img
+              className="object-contain h-full w-full border-1"
+              src={event.avatar_url || './src/assets/images/default_avatar.png'}
+            ></img>
+          </div>
+          <div className="text-xs">
+            <p className="text-xs">{event.display_name}</p>
+            <p className="text-xs">{event.message}</p>
+          </div>
+        </div>
+      </MessageNotification>
+    ));
+  };
+
+  const handleNotificationClick = (sender_id: string) => {
+    setSelectedFriend(sender_id);
+    setRoomId(null);
+    console.log('message notfication CLICKED: ', sender_id);
+    openModal('chatModal', {
+      user,
+      friends,
+      selectedFriendId: sender_id,
+      sendChatMessage,
+    });
+  };
 
   const handleChatMessage = (event: MessageEvent) => {
+    console.log('----- HANDLE MESSAGE -----');
     console.log('Chat message:', event);
     console.log('Chat room id:', event.room_id);
     console.log('chat receiver_id:', event.receiver_id);
     console.log('chat selected room id:', roomIdRef.current);
     console.log('chat selected friend id:', selectedFriendRef.current);
+
+    notifyMessage(event);
     if (
       (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
       (selectedFriendRef.current &&
@@ -165,6 +220,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         type: selectedFriend ? 'dm' : 'room',
         payload: {
           sender_id: userId,
+          avatar_url: user?.avatar_url,
+          display_name: user?.display_name,
           receiver_id: selectedFriend,
           room_id: roomId,
           message: newMessage,
@@ -189,11 +246,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const createRoom = async (roomName: string, isPrivate: boolean, memberList: string[]) => {
+    console.log('roomName: ', roomName, ' isPrivate: ', isPrivate, 'memberList: ', memberList);
     const data = await createChatRoom(roomName, isPrivate ? 'private' : 'public');
     if (data) {
+      console.log('create room data: ', data);
       await addMember(data.chat_room_id, memberList);
       setRooms((prev) => [...prev, data]);
     }
+    setRoomId(data.chat_room_id);
+    return roomId;
   };
 
   return (

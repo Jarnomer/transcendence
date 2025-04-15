@@ -111,6 +111,34 @@ body {
   line-height: normal;
 }
 
+.clipped-corner {
+  clip-path: polygon(0 0, 96% 0, 100% 50%, 100% 100%, 0 100%);
+}
+
+.clipped-corner-bottom {
+  clip-path: polygon(0 0, 96% 0, 100% 50%, 100% 100%, 0 100%);
+}
+
+.clipped-corner-bottom-left {
+  clip-path: polygon(
+    0 0,
+    /* top-left */ 100% 0,
+    /* top-right */ 100% 100%,
+    /* bottom-right */ 4% 100%,
+    /* clipped point (bottom-left pushed in) */ 0 90% /* sharp diagonal up from bottom-left */
+  );
+}
+
+.clipped-corner-bottom-right {
+  clip-path: polygon(
+    0 0,
+    /* top-left */ 100% 0,
+    /* top-right */ 100% 90%,
+    /* diagonal start (before the corner) */ 96% 100%,
+    /* clipped point (moves left on the bottom line) */ 0 100% /* bottom-left */
+  );
+}
+
 @theme {
   /* --font-display: "Satoshi", "sans-serif"; */
   --font-*: initial;
@@ -119,8 +147,7 @@ body {
 
   /* --color-primary: oklch(88.3% 0.1288 203.73); */
   --color-primary: #ea355a;
-  --color-secondary: oklch(8% 0% 0);
-  --color-creators-secondary: oklch(45.9% 0.0227 21.99);
+  --color-secondary: #76f7fd;
   --color-background: black;
   /* --font-primary: "Tomorrow", "sans-serif"; */
   --font-primary: 'JetBrains Mono', 'italic';
@@ -139,7 +166,13 @@ body {
 
 @layer components {
   .glass-box {
-    @apply border-1 bg-primary/15 border-primary shadow-[0_0_3px] shadow-primary/80 inset-shadow-[0_0_3px] inset-shadow-primary/80;
+    @apply border-1 bg-current/15 border-current shadow-[0_0_3px] shadow-current/80 inset-shadow-[0_0_3px] inset-shadow-current/80;
+  }
+}
+
+@layer components {
+  .glow-container {
+    @apply relative w-[190px] h-[254px] transition-[200ms];
   }
 }
 
@@ -251,12 +284,12 @@ body {
 
 /* BACKGROUND GLOW SCANLINE ANIMATION  */
 
-.glow-container {
+/* .glow-container {
   position: relative;
   width: 190px;
   height: 254px;
   transition: 200ms;
-}
+} */
 
 .cyber-lines span {
   position: absolute;

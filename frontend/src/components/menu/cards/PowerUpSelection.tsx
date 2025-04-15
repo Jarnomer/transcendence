@@ -37,16 +37,16 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
         <span
           key={powerUp}
           onClick={() => handlePowerUpToggle(powerUp)}
-          className={`aspect-square text-center cursor-pointer ${selectedPowerUps.includes(powerUp) ? 'text-primary' : ' opacity-40'}`}
+          className={`aspect-square text-center cursor-pointer ${selectedPowerUps.includes(powerUp) ? 'text-secondary' : 'hover:opacity-100 opacity-60'}`}
         >
           <BoxDiv index={index} key={powerUp}>
             <div
-              className={`aspect-square max-w-full max-h-full p-2 flex flex-col gap-2 lg:p-10 text-center cursor-pointer ${selectedPowerUps.includes(powerUp) ? 'text-primary' : 'text-grey'}`}
+              className={`aspect-square max-w-full max-h-full p-3 flex flex-col gap-2 text-center cursor-pointer ${selectedPowerUps.includes(powerUp) ? 'text-primary' : 'text-grey'}`}
             >
-              <span className="text-secondary text-[10px]">{powerUp}</span>
               <div className="">{powerUpIcons[powerUp] || <PaddleSlowerIcon />}</div>
             </div>
           </BoxDiv>
+          <span className="text-secondary text-[10px]">{powerUp}</span>
         </span>
       ))}
     </div>

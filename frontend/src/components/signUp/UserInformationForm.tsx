@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
 import { api } from '../../services/api';
+import { ProfilePicture } from '../profile/ProfilePicture';
 
 interface EditProfileProps {
   user: UserDataResponseType;
@@ -301,6 +302,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setUser } = useUser();
+  // const [loading, setLoading] = useState<boolean>();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -385,40 +387,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
               <InformationRequestSvg></InformationRequestSvg>
             </div>
             <div className="relative">
-              <div className="w-[150px] h-[150px] border-l-1 border-y-1 border-primary">
-                <img
-                  className="object-cover w-full h-full"
-                  src={`https://localhost:8443/${user.avatar_url}`}
-                  alt="profile picture"
-                />
-              </div>
-              <>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  aria-label="Upload profile picture"
-                />
-
-                <button
-                  className="absolute right-0 bottom-0"
-                  onClick={() => fileInputRef.current?.click()}
-                  aria-label="upload profile picture"
-                >
-                  <svg
-                    className="size-9"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="black"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                  >
-                    <path d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                  </svg>
-                </button>
-              </>
+              <ProfilePicture user={user} isOwnProfile={true}></ProfilePicture>
             </div>
           </div>
           <motion.div

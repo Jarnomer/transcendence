@@ -14,7 +14,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'Search...',
 }) => {
   return (
-    <div className="w-full flex justify-between border">
+    <div className="w-full flex justify-between border-1">
       <label htmlFor="searchBar" className="sr-only">
         Search
       </label>
@@ -24,7 +24,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="p-2 border w-full "
+        className="p-2 border-1 w-full "
       />
 
       <div className="px-2 border">

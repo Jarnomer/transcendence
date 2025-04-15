@@ -15,6 +15,7 @@ import { LoginPage } from '../../pages/LoginPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
+import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
@@ -107,6 +108,19 @@ export const AnimatedRoutes: React.FC = () => {
             user ? (
               <PageWrapper>
                 <Settings />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/tournamentLobby"
+          element={
+            user ? (
+              <PageWrapper>
+                <TournamentLobby />
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />

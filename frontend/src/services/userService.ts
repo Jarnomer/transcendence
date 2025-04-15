@@ -18,7 +18,7 @@ export async function getUserData(userId: string) {
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
-    console.log('user data', res.data);
+    // console.log('user data', res.data);
     return res.data;
   } catch (err) {
     console.error('Failed to get user data:', err);
@@ -29,7 +29,7 @@ export async function getUserData(userId: string) {
 export async function getUsers() {
   try {
     const res = await api.get<AllResponseType>(`/user/all`);
-    console.log(res);
+    // console.log(res);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to fetch user data`);
     }
@@ -62,6 +62,19 @@ export async function getUsersInQueue() {
     return res.data;
   } catch (err) {
     console.error('Failed to get users in queue:', err);
+    throw err;
+  }
+}
+
+export async function getTournaments() {
+  try {
+    const res = await api.get(`/matchmaking/tournaments?page=1&pageSize=10`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch tournaments`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get tournaments:', err);
     throw err;
   }
 }

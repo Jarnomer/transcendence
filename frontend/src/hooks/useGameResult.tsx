@@ -9,21 +9,15 @@ import { GameState } from '@types';
 
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
-export const useGameResult = (
-  gameStatus: string,
-  gameId: string | null,
-  gameState: GameState,
-  dispatch: any,
-  userId: string | null
-) => {
+export const useGameResult = (userId: string | null) => {
   const navigate = useNavigate();
+  const { resetGameOptions, gameId, mode } = useGameOptionsContext();
+  const { closeConnection, gameStatus, gameState, dispatch } = useWebSocketContext();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
-  const { resetGameOptions } = useGameOptionsContext();
-  const { closeConnection } = useWebSocketContext();
 
   useEffect(() => {
     if (!userId) return;
@@ -49,7 +43,9 @@ export const useGameResult = (
     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
       console.log('Game finished, submitting result');
       dispatch({ type: 'GAME_RESET' });
-      navigate('/home');
+      if (mode !== 'tournamnet') {
+        navigate('/home');
+      }
       resetGameOptions();
       hasSubmittedResult.current = true;
     }
@@ -91,10 +87,12 @@ export const useGameResult = (
   useEffect(() => {
     return () => {
       console.log('Cleanup');
-      if (!gameIdRef.current || hasSubmittedResult.current) return;
+      if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
-        navigate('/home');
+        if (mode !== 'tournamnet') {
+          navigate('/home');
+        }
         return;
       }
       console.log('Submitting game result:', gameIdRef.current);
@@ -124,7 +122,9 @@ export const useGameResult = (
           console.error('Error submitting game result:', err);
         })
         .finally(() => {
-          navigate('/home');
+          if (mode !== 'tournamnet') {
+            navigate('/home');
+          }
         });
     };
   }, []);

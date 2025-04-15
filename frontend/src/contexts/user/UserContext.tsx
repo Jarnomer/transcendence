@@ -36,7 +36,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
   const userId = localStorage.getItem('userID');
 
   const fetchUser = useCallback(() => {
@@ -45,15 +44,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       return;
     }
-    console.log('Fetching user data in UserContext...');
-    console.log(userId);
+    // console.log('Fetching user data in UserContext...');
+    // console.log(userId);
     getUserData(userId)
       .then((data) => {
         setUser(data);
-        console.log('Fetched user data:', data);
+        // console.log('Fetched user data:', data);
       })
       .catch((err) => {
         console.error('Failed to fetch user data', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('userID');
+        localStorage.removeItem('username');
         setUser(null);
       });
   }, []);
@@ -97,8 +99,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const userId = user?.user_id || localStorage.getItem('userID');
       if (userId) {
-        await api.post('/auth/logout', { user_id: userId });
         await api.patch(`/user/${userId}`, { status: 'offline' });
+        await api.post('/auth/logout', { user_id: userId });
       }
     } catch (error) {
       console.error('Logout failed:', error);
@@ -112,6 +114,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    console.log('UserContext mounted');
     fetchUser();
     fetchRequestsSent();
   }, [fetchUser, fetchRequestsSent]);

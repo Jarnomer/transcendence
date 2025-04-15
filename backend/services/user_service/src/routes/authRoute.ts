@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import 'module-alias/register';
 
-
 import {
   DeleteResponseSchema,
   DeleteResponseType,
@@ -11,6 +10,7 @@ import {
   LoginResponseType,
   LoginSchema,
   LoginType,
+  LogoutResponseSchema,
   LogoutResponseType,
   LogoutSchema,
   LogoutType,
@@ -51,7 +51,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   );
   fastify.post<{ Body: LogoutType; Reply: LogoutResponseType }>(
     '/logout',
-    { schema: { body: LogoutSchema, response: { 200: LoginResponseSchema } } },
+    { schema: { body: LogoutSchema, response: { 200: LogoutResponseSchema } } },
     authController.logout.bind(authController)
   );
   fastify.get<{ Headers: RefreshType; Reply: RefreshResponseType }>(

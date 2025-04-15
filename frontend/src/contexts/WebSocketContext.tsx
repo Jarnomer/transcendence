@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 
-import { GameState, GameStatus, GameEvent } from '@shared/types';
+import { GameEvent, GameState, GameStatus } from '@shared/types';
 
 import { useChatSocket } from '../hooks/useChatSocket';
 import { useGameSocket } from '../hooks/useGameSocket';
@@ -31,7 +31,7 @@ interface WebSocketContextType {
     matchmaking: ConnectionStatus;
   };
   gameStatus: GameStatus;
-  gameState: GameState;
+  gameState: GameState | null;
   gameEvent: GameEvent;
   dispatch: React.Dispatch<any>;
 }

@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import {
   ArcRotateCamera,
-  Vector3,
   Color3,
   DefaultRenderingPipeline,
   Engine,
   Scene,
+  Vector3,
 } from 'babylonjs';
 
 import {
-  RetroEffectsManager,
   PowerUpEffectsManager,
+  RetroEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -22,9 +22,9 @@ import {
   createFloor,
   createPaddle,
   createPongRetroEffects,
-  getThemeColors,
   gameToSceneX,
   gameToSceneY,
+  getThemeColors,
   setupEnvironmentMap,
   setupPostProcessing,
   setupReflections,
@@ -36,9 +36,9 @@ import {
   GameState,
   PowerUp,
   RetroEffectsLevels,
-  defaultRetroEffectsLevels,
-  defaultGameParams,
   defaultGameObjectParams,
+  defaultGameParams,
+  defaultRetroEffectsLevels,
 } from '@shared/types';
 
 interface GameCanvasProps {
@@ -236,7 +236,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   }, [retroLevels, retroPreset]);
 
-  // Handle power-up updates
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;
 
@@ -251,7 +250,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Handle game object updates
   useEffect(() => {
-    if (!canvasRef.current || !themeColors.current) return;
+    if (!canvasRef.current || !sceneRef.current || !themeColors.current) return;
 
     const { players, ball, powerUps } = gameState;
     const primaryColor = themeColors.current.primaryColor;
@@ -307,17 +306,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (score) applyScoreEffects(retroEffectsRef.current);
 
-    if (sceneRef.current && powerUps && powerUps.length > 0) {
-      applyPlayerEffects(
-        sceneRef.current,
-        player1Ref.current,
-        player2Ref.current,
-        players,
-        powerUps,
-        primaryColor,
-        secondaryColor
-      );
-    }
+    applyPlayerEffects(
+      sceneRef.current,
+      player1Ref.current,
+      player2Ref.current,
+      players,
+      powerUps,
+      primaryColor,
+      secondaryColor
+    );
 
     prevBallState.current = {
       x: ball.x,

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { motion } from 'framer-motion';
 
-import { PowerUpSelection } from '../components/menu/cards/PowerUpSelection';
 import { ClippedButton } from '../components/UI/buttons/ClippedButton';
 import { SvgBorderBig } from '../components/visual/svg/borders/SvgBorderBig';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -14,7 +15,8 @@ export const CreateTournament: React.FC = () => {
   const [enablePowerUps, setEnablePowerUps] = useState(false);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   const [tournamentName, setTournamentName] = useState('');
-  const { setTournamentOptions } = useGameOptionsContext();
+  const { setTournamentOptions, setDifficulty } = useGameOptionsContext();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +29,8 @@ export const CreateTournament: React.FC = () => {
       // selectedPowerUps: enablePowerUps ? selectedPowerUps : [],
     };
     setTournamentOptions(formData);
+    setDifficulty(formData.playerCount.toString());
+    navigate('/game');
     console.log('Submitting tournament data:', formData);
   };
 
@@ -43,7 +47,7 @@ export const CreateTournament: React.FC = () => {
             Player Count: {playerCount}
             <input
               type="range"
-              min={4}
+              min={2}
               max={16}
               step={2}
               value={playerCount}

@@ -8,7 +8,6 @@ import { BackgroundGlow } from '../components';
 import { ChatSidebar } from '../components/chat/ChatSideBar';
 import { ChatWindow } from '../components/chat/ChatWindow';
 import { CreateRoomPopup } from '../components/chat/CreateRoomPopup';
-import { RoomChatWindow } from '../components/chat/RoomChatWindow';
 
 export const ChatPage: React.FC = () => {
   const {
@@ -53,7 +52,7 @@ export const ChatPage: React.FC = () => {
       <div className="flex h-[600px] glass-box overflow-hidden relative">
         <BackgroundGlow />
         <div
-          className={` w-full h-full ${!selectedFriend ? 'w-full md:block' : 'hidden lg:block md:w-1/3 lg:1/5'} overflow-y-auto`}
+          className={` w-full h-full ${!selectedFriend && !roomId ? 'w-full md:block' : 'hidden lg:block md:w-1/3 lg:1/5'} overflow-y-auto`}
         >
           <ChatSidebar />
         </div>
@@ -71,7 +70,7 @@ export const ChatPage: React.FC = () => {
             onSend={sendChatMessage}
           />
         ) : roomId ? (
-          <RoomChatWindow
+          <ChatWindow
             messages={messages}
             user={user}
             roomId={roomId}
