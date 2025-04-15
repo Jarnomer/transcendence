@@ -4,7 +4,6 @@ import { Room, User } from '@/shared/types';
 
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
-import SearchBar from '../UI/SearchBar';
 
 interface ChatSidebarProps {
   searchQuery: string;
@@ -17,9 +16,10 @@ interface ChatSidebarProps {
   onFriendSelect: (id: string) => void;
   onRoomSelect: (id: string) => void;
   handleClickNewChat: () => void;
+  children?: React.ReactNode;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) => {
+export const NewChat: React.FC<ChatSidebarProps> = ({ handleClickNewChat, children }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const {
     friends,
@@ -32,33 +32,34 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
     joinRoom,
   } = useChatContext();
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value.toLowerCase());
-  };
-
-  const filteredUsers = friends.filter((friend) =>
-    friend.display_name?.toLowerCase().startsWith(searchQuery)
+  const filteredUsers = friends.filter((u) =>
+    u.display_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   return (
     <>
       <div
         id="chatSideBar"
-        className={`w-full h-full ${selectedFriend ? 'hidden lg:block' : 'md:block border-l-0'} border-r p-2 overflow-y-auto`}
+        className={`w-full h-full ${selectedFriend ? 'hidden lg:block' : 'md:block'} border-r p-2 overflow-y-auto`}
       >
-        <div className={`flex  ${selectedFriend ? 'w-full' : 'sm:w-1/2'}  items-center gap-2 mb-2`}>
-          <SearchBar value={searchQuery} onChange={handleSearchChange} placeholder="Search users" />
-          <div className="w-8 h-8">
+        <div className="w-full flex gap-3 relative">
+          <div className="overflow-hidden absolute left-0">
             <NavIconButton
-              id="new-chat-button"
-              ariaLabel="New Chat"
-              icon="PencilSquareIcon"
+              id="go-back-button"
+              ariaLabel="back to chat list"
+              icon="arrowLeft"
               onClick={handleClickNewChat}
             />
+          </div>
+          <div className="mb-2 text-center w-full">
+            <p>New Group Chat</p>
           </div>
         </div>
 
         <div>
-          <h3 className="text-md font-bold mb-1">Friends</h3>
+          {children}
+
+          {/* <h3 className="text-sm font-bold mb-1">Friends</h3>
           {filteredUsers.map((user) => (
             <div className="flex gap-3 justify-center items-center" key={`chat_${user.user_id}`}>
               <div className="w-[25px] h-[25px]">
@@ -73,7 +74,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
                   setSelectedFriend(user.user_id);
                   setRoomId(null);
                 }}
-                className={`block w-full text-left text-sm p-1 rounded ${
+                className={`block w-full text-left p-1 rounded ${
                   selectedFriend === user.user_id ? 'text-secondary' : ''
                 }`}
               >
@@ -84,7 +85,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
         </div>
 
         <div className="mt-4">
-          <h3 className="text-md font-bold mb-1">Rooms</h3>
+          <h3 className="text-sm font-bold mb-1">Rooms</h3>
           {[...myRooms, ...rooms].map((room) => (
             <button
               key={room.chat_room_id}
@@ -93,13 +94,13 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
                 setSelectedFriend(null);
                 setRoomId(room.chat_room_id);
               }}
-              className={`block w-full text-sm text-left p-1 rounded hover:bg-secondary/20 ${
+              className={`block w-full text-left p-1 rounded hover:bg-secondary/20 ${
                 roomId === room.chat_room_id ? 'text-secondary' : ''
               }`}
             >
               {room.name}
             </button>
-          ))}
+          ))} */}
         </div>
       </div>
     </>

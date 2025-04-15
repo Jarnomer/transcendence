@@ -2,11 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { AnimatePresence, motion } from 'framer-motion';
+
 // import { logout } from "../auth";  // Ensure your logout function is correctly imported
 import { useModal } from '../../contexts/modalContext/ModalContext'; // Importing modal context
 import { useUser } from '../../contexts/user/UserContext';
+import { Notifications } from '../notifications/Notifications';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
-import { Notifications } from '../UI/Notifications';
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0% 0 0% 0)',
+    opacity: 1,
+    transition: { duration: 0.1, ease: 'easeInOut' },
+  },
+  exit: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+    transition: { duration: 0.1, ease: 'easeInOut' },
+  },
+};
 
 export const HeaderNav: React.FC = () => {
   const { openModal } = useModal();
@@ -16,7 +35,7 @@ export const HeaderNav: React.FC = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+    if (!isDropdownOpen) setIsDropdownOpen(!isDropdownOpen);
   };
 
   useEffect(() => {
@@ -72,11 +91,20 @@ export const HeaderNav: React.FC = () => {
             icon="bell"
             onClick={() => toggleDropdown()}
           />
-          {isDropdownOpen ? (
-            <div ref={dropdownRef} className="absolute right-0 top-10 glass-box p-2 opening">
-              <Notifications></Notifications>
-            </div>
-          ) : null}
+          <AnimatePresence mode="wait">
+            {isDropdownOpen ? (
+              <motion.div
+                ref={dropdownRef}
+                className="absolute h-[200px] right-0 top-15 glass-box p-2"
+                variants={animationVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <Notifications></Notifications>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
           <NavIconButton
             id="nav-chat-button"
             ariaLabel="Chat"

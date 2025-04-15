@@ -99,11 +99,18 @@ export const ProfilePage: React.FC = () => {
     return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
   }
 
+  console.log('loggedInUser friend requests: ', loggedInUser?.friend_requests);
   return (
     <>
       <motion.div className="w-full h-full  pb-10 flex flex-col justify-start text-center">
         <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
-        asdasd
+
+        {loggedInUser?.friend_requests &&
+        loggedInUser.friend_requests.some((req) => req.user_id === user?.user_id) ? (
+          <span className="p-1">{user?.display_name + ' sent you a friend request'}</span>
+        ) : (
+          ''
+        )}
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
             <UserInformationForm

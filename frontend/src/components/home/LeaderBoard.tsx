@@ -53,6 +53,7 @@ export const LeaderBoard: React.FC = () => {
   const filteredUsers = users.filter((user) =>
     user.display_name?.toLowerCase().startsWith(searchQuery)
   );
+  
   // .filter(
   //   (user) => !['easy', 'brutal', 'normal'].includes(user.user_id) // Filter by user_id
   // );

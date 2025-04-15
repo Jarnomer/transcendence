@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -7,7 +7,7 @@ import { useChatContext } from '@/contexts/chatContext/ChatContext';
 import { BackgroundGlow } from '../components';
 import { ChatSidebar } from '../components/chat/ChatSideBar';
 import { ChatWindow } from '../components/chat/ChatWindow';
-import { CreateRoomPopup } from '../components/chat/CreateRoomPopup';
+import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
 
 export const ChatPage: React.FC = () => {
   const {
@@ -31,12 +31,16 @@ export const ChatPage: React.FC = () => {
   const isChatPage = location.pathname === '/chat' ? true : false;
   console.log('isChatPage:', isChatPage);
 
+  useEffect(() => {}, [isRoomPopupVisible]);
+
+  const handleClickNewChat = () => {
+    setRoomPopupVisible(!isRoomPopupVisible);
+  };
+
   return (
     <div className="p-2 w-full h-full">
-      {isChatPage ? (
+      {/* {isChatPage ? (
         <>
-          <button onClick={() => setRoomPopupVisible(true)}>Create Room</button>
-
           <CreateRoomPopup
             isVisible={isRoomPopupVisible}
             onClose={() => setRoomPopupVisible(false)}
@@ -47,14 +51,20 @@ export const ChatPage: React.FC = () => {
             }}
           />
         </>
-      ) : null}
+      ) : null} */}
 
       <div className="flex h-[600px] glass-box overflow-hidden relative">
         <BackgroundGlow />
         <div
           className={` w-full h-full ${!selectedFriend && !roomId ? 'w-full md:block' : 'hidden lg:block md:w-1/3 lg:1/5'} overflow-y-auto`}
         >
-          <ChatSidebar />
+          {isRoomPopupVisible ? (
+            <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
+          ) : (
+            <>
+              <ChatSidebar handleClickNewChat={handleClickNewChat}></ChatSidebar>
+            </>
+          )}
         </div>
 
         {selectedFriend ? (
