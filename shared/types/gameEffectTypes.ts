@@ -82,7 +82,7 @@ export const defaultBallEffectsParams: BallEffectsParams = {
     spinDivisor: 10,
     speedDivisor: 50,
     scaleMultiplier: 0.7,
-    alphaMultiplier: 0.5,
+    alphaMultiplier: 0.8,
     baseEmitRate: 40,
     limits: {
       spinFactor: {

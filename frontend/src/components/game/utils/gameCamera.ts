@@ -24,20 +24,68 @@ export interface CameraAngle {
   dofBlurLevel?: number; // blur level (low, medium, high)
 }
 
-// Camera angle presets
+// NOTE: alpha, beta and radius are ignored if position is set
 export const cameraAngles: CameraAngle[] = [
   {
-    alpha: Math.PI / 3, // ignored if position is set
-    beta: Math.PI / 3, // ignored if position is set
+    alpha: Math.PI / 3,
+    beta: Math.PI / 3,
     radius: 20,
-    position: new Vector3(35, 20, 10), // explicit position
-    target: new Vector3(20, 10, 4), // where camera targets
+    position: new Vector3(3, -14, 4),
+    target: new Vector3(0, 0, 0),
     dofEnabled: true,
-    focalLength: 50,
+    focalLength: 30,
     fStop: 1.5,
     focusDistance: 50,
     dofBlurLevel: 5,
   },
+  // {
+  //   alpha: Math.PI / 3,
+  //   beta: Math.PI / 3,
+  //   radius: 20,
+  //   position: new Vector3(5, 15, 6),
+  //   target: new Vector3(-1, 2, -1),
+  //   dofEnabled: true,
+  //   focalLength: 30,
+  //   fStop: 1.5,
+  //   focusDistance: 50,
+  //   dofBlurLevel: 5,
+  // },
+  // {
+  //   alpha: Math.PI / 3,
+  //   beta: Math.PI / 3,
+  //   radius: 20,
+  //   position: new Vector3(12.5, 22.5, 22),
+  //   target: new Vector3(-1, -5, 0),
+  //   dofEnabled: true,
+  //   focalLength: 30,
+  //   fStop: 1.5,
+  //   focusDistance: 50,
+  //   dofBlurLevel: 5,
+  // },
+  // {
+  //   alpha: Math.PI / 3,
+  //   beta: Math.PI / 3,
+  //   radius: 20,
+  //   position: new Vector3(-2, 18.5, 9),
+  //   target: new Vector3(5, 5, 0),
+  //   dofEnabled: true,
+  //   focalLength: 30,
+  //   fStop: 1.5,
+  //   focusDistance: 50,
+  //   dofBlurLevel: 5,
+  // },
+  // {
+  //   alpha: Math.PI / 3,
+  //   beta: Math.PI / 3,
+  //   radius: 20,
+  //   position: new Vector3(33, 21, 11),
+  //   target: new Vector3(20, 9, 4),
+  //   dofEnabled: true,
+  //   focalLength: 30,
+  //   fStop: 1.5,
+  //   focusDistance: 50,
+  //   dofBlurLevel: 5,
+  // },
 ];
 
 export function setupSceneCamera(scene: Scene): ArcRotateCamera {

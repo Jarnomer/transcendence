@@ -556,7 +556,7 @@ export function registerRetroShaders() {
   }
   `;
 
-  // Add CRT distortion effect with proper screen curvature
+  // Add CRT distortion effect
   Effect.ShadersStore['crtDistortionVertexShader'] = `
     precision highp float;
     attribute vec2 position;

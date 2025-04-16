@@ -605,7 +605,7 @@ export function applyScoreEffects(
 
   if (retroEffectsRef) {
     setTimeout(() => {
-      retroEffectsRef?.changeChannel(1200).then(() => {});
+      retroEffectsRef.simulateTrackingDistortion(intensityFactor).then(() => {});
     }, 300);
   }
 }
