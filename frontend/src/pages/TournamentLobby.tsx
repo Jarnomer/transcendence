@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { ChatWindow } from '../components/chat/ChatWindow';
-import { PowerUpSelection } from '../components/menu/cards/PowerUpSelection';
+import { GameOptions } from '../components/gameOptions/GameOptions';
 import TournamentBracket from '../components/tournament/TournamentBracket';
 import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
@@ -101,18 +101,7 @@ export const TournamentLobbyNav: React.FC<{
 export const TournamentSettings: React.FC = () => {
   const [enablePowerUps, setEnablePowerUps] = useState(false);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
-  return (
-    <div className="glass-box h-full w-full">
-      <div></div>
-      <div className="broder-1 h-full w-full">
-        <span className="text-secondary">Power Ups</span>
-        <PowerUpSelection
-          selectedPowerUps={selectedPowerUps}
-          setSelectedPowerUps={setSelectedPowerUps}
-        />
-      </div>
-    </div>
-  );
+  return <GameOptions></GameOptions>;
 };
 
 export const TournamentPlayerList: React.FC = () => {

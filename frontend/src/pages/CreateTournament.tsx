@@ -34,7 +34,7 @@ export const CreateTournament: React.FC = () => {
   };
 
   return (
-    <motion.div className="h-full max-w-3xl min-h-[450px] relative glass-box mt-10 text-sm">
+    <motion.div className="h-full  w-full min-h-[450px] relative glass-box mt-10 text-sm">
       <span
         aria-hidden="true"
         className="absolute top-0 left-0 bg-primary text-black w-full  pointer-events-none"

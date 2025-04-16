@@ -69,7 +69,7 @@ const GameSoundSettings: React.FC<soundSettingsProps> = ({
       />
       <label
         htmlFor="gameVolume"
-        className={`block text-sm font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
+        className={`block text-xs font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
       >
         <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
       </label>
@@ -108,13 +108,13 @@ const MusicSettings: React.FC<soundSettingsProps> = ({
         value={level}
         onChange={(e) => setLevel(parseInt(e.target.value))}
         disabled={!isEnabled}
-        className={`w-full appearance-none h-2 rounded-lg cursor-pointer ${
+        className={`w-full  appearance-none h-2  cursor-pointer ${
           isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
         }`}
       />
       <label
         htmlFor="musicVolume"
-        className={`block text-sm font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
+        className={`block text-xs font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
       >
         <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
       </label>
@@ -159,7 +159,7 @@ const UISoundSetting: React.FC<soundSettingsProps> = ({
       />
       <label
         htmlFor="effectLevel"
-        className={`block text-sm font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
+        className={`block text-xs font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
       >
         <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
       </label>
@@ -190,7 +190,7 @@ export const Soundsettings: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10 text-sm"
+        className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
         variants={animationVariants}
         initial="hidden"
         animate="visible"
