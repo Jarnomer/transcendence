@@ -5,14 +5,22 @@ import { PaddleBiggerIcon } from '../visual/svg/icons/PaddleBiggerIcon';
 import { PaddleFasterIcon } from '../visual/svg/icons/PaddleFasterIcont';
 import { PaddleSlowerIcon } from '../visual/svg/icons/PaddleSlowerIcon';
 import { PaddleSmallerIcon } from '../visual/svg/icons/PaddleSmallerIcon';
+import { SpinPowerUp } from '../visual/svg/icons/SpinPowerUp';
 
-const powerUps = ['Paddle Slower', 'Paddle Smaller', 'Paddle Bigger', 'Paddle Faster'];
+const powerUps = [
+  'Paddle Slower',
+  'Paddle Smaller',
+  'Paddle Bigger',
+  'Paddle Faster',
+  'Extra Spin',
+];
 
 const powerUpIcons: Record<string, React.ReactNode> = {
   'Paddle Slower': <PaddleSlowerIcon />,
   'Paddle Faster': <PaddleFasterIcon />,
   'Paddle Bigger': <PaddleBiggerIcon />,
   'Paddle Smaller': <PaddleSmallerIcon />,
+  'Extra Spin': <SpinPowerUp />,
 };
 
 type PowerUpSelectionProps = {
