@@ -8,16 +8,88 @@ import {
   GlowLayer,
   PBRMaterial,
   ParticleSystem,
+  DirectionalLight,
   Scene,
   Texture,
   Vector3,
 } from 'babylonjs';
 
+import { gameToSceneX, gameToSceneY, applyCameraShake, createParticleTexture } from '@game/utils';
+
 import { Ball, Player, defaultGameParams } from '@shared/types';
 
-import { applyCameraShake } from './gameCamera';
-import { createParticleTexture } from './gamePostProcess';
-import { gameToSceneX, gameToSceneY } from './gameUtilities';
+function applyLightEffect(
+  scene: Scene,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  color: Color3,
+  effectDelay: number
+): void {
+  setTimeout(() => {
+    const direction = new Vector3(scoringDirection === 'right' ? -1 : 1, -0.3, 0.5).normalize();
+    const light = new DirectionalLight('scoreDirectionalLight', direction, scene);
+
+    light.diffuse = color.clone().scale(1.5);
+    light.specular = color.clone().scale(2.0);
+    light.intensity = 0;
+
+    const frameRate = 60;
+    const maxIntensity = 100 * intensity;
+
+    const lightAnimation = new Animation(
+      'lightIntensityAnimation',
+      'intensity',
+      frameRate,
+      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const keys = [
+      { frame: 0, value: 0 },
+      { frame: 5, value: maxIntensity },
+      { frame: 10, value: maxIntensity * 0.8 },
+      { frame: 15, value: maxIntensity * 0.6 },
+      { frame: 30, value: 0 },
+    ];
+
+    lightAnimation.setKeys(keys);
+
+    scene.beginDirectAnimation(light, [lightAnimation], 0, 30, false, 1, () => {
+      light.dispose();
+    });
+
+    const secondaryDirection = new Vector3(
+      scoringDirection === 'right' ? 0.5 : -0.5,
+      0.2,
+      0.3
+    ).normalize();
+
+    const secondaryLight = new DirectionalLight('scoreSecondaryLight', secondaryDirection, scene);
+
+    secondaryLight.diffuse = color.clone().scale(0.5);
+    secondaryLight.specular = color.clone().scale(0.7);
+    secondaryLight.intensity = 0;
+
+    const secondaryAnimation = new Animation(
+      'secondaryLightAnimation',
+      'intensity',
+      frameRate,
+      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const secondaryKeys = [
+      { frame: 0, value: 0 },
+      { frame: 10, value: maxIntensity * 0.8 },
+      { frame: 15, value: maxIntensity * 0.5 },
+      { frame: 40, value: 0 },
+    ];
+
+    secondaryAnimation.setKeys(secondaryKeys);
+
+    scene.beginDirectAnimation(secondaryLight, [secondaryAnimation], 0, 40, false, 1, () => {
+      secondaryLight.dispose();
+    });
+  }, effectDelay);
+}
 
 function applyBallParticles(
   scene: Scene,
@@ -504,6 +576,7 @@ export function applyScoreEffects(
   const volumeFactor = intensityFactor * 1.2;
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
+  applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
   applyPaddleExplosion(
     scene,
     scoredAgainstPaddle,
