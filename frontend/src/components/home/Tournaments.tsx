@@ -65,7 +65,7 @@ export const Tournaments: React.FC = () => {
           <h2 className="">Open Tournaments</h2>
         </div>
         <motion.div className="text-xs relative  text-sm">
-          <div className="p-5 mt-1 border-1  h-full relative overflow-hidden bg-primary/20 clipped-corner-bottom-right">
+          <div className="p-5 mt-1 border-1  h-full relative overflow-hidden bg-primary/20 ">
             <BackgroundGlow></BackgroundGlow>
             <ul>
               {dataInQueue.length === 0 ? (

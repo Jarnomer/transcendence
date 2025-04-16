@@ -22,14 +22,23 @@ export const animationVariants = {
   },
 };
 
-const RetroEffectSettings: React.FC = ({ level, setLevel, isEnabled, setIsEnabled }) => {
-  // const [level, setLevel] = useState(2);
-  // const [isEnabled, setIsEnabled] = useState(true);
+interface retroEffectSettingsProps {
+  isEnabled: boolean;
+  level: number;
+  setLevel: React.Dispatch<React.SetStateAction<number>>;
+  setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const RetroEffectSettings: React.FC<retroEffectSettingsProps> = ({
+  level,
+  setLevel,
+  isEnabled,
+  setIsEnabled,
+}) => {
   const baseValue = 5;
   const effectValue = isEnabled ? setRetroEffectLevel(level, baseValue) : 0;
   return (
     <div className="p-2 max-w-md ">
-      {/* Checkbox to Enable/Disable Effect */}
       <div className="flex items-center mb-4">
         <input
           type="checkbox"
@@ -43,7 +52,6 @@ const RetroEffectSettings: React.FC = ({ level, setLevel, isEnabled, setIsEnable
         </label>
       </div>
 
-      {/* Slider Input */}
       <input
         type="range"
         id="effectLevel"
@@ -57,16 +65,11 @@ const RetroEffectSettings: React.FC = ({ level, setLevel, isEnabled, setIsEnable
           isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
         }`}
       />
-      <label htmlFor="effectLevel" className="block text-sm font-medium text-gray-700">
+      <label htmlFor="effectLevel" className="block text-xs font-medium text-gray-700">
         <span className={`${isEnabled ? 'text-secondary' : 'text-gray-400'}`}>
           {isEnabled ? level : 'Disabled'}
         </span>
       </label>
-
-      {/* Display Values */}
-      <div className="mt-4 text-center">
-        <p className="text-sm"></p>
-      </div>
     </div>
   );
 };
@@ -84,7 +87,7 @@ export const GameSettings: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10 text-sm"
+        className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
         variants={animationVariants}
         initial="hidden"
         animate="visible"

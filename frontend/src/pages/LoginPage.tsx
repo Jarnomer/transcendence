@@ -2,8 +2,9 @@ import React, { ReactNode, useState } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { ClippedCornerCard } from '@/components/UI/cards/ClippedCornerCard';
+
 import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
-import { SVGModal } from '@components/UI/svgWrappers/svgModal.tsx';
 
 import { login, register } from '@services/authService.ts';
 import { updateUser } from '@services/userService.ts';
@@ -82,7 +83,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="w-full h-full flex justify-center p-10">
       <div className="w-[300px]">
-        <SVGModal>
+        <ClippedCornerCard>
           <div className="text-center">
             <h1 className="text-3xl mb-2 font-heading font-bold">
               {isRegistering ? 'Register' : 'Login'}
@@ -125,7 +126,7 @@ export const LoginPage: React.FC = () => {
               {!isRegistering && <ClippedButton label="Play as a guest" />}
             </div>
           </div>
-        </SVGModal>
+        </ClippedCornerCard>
       </div>
     </div>
   );
