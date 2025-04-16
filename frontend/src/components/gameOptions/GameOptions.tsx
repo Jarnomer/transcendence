@@ -5,7 +5,7 @@ import { CheckBox } from '../UI/forms/CheckBox';
 import { PowerUpSelection } from './PowerUpSelection';
 
 export const GameOptions: React.FC = () => {
-  const [enablePowerUps, setEnablePowerUps] = useState(false);
+  const [enablePowerUps, setEnablePowerUps] = useState(true);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
@@ -75,7 +75,11 @@ export const GameOptions: React.FC = () => {
         </div>
         <div className="">
           <label className="block font-heading text-2xl">Ball Spin</label>
-          <CheckBox isEnabled={enableSpin} setIsEnabled={setEnableSpin} label={''}></CheckBox>
+          <CheckBox
+            isEnabled={enableSpin}
+            setIsEnabled={setEnableSpin}
+            id={'enableSpin'}
+          ></CheckBox>
         </div>
       </div>
       <div className="max-w-lg">
@@ -83,7 +87,7 @@ export const GameOptions: React.FC = () => {
         <CheckBox
           isEnabled={enablePowerUps}
           setIsEnabled={setEnablePowerUps}
-          label={'Enable'}
+          id={'enablePowerups'}
         ></CheckBox>
         <PowerUpSelection
           isEnabled={enablePowerUps}

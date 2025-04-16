@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { BoxDiv } from '../visual/svg/containers/SvgBoxContainer';
 import { PaddleBiggerIcon } from '../visual/svg/icons/PaddleBiggerIcon';
@@ -46,6 +46,20 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
       prev.includes(powerUp) ? prev.filter((p) => p !== powerUp) : [...prev, powerUp]
     );
   };
+
+  useEffect(() => {
+    if (isEnabled) {
+      setSelectedPowerUps((prev) => {
+        // Only populate if empty
+        if (prev.length === 0) {
+          return powerUps;
+        }
+        return prev;
+      });
+    } else {
+      setSelectedPowerUps([]);
+    }
+  }, [selectedPowerUps]);
 
   const handleEnableToggle = () => {
     setIsEnabled((prev) => {
