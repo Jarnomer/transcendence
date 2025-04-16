@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
+import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreateTournament } from '../../pages/CreateTournament.tsx';
@@ -22,6 +23,7 @@ export const AnimatedRoutes: React.FC = () => {
   const { loading } = useUser(); // Retrieve user from context
   const location = useLocation();
   const user = localStorage.getItem('token');
+  const { fromAppNavigation } = useNavigationAccess();
 
   return (
     <AnimatePresence mode="wait">
@@ -66,12 +68,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route
           path="/tournament"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <CreateTournament />
               </PageWrapper>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
@@ -92,12 +94,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route
           path="/game"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <GamePage />
               </PageWrapper>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
@@ -123,7 +125,7 @@ export const AnimatedRoutes: React.FC = () => {
                 <TournamentLobby />
               </PageWrapper>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
