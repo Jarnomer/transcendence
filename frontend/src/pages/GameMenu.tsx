@@ -137,7 +137,11 @@ export const GameMenu: React.FC = () => {
     }
     if (mode && difficulty) {
       allowInternalNavigation();
-      navigate('/game');
+      if (mode === '1v1' && difficulty === 'online') {
+        navigate('/game');
+      } else {
+        navigate('/gameOptions');
+      }
     }
   }, [mode, difficulty]);
 

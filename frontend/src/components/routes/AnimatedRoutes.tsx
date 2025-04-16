@@ -10,6 +10,7 @@ import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreateTournament } from '../../pages/CreateTournament.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
+import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
@@ -88,6 +89,19 @@ export const AnimatedRoutes: React.FC = () => {
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/gameOptions"
+          element={
+            user && fromAppNavigation ? (
+              <PageWrapper>
+                <GameOptionsPage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/" replace />
             )
           }
         />
