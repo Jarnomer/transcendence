@@ -77,7 +77,9 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
       <div>
         <>
           <div className="flex w-full">
-            <div className="w-full p-2 flex flex-col gap-2">
+            <div
+              className={`${selectedFriend ? 'w-full' : 'sm:w-1/2'} flex flex-col items-center gap-2 mb-2`}
+            >
               <input
                 type="text"
                 placeholder="Room name"

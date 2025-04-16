@@ -38,7 +38,7 @@ export const ChatPage: React.FC = () => {
   };
 
   return (
-    <div className="p-2 h-full flex items-center justify-center">
+    <div className="p-2 w-full h-full flex items-center justify-center">
       <div className="flex h-[600px] w-3xl  glass-box overflow-hidden relative">
         <BackgroundGlow />
         <div

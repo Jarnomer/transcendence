@@ -59,7 +59,7 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
     } else {
       setSelectedPowerUps([]);
     }
-  }, [selectedPowerUps]);
+  }, []);
 
   const handleEnableToggle = () => {
     setIsEnabled((prev) => {

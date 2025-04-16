@@ -34,7 +34,7 @@ const App: React.FC = () => {
     <WebSocketProvider>
       <ChatProvider>
         <GameOptionsProvider>
-          <div className="fixed">
+          <div className="fixed pointer-events-none" aria-hidden="true">
             <BackgroundGameProvider />
           </div>
           <div
@@ -47,7 +47,7 @@ const App: React.FC = () => {
                 <motion.div
                   id="backgroundGlitch"
                   aria-hidden="true"
-                  className="absolute w-full h-full"
+                  className="absolute w-full h-full pointer-events-none"
                 >
                   <BackgroundGlitch duration={1100} />
                 </motion.div>

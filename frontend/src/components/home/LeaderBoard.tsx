@@ -70,7 +70,7 @@ export const LeaderBoard: React.FC = () => {
   }
 
   return (
-    <motion.div className=" h-full overflow-hidden flex flex-col justify-center items-center">
+    <motion.div className="h-full overflow-hidden flex flex-col  items-center">
       <div className="flex w-full items-center justify-center text-center h-[20px] bg-primary text-black text-xs">
         Leaderboard
       </div>

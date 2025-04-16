@@ -64,7 +64,7 @@ export const Tournaments: React.FC = () => {
         <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
           <h2 className="">Open Tournaments</h2>
         </div>
-        <motion.div className="text-xs relative  text-sm">
+        <motion.div className="p-2 relative  text-sm">
           <div className="p-5 mt-1 border-1  h-full relative overflow-hidden bg-primary/20 ">
             <BackgroundGlow></BackgroundGlow>
             <ul>
