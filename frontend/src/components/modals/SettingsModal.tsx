@@ -14,7 +14,7 @@ export const SettingsModal: React.FC = () => {
 
   return (
     <ModalWrapper modalName="settings">
-      <div className="relative">
+      <div className="relative w-full sm:w-3xl">
         <Settings></Settings>
       </div>
     </ModalWrapper>

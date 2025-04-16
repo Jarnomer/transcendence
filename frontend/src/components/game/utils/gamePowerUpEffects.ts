@@ -34,12 +34,24 @@ export class PowerUpEffectsManager {
   private primaryColor: Color3;
   private secondaryColor: Color3;
   private powerUpSize: number;
+  private soundManager: any;
 
-  constructor(scene: Scene, primaryColor: Color3, secondaryColor: Color3, powerUpSize: number) {
+  private isPowerUpNegative(type: PowerUpType): boolean {
+    return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
+  }
+
+  constructor(
+    scene: Scene,
+    primaryColor: Color3,
+    secondaryColor: Color3,
+    powerUpSize: number,
+    soundManager?: any
+  ) {
     this.scene = scene;
     this.primaryColor = primaryColor;
     this.secondaryColor = secondaryColor;
     this.powerUpSize = powerUpSize;
+    this.soundManager = soundManager;
   }
 
   // Check for new and collected power-ups
@@ -355,6 +367,12 @@ export class PowerUpEffectsManager {
     if (!effect) return;
 
     effect.collected = true;
+
+    if (this.isPowerUpNegative(effect.type)) {
+      this.soundManager.playNegativePowerUpSound();
+    } else {
+      this.soundManager.playPositivePowerUpSound();
+    }
 
     // Animate icon scaling
     const scaleAnim = new Animation(

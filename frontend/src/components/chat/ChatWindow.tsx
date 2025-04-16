@@ -30,7 +30,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   console.log(roomId);
   return (
-    <div className="w-full h-full flex flex-col flex-1">
+    <div className="h-full flex flex-col flex-1">
       <div className="p-2 border-b flex justify-between items-center ">
         <button className="text-sm text-gray-500" onClick={onBack}>
           Back

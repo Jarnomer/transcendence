@@ -22,7 +22,11 @@ export const animationVariants = {
   },
 };
 
-export const ColorThemeSettings: React.FC = ({ setSelectedTheme }) => {
+interface colorThemeSettingsProps {
+  setSelectedTheme: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+export const ColorThemeSettings: React.FC<colorThemeSettingsProps> = ({ setSelectedTheme }) => {
   return (
     <>
       <div className="w-full h-full p-4">
@@ -61,7 +65,15 @@ export const ColorThemeSettings: React.FC = ({ setSelectedTheme }) => {
   );
 };
 
-export const BackGroundGameSettings: React.FC = ({ isEnabled, setIsEnabled }) => {
+interface backgroundGameSettings {
+  isEnabled: boolean;
+  setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const BackGroundGameSettings: React.FC<backgroundGameSettings> = ({
+  isEnabled,
+  setIsEnabled,
+}) => {
   // const [isEnabled, setIsEnabled] = useState(true);
 
   return (

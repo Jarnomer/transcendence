@@ -377,13 +377,9 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
   return (
     <>
       {!loading ? (
-        <>
-          <div className="w-full flex justify-between">
+        <div className="justify-center flex flex-col max-w-lg ">
+          <div className="flex justify-between">
             <div className="flex justify-center items-center relative">
-              <div
-                aria-hidden="true"
-                className="absolute top-0 left-0 border-l-1 border-t-1 h-[20px] w-[20px]"
-              ></div>
               <InformationRequestSvg></InformationRequestSvg>
             </div>
             <div className="relative">
@@ -420,9 +416,6 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   </div>
                 </div>
                 <form className="flex flex-col justify-center" onSubmit={handleSubmit}>
-                  {/* <div className="h-[100px] onject-contain  border-1">
-                <img className="h-full object-contain" src={user?.avatar_url}></img>
-              </div> */}
                   <span className="flex flex-row relative">
                     <div className="border relative">
                       <label htmlFor="displayName">
@@ -505,7 +498,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
               </div>
             </div>
           </motion.div>
-        </>
+        </div>
       ) : null}
     </>
   );

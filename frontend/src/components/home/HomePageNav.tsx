@@ -38,17 +38,12 @@ export const HomePageNav: React.FC<{
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
       <span className="relative p-2 px-3 flex gap-4">
-        {/* <div className="absolute w-[30px] h-[30px] top-0 left-0 border-t-1 border-l-1"></div>
-        <div className="absolute w-[30px] h-[30px] bottom-0 right-0 border-b-1 border-r-1"></div> */}
         <button className="btn btn-primary" onClick={handleCreateGameClick}>
           create game
         </button>
         <button className="btn btn-primary" onClick={handleJoinGameClick}>
           Quick Join
         </button>
-        {/* <button onClick={() => setActiveTab('queue')}>
-          <span className={`${activeTab === 'queue' ? 'text-secondary' : ''}`}>Tournaments</span>
-        </button> */}
         <button onClick={() => setActiveTab('leaderboard')}>
           <span className={`${activeTab === 'leaderboard' ? ' text-secondary' : ''}`}>
             Leaderboard

@@ -2,7 +2,27 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { motion } from 'framer-motion';
+
 import { getNotifications, getUserByID, markNotificationAsSeen } from '../../services/userService';
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0% 0 0% 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+  exit: {
+    clipPath: 'inset(50% 0 50% 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+    delay: 0.4,
+  },
+};
 
 export const Notifications: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -66,8 +86,9 @@ export const Notifications: React.FC = () => {
     }
   };
 
+  console.log('notficitations: ', notifications);
   return (
-    <>
+    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
       <ul>
         {notifications.length > 0 ? (
           notifications.map((request: any, index: number) => (
@@ -84,9 +105,9 @@ export const Notifications: React.FC = () => {
             </li>
           ))
         ) : (
-          <p>No new notifications.</p>
+          <p className="text-xs">No new notifications.</p>
         )}
       </ul>
-    </>
+    </motion.div>
   );
 };
