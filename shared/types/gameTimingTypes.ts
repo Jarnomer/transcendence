@@ -56,7 +56,7 @@ export const defaultRetroEffectTimings: RetroEffectTimings = {
   crtTurnOnDelay: 500,
 
   channelChangeDuration: 1200,
-  trackingDistortionIntensity: 10,
+  trackingDistortionIntensity: 3,
   trackingDistortionDuration: 800,
 
   standardGlitchDuration: 200,

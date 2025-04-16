@@ -297,9 +297,15 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
           const newAngle = cameraAngles[currentAngleIndexRef.current];
 
           animateCamera(cameraRef.current, newAngle, postProcessingRef.current);
+
+          // if (retroEffectsRef.current) {
+          //   retroEffectsRef.current.simulateTrackingDistortion(
+          //     defaultRetroEffectTimings.trackingDistortionIntensity,
+          //     defaultRetroEffectTimings.trackingDistortionDuration
+          //   );
+          // }
         }
       }, defaultCameraTimings.cameraMoveInterval);
-
       if (engineRef.current && sceneRef.current) {
         setupThrottledRenderLoop(engineRef.current, sceneRef.current);
       }

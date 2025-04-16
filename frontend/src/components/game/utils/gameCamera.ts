@@ -26,58 +26,58 @@ export interface CameraAngle {
 
 // NOTE: alpha, beta and radius are ignored if position is set
 export const cameraAngles: CameraAngle[] = [
-  // {
-  //   // Low player 2 view
-  //   alpha: Math.PI / 3,
-  //   beta: Math.PI / 3,
-  //   radius: 20,
-  //   position: new Vector3(-13, 12, 5),
-  //   target: new Vector3(-1, -2.5, -5),
-  //   dofEnabled: true,
-  //   focalLength: 30,
-  //   fStop: 1.5,
-  //   focusDistance: 50,
-  //   dofBlurLevel: 5,
-  // },
-  // {
-  //   // Low player 2 view2
-  //   alpha: Math.PI / 3,
-  //   beta: Math.PI / 3,
-  //   radius: 20,
-  //   position: new Vector3(-2, 18.5, 9),
-  //   target: new Vector3(5, 5, 0),
-  //   dofEnabled: true,
-  //   focalLength: 30,
-  //   fStop: 1.5,
-  //   focusDistance: 50,
-  //   dofBlurLevel: 5,
-  // },
-  // {
-  //   // Low mid board view
-  //   alpha: Math.PI / 3,
-  //   beta: Math.PI / 3,
-  //   radius: 20,
-  //   position: new Vector3(5, 15, 6),
-  //   target: new Vector3(-1, -3, -1),
-  //   dofEnabled: true,
-  //   focalLength: 30,
-  //   fStop: 1.5,
-  //   focusDistance: 50,
-  //   dofBlurLevel: 5,
-  // },
-  // {
-  //   // High side view (original)
-  //   alpha: Math.PI / 3,
-  //   beta: Math.PI / 3,
-  //   radius: 20,
-  //   position: new Vector3(33, 21, 11),
-  //   target: new Vector3(20, 9, 4),
-  //   dofEnabled: true,
-  //   focalLength: 30,
-  //   fStop: 1.5,
-  //   focusDistance: 50,
-  //   dofBlurLevel: 5,
-  // },
+  {
+    // Low player 2 view
+    alpha: Math.PI / 3,
+    beta: Math.PI / 3,
+    radius: 20,
+    position: new Vector3(-13, 12, 5),
+    target: new Vector3(-1, -2.5, -5),
+    dofEnabled: true,
+    focalLength: 30,
+    fStop: 1.5,
+    focusDistance: 50,
+    dofBlurLevel: 5,
+  },
+  {
+    // Low player 2 view2
+    alpha: Math.PI / 3,
+    beta: Math.PI / 3,
+    radius: 20,
+    position: new Vector3(-2, 18.5, 9),
+    target: new Vector3(5, 5, 0),
+    dofEnabled: true,
+    focalLength: 30,
+    fStop: 1.5,
+    focusDistance: 50,
+    dofBlurLevel: 5,
+  },
+  {
+    // Low mid board view
+    alpha: Math.PI / 3,
+    beta: Math.PI / 3,
+    radius: 20,
+    position: new Vector3(5, 15, 6),
+    target: new Vector3(-1, -3, -1),
+    dofEnabled: true,
+    focalLength: 30,
+    fStop: 1.5,
+    focusDistance: 50,
+    dofBlurLevel: 5,
+  },
+  {
+    // High side view (original)
+    alpha: Math.PI / 3,
+    beta: Math.PI / 3,
+    radius: 20,
+    position: new Vector3(33, 21, 11),
+    target: new Vector3(20, 9, 4),
+    dofEnabled: true,
+    focalLength: 30,
+    fStop: 1.5,
+    focusDistance: 50,
+    dofBlurLevel: 5,
+  },
   {
     // Low player 1 view
     alpha: Math.PI / 3,
@@ -390,6 +390,8 @@ export function applyCameraAngle(
   if (cameraAngle.target) {
     camera.target = cameraAngle.target.clone();
   }
+
+  if (!pipeline) return;
 
   // Set depth of field settings
   if (pipeline && cameraAngle.dofEnabled !== undefined) {
