@@ -112,11 +112,11 @@ export interface GameSettings {
 }
 
 export const defaultGameSettings: GameSettings = {
-  mode: 'singleplayer',
-  difficulty: 'brutal',
-  maxScore: 3,
+  mode: '1v1',
+  difficulty: 'online',
+  maxScore: 5,
   ballSpeed: 7,
-  enableSpin: false,
+  enableSpin: true,
   enablePowerUps: true,
   powerUpTypes: {
     [PowerUpType.BiggerPaddle]: true,
