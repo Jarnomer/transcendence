@@ -166,7 +166,13 @@ body {
 
 @layer components {
   .glass-box {
-    @apply border-1 bg-primary/15 border-primary shadow-[0_0_3px] shadow-primary/80 inset-shadow-[0_0_3px] inset-shadow-primary/80;
+    @apply border-1 bg-current/15 border-current shadow-[0_0_3px] shadow-current/80 inset-shadow-[0_0_3px] inset-shadow-current/80;
+  }
+}
+
+@layer components {
+  .glass-box {
+    @apply border-1 bg-current/15 border-current shadow-[0_0_3px] shadow-current/80 inset-shadow-[0_0_3px] inset-shadow-current/80;
   }
 }
 

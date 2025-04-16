@@ -101,8 +101,9 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full h-full pb-10 flex flex-col items-center text-center">
+      <motion.div className="w-full h-full  pb-10 flex flex-col justify-start text-center">
         <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
+        asdasd
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
             <UserInformationForm
@@ -112,7 +113,7 @@ export const ProfilePage: React.FC = () => {
             ></UserInformationForm>
           ) : (
             <>
-              <div className="w-full h-full gap-3 sm:flex">
+              <div className="w-full h-full gap-3 sm:flex sm:justify-center">
                 <div className="w-full sm:w-1/2">
                   <ProfileHeader
                     user={user}
@@ -123,7 +124,7 @@ export const ProfilePage: React.FC = () => {
                     sent={sent}
                   ></ProfileHeader>
                 </div>
-                <motion.div className="w-[80%] sm:w-1/2 h-full">
+                <motion.div className="">
                   <FriendList
                     isOwnProfile={isOwnProfile}
                     friends={user.friends}

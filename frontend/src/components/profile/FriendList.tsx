@@ -8,6 +8,7 @@ import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assumin
 
 import { useUser } from '../../contexts/user/UserContext';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
+import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
 
 export const listAnimationVariants = {
   initial: {
@@ -172,7 +173,7 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
   const navigate = useNavigate();
   return friends && friends.length > 0 ? (
     <motion.ul
-      className="pl-5 w-full h-full overflow-y-scroll"
+      className="pl-5 w-full h-full gap-3 overflow-y-scroll"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -181,25 +182,27 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
     >
       {friends.map((friend) => (
         <motion.li
-          className=""
+          className="my-1 hover:text-secondary"
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
           variants={listItemVariants}
         >
-          <div className="flex w-full h-full items-center gap-2 border-1 my-1 bg-primary/20 clipped-corner-bottom-right">
-            <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-              <img
-                className="object-cover w-full h-full"
-                src={
-                  friend.display_name.startsWith('AI')
-                    ? './src/assets/images/ai.png'
-                    : friend.avatar_url
-                }
-                alt={`${friend.display_name}'s profile picture`}
-              />
+          <ListSvgContainer>
+            <div className="flex w-full h-full items-center gap-2">
+              <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
+                <img
+                  className="object-cover w-full h-full"
+                  src={
+                    friend.display_name.startsWith('AI')
+                      ? './src/assets/images/ai.png'
+                      : friend.avatar_url
+                  }
+                  alt={`${friend.display_name}'s profile picture`}
+                />
+              </div>
+              <span className="text-xs font-medium">{friend.display_name}</span>
             </div>
-            <span className="text-xs font-medium">{friend.display_name}</span>
-          </div>
+          </ListSvgContainer>
 
           {/* <div className="flex flex-col  justify-centeritems-center gap-3">
             <img
@@ -212,7 +215,31 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
       ))}
     </motion.ul>
   ) : (
-    <p className="text-gray-400 "></p>
+    <>
+      <p className="text-gray-400 "></p>
+      <motion.ul
+        className="pl-5 w-full h-full gap-3 overflow-y-scroll text-grey-400"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        exit="hidden"
+        transition={{ duration: 0.4 }}
+      >
+        <motion.li className="my-1 text-gray-500" variants={listItemVariants}>
+          <ListSvgContainer>
+            <div className="flex w-full h-full items-center gap-2">
+              <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
+                <img
+                  className="object-cover w-full h-full"
+                  src={'./src/assets/images/default_avatar.png'}
+                />
+              </div>
+              <span className="text-xs font-medium">mystery man</span>
+            </div>
+          </ListSvgContainer>
+        </motion.li>
+      </motion.ul>
+    </>
   );
 };
 

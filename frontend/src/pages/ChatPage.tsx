@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -30,6 +30,13 @@ export const ChatPage: React.FC = () => {
   const location = useLocation();
   const isChatPage = location.pathname === '/chat' ? true : false;
   console.log('isChatPage:', isChatPage);
+
+  useEffect(() => {
+    return () => {
+      setRoomId(null);
+      setSelectedFriend(null);
+    };
+  }, [setRoomId, setSelectedFriend]);
 
   return (
     <div className="p-2 w-full h-full">

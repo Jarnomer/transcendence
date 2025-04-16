@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { toast } from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
 
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 import {
@@ -20,13 +21,14 @@ const ChatContext = createContext<any>(null);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage, closeConnection, connections } = useWebSocketContext();
+  const location = useLocation();
+  const isChatPage = location.pathname === '/chat' ? true : false;
 
   const { user } = useUser();
   const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, any[]>>({});
-  const [messageList, setMessageList] = useState<any[]>([]);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
   const [myRooms, setMyRooms] = useState<any[]>([]);
@@ -69,6 +71,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  const fetchDmHistory = async (friendId: string) => {
+    try {
+      console.log('Fetching DM history for friend:', friendId);
+      const data = (await getDm(friendId)) as any;
+      console.log('DM history:', data);
+      setMessages((prev) => ({
+        ...prev,
+        [friendId]: data,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch DM history:', error);
+    }
+  };
+
   //fetching DM chat history
   useEffect(() => {
     if (!selectedFriend) return;
@@ -79,28 +95,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev,
         [selectedFriend]: prev[selectedFriend],
       }));
-      setMessageList(messages[selectedFriend]);
       return;
+    } else {
+      // fetch DM messages
+      fetchDmHistory(selectedFriend);
     }
-    // fetch DM messages
-    getDm(selectedFriend)
-      .then((data: any) => {
-        console.log('Chat history:', data);
-        setMessages((prev) => ({
-          ...prev,
-          [selectedFriend]: data,
-        }));
-        setMessageList(data);
-        // setMessages(...messages, data);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch chat history:', error);
-      });
   }, [selectedFriend]);
 
   useEffect(() => {
     console.log('messages:', messages);
   }, [messages]);
+
+  const fetchChatHistory = async (roomId: string) => {
+    try {
+      console.log('Fetching chat history for room:', roomId);
+      const data = (await getChat(roomId)) as any;
+      console.log('Chat history:', data);
+      setMessages((prev) => ({
+        ...prev,
+        [roomId]: data,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch chat history:', error);
+    }
+  };
 
   //fetching room chat history
   useEffect(() => {
@@ -112,24 +130,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...prev,
           [roomId]: prev[roomId],
         }));
-        setMessageList(messages[roomId]);
-        return;
+      } else {
+        // fetch chat messages
+        fetchChatHistory(roomId);
       }
-      // fetch chat messages
-      getChat(roomId)
-        .then((data: any) => {
-          console.log('Chat history:', data);
-          setMessages((prev) => ({
-            ...prev,
-            [roomId]: data,
-          }));
-          // setMessages(...messages, data);
-          setMessageList(data);
-          console.log('messages:', messages);
-        })
-        .catch((error) => {
-          console.error('Failed to fetch chat history:', error);
-        });
     }
   }, [roomId]);
 
@@ -186,24 +190,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <div className="h-full aspect-square p-2">
             <img
               className="object-contain h-full w-full border-1"
-              src={event.sender_avatar_url || './src/assets/images/default_avatar.png'}
+              src={event.avatar_url || './src/assets/images/default_avatar.png'}
             ></img>
           </div>
-          <span className="text-xs">{event.message}</span>
+          <div className="text-xs">
+            <p className="text-xs">{event.display_name}</p>
+            <p className="text-xs">{event.message}</p>
+          </div>
         </div>
       </MessageNotification>
     ));
   };
 
   const handleNotificationClick = (sender_id: string) => {
-    setSelectedFriend(sender_id);
-    setRoomId(null);
+    // setSelectedFriend(sender_id);
+    // setRoomId(null);
     console.log('message notfication CLICKED: ', sender_id);
+    console.log('ischatpage', isChatPage);
+    // if (isChatPage) return;
     openModal('chatModal', {
       user,
       friends,
       selectedFriendId: sender_id,
-      sendChatMessage,
+      onsend: sendChatMessage,
+      messages,
     });
   };
 
@@ -215,27 +225,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('chat selected room id:', roomIdRef.current);
     console.log('chat selected friend id:', selectedFriendRef.current);
 
-    notifyMessage(event);
-    if (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) {
-      console.log('Adding message:', event);
+    if (event.room_id) {
+      console.log('Adding room message:', event);
       setMessages((prev) => ({
         ...prev,
         [event.room_id]: [...(prev[event.room_id] || []), event],
       }));
-      setMessageList((prev) => [...prev, event]);
     }
 
-    if (
-      selectedFriendRef.current &&
-      event.receiver_id &&
-      event.sender_id === selectedFriendRef.current
-    ) {
-      console.log('Adding message:', event);
+    if (event.sender_id) {
+      console.log('Adding dm message:', event);
       setMessages((prev) => ({
         ...prev,
         [event.sender_id]: [...(prev[event.sender_id] || []), event],
       }));
     }
+    notifyMessage(event);
   };
 
   const sendChatMessage = (selectedFriend, roomId, newMessage) => {
@@ -286,6 +291,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRooms((prev) => [...prev, data]);
     }
     setRoomId(data.chat_room_id);
+    return roomId;
   };
 
   return (
@@ -294,7 +300,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         friends,
         messages,
-        messageList,
         selectedFriend,
         roomId,
         rooms,
