@@ -13,6 +13,7 @@ import { GameMenu } from '../../pages/GameMenu.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
+import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
@@ -179,6 +180,15 @@ export const AnimatedRoutes: React.FC = () => {
             ) : (
               <Navigate to="/login" replace />
             )
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <PageWrapper>
+              <NotFoundPage />
+            </PageWrapper>
           }
         />
       </Routes>

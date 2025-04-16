@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
 import { PowerUpSelection } from './PowerUpSelection';
 
@@ -30,6 +31,15 @@ export const GameOptions: React.FC = () => {
     } else {
       setBallSpeed(value);
     }
+  };
+
+  const handleSaveSettings = () => {
+    console.log('--- sending game options ----');
+    console.log('Max score: ', maxScore);
+    console.log('Ball speed: ', ballSpeed);
+    console.log('Enable spin: ', enableSpin);
+    console.log('Enable powerups: ', enablePowerUps);
+    console.log('selected powerups: ', selectedPowerUps);
   };
 
   return (
@@ -75,6 +85,9 @@ export const GameOptions: React.FC = () => {
           selectedPowerUps={selectedPowerUps}
           setSelectedPowerUps={setSelectedPowerUps}
         />
+      </div>
+      <div className="flex justify-end p-4">
+        <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
       </div>
     </div>
   );
