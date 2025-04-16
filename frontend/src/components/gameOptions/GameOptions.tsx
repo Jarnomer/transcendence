@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
@@ -32,6 +32,12 @@ export const GameOptions: React.FC = () => {
       setBallSpeed(value);
     }
   };
+
+  useEffect(() => {
+    if (!enableSpin && selectedPowerUps.includes('Extra Spin')) {
+      setSelectedPowerUps((prev) => prev.filter((p) => p !== 'Extra Spin'));
+    }
+  }, [enableSpin]);
 
   const handleSaveSettings = () => {
     console.log('--- sending game options ----');
@@ -84,6 +90,7 @@ export const GameOptions: React.FC = () => {
           setIsEnabled={setEnablePowerUps}
           selectedPowerUps={selectedPowerUps}
           setSelectedPowerUps={setSelectedPowerUps}
+          isSpinEnabled={enableSpin}
         />
       </div>
       <div className="flex justify-end p-4">

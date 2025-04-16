@@ -25,6 +25,7 @@ const powerUpIcons: Record<string, React.ReactNode> = {
 
 type PowerUpSelectionProps = {
   isEnabled: boolean;
+  isSpinEnabled: boolean;
   setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   selectedPowerUps: string[];
   setSelectedPowerUps: React.Dispatch<React.SetStateAction<string[]>>;
@@ -35,9 +36,11 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
   setIsEnabled,
   selectedPowerUps,
   setSelectedPowerUps,
+  isSpinEnabled,
 }) => {
   const handlePowerUpToggle = (powerUp: string) => {
-    if (!isEnabled) return;
+    if (!isEnabled || (powerUp === 'Extra Spin' && !isSpinEnabled)) return;
+
     console.log(selectedPowerUps);
     setSelectedPowerUps((prev) =>
       prev.includes(powerUp) ? prev.filter((p) => p !== powerUp) : [...prev, powerUp]
