@@ -6,12 +6,15 @@ import { motion } from 'framer-motion';
 
 import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
 
+import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext';
+
 export const HomePageNav: React.FC<{
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
   const { setLobby, setDifficulty, setMode, resetGameOptions } = useGameOptionsContext();
+  const { allowInternalNavigation } = useNavigationAccess();
 
   useEffect(() => {
     resetGameOptions();
@@ -28,6 +31,7 @@ export const HomePageNav: React.FC<{
     setLobby('random');
     setMode('1v1');
     setDifficulty('online');
+    allowInternalNavigation();
     navigate('/game');
   };
   return (
