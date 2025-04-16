@@ -1,5 +1,9 @@
-import { GameStatus } from '@shared/gameTypes';
 import React, { useEffect, useState } from 'react';
+
+import hoverSound from '@/assets/sounds/countDown.wav';
+import { useSound } from '@/hooks/useSound';
+
+import { GameStatus } from '@shared/gameTypes';
 
 interface CountDownProps {
   gameStatus: GameStatus;
@@ -8,6 +12,7 @@ interface CountDownProps {
 export const CountDown: React.FC<CountDownProps> = ({ gameStatus }) => {
   const [count, setCount] = useState<number>(3); // Start countdown from 3
   const [animate, setAnimate] = useState<boolean>(true);
+  const playCountDownSound = useSound(hoverSound);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -22,6 +27,10 @@ export const CountDown: React.FC<CountDownProps> = ({ gameStatus }) => {
       setCount(3);
     }
   }, [gameStatus]);
+
+  useEffect(() => {
+    // playCountDownSound();
+  }, [count]);
 
   return (
     <div className="absolute inset-0 flex items-center justify-center">

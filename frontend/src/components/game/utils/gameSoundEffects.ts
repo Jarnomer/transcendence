@@ -47,8 +47,8 @@ export class GameSoundManager {
     if (typeof window !== 'undefined') {
       const baseUrl = '/src/assets/sounds/';
 
-      this.edgeSound = new Audio(baseUrl + 'collision.wav');
-      this.paddleSound = new Audio(baseUrl + 'collision.wav');
+      this.edgeSound = new Audio(baseUrl + 'collision_1.wav');
+      this.paddleSound = new Audio(baseUrl + 'collision_2.wav');
 
       this.negativePowerUpSound = new Audio(baseUrl + 'powerup.wav');
       this.positivePowerUpSound = new Audio(baseUrl + 'powerup.wav');
@@ -58,9 +58,9 @@ export class GameSoundManager {
       this.gameStartSound = new Audio(baseUrl + 'powerup.wav');
       this.gameOverSound = new Audio(baseUrl + 'powerup.wav');
 
-      this.countDown1Sound = new Audio(baseUrl + 'collision.wav');
-      this.countDown2Sound = new Audio(baseUrl + 'collision.wav');
-      this.countDown3Sound = new Audio(baseUrl + 'collision.wav');
+      this.countDown1Sound = new Audio(baseUrl + 'countDown.wav');
+      this.countDown2Sound = new Audio(baseUrl + 'countDown.wav');
+      this.countDown3Sound = new Audio(baseUrl + 'countDown.wav');
 
       this.allSounds = [
         this.edgeSound,
