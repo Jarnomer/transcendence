@@ -53,23 +53,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     selectedFriendRef.current = selectedFriend;
   }, [selectedFriend]);
 
-  useEffect(() => {
-    console.log('chat context:', connections);
-    const userId = localStorage.getItem('userID');
-    if (!userId) return;
-    const user_id = localStorage.getItem('userID')!;
-    const token = localStorage.getItem('token')!;
-    const params = new URLSearchParams({
-      user_id,
-      token,
-    });
-    chatSocket.connect(params);
-    console.log('Connecting to chat:', params.toString());
-    return () => {
-      console.log('Cleaning up chat socket');
-      closeConnection('chat');
-    };
-  }, []);
+  // useEffect(() => {
+  //   console.log('chat context:', connections);
+  //   const userId = localStorage.getItem('userID');
+  //   if (!userId) return;
+  //   const user_id = localStorage.getItem('userID')!;
+  //   const token = localStorage.getItem('token')!;
+  //   const params = new URLSearchParams({
+  //     user_id,
+  //     token,
+  //   });
+  //   chatSocket.connect(params);
+  //   console.log('Connecting to chat:', params.toString());
+  //   return () => {
+  //     console.log('Cleaning up chat socket');
+  //     closeConnection('chat');
+  //   };
+  // }, []);
 
   const fetchDmHistory = async (friendId: string) => {
     try {
@@ -139,6 +139,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   //get public chat rooms
   useEffect(() => {
+    if (!user) return;
     getPublicChat()
       .then((data) => {
         console.log('Public chat rooms:', data);

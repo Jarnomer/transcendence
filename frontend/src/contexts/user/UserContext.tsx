@@ -37,11 +37,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  // const [token, setToken] = useState<string | null>(null);
   const userId = localStorage.getItem('userID');
 
   const fetchUser = useCallback(() => {
-    const userId = localStorage.getItem('userID');
     if (!userId) {
       setUser(null);
       return;
@@ -60,7 +58,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('username');
         setUser(null);
       });
-  }, []);
+  }, [userId]);
 
   const fetchRequestsSent = useCallback(() => {
     if (!userId) return;
