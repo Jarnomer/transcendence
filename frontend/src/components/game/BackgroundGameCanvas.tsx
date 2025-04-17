@@ -298,12 +298,12 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
           animateCamera(cameraRef.current, newAngle, postProcessingRef.current);
 
-          // if (retroEffectsRef.current) {
-          //   retroEffectsRef.current.simulateTrackingDistortion(
-          //     defaultRetroEffectTimings.trackingDistortionIntensity,
-          //     defaultRetroEffectTimings.trackingDistortionDuration
-          //   );
-          // }
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.simulateTrackingDistortion(
+              defaultRetroEffectTimings.trackingDistortionIntensity,
+              defaultRetroEffectTimings.trackingDistortionDuration
+            );
+          }
         }
       }, defaultCameraTimings.cameraMoveInterval);
       if (engineRef.current && sceneRef.current) {
