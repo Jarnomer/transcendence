@@ -64,14 +64,14 @@ const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipelin
   scene.skipFrustumClipping = true;
   scene.skipPointerMovePicking = true;
 
-  if (pipeline) {
-    pipeline.bloomEnabled = false;
-    pipeline.depthOfFieldEnabled = false;
-    pipeline.chromaticAberrationEnabled = true;
-    pipeline.grainEnabled = true;
-    pipeline.fxaaEnabled = true;
-    pipeline.samples = 1;
-  }
+  // if (pipeline) {
+  //   pipeline.bloomEnabled = true;
+  //   pipeline.depthOfFieldEnabled = true;
+  //   pipeline.chromaticAberrationEnabled = true;
+  //   pipeline.grainEnabled = true;
+  //   pipeline.fxaaEnabled = true;
+  //   pipeline.samples = 1;
+  // }
 
   // Enable occlusion culling
   scene.autoClear = false;
@@ -296,7 +296,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
           currentAngleIndexRef.current = (currentAngleIndexRef.current + 1) % cameraAngles.length;
           const newAngle = cameraAngles[currentAngleIndexRef.current];
 
-          animateCamera(cameraRef.current, newAngle, postProcessingRef.current);
+          animateCamera(cameraRef.current, newAngle);
 
           if (retroEffectsRef.current) {
             retroEffectsRef.current.simulateTrackingDistortion(

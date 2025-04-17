@@ -77,28 +77,6 @@ export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boo
     pipeline.depthOfFieldBlurLevel = 2;
   }
 
-  // NOTE: Motion blur and SSAO break the camera and rotating objects
-
-  // // Enable motion blur
-  // const motionBlur = new MotionBlurPostProcess('motionBlur', scene, 1.0, camera);
-  // motionBlur.motionStrength = 0.1;
-  // motionBlur.motionBlurSamples = 15;
-
-  // Screen Space Ambient Occlusion
-  // const ssaoRatio = {
-  //   ssaoRatio: 1.0,
-  //   blurRatio: 0.5,
-  // };
-  // const ssao = new SSAO2RenderingPipeline('ssao', scene, ssaoRatio);
-  // pipeline.imageProcessingEnabled = true;
-  // pipeline.samples = 4;
-  // ssao.totalStrength = 2.0;
-  // ssao.expensiveBlur = true;
-  // ssao.samples = 16;
-  // ssao.radius = 8;
-
-  // scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', camera);
-
   return pipeline;
 }
 

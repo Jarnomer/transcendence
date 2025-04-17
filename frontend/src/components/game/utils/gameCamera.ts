@@ -1,36 +1,26 @@
 import {
   ArcRotateCamera,
   Animation,
-  Camera,
   CubicEase,
   DefaultRenderingPipeline,
   EasingFunction,
-  MotionBlurPostProcess,
   Scene,
   Vector3,
 } from 'babylonjs';
 
-// Camera interface definition
 export interface CameraAngle {
-  alpha: number; // horizontal rotation in radians
-  beta: number; // vertical rotation in radians
-  radius: number; // distance from target
-  target?: Vector3; // optional target position
-  position?: Vector3; // explicit XYZ position
-  dofEnabled?: boolean; // enable/disable depth of field
-  focalLength?: number; // camera focal length
-  fStop?: number; // aperture f-stop
-  focusDistance?: number; // focus distance
-  dofBlurLevel?: number; // blur level (low, medium, high)
+  target: Vector3; // Target position
+  position: Vector3; // Explicit position
+  dofEnabled: boolean; // enable/disable DOF
+  focalLength: number; // Camera focal length
+  fStop: number; // Aperture f-stop
+  focusDistance: number; // Focus distance
+  dofBlurLevel: number; // Blur level
 }
 
-// NOTE: alpha, beta and radius are ignored if position is set
 export const cameraAngles: CameraAngle[] = [
   {
     // Low player 2 view
-    alpha: Math.PI / 3,
-    beta: Math.PI / 3,
-    radius: 20,
     position: new Vector3(-13, 12, 5),
     target: new Vector3(-1, -2.5, -5),
     dofEnabled: true,
@@ -41,9 +31,6 @@ export const cameraAngles: CameraAngle[] = [
   },
   {
     // Low player 2 view2
-    alpha: Math.PI / 3,
-    beta: Math.PI / 3,
-    radius: 20,
     position: new Vector3(-2, 18.5, 9),
     target: new Vector3(5, 5, 0),
     dofEnabled: true,
@@ -54,9 +41,6 @@ export const cameraAngles: CameraAngle[] = [
   },
   {
     // Low mid board view
-    alpha: Math.PI / 3,
-    beta: Math.PI / 3,
-    radius: 20,
     position: new Vector3(5, 15, 6),
     target: new Vector3(-1, -3, -1),
     dofEnabled: true,
@@ -67,9 +51,6 @@ export const cameraAngles: CameraAngle[] = [
   },
   {
     // High side view (original)
-    alpha: Math.PI / 3,
-    beta: Math.PI / 3,
-    radius: 20,
     position: new Vector3(33, 21, 11),
     target: new Vector3(20, 9, 4),
     dofEnabled: true,
@@ -80,9 +61,6 @@ export const cameraAngles: CameraAngle[] = [
   },
   {
     // Low player 1 view
-    alpha: Math.PI / 3,
-    beta: Math.PI / 3,
-    radius: 20,
     position: new Vector3(13, 16, 10),
     target: new Vector3(-20, -10, -15),
     dofEnabled: true,
@@ -106,18 +84,6 @@ export function setupSceneCamera(scene: Scene): ArcRotateCamera {
   camera.detachControl();
 
   return camera;
-}
-
-export function updateMotionBlur(speed: number, camera: Camera) {
-  const motionBlur = camera._postProcesses?.find(
-    (pp) => pp instanceof MotionBlurPostProcess
-  ) as MotionBlurPostProcess;
-
-  if (motionBlur) {
-    const normalizedSpeed = Math.min(Math.max(speed / 10, 0), 1);
-    motionBlur.motionStrength = 0.05 + normalizedSpeed * 0.25;
-    motionBlur.motionBlurSamples = 5 + Math.floor(normalizedSpeed * 15);
-  }
 }
 
 export function applyCameraShake(
@@ -162,189 +128,43 @@ export function applyCameraShake(
 export const animateCamera = (
   camera: ArcRotateCamera,
   targetAngle: CameraAngle,
-  pipeline: DefaultRenderingPipeline | null,
   duration: number = 3000
 ) => {
   const scene = camera.getScene();
   const animations = [];
 
-  if (targetAngle.position) {
-    // Direct position animation (XYZ coordinates)
-    const positionAnimation = new Animation(
-      'cameraPositionAnimation',
-      'position',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
+  const positionAnimation = new Animation(
+    'cameraPositionAnimation',
+    'position',
+    30,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  positionAnimation.setKeys([
+    { frame: 0, value: camera.position.clone() },
+    { frame: 100, value: targetAngle.position },
+  ]);
+  animations.push({
+    animation: positionAnimation,
+    target: camera,
+  });
 
-    positionAnimation.setKeys([
-      { frame: 0, value: camera.position.clone() },
-      { frame: 100, value: targetAngle.position },
-    ]);
+  const targetAnimation = new Animation(
+    'cameraTargetAnimation',
+    'target',
+    30,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  targetAnimation.setKeys([
+    { frame: 0, value: camera.target.clone() },
+    { frame: 100, value: targetAngle.target },
+  ]);
+  animations.push({
+    animation: targetAnimation,
+    target: camera,
+  });
 
-    animations.push({
-      animation: positionAnimation,
-      target: camera,
-    });
-  } else {
-    // Traditional spherical coordinates animation
-    // Create animations for alpha, beta and radius
-    const alphaAnimation = new Animation(
-      'cameraAlphaAnimation',
-      'alpha',
-      30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const betaAnimation = new Animation(
-      'cameraBetaAnimation',
-      'beta',
-      30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const radiusAnimation = new Animation(
-      'cameraRadiusAnimation',
-      'radius',
-      30,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    // Create keyframes
-    const keyframes = {
-      alpha: [
-        { frame: 0, value: camera.alpha },
-        { frame: 100, value: targetAngle.alpha },
-      ],
-      beta: [
-        { frame: 0, value: camera.beta },
-        { frame: 100, value: targetAngle.beta },
-      ],
-      radius: [
-        { frame: 0, value: camera.radius },
-        { frame: 100, value: targetAngle.radius },
-      ],
-    };
-
-    // Set keyframes
-    alphaAnimation.setKeys(keyframes.alpha);
-    betaAnimation.setKeys(keyframes.beta);
-    radiusAnimation.setKeys(keyframes.radius);
-
-    // Add animations to list
-    animations.push({
-      animation: alphaAnimation,
-      target: camera,
-    });
-
-    animations.push({
-      animation: betaAnimation,
-      target: camera,
-    });
-
-    animations.push({
-      animation: radiusAnimation,
-      target: camera,
-    });
-  }
-
-  // Add target animation if specified
-  if (targetAngle.target) {
-    const targetAnimation = new Animation(
-      'cameraTargetAnimation',
-      'target',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    targetAnimation.setKeys([
-      { frame: 0, value: camera.target.clone() },
-      { frame: 100, value: targetAngle.target },
-    ]);
-
-    animations.push({
-      animation: targetAnimation,
-      target: camera,
-    });
-  }
-
-  // Add depth of field animations if specified
-  if (pipeline && targetAngle.dofEnabled !== undefined) {
-    pipeline.depthOfFieldEnabled = targetAngle.dofEnabled;
-
-    if (targetAngle.dofEnabled) {
-      if (targetAngle.focalLength !== undefined) {
-        const focalLengthAnimation = new Animation(
-          'dofFocalLengthAnimation',
-          'depthOfField.focalLength',
-          30,
-          Animation.ANIMATIONTYPE_FLOAT,
-          Animation.ANIMATIONLOOPMODE_CONSTANT
-        );
-
-        focalLengthAnimation.setKeys([
-          { frame: 0, value: pipeline.depthOfField.focalLength },
-          { frame: 100, value: targetAngle.focalLength },
-        ]);
-
-        animations.push({
-          animation: focalLengthAnimation,
-          target: pipeline,
-        });
-      }
-
-      if (targetAngle.fStop !== undefined) {
-        const fStopAnimation = new Animation(
-          'dofFStopAnimation',
-          'depthOfField.fStop',
-          30,
-          Animation.ANIMATIONTYPE_FLOAT,
-          Animation.ANIMATIONLOOPMODE_CONSTANT
-        );
-
-        fStopAnimation.setKeys([
-          { frame: 0, value: pipeline.depthOfField.fStop },
-          { frame: 100, value: targetAngle.fStop },
-        ]);
-
-        animations.push({
-          animation: fStopAnimation,
-          target: pipeline,
-        });
-      }
-
-      if (targetAngle.focusDistance !== undefined) {
-        const focusDistanceAnimation = new Animation(
-          'dofFocusDistanceAnimation',
-          'depthOfField.focusDistance',
-          30,
-          Animation.ANIMATIONTYPE_FLOAT,
-          Animation.ANIMATIONLOOPMODE_CONSTANT
-        );
-
-        focusDistanceAnimation.setKeys([
-          { frame: 0, value: pipeline.depthOfField.focusDistance },
-          { frame: 100, value: targetAngle.focusDistance },
-        ]);
-
-        animations.push({
-          animation: focusDistanceAnimation,
-          target: pipeline,
-        });
-      }
-
-      if (targetAngle.dofBlurLevel !== undefined) {
-        pipeline.depthOfFieldBlurLevel = targetAngle.dofBlurLevel;
-      }
-    }
-  }
-
-  // Add easing function for smooth transitions to all animations
   const easingFunction = new CubicEase();
   easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
@@ -352,8 +172,7 @@ export const animateCamera = (
     anim.animation.setEasingFunction(easingFunction);
   });
 
-  // Start animations
-  const animatables = animations.map((anim) => {
+  const animationTables = animations.map((anim) => {
     return scene.beginDirectAnimation(
       anim.target,
       [anim.animation],
@@ -364,7 +183,7 @@ export const animateCamera = (
     );
   });
 
-  return animatables;
+  return animationTables;
 };
 
 export const getRandomCameraAngle = (): CameraAngle => {
@@ -377,42 +196,17 @@ export function applyCameraAngle(
   cameraAngle: CameraAngle,
   pipeline: DefaultRenderingPipeline | null
 ) {
-  // Set position
-  if (cameraAngle.position) {
-    camera.position = cameraAngle.position.clone();
-  } else {
-    camera.alpha = cameraAngle.alpha;
-    camera.beta = cameraAngle.beta;
-    camera.radius = cameraAngle.radius;
-  }
+  if (!cameraAngle || !pipeline) return;
 
-  // Set target
-  if (cameraAngle.target) {
-    camera.target = cameraAngle.target.clone();
-  }
+  camera.position = cameraAngle.position.clone();
+  camera.target = cameraAngle.target.clone();
 
-  if (!pipeline) return;
-
-  // Set depth of field settings
-  if (pipeline && cameraAngle.dofEnabled !== undefined) {
+  if (cameraAngle.dofEnabled === true) {
     pipeline.depthOfFieldEnabled = cameraAngle.dofEnabled;
-
-    if (cameraAngle.dofEnabled) {
-      if (cameraAngle.focalLength !== undefined) {
-        pipeline.depthOfField.focalLength = cameraAngle.focalLength;
-      }
-
-      if (cameraAngle.fStop !== undefined) {
-        pipeline.depthOfField.fStop = cameraAngle.fStop;
-      }
-
-      if (cameraAngle.focusDistance !== undefined) {
-        pipeline.depthOfField.focusDistance = cameraAngle.focusDistance;
-      }
-
-      if (cameraAngle.dofBlurLevel !== undefined) {
-        pipeline.depthOfFieldBlurLevel = cameraAngle.dofBlurLevel;
-      }
-    }
+    pipeline.depthOfFieldEnabled = cameraAngle.dofEnabled;
+    pipeline.depthOfField.focalLength = cameraAngle.focalLength;
+    pipeline.depthOfField.fStop = cameraAngle.fStop;
+    pipeline.depthOfField.focusDistance = cameraAngle.focusDistance;
+    pipeline.depthOfFieldBlurLevel = cameraAngle.dofBlurLevel;
   }
 }
