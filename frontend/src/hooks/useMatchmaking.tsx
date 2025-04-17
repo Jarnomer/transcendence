@@ -3,17 +3,20 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
 
-const useMatchmaking = (userId: string | null) => {
+const useMatchmaking = () => {
   const navigate = useNavigate();
-  const { gameSocket, matchmakingSocket, sendMessage, closeConnection, connections } =
+  const { userId } = useUser();
+  const { matchmakingSocket, sendMessage, closeConnection, connections } =
     useWebSocketContext();
   const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions, gameSettings } =
     useGameOptionsContext();
-  const params = useRef<URLSearchParams>(new URLSearchParams());
   const matchmaker = useRef<MatchMaker>(null);
+  const params = useRef<URLSearchParams>(new URLSearchParams());
+
   useEffect(() => {
     if (!mode || !difficulty) return;
     params.current = new URLSearchParams({ mode: mode, difficulty: difficulty });
@@ -36,12 +39,9 @@ const useMatchmaking = (userId: string | null) => {
   const handleGameStart = () => {
     if (!matchmaker.current) return;
     console.log('Game started');
-    console.log('userId:', userId);
     setGameId(matchmaker.current.getGameId());
-    console.log('Game ID:', matchmaker.current.getGameId());
-    params.current.set('game_id', matchmaker.current.getGameId() || '');
-    console.log('Connecting to game:', params.current.toString());
-    gameSocket.connect(params.current);
+    // navigate('/game');
+    // gameSocket.connect(params.current);
   };
 
   const handleMatchFound = useCallback((game: any) => {
@@ -50,8 +50,8 @@ const useMatchmaking = (userId: string | null) => {
     // closeConnection('matchmaking');
     matchmaker.current.setMatchMakerState(MatchMakerState.MATCHED);
     setGameId(game.game_id);
-    params.current.set('game_id', game.game_id);
-    gameSocket.connect(params.current);
+    // navigate('/game');
+    // gameSocket.connect(params.current);
   }, []);
 
   const handleJoinMatch = useCallback(() => {
@@ -87,9 +87,6 @@ const useMatchmaking = (userId: string | null) => {
     if (!userId || !matchmaker.current) return;
     console.log('Starting matchmaking');
     console.log('mode:', mode, 'difficulty:', difficulty, 'lobby:', lobby, 'queueId:', queueId);
-    params.current.set('user_id', userId);
-    params.current.set('token', localStorage.getItem('token') || '');
-    console.log('Connecting to matchmaker:', params.current.toString());
     matchmaker.current
       .startMatchMake()
       .then(() => {
@@ -147,14 +144,7 @@ const useMatchmaking = (userId: string | null) => {
     }
   }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
 
-  useEffect(() => {
-    if (connections.game !== 'connected') return;
-    console.log('Game connected sending settings');
-    sendMessage('game', {
-      type: 'settings',
-      settings: gameSettings,
-    });
-  }, [connections.game, gameSettings]);
+
 
   useEffect(() => {
     console.log('Attaching matchmaking event listeners');
@@ -169,6 +159,5 @@ const useMatchmaking = (userId: string | null) => {
       matchmakingSocket.removeEventListener('game_loser', handleGameLoser);
     };
   }, []); // only depend on stable vars
-
 };
 export default useMatchmaking;

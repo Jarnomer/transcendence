@@ -7,12 +7,14 @@ import { submitResult } from '@/services/gameService';
 
 import { GameState } from '@types';
 
+import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
-export const useGameResult = (userId: string | null) => {
+export const useGameResult = () => {
   const navigate = useNavigate();
   const { resetGameOptions, gameId, mode } = useGameOptionsContext();
   const { closeConnection, gameStatus, gameState, dispatch } = useWebSocketContext();
+  const { userId } = useUser();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);

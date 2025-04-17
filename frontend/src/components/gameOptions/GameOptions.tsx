@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
 
+import useMatchmaking from '@hooks/useMatchmaking';
+
 import { PowerUpType } from '../../../../shared/types';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
@@ -17,6 +19,7 @@ export const GameOptions: React.FC = () => {
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
   const { setGameSettings } = useGameOptionsContext();
   const navigate = useNavigate();
+  useMatchmaking();
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);

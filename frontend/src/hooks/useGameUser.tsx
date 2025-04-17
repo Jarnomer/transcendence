@@ -21,7 +21,7 @@ const useGameUser = () => {
       setRemotePlayerId(userId);
     }
   }, [difficulty, userId, setLocalPlayerId, setRemotePlayerId]);
-  return { userId, localPlayerId, remotePlayerId };
+  return { localPlayerId, remotePlayerId };
 };
 
 export default useGameUser;

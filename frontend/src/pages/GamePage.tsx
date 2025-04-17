@@ -1,26 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { CountDown, GameCanvas, PlayerScoreBoard } from '@components';
 
-import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@hooks';
+import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useBackgroundGameVisibility } from '../hooks/useBackgroundGameVisibility';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
-  const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
+  const { gameState, gameStatus, connections, sendMessage, gameSocket } = useWebSocketContext();
+  const { gameId, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
+  const { userId } = useUser();
   const { loadingStates } = useLoading();
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const { showBackgroundGame } = useBackgroundGameVisibility();
+  const params = useRef<URLSearchParams>(new URLSearchParams());
+
+  useEffect(() => {
+    if (!mode || !difficulty) return;
+    params.current = new URLSearchParams({ mode: mode, difficulty: difficulty });
+  }, [mode, difficulty]);
 
   useEffect(() => {
     console.log('GamePage mounted');
@@ -45,10 +53,28 @@ export const GamePage: React.FC = () => {
     }
   }, [gameStatus]);
 
-  const { userId, localPlayerId, remotePlayerId } = useGameUser();
-  useMatchmaking(userId);
-  useGameResult(userId);
-  useGameControls(localPlayerId, remotePlayerId);
+  useEffect(() => {
+    if (connections.game !== 'connected') return;
+    console.log('Game connected sending settings');
+    sendMessage('game', {
+      type: 'settings',
+      settings: gameSettings,
+    });
+  }, [connections.game, gameSettings]);
+
+  // const { localPlayerId, remotePlayerId } = useGameUser();
+  // useMatchmaking();
+
+  useEffect(() => {
+    if (!gameId || !userId) return;
+    console.log('connecting to game socket');
+    params.current.set('user_id', userId);
+    params.current.set('token', localStorage.getItem('token') || '');
+    params.current.set('game_id', gameId);
+    gameSocket.connect(params.current);
+  }, [gameId]);
+  useGameResult();
+  const localPlayerId = useGameControls();
   const playersData = useFetchPlayerData();
 
   // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED

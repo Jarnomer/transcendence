@@ -2,15 +2,31 @@ import { useEffect, useRef, useState } from 'react';
 
 import { createMoveInputMessage } from '@shared/messages/';
 
+import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
-const useGameControls = (localPlayerId: string | null, remotePlayerId: string | null) => {
+const useGameControls = () => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
+  const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
+  const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
   const { sendMessage } = useWebSocketContext();
+  const { difficulty } = useGameOptionsContext();
+  const { userId } = useUser();
 
   // Only track whether movement was null previously
   const wasLocalMovingRef = useRef<boolean>(false);
   const wasRemoteMovingRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (difficulty === 'local') {
+      setLocalPlayerId(userId);
+      setRemotePlayerId('player2');
+    } else {
+      setLocalPlayerId(userId);
+      setRemotePlayerId(userId);
+    }
+  }, [difficulty, userId, setLocalPlayerId, setRemotePlayerId]);
 
   useEffect(() => {
     if (!localPlayerId || !remotePlayerId) return;
@@ -94,7 +110,8 @@ const useGameControls = (localPlayerId: string | null, remotePlayerId: string | 
     };
   }, [keysPressed, sendMessage, localPlayerId, remotePlayerId]);
 
-  return keysPressed;
+  return localPlayerId;
+;
 };
 
 export default useGameControls;
