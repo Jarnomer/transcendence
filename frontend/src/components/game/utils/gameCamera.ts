@@ -13,63 +13,47 @@ import { defaultGameAnimationTimings } from '@shared/types';
 export interface CameraAngle {
   target: Vector3; // Target position
   position: Vector3; // Explicit position
-  dofEnabled: boolean; // enable/disable DOF
-  focalLength: number; // Camera focal length
-  fStop: number; // Aperture f-stop
-  focusDistance: number; // Focus distance
-  dofBlurLevel: number; // Blur level
 }
+
+export interface CameraDOFSettings {
+  focalLength: number;
+  fStop: number;
+  focusDistance: number;
+  dofBlurLevel: number;
+}
+
+export const defaultCameraDOFSettings: CameraDOFSettings = {
+  focalLength: 30,
+  fStop: 1.5,
+  focusDistance: 50,
+  dofBlurLevel: 5,
+};
 
 export const cameraAngles: CameraAngle[] = [
   {
     // Low player 2 view
     position: new Vector3(-13, 12, 5),
     target: new Vector3(-1, -2.5, -5),
-    dofEnabled: true,
-    focalLength: 30,
-    fStop: 1.5,
-    focusDistance: 50,
-    dofBlurLevel: 5,
   },
   {
     // Low player 2 view2
     position: new Vector3(-2, 18.5, 9),
     target: new Vector3(5, 5, 0),
-    dofEnabled: true,
-    focalLength: 30,
-    fStop: 1.5,
-    focusDistance: 50,
-    dofBlurLevel: 5,
   },
   {
     // Low mid board view
     position: new Vector3(5, 15, 6),
     target: new Vector3(-1, -3, -1),
-    dofEnabled: true,
-    focalLength: 30,
-    fStop: 1.5,
-    focusDistance: 50,
-    dofBlurLevel: 5,
   },
   {
     // High side view (original)
     position: new Vector3(33, 21, 11),
     target: new Vector3(20, 9, 4),
-    dofEnabled: true,
-    focalLength: 30,
-    fStop: 1.5,
-    focusDistance: 50,
-    dofBlurLevel: 5,
   },
   {
     // Low player 1 view
     position: new Vector3(13, 16, 10),
     target: new Vector3(-20, -10, -15),
-    dofEnabled: true,
-    focalLength: 30,
-    fStop: 1.5,
-    focusDistance: 50,
-    dofBlurLevel: 5,
   },
 ];
 
@@ -196,19 +180,19 @@ export const getRandomCameraAngle = (): CameraAngle => {
 export function applyCameraAngle(
   camera: ArcRotateCamera,
   cameraAngle: CameraAngle,
-  pipeline: DefaultRenderingPipeline | null
+  pipeline: DefaultRenderingPipeline | null,
+  dofSettings: CameraDOFSettings = defaultCameraDOFSettings
 ) {
-  if (!cameraAngle || !pipeline) return;
+  if (!cameraAngle) return;
 
   camera.position = cameraAngle.position.clone();
   camera.target = cameraAngle.target.clone();
 
-  if (cameraAngle.dofEnabled === true) {
-    pipeline.depthOfFieldEnabled = cameraAngle.dofEnabled;
-    pipeline.depthOfFieldEnabled = cameraAngle.dofEnabled;
-    pipeline.depthOfField.focalLength = cameraAngle.focalLength;
-    pipeline.depthOfField.fStop = cameraAngle.fStop;
-    pipeline.depthOfField.focusDistance = cameraAngle.focusDistance;
-    pipeline.depthOfFieldBlurLevel = cameraAngle.dofBlurLevel;
+  if (pipeline) {
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.depthOfField.focalLength = dofSettings.focalLength;
+    pipeline.depthOfField.fStop = dofSettings.fStop;
+    pipeline.depthOfField.focusDistance = dofSettings.focusDistance;
+    pipeline.depthOfFieldBlurLevel = dofSettings.dofBlurLevel;
   }
 }

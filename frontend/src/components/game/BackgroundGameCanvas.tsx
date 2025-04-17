@@ -64,14 +64,14 @@ const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipelin
   scene.skipFrustumClipping = true;
   scene.skipPointerMovePicking = true;
 
-  // if (pipeline) {
-  //   pipeline.bloomEnabled = true;
-  //   pipeline.depthOfFieldEnabled = true;
-  //   pipeline.chromaticAberrationEnabled = true;
-  //   pipeline.grainEnabled = true;
-  //   pipeline.fxaaEnabled = true;
-  //   pipeline.samples = 1;
-  // }
+  if (pipeline) {
+    pipeline.bloomEnabled = true;
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.chromaticAberrationEnabled = true;
+    pipeline.grainEnabled = true;
+    pipeline.fxaaEnabled = true;
+    pipeline.samples = 1;
+  }
 
   // Enable occlusion culling
   scene.autoClear = false;

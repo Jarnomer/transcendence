@@ -6,9 +6,7 @@ import {
   DynamicTexture,
   HemisphericLight,
   MirrorTexture,
-  MotionBlurPostProcess,
   Plane,
-  SSAO2RenderingPipeline,
   Scene,
   ShadowGenerator,
   DirectionalLight,
@@ -49,33 +47,23 @@ export function setupEnvironmentMap(scene: Scene) {
 export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boolean = false) {
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
 
-  // Enable bloom effect
   pipeline.bloomEnabled = true;
   pipeline.bloomThreshold = 0.6;
   pipeline.bloomWeight = 0.05;
   pipeline.bloomKernel = 64;
   pipeline.bloomScale = 0.2;
 
-  // // Enable chromatic aberration
   pipeline.chromaticAberrationEnabled = true;
   pipeline.chromaticAberration.aberrationAmount = 10;
   pipeline.chromaticAberration.radialIntensity = 0.2;
 
-  // // Enable grain effect
   pipeline.grainEnabled = true;
   pipeline.grain.intensity = 8;
   pipeline.grain.animated = true;
 
-  pipeline.fxaaEnabled = true; // Enable anti-aliasing
+  pipeline.fxaaEnabled = true;
 
-  // Enable depth of field if requested
-  if (enableDOF) {
-    pipeline.depthOfFieldEnabled = true;
-    pipeline.depthOfField.focalLength = 50;
-    pipeline.depthOfField.fStop = 1.4;
-    pipeline.depthOfField.focusDistance = 50;
-    pipeline.depthOfFieldBlurLevel = 2;
-  }
+  if (enableDOF) pipeline.depthOfFieldEnabled = true;
 
   return pipeline;
 }
