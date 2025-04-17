@@ -10,8 +10,7 @@ import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
 const useMatchmaking = () => {
   const navigate = useNavigate();
   const { userId } = useUser();
-  const { matchmakingSocket, sendMessage, closeConnection, connections } =
-    useWebSocketContext();
+  const { matchmakingSocket, sendMessage, closeConnection, connections } = useWebSocketContext();
   const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions, gameSettings } =
     useGameOptionsContext();
   const matchmaker = useRef<MatchMaker>(null);
@@ -118,7 +117,6 @@ const useMatchmaking = () => {
       if (!matchmaker.current) return;
       matchmaker.current.stopMatchMake();
       closeConnection('matchmaking');
-      closeConnection('game');
     };
   }, [userId]);
 
@@ -143,8 +141,6 @@ const useMatchmaking = () => {
         break;
     }
   }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
-
-
 
   useEffect(() => {
     console.log('Attaching matchmaking event listeners');

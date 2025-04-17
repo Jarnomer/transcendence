@@ -64,6 +64,7 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
     setQueueId(null);
     setGameId(null);
     setTournamentOptions(null);
+    setGameSettings(defaultGameSettings);
   };
   return (
     <GameOptionsContext.Provider

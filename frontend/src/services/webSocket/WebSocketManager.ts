@@ -13,6 +13,8 @@ class WebSocketManager {
 
   private constructor(type: string) {
     this.url = `wss://${window.location.host}/ws/${type}/`;
+    this.authParams.set('user_id', localStorage.getItem('userID') || '');
+    this.authParams.set('token', localStorage.getItem('token') || '');
   }
 
   static getInstance(type: string): WebSocketManager {
@@ -28,14 +30,15 @@ class WebSocketManager {
     });
   }
 
-  connect(params: URLSearchParams = this.authParams) {
+  connect(params: URLSearchParams = new URLSearchParams()) {
     if (this.ws) {
       console.log('Closing existing WebSocket:', this.url);
       this.ws.close();
     }
     this.params = params;
+    console.log(`params before connection: ${params.toString()}`);
     console.log('Connecting to WebSocket:', this.url + `?${params.toString()}`);
-    this.ws = new WebSocket(`${this.url}?${this.authParams}${params.toString()}`);
+    this.ws = new WebSocket(`${this.url}?${this.authParams}&${params.toString()}`);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected:', this.url);

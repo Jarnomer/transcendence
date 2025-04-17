@@ -23,6 +23,7 @@ async function initDB(): Promise<Database> {
   console.log('Database initialized.');
   await insertAIUsers(db);
   await inserAIProfiles(db);
+  await insertAIStats(db);
   return db;
 }
 
@@ -66,4 +67,10 @@ async function inserAIProfiles(db: Database) {
     ['brutal', 'AI Brutal', 'uploads/ai_hard.png']
   );
   console.log('AI Users and Profiles inserted.'); // Log to console
+}
+
+async function insertAIStats(db: Database) {
+  await db.run('INSERT OR IGNORE INTO user_stats (user_id) VALUES (?)', ['easy']);
+  await db.run('INSERT OR IGNORE INTO user_stats (user_id) VALUES (?)', ['normal']);
+  await db.run('INSERT OR IGNORE INTO user_stats (user_id) VALUES (?)', ['brutal']);
 }

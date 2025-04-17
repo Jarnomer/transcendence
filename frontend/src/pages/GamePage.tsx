@@ -16,7 +16,8 @@ import { useBackgroundGameVisibility } from '../hooks/useBackgroundGameVisibilit
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, sendMessage, gameSocket } = useWebSocketContext();
+  const { gameState, gameStatus, connections, sendMessage, gameSocket, closeConnection } =
+    useWebSocketContext();
   const { gameId, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
   const { userId } = useUser();
   const { loadingStates } = useLoading();
@@ -66,12 +67,15 @@ export const GamePage: React.FC = () => {
   // useMatchmaking();
 
   useEffect(() => {
-    if (!gameId || !userId) return;
+    if (!gameId) return;
     console.log('connecting to game socket');
-    params.current.set('user_id', userId);
-    params.current.set('token', localStorage.getItem('token') || '');
+    // params.current.set('user_id', userId);
+    // params.current.set('token', localStorage.getItem('token') || '');
     params.current.set('game_id', gameId);
     gameSocket.connect(params.current);
+    return () => {
+      closeConnection('game');
+    };
   }, [gameId]);
   useGameResult();
   const localPlayerId = useGameControls();
