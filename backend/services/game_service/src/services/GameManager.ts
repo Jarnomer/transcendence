@@ -1,10 +1,6 @@
 import '@fastify/websocket';
 
-import { getPackedSettings } from 'http2';
-
 import { Database } from 'sqlite';
-
-import { GameSettings } from '@shared/types';
 
 import { GameService } from '@my-backend/matchmaking_service';
 import { MatchmakingService } from '@my-backend/remote_service';

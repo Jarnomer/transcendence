@@ -60,6 +60,10 @@ export default class PongGame {
     this.resetBall();
   }
 
+  setSettings(settings: GameSettings): void {
+    this.settings = settings;
+  }
+
   addPlayer(playerId: string): void {
     if (!this.gameState.players.player1.id) {
       console.log('Adding player1:', playerId);

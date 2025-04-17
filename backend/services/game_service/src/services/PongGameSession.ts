@@ -1,8 +1,10 @@
 import { isPlayerInputMessage } from '@shared/messages';
+import { isGameSettingsMessage } from '@shared/messages/gameSettingsMessage';
 import { GameStatus, GameSettings, defaultGameSettings } from '@shared/types';
 
 import PongGame from './PongGame';
 import { AIController } from '../controllers/AIController';
+import { handleGameSettingsMessage } from '../handlers/gameSettingsHandler';
 import { handlePlayerInputMessage } from '../handlers/playerInputHandler';
 
 export default class PongGameSession {
@@ -74,6 +76,14 @@ export default class PongGameSession {
     }
   }
 
+  getSettings(): GameSettings {
+    return structuredClone(this.settings);
+  }
+  setSettings(settings: GameSettings): void {
+    this.settings = settings;
+    this.game.setSettings(settings);
+  }
+
   getClientCount(): number {
     return this.clients.size;
   }
@@ -140,6 +150,9 @@ export default class PongGameSession {
       //console.log('Received message:', data);
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
+      }
+      if (isGameSettingsMessage(data)) {
+        handleGameSettingsMessage(this, data);
       }
     } catch (error) {
       console.error('Invalid WebSocket message:', error);
