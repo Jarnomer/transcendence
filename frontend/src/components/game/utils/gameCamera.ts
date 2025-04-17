@@ -8,6 +8,8 @@ import {
   Vector3,
 } from 'babylonjs';
 
+import { defaultGameAnimationTimings } from '@shared/types';
+
 export interface CameraAngle {
   target: Vector3; // Target position
   position: Vector3; // Explicit position
@@ -128,7 +130,7 @@ export function applyCameraShake(
 export const animateCamera = (
   camera: ArcRotateCamera,
   targetAngle: CameraAngle,
-  duration: number = 3000
+  duration: number = defaultGameAnimationTimings.camera.cameraAnimationDuration
 ) => {
   const scene = camera.getScene();
   const animations = [];

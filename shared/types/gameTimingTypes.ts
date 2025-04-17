@@ -26,6 +26,7 @@ export interface CameraTimings {
   cameraMoveInterval: number;
   cameraTransitionDuration: number;
   cameraInitialDelay: number;
+  cameraAnimationDuration: number;
 }
 
 export interface CinematicGlitchTimings {
@@ -77,6 +78,7 @@ export const defaultCameraTimings: CameraTimings = {
   cameraMoveInterval: 12000,
   cameraTransitionDuration: 2000,
   cameraInitialDelay: 500,
+  cameraAnimationDuration: 5000,
 };
 
 export const defaultCinematicGlitchTimings: CinematicGlitchTimings = {
