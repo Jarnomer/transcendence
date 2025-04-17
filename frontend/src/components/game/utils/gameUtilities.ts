@@ -1,4 +1,4 @@
-import { Mesh } from 'babylonjs';
+import { Engine, Mesh, Scene, Texture } from 'babylonjs';
 
 import { defaultGameParams } from '@shared/types';
 
@@ -35,4 +35,25 @@ export function enforceBoundary(
 ): number {
   const halfHeight = objectHeight / 2;
   return Math.max(halfHeight, Math.min(gameHeight - halfHeight, position));
+}
+
+export function createSafeTexture(url: string, scene: Scene, onLoad?: () => void): Texture {
+  const texture = new Texture(url, scene, false, true, Texture.TRILINEAR_SAMPLINGMODE, () => {
+    texture.updateSamplingMode(Texture.TRILINEAR_SAMPLINGMODE);
+    if (onLoad) onLoad();
+  });
+
+  texture.delayLoadState = Engine.DELAYLOADSTATE_NOTLOADED;
+  return texture;
+}
+
+export function enableRequiredExtensions(engine: Engine): void {
+  const gl = engine._gl as WebGLRenderingContext;
+
+  if (gl) {
+    gl.getExtension('EXT_float_blend');
+    gl.getExtension('EXT_color_buffer_float');
+    gl.getExtension('OES_texture_float_linear');
+    gl.getExtension('OES_texture_half_float_linear');
+  }
 }

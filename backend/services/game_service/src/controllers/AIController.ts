@@ -1,16 +1,18 @@
-import { Ball, Player, GameParams, defaultGameParams, PowerUp } from '@shared/types';
+import { Ball, Player, GameParams, defaultGameParams, PowerUp, GameSettings } from '@shared/types';
 
 export class AIController {
   private plannedMoves: ('up' | 'down' | null)[] = [];
   private lastUpdateTime: number = 0;
   private difficulty: string;
+  private settings: GameSettings;
   private lastBallDx: number = 0;
   private params: GameParams = defaultGameParams;
   public isPlayer1: boolean;
 
   // difficulty levels: easy, normal, brutal
-  constructor(difficulty: string, isPlayer1: boolean) {
-    this.difficulty = difficulty;
+  constructor(settings: GameSettings, isPlayer1: boolean) {
+    this.settings = settings;
+    this.difficulty = this.settings.difficulty;
     this.isPlayer1 = isPlayer1;
   }
 
@@ -35,7 +37,7 @@ export class AIController {
     }
 
     // Find the first power up that is not collected
-    const powerUp = powerUps.find((p) => !p.collectedBy);
+    const powerUp = powerUps.find((p) => !p.isCollected);
 
     if (powerUp) {
       const playerX = this.isPlayer1
@@ -82,6 +84,7 @@ export class AIController {
 
     // Don't apply spin if there are power-ups or if the ball is not moving towards AI
     if (
+      this.settings.enableSpin &&
       !powerUps.length &&
       ballMovingTowardsAI &&
       this.plannedMoves.length <= prediction.frames - spinMovesNeeded

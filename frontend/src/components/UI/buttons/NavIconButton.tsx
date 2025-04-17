@@ -10,6 +10,7 @@ import {
   HomeIcon,
   NoSymbolIcon,
   PauseIcon,
+  PencilSquareIcon,
   PlayIcon,
   UserIcon,
   UserMinusIcon,
@@ -35,7 +36,8 @@ interface NavIconButtonProps {
     | 'bell'
     | 'checkCircle'
     | 'xCircle'
-    | 'block';
+    | 'block'
+    | 'PencilSquareIcon';
   onClick: () => void;
 }
 
@@ -58,6 +60,7 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick,
     bell: <BellIcon className={iconSizeResponsive}></BellIcon>,
     checkCircle: <CheckCircleIcon className={iconSizeResponsive}></CheckCircleIcon>,
     xCircle: <XCircleIcon className={iconSizeResponsive}></XCircleIcon>,
+    PencilSquareIcon: <PencilSquareIcon className={`w-full h-full`}></PencilSquareIcon>,
   };
 
   return (

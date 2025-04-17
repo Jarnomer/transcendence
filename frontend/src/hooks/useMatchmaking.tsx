@@ -10,7 +10,7 @@ const useMatchmaking = (userId: string | null) => {
   const navigate = useNavigate();
   const { gameSocket, matchmakingSocket, sendMessage, closeConnection, connections } =
     useWebSocketContext();
-  const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions } =
+  const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions, gameSettings } =
     useGameOptionsContext();
   const params = useRef<URLSearchParams>(new URLSearchParams());
   const matchmaker = useRef<MatchMaker>(null);
@@ -146,6 +146,15 @@ const useMatchmaking = (userId: string | null) => {
         break;
     }
   }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
+
+  useEffect(() => {
+    if (connections.game !== 'connected') return;
+    console.log('Game connected');
+    sendMessage('game', {
+      type: 'game_settings',
+      payload: gameSettings,
+    });
+  }, [connections.game, gameSettings]);
 
   useEffect(() => {
     console.log('Attaching matchmaking event listeners');

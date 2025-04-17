@@ -62,20 +62,17 @@ export const HomePage: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full relative h-full overflow-hidden z-10 gap-5 md:gap-10 md:p-4">
+      <motion.div className="w-full relative flex flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
         <div className="absolute w-full h-full" aria-hidden="true">
           <HomePageBackgroundGlitch activeTab={activeTab} duration={1100} />
         </div>
         <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav>
-        <motion.div
-          id="home-page-content"
-          className="flex flex-col md:flex-row h-full  gap-2 md:gap-10"
-        >
+        <motion.div id="home-page-content" className="flex flex-col md:flex-row h-full gap-2">
           {activeTab === 'leaderboard' && (
             <AnimatePresence>
               <motion.div
                 key="leaderboard"
-                className="w-full h-full min-w-1/2 md:w-1/2 flex"
+                className="md:min-w-1/2 flex justify-center md:justify-end  p-0"
                 variants={slideFromLeftVariants}
                 initial="initial"
                 animate="animate"
@@ -85,7 +82,7 @@ export const HomePage: React.FC = () => {
               </motion.div>
               <motion.div
                 key="playerQueue"
-                className="w-full h-full md:w-1/2 h-full  flex flex-col gap-10"
+                className="md:min-w-1/2 flex justify-center flex-col gap-10"
                 variants={slideFromRightVariants}
                 initial="initial"
                 animate="animate"

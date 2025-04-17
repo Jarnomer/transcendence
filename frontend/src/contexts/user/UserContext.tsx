@@ -76,7 +76,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       return;
     }
-
     try {
       const res = await api.get('/auth/validate');
       localStorage.setItem('userID', res.data.user_id);

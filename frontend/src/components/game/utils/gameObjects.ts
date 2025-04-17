@@ -7,10 +7,11 @@ import {
   PBRMaterial,
   Scene,
   Path3D,
-  Texture,
 } from 'babylonjs';
 
 import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
+
+import { createSafeTexture } from './gameUtilities.ts';
 
 export function createEdge(
   scene: Scene,
@@ -115,10 +116,19 @@ export function createFloor(
   floor.rotation.x = Math.PI / 2;
 
   const baseUrl = '/floor-metal/';
-  pbr.albedoTexture = new Texture(baseUrl + 'albedo.png', scene);
-  pbr.bumpTexture = new Texture(baseUrl + 'normal.png', scene);
-  pbr.metallicTexture = new Texture(baseUrl + 'metallic.png', scene);
-  pbr.ambientTexture = new Texture(baseUrl + 'ao.png', scene);
+
+  const texturesLoaded = { count: 0, total: 4 };
+  const checkAllLoaded = () => {
+    texturesLoaded.count++;
+    if (texturesLoaded.count === texturesLoaded.total) {
+      floor.material = pbr;
+    }
+  };
+
+  pbr.albedoTexture = createSafeTexture(baseUrl + 'albedo.png', scene, checkAllLoaded);
+  pbr.bumpTexture = createSafeTexture(baseUrl + 'normal.png', scene, checkAllLoaded);
+  pbr.metallicTexture = createSafeTexture(baseUrl + 'metallic.png', scene, checkAllLoaded);
+  pbr.ambientTexture = createSafeTexture(baseUrl + 'ao.png', scene, checkAllLoaded);
 
   const multipleColor = params.floor.colorMultiplier;
   const adjustedColor = new Color3(

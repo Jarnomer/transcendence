@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { ChatWindow } from '../components/chat/ChatWindow';
-import { PowerUpSelection } from '../components/menu/cards/PowerUpSelection';
+import { GameOptions } from '../components/gameOptions/GameOptions';
+import TournamentBracket from '../components/tournament/TournamentBracket';
 import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -88,6 +89,10 @@ export const TournamentLobbyNav: React.FC<{
         <button onClick={() => setActiveTab('players')}>
           <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
         </button>
+
+        <button onClick={() => setActiveTab('matches')}>
+          <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
+        </button>
       </span>
     </motion.div>
   );
@@ -96,18 +101,7 @@ export const TournamentLobbyNav: React.FC<{
 export const TournamentSettings: React.FC = () => {
   const [enablePowerUps, setEnablePowerUps] = useState(false);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
-  return (
-    <div className="glass-box h-full w-full">
-      <div></div>
-      <div className="broder-1 h-full w-full">
-        <span className="text-secondary">Power Ups</span>
-        <PowerUpSelection
-          selectedPowerUps={selectedPowerUps}
-          setSelectedPowerUps={setSelectedPowerUps}
-        />
-      </div>
-    </div>
-  );
+  return <GameOptions></GameOptions>;
 };
 
 export const TournamentPlayerList: React.FC = () => {
@@ -115,37 +109,61 @@ export const TournamentPlayerList: React.FC = () => {
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   return (
     <div className="h-full w-full">
-      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2 overflow-y-scroll">
+      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2overflow-y-scroll">
         <motion.li
-          className=" w-full h-full flex gap-3 hover:scale-[1.05] hover:text-secondary"
+          className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.02] p-1 hover:text-secondary"
           // onClick={() => navigate(`/profile/${user.user_id}`)}
         >
           <ListSvgContainer>
             <div className="flex items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
                 <img
-                  className="object-cover w-full h-full grayscale"
+                  className="object-cover w-full h-full"
                   src={'./src/assets/images/default_avatar.png'}
                   alt={`users's profile picture`}
                 />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundColor: 'currentColor',
-                    mixBlendMode: 'color',
-                  }}
-                ></div>
               </div>
               <p className="text-xs">
                 dummy user <br />
               </p>
-              <p>Rank: 900</p>
             </div>
           </ListSvgContainer>
         </motion.li>
       </motion.ul>
     </div>
+  );
+};
+
+export const TournamentMatchList: React.FC = ({ players }) => {
+  const [activeTab, setActiveTab] = useState('bracket');
+
+  return (
+    <motion.div>
+      <div className="flex gap-3">
+        <button className="text-xs" onClick={() => setActiveTab('bracket')}>
+          bracket
+        </button>
+        <button className="text-xs" onClick={() => setActiveTab('list')}>
+          list
+        </button>
+      </div>
+      <motion.div
+        key="tournamentBracket"
+        className="w-full h-full  border-1 border-primary bg-black/30"
+        variants={slideFromRightVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        {activeTab == 'bracket' ? (
+          <TournamentBracket players={players}></TournamentBracket>
+        ) : (
+          <>
+            <h1>not implemented :)</h1>
+          </>
+        )}
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -158,23 +176,36 @@ export const TournamentLobby: React.FC = () => {
 
   const { createRoom } = useChatContext();
 
-  useEffect(() => {
-    setPlayers([user?.user_id]);
-  }, [user]);
+  // useEffect(() => {
+  //   setPlayers([user?.user_id]);
+  // }, [user]);
 
   useEffect(() => {
-    if (!user || !players) return;
+    if (!user) return;
 
     const setupChat = async () => {
-      console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', players);
-      const chatId = await createRoom('tournamentChat', true, players);
-      setTournamentChatId(chatId);
+      console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
+      const chatId = await createRoom(
+        'tournamentChat_' + Math.floor(Math.random() * 50),
+        true,
+        null
+      );
+      if (chatId) {
+        setTournamentChatId(chatId);
+      }
     };
 
     setupChat();
-  }, [players]);
+  }, [user]);
+
+  useEffect(() => {}, [tournamentChatId]);
+
+  useEffect(() => {
+    setPlayers(Array.from({ length: 8 }, (_, i) => `Competitor ${i + 1}`));
+  }, []);
 
   console.log(selectedFriendId);
+
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
@@ -186,8 +217,8 @@ export const TournamentLobby: React.FC = () => {
           <span className="text-secondary">X/X Players</span>
         </header>
 
-        <div className="flex flex-col md:flex-row gap-2 w-full h-full flex-grow">
-          <motion.div className="flex flex-col md:flex-row md:w-3/5 h-full w-full gap-2 md:gap-10">
+        <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
+          <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">
               {activeTab === 'settings' ? (
                 <motion.div
@@ -200,6 +231,8 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
+              ) : activeTab == 'matches' ? (
+                <TournamentMatchList players={players}></TournamentMatchList>
               ) : (
                 <motion.div
                   key="tournamentPlayerList"
@@ -214,8 +247,9 @@ export const TournamentLobby: React.FC = () => {
               )}
             </AnimatePresence>
           </motion.div>
-          <div className="@container glass-box h-[200px] w-2/5">
-            {user && players && tournamentChatId && (
+          <div className="@container glass-box h-[200px] w-full">
+            <p>chat</p>
+            {user && tournamentChatId && (
               <ChatWindow
                 selectedFriendId={selectedFriendId}
                 friends={friends}

@@ -11,13 +11,23 @@ import {
   SSAO2RenderingPipeline,
   Scene,
   ShadowGenerator,
-  SpotLight,
+  DirectionalLight,
   Texture,
   Vector3,
 } from 'babylonjs';
 
+function createCubeTexture(rootUrl: string, scene: Scene) {
+  const envTexture = new CubeTexture(rootUrl, scene);
+
+  envTexture.onLoadObservable.add(() => {
+    envTexture.updateSamplingMode(Texture.TRILINEAR_SAMPLINGMODE);
+  });
+
+  return envTexture;
+}
+
 export function setupEnvironmentMap(scene: Scene) {
-  const envTex = CubeTexture.CreateFromPrefilteredData(
+  const envTex = createCubeTexture(
     'https://assets.babylonjs.com/environments/environmentSpecular.env',
     scene
   );
@@ -26,6 +36,14 @@ export function setupEnvironmentMap(scene: Scene) {
   scene.imageProcessingConfiguration.contrast = 1.1;
   scene.imageProcessingConfiguration.exposure = 0.8;
   scene.createDefaultSkybox(envTex, true);
+
+  scene.useDelayedTextureLoading = true;
+  scene.autoClearDepthAndStencil = true;
+  scene.autoClear = true;
+
+  scene.executeWhenReady(() => {
+    scene.render();
+  });
 }
 
 export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boolean = false) {
@@ -40,12 +58,12 @@ export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boo
 
   // Enable chromatic aberration
   pipeline.chromaticAberrationEnabled = true;
-  pipeline.chromaticAberration.aberrationAmount = 10.0;
+  pipeline.chromaticAberration.aberrationAmount = 10;
   pipeline.chromaticAberration.radialIntensity = 0.2;
 
   // Enable grain effect
   pipeline.grainEnabled = true;
-  pipeline.grain.intensity = 12;
+  pipeline.grain.intensity = 8;
   pipeline.grain.animated = true;
 
   pipeline.fxaaEnabled = true; // Enable anti-aliasing
@@ -82,43 +100,39 @@ export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boo
   return pipeline;
 }
 
-export function setupScenelights(scene: Scene) {
+export function setupScenelights(scene: Scene, primaryColor: Color3) {
   const hemiLight = new HemisphericLight('hemiLight', new Vector3(0, 1, 0), scene);
-  hemiLight.intensity = 0.2;
+  hemiLight.intensity = 0.3;
 
-  const leftSpotlight = new SpotLight(
-    'leftSpot',
-    new Vector3(-10, 10, 10), // Position
-    new Vector3(0.2, -0.9, -0.4).normalize(), // Direction
-    Math.PI / 3, // Angle
-    10, // Exponent
+  const leftDirectionalLight = new DirectionalLight(
+    'leftDirectionalLight',
+    new Vector3(1, -0.5, -0.5),
     scene
   );
-  leftSpotlight.intensity = 0.7;
-  leftSpotlight.diffuse = new Color3(0.7, 0.7, 0.7);
+  leftDirectionalLight.intensity = 6;
+  leftDirectionalLight.diffuse = primaryColor;
+  leftDirectionalLight.specular = primaryColor;
 
-  const rightSpotlight = new SpotLight(
-    'rightSpot',
-    new Vector3(10, 10, 10),
-    new Vector3(-0.2, -0.9, -0.4).normalize(),
-    Math.PI / 3,
-    10,
+  const rightDirectionalLight = new DirectionalLight(
+    'rightDirectionalLight',
+    new Vector3(-1, -0.5, -0.5),
     scene
   );
-  rightSpotlight.intensity = 0.7;
-  rightSpotlight.diffuse = new Color3(0.7, 0.7, 0.7);
+  rightDirectionalLight.intensity = 6;
+  rightDirectionalLight.diffuse = primaryColor;
+  rightDirectionalLight.specular = primaryColor;
 
-  const shadowGenerator1 = new ShadowGenerator(1024, leftSpotlight);
-  const shadowGenerator2 = new ShadowGenerator(1024, rightSpotlight);
+  const leftShadowGenerator = new ShadowGenerator(1024, leftDirectionalLight);
+  leftShadowGenerator.useBlurExponentialShadowMap = true;
+  leftShadowGenerator.blurKernel = 32;
 
-  shadowGenerator1.useBlurExponentialShadowMap = true;
-  shadowGenerator1.blurKernel = 32;
-  shadowGenerator2.useBlurExponentialShadowMap = true;
-  shadowGenerator2.blurKernel = 32;
+  const rightShadowGenerator = new ShadowGenerator(1024, rightDirectionalLight);
+  rightShadowGenerator.useBlurExponentialShadowMap = true;
+  rightShadowGenerator.blurKernel = 32;
 
   return {
-    lights: [leftSpotlight, rightSpotlight],
-    shadowGenerators: [shadowGenerator1, shadowGenerator2],
+    lights: [leftDirectionalLight, rightDirectionalLight],
+    shadowGenerators: [leftShadowGenerator, rightShadowGenerator],
   };
 }
 

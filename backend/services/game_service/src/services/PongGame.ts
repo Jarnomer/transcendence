@@ -1,6 +1,13 @@
 // import { Any } from '@sinclair/typebox';
 
-import { GameState, GameStatus, GameParams, defaultGameParams, PowerUpType } from '@shared/types';
+import {
+  GameState,
+  GameStatus,
+  GameParams,
+  defaultGameParams,
+  PowerUpType,
+  GameSettings,
+} from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
 
@@ -13,20 +20,16 @@ export default class PongGame {
   private gameStatus: GameStatus;
   private updateInterval: NodeJS.Timeout | null = null;
 
-  private mode: string;
-  private difficulty: string;
+  private settings: GameSettings;
 
   private readyState = new Map<number, boolean>();
 
   private powerUpManager: PowerUpManager;
-  private powerUps: boolean;
 
-  constructor(mode: string, difficulty: string, powerUps: boolean) {
+  constructor(settings: GameSettings) {
     this.params = structuredClone(defaultGameParams);
-    this.powerUpManager = new PowerUpManager(this);
-    this.mode = mode;
-    this.difficulty = difficulty;
-    this.powerUps = powerUps;
+    this.settings = settings;
+    this.powerUpManager = new PowerUpManager(this, this.settings);
     this.gameState = {
       players: {
         player1: {
@@ -91,16 +94,16 @@ export default class PongGame {
 
   areAllPlayersReady(): boolean {
     // console.log('Checking if all players are ready, mode:', this.mode);
-    if (this.mode === 'AIvsAI') {
+    if (this.settings.mode === 'AIvsAI') {
       return true;
     } else if (
-      this.mode === 'singleplayer' ||
-      (this.mode === '1v1' && this.difficulty === 'local')
+      this.settings.mode === 'singleplayer' ||
+      (this.settings.mode === '1v1' && this.settings.difficulty === 'local')
     ) {
       if (this.readyState.get(1)) {
         return true;
       }
-    } else if (this.mode === '1v1' && this.difficulty === 'online') {
+    } else if (this.settings.mode === '1v1' && this.settings.difficulty === 'online') {
       if (this.readyState.get(1) && this.readyState.get(2)) {
         return true;
       }
@@ -176,6 +179,7 @@ export default class PongGame {
   }
 
   collectPowerUp(
+    id: number,
     type: PowerUpType,
     affectedPlayer: number,
     timeToExpire: number,
@@ -188,6 +192,11 @@ export default class PongGame {
       timeToExpire,
       isNegative,
     });
+    for (const powerUp of this.gameState.powerUps) {
+      if (powerUp.id === id) {
+        powerUp.isCollected = true;
+      }
+    }
     console.log(`Power-up collected by player ${affectedPlayer}:`, type);
   }
 
@@ -203,6 +212,8 @@ export default class PongGame {
 
   // Decrement timeToDespawn or timeToExpire for all power-ups
   updatePowerUpTimers(): void {
+    if (!this.settings.enablePowerUps || this.gameStatus !== 'playing') return;
+
     for (const powerUp of this.gameState.powerUps) {
       powerUp.timeToDespawn -= 1000 / 60; // Assuming 60 FPS
     }
@@ -335,15 +346,16 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
+    this.powerUpManager.resetPowerUps();
+    this.gameState.players.player1.activePowerUps = [];
+    this.gameState.players.player2.activePowerUps = [];
+    this.gameState.powerUps = [];
+
     console.log('Starting countdown...');
     console.log('Countdown length:', this.params.rules.countdown);
     this.setGameStatus('countdown');
     this.resetBall();
     this.resetPaddles();
-    this.powerUpManager.resetPowerUps();
-    this.gameState.players.player1.activePowerUps = [];
-    this.gameState.players.player2.activePowerUps = [];
-    this.gameState.powerUps = [];
 
     console.log('Game starting with max score:', this.params.rules.maxScore);
 
@@ -445,18 +457,22 @@ export default class PongGame {
     if (ball.x <= 0) {
       players.player2.score++;
       console.log('Player 2 scores!');
-      if (this.params.rules.maxScore !== 0 && players.player2.score >= this.params.rules.maxScore) {
+      if (this.settings.maxScore !== 0 && players.player2.score >= this.settings.maxScore) {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
+        this.resetPaddles();
+        // this.resetBall();
       }
     } else if (ball.x + this.params.ball.size >= this.params.dimensions.gameWidth) {
       players.player1.score++;
       console.log('Player 1 scores!');
-      if (this.params.rules.maxScore !== 0 && players.player1.score >= this.params.rules.maxScore) {
+      if (this.settings.maxScore !== 0 && players.player1.score >= this.settings.maxScore) {
         this.stopGame();
       } else {
         this.setGameStatus('waiting');
+        this.resetPaddles();
+        // this.resetBall();
       }
     }
   }
@@ -542,16 +558,18 @@ export default class PongGame {
     const direction = isLeftPaddle ? 1 : -1;
     const paddle = isLeftPaddle ? players.player1 : players.player2;
 
-    if (paddle.dy !== 0) {
-      const spinDirection = isLeftPaddle ? -1 : 1;
-      const spinChange = paddle.dy * spinDirection * paddleState.spinIntensity;
-      ball.spin += spinChange;
-      if (Math.abs(ball.spin) > this.params.spin.maxSpin) {
-        ball.spin = this.params.spin.maxSpin * Math.sign(ball.spin);
+    if (this.settings.enableSpin) {
+      if (paddle.dy !== 0) {
+        const spinDirection = isLeftPaddle ? -1 : 1;
+        const spinChange = paddle.dy * spinDirection * paddleState.spinIntensity;
+        ball.spin += spinChange;
+        if (Math.abs(ball.spin) > this.params.spin.maxSpin) {
+          ball.spin = this.params.spin.maxSpin * Math.sign(ball.spin);
+        }
+      } else {
+        ball.spin *= this.params.spin.reductionFactor;
+        if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
       }
-    } else {
-      ball.spin *= this.params.spin.reductionFactor;
-      if (Math.abs(ball.spin) < 0.1) ball.spin = 0;
     }
 
     ball.dx = direction * newSpeed * Math.cos(bounceAngle);
@@ -561,7 +579,7 @@ export default class PongGame {
   setGameStatus(status: GameStatus): void {
     this.gameStatus = status;
     if (status === 'playing') {
-      if (this.powerUps) {
+      if (this.settings.enablePowerUps) {
         this.powerUpManager.startSpawning();
       }
     } else {

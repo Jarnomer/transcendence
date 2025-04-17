@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
@@ -7,7 +7,7 @@ import { useChatContext } from '@/contexts/chatContext/ChatContext';
 import { BackgroundGlow } from '../components';
 import { ChatSidebar } from '../components/chat/ChatSideBar';
 import { ChatWindow } from '../components/chat/ChatWindow';
-import { CreateRoomPopup } from '../components/chat/CreateRoomPopup';
+import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
 
 export const ChatPage: React.FC = () => {
   const {
@@ -31,37 +31,26 @@ export const ChatPage: React.FC = () => {
   const isChatPage = location.pathname === '/chat' ? true : false;
   console.log('isChatPage:', isChatPage);
 
-  useEffect(() => {
-    return () => {
-      setRoomId(null);
-      setSelectedFriend(null);
-    };
-  }, [setRoomId, setSelectedFriend]);
+  useEffect(() => {}, [isRoomPopupVisible]);
+
+  const handleClickNewChat = () => {
+    setRoomPopupVisible(!isRoomPopupVisible);
+  };
 
   return (
-    <div className="p-2 w-full h-full">
-      {isChatPage ? (
-        <>
-          <button onClick={() => setRoomPopupVisible(true)}>Create Room</button>
-
-          <CreateRoomPopup
-            isVisible={isRoomPopupVisible}
-            onClose={() => setRoomPopupVisible(false)}
-            friends={friends}
-            onRoomCreated={(roomId) => {
-              setRoomId(roomId);
-              setRoomPopupVisible(false);
-            }}
-          />
-        </>
-      ) : null}
-
-      <div className="flex h-[600px] glass-box overflow-hidden relative">
+    <div className="p-2 w-full h-full flex items-center justify-center">
+      <div className="flex h-[600px] w-3xl  glass-box overflow-hidden relative">
         <BackgroundGlow />
         <div
           className={` w-full h-full ${!selectedFriend && !roomId ? 'w-full md:block' : 'hidden lg:block md:w-1/3 lg:1/5'} overflow-y-auto`}
         >
-          <ChatSidebar />
+          {isRoomPopupVisible ? (
+            <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
+          ) : (
+            <>
+              <ChatSidebar handleClickNewChat={handleClickNewChat}></ChatSidebar>
+            </>
+          )}
         </div>
 
         {selectedFriend ? (

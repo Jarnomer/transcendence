@@ -64,8 +64,8 @@ export const Tournaments: React.FC = () => {
         <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
           <h2 className="">Open Tournaments</h2>
         </div>
-        <motion.div className=" w-full text-xs relative  text-sm">
-          <div className="p-5 mt-1 border-1 w-full h-full relative overflow-hidden bg-primary/20 clipped-corner-bottom-right">
+        <motion.div className="p-2 relative  text-sm">
+          <div className="p-5 mt-1 border-1  h-full relative overflow-hidden bg-primary/20 ">
             <BackgroundGlow></BackgroundGlow>
             <ul>
               {dataInQueue.length === 0 ? (
@@ -73,7 +73,7 @@ export const Tournaments: React.FC = () => {
               ) : (
                 dataInQueue.map((options, index) => (
                   <li key={index} className="my-2">
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center justify-center gap-5">
                       <p>{options.name || 'N/A'}</p>
                       {Boolean(options.isPrivate) && (
                         <input

@@ -24,7 +24,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="p-2 border-1 w-full "
+        className="p-2 border-1 w-full text-sm "
       />
 
       <div className="px-2 border">

@@ -1,4 +1,4 @@
-import { GameParams, defaultGameParams, PowerUpType } from '@shared/types';
+import { GameParams, defaultGameParams, PowerUpType, GameSettings } from '@shared/types';
 
 import PongGame from './PongGame';
 import { BiggerPaddlePowerUp } from './powerups/BiggerPaddlePowerUp';
@@ -14,10 +14,12 @@ export class PowerUpManager {
   private spawnInterval: NodeJS.Timeout | null = null;
   private isSpawning: boolean = false;
   private params: GameParams;
+  private settings: GameSettings;
 
-  constructor(game: PongGame) {
+  constructor(game: PongGame, settings: GameSettings) {
     this.game = game;
     this.params = structuredClone(defaultGameParams);
+    this.settings = settings;
   }
 
   getPowerUps(): PowerUp[] {
@@ -48,9 +50,20 @@ export class PowerUpManager {
     );
   }
 
-  private getRandomPowerUpType(): PowerUpType {
-    const types = Object.values(PowerUpType);
-    return types[Math.floor(Math.random() * types.length)];
+  // private getRandomPowerUpType(): PowerUpType {
+  //   const types = Object.values(PowerUpType);
+  //   return types[Math.floor(Math.random() * types.length)];
+  // }
+
+  private getRandomPowerUpType(): PowerUpType | null {
+    const enabledTypes = Object.entries(this.settings.powerUpTypes)
+      .filter(([, enabled]) => enabled)
+      .map(([type]) => type as PowerUpType);
+
+    if (enabledTypes.length === 0) return null; // or throw error / fallback type
+
+    const index = Math.floor(Math.random() * enabledTypes.length);
+    return enabledTypes[index];
   }
 
   spawnPowerUp(): void {
@@ -143,12 +156,15 @@ export class PowerUpManager {
         } else {
           // Otherwise, collect the power-up
           this.game.collectPowerUp(
+            powerUp.id,
             powerUp.type,
             affectedPlayer,
             powerUp.timeToExpire,
             powerUp.negativeEffect
           );
-          this.game.removePowerUp(powerUp.id);
+          setTimeout(() => {
+            this.game.removePowerUp(powerUp.id);
+          }, 500); // Delay the removal, so frontend can animate the pickup
           console.log(`New power-up collected by player ${affectedPlayer}:`, powerUp.id);
           powerUp.applyEffect(this.game, affectedPlayer);
         }
@@ -171,13 +187,7 @@ export class PowerUpManager {
   }
 
   resetPowerUps(): void {
-    for (const powerUp of this.powerUps) {
-      // if (!powerUp.active) {
-      //   console.log('Deleting uncollected power-up id:', powerUp.id);
-      //   this.removePowerUp(powerUp.id);
-      // }
-      this.removePowerUp(powerUp.id);
-    }
+    this.powerUps = [];
   }
 
   removePowerUp(id: number): void {

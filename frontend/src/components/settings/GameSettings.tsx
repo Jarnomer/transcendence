@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { SvgBorderBig } from '@components/visual/svg/borders/SvgBorderBig';
-
 import { setRetroEffectLevel } from '../game';
+import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 export const animationVariants = {
   initial: {
@@ -23,16 +22,23 @@ export const animationVariants = {
   },
 };
 
-const RetroEffectSettings: React.FC = () => {
-  const [level, setLevel] = useState(2); // Default level
-  const [isEnabled, setIsEnabled] = useState(true); // Checkbox state
+interface retroEffectSettingsProps {
+  isEnabled: boolean;
+  level: number;
+  setLevel: React.Dispatch<React.SetStateAction<number>>;
+  setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const RetroEffectSettings: React.FC<retroEffectSettingsProps> = ({
+  level,
+  setLevel,
+  isEnabled,
+  setIsEnabled,
+}) => {
   const baseValue = 5;
   const effectValue = isEnabled ? setRetroEffectLevel(level, baseValue) : 0;
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">Retro Effect</h2>
-
-      {/* Checkbox to Enable/Disable Effect */}
+    <div className="p-2 max-w-md ">
       <div className="flex items-center mb-4">
         <input
           type="checkbox"
@@ -46,7 +52,6 @@ const RetroEffectSettings: React.FC = () => {
         </label>
       </div>
 
-      {/* Slider Input */}
       <input
         type="range"
         id="effectLevel"
@@ -60,23 +65,29 @@ const RetroEffectSettings: React.FC = () => {
           isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
         }`}
       />
-      <label htmlFor="effectLevel" className="block text-sm font-medium text-gray-700">
-        <span className="font-semibold">{isEnabled ? level : 'Disabled'}</span>
+      <label htmlFor="effectLevel" className="block text-xs font-medium text-gray-700">
+        <span className={`${isEnabled ? 'text-secondary' : 'text-gray-400'}`}>
+          {isEnabled ? level : 'Disabled'}
+        </span>
       </label>
-
-      {/* Display Values */}
-      <div className="mt-4 text-center">
-        <p className="text-sm"></p>
-      </div>
     </div>
   );
 };
 
 export const GameSettings: React.FC = () => {
+  const [retroEffectLevel, setRetroEffectLevel] = useState(2);
+  const [isRetroEffectEnabled, setIsRetroEffectEnabled] = useState(true);
+
+  const handleSaveSettings = () => {
+    console.log('---- Saving Game settings -------');
+    console.log('Retro Effect Enabled: ', isRetroEffectEnabled);
+    console.log('Retro Effect Level: ', retroEffectLevel);
+  };
+
   return (
     <>
       <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10 text-sm"
+        className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
         variants={animationVariants}
         initial="hidden"
         animate="visible"
@@ -84,18 +95,26 @@ export const GameSettings: React.FC = () => {
       >
         <span
           aria-hidden="true"
-          className="absolute top-0 left-0 translate-y-[-50%] w-full pointer-events-none"
+          className="absolute top-0 left-0 bg-primary text-black w-full pointer-events-none"
         >
-          <SvgBorderBig></SvgBorderBig>
+          <h1>Game settings</h1>
         </span>
         <div className="w-full h-full relative overflow-hidden">
           <BackgroundGlow></BackgroundGlow>
           <div className="w-full h-full p-10">
-            <h1 className="font-heading text-4xl">Game Settings</h1>
-
             {/* Retro effect controls */}
-            <RetroEffectSettings></RetroEffectSettings>
+
+            <h2 className="font-heading text-2xl">Retro Effect</h2>
+            <RetroEffectSettings
+              isEnabled={isRetroEffectEnabled}
+              setIsEnabled={setIsRetroEffectEnabled}
+              level={retroEffectLevel}
+              setLevel={setRetroEffectLevel}
+            ></RetroEffectSettings>
           </div>
+        </div>
+        <div className="absolute bottom-0 right-0 p-4">
+          <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
         </div>
       </motion.div>
     </>

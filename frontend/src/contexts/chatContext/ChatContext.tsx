@@ -102,9 +102,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [selectedFriend]);
 
-  useEffect(() => {
-    console.log('messages:', messages);
-  }, [messages]);
+  // useEffect(() => {
+  //   console.log('messages:', messages);
+  // }, [messages]);
 
   const fetchChatHistory = async (roomId: string) => {
     try {
@@ -165,7 +165,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    console.log('Chat socket is already connected');
+    // console.log('Chat socket is already connected');
     chatSocket.addEventListener('message', handleChatMessage);
     return () => {
       console.log('Cleaning up chat socket');
@@ -286,8 +286,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const createRoom = async (roomName: string, isPrivate: boolean, memberList: string[]) => {
+    console.log('roomName: ', roomName, ' isPrivate: ', isPrivate, 'memberList: ', memberList);
     const data = await createChatRoom(roomName, isPrivate ? 'private' : 'public');
     if (data) {
+      console.log('create room data: ', data);
       await addMember(data.chat_room_id, memberList);
       setRooms((prev) => [...prev, data]);
     }

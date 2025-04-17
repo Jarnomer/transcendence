@@ -1,6 +1,8 @@
 // FlowContext.tsx
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
+import { GameSettings, defaultGameSettings } from '@shared/types/gameTypes';
+
 type GameOptionsContextType = {
   mode: string | null;
   setMode: React.Dispatch<React.SetStateAction<string | null>>;
@@ -15,6 +17,8 @@ type GameOptionsContextType = {
   resetGameOptions: () => void;
   tournamentOptions: TournamentOptionsType | null;
   setTournamentOptions: React.Dispatch<React.SetStateAction<TournamentOptionsType | null>>;
+  gameSettings: GameSettings;
+  setGameSettings: React.Dispatch<React.SetStateAction<GameSettings>>;
 };
 
 export type TournamentOptionsType = {
@@ -41,6 +45,7 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
   const [queueId, setQueueId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [tournamentOptions, setTournamentOptions] = useState<TournamentOptionsType | null>(null);
+  const [gameSettings, setGameSettings] = useState<GameSettings>(defaultGameSettings);
 
   const resetGameOptions = () => {
     setMode(null);
@@ -66,6 +71,8 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
         resetGameOptions,
         tournamentOptions,
         setTournamentOptions,
+        gameSettings,
+        setGameSettings,
       }}
     >
       {children}

@@ -7,6 +7,7 @@ export interface RetroEffectsLevels {
   flicker: number;
   vignette: number;
   noise: number;
+  dust: number;
   crtTurnOnEffect: number;
   crtTurnOffEffect: number;
   crtChannelSwitchEffect: number;
@@ -21,8 +22,24 @@ export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   flicker: 3,
   vignette: 3,
   noise: 3,
+  dust: 0,
   crtTurnOnEffect: 0,
   crtTurnOffEffect: 0,
+  crtChannelSwitchEffect: 1,
+};
+
+export const cinematicRetroEffectsLevels: RetroEffectsLevels = {
+  scanlines: 5,
+  phosphor: 5,
+  curvature: 5,
+  glitch: 5,
+  colorBleed: 5,
+  flicker: 5,
+  vignette: 5,
+  noise: 5,
+  dust: 1,
+  crtTurnOnEffect: 1,
+  crtTurnOffEffect: 1,
   crtChannelSwitchEffect: 1,
 };
 
@@ -59,6 +76,13 @@ export interface RetroEffectsBaseParams {
     distortion: number;
     colorBleed: number;
   };
+  dustScratch: {
+    dustAmount: number;
+    scratchAmount: number;
+    dustSize: number;
+    edgeIntensity: number;
+    movementSpeed: number;
+  };
 }
 
 export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
@@ -94,6 +118,13 @@ export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
     distortion: 0.15,
     colorBleed: 0.4,
   },
+  dustScratch: {
+    dustAmount: 0.5,
+    scratchAmount: 0.4,
+    dustSize: 0.7,
+    edgeIntensity: 0.6,
+    movementSpeed: 1.0,
+  },
 };
 
 export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
@@ -112,7 +143,7 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     nonSquareRatio: 0.2,
   },
   crtDistortion: {
-    curvatureAmount: 0,
+    curvatureAmount: 0.2,
     scanlineIntensity: 0.05,
     vignette: 1.2,
     colorBleed: 0.0,
@@ -129,22 +160,16 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     distortion: 0.08,
     colorBleed: 1.6,
   },
+  dustScratch: {
+    dustAmount: 1.2,
+    scratchAmount: 1.2,
+    dustSize: 0.4,
+    edgeIntensity: 1.0,
+    movementSpeed: 2.0,
+  },
 };
 
 export const retroEffectsPresets = {
   default: defaultRetroEffectsLevels,
-
-  cinematic: {
-    scanlines: 5,
-    phosphor: 5,
-    curvature: 0,
-    glitch: 5,
-    colorBleed: 5,
-    flicker: 5,
-    vignette: 5,
-    noise: 5,
-    crtTurnOnEffect: 1,
-    crtTurnOffEffect: 1,
-    crtChannelSwitchEffect: 1,
-  } as RetroEffectsLevels,
+  cinematic: cinematicRetroEffectsLevels,
 };

@@ -11,21 +11,16 @@ import { createReadyInputMessage } from '@shared/messages';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { useBackgroundGameVisibility } from '../hooks/useBackgroundGameVisibility';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
   const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
   const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
-  // const location = useLocation();
   const { loadingStates } = useLoading();
-  // const { mode, difficulty, lobby, queueId } = location.state || {};
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-
-  //const [userId, setUserId] = useState<string | null>(null);
-  // const [gameId, setGameId] = useState<string | null>(null);
-  // const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
-  //const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
+  const { showBackgroundGame } = useBackgroundGameVisibility();
 
   useEffect(() => {
     console.log('GamePage mounted');
@@ -33,10 +28,25 @@ export const GamePage: React.FC = () => {
     console.log('difficulty: ', difficulty);
     console.log('gameId: ', gameId);
     console.log('setTournamentOptions', tournamentOptions);
+
+    return () => {
+      showBackgroundGame();
+    };
   }, []);
 
+  useEffect(() => {
+    if (gameStatus === 'finished') {
+      // When game finishes, show the background game again
+      const timer = setTimeout(() => {
+        showBackgroundGame();
+      }, 5000); // 5 seconds delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [gameStatus]);
+
   const { userId, localPlayerId, remotePlayerId } = useGameUser();
-  useMatchmaking(userId);
+  // useMatchmaking(userId);
   useGameResult(userId);
   useGameControls(localPlayerId, remotePlayerId);
   const playersData = useFetchPlayerData();
@@ -52,14 +62,24 @@ export const GamePage: React.FC = () => {
 
   useEffect(() => {
     if (!gameId || !localPlayerId) return;
+
+    let isMounted = true; // Track if component is mounted
+
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
-      console.log('sending player ready for player: ', localPlayerId);
-      sendMessage('game', createReadyInputMessage(localPlayerId, true));
+      const readyMessageDelay = setTimeout(() => {
+        if (isMounted) {
+          console.log('Sending delayed player ready for player:', localPlayerId);
+          sendMessage('game', createReadyInputMessage(localPlayerId, true));
+        }
+      }, 2000); // 2000ms delay
+
+      // Clean up the timeout if component unmounts
+      return () => {
+        isMounted = false;
+        clearTimeout(readyMessageDelay);
+      };
     }
   }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
-
-  // TODO: Reconnection handler
-  // TODO: Pause - Resume
 
   return (
     <div
@@ -75,10 +95,11 @@ export const GamePage: React.FC = () => {
             {/* RENDER COUNTDOWN CONDITIONALLY */}
             <CountDown gameStatus={gameStatus} />
 
-            <p className="text-xs text-gray-500">
-              Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} |
-              Player2_DY: {gameState?.players.player2.dy}
-            </p>
+            {/* SHOW GAME INFORMATION */}
+            {/* <p className="text-xs text-gray-500"> */}
+            {/*   Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} | */}
+            {/*   Player2_DY: {gameState?.players.player2.dy} */}
+            {/* </p> */}
             <GameCanvas gameState={gameState} />
           </div>
         </>
@@ -90,13 +111,3 @@ export const GamePage: React.FC = () => {
 };
 
 export default GamePage;
-
-// <div className="flex flex-col items-center justify-center h-full gap-4">
-//   <p>{getStatusMessage()}</p>
-//   <ClipLoader
-//     color={'primary'}
-//     size={50}
-//     aria-label="Loading Spinner"
-//     data-testid="loader"
-//   />
-// </div>

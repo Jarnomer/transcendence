@@ -48,10 +48,10 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
         Game History
       </div>
 
-      <motion.div className=" w-full h-full p-4 glass-box text-sm">
+      <motion.div className="p-4 glass-box text-sm">
         <h3 className="text-md ">Match History</h3>
         {/* Stats */}
-        <div className="w-full text-center flex items-center justify-center gap-6">
+        <div className="text-center flex items-center justify-center gap-6">
           <span className="">Wins: {user.stats?.wins}</span>
           <span className="">Losses: {user.stats?.losses}</span>
         </div>
