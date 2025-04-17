@@ -1,5 +1,5 @@
 import { isPlayerInputMessage } from '@shared/messages';
-import { GameStatus, GameSettings } from '@shared/types';
+import { GameStatus, GameSettings, defaultGameSettings } from '@shared/types';
 
 import PongGame from './PongGame';
 import { AIController } from '../controllers/AIController';
@@ -16,27 +16,32 @@ export default class PongGameSession {
   private previousGameStatus: GameStatus;
   private interval: NodeJS.Timeout | null = null;
   private isGameFinished: boolean = false;
-  private settings: GameSettings;
+  private settings: GameSettings = defaultGameSettings;
   private mode: string;
   private difficulty: string;
 
   constructor(
     gameId: string,
-    settings: GameSettings,
+    mode: string,
+    difficulty: string,
     onEndCallback: () => void,
     setGameResult: (gameResult: any) => void
   ) {
     this.gameId = gameId;
-    this.settings = settings;
-    const { mode, difficulty } = settings;
     this.mode = mode;
     this.difficulty = difficulty;
+    this.settings.mode = mode as '1v1' | 'singleplayer' | 'AIvsAI';
+    this.settings.difficulty = difficulty as 'easy' | 'normal' | 'brutal' | 'local' | 'online';
     this.clients = new Map(); // Now maps playerId -> connection
     this.spectators = new Map();
     this.onEndCallback = onEndCallback;
     this.setGameResult = setGameResult;
 
-    this.settings.enablePowerUps = this.gameId === 'background_game' ? false : true;
+    if (this.gameId === 'background_game') {
+      this.settings.enablePowerUps = false;
+      this.settings.maxScore = 0;
+    }
+
     this.game = new PongGame(this.settings);
     console.log(
       `Created game ${gameId} with mode: "${this.mode}" and difficulty: "${this.difficulty}"`
@@ -45,16 +50,8 @@ export default class PongGameSession {
     this.previousGameStatus = this.game.getGameStatus();
 
     if (this.mode === 'singleplayer') {
-      // this.aiControllers.set(1, new AIController(this.settings, true));
       this.aiControllers.set(2, new AIController(this.settings, false));
     }
-
-    // For testing tournaments, player moves not needed
-    // Readystate is still needed from both players!
-    // if (mode === '1v1') {
-    //   this.aiControllers.set(1, new AIController(this.settings, true));
-    //   this.aiControllers.set(2, new AIController(this.settings, false));
-    // }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
