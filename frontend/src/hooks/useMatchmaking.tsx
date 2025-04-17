@@ -149,10 +149,10 @@ const useMatchmaking = (userId: string | null) => {
 
   useEffect(() => {
     if (connections.game !== 'connected') return;
-    console.log('Game connected');
+    console.log('Game connected sending settings');
     sendMessage('game', {
-      type: 'game_settings',
-      payload: gameSettings,
+      type: 'settings',
+      settings: gameSettings,
     });
   }, [connections.game, gameSettings]);
 
@@ -170,11 +170,5 @@ const useMatchmaking = (userId: string | null) => {
     };
   }, []); // only depend on stable vars
 
-  useEffect(() => {
-    console.log('mounting');
-    return () => {
-      console.log('unmounting');
-    };
-  }, []);
 };
 export default useMatchmaking;

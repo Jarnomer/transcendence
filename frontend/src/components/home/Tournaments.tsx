@@ -55,7 +55,7 @@ export const Tournaments: React.FC = () => {
     });
     setLobby('join');
     setQueueId(options.queue_id);
-    navigate('/game');
+    navigate('/tournamentLobby');
   };
 
   return (

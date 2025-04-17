@@ -46,7 +46,7 @@ export const GamePage: React.FC = () => {
   }, [gameStatus]);
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser();
-  // useMatchmaking(userId);
+  useMatchmaking(userId);
   useGameResult(userId);
   useGameControls(localPlayerId, remotePlayerId);
   const playersData = useFetchPlayerData();
