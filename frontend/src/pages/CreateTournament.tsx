@@ -29,7 +29,7 @@ export const CreateTournament: React.FC = () => {
     };
     setTournamentOptions(formData);
     setDifficulty(formData.playerCount.toString());
-    navigate('/game');
+    navigate('/tournamentLobby');
     console.log('Submitting tournament data:', formData);
   };
 

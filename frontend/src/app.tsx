@@ -35,7 +35,7 @@ const App: React.FC = () => {
       <ChatProvider>
         <GameOptionsProvider>
           <div className="fixed pointer-events-none" aria-hidden="true">
-            <BackgroundGameProvider />
+            {/* <BackgroundGameProvider /> */}
           </div>
           <div
             id="app-main-container"

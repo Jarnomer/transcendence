@@ -2,6 +2,7 @@ import { jwtDecode } from 'jwt-decode';
 
 import { LoginResponseType, RegisterResponseType } from '@types';
 
+import { useUser } from '../contexts/user/UserContext';
 import { api } from './api';
 
 interface TokenDecoded {

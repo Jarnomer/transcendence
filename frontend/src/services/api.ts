@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { RefreshResponseType } from '@types';
 
-const API_URL = '/api/auth';
+import WebsocketManager from './webSocket/WebSocketManager';
 
 export const api = axios.create({
   baseURL: '/api',
@@ -38,7 +38,6 @@ api.interceptors.response.use(
       // If token expired, attempt refresh
       if (errorMessage === 'TOKEN_EXPIRED' && !originalRequest._retry) {
         originalRequest._retry = true; // Prevent infinite loop
-
         const newToken = await refreshToken();
         if (newToken) {
           api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
@@ -52,6 +51,9 @@ api.interceptors.response.use(
   }
 );
 
+const chatSocket = WebsocketManager.getInstance('chat');
+const gameSocket = WebsocketManager.getInstance('game');
+const matchmakingSocket = WebsocketManager.getInstance('matchmaking');
 // Function to Refresh Token
 export async function refreshToken(): Promise<string | null> {
   try {
@@ -61,6 +63,10 @@ export async function refreshToken(): Promise<string | null> {
     ); // Backend refresh route
     const newToken = response.data.token;
     localStorage.setItem('token', newToken);
+    const param = new URLSearchParams({ token: newToken });
+    chatSocket.setAuthParams(param);
+    gameSocket.setAuthParams(param);
+    matchmakingSocket.setAuthParams(param);
     return newToken;
   } catch (error) {
     console.error('Failed to refresh token:', error);

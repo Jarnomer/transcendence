@@ -2,8 +2,6 @@ import '@fastify/websocket';
 
 import { Database } from 'sqlite';
 
-import { GameSettings, defaultGameSettings } from '@shared/types';
-
 import { GameService } from '@my-backend/matchmaking_service';
 import { MatchmakingService } from '@my-backend/remote_service';
 
@@ -14,12 +12,13 @@ export class GameManager {
   private sessions: Record<string, PongGameSession>;
   private gameService: GameService;
   private matchmakingService: MatchmakingService;
+
   constructor(db: Database) {
     console.log('GameManager constructor');
     this.sessions = {};
     this.gameService = GameService.getInstance(db);
     this.matchmakingService = MatchmakingService.getInstance(db);
-    this.createBackgroundGame();
+    // this.createBackgroundGame();
   }
 
   static getInstance(db: Database): GameManager {
@@ -33,17 +32,12 @@ export class GameManager {
     this.createGame('background_game', 'AIvsAI', 'brutal');
   }
 
-  createGame(
-    gameId: string,
-    mode: string,
-    difficulty: string,
-    settings: GameSettings = defaultGameSettings
-  ): void {
+  createGame(gameId: string, mode: string, difficulty: string): void {
     console.log(`Creating game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
-    console.log('settings:', settings);
     this.sessions[gameId] = new PongGameSession(
       gameId,
-      settings,
+      mode,
+      difficulty,
       () => this.endGame(gameId),
       this.setGameResult.bind(this)
     );

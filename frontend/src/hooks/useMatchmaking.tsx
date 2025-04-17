@@ -10,7 +10,7 @@ const useMatchmaking = (userId: string | null) => {
   const navigate = useNavigate();
   const { gameSocket, matchmakingSocket, sendMessage, closeConnection, connections } =
     useWebSocketContext();
-  const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions } =
+  const { mode, difficulty, lobby, queueId, setGameId, tournamentOptions, gameSettings } =
     useGameOptionsContext();
   const params = useRef<URLSearchParams>(new URLSearchParams());
   const matchmaker = useRef<MatchMaker>(null);
@@ -148,6 +148,15 @@ const useMatchmaking = (userId: string | null) => {
   }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
 
   useEffect(() => {
+    if (connections.game !== 'connected') return;
+    console.log('Game connected sending settings');
+    sendMessage('game', {
+      type: 'settings',
+      settings: gameSettings,
+    });
+  }, [connections.game, gameSettings]);
+
+  useEffect(() => {
     console.log('Attaching matchmaking event listeners');
     matchmakingSocket.addEventListener('match_found', handleMatchFound);
     matchmakingSocket.addEventListener('game_winner', handleGameWinner);
@@ -161,11 +170,5 @@ const useMatchmaking = (userId: string | null) => {
     };
   }, []); // only depend on stable vars
 
-  useEffect(() => {
-    console.log('mounting');
-    return () => {
-      console.log('unmounting');
-    };
-  }, []);
 };
 export default useMatchmaking;

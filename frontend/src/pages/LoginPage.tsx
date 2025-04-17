@@ -10,6 +10,7 @@ import { login, register } from '@services/authService.ts';
 import { updateUser } from '@services/userService.ts';
 
 import { useUser } from '../contexts/user/UserContext';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 interface inputWrapperProps {
   children: ReactNode;
@@ -23,7 +24,8 @@ export const InputWrapper: React.FC<inputWrapperProps> = ({ children }) => {
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, setUser, refetchUser, checkAuth, logout } = useUser();
+  const { user, setUser, refetchUser, checkAuth, logout, setToken } = useUser();
+  const { chatSocket } = useWebSocketContext();
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState<string>('');
@@ -53,7 +55,12 @@ export const LoginPage: React.FC = () => {
 
       // THEN LOG IN THE USER
       try {
-        await login(username, password);
+        const token = await login(username, password);
+        const userId = localStorage.getItem('userID');
+        const param = new URLSearchParams({ token: token.token, user_id: userId! });
+        chatSocket.setAuthParams(param);
+        chatSocket.connect();
+        // setToken(token.token); // Update the token in the context
         if (isRegistering) {
           navigate(`/signUp`);
         } else {

@@ -22,6 +22,7 @@ interface UserContextType {
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  // setToken: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -39,7 +40,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const userId = localStorage.getItem('userID');
 
   const fetchUser = useCallback(() => {
-    const userId = localStorage.getItem('userID');
     if (!userId) {
       setUser(null);
       return;
@@ -58,7 +58,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('username');
         setUser(null);
       });
-  }, []);
+  }, [userId]);
 
   const fetchRequestsSent = useCallback(() => {
     if (!userId) return;
@@ -76,7 +76,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       return;
     }
-
     try {
       const res = await api.get('/auth/validate');
       localStorage.setItem('userID', res.data.user_id);

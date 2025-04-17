@@ -69,6 +69,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
+    console.log('websocket context moounted');
     return () => {
       console.log('Cleaning up WebSocket connections');
       gameSocket.deleteInstance();

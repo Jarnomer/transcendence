@@ -46,7 +46,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
         <div />
       </div>
-      <MessageList messages={messages} user={user} />
+      <MessageList
+        messages={messages}
+        user={user}
+        selectedFriendId={selectedFriendId}
+        roomId={roomId}
+      />
       <div className="p-2 border-t flex gap-2">
         <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
       </div>

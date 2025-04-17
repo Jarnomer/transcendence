@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
+
+import { PowerUpType } from '../../../../shared/types';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
 import { PowerUpSelection } from './PowerUpSelection';
@@ -10,6 +15,8 @@ export const GameOptions: React.FC = () => {
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
+  const { setGameSettings } = useGameOptionsContext();
+  const navigate = useNavigate();
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -34,6 +41,23 @@ export const GameOptions: React.FC = () => {
   };
 
   useEffect(() => {
+    setGameSettings((prev) => ({
+      ...prev,
+      maxScore: maxScore,
+      ballSpeed: ballSpeed,
+      enableSpin: enableSpin,
+      enablePowerUps: enablePowerUps,
+      powerUpTypes: {
+        [PowerUpType.SlowerPaddle]: selectedPowerUps.includes('Paddle Slower'),
+        [PowerUpType.SmallerPaddle]: selectedPowerUps.includes('Paddle Smaller'),
+        [PowerUpType.BiggerPaddle]: selectedPowerUps.includes('Paddle Bigger'),
+        [PowerUpType.FasterPaddle]: selectedPowerUps.includes('Paddle Faster'),
+        [PowerUpType.MoreSpin]: selectedPowerUps.includes('Extra Spin'),
+      },
+    }));
+  }, [maxScore, ballSpeed, enableSpin, enablePowerUps, selectedPowerUps, setGameSettings]);
+
+  useEffect(() => {
     if (!enableSpin && selectedPowerUps.includes('Extra Spin')) {
       setSelectedPowerUps((prev) => prev.filter((p) => p !== 'Extra Spin'));
     }
@@ -46,6 +70,7 @@ export const GameOptions: React.FC = () => {
     console.log('Enable spin: ', enableSpin);
     console.log('Enable powerups: ', enablePowerUps);
     console.log('selected powerups: ', selectedPowerUps);
+    navigate('/game');
   };
 
   return (
