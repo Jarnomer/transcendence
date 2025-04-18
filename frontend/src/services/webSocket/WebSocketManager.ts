@@ -4,6 +4,7 @@ class WebSocketManager {
   private url: string;
   private reconnectAttempts = 0;
   private params: URLSearchParams = new URLSearchParams();
+  private authParams: URLSearchParams = new URLSearchParams();
   private static readonly MAX_RECONNECT_ATTEMPTS = 5;
   private static readonly RECONNECT_INTERVAL = 3000;
   private reconnectTimer: NodeJS.Timeout | null = null;
@@ -21,14 +22,20 @@ class WebSocketManager {
     return this.instances[type];
   }
 
-  connect(params: URLSearchParams) {
+  setAuthParams(authParams: URLSearchParams) {
+    authParams.forEach((value, key) => {
+      this.authParams.set(key, value);
+    });
+  }
+
+  connect(params: URLSearchParams = this.authParams) {
     if (this.ws) {
       console.log('Closing existing WebSocket:', this.url);
       this.ws.close();
     }
     this.params = params;
     console.log('Connecting to WebSocket:', this.url + `?${params.toString()}`);
-    this.ws = new WebSocket(`${this.url}?${params.toString()}`);
+    this.ws = new WebSocket(`${this.url}?${this.authParams}${params.toString()}`);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected:', this.url);

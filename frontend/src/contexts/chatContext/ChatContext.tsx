@@ -20,12 +20,13 @@ const ChatContext = createContext<any>(null);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage, closeConnection, connections } = useWebSocketContext();
+  const isChatPage = location.pathname === '/chat' ? true : false;
 
   const { user } = useUser();
   const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Record<string, any[]>>({});
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
   const [myRooms, setMyRooms] = useState<any[]>([]);
@@ -50,71 +51,93 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     selectedFriendRef.current = selectedFriend;
   }, [selectedFriend]);
 
-  useEffect(() => {
-    console.log('chat context:', connections);
-    const userId = localStorage.getItem('userID');
-    if (!userId) return;
-    const user_id = localStorage.getItem('userID')!;
-    const token = localStorage.getItem('token')!;
-    const params = new URLSearchParams({
-      user_id,
-      token,
-    });
-    chatSocket.connect(params);
-    console.log('Connecting to chat:', params.toString());
-    return () => {
-      console.log('Cleaning up chat socket');
-      closeConnection('chat');
-    };
-  }, []);
+  // useEffect(() => {
+  //   console.log('chat context:', connections);
+  //   const userId = localStorage.getItem('userID');
+  //   if (!userId) return;
+  //   const user_id = localStorage.getItem('userID')!;
+  //   const token = localStorage.getItem('token')!;
+  //   const params = new URLSearchParams({
+  //     user_id,
+  //     token,
+  //   });
+  //   chatSocket.connect(params);
+  //   console.log('Connecting to chat:', params.toString());
+  //   return () => {
+  //     console.log('Cleaning up chat socket');
+  //     closeConnection('chat');
+  //   };
+  // }, []);
+
+  const fetchDmHistory = async (friendId: string) => {
+    try {
+      console.log('Fetching DM history for friend:', friendId);
+      const data = (await getDm(friendId)) as any;
+      console.log('DM history:', data);
+      setMessages((prev) => ({
+        ...prev,
+        [friendId]: data,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch DM history:', error);
+    }
+  };
 
   //fetching DM chat history
   useEffect(() => {
-    if (selectedFriend !== null) {
-      console.log('Selected friend:', selectedFriend);
+    if (!selectedFriend) return;
+    console.log('Selected friend:', selectedFriend);
+    if (messages[selectedFriend]?.length > 0) {
+      console.log('Already have messages for this friend:', selectedFriend);
+      setMessages((prev) => ({
+        ...prev,
+        [selectedFriend]: prev[selectedFriend],
+      }));
+      return;
+    } else {
       // fetch DM messages
-      getDm(selectedFriend)
-        .then((data) => {
-          console.log('Chat history:', data);
-          setMessages(data);
-
-          // setMessages(...messages, data);
-        })
-        .catch((error) => {
-          console.error('Failed to fetch chat history:', error);
-        });
+      fetchDmHistory(selectedFriend);
     }
   }, [selectedFriend]);
 
-  useEffect(() => {
-    console.log('messages:', messages);
-  }, [messages]);
+  // useEffect(() => {
+  //   console.log('messages:', messages);
+  // }, [messages]);
+
+  const fetchChatHistory = async (roomId: string) => {
+    try {
+      console.log('Fetching chat history for room:', roomId);
+      const data = (await getChat(roomId)) as any;
+      console.log('Chat history:', data);
+      setMessages((prev) => ({
+        ...prev,
+        [roomId]: data,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch chat history:', error);
+    }
+  };
 
   //fetching room chat history
   useEffect(() => {
     if (roomId !== null) {
       console.log('Room ID:', roomId);
-      // fetch chat messages
-      getChat(roomId)
-        .then((data) => {
-          console.log('Chat history:', data);
-          setMessages(data);
-
-          // setMessages(...messages, data);
-          console.log('messages:', messages);
-        })
-        .catch((error) => {
-          console.error('Failed to fetch chat history:', error);
-        });
+      if (messages[roomId]?.length > 0) {
+        console.log('Already have messages for this room:', roomId);
+        setMessages((prev) => ({
+          ...prev,
+          [roomId]: prev[roomId],
+        }));
+      } else {
+        // fetch chat messages
+        fetchChatHistory(roomId);
+      }
     }
   }, [roomId]);
 
-  useEffect(() => {
-    console.log('my rooms useEffect: ', myRooms);
-  }, [myRooms]);
-
   //get public chat rooms
   useEffect(() => {
+    if (!user) return;
     getPublicChat()
       .then((data) => {
         console.log('Public chat rooms:', data);
@@ -140,7 +163,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    console.log('Chat socket is already connected');
+    // console.log('Chat socket is already connected');
     chatSocket.addEventListener('message', handleChatMessage);
     return () => {
       console.log('Cleaning up chat socket');
@@ -179,14 +202,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleNotificationClick = (sender_id: string) => {
-    setSelectedFriend(sender_id);
-    setRoomId(null);
+    // setSelectedFriend(sender_id);
+    // setRoomId(null);
     console.log('message notfication CLICKED: ', sender_id);
+    console.log('ischatpage', isChatPage);
+    // if (isChatPage) return;
     openModal('chatModal', {
       user,
       friends,
       selectedFriendId: sender_id,
-      sendChatMessage,
+      onsend: sendChatMessage,
+      messages,
     });
   };
 
@@ -198,16 +224,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('chat selected room id:', roomIdRef.current);
     console.log('chat selected friend id:', selectedFriendRef.current);
 
-    notifyMessage(event);
-    if (
-      (roomIdRef.current && event.room_id && event.room_id === roomIdRef.current) ||
-      (selectedFriendRef.current &&
-        event.receiver_id &&
-        event.sender_id === selectedFriendRef.current)
-    ) {
-      console.log('Adding message:', event);
-      setMessages((prev) => [...prev, event]);
+    if (event.room_id) {
+      console.log('Adding room message:', event);
+      setMessages((prev) => ({
+        ...prev,
+        [event.room_id]: [...(prev[event.room_id] || []), event],
+      }));
     }
+
+    if (event.sender_id) {
+      console.log('Adding dm message:', event);
+      setMessages((prev) => ({
+        ...prev,
+        [event.sender_id]: [...(prev[event.sender_id] || []), event],
+      }));
+    }
+    notifyMessage(event);
   };
 
   const sendChatMessage = (selectedFriend, roomId, newMessage) => {
@@ -230,7 +262,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Sending message:', messageData);
       sendMessage('chat', messageData);
-      setMessages((prev) => [...prev, { ...messageData.payload, sender_id: userId }]);
+      setMessages((prev) => ({
+        ...prev,
+        [selectedFriend || roomId]: [
+          ...(prev[selectedFriend || roomId] || []),
+          messageData.payload,
+        ],
+      }));
     }
   };
 

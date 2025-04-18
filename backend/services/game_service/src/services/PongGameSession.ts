@@ -1,14 +1,15 @@
 import { isPlayerInputMessage } from '@shared/messages';
-import { GameStatus } from '@shared/types';
+import { isGameSettingsMessage } from '@shared/messages/gameSettingsMessage';
+import { GameStatus, GameSettings, defaultGameSettings } from '@shared/types';
 
-import { AIController } from '../controllers/AIController';
-import { handlePlayerInputMessage } from '../handlers/playerInputHandler';
 import PongGame from './PongGame';
+import { AIController } from '../controllers/AIController';
+import { handleGameSettingsMessage } from '../handlers/gameSettingsHandler';
+import { handlePlayerInputMessage } from '../handlers/playerInputHandler';
 
 export default class PongGameSession {
   private gameId: string;
   private game: PongGame;
-  private mode: string;
   private clients: Map<string, any>;
   private spectators: Map<string, any>;
   private aiControllers: Map<number, AIController> = new Map();
@@ -17,6 +18,8 @@ export default class PongGameSession {
   private previousGameStatus: GameStatus;
   private interval: NodeJS.Timeout | null = null;
   private isGameFinished: boolean = false;
+  private settings: GameSettings = defaultGameSettings;
+  private mode: string;
   private difficulty: string;
 
   constructor(
@@ -29,27 +32,28 @@ export default class PongGameSession {
     this.gameId = gameId;
     this.mode = mode;
     this.difficulty = difficulty;
+    this.settings.mode = mode as '1v1' | 'singleplayer' | 'AIvsAI';
+    this.settings.difficulty = difficulty as 'easy' | 'normal' | 'brutal' | 'local' | 'online';
     this.clients = new Map(); // Now maps playerId -> connection
     this.spectators = new Map();
     this.onEndCallback = onEndCallback;
     this.setGameResult = setGameResult;
 
-    const powerUps = this.gameId === 'background_game' ? false : true;
-    this.game = new PongGame(mode, difficulty, powerUps);
-    console.log(`Created game ${gameId} with mode: "${mode}" and difficulty: "${difficulty}"`);
-    this.previousGameStatus = this.game.getGameStatus();
-
-    if (mode === 'singleplayer') {
-      // this.aiControllers.set(1, new AIController(this.difficulty, true));
-      this.aiControllers.set(2, new AIController(this.difficulty, false));
+    if (this.gameId === 'background_game') {
+      this.settings.enablePowerUps = false;
+      this.settings.maxScore = 0;
     }
 
-    // For testing tournaments, player moves not needed
-    // Readystate is still needed from both players!
-    // if (mode === '1v1') {
-    //   this.aiControllers.set(1, new AIController(this.difficulty, true));
-    //   this.aiControllers.set(2, new AIController(this.difficulty, false));
-    // }
+    this.game = new PongGame(this.settings);
+    console.log(
+      `Created game ${gameId} with mode: "${this.mode}" and difficulty: "${this.difficulty}"`
+    );
+    console.log('settings:', this.settings);
+    this.previousGameStatus = this.game.getGameStatus();
+
+    if (this.mode === 'singleplayer') {
+      this.aiControllers.set(2, new AIController(this.settings, false));
+    }
 
     if (this.mode === '1v1' && this.difficulty === 'local') {
       this.game.setPlayerId(2, 'player2');
@@ -59,8 +63,8 @@ export default class PongGameSession {
     }
 
     if (this.mode === 'AIvsAI') {
-      this.aiControllers.set(1, new AIController(this.difficulty, true));
-      this.aiControllers.set(2, new AIController(this.difficulty, false));
+      this.aiControllers.set(1, new AIController(this.settings, true));
+      this.aiControllers.set(2, new AIController(this.settings, false));
       this.game.setPlayerId(1, 'player1');
       this.game.setPlayerId(2, 'player2');
       if (this.gameId === 'background_game') {
@@ -70,6 +74,14 @@ export default class PongGameSession {
       }
       this.readyGame('player1', true);
     }
+  }
+
+  getSettings(): GameSettings {
+    return structuredClone(this.settings);
+  }
+  setSettings(settings: GameSettings): void {
+    this.settings = settings;
+    this.game.setSettings(settings);
   }
 
   getClientCount(): number {
@@ -138,6 +150,9 @@ export default class PongGameSession {
       //console.log('Received message:', data);
       if (isPlayerInputMessage(data)) {
         handlePlayerInputMessage(this, data);
+      }
+      if (isGameSettingsMessage(data)) {
+        handleGameSettingsMessage(this, data);
       }
     } catch (error) {
       console.error('Invalid WebSocket message:', error);

@@ -1,6 +1,6 @@
 import { PlayerInputMessage } from '@shared/messages';
 
-import { PongGameSession } from '../services/PongGameSession';
+import PongGameSession from '../services/PongGameSession';
 
 export const handlePlayerInputMessage = (
   gameSession: PongGameSession,

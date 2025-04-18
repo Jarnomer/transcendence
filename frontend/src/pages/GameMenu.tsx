@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -8,6 +8,8 @@ import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext
 
 import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
+
+import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
 
 interface GameMenuOption {
   content: string;
@@ -46,6 +48,7 @@ export const GameMenu: React.FC = () => {
   // const location = useLocation();
   const { setMode, setDifficulty, difficulty, mode } = useGameOptionsContext(); // Destructure context functions
   // const { lobby } = location.state || {};
+  const { allowInternalNavigation } = useNavigationAccess();
 
   const modes = [
     {
@@ -127,13 +130,20 @@ export const GameMenu: React.FC = () => {
     setDifficulty(difficulty);
   };
 
-  // Effect to navigate once both mode and difficulty are
   useEffect(() => {
-    if (mode === 'tournament') navigate('/tournament');
-    if (mode && difficulty) {
-      navigate('/game');
+    if (mode === 'tournament') {
+      allowInternalNavigation();
+      navigate('/tournament');
     }
-  }, [mode, difficulty]); // Trigger navigation when both values are set
+    if (mode && difficulty) {
+      allowInternalNavigation();
+      if (mode === '1v1' && difficulty === 'online') {
+        navigate('/game');
+      } else {
+        navigate('/gameOptions');
+      }
+    }
+  }, [mode, difficulty]);
 
   return (
     <AnimatePresence mode="wait">
@@ -151,7 +161,7 @@ export const GameMenu: React.FC = () => {
             <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
 
             {subMenus[mode].map((option, index) => (
-              <motion.div key={index} style={{ flexBasis: '300px' }}>
+              <motion.div key={index} style={{ flexBasis: '250px' }}>
                 <GameMenuCard
                   content={option.content}
                   imageUrl={option.imageUrl}
@@ -164,7 +174,7 @@ export const GameMenu: React.FC = () => {
         ) : (
           <>
             {modes.map((mode, index) => (
-              <motion.div key={index} style={{ flexBasis: '300px' }}>
+              <motion.div key={index} style={{ flexBasis: '250px' }}>
                 <GameMenuCard
                   content={mode.content}
                   imageUrl={mode.imageUrl}

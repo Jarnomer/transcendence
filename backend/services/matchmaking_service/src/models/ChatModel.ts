@@ -20,7 +20,16 @@ export class ChatModel {
   }
 
   async getChat(room_id: string) {
-    return await this.db.all('SELECT * FROM chat_messages WHERE chat_room_id = ?', [room_id]);
+    return await this.db.all(
+      `SELECT
+      c.*,
+      up.avatar_url,
+      up.display_name
+      FROM chat_messages c
+      LEFT JOIN user_profiles up ON up.user_id = c.sender_id
+      WHERE c.chat_room_id = ? ORDER BY c.created_at ASC LIMIT 50`,
+      [room_id]
+    );
   }
 
   async getRole(room_id: string) {
@@ -41,7 +50,13 @@ export class ChatModel {
 
   async getDm(user_id: string, receiver_id: string) {
     return await this.db.all(
-      'SELECT * FROM direct_messages WHERE (sender_id = ? AND receiver_id = ?) OR (receiver_id = ? AND sender_id = ?) ORDER BY created_at ASC LIMIT 50',
+      `SELECT
+      dm.*,
+      up.avatar_url,
+      up.display_name
+      FROM direct_messages dm
+      LEFT JOIN user_profiles up ON up.user_id = dm.sender_id
+      WHERE (dm.sender_id = ? AND dm.receiver_id = ?) OR (dm.receiver_id = ? AND dm.sender_id = ?) ORDER BY dm.created_at ASC LIMIT 50`,
       [user_id, receiver_id, user_id, receiver_id]
     );
   }

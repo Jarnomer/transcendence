@@ -99,11 +99,17 @@ export const ProfilePage: React.FC = () => {
     return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
   }
 
+  console.log('loggedInUser friend requests: ', loggedInUser?.friend_requests);
   return (
     <>
-      <motion.div className="w-full h-full  pb-10 flex flex-col justify-start text-center">
-        <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
-        asdasd
+      <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
+      <motion.div className="flex flex-col h-full w-full justify-center items-center">
+        {loggedInUser?.friend_requests &&
+        loggedInUser.friend_requests.some((req) => req.user_id === user?.user_id) ? (
+          <span className="p-1">{user?.display_name + ' sent you a friend request'}</span>
+        ) : (
+          ''
+        )}
         <AnimatePresence>
           {isOwnProfile && editProfile ? (
             <UserInformationForm
@@ -113,8 +119,8 @@ export const ProfilePage: React.FC = () => {
             ></UserInformationForm>
           ) : (
             <>
-              <div className="w-full h-full gap-3 sm:flex sm:justify-center">
-                <div className="w-full sm:w-1/2">
+              <div className="gap-3 sm:flex sm:justify-center w-full">
+                <div className="sm:w-1/2">
                   <ProfileHeader
                     user={user}
                     isOwnProfile={isOwnProfile}
@@ -124,7 +130,7 @@ export const ProfilePage: React.FC = () => {
                     sent={sent}
                   ></ProfileHeader>
                 </div>
-                <motion.div className="">
+                <motion.div className=" sm:w-1/2">
                   <FriendList
                     isOwnProfile={isOwnProfile}
                     friends={user.friends}
@@ -135,11 +141,11 @@ export const ProfilePage: React.FC = () => {
                   />
                 </motion.div>
               </div>
-              <motion.div
-                key="defaultSection"
-                className="w-full mt-10  h-1/2 flex gap-4 flex-col md:flex-row  md:items-top  text-center"
-              >
-                <motion.div className="w-[80%] sm:w-1/2 h-full">
+              <motion.div key="defaultSection" className="gap-3 sm:flex sm:justify-center w-full">
+                <motion.div className="sm:w-1/2">
+                  <MatchHistory user={user} />
+                </motion.div>
+                <motion.div className="sm:w-1/2">
                   <MatchHistory user={user} />
                 </motion.div>
               </motion.div>

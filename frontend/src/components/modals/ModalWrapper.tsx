@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 
 import { useModal } from '../../contexts/modalContext/ModalContext';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
 
 interface ModalWrapperProps {
   modalName: string;
@@ -27,17 +26,18 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
       onClick={handleOverlayClick}
     >
       <div
-        className="text-primary shadow-lg max-w-md w-full h-full md:h-auto md:max-w-4xl overflow-hidden"
+        className="text-primary relative shadow-lg flex flex-col justify-center items-center overflow-hidden"
         onClick={handleModalClick}
       >
-        <span className="">
+        {/* <span className="absolute right-0 top-0">
           <NavIconButton
             id="settings-modal-close-button"
             ariaLabel="Close settings modal"
             icon="close"
             onClick={handleOverlayClick}
           />
-        </span>
+        </span> */}
+
         {children}
       </div>
     </div>

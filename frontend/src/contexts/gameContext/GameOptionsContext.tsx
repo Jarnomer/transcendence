@@ -1,5 +1,7 @@
 // FlowContext.tsx
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+
+import { defaultGameSettings, GameSettings } from '@shared/types/gameTypes';
 
 type GameOptionsContextType = {
   mode: string | null;
@@ -15,6 +17,8 @@ type GameOptionsContextType = {
   resetGameOptions: () => void;
   tournamentOptions: TournamentOptionsType | null;
   setTournamentOptions: React.Dispatch<React.SetStateAction<TournamentOptionsType | null>>;
+  gameSettings: GameSettings;
+  setGameSettings: React.Dispatch<React.SetStateAction<GameSettings>>;
 };
 
 export type TournamentOptionsType = {
@@ -41,6 +45,17 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
   const [queueId, setQueueId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [tournamentOptions, setTournamentOptions] = useState<TournamentOptionsType | null>(null);
+  const [gameSettings, setGameSettings] = useState<GameSettings>(defaultGameSettings);
+
+  useEffect(() => {
+    if (mode && difficulty) {
+      setGameSettings((prev) => ({
+        ...prev,
+        mode: mode as '1v1' | 'singleplayer' | 'AIvsAI',
+        difficulty: difficulty as 'easy' | 'normal' | 'brutal' | 'local' | 'online',
+      }));
+    }
+  }, [mode, difficulty, lobby]);
 
   const resetGameOptions = () => {
     setMode(null);
@@ -66,6 +81,8 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
         resetGameOptions,
         tournamentOptions,
         setTournamentOptions,
+        gameSettings,
+        setGameSettings,
       }}
     >
       {children}

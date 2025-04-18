@@ -12,6 +12,7 @@ export class GameManager {
   private sessions: Record<string, PongGameSession>;
   private gameService: GameService;
   private matchmakingService: MatchmakingService;
+
   constructor(db: Database) {
     console.log('GameManager constructor');
     this.sessions = {};
@@ -38,7 +39,7 @@ export class GameManager {
       mode,
       difficulty,
       () => this.endGame(gameId),
-      this.setGameResult.bind(this) // Placeholder for game result
+      this.setGameResult.bind(this)
     );
   }
 

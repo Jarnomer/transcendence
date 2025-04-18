@@ -24,26 +24,28 @@ export const Updates: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full h-[100px]">
+      <motion.div className="w-full ">
         <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
           <h2 className="">News / Updates</h2>
         </div>
-        <div className="flex gap-0  min-w-full h-[100px]">
+        <div className="flex gap-0  min-w-full">
           <div className="p-5 relative  w-full h-full relative overflow-hidden">
             <BackgroundGlow></BackgroundGlow>
+            <div className="flex items-center justify-between ">
+              <h2 className="font-heading text-2xl">3D Super Pong is online</h2>
+              <p className="text-xs text-gray-400">15.4.2025</p>
+            </div>
+            <p className="text-secondary text-xs">Welcome to play 3D Super Pong</p>
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-2xl">asdasd</h2>
+              <p className="text-xs text-gray-400">1.4.2025</p>
+            </div>
             <p className="text-secondary text-xs">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam eget elementum nulla.
               Praesent in felis sem. Quisque nec lacus scelerisque, iaculis magna sit amet,
               tincidunt libero. Nunc sagittis laoreet metus, eu aliquam mauris. Sed in metus sed
               erat dapibus bibendum. Aliquam pellentesque, erat ut tincidunt eleifend, lacus felis
-              tempor tortor, quis gravida enim leo eget felis. Vestibulum at vulputate sapien, in
-              fermentum justo. Mauris porta ante vitae augue elementum, ac luctus ligula vehicula.
-              Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
-              himenaeos. Duis sed neque condimentum, luctus mi id, faucibus elit. Morbi sodales in
-              libero sed pretium. Nullam in diam consectetur, ornare felis eu, tincidunt urna. Morbi
-              venenatis felis quis leo efficitur, vitae dignissim massa mollis. Sed ut arcu eu ante
-              interdum congue eget id est. Mauris velit lectus, bibendum sed eros ut, elementum
-              aliquam orci.
+              tempor tortor, quis gravida enim leo eget felis. Vestibulum at vulputate sapien, in..
             </p>
           </div>
         </div>

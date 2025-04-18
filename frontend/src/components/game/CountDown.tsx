@@ -1,5 +1,6 @@
-import { GameStatus } from '@shared/gameTypes';
 import React, { useEffect, useState } from 'react';
+
+import { GameStatus } from '@shared/gameTypes';
 
 interface CountDownProps {
   gameStatus: GameStatus;
@@ -22,6 +23,10 @@ export const CountDown: React.FC<CountDownProps> = ({ gameStatus }) => {
       setCount(3);
     }
   }, [gameStatus]);
+
+  useEffect(() => {
+    // playCountDownSound();
+  }, [count]);
 
   return (
     <div className="absolute inset-0 flex items-center justify-center">

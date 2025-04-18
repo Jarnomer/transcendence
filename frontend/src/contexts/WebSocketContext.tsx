@@ -45,6 +45,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const [matchmakingSocket] = useState(() => WebSocketManager.getInstance('matchmaking'));
   const [state, dispatch] = useReducer(webSocketReducer, initialState);
 
+  console.log('---WEBSOCKER PROVIDER MOUNTED---');
   // Send messages based on socket type
   const sendMessage = useCallback(
     (type: 'game' | 'chat' | 'matchmaking', message: any) => {
@@ -69,6 +70,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
+    console.log('websocket context moounted');
     return () => {
       console.log('Cleaning up WebSocket connections');
       gameSocket.deleteInstance();

@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Toaster } from 'react-hot-toast';
-import { useLocation } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -14,37 +14,29 @@ import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { ChatProvider } from './contexts/chatContext/ChatContext.tsx';
 import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
-import { LoadingProvider } from './contexts/gameContext/LoadingContextProvider.tsx'; // Added this import
-import { useUser } from './contexts/user/UserContext';
 import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
 const App: React.FC = () => {
-  const location = useLocation();
-  const { checkAuth } = useUser();
-
-  console.log('app rendered');
-
-  useEffect(() => {
-    checkAuth();
-    return () => {
-      console.log('Cleanup');
-    };
-  }, [location]);
+  console.log('---- APP MOUNTED ----');
 
   return (
     <WebSocketProvider>
       <ChatProvider>
         <GameOptionsProvider>
-          <LoadingProvider>
+          <Router>
             <BackgroundGameProvider />
             <div
-              id="app-container"
-              className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
+              id="app-main-container"
+              className={`flex flex-col relative items-center min-h-screen w-full overflow-hidden text-primary p-2 `}
             >
-              <Header />
-              <div id="app-content" className="relative md:px-10 p-5 w-full ">
+              <div id="app-content" className="relative p-5 w-full h-full max-w-screen-lg">
+                <Header />
                 <AnimatePresence>
-                  <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
+                  <motion.div
+                    id="backgroundGlitch"
+                    aria-hidden="true"
+                    className="absolute w-full h-full point"
+                  >
                     <BackgroundGlitch duration={1100} />
                   </motion.div>
                 </AnimatePresence>
@@ -53,7 +45,7 @@ const App: React.FC = () => {
               </div>
               {location.pathname !== '/game' ? <Footer /> : null}
             </div>
-          </LoadingProvider>
+          </Router>
         </GameOptionsProvider>
         <ChatModal></ChatModal>
         <SettingsModal></SettingsModal>

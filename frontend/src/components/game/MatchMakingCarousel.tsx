@@ -124,8 +124,8 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
           className="border glass-box relative overflow-hidden flex flex-col justify-center items-center p-4 "
         >
           <BackgroundGlow></BackgroundGlow>
-          <div className="w-[200px] h-[200px] overflow-hidden bg-background  border-2 border-primary">
-            <img className="w-full h-full object-cover" src={user?.avatar_url} alt="You" />
+          <div className="w-[200px] h-auto max-w-full aspect-square overflow-hidden bg-background  border-2 border-primary">
+            <img className="w-full h-auto object-cover" src={user?.avatar_url} alt="You" />
           </div>
           <p className="mt-2 font-semibold">{user?.display_name}</p>
         </div>
@@ -136,7 +136,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
           className="border glass-box relative overflow-hidden flex flex-col justify-center items-center p-4 "
         >
           <BackgroundGlow></BackgroundGlow>
-          <div className="w-[200px] h-[200px] bg-background overflow-hidden border-2 border-primary relative">
+          <div className="w-[200px] h-auto max-w-full aspect-square  bg-background overflow-hidden border-2 border-primary relative">
             <div className="absolute w-full h-full">
               <AnimatePresence mode="wait">
                 {opponentAvatar && (

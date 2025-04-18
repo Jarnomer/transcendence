@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
+import { useBackgroundMusic } from '../../contexts/Music/BackgroundMusicManager.tsx';
+import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreateTournament } from '../../pages/CreateTournament.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
+import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
+import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
@@ -19,9 +23,25 @@ import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
-  const { loading } = useUser(); // Retrieve user from context
+  const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();
   const user = localStorage.getItem('token');
+  const { fromAppNavigation } = useNavigationAccess();
+  const { play } = useBackgroundMusic();
+  // play('game');
+
+  useEffect(() => {
+    checkAuth();
+    if (location.pathname === '/game') {
+      play('game');
+    } else {
+      play('menu');
+    }
+    console.log('location change');
+    return () => {
+      console.log('Cleanup');
+    };
+  }, [location]);
 
   return (
     <AnimatePresence mode="wait">
@@ -66,12 +86,12 @@ export const AnimatedRoutes: React.FC = () => {
         <Route
           path="/tournament"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <CreateTournament />
               </PageWrapper>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
@@ -90,14 +110,27 @@ export const AnimatedRoutes: React.FC = () => {
         />
 
         <Route
+          path="/gameOptions"
+          element={
+            user && fromAppNavigation ? (
+              <PageWrapper>
+                <GameOptionsPage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
           path="/game"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <GamePage />
               </PageWrapper>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
@@ -123,7 +156,7 @@ export const AnimatedRoutes: React.FC = () => {
                 <TournamentLobby />
               </PageWrapper>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" replace />
             )
           }
         />
@@ -177,6 +210,15 @@ export const AnimatedRoutes: React.FC = () => {
             ) : (
               <Navigate to="/login" replace />
             )
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <PageWrapper>
+              <NotFoundPage />
+            </PageWrapper>
           }
         />
       </Routes>

@@ -5,7 +5,7 @@ import { UserDataResponseType } from '@shared/types/userTypes';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
-import { sendFriendRequest } from '../../services/friendService';
+import { acceptFriendRequest, sendFriendRequest } from '../../services/friendService';
 import { AddFriend } from '../UI/buttons/AddFriend';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { ProfilePicture } from './ProfilePicture';
@@ -34,7 +34,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   editProfile,
   sent,
 }) => {
-  const { setUser } = useUser();
+  const { setUser, refetchUser } = useUser();
   const { setSelectedFriend, setRoomId } = useChatContext();
   const { openModal } = useModal();
   const {
@@ -46,8 +46,23 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   } = useChatContext();
 
   const handleAddFriendClick = (user_id: string) => {
-    console.log('Sending friend request to user: ', user_id);
-    sendFriendRequest(user_id);
+    if (
+      loggedInUser?.friend_requests &&
+      loggedInUser.friend_requests.some((req) => req.user_id === user?.user_id)
+    ) {
+      console.log('ACCEPTING FRIEND REQUEST');
+      acceptFriendRequest(user_id)
+        .then(() => {
+          console.log('Friend request accepted');
+          refetchUser();
+        })
+        .catch((error) => {
+          console.error('Failed to accept friend request: ', error);
+        });
+    } else {
+      console.log('Sending friend request to user: ', user_id);
+      sendFriendRequest(user_id);
+    }
   };
 
   const handleChatClick = (user_id: string) => {

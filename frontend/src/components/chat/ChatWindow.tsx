@@ -30,7 +30,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   console.log(roomId);
   return (
-    <div className="w-full h-full flex flex-col flex-1">
+    <div className="h-full flex flex-col flex-1">
       <div className="p-2 border-b flex justify-between items-center ">
         <button className="text-sm text-gray-500" onClick={onBack}>
           Back
@@ -46,7 +46,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
         <div />
       </div>
-      <MessageList messages={messages} user={user} />
+      <MessageList
+        messages={messages}
+        user={user}
+        selectedFriendId={selectedFriendId}
+        roomId={roomId}
+      />
       <div className="p-2 border-t flex gap-2">
         <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
       </div>

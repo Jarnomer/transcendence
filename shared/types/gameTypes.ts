@@ -18,7 +18,7 @@ export interface Ball {
 }
 
 export enum PowerUpType {
-  NoType = 'no_type',
+  // NoType = 'no_type',
   BiggerPaddle = 'bigger_paddle',
   SmallerPaddle = 'smaller_paddle',
   FasterPaddle = 'faster_paddle',
@@ -101,6 +101,32 @@ export interface GameRules {
   countdown: number;
 }
 
+export interface GameSettings {
+  mode: '1v1' | 'singleplayer' | 'AIvsAI';
+  difficulty: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
+  maxScore: number;
+  ballSpeed: number;
+  enableSpin: boolean;
+  enablePowerUps: boolean;
+  powerUpTypes: Record<PowerUpType, boolean>;
+}
+
+export const defaultGameSettings: GameSettings = {
+  mode: '1v1',
+  difficulty: 'online',
+  maxScore: 5,
+  ballSpeed: 7,
+  enableSpin: true,
+  enablePowerUps: true,
+  powerUpTypes: {
+    [PowerUpType.BiggerPaddle]: true,
+    [PowerUpType.SmallerPaddle]: true,
+    [PowerUpType.FasterPaddle]: true,
+    [PowerUpType.SlowerPaddle]: true,
+    [PowerUpType.MoreSpin]: true,
+  },
+};
+
 export interface GameSoundOptions {
   enabled?: boolean;
   muted?: boolean;
@@ -134,7 +160,7 @@ export const defaultGameParams: GameParams = {
     minDX: 7,
     speedMultiplier: 1,
     maxSpeedMultiplier: 3,
-    speedIncreaseFactor: 1.03, // Ball speed increase on paddle hit
+    speedIncreaseFactor: 1.015, // Ball speed increase on paddle hit
   },
   spin: {
     maxSpin: 15,
@@ -161,7 +187,7 @@ export const defaultGameParams: GameParams = {
     maxScore: 5,
     countdown: 3, // Seconds
   },
-  sound: {
+  sounds: {
     enabled: true,
     muted: false,
     volume: 1.0,
