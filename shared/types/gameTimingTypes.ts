@@ -52,8 +52,8 @@ export interface GameAnimationTimings {
 }
 
 export const defaultRetroEffectTimings: RetroEffectTimings = {
-  crtTurnOnDuration: 1800,
-  crtTurnOffDuration: 1800,
+  crtTurnOnDuration: 1500,
+  crtTurnOffDuration: 1500,
   crtTurnOnDelay: 500,
 
   channelChangeDuration: 1200,

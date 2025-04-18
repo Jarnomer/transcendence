@@ -966,8 +966,7 @@ export function createPongRetroEffects(
         .enablePhosphorDots()
         .enableVHS()
         .enableTurnOnEffect()
-        .enableTurnOffEffect()
-        .enableDustScratch();
+        .enableTurnOffEffect();
       break;
   }
 
