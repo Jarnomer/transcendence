@@ -31,27 +31,37 @@ export const defaultCameraDOFSettings: CameraDOFSettings = {
 
 export const cameraAngles: CameraAngle[] = [
   {
-    // Low player 2 view
+    // player2 view
     position: new Vector3(-13, 12, 5),
     target: new Vector3(-1, -2.5, -5),
   },
   {
-    // Low player 2 view2
+    // player 2 view2
     position: new Vector3(-2, 18.5, 9),
     target: new Vector3(5, 5, 0),
   },
   {
-    // Low mid board view
-    position: new Vector3(5, 15, 6),
+    // mid board view
+    position: new Vector3(8, 17, 12),
     target: new Vector3(-1, -3, -1),
   },
   {
-    // High side view (original)
+    // mid board view2
+    position: new Vector3(9, -15, 14),
+    target: new Vector3(6, -6, 4),
+  },
+  {
+    // mid board view7
+    position: new Vector3(2, -20, 6),
+    target: new Vector3(6, -4, -1.5),
+  },
+  {
+    // player1 view
     position: new Vector3(33, 21, 11),
     target: new Vector3(20, 9, 4),
   },
   {
-    // Low player 1 view
+    // player1 view2
     position: new Vector3(13, 16, 10),
     target: new Vector3(-20, -10, -15),
   },
