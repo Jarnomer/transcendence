@@ -1,6 +1,5 @@
 import React from 'react';
 
-import hoverSound from '@/assets/sounds/button_hover.wav';
 import { useSound } from '@/hooks/useSound';
 
 type ButtonOptions = {
@@ -17,7 +16,7 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
   className = '',
   onClick,
 }) => {
-  const playHoverSound = useSound(hoverSound);
+  const playHoverSound = useSound('/sounds/effects/button_hover.wav');
   return (
     <button
       id={id}

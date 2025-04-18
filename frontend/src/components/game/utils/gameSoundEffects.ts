@@ -45,17 +45,17 @@ export class GameSoundManager {
 
   private initSounds(): void {
     if (typeof window !== 'undefined') {
-      const baseUrl = '/src/assets/sounds/';
+      const baseUrl = 'sounds/effects/';
 
-      this.edgeSound = new Audio(baseUrl + 'collision_1.wav');
-      this.paddleSound = new Audio(baseUrl + 'collision_2.wav');
+      this.edgeSound = new Audio(baseUrl + 'HIT1.wav');
+      this.paddleSound = new Audio(baseUrl + 'HIT2.wav');
 
-      this.negativePowerUpSound = new Audio(baseUrl + 'powerup.wav');
-      this.positivePowerUpSound = new Audio(baseUrl + 'powerup.wav');
+      this.negativePowerUpSound = new Audio(baseUrl + 'POWERUP.wav');
+      this.positivePowerUpSound = new Audio(baseUrl + 'POWERUP_END.wav');
 
-      this.scoreSound = new Audio(baseUrl + 'powerup.wav');
+      this.scoreSound = new Audio(baseUrl + 'EXPLOSION_1.wav');
 
-      this.gameStartSound = new Audio(baseUrl + 'powerup.wav');
+      this.gameStartSound = new Audio(baseUrl + 'BALLDROP.wav');
       this.gameOverSound = new Audio(baseUrl + 'powerup.wav');
 
       this.countDown1Sound = new Audio(baseUrl + 'countDown.wav');

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 import { toast } from 'react-hot-toast';
-import { useLocation } from 'react-router-dom';
 
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 import {
@@ -21,7 +20,6 @@ const ChatContext = createContext<any>(null);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage, closeConnection, connections } = useWebSocketContext();
-  const location = useLocation();
   const isChatPage = location.pathname === '/chat' ? true : false;
 
   const { user } = useUser();
