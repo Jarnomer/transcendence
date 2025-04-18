@@ -9,11 +9,11 @@ import {
 } from '@shared/types';
 
 import BackgroundGameCanvas from './BackgroundGameCanvas';
-import { useBackgroundGameVisibility } from '../../hooks/useBackgroundGameVisibility';
+import { useGameVisibility } from '../../hooks/useGameVisibility';
 
 const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
-  const { isBackgroundGameActive, isBackgroundGameVisible } = useBackgroundGameVisibility();
+  const { isBackgroundGameActive, isBackgroundGameVisible } = useGameVisibility();
 
   const reconnectTimeoutRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);

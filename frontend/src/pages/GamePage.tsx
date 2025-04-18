@@ -11,8 +11,8 @@ import { createReadyInputMessage } from '@shared/messages';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { useBackgroundGameVisibility } from '../hooks/useBackgroundGameVisibility';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
+import { useGameVisibility } from '../hooks/useGameVisibility';
 
 export const GamePage: React.FC = () => {
   const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
@@ -20,7 +20,14 @@ export const GamePage: React.FC = () => {
   const { loadingStates } = useLoading();
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const { showBackgroundGame } = useBackgroundGameVisibility();
+
+  const {
+    hideBackgroundGame,
+    showBackgroundGame,
+    isGameCanvasVisible,
+    hideGameCanvas,
+    showGameCanvas,
+  } = useGameVisibility();
 
   useEffect(() => {
     console.log('GamePage mounted');
@@ -29,21 +36,33 @@ export const GamePage: React.FC = () => {
     console.log('gameId: ', gameId);
     console.log('setTournamentOptions', tournamentOptions);
 
+    hideBackgroundGame();
+
     return () => {
       showBackgroundGame();
+      hideGameCanvas();
     };
   }, []);
 
   useEffect(() => {
     if (gameStatus === 'finished') {
-      // When game finishes, show the background game again
       const timer = setTimeout(() => {
+        hideGameCanvas();
         showBackgroundGame();
-      }, 5000); // 5 seconds delay
+      }, 5000); // show background again after 5s delay
 
       return () => clearTimeout(timer);
     }
   }, [gameStatus]);
+
+  // Show game canvas when ready to play
+  useEffect(() => {
+    if (!loading && gameState && connections.game === 'connected' && gameStatus !== 'finished') {
+      if (!isGameCanvasVisible) {
+        showGameCanvas();
+      }
+    }
+  }, [loading, gameStatus, gameState, connections.game]);
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser();
   useMatchmaking(userId);
@@ -71,7 +90,7 @@ export const GamePage: React.FC = () => {
           console.log('Sending delayed player ready for player:', localPlayerId);
           sendMessage('game', createReadyInputMessage(localPlayerId, true));
         }
-      }, 2000); // 2000ms delay
+      }, 2000); // 2s delay
 
       // Clean up the timeout if component unmounts
       return () => {
@@ -89,20 +108,12 @@ export const GamePage: React.FC = () => {
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}
-      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
-        <>
-          <div className="w-full h-full relative overflow-hidden">
-            {/* RENDER COUNTDOWN CONDITIONALLY */}
-            <CountDown gameStatus={gameStatus} />
 
-            {/* SHOW GAME INFORMATION */}
-            {/* <p className="text-xs text-gray-500"> */}
-            {/*   Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} | */}
-            {/*   Player2_DY: {gameState?.players.player2.dy} */}
-            {/* </p> */}
-            <GameCanvas gameState={gameState} />
-          </div>
-        </>
+      {gameState && <GameCanvas gameState={gameState} isVisible={isGameCanvasVisible} />}
+
+      {/* Show countdown conditionally */}
+      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
+        <CountDown gameStatus={gameStatus} />
       ) : (
         <MatchMakingCarousel playersData={playersData} />
       )}

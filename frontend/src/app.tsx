@@ -14,6 +14,7 @@ import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { ChatProvider } from './contexts/chatContext/ChatContext.tsx';
 import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
+import { LoadingProvider } from './contexts/gameContext/LoadingContextProvider.tsx'; // Added this import
 import { useUser } from './contexts/user/UserContext';
 import { WebSocketProvider } from './contexts/WebSocketContext.tsx';
 
@@ -34,23 +35,25 @@ const App: React.FC = () => {
     <WebSocketProvider>
       <ChatProvider>
         <GameOptionsProvider>
-          <BackgroundGameProvider />
-          <div
-            id="app-container"
-            className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
-          >
-            <Header />
-            <div id="app-content" className="relative md:px-10 p-5 w-full ">
-              <AnimatePresence>
-                <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
-                  <BackgroundGlitch duration={1100} />
-                </motion.div>
-              </AnimatePresence>
+          <LoadingProvider>
+            <BackgroundGameProvider />
+            <div
+              id="app-container"
+              className={`flex flex-col relative items-center min-h-screen w-screen overflow-hidden text-primary p-2 `}
+            >
+              <Header />
+              <div id="app-content" className="relative md:px-10 p-5 w-full ">
+                <AnimatePresence>
+                  <motion.div id="backgroundGlitch" aria-hidden="true" className="w-full h-full">
+                    <BackgroundGlitch duration={1100} />
+                  </motion.div>
+                </AnimatePresence>
 
-              <AnimatedRoutes></AnimatedRoutes>
+                <AnimatedRoutes></AnimatedRoutes>
+              </div>
+              {location.pathname !== '/game' ? <Footer /> : null}
             </div>
-            {location.pathname !== '/game' ? <Footer /> : null}
-          </div>
+          </LoadingProvider>
         </GameOptionsProvider>
         <ChatModal></ChatModal>
         <SettingsModal></SettingsModal>

@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useLoading } from '../../contexts/gameContext/LoadingContextProvider';
 import { useUser } from '../../contexts/user/UserContext';
-import { useBackgroundGameVisibility } from '../../hooks/useBackgroundGameVisibility';
+import { useGameVisibility } from '../../hooks/useGameVisibility';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 interface PlayerData {
@@ -17,7 +17,6 @@ interface PlayerData {
 }
 
 interface MatchMakingCarouselProps {
-  // setAnimate: (value: boolean) => void;
   playersData: {
     player1: PlayerData | null;
     player2: PlayerData | null;
@@ -57,7 +56,8 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const { mode, difficulty } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const { user: loggedInUser } = useUser();
-  const { hideBackgroundGame } = useBackgroundGameVisibility();
+
+  const { hideBackgroundGame, showGameCanvas } = useGameVisibility();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

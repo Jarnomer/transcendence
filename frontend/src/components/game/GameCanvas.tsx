@@ -47,10 +47,12 @@ import {
   RetroEffectsLevels,
   defaultGameParams,
   defaultRetroEffectsLevels,
+  defaultRetroEffectTimings,
 } from '@shared/types';
 
 interface GameCanvasProps {
   gameState: GameState;
+  isVisible: boolean;
   theme?: 'light' | 'dark';
   retroPreset?: 'default' | 'cinematic';
   retroLevels?: RetroEffectsLevels;
@@ -101,6 +103,7 @@ const detectScore = (
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
   gameState,
+  isVisible,
   theme = 'dark',
   retroPreset = 'default',
   retroLevels = defaultRetroEffectsLevels,
@@ -290,9 +293,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     retroEffectsRef.current = createPongRetroEffects(scene, camera, retroPreset, retroLevels);
     retroLevelsRef.current = retroLevels;
 
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
+    if (isVisible) {
+      engine.runRenderLoop(() => {
+        scene.render();
+      });
+    }
 
     const handleResize = () => {
       engine.resize();
@@ -310,6 +315,31 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
   }, []);
 
+  // Handle visibility and turn on/off effects
+  useEffect(() => {
+    if (!engineRef.current || !sceneRef.current || !retroEffectsRef.current) return;
+
+    if (!isVisible) {
+      retroEffectsRef.current
+        .simulateCRTTurnOff(defaultRetroEffectTimings.crtTurnOffDuration)
+        .then(() => {
+          if (engineRef.current) engineRef.current.stopRenderLoop();
+        });
+    } else {
+      if (engineRef.current && sceneRef.current) {
+        engineRef.current.runRenderLoop(() => {
+          if (sceneRef.current) sceneRef.current.render();
+        });
+      }
+
+      setTimeout(() => {
+        if (retroEffectsRef.current) {
+          retroEffectsRef.current.simulateCRTTurnOn(defaultRetroEffectTimings.crtTurnOnDuration);
+        }
+      }, defaultRetroEffectTimings.crtTurnOnDelay);
+    }
+  }, [isVisible]);
+
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;
 
@@ -324,7 +354,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Handle game object updates
   useEffect(() => {
-    if (!canvasRef.current || !sceneRef.current || !cameraRef.current || !themeColors.current)
+    if (
+      !canvasRef.current ||
+      !sceneRef.current ||
+      !cameraRef.current ||
+      !themeColors.current ||
+      !isVisible
+    )
       return;
 
     const { players, ball } = gameState;
@@ -415,9 +451,22 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       dy: ball.dy,
       spin: ball.spin,
     };
-  }, [gameState]);
+  }, [gameState, isVisible]);
 
-  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <div
+      className={`game-canvas-container absolute pointer-events-none w-full h-full bg-[#33353e] ${
+        !isVisible ? 'opacity-0' : 'opacity-100'
+      } transition-opacity duration-1000`}
+      aria-hidden="true"
+      style={{
+        visibility: isVisible ? 'visible' : 'hidden',
+        transition: `opacity ${defaultRetroEffectTimings.crtTurnOffDuration / 1000}s ease-out`,
+      }}
+    >
+      <canvas ref={canvasRef} className="w-full h-full" />
+    </div>
+  );
 };
 
 export default GameCanvas;
