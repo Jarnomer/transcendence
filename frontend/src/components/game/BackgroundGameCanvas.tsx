@@ -275,6 +275,10 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     if (!isVisible) {
       if (retroEffectsRef.current) {
+        if (engineRef.current && sceneRef.current) {
+          setupThrottledRenderLoop(engineRef.current, sceneRef.current);
+        }
+
         retroEffectsRef.current
           .simulateCRTTurnOff(defaultRetroEffectTimings.crtTurnOffDuration)
           .then(() => {
