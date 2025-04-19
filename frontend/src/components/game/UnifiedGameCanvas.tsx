@@ -16,6 +16,7 @@ import {
 
 import {
   RetroEffectsManager,
+  PowerUpEffectsManager,
   GameSoundManager,
   animateCinematicCamera,
   animateGameplayCamera,
@@ -48,6 +49,7 @@ import {
 
 import {
   Ball,
+  PowerUp,
   GameState,
   RetroEffectsLevels,
   defaultCameraTimings,
@@ -171,6 +173,9 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
   const lastGameModeRef = useRef<GameMode>('background');
+
+  const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
+  const prevPowerUpsRef = useRef<PowerUp[]>([]);
 
   const floorRef = useRef<any>(null);
   const topEdgeRef = useRef<any>(null);
@@ -394,7 +399,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
-    const { primaryColor, backgroundColor } = colors;
+    const { primaryColor, secondaryColor, backgroundColor } = colors;
 
     const bgColor = parseColor('#33353e');
     scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
@@ -452,9 +457,21 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       defaultRetroCinematicBaseParams
     );
 
+    powerUpEffectsRef.current = new PowerUpEffectsManager(
+      scene,
+      primaryColor,
+      secondaryColor,
+      defaultGameParams.powerUps.size,
+      soundManagerRef.current
+    );
+
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
 
     setupCamera();
+
+    if (gameMode === 'background') {
+      setupRandomGlitchEffects();
+    }
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -489,6 +506,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
+      if (powerUpEffectsRef.current) powerUpEffectsRef.current.disposeAll();
 
       if (cameraMoveTimerRef.current) {
         window.clearInterval(cameraMoveTimerRef.current);
@@ -505,16 +523,10 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     };
   }, []);
 
-  // Handle game mode changes
+  // Handle game modes
   useEffect(() => {
     if (!cameraRef.current || !retroEffectsRef.current || !engineRef.current || !sceneRef.current)
       return;
-
-    // Clear any existing random glitch timer
-    if (randomGlitchTimerRef.current) {
-      window.clearTimeout(randomGlitchTimerRef.current);
-      randomGlitchTimerRef.current = null;
-    }
 
     if (lastGameModeRef.current !== gameMode) {
       setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
@@ -523,6 +535,10 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       setupCamera();
 
       if (gameMode === 'background') {
+        if (powerUpEffectsRef.current) {
+          powerUpEffectsRef.current.updatePowerUpEffects([]);
+          prevPowerUpsRef.current = [];
+        }
         setupRandomGlitchEffects();
       }
 
@@ -530,7 +546,29 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     }
   }, [gameMode]);
 
-  // Handle game object updates
+  // Handle game power-ups
+  useEffect(() => {
+    if (!powerUpEffectsRef.current || !gameState) return;
+
+    // Only process power-ups in active game mode
+    if (gameMode === 'active') {
+      const powerUps = gameState.powerUps || [];
+      const powerUpsChanged = JSON.stringify(powerUps) !== JSON.stringify(prevPowerUpsRef.current);
+
+      if (powerUpsChanged) {
+        powerUpEffectsRef.current.updatePowerUpEffects(powerUps);
+        prevPowerUpsRef.current = [...powerUps];
+      }
+    } else {
+      // In background mode, make sure no power-ups are showing
+      if (prevPowerUpsRef.current.length > 0) {
+        powerUpEffectsRef.current.updatePowerUpEffects([]);
+        prevPowerUpsRef.current = [];
+      }
+    }
+  }, [gameState, gameMode]);
+
+  // Handle game objects
   useEffect(() => {
     if (!canvasRef.current || !sceneRef.current || !cameraRef.current || !themeColors.current)
       return;
