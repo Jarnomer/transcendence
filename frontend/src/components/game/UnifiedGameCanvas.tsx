@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import {
   ArcRotateCamera,
@@ -63,8 +63,8 @@ interface UnifiedGameCanvasProps {
 }
 
 const gameplayCameraAngle = {
-  position: new Vector3(0, 28, -28),
-  target: new Vector3(0, -0.15, 0),
+  position: new Vector3(0, 30, 5),
+  target: new Vector3(0, 0, 0),
 };
 
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {

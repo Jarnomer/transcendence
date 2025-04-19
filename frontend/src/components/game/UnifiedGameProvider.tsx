@@ -22,6 +22,7 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
   const reconnectTimeoutRef = useRef<number | null>(null);
   const currentGameStateRef = useRef<GameState | null>(null);
   const lastGameIdRef = useRef<string | null>(null);
+  const modeChangeRequestedRef = useRef<boolean>(false);
 
   // Create initial game state before WebSocket connects
   const initialGameState: GameState = {
@@ -65,9 +66,8 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
       reconnectTimeoutRef.current = null;
     }
 
-    // Close existing connection if it exists
+    // Close existing connection
     if (bgWsRef.current) {
-      // Remove the onclose handler to prevent reconnection
       bgWsRef.current.onclose = null;
       if (
         bgWsRef.current.readyState === WebSocket.OPEN ||
@@ -75,124 +75,123 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
       ) {
         bgWsRef.current.close();
       }
-    }
-
-    // Only create a new connection if we're in background mode
-    if (currentMode !== 'background') {
-      console.log('Not creating background WebSocket while in active mode');
-      return;
+      bgWsRef.current = null;
     }
 
     console.log('Setting up background WebSocket connection');
     const wsUrl = `wss://${window.location.host}/ws/background-game?`;
-    const ws = new WebSocket(wsUrl);
 
-    ws.onopen = () => {
-      console.log('Background game connection established');
-    };
+    try {
+      const ws = new WebSocket(wsUrl);
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'game_state') {
-          // Only update state if we're still in background mode
-          if (currentMode === 'background') {
-            setBackgroundGameState(data.state);
+      ws.onopen = () => {
+        console.log('Background game connection established');
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'game_state') {
+            // Only update state in background mode
+            if (currentMode === 'background') {
+              setBackgroundGameState(data.state);
+            }
           }
+        } catch (error) {
+          console.error('Error parsing background game message:', error);
         }
-      } catch (error) {
-        console.error('Error parsing background game message:', error);
-      }
-    };
+      };
 
-    ws.onclose = () => {
-      console.log('Background game connection closed');
-      if (currentMode === 'background') {
-        console.log('Attempting to reconnect to background game...');
-        reconnectTimeoutRef.current = window.setTimeout(() => {
-          reconnectTimeoutRef.current = null;
-          if (currentMode === 'background') setupBackgroundWebSocket();
-        }, 2000);
-      }
-    };
+      ws.onclose = () => {
+        console.log('Background game connection closed');
+        // Only attempt to reconnect if we're still in background mode
+        if (currentMode === 'background' && !modeChangeRequestedRef.current) {
+          console.log('Attempting to reconnect to background game...');
+          reconnectTimeoutRef.current = window.setTimeout(() => {
+            reconnectTimeoutRef.current = null;
+            if (currentMode === 'background') setupBackgroundWebSocket();
+          }, 3000);
+        }
+      };
 
-    ws.onerror = (error) => {
-      console.error('Background WebSocket error:', error);
-    };
+      ws.onerror = (error) => {
+        console.error('Background WebSocket error:', error);
+      };
 
-    bgWsRef.current = ws;
+      bgWsRef.current = ws;
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+      reconnectTimeoutRef.current = window.setTimeout(() => {
+        reconnectTimeoutRef.current = null;
+        if (currentMode === 'background') setupBackgroundWebSocket();
+      }, 3000);
+    }
   }, [currentMode]);
 
-  // Handle game active/inactive status
+  // Handle mode changes
+  const switchToMode = useCallback(
+    (newMode: 'background' | 'active') => {
+      if (currentMode === newMode || isTransitioning) return;
+
+      console.log(`Switching game mode from ${currentMode} to ${newMode}`);
+      modeChangeRequestedRef.current = true;
+      setIsTransitioning(true);
+
+      setTimeout(() => {
+        setCurrentMode(newMode);
+        setIsTransitioning(false);
+        modeChangeRequestedRef.current = false;
+
+        if (
+          (!bgWsRef.current || bgWsRef.current.readyState !== WebSocket.OPEN) &&
+          newMode === 'background'
+        ) {
+          console.log('Reconnecting to background game after mode switch');
+          setupBackgroundWebSocket();
+        }
+      }, 100); // Small delay to allow for animations
+    },
+    [currentMode, isTransitioning, setupBackgroundWebSocket]
+  );
+
+  // Handle active game state changes
   useEffect(() => {
     const hasActiveGame = gameId && activeGameState && connections.game === 'connected';
-    const shouldBeInActiveMode = hasActiveGame && !isTransitioning;
-    const shouldBeInBackgroundMode = !hasActiveGame && !isTransitioning;
 
     // Track if the gameId changed
     const gameIdChanged = lastGameIdRef.current !== gameId;
     lastGameIdRef.current = gameId;
 
-    // Handle transition to active mode
-    if (shouldBeInActiveMode && currentMode === 'background') {
-      console.log('Switching to active game mode');
-      setIsTransitioning(true);
-
-      // Short delay to allow for animation
-      setTimeout(() => {
-        setCurrentMode('active');
-        setIsTransitioning(false);
-      }, 100);
+    if (hasActiveGame && currentMode === 'background') {
+      switchToMode('active');
+    } else if (!hasActiveGame && gameIdChanged && gameId === null && currentMode === 'active') {
+      switchToMode('background');
     }
-    // Handle transition to background mode
-    else if (shouldBeInBackgroundMode && currentMode === 'active') {
-      console.log('Switching to background mode (game no longer active)');
-      setIsTransitioning(true);
-
-      // Short delay to allow for animation
-      setTimeout(() => {
-        setCurrentMode('background');
-        setupBackgroundWebSocket();
-        setIsTransitioning(false);
-      }, 100);
-    }
-    // Handle game ID changes
-    else if (gameIdChanged && gameId === null && currentMode === 'active') {
-      console.log('Game ID changed to null, returning to background mode');
-      setIsTransitioning(true);
-
-      setTimeout(() => {
-        setCurrentMode('background');
-        setupBackgroundWebSocket();
-        setIsTransitioning(false);
-      }, 100);
-    }
-  }, [
-    gameId,
-    activeGameState,
-    connections.game,
-    currentMode,
-    isTransitioning,
-    setupBackgroundWebSocket,
-  ]);
+  }, [gameId, activeGameState, connections.game, currentMode, switchToMode]);
 
   // Handle game finish
   useEffect(() => {
     if (gameStatus === 'finished' && currentMode === 'active' && !isTransitioning) {
       console.log('Game finished, returning to background mode');
-      setIsTransitioning(true);
-
+      // Using a slightly longer delay for end-game transition
       setTimeout(() => {
-        setCurrentMode('background');
-        setupBackgroundWebSocket();
-        setIsTransitioning(false);
-      }, 1000); // Slightly longer delay for end-game transition
+        switchToMode('background');
+      }, 1000);
     }
-  }, [gameStatus, currentMode, isTransitioning, setupBackgroundWebSocket]);
+  }, [gameStatus, currentMode, isTransitioning, switchToMode]);
 
-  // Initialize background WebSocket when component mounts
+  // Initialize background WebSocket
   useEffect(() => {
+    // Initial setup on mount
     if (currentMode === 'background' && !bgWsRef.current) {
+      setupBackgroundWebSocket();
+    }
+
+    // Handle mode changes
+    if (
+      currentMode === 'background' &&
+      (!bgWsRef.current || bgWsRef.current.readyState !== WebSocket.OPEN)
+    ) {
       setupBackgroundWebSocket();
     }
 
@@ -210,7 +209,7 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
         bgWsRef.current = null;
       }
     };
-  }, [setupBackgroundWebSocket]);
+  }, [currentMode, setupBackgroundWebSocket]);
 
   // Choose which game state to render based on current mode
   const currentGameState =
@@ -222,7 +221,7 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
 
   return (
     <>
-      <div className="absolute inset-0 w-screen h-screen pointer-events-none">
+      <div className="absolute w-screen h-screen pointer-events-none">
         <UnifiedGameCanvas gameState={currentGameState} gameMode={currentMode} />
       </div>
     </>
