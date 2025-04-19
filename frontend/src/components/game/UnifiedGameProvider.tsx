@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { GameState, defaultGameParams } from '@shared/types';
+import { GameState, GameStatus, defaultGameParams } from '@shared/types';
 
 import UnifiedGameCanvas from './UnifiedGameCanvas';
 import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 
-interface UnifiedGameProviderProps {
-  children?: React.ReactNode;
-}
+interface UnifiedGameProviderProps {}
 
 const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
   const { gameState: activeGameState, gameStatus, connections } = useWebSocketContext();
@@ -211,18 +209,24 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
     };
   }, [currentMode, setupBackgroundWebSocket]);
 
-  // Choose which game state to render based on current mode
+  // Choose game state and status based on current mode
   const currentGameState =
     currentMode === 'background'
       ? backgroundGameState || initialGameState
       : activeGameState || initialGameState;
+  const currentGameStatus: GameStatus =
+    currentMode === 'background' ? 'playing' : gameStatus || 'loading';
 
   currentGameStateRef.current = currentGameState;
 
   return (
     <>
       <div className="absolute w-screen h-screen pointer-events-none">
-        <UnifiedGameCanvas gameState={currentGameState} gameMode={currentMode} />
+        <UnifiedGameCanvas
+          gameState={currentGameState}
+          gameMode={currentMode}
+          gameStatus={currentGameStatus}
+        />
       </div>
     </>
   );

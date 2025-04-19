@@ -51,6 +51,7 @@ import {
   Ball,
   PowerUp,
   GameState,
+  GameStatus,
   RetroEffectsLevels,
   defaultCameraTimings,
   defaultGameParams,
@@ -66,6 +67,7 @@ type GameMode = 'background' | 'active';
 interface UnifiedGameCanvasProps {
   gameState: GameState;
   gameMode: GameMode;
+  gameStatus: GameStatus;
   theme?: 'light' | 'dark';
 }
 
@@ -148,6 +150,7 @@ const optimizeShadowGenerators = (shadowGenerators: any[]) => {
 const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   gameState,
   gameMode,
+  gameStatus,
   theme = 'dark',
 }) => {
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
@@ -608,18 +611,20 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     }
 
     // Calculate current speed and angle, detect collision and score
-    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-    const angle = Math.atan2(ball.dx, -ball.dy);
-    const collisionType = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
+    const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+    const ballAngle = Math.atan2(ball.dx, -ball.dy);
+
+    const collisionType =
+      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
 
     const scoringPlayer =
       gameMode === 'active'
         ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
         : null;
 
-    applyBallEffects(ballRef.current, speed, angle, ball.spin, primaryColor);
+    applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
 
-    if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
+    if (sparkEffectsRef.current) sparkEffectsRef.current(ballSpeed, ball.spin);
 
     if (collisionType) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
@@ -632,7 +637,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         paddleToRecoil,
         edgeToDeform,
         collisionType,
-        speed,
+        ballSpeed,
         ball.spin,
         primaryColor,
         applyGlitch,
@@ -662,7 +667,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         scoringPlayerPaddle,
         scoredAgainstPaddle,
         players[scoringPlayer].score,
-        speed,
+        ballSpeed,
         players,
         ball,
         primaryColor,

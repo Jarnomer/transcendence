@@ -32,8 +32,8 @@ export class GameSoundManager {
   };
 
   private soundEffectsVolume: number = 1.0;
-  private gameMusicVolume: number = 1.0;
-  private backgroundMusicVolume: number = 1.0;
+  private gameMusicVolume: number = 0.3;
+  private backgroundMusicVolume: number = 0.3;
 
   private soundEffectsEnabled: boolean = true;
   private gameMusicEnabled: boolean = true;
@@ -61,7 +61,7 @@ export class GameSoundManager {
       this.positivePowerUpSound = new Audio(baseUrl + 'POWERUP_END.wav');
       this.scoreSound = new Audio(baseUrl + 'EXPLOSION_1.wav');
       this.gameStartSound = new Audio(baseUrl + 'BALLDROP.wav');
-      this.gameOverSound = new Audio(baseUrl + 'powerup.wav');
+      this.gameOverSound = new Audio(baseUrl + 'POWERUP.wav');
       this.countDown1Sound = new Audio(baseUrl + 'countDown.wav');
       this.countDown2Sound = new Audio(baseUrl + 'countDown.wav');
       this.countDown3Sound = new Audio(baseUrl + 'countDown.wav');
