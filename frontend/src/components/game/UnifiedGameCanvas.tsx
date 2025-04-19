@@ -1,36 +1,38 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import {
-  Animation,
   ArcRotateCamera,
+  Animation,
   Color3,
-  Color4,
   CubicEase,
+  Mesh,
+  Color4,
   DefaultRenderingPipeline,
   EasingFunction,
   Engine,
-  Mesh,
   Scene,
   Vector3,
 } from 'babylonjs';
 
 import {
-  PowerUpEffectsManager,
   RetroEffectsManager,
+  animateCamera,
   applyBallEffects,
+  applyCameraAngle,
   applyCollisionEffects,
   applyPlayerEffects,
   applyScoreEffects,
   ballSparkEffect,
+  cameraAngles,
   createBall,
   createEdge,
   createFloor,
   createPaddle,
   createPongRetroEffects,
   enableRequiredExtensions,
-  getGameSoundManager,
   gameToSceneX,
   gameToSceneY,
+  getRandomCameraAngle,
   getThemeColors,
   parseColor,
   setupPostProcessing,
@@ -38,32 +40,36 @@ import {
   setupSceneCamera,
   setupScenelights,
   GameSoundManager,
+  getGameSoundManager,
 } from '@game/utils';
 
 import {
   Ball,
   GameState,
   PowerUp,
-  RetroEffectsBaseParams,
   RetroEffectsLevels,
+  defaultCameraTimings,
+  defaultCinematicGlitchTimings,
   defaultGameParams,
-  defaultRetroEffectsLevels,
+  defaultRetroCinematicBaseParams,
   defaultRetroEffectTimings,
+  defaultRetroEffectsLevels,
+  defaultRetroEffectsBaseParams,
+  retroEffectsPresets,
 } from '@shared/types';
 
-interface GameCanvasProps {
+type GameMode = 'background' | 'active';
+
+interface UnifiedGameCanvasProps {
   gameState: GameState;
   isVisible: boolean;
+  gameMode: GameMode;
   theme?: 'light' | 'dark';
-  retroPreset?: 'default' | 'cinematic';
-  retroLevels?: RetroEffectsLevels;
-  retroBaseParams?: RetroEffectsBaseParams;
-  onTransitionComplete?: () => void;
+  onTransitionComplete?: (toMode: GameMode) => void;
 }
 
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   const computedStyle = getComputedStyle(document.documentElement);
-
   document.documentElement.setAttribute('data-theme', theme);
 
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
@@ -104,16 +110,49 @@ const detectScore = (
   }
 };
 
-const GameCanvas: React.FC<GameCanvasProps> = ({
+const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipeline | null) => {
+  scene.getEngine().setHardwareScalingLevel(2.0);
+
+  scene.shadowsEnabled = true;
+  scene.lightsEnabled = true;
+  scene.skipFrustumClipping = true;
+  scene.skipPointerMovePicking = true;
+
+  if (pipeline) {
+    pipeline.bloomEnabled = true;
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.chromaticAberrationEnabled = true;
+    pipeline.grainEnabled = true;
+    pipeline.fxaaEnabled = true;
+    pipeline.samples = 1;
+  }
+
+  // Enable occlusion culling
+  scene.autoClear = false;
+  scene.autoClearDepthAndStencil = false;
+  scene.blockMaterialDirtyMechanism = true;
+};
+
+const optimizeShadowGenerators = (shadowGenerators: any[]) => {
+  shadowGenerators.forEach((generator) => {
+    generator.useBlurExponentialShadowMap = true;
+    generator.blurKernel = 8;
+    generator.bias = 0.01;
+    generator.mapSize = 512;
+    generator.forceBackFacesOnly = true;
+    generator.usePercentageCloserFiltering = false;
+  });
+};
+
+const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   gameState,
   isVisible,
+  gameMode,
   theme = 'dark',
-  retroPreset = 'default',
-  retroLevels = defaultRetroEffectsLevels,
-  retroBaseParams = {},
   onTransitionComplete,
 }) => {
-  const [lastTheme, setLastTheme] = useState(theme);
+  const [lastGameMode, setLastGameMode] = useState<GameMode>(gameMode);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
@@ -131,11 +170,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
-  const retroLevelsRef = useRef<RetroEffectsLevels>(retroLevels);
+  const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
 
+  const currentAngleIndexRef = useRef<number>(-1);
+  const cameraMoveTimerRef = useRef<number | null>(null);
+  const randomGlitchTimerRef = useRef<number | null>(null);
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
-  const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
   const prevPowerUpsRef = useRef<PowerUp[]>([]);
 
   const floorRef = useRef<any>(null);
@@ -148,21 +189,127 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
 
+  // Setup render loop based on game mode
+  const setupRenderLoop = () => {
+    if (!engineRef.current || !sceneRef.current) return;
+
+    engineRef.current.stopRenderLoop();
+
+    if (gameMode === 'background') {
+      // Background mode: 30fps throttled render loop
+      const interval = 1000 / 30;
+      let lastTime = 0;
+
+      engineRef.current.runRenderLoop(() => {
+        const currentTime = performance.now();
+        if (currentTime - lastTime >= interval) {
+          lastTime = currentTime;
+          sceneRef.current?.render();
+        }
+      });
+    } else {
+      // Active game mode: Full 60fps render loop
+      engineRef.current.runRenderLoop(() => {
+        sceneRef.current?.render();
+      });
+    }
+  };
+
+  // Handle camera management based on game mode
+  const setupCamera = () => {
+    if (!cameraRef.current) return;
+
+    // Clear any existing camera timer
+    if (cameraMoveTimerRef.current) {
+      window.clearInterval(cameraMoveTimerRef.current);
+      cameraMoveTimerRef.current = null;
+    }
+
+    if (gameMode === 'background') {
+      // Background mode: Rotating cinematic camera
+      const randomAngle = getRandomCameraAngle();
+      applyCameraAngle(cameraRef.current, randomAngle, postProcessingRef.current);
+      currentAngleIndexRef.current = cameraAngles.findIndex((angle) => angle === randomAngle);
+
+      cameraMoveTimerRef.current = window.setInterval(() => {
+        if (cameraRef.current) {
+          currentAngleIndexRef.current = (currentAngleIndexRef.current + 1) % cameraAngles.length;
+          const newAngle = cameraAngles[currentAngleIndexRef.current];
+          animateCamera(cameraRef.current, newAngle);
+
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.simulateTrackingDistortion(
+              defaultRetroEffectTimings.trackingDistortionIntensity,
+              defaultRetroEffectTimings.trackingDistortionDuration
+            );
+          }
+        }
+      }, defaultCameraTimings.cameraMoveInterval);
+    } else {
+      // Active game mode: Static gameplay camera
+      const scene = cameraRef.current.getScene();
+      // Reset to default game camera position
+      const gameCamera = setupSceneCamera(scene);
+      cameraRef.current.position = gameCamera.position.clone();
+      cameraRef.current.target = gameCamera.target.clone();
+      gameCamera.dispose();
+    }
+  };
+
+  // Handle retro effects based on game mode
+  const setupRetroEffects = () => {
+    if (!retroEffectsRef.current || !sceneRef.current || !cameraRef.current) return;
+
+    // Clear any existing glitch timer
+    if (randomGlitchTimerRef.current) {
+      window.clearTimeout(randomGlitchTimerRef.current);
+      randomGlitchTimerRef.current = null;
+    }
+
+    if (gameMode === 'background') {
+      // Background mode: Use cinematic retro effects
+      // retroEffectsRef.current.updateBaseParams(cinematicRetroEffectsLevels);
+
+      // Setup random glitch effects for background mode
+      const scheduleNextGlitch = () => {
+        const params = defaultCinematicGlitchTimings;
+        const nextDelay =
+          Math.floor(Math.random() * params.additiveEffectInterval) + params.baseEffectInterval;
+
+        randomGlitchTimerRef.current = window.setTimeout(() => {
+          if (!retroEffectsRef.current || !isVisible || gameMode !== 'background') return;
+
+          const intensity = params.baseIntensity + Math.random() * params.randomIntensityMultiplier;
+          const duration = params.baseDuration + Math.random() * params.randomDurationMultiplier;
+
+          retroEffectsRef.current.setGlitchAmount(intensity, duration);
+          scheduleNextGlitch();
+        }, nextDelay);
+      };
+
+      scheduleNextGlitch();
+    } else {
+      // Active game mode: Use default retro effects
+      // retroEffectsRef.current.updateBaseParams(defaultRetroEffectsLevels);
+    }
+  };
+
+  // Animate ball after score (only in active game mode)
   const animateBallAfterScore = (
     scene: Scene,
     ballMesh: Mesh,
     ballState: Ball,
     camera: ArcRotateCamera,
-    scoringPlayer: 'player1' | 'player2',
-    gameWidth: number = defaultGameParams.dimensions.gameWidth,
-    gameHeight: number = defaultGameParams.dimensions.gameHeight,
-    scaleFactor: number = defaultGameParams.dimensions.scaleFactor
+    scoringPlayer: 'player1' | 'player2'
   ) => {
+    if (gameMode !== 'active') return;
+
     isAnimatingBallRef.current = true;
 
     const ballX = ballMesh.position.x;
     const ballY = ballMesh.position.y;
     const ballZ = ballMesh.position.z;
+    const scaleFactor = defaultGameParams.dimensions.scaleFactor;
 
     const ballDx = ballState.dx / scaleFactor;
     const ballDy = -ballState.dy / scaleFactor;
@@ -183,10 +330,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
+
     const continueKeys = [
       { frame: 0, value: continueStartPos },
       { frame: frameRate, value: continueFinalPos },
     ];
+
     continueAnim.setKeys(continueKeys);
 
     const cameraPos = camera.position.clone();
@@ -212,10 +361,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
+
     const dropKeys = [
       { frame: 0, value: dropStartPos },
       { frame: frameRate, value: dropFinalPos },
     ];
+
     dropAnim.setKeys(dropKeys);
 
     const easingFunction = new CubicEase();
@@ -233,7 +384,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     });
   };
 
-  // initial render setup
+  // Initial render setup
   useEffect(() => {
     if (!canvasRef.current || !gameState) return;
 
@@ -249,8 +400,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
     const camera = setupSceneCamera(scene);
-    const pipeline = setupPostProcessing(scene, camera, false);
+    const pipeline = setupPostProcessing(scene, camera, gameMode === 'background');
+
+    // Apply optimizations for all modes
+    applyLowQualitySettings(scene, pipeline);
+
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
+    optimizeShadowGenerators(shadowGenerators);
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
@@ -266,6 +422,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       topEdgeRef.current,
       bottomEdgeRef.current,
     ];
+
     setupReflections(scene, floorRef.current, gameObjects);
     shadowGenerators.forEach((generator) => {
       gameObjects.forEach((obj) => {
@@ -284,48 +441,77 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
-    powerUpEffectsRef.current = new PowerUpEffectsManager(
-      scene,
-      colors.primaryColor,
-      colors.secondaryColor,
-      defaultGameParams.powerUps.size,
-      soundManagerRef.current
-    );
 
-    setLastTheme(theme); // Save current theme
-
-    sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
-    retroEffectsRef.current = createPongRetroEffects(scene, camera, retroPreset, retroLevels);
-    retroLevelsRef.current = retroLevels;
-
-    if (isVisible) {
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
+    // Configure based on mode
+    if (gameMode === 'active') {
+      sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
+      retroEffectsRef.current = createPongRetroEffects(
+        scene,
+        camera,
+        'default',
+        retroEffectsPresets.default,
+        defaultRetroEffectsBaseParams
+      );
+    } else {
+      retroEffectsRef.current = createPongRetroEffects(
+        scene,
+        camera,
+        'cinematic',
+        retroEffectsPresets.cinematic,
+        defaultRetroCinematicBaseParams
+      );
     }
+
+    retroLevelsRef.current =
+      gameMode === 'background' ? retroEffectsPresets.cinematic : defaultRetroEffectsLevels;
+
+    setupCamera();
+    setupRenderLoop();
+    setupRetroEffects();
 
     const handleResize = () => {
       engine.resize();
     };
 
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (engineRef.current) engineRef.current.renderEvenInBackground = false;
+      } else {
+        if (engineRef.current) engineRef.current.renderEvenInBackground = true;
+      }
+    };
+
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (powerUpEffectsRef.current) powerUpEffectsRef.current.disposeAll();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
+
+      if (cameraMoveTimerRef.current) {
+        window.clearInterval(cameraMoveTimerRef.current);
+        cameraMoveTimerRef.current = null;
+      }
+
+      if (randomGlitchTimerRef.current) {
+        window.clearTimeout(randomGlitchTimerRef.current);
+        randomGlitchTimerRef.current = null;
+      }
+
       engine.dispose();
       scene.dispose();
     };
   }, []);
 
-  // Update isVisible effect to only use tracking distortion
+  // Handle visibility changes
   useEffect(() => {
-    if (!engineRef.current || !sceneRef.current || !retroEffectsRef.current) return;
+    if (!engineRef.current || !retroEffectsRef.current) return;
 
     if (!isVisible) {
-      // Apply tracking distortion for transition
+      // Apply tracking distortion for transition out
       retroEffectsRef.current.simulateTrackingDistortion(
         defaultRetroEffectTimings.trackingDistortionIntensity,
         defaultRetroEffectTimings.trackingDistortionDuration
@@ -334,15 +520,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       // Stop render loop after distortion duration
       setTimeout(() => {
         if (engineRef.current) engineRef.current.stopRenderLoop();
-        if (onTransitionComplete) onTransitionComplete();
       }, defaultRetroEffectTimings.trackingDistortionDuration);
     } else {
-      // Start render loop
-      if (engineRef.current && sceneRef.current) {
-        engineRef.current.runRenderLoop(() => {
-          if (sceneRef.current) sceneRef.current.render();
-        });
-      }
+      // Start render loop based on mode
+      setupRenderLoop();
 
       // Apply initial tracking distortion when becoming visible
       retroEffectsRef.current.simulateTrackingDistortion(
@@ -350,19 +531,49 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         defaultRetroEffectTimings.trackingDistortionDuration
       );
     }
-  }, [isVisible, retroBaseParams, onTransitionComplete]);
+  }, [isVisible]);
 
+  // Handle game mode changes
   useEffect(() => {
-    if (!powerUpEffectsRef.current || !gameState) return;
+    if (!retroEffectsRef.current || !isVisible) return;
+
+    if (gameMode !== lastGameMode) {
+      setIsTransitioning(true);
+
+      // Apply transition effect
+      retroEffectsRef.current.simulateTrackingDistortion(
+        defaultRetroEffectTimings.trackingDistortionIntensity * 1.5, // Stronger effect for mode transition
+        defaultRetroEffectTimings.trackingDistortionDuration
+      );
+
+      // Apply mode-specific changes after transition
+      setTimeout(() => {
+        setupCamera();
+        setupRenderLoop();
+        setupRetroEffects();
+        setIsTransitioning(false);
+        setLastGameMode(gameMode);
+
+        if (onTransitionComplete) {
+          onTransitionComplete(gameMode);
+        }
+      }, defaultRetroEffectTimings.trackingDistortionDuration);
+    }
+  }, [gameMode, lastGameMode, isVisible]);
+
+  // Handle power-ups (only in active game mode)
+  useEffect(() => {
+    if (gameMode !== 'active' || !gameState) return;
 
     const powerUps = gameState.powerUps || [];
     const powerUpsChanged = JSON.stringify(powerUps) !== JSON.stringify(prevPowerUpsRef.current);
 
     if (powerUpsChanged) {
-      powerUpEffectsRef.current.updatePowerUpEffects(powerUps);
+      // This would handle power-up effects in active game mode
+      // Would need to implement PowerUpEffectsManager here
       prevPowerUpsRef.current = [...powerUps];
     }
-  }, [gameState]);
+  }, [gameState, gameMode]);
 
   // Handle game object updates
   useEffect(() => {
@@ -371,7 +582,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       !sceneRef.current ||
       !cameraRef.current ||
       !themeColors.current ||
-      !isVisible
+      !isVisible ||
+      isTransitioning
     )
       return;
 
@@ -379,7 +591,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
 
-    // Convert coordinates to Babylon coordinate system
+    // Update paddle positions
     player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
     player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
     player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
@@ -395,17 +607,22 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
     const collision = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
-    const score = detectScore(
-      players.player1.score,
-      players.player2.score,
-      lastScoreRef.current,
-      ball.dx
-    );
 
+    // Only detect score in active game mode
+    const score =
+      gameMode === 'active'
+        ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
+        : null;
+
+    // Apply ball effects in both modes
     applyBallEffects(ballRef.current, speed, angle, ball.spin, primaryColor);
 
-    if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
+    // Ball spark effects only in active mode
+    if (gameMode === 'active' && sparkEffectsRef.current) {
+      sparkEffectsRef.current(speed, ball.spin);
+    }
 
+    // Handle collisions in both modes
     if (collision) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
       const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
@@ -419,12 +636,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         speed,
         ball.spin,
         primaryColor,
-        true,
-        soundManagerRef.current
+        gameMode === 'active', // Only play sound in active mode
+        gameMode === 'active' ? soundManagerRef.current : null
       );
     }
 
-    if (score) {
+    // Score effects only in active game mode
+    if (score && gameMode === 'active') {
       const scoringPlayerPaddle = score === 'player1' ? player1Ref.current : player2Ref.current;
       const scoredAgainstPaddle = score === 'player1' ? player2Ref.current : player1Ref.current;
 
@@ -447,14 +665,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       );
     }
 
-    applyPlayerEffects(
-      sceneRef.current,
-      player1Ref.current,
-      player2Ref.current,
-      players,
-      primaryColor,
-      secondaryColor
-    );
+    // Player effects only in active game mode
+    if (gameMode === 'active') {
+      applyPlayerEffects(
+        sceneRef.current,
+        player1Ref.current,
+        player2Ref.current,
+        players,
+        primaryColor,
+        secondaryColor
+      );
+    }
 
     prevBallState.current = {
       x: ball.x,
@@ -463,22 +684,18 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       dy: ball.dy,
       spin: ball.spin,
     };
-  }, [gameState, isVisible]);
+  }, [gameState, isVisible, gameMode, isTransitioning]);
 
   return (
-    <div
-      className={`game-canvas-container absolute pointer-events-none w-full h-full bg-[#33353e] ${
-        !isVisible ? 'opacity-0' : 'opacity-100'
-      } transition-opacity duration-1000`}
-      aria-hidden="true"
+    <canvas
+      ref={canvasRef}
+      className="w-full h-full pointer-events-none bg-[#33353e]"
       style={{
-        visibility: isVisible ? 'visible' : 'hidden',
-        transition: `opacity ${defaultRetroEffectTimings.crtTurnOffDuration / 1000}s ease-out`,
+        opacity: isVisible ? 1 : 0,
+        transition: `opacity ${defaultRetroEffectTimings.trackingDistortionDuration}ms ease-out`,
       }}
-    >
-      <canvas ref={canvasRef} className="w-full h-full" />
-    </div>
+    />
   );
 };
 
-export default GameCanvas;
+export default UnifiedGameCanvas;
