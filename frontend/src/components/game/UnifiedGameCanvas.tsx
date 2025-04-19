@@ -16,13 +16,18 @@ import {
 
 import {
   RetroEffectsManager,
-  animateCamera,
+  GameSoundManager,
+  animateCinematicCamera,
+  animateGameplayCamera,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
   applyScoreEffects,
+  applyCinematicCameraAngle,
+  applyGameplayCameraAngle,
   ballSparkEffect,
-  cameraAngles,
+  gameplayCameraAngles,
+  gameplayCameraDOFSettings,
   createBall,
   createEdge,
   createFloor,
@@ -31,14 +36,13 @@ import {
   enableRequiredExtensions,
   gameToSceneX,
   gameToSceneY,
-  getRandomCameraAngle,
+  getNextCinematicCameraAngle,
   getThemeColors,
   parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  GameSoundManager,
   getGameSoundManager,
 } from '@game/utils';
 
@@ -61,11 +65,6 @@ interface UnifiedGameCanvasProps {
   gameMode: GameMode;
   theme?: 'light' | 'dark';
 }
-
-const gameplayCameraAngle = {
-  position: new Vector3(0, 30, 5),
-  target: new Vector3(0, 0, 0),
-};
 
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
   const computedStyle = getComputedStyle(document.documentElement);
@@ -166,7 +165,6 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
 
-  const currentAngleIndexRef = useRef<number>(-1);
   const cameraMoveTimerRef = useRef<number | null>(null);
   const randomGlitchTimerRef = useRef<number | null>(null);
   const isAnimatingBallRef = useRef<boolean>(false);
@@ -184,42 +182,54 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   const gameHeight = defaultGameParams.dimensions.gameHeight;
 
   const setupCamera = () => {
-    if (!cameraRef.current) return;
+    if (!engineRef.current || !sceneRef.current || !cameraRef.current) return;
 
     if (cameraMoveTimerRef.current) {
       window.clearInterval(cameraMoveTimerRef.current);
       cameraMoveTimerRef.current = null;
     }
 
-    console.log(`Setting up camera for mode: ${gameMode}`);
-
     if (gameMode === 'background') {
-      const randomAngle = getRandomCameraAngle();
-      animateCamera(cameraRef.current, randomAngle);
-      currentAngleIndexRef.current = cameraAngles.findIndex((angle) => angle === randomAngle);
+      const cinematicAngle = getNextCinematicCameraAngle();
+
+      applyCinematicCameraAngle(cameraRef.current, cinematicAngle, postProcessingRef.current);
+      animateCinematicCamera(cameraRef.current, cinematicAngle);
 
       cameraMoveTimerRef.current = window.setInterval(() => {
         if (cameraRef.current) {
-          currentAngleIndexRef.current = (currentAngleIndexRef.current + 1) % cameraAngles.length;
-          const newAngle = cameraAngles[currentAngleIndexRef.current];
-          animateCamera(cameraRef.current, newAngle);
+          const nextCinematicAngle = getNextCinematicCameraAngle();
+
+          applyCinematicCameraAngle(
+            cameraRef.current,
+            nextCinematicAngle,
+            postProcessingRef.current
+          );
+          animateCinematicCamera(cameraRef.current, nextCinematicAngle);
 
           if (retroEffectsRef.current) {
             retroEffectsRef.current.simulateTrackingDistortion(
               defaultRetroEffectTimings.trackingDistortionIntensity,
-              defaultRetroEffectTimings.trackingDistortionIntensity
+              defaultRetroEffectTimings.trackingDistortionDuration
             );
           }
         }
       }, defaultCameraTimings.cameraMoveInterval);
     } else {
       if (cameraRef.current) {
-        animateCamera(cameraRef.current, gameplayCameraAngle);
+        const gameplayAngle = gameplayCameraAngles[0];
+
+        applyGameplayCameraAngle(
+          cameraRef.current,
+          gameplayAngle,
+          postProcessingRef.current,
+          gameplayCameraDOFSettings
+        );
+        animateGameplayCamera(cameraRef.current, gameplayAngle);
 
         if (retroEffectsRef.current) {
           retroEffectsRef.current.simulateTrackingDistortion(
             defaultRetroEffectTimings.trackingDistortionIntensity,
-            defaultRetroEffectTimings.trackingDistortionIntensity
+            defaultRetroEffectTimings.trackingDistortionDuration
           );
         }
       }
@@ -230,11 +240,9 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     if (!retroEffectsRef.current) return;
 
     if (gameMode === 'active') {
-      // Switch to gameplay effects
       retroEffectsRef.current.updateLevels(retroEffectsPresets.default);
       retroLevelsRef.current = defaultRetroEffectsLevels;
     } else {
-      // Switch to background cinematic effects
       retroEffectsRef.current.updateLevels(retroEffectsPresets.cinematic);
       retroLevelsRef.current = retroEffectsPresets.cinematic;
     }

@@ -10,9 +10,19 @@ import {
 
 import { defaultGameAnimationTimings } from '@shared/types';
 
-export interface CameraAngle {
+let lastCameraAngleIndex = -1;
+let lastGameplayCameraAngleIndex = -1;
+
+export interface PosCameraAngle {
   target: Vector3; // Target position
   position: Vector3; // Explicit position
+}
+
+export interface ArcCameraAngle {
+  alpha: number; // Horizontal rotation in radians
+  beta: number; // Vertical rotation in radians
+  radius: number; // Distance from target
+  target: Vector3; // Target position
 }
 
 export interface CameraDOFSettings {
@@ -29,9 +39,16 @@ export const defaultCameraDOFSettings: CameraDOFSettings = {
   dofBlurLevel: 5,
 };
 
-export const cameraAngles: CameraAngle[] = [
+export const gameplayCameraDOFSettings: CameraDOFSettings = {
+  focalLength: 5,
+  fStop: 20.0,
+  focusDistance: 10,
+  dofBlurLevel: 3,
+};
+
+export const cinematicCameraAngles: PosCameraAngle[] = [
   {
-    // player2 view
+    // player2 view1
     position: new Vector3(-13, 12, 5),
     target: new Vector3(-1, -2.5, -5),
   },
@@ -41,7 +58,7 @@ export const cameraAngles: CameraAngle[] = [
     target: new Vector3(5, 5, 0),
   },
   {
-    // mid board view
+    // mid board view1
     position: new Vector3(8, 17, 12),
     target: new Vector3(-1, -3, -1),
   },
@@ -51,12 +68,12 @@ export const cameraAngles: CameraAngle[] = [
     target: new Vector3(6, -6, 4),
   },
   {
-    // mid board view7
+    // mid board view3
     position: new Vector3(2, -20, 6),
     target: new Vector3(6, -4, -1.5),
   },
   {
-    // player1 view
+    // player1 view1
     position: new Vector3(33, 21, 11),
     target: new Vector3(20, 9, 4),
   },
@@ -67,13 +84,37 @@ export const cameraAngles: CameraAngle[] = [
   },
 ];
 
+export const gameplayCameraAngles: ArcCameraAngle[] = [
+  {
+    // Main top-down view
+    alpha: -Math.PI / 2,
+    beta: Math.PI / 2,
+    radius: 50,
+    target: new Vector3(0, 0, 0),
+  },
+  {
+    // Player 1 perspective
+    alpha: 0,
+    beta: Math.PI / 3,
+    radius: 20,
+    target: new Vector3(5, 0, 0),
+  },
+  {
+    // Player 2 perspective
+    alpha: -Math.PI,
+    beta: Math.PI / 3,
+    radius: 20,
+    target: new Vector3(-5, 0, 0),
+  },
+];
+
 export function setupSceneCamera(scene: Scene): ArcRotateCamera {
   const camera = new ArcRotateCamera(
     'camera',
-    -Math.PI / 2, // horizontal rotation
-    Math.PI / 2, // vertical rotation
-    28, // distance from floor
-    new Vector3(0, -0.15, 0),
+    -Math.PI / 2,
+    Math.PI / 2,
+    32,
+    new Vector3(0, 0, 0),
     scene
   );
 
@@ -121,9 +162,39 @@ export function applyCameraShake(
   }, effectDelay);
 }
 
-export const animateCamera = (
+export const getNextCinematicCameraAngle = (): PosCameraAngle => {
+  lastCameraAngleIndex = (lastCameraAngleIndex + 1) % cinematicCameraAngles.length;
+  return cinematicCameraAngles[lastCameraAngleIndex];
+};
+
+export const getNextGameplayCameraAngle = (): ArcCameraAngle => {
+  lastGameplayCameraAngleIndex = (lastGameplayCameraAngleIndex + 1) % gameplayCameraAngles.length;
+  return gameplayCameraAngles[lastGameplayCameraAngleIndex];
+};
+
+export function applyCinematicCameraAngle(
   camera: ArcRotateCamera,
-  targetAngle: CameraAngle,
+  cameraAngle: PosCameraAngle,
+  pipeline: DefaultRenderingPipeline | null,
+  dofSettings: CameraDOFSettings = defaultCameraDOFSettings
+) {
+  if (!cameraAngle) return;
+
+  camera.position = cameraAngle.position.clone();
+  camera.target = cameraAngle.target.clone();
+
+  if (pipeline) {
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.depthOfField.focalLength = dofSettings.focalLength;
+    pipeline.depthOfField.fStop = dofSettings.fStop;
+    pipeline.depthOfField.focusDistance = dofSettings.focusDistance;
+    pipeline.depthOfFieldBlurLevel = dofSettings.dofBlurLevel;
+  }
+}
+
+export const animateCinematicCamera = (
+  camera: ArcRotateCamera,
+  targetAngle: PosCameraAngle,
   duration: number = defaultGameAnimationTimings.camera.cameraAnimationDuration
 ) => {
   const scene = camera.getScene();
@@ -182,21 +253,18 @@ export const animateCamera = (
   return animationTables;
 };
 
-export const getRandomCameraAngle = (): CameraAngle => {
-  const randomIndex = Math.floor(Math.random() * cameraAngles.length);
-  return cameraAngles[randomIndex];
-};
-
-export function applyCameraAngle(
+export function applyGameplayCameraAngle(
   camera: ArcRotateCamera,
-  cameraAngle: CameraAngle,
+  arcAngle: ArcCameraAngle,
   pipeline: DefaultRenderingPipeline | null,
-  dofSettings: CameraDOFSettings = defaultCameraDOFSettings
+  dofSettings: CameraDOFSettings = gameplayCameraDOFSettings
 ) {
-  if (!cameraAngle) return;
+  if (!arcAngle) return;
 
-  camera.position = cameraAngle.position.clone();
-  camera.target = cameraAngle.target.clone();
+  camera.alpha = arcAngle.alpha;
+  camera.beta = arcAngle.beta;
+  camera.radius = arcAngle.radius;
+  camera.target = arcAngle.target.clone();
 
   if (pipeline) {
     pipeline.depthOfFieldEnabled = true;
@@ -205,4 +273,101 @@ export function applyCameraAngle(
     pipeline.depthOfField.focusDistance = dofSettings.focusDistance;
     pipeline.depthOfFieldBlurLevel = dofSettings.dofBlurLevel;
   }
+}
+
+export function animateGameplayCamera(
+  camera: ArcRotateCamera,
+  targetAngle: ArcCameraAngle,
+  duration: number = defaultGameAnimationTimings.camera.cameraAnimationDuration
+) {
+  const scene = camera.getScene();
+  const animations = [];
+
+  // Alpha animation
+  const alphaAnimation = new Animation(
+    'cameraAlphaAnimation',
+    'alpha',
+    30,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  alphaAnimation.setKeys([
+    { frame: 0, value: camera.alpha },
+    { frame: 100, value: targetAngle.alpha },
+  ]);
+  animations.push({
+    animation: alphaAnimation,
+    target: camera,
+  });
+
+  // Beta animation
+  const betaAnimation = new Animation(
+    'cameraBetaAnimation',
+    'beta',
+    30,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  betaAnimation.setKeys([
+    { frame: 0, value: camera.beta },
+    { frame: 100, value: targetAngle.beta },
+  ]);
+  animations.push({
+    animation: betaAnimation,
+    target: camera,
+  });
+
+  // Radius animation
+  const radiusAnimation = new Animation(
+    'cameraRadiusAnimation',
+    'radius',
+    30,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  radiusAnimation.setKeys([
+    { frame: 0, value: camera.radius },
+    { frame: 100, value: targetAngle.radius },
+  ]);
+  animations.push({
+    animation: radiusAnimation,
+    target: camera,
+  });
+
+  // Target animation
+  const targetAnimation = new Animation(
+    'cameraTargetAnimation',
+    'target',
+    30,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  targetAnimation.setKeys([
+    { frame: 0, value: camera.target.clone() },
+    { frame: 100, value: targetAngle.target },
+  ]);
+  animations.push({
+    animation: targetAnimation,
+    target: camera,
+  });
+
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+  animations.forEach((anim) => {
+    anim.animation.setEasingFunction(easingFunction);
+  });
+
+  const animationTables = animations.map((anim) => {
+    return scene.beginDirectAnimation(
+      anim.target,
+      [anim.animation],
+      0,
+      100,
+      false,
+      (1000 / duration) * 100
+    );
+  });
+
+  return animationTables;
 }
