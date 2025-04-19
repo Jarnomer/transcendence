@@ -198,21 +198,19 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       cameraMoveTimerRef.current = null;
     }
 
+    const pipeline = postProcessingRef.current;
+
     if (gameMode === 'background') {
       const cinematicAngle = getNextCinematicCameraAngle();
 
-      applyCinematicCameraAngle(cameraRef.current, cinematicAngle, postProcessingRef.current);
+      applyCinematicCameraAngle(cameraRef.current, cinematicAngle, pipeline);
       animateCinematicCamera(cameraRef.current, cinematicAngle);
 
       cameraMoveTimerRef.current = window.setInterval(() => {
         if (cameraRef.current) {
           const nextCinematicAngle = getNextCinematicCameraAngle();
 
-          applyCinematicCameraAngle(
-            cameraRef.current,
-            nextCinematicAngle,
-            postProcessingRef.current
-          );
+          applyCinematicCameraAngle(cameraRef.current, nextCinematicAngle, pipeline);
           animateCinematicCamera(cameraRef.current, nextCinematicAngle);
 
           if (retroEffectsRef.current) {
@@ -470,6 +468,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
 
+    setupRenderLoop(engine, scene, gameMode);
     setupCamera();
 
     if (gameMode === 'background') {
@@ -483,10 +482,6 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         soundManagerRef.current.playBackgroundMusic('menu');
       }
     }
-
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
 
     const handleResize = () => {
       if (engineRef.current) {
