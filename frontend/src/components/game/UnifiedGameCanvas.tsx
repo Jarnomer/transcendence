@@ -50,6 +50,7 @@ import {
   defaultGameParams,
   defaultRetroCinematicBaseParams,
   defaultRetroEffectsLevels,
+  defaultRetroEffectTimings,
   retroEffectsPresets,
 } from '@shared/types';
 
@@ -203,20 +204,23 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
           const newAngle = cameraAngles[currentAngleIndexRef.current];
           animateCamera(cameraRef.current, newAngle);
 
-          // Apply distortion when camera angle changes
           if (retroEffectsRef.current) {
-            retroEffectsRef.current.simulateTrackingDistortion(0.7, 300);
+            retroEffectsRef.current.simulateTrackingDistortion(
+              defaultRetroEffectTimings.trackingDistortionIntensity,
+              defaultRetroEffectTimings.trackingDistortionIntensity
+            );
           }
         }
       }, defaultCameraTimings.cameraMoveInterval);
     } else {
       if (cameraRef.current) {
-        console.log('Animating to gameplay camera position');
         animateCamera(cameraRef.current, gameplayCameraAngle);
 
-        // Apply distortion for transition to gameplay mode
         if (retroEffectsRef.current) {
-          retroEffectsRef.current.simulateTrackingDistortion(1.0, 400);
+          retroEffectsRef.current.simulateTrackingDistortion(
+            defaultRetroEffectTimings.trackingDistortionIntensity,
+            defaultRetroEffectTimings.trackingDistortionIntensity
+          );
         }
       }
     }

@@ -14,6 +14,8 @@ import {
   Vector3,
 } from 'babylonjs';
 
+import { CameraDOFSettings, defaultCameraDOFSettings } from '@game/utils';
+
 function createCubeTexture(rootUrl: string, scene: Scene) {
   const envTexture = new CubeTexture(rootUrl, scene);
 
@@ -46,8 +48,8 @@ export function setupEnvironmentMap(scene: Scene) {
 
 export function setupPostProcessing(scene: Scene, camera: Camera) {
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
+  const dofSettings: CameraDOFSettings = defaultCameraDOFSettings;
 
-  pipeline.bloomEnabled = true;
   pipeline.bloomThreshold = 0.6;
   pipeline.bloomWeight = 0.05;
   pipeline.bloomKernel = 64;
@@ -64,6 +66,10 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
   pipeline.fxaaEnabled = true;
 
   pipeline.depthOfFieldEnabled = true;
+  pipeline.depthOfField.focalLength = dofSettings.focalLength;
+  pipeline.depthOfField.fStop = dofSettings.fStop;
+  pipeline.depthOfField.focusDistance = dofSettings.focusDistance;
+  pipeline.depthOfFieldBlurLevel = dofSettings.dofBlurLevel;
 
   return pipeline;
 }
