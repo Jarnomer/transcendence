@@ -44,7 +44,7 @@ export function setupEnvironmentMap(scene: Scene) {
   });
 }
 
-export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boolean = false) {
+export function setupPostProcessing(scene: Scene, camera: Camera) {
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
 
   pipeline.bloomEnabled = true;
@@ -63,7 +63,7 @@ export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boo
 
   pipeline.fxaaEnabled = true;
 
-  if (enableDOF) pipeline.depthOfFieldEnabled = true;
+  pipeline.depthOfFieldEnabled = true;
 
   return pipeline;
 }

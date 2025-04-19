@@ -1,22 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  defaultRetroEffectTimings,
-  defaultGameAnimationTimings,
-  GameState,
-  defaultGameParams,
-} from '@shared/types';
+import { GameState, defaultGameParams } from '@shared/types';
 
 import UnifiedGameCanvas from './UnifiedGameCanvas';
 import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
-import { useGameVisibility } from '../../hooks/useGameVisibility';
 
 interface UnifiedGameProviderProps {
   children?: React.ReactNode;
 }
 
-const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = ({ children }) => {
+const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
   const { gameState: activeGameState, gameStatus, connections } = useWebSocketContext();
   const { gameId, mode, difficulty } = useGameOptionsContext();
 
@@ -26,14 +20,7 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = ({ children }) =
 
   const bgWsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
-
-  const {
-    isGameCanvasActive,
-    showGameCanvas,
-    hideGameCanvas,
-    isBackgroundGameVisible,
-    setBackgroundGameVisible,
-  } = useGameVisibility();
+  const currentGameStateRef = useRef<GameState | null>(null);
 
   // Create initial game state before WebSocket connects
   const initialGameState: GameState = {
@@ -121,57 +108,34 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = ({ children }) =
     bgWsRef.current = ws;
   }, [currentMode]);
 
-  // Handle transitions between background and active game modes
-  const handleModeTransition = useCallback(
-    (toMode: 'background' | 'active') => {
-      console.log(`Mode transition complete: ${toMode}`);
-      setIsTransitioning(false);
-
-      if (toMode === 'active') {
-        showGameCanvas();
-      } else {
-        setBackgroundGameVisible(true);
-      }
-    },
-    [showGameCanvas, setBackgroundGameVisible]
-  );
-
-  // Handle when the game becomes active
+  // Handle game active
   useEffect(() => {
     if (gameId && activeGameState && connections.game === 'connected' && !isTransitioning) {
       if (currentMode === 'background') {
         console.log('Switching to active game mode');
         setIsTransitioning(true);
         setCurrentMode('active');
+        // No need to reconnect WebSocket
       }
     }
   }, [gameId, activeGameState, connections.game, currentMode, isTransitioning]);
 
-  // Handle when the game finishes
+  // Handle game finish
   useEffect(() => {
     if (gameStatus === 'finished' && currentMode === 'active' && !isTransitioning) {
       console.log('Game finished, returning to background mode');
       setIsTransitioning(true);
-
-      // Delay the mode switch to allow for game over animations
-      setTimeout(() => {
-        setCurrentMode('background');
-      }, defaultGameAnimationTimings.gameOverAnimationDuration);
+      setCurrentMode('background');
+      setupBackgroundWebSocket();
     }
-  }, [gameStatus, currentMode, isTransitioning]);
+  }, [gameStatus, currentMode, isTransitioning, setupBackgroundWebSocket]);
 
-  // Setup and manage background WebSocket connection
+  // Handle WebSocket connection
   useEffect(() => {
     if (currentMode === 'background') {
       setupBackgroundWebSocket();
     } else {
-      // Clean up when switching to active game
-      if (bgWsRef.current) {
-        console.log('Closing background WebSocket connection');
-        bgWsRef.current.onclose = null;
-        bgWsRef.current.close();
-        bgWsRef.current = null;
-      }
+      // Ignore background game state
     }
 
     return () => {
@@ -181,38 +145,24 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = ({ children }) =
       }
 
       if (bgWsRef.current) {
-        console.log('Closing WebSocket connection on cleanup');
+        console.log('Closing WebSocket connection');
         bgWsRef.current.onclose = null;
         bgWsRef.current.close();
       }
     };
   }, [currentMode, setupBackgroundWebSocket]);
 
-  // Choose which game state to render based on current mode
   const currentGameState =
     currentMode === 'background'
       ? backgroundGameState || initialGameState
       : activeGameState || initialGameState;
 
-  // Determine if the canvas should be visible
-  const isCanvasVisible =
-    currentMode === 'background' ? isBackgroundGameVisible : isGameCanvasActive;
+  currentGameStateRef.current = currentGameState;
 
   return (
     <>
-      <div
-        className="absolute inset-0 w-screen h-screen pointer-events-none"
-        style={{
-          visibility: isCanvasVisible ? 'visible' : 'hidden',
-          transition: `opacity ${defaultRetroEffectTimings.trackingDistortionDuration}ms ease-out`,
-        }}
-      >
-        <UnifiedGameCanvas
-          gameState={currentGameState}
-          isVisible={isCanvasVisible}
-          gameMode={currentMode}
-          onTransitionComplete={handleModeTransition}
-        />
+      <div className="absolute inset-0 w-screen h-screen pointer-events-none">
+        <UnifiedGameCanvas gameState={currentGameState} gameMode={currentMode} />
       </div>
     </>
   );
