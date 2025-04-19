@@ -170,6 +170,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   const randomGlitchTimerRef = useRef<number | null>(null);
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
+  const lastGameModeRef = useRef<GameMode>('background');
 
   const floorRef = useRef<any>(null);
   const topEdgeRef = useRef<any>(null);
@@ -189,6 +190,8 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       cameraMoveTimerRef.current = null;
     }
 
+    console.log(`Setting up camera for mode: ${gameMode}`);
+
     if (gameMode === 'background') {
       const randomAngle = getRandomCameraAngle();
       animateCamera(cameraRef.current, randomAngle);
@@ -199,12 +202,37 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
           currentAngleIndexRef.current = (currentAngleIndexRef.current + 1) % cameraAngles.length;
           const newAngle = cameraAngles[currentAngleIndexRef.current];
           animateCamera(cameraRef.current, newAngle);
+
+          // Apply distortion when camera angle changes
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.simulateTrackingDistortion(0.7, 300);
+          }
         }
       }, defaultCameraTimings.cameraMoveInterval);
     } else {
       if (cameraRef.current) {
+        console.log('Animating to gameplay camera position');
         animateCamera(cameraRef.current, gameplayCameraAngle);
+
+        // Apply distortion for transition to gameplay mode
+        if (retroEffectsRef.current) {
+          retroEffectsRef.current.simulateTrackingDistortion(1.0, 400);
+        }
       }
+    }
+  };
+
+  const updateRetroEffects = () => {
+    if (!retroEffectsRef.current) return;
+
+    if (gameMode === 'active') {
+      // Switch to gameplay effects
+      retroEffectsRef.current.updateLevels(retroEffectsPresets.default);
+      retroLevelsRef.current = defaultRetroEffectsLevels;
+    } else {
+      // Switch to background cinematic effects
+      retroEffectsRef.current.updateLevels(retroEffectsPresets.cinematic);
+      retroLevelsRef.current = retroEffectsPresets.cinematic;
     }
   };
 
@@ -354,12 +382,13 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
 
+    lastGameModeRef.current = gameMode;
     retroLevelsRef.current = retroEffectsPresets.cinematic;
     retroEffectsRef.current = createPongRetroEffects(
       scene,
       camera,
       'cinematic',
-      retroEffectsPresets.cinematic,
+      retroLevelsRef.current,
       defaultRetroCinematicBaseParams
     );
 
@@ -407,6 +436,20 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       scene.dispose();
     };
   }, []);
+
+  // Handle game mode changes
+  useEffect(() => {
+    if (!cameraRef.current || !retroEffectsRef.current) return;
+
+    if (lastGameModeRef.current !== gameMode) {
+      console.log(`Game mode changed from ${lastGameModeRef.current} to ${gameMode}`);
+
+      updateRetroEffects();
+      setupCamera();
+
+      lastGameModeRef.current = gameMode;
+    }
+  }, [gameMode]);
 
   // Handle game object updates
   useEffect(() => {
