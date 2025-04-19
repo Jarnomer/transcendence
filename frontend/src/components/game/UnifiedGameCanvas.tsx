@@ -473,6 +473,14 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       setupRandomGlitchEffects();
     }
 
+    if (soundManagerRef.current) {
+      if (gameMode === 'active') {
+        soundManagerRef.current.playBackgroundMusic('game');
+      } else {
+        soundManagerRef.current.playBackgroundMusic('menu');
+      }
+    }
+
     engine.runRenderLoop(() => {
       scene.render();
     });
@@ -507,6 +515,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       if (powerUpEffectsRef.current) powerUpEffectsRef.current.disposeAll();
+      if (soundManagerRef.current) soundManagerRef.current.dispose();
 
       if (cameraMoveTimerRef.current) {
         window.clearInterval(cameraMoveTimerRef.current);
@@ -540,6 +549,14 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
           prevPowerUpsRef.current = [];
         }
         setupRandomGlitchEffects();
+      }
+
+      if (soundManagerRef.current) {
+        if (gameMode === 'active') {
+          soundManagerRef.current.playBackgroundMusic('game');
+        } else {
+          soundManagerRef.current.playBackgroundMusic('menu');
+        }
       }
 
       lastGameModeRef.current = gameMode;
@@ -618,7 +635,8 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         speed,
         ball.spin,
         primaryColor,
-        applyGlitch
+        applyGlitch,
+        soundManagerRef.current
       );
     }
 

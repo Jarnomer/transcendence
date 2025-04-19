@@ -1,10 +1,10 @@
-import { GameSoundOptions } from '@shared/types';
+import { GameSoundOptions, defaultGameSoundOptions } from '@shared/types';
 
 let soundManagerInstance: GameSoundManager | null = null;
 
-export function getGameSoundManager(options?: GameSoundOptions): GameSoundManager {
+export function getGameSoundManager(): GameSoundManager {
   if (!soundManagerInstance) {
-    soundManagerInstance = new GameSoundManager(options);
+    soundManagerInstance = new GameSoundManager();
   }
   return soundManagerInstance;
 }
@@ -12,34 +12,42 @@ export function getGameSoundManager(options?: GameSoundOptions): GameSoundManage
 export class GameSoundManager {
   private edgeSound: HTMLAudioElement | null = null;
   private paddleSound: HTMLAudioElement | null = null;
-
   private negativePowerUpSound: HTMLAudioElement | null = null;
   private positivePowerUpSound: HTMLAudioElement | null = null;
-
   private scoreSound: HTMLAudioElement | null = null;
-
   private gameStartSound: HTMLAudioElement | null = null;
   private gameOverSound: HTMLAudioElement | null = null;
-
   private countDown1Sound: HTMLAudioElement | null = null;
   private countDown2Sound: HTMLAudioElement | null = null;
   private countDown3Sound: HTMLAudioElement | null = null;
 
-  private volumeLevel: number = 1.0;
-  private isMuted: boolean = false;
-  private isEnabled: boolean = true;
+  private backgroundMusic: {
+    menu: HTMLAudioElement | null;
+    game: HTMLAudioElement | null;
+    currentTrack: 'menu' | 'game' | null;
+  } = {
+    menu: null,
+    game: null,
+    currentTrack: null,
+  };
+
+  private soundEffectsVolume: number = 1.0;
+  private gameMusicVolume: number = 1.0;
+  private backgroundMusicVolume: number = 1.0;
+
+  private soundEffectsEnabled: boolean = true;
+  private gameMusicEnabled: boolean = true;
+  private backgroundMusicEnabled: boolean = true;
 
   private lastSoundTimes: Record<string, number> = {};
   private soundDebounceTime: number = 100; // ms
+  private readonly FADE_DURATION = 1000; // ms
 
   private allSounds: HTMLAudioElement[] | null = null;
   private soundsLoaded: boolean = false;
 
-  constructor(options?: GameSoundOptions) {
-    this.volumeLevel = options?.volume ?? 0.7;
-    this.isMuted = options?.muted ?? false;
-    this.isEnabled = options?.enabled ?? true;
-
+  constructor() {
+    this.initBackgroundMusic();
     this.initSounds();
   }
 
@@ -49,15 +57,11 @@ export class GameSoundManager {
 
       this.edgeSound = new Audio(baseUrl + 'HIT1.wav');
       this.paddleSound = new Audio(baseUrl + 'HIT2.wav');
-
       this.negativePowerUpSound = new Audio(baseUrl + 'POWERUP.wav');
       this.positivePowerUpSound = new Audio(baseUrl + 'POWERUP_END.wav');
-
       this.scoreSound = new Audio(baseUrl + 'EXPLOSION_1.wav');
-
       this.gameStartSound = new Audio(baseUrl + 'BALLDROP.wav');
       this.gameOverSound = new Audio(baseUrl + 'powerup.wav');
-
       this.countDown1Sound = new Audio(baseUrl + 'countDown.wav');
       this.countDown2Sound = new Audio(baseUrl + 'countDown.wav');
       this.countDown3Sound = new Audio(baseUrl + 'countDown.wav');
@@ -77,7 +81,7 @@ export class GameSoundManager {
 
       this.allSounds.forEach((sound) => {
         if (sound) {
-          sound.volume = this.volumeLevel;
+          sound.volume = this.soundEffectsVolume;
           sound.addEventListener('canplaythrough', () => {
             this.soundsLoaded = true;
           });
@@ -85,6 +89,28 @@ export class GameSoundManager {
       });
 
       this.preloadSounds();
+    }
+  }
+
+  private initBackgroundMusic(): void {
+    if (typeof window !== 'undefined') {
+      const musicMap = {
+        menu: '/sounds/music/TRANSCENDENCE_MENU.mp3',
+        game: '/sounds/music/TRANSCENDENCE.mp3',
+      };
+
+      this.backgroundMusic.menu = new Audio(musicMap.menu);
+      this.backgroundMusic.game = new Audio(musicMap.game);
+
+      [this.backgroundMusic.menu, this.backgroundMusic.game].forEach((track) => {
+        if (track) {
+          track.loop = true;
+          track.volume = 0;
+          track.addEventListener('ended', () => {
+            track.play().catch((err) => console.warn("Couldn't play background music:", err));
+          });
+        }
+      });
     }
   }
 
@@ -198,8 +224,132 @@ export class GameSoundManager {
     this.updateLastSoundTime('countDown3');
   }
 
+  playBackgroundMusic(track: 'menu' | 'game'): void {
+    // Determine track and volume to use based on mode
+    const isGameTrack = track === 'game';
+    const enabled = isGameTrack ? this.gameMusicEnabled : this.backgroundMusicEnabled;
+    const volume = isGameTrack ? this.gameMusicVolume : this.backgroundMusicVolume;
+
+    if (!enabled) return;
+
+    const newTrack = this.backgroundMusic[track];
+    const currentTrackName = this.backgroundMusic.currentTrack;
+    const currentTrackAudio = currentTrackName ? this.backgroundMusic[currentTrackName] : null;
+
+    // Don't restart if already playing this track
+    if (currentTrackName === track && newTrack && !newTrack.paused) return;
+
+    // If we have a track playing, fade it out
+    if (currentTrackAudio) {
+      this.fadeOut(currentTrackAudio, () => {
+        currentTrackAudio.pause();
+        currentTrackAudio.currentTime = 0;
+
+        // Start the new track with fade-in
+        if (newTrack) {
+          newTrack.volume = 0;
+          newTrack.currentTime = 0;
+          const playPromise = newTrack.play();
+          if (playPromise) {
+            playPromise
+              .then(() => {
+                this.fadeIn(newTrack, volume);
+              })
+              .catch((err) => {
+                console.warn("Couldn't play background music:", err);
+              });
+          }
+        }
+      });
+    } else if (newTrack) {
+      // No current track playing, just start new one
+      newTrack.volume = 0;
+      newTrack.currentTime = 0;
+      const playPromise = newTrack.play();
+      if (playPromise) {
+        playPromise
+          .then(() => {
+            this.fadeIn(newTrack, volume);
+          })
+          .catch((err) => {
+            console.warn("Couldn't play background music:", err);
+          });
+      }
+    }
+
+    this.backgroundMusic.currentTrack = track;
+  }
+
+  pauseBackgroundMusic(): void {
+    const currentTrack = this.backgroundMusic.currentTrack;
+    if (currentTrack) {
+      const audio = this.backgroundMusic[currentTrack];
+      if (audio) {
+        this.fadeOut(audio, () => {
+          audio.pause();
+        });
+      }
+    }
+  }
+
+  stopBackgroundMusic(): void {
+    const currentTrack = this.backgroundMusic.currentTrack;
+    if (currentTrack) {
+      const audio = this.backgroundMusic[currentTrack];
+      if (audio) {
+        this.fadeOut(audio, () => {
+          audio.pause();
+          audio.currentTime = 0;
+        });
+      }
+      this.backgroundMusic.currentTrack = null;
+    }
+  }
+
+  private fadeIn(audio: HTMLAudioElement, targetVolume: number): void {
+    if (!audio) return;
+
+    const steps = 20;
+    const interval = this.FADE_DURATION / steps;
+    let vol = 0;
+    audio.volume = 0;
+
+    const step = () => {
+      vol += targetVolume / steps;
+      if (vol >= targetVolume) {
+        audio.volume = targetVolume;
+      } else {
+        audio.volume = vol;
+        setTimeout(step, interval);
+      }
+    };
+
+    step();
+  }
+
+  private fadeOut(audio: HTMLAudioElement, callback: () => void): void {
+    if (!audio) return callback();
+
+    const steps = 20;
+    const interval = this.FADE_DURATION / steps;
+    let vol = audio.volume;
+
+    const step = () => {
+      vol -= vol / steps;
+      if (vol <= 0.02) {
+        audio.volume = 0;
+        callback();
+      } else {
+        audio.volume = vol;
+        setTimeout(step, interval);
+      }
+    };
+
+    step();
+  }
+
   private shouldPlaySound(soundType: string): boolean {
-    if (!this.isEnabled || this.isMuted || !this.soundsLoaded) return false;
+    if (!this.soundEffectsEnabled || !this.soundsLoaded) return false;
 
     // Throttle sound playing to avoid performance issues
     const now = Date.now();
@@ -212,10 +362,10 @@ export class GameSoundManager {
   }
 
   private playSound(sound: HTMLAudioElement | null, volumeMultiplier: number = 1.0): void {
-    if (!sound || !this.isEnabled || this.isMuted) return;
+    if (!sound || !this.soundEffectsEnabled) return;
 
     try {
-      sound.volume = Math.min(this.volumeLevel * volumeMultiplier, 1.0);
+      sound.volume = Math.min(this.soundEffectsVolume * volumeMultiplier, 1.0);
       sound.currentTime = 0;
 
       const playPromise = sound.play();
@@ -230,27 +380,66 @@ export class GameSoundManager {
     }
   }
 
-  setVolume(volume: number): void {
+  setSoundEffectsVolume(volume: number): void {
     if (!this.allSounds) return;
 
-    this.volumeLevel = Math.max(0, Math.min(volume, 1.0));
+    this.soundEffectsVolume = Math.max(0, Math.min(volume, 1.0));
 
     this.allSounds.forEach((sound) => {
-      if (sound) sound.volume = this.volumeLevel;
+      if (sound) sound.volume = this.soundEffectsVolume;
     });
   }
 
-  toggleMute(): boolean {
-    this.isMuted = !this.isMuted;
-    return this.isMuted;
+  setGameMusicVolume(volume: number): void {
+    this.gameMusicVolume = Math.max(0, Math.min(volume, 1.0));
+
+    if (this.backgroundMusic.currentTrack === 'game' && this.gameMusicEnabled) {
+      const audio = this.backgroundMusic.game;
+      if (audio) {
+        audio.volume = this.gameMusicVolume;
+      }
+    }
   }
 
-  setEnabled(enabled: boolean = true): void {
-    this.isEnabled = enabled;
+  setBackgroundMusicVolume(volume: number): void {
+    this.backgroundMusicVolume = Math.max(0, Math.min(volume, 1.0));
+
+    if (this.backgroundMusic.currentTrack === 'menu' && this.backgroundMusicEnabled) {
+      const audio = this.backgroundMusic.menu;
+      if (audio) {
+        audio.volume = this.backgroundMusicVolume;
+      }
+    }
   }
 
-  setDisabled(disabled: boolean = true): void {
-    this.isEnabled = !disabled;
+  setSoundEffectsEnabled(enabled: boolean): void {
+    this.soundEffectsEnabled = enabled;
+  }
+
+  setGameMusicEnabled(enabled: boolean): void {
+    this.gameMusicEnabled = enabled;
+
+    if (!enabled && this.backgroundMusic.currentTrack === 'game') {
+      this.stopBackgroundMusic();
+    } else if (enabled && this.backgroundMusic.currentTrack === 'game') {
+      const audio = this.backgroundMusic.game;
+      if (audio) {
+        audio.volume = this.gameMusicVolume;
+      }
+    }
+  }
+
+  setBackgroundMusicEnabled(enabled: boolean): void {
+    this.backgroundMusicEnabled = enabled;
+
+    if (!enabled && this.backgroundMusic.currentTrack === 'menu') {
+      this.stopBackgroundMusic();
+    } else if (enabled && this.backgroundMusic.currentTrack === 'menu') {
+      const audio = this.backgroundMusic.menu;
+      if (audio) {
+        audio.volume = this.backgroundMusicVolume;
+      }
+    }
   }
 
   preloadSounds(): void {
@@ -276,5 +465,27 @@ export class GameSoundManager {
 
   areSoundsLoaded(): boolean {
     return this.soundsLoaded;
+  }
+
+  dispose(): void {
+    this.stopBackgroundMusic();
+
+    // Clean up all sound resources
+    if (this.allSounds) {
+      this.allSounds.forEach((sound) => {
+        if (sound) {
+          sound.pause();
+          sound.src = '';
+        }
+      });
+    }
+
+    // Clean up background music
+    Object.values(this.backgroundMusic).forEach((track) => {
+      if (track && typeof track !== 'string') {
+        track.pause();
+        track.src = '';
+      }
+    });
   }
 }
