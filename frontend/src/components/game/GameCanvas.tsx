@@ -44,6 +44,7 @@ import {
   Ball,
   GameState,
   PowerUp,
+  RetroEffectsBaseParams,
   RetroEffectsLevels,
   defaultGameParams,
   defaultRetroEffectsLevels,
@@ -56,6 +57,8 @@ interface GameCanvasProps {
   theme?: 'light' | 'dark';
   retroPreset?: 'default' | 'cinematic';
   retroLevels?: RetroEffectsLevels;
+  retroBaseParams?: RetroEffectsBaseParams;
+  onTransitionComplete?: () => void;
 }
 
 const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
@@ -107,6 +110,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   theme = 'dark',
   retroPreset = 'default',
   retroLevels = defaultRetroEffectsLevels,
+  retroBaseParams = {},
+  onTransitionComplete,
 }) => {
   const [lastTheme, setLastTheme] = useState(theme);
 
@@ -315,30 +320,37 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
   }, []);
 
-  // Handle visibility and turn on/off effects
+  // Update isVisible effect to only use tracking distortion
   useEffect(() => {
     if (!engineRef.current || !sceneRef.current || !retroEffectsRef.current) return;
 
     if (!isVisible) {
-      retroEffectsRef.current
-        .simulateCRTTurnOff(defaultRetroEffectTimings.crtTurnOffDuration)
-        .then(() => {
-          if (engineRef.current) engineRef.current.stopRenderLoop();
-        });
+      // Apply tracking distortion for transition
+      retroEffectsRef.current.simulateTrackingDistortion(
+        defaultRetroEffectTimings.trackingDistortionIntensity,
+        defaultRetroEffectTimings.trackingDistortionDuration
+      );
+
+      // Stop render loop after distortion duration
+      setTimeout(() => {
+        if (engineRef.current) engineRef.current.stopRenderLoop();
+        if (onTransitionComplete) onTransitionComplete();
+      }, defaultRetroEffectTimings.trackingDistortionDuration);
     } else {
+      // Start render loop
       if (engineRef.current && sceneRef.current) {
         engineRef.current.runRenderLoop(() => {
           if (sceneRef.current) sceneRef.current.render();
         });
       }
 
-      setTimeout(() => {
-        if (retroEffectsRef.current) {
-          retroEffectsRef.current.simulateCRTTurnOn(defaultRetroEffectTimings.crtTurnOnDuration);
-        }
-      }, defaultRetroEffectTimings.crtTurnOnDelay);
+      // Apply initial tracking distortion when becoming visible
+      retroEffectsRef.current.simulateTrackingDistortion(
+        defaultRetroEffectTimings.trackingDistortionIntensity,
+        defaultRetroEffectTimings.trackingDistortionDuration
+      );
     }
-  }, [isVisible]);
+  }, [isVisible, retroBaseParams, onTransitionComplete]);
 
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;

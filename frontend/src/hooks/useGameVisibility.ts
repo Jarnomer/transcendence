@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 
-import { defaultRetroEffectTimings } from '@shared/types';
-
 type VisibilityState = {
   isBackgroundGameActive: boolean;
   isBackgroundGameVisible: boolean;
@@ -22,13 +20,7 @@ const gameVisibilityState = {
     const newState = { ...this.state, isBackgroundGameActive: value };
 
     if (!value && this.state.isBackgroundGameVisible) {
-      setTimeout(() => {
-        this.setBackgroundGameVisibility(false);
-
-        if (!this.state.isGameCanvasActive) {
-          this.setGameCanvasActive(true);
-        }
-      }, defaultRetroEffectTimings.crtTurnOffDuration);
+      newState.isBackgroundGameVisible = false;
     }
 
     this.state = newState;
@@ -38,10 +30,12 @@ const gameVisibilityState = {
   setBackgroundGameVisibility(value: boolean) {
     const newState = { ...this.state, isBackgroundGameVisible: value };
 
-    if (value && !this.state.isBackgroundGameActive) newState.isBackgroundGameActive = true;
+    if (value && !this.state.isBackgroundGameActive) {
+      newState.isBackgroundGameActive = true;
+    }
 
     if (value && this.state.isGameCanvasVisible) {
-      this.setGameCanvasVisibility(false);
+      newState.isGameCanvasVisible = false;
     }
 
     this.state = newState;
@@ -52,13 +46,7 @@ const gameVisibilityState = {
     const newState = { ...this.state, isGameCanvasActive: value };
 
     if (!value && this.state.isGameCanvasVisible) {
-      setTimeout(() => {
-        this.setGameCanvasVisibility(false);
-
-        if (!this.state.isBackgroundGameActive) {
-          this.setBackgroundGameActive(true);
-        }
-      }, defaultRetroEffectTimings.crtTurnOffDuration);
+      newState.isGameCanvasVisible = false;
     }
 
     this.state = newState;
@@ -68,10 +56,12 @@ const gameVisibilityState = {
   setGameCanvasVisibility(value: boolean) {
     const newState = { ...this.state, isGameCanvasVisible: value };
 
-    if (value && !this.state.isGameCanvasActive) newState.isGameCanvasActive = true;
+    if (value && !this.state.isGameCanvasActive) {
+      newState.isGameCanvasActive = true;
+    }
 
     if (value && this.state.isBackgroundGameVisible) {
-      this.setBackgroundGameVisibility(false);
+      newState.isBackgroundGameVisible = false;
     }
 
     this.state = newState;

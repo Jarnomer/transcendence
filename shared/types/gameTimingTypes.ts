@@ -1,25 +1,9 @@
 export interface RetroEffectTimings {
-  crtTurnOnDuration: number;
-  crtTurnOffDuration: number;
-  crtTurnOnDelay: number;
-
-  channelChangeDuration: number;
   trackingDistortionIntensity: number;
   trackingDistortionDuration: number;
-
-  // Glitch effect durations
   standardGlitchDuration: number;
   scoreGlitchDuration: number;
   collisionGlitchDuration: number;
-
-  // Animation phase timings
-  // for turn on/off effects
-  turnOnPhase1Duration: number;
-  turnOnPhase2Duration: number;
-
-  turnOffPhase1Duration: number;
-  turnOffPhase2Duration: number;
-  turnOffPhase3Duration: number;
 }
 
 export interface CameraTimings {
@@ -42,7 +26,6 @@ export interface GameAnimationTimings {
   retroEffects: RetroEffectTimings;
   camera: CameraTimings;
 
-  // General animation timings
   fadeInDuration: number;
   fadeOutDuration: number;
   matchmakingAnimationDuration: number;
@@ -52,26 +35,12 @@ export interface GameAnimationTimings {
 }
 
 export const defaultRetroEffectTimings: RetroEffectTimings = {
-  crtTurnOnDuration: 1500,
-  crtTurnOffDuration: 1500,
-  crtTurnOnDelay: 500,
-
-  channelChangeDuration: 1200,
   trackingDistortionIntensity: 4,
   trackingDistortionDuration: 800,
 
   standardGlitchDuration: 200,
   scoreGlitchDuration: 400,
   collisionGlitchDuration: 300,
-
-  // Progress from 0 to 1
-  turnOnPhase1Duration: 0.2,
-  turnOnPhase2Duration: 0.5,
-
-  // Progress from 0 to 1
-  turnOffPhase1Duration: 0.2,
-  turnOffPhase2Duration: 0.5,
-  turnOffPhase3Duration: 0.7,
 };
 
 export const defaultCameraTimings: CameraTimings = {

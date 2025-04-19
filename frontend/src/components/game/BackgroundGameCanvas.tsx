@@ -54,6 +54,7 @@ interface BackgroundGameCanvasProps {
   retroLevels?: RetroEffectsLevels;
   retroBaseParams?: RetroEffectsBaseParams;
   randomGlitchEnabled?: boolean;
+  onTransitionComplete?: () => void;
 }
 
 const applyLowQualitySettings = (scene: Scene, pipeline: DefaultRenderingPipeline | null) => {
@@ -136,6 +137,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
   retroLevels = retroEffectsPresets.cinematic,
   retroBaseParams = defaultRetroCinematicBaseParams,
   randomGlitchEnabled = true,
+  onTransitionComplete,
 }) => {
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
@@ -263,7 +265,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
     };
   }, [isVisible]);
 
-  // Handle visibility and camera positions
+  // Update isVisible effect to only use tracking distortion
   useEffect(() => {
     if (!engineRef.current || !sceneRef.current || !cameraRef.current) return;
 
@@ -275,17 +277,18 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
 
     if (!isVisible) {
       if (retroEffectsRef.current) {
-        if (engineRef.current && sceneRef.current) {
-          setupThrottledRenderLoop(engineRef.current, sceneRef.current);
-        }
-
-        retroEffectsRef.current
-          .simulateCRTTurnOff(defaultRetroEffectTimings.crtTurnOffDuration)
-          .then(() => {
-            if (engineRef.current) engineRef.current.stopRenderLoop();
-          });
+        retroEffectsRef.current.simulateTrackingDistortion(
+          defaultRetroEffectTimings.trackingDistortionIntensity,
+          defaultRetroEffectTimings.trackingDistortionDuration
+        );
+        setTimeout(() => {
+          if (engineRef.current) engineRef.current.stopRenderLoop();
+          if (onTransitionComplete) onTransitionComplete();
+        }, defaultRetroEffectTimings.trackingDistortionDuration);
       } else {
+        // No effect available, just stop rendering
         if (engineRef.current) engineRef.current.stopRenderLoop();
+        if (onTransitionComplete) onTransitionComplete();
       }
     } else {
       const randomAngle = getRandomCameraAngle();
@@ -310,16 +313,17 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
           }
         }
       }, defaultCameraTimings.cameraMoveInterval);
+
       if (engineRef.current && sceneRef.current) {
         setupThrottledRenderLoop(engineRef.current, sceneRef.current);
       }
 
+      // Apply initial tracking distortion when becoming visible
       if (retroEffectsRef.current) {
-        setTimeout(() => {
-          if (retroEffectsRef.current) {
-            retroEffectsRef.current.simulateCRTTurnOn(defaultRetroEffectTimings.crtTurnOnDuration);
-          }
-        }, defaultRetroEffectTimings.crtTurnOnDelay);
+        retroEffectsRef.current.simulateTrackingDistortion(
+          defaultRetroEffectTimings.trackingDistortionIntensity,
+          defaultRetroEffectTimings.trackingDistortionDuration
+        );
       }
     }
 
@@ -329,7 +333,7 @@ const BackgroundGameCanvas: React.FC<BackgroundGameCanvasProps> = ({
         cameraMoveTimerRef.current = null;
       }
     };
-  }, [isVisible]);
+  }, [isVisible, retroBaseParams, onTransitionComplete]);
 
   // Random glitch effects
   useEffect(() => {
