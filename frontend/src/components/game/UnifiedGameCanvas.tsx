@@ -56,6 +56,7 @@ import {
   defaultRetroEffectsLevels,
   defaultRetroEffectTimings,
   retroEffectsPresets,
+  defaultCinematicGlitchTimings,
 } from '@shared/types';
 
 type GameMode = 'background' | 'active';
@@ -263,6 +264,36 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       retroEffectsRef.current.updateLevels(retroEffectsPresets.cinematic);
       retroLevelsRef.current = retroEffectsPresets.cinematic;
     }
+  };
+
+  const setupRandomGlitchEffects = () => {
+    if (!retroEffectsRef.current) return;
+
+    if (randomGlitchTimerRef.current) {
+      window.clearTimeout(randomGlitchTimerRef.current);
+      randomGlitchTimerRef.current = null;
+    }
+
+    const scheduleNextGlitch = () => {
+      if (gameMode !== 'background') return;
+
+      const params = defaultCinematicGlitchTimings;
+      const nextDelay =
+        Math.floor(Math.random() * params.additiveEffectInterval) + params.baseEffectInterval;
+
+      randomGlitchTimerRef.current = window.setTimeout(() => {
+        if (!retroEffectsRef.current || gameMode !== 'background') return;
+
+        const intensity = params.baseIntensity + Math.random() * params.randomIntensityMultiplier;
+        const duration = params.baseDuration + Math.random() * params.randomDurationMultiplier;
+
+        retroEffectsRef.current.setGlitchAmount(intensity, duration);
+
+        scheduleNextGlitch(); // Schedule next glitch
+      }, nextDelay);
+    };
+
+    scheduleNextGlitch();
   };
 
   const animateBallAfterScore = (
@@ -476,13 +507,24 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
   // Handle game mode changes
   useEffect(() => {
-    if (!engineRef.current || !sceneRef.current || !cameraRef.current || !retroEffectsRef.current)
+    if (!cameraRef.current || !retroEffectsRef.current || !engineRef.current || !sceneRef.current)
       return;
+
+    // Clear any existing random glitch timer
+    if (randomGlitchTimerRef.current) {
+      window.clearTimeout(randomGlitchTimerRef.current);
+      randomGlitchTimerRef.current = null;
+    }
 
     if (lastGameModeRef.current !== gameMode) {
       setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+
       updateRetroEffects();
       setupCamera();
+
+      if (gameMode === 'background') {
+        setupRandomGlitchEffects();
+      }
 
       lastGameModeRef.current = gameMode;
     }
