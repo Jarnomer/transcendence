@@ -236,6 +236,23 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     }
   };
 
+  const setupRenderLoop = (engine: Engine, scene: Scene, mode: GameMode) => {
+    engine.stopRenderLoop();
+
+    const targetFps = mode === 'background' ? 30 : 60;
+    const interval = 1000 / targetFps;
+
+    let lastTime = 0;
+
+    engine.runRenderLoop(() => {
+      const currentTime = performance.now();
+      if (currentTime - lastTime >= interval) {
+        lastTime = currentTime;
+        scene.render();
+      }
+    });
+  };
+
   const updateRetroEffects = () => {
     if (!retroEffectsRef.current) return;
 
@@ -413,14 +430,22 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     });
 
     const handleResize = () => {
-      engine.resize();
+      if (engineRef.current) {
+        engineRef.current.resize();
+        if (sceneRef.current) {
+          setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+        }
+      }
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         if (engineRef.current) engineRef.current.renderEvenInBackground = false;
       } else {
-        if (engineRef.current) engineRef.current.renderEvenInBackground = true;
+        if (engineRef.current && sceneRef.current) {
+          engineRef.current.renderEvenInBackground = true;
+          setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+        }
       }
     };
 
@@ -451,11 +476,11 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
   // Handle game mode changes
   useEffect(() => {
-    if (!cameraRef.current || !retroEffectsRef.current) return;
+    if (!engineRef.current || !sceneRef.current || !cameraRef.current || !retroEffectsRef.current)
+      return;
 
     if (lastGameModeRef.current !== gameMode) {
-      console.log(`Game mode changed from ${lastGameModeRef.current} to ${gameMode}`);
-
+      setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
       updateRetroEffects();
       setupCamera();
 
