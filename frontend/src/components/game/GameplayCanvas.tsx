@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import {
   Animation,
@@ -17,6 +17,9 @@ import {
 import {
   PowerUpEffectsManager,
   RetroEffectsManager,
+  GameSoundManager,
+  createPongRetroEffects,
+  getGameSoundManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -26,87 +29,42 @@ import {
   createEdge,
   createFloor,
   createPaddle,
-  createPongRetroEffects,
-  enableRequiredExtensions,
-  getGameSoundManager,
-  gameToSceneX,
-  gameToSceneY,
-  getThemeColors,
-  parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  GameSoundManager,
+  detectCollision,
+  detectScore,
+  gameToSceneX,
+  gameToSceneY,
+  parseColor,
+  getThemeColorsFromDOM,
+  enableRequiredExtensions,
 } from '@game/utils';
 
 import {
   Ball,
   GameState,
+  GameStatus,
   PowerUp,
   RetroEffectsLevels,
   defaultGameParams,
   defaultRetroEffectsLevels,
+  defaultRetroEffectsBaseParams,
+  retroEffectsPresets,
 } from '@shared/types';
 
-interface GameCanvasProps {
+interface GameplayCanvasProps {
   gameState: GameState;
+  gameStatus: GameStatus;
   theme?: 'light' | 'dark';
-  retroPreset?: 'default' | 'cinematic';
-  retroLevels?: RetroEffectsLevels;
 }
 
-const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
-  const computedStyle = getComputedStyle(document.documentElement);
-
-  document.documentElement.setAttribute('data-theme', theme);
-
-  const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
-  const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
-  const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
-
-  return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
-};
-
-const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
-  const gameHeight = defaultGameParams.dimensions.gameHeight;
-  const ballSize = defaultGameParams.ball.size;
-  const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = newY === 0 || newY === gameHeight - ballSize;
-
-  if (dxCollision) return 'dx';
-  if (dyCollision) return 'dy';
-
-  return null;
-};
-
-const detectScore = (
-  player1Score: number,
-  player2Score: number,
-  lastScoreRef: { value: number },
-  ballDx: number
-): 'player1' | 'player2' | null => {
-  const currentScore = player1Score + player2Score;
-
-  if (currentScore === lastScoreRef.value) return null;
-
-  if (ballDx < 0) {
-    lastScoreRef.value = currentScore;
-    return 'player2';
-  } else {
-    lastScoreRef.value = currentScore;
-    return 'player1';
-  }
-};
-
-const GameCanvas: React.FC<GameCanvasProps> = ({
+const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   gameState,
+  gameStatus,
   theme = 'dark',
-  retroPreset = 'default',
-  retroLevels = defaultRetroEffectsLevels,
 }) => {
-  const [lastTheme, setLastTheme] = useState(theme);
-
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
@@ -123,7 +81,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
-  const retroLevelsRef = useRef<RetroEffectsLevels>(retroLevels);
+  const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
 
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
@@ -231,7 +189,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const canvas = canvasRef.current;
     const engine = new Engine(canvas, true);
-    enableRequiredExtensions(engine);
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
@@ -240,9 +197,30 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const bgColor = parseColor('#33353e');
     scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
+    soundManagerRef.current = getGameSoundManager();
+
     const camera = setupSceneCamera(scene);
-    const pipeline = setupPostProcessing(scene, camera, false);
+
+    const pipeline = setupPostProcessing(scene, camera);
+
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
+
+    enableRequiredExtensions(engine);
+
+    retroLevelsRef.current = retroEffectsPresets.default;
+    retroEffectsRef.current = createPongRetroEffects(
+      scene,
+      camera,
+      'default',
+      retroLevelsRef.current,
+      defaultRetroEffectsBaseParams
+    );
+
+    engineRef.current = engine;
+    sceneRef.current = scene;
+    cameraRef.current = camera;
+    themeColors.current = colors;
+    postProcessingRef.current = pipeline;
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
@@ -258,6 +236,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       topEdgeRef.current,
       bottomEdgeRef.current,
     ];
+
     setupReflections(scene, floorRef.current, gameObjects);
     shadowGenerators.forEach((generator) => {
       gameObjects.forEach((obj) => {
@@ -265,17 +244,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       });
     });
 
-    engineRef.current = engine;
-    sceneRef.current = scene;
-    cameraRef.current = camera;
-    themeColors.current = colors;
-    postProcessingRef.current = pipeline;
-    soundManagerRef.current = getGameSoundManager();
-
     topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
     topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
+
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
       colors.primaryColor,
@@ -284,11 +257,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       soundManagerRef.current
     );
 
-    setLastTheme(theme); // Save current theme
-
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
-    retroEffectsRef.current = createPongRetroEffects(scene, camera, retroPreset, retroLevels);
-    retroLevelsRef.current = retroLevels;
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -310,6 +279,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
   }, []);
 
+  // Handle game power-ups
   useEffect(() => {
     if (!powerUpEffectsRef.current || !gameState) return;
 
@@ -328,6 +298,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
 
     const { players, ball } = gameState;
+
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
 
@@ -346,8 +317,11 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
-    const collision = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
-    const score = detectScore(
+
+    const collisionType =
+      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
+
+    const scoringPlayer = detectScore(
       players.player1.score,
       players.player2.score,
       lastScoreRef.current,
@@ -358,7 +332,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
-    if (collision) {
+    if (collisionType) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
       const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
 
@@ -367,7 +341,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
         ballRef.current,
         paddleToRecoil,
         edgeToDeform,
-        collision,
+        collisionType,
         speed,
         ball.spin,
         primaryColor,
@@ -376,22 +350,30 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       );
     }
 
-    if (score) {
-      const scoringPlayerPaddle = score === 'player1' ? player1Ref.current : player2Ref.current;
-      const scoredAgainstPaddle = score === 'player1' ? player2Ref.current : player1Ref.current;
+    if (scoringPlayer) {
+      const scoringPlayerPaddle =
+        scoringPlayer === 'player1' ? player1Ref.current : player2Ref.current;
+      const scoredAgainstPaddle =
+        scoringPlayer === 'player1' ? player2Ref.current : player1Ref.current;
 
-      animateBallAfterScore(sceneRef.current, ballRef.current, ball, cameraRef.current, score);
+      animateBallAfterScore(
+        sceneRef.current,
+        ballRef.current,
+        ball,
+        cameraRef.current,
+        scoringPlayer
+      );
 
       applyScoreEffects(
         retroEffectsRef.current,
         sceneRef.current,
+        cameraRef.current,
         topEdgeRef.current,
         bottomEdgeRef.current,
         scoringPlayerPaddle,
         scoredAgainstPaddle,
-        players[score].score,
+        players[scoringPlayer].score,
         speed,
-        players,
         ball,
         primaryColor,
         soundManagerRef.current
@@ -416,7 +398,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     };
   }, [gameState]);
 
-  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%' }} />;
+  return <canvas ref={canvasRef} className="w-full h-full" />;
 };
 
-export default GameCanvas;
+export default GameplayCanvas;

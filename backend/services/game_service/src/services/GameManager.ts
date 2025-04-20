@@ -18,7 +18,7 @@ export class GameManager {
     this.sessions = {};
     this.gameService = GameService.getInstance(db);
     this.matchmakingService = MatchmakingService.getInstance(db);
-    // this.createBackgroundGame();
+    this.createBackgroundGame();
   }
 
   static getInstance(db: Database): GameManager {

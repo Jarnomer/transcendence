@@ -6,7 +6,7 @@ export interface Player {
   paddleSpeed: number;
   spinIntensity: number;
   score: number;
-  activePowerUps: playerPowerUp[]; // Added this
+  activePowerUps: playerPowerUp[];
 }
 
 export interface Ball {
@@ -26,7 +26,6 @@ export enum PowerUpType {
   MoreSpin = 'more_spin',
 }
 
-// Added this interface for player power ups
 export interface playerPowerUp {
   type: PowerUpType;
   timeToExpire: number;
@@ -127,12 +126,6 @@ export const defaultGameSettings: GameSettings = {
   },
 };
 
-export interface GameSoundOptions {
-  enabled?: boolean;
-  muted?: boolean;
-  volume?: number;
-}
-
 export interface GameParams {
   dimensions: GameDimensions;
   paddle: PaddleParams;
@@ -140,7 +133,6 @@ export interface GameParams {
   spin: SpinParams;
   powerUps: PowerUpParams;
   rules: GameRules;
-  sounds: GameSoundOptions;
 }
 
 export const defaultGameParams: GameParams = {
@@ -187,11 +179,6 @@ export const defaultGameParams: GameParams = {
     maxScore: 5,
     countdown: 3, // Seconds
   },
-  sounds: {
-    enabled: true,
-    muted: false,
-    volume: 1.0,
-  } as GameSoundOptions,
 };
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';

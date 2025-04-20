@@ -2,50 +2,61 @@ import React, { useEffect, useState } from 'react';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
-import { CountDown, GameCanvas, PlayerScoreBoard } from '@components';
+import { CountDown, PlayerScoreBoard } from '@components';
 
 import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
+import GameplayCanvas from '../components/game/GameplayCanvas';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { useBackgroundGameVisibility } from '../hooks/useBackgroundGameVisibility';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
+import { useGameVisibility } from '../hooks/useGameVisibility';
 
 export const GamePage: React.FC = () => {
   const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
-  const { gameId, mode, difficulty, tournamentOptions, resetGameOptions } = useGameOptionsContext();
-  const { loadingStates } = useLoading();
-  const [animate, setAnimate] = useState<boolean>(false);
+  const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
+  const { loadingStates, setLoadingState } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
-  const { showBackgroundGame } = useBackgroundGameVisibility();
+
+  const {
+    hideBackgroundGame,
+    showBackgroundGame,
+    isGameCanvasActive,
+    isGameCanvasVisible,
+    showGameCanvas,
+    hideGameCanvas,
+  } = useGameVisibility();
 
   useEffect(() => {
     console.log('GamePage mounted');
     console.log('mode: ', mode);
     console.log('difficulty: ', difficulty);
     console.log('gameId: ', gameId);
-    console.log('setTournamentOptions', tournamentOptions);
+    console.log('tournamentOptions', tournamentOptions);
+
+    // Signal that we want to hide the background game
+    // This will trigger the transition in UnifiedGameProvider
+    hideBackgroundGame();
 
     return () => {
+      // When unmounting, signal that we want to show the background game again
       showBackgroundGame();
+      hideGameCanvas();
     };
   }, []);
 
+  // Show game canvas when ready to play
   useEffect(() => {
-    if (gameStatus === 'finished') {
-      // When game finishes, show the background game again
-      const timer = setTimeout(() => {
-        showBackgroundGame();
-      }, 5000); // 5 seconds delay
-
-      return () => {
-        clearTimeout(timer);
-      };
+    if (!loading && gameState && connections.game === 'connected' && gameStatus !== 'finished') {
+      console.log('Game is ready to play, showing game canvas');
+      if (!isGameCanvasVisible) {
+        showGameCanvas();
+      }
     }
-  }, [gameStatus]);
+  }, [loading, gameStatus, gameState, connections.game, isGameCanvasVisible, showGameCanvas]);
 
   const { userId, localPlayerId, remotePlayerId } = useGameUser();
   useMatchmaking(userId);
@@ -53,14 +64,14 @@ export const GamePage: React.FC = () => {
   useGameControls(localPlayerId, remotePlayerId);
   const playersData = useFetchPlayerData();
 
-  // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED
-  // SET LOADING TO FALSE TO RENDER THE GAMECANVAS
+  // SET LOADING TO FALSE TO RENDER THE GAME
   useEffect(() => {
     if (!gameId) return;
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
+      console.log('Setting loading to false - game ready to render');
       setLoading(false);
     }
-  }, [animate, loadingStates, gameId]);
+  }, [loadingStates, gameId]);
 
   useEffect(() => {
     if (!gameId || !localPlayerId) return;
@@ -68,12 +79,13 @@ export const GamePage: React.FC = () => {
     let isMounted = true; // Track if component is mounted
 
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
+      console.log('Ready to send player ready message');
       const readyMessageDelay = setTimeout(() => {
         if (isMounted) {
           console.log('Sending delayed player ready for player:', localPlayerId);
           sendMessage('game', createReadyInputMessage(localPlayerId, true));
         }
-      }, 2000); // 2000ms delay
+      }, 2000); // 2s delay
 
       // Clean up the timeout if component unmounts
       return () => {
@@ -86,25 +98,26 @@ export const GamePage: React.FC = () => {
   return (
     <div
       id="game-page"
-      className="w-full h-full p-15 pt-0 flex flex-col flex-grow items-center justify-center overflow-hidden"
+      className="w-full h-full pt-0 flex flex-col flex-grow items-center justify-center overflow-hidden"
     >
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}
-      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
-        <>
-          <div className="w-full h-full relative overflow-hidden">
-            {/* RENDER COUNTDOWN CONDITIONALLY */}
-            <CountDown gameStatus={gameStatus} />
 
-            {/* SHOW GAME INFORMATION */}
-            {/* <p className="text-xs text-gray-500"> */}
-            {/*   Connection: {connections.game} | Game: {gameStatus} | Spin: {gameState?.ball.spin} | */}
-            {/*   Player2_DY: {gameState?.players.player2.dy} */}
-            {/* </p> */}
-            <GameCanvas gameState={gameState} />
-          </div>
-        </>
+      {/* GameplayCanvas is always rendered but visibility is controlled */}
+      <div
+        className={`w-full h-full transition-opacity duration-1000 ${
+          isGameCanvasVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {isGameCanvasActive && gameState && (
+          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+        )}
+      </div>
+
+      {/* Show countdown conditionally */}
+      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
+        <CountDown gameStatus={gameStatus} />
       ) : (
         <MatchMakingCarousel playersData={playersData} />
       )}

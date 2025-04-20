@@ -10,5 +10,3 @@ export * from './profile/RadialBackground';
 export * from './UI/buttons/GoBackButton';
 export * from './UI/buttons/NavIconButton';
 export * from './visual/BackgroundGlow';
-
-export { default as GameCanvas } from './game/GameCanvas';

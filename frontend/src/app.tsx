@@ -6,7 +6,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Footer } from './components/footer/Footer.tsx';
-import BackgroundGameProvider from './components/game/BackgroundGameProvider.tsx';
+import UnifiedGameProvider from './components/game/UnifiedGameProvider';
 import { Header } from './components/header/Header.tsx';
 import { ChatModal } from './components/modals/ChatModal.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
@@ -24,13 +24,12 @@ const App: React.FC = () => {
       <ChatProvider>
         <GameOptionsProvider>
           <Router>
-            <BackgroundGameProvider />
-
+            <UnifiedGameProvider />
             <div
               id="app-main-container"
               className={`flex flex-col relative items-center min-h-screen w-full overflow-hidden text-primary p-2 `}
             >
-              <div id="app-content" className="relative p-5 w-full h-full max-w-screen-lg">
+              <div id="app-content" className="relative w-full h-full max-w-screen-lg">
                 <Header />
                 <AnimatePresence>
                   <motion.div
