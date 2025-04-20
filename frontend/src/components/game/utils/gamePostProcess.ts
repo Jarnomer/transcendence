@@ -3,13 +3,13 @@ import {
   Color3,
   CubeTexture,
   DefaultRenderingPipeline,
-  DynamicTexture,
+  DirectionalLight,
   HemisphericLight,
+  Mesh,
   MirrorTexture,
   Plane,
   Scene,
   ShadowGenerator,
-  DirectionalLight,
   Texture,
   Vector3,
 } from 'babylonjs';
@@ -110,7 +110,7 @@ export function setupScenelights(scene: Scene, primaryColor: Color3) {
   };
 }
 
-export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: any[]) {
+export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: Mesh[]) {
   const mirrorTexture = new MirrorTexture('floorMirror', 1024, scene, true);
   const floorMaterial = floorMesh.material;
 

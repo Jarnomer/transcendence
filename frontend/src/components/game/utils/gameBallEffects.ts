@@ -9,7 +9,7 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { createParticleTexture, updateMotionBlur } from '@game/utils';
+import { createParticleTexture } from '@game/utils';
 
 import { BallEffectsParams, defaultBallEffectsParams } from '@shared/types';
 

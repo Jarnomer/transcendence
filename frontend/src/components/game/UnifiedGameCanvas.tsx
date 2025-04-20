@@ -240,6 +240,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     sceneRef.current = scene;
     cameraRef.current = camera;
     themeColors.current = colors;
+
     postProcessingRef.current = pipeline;
     lastGameModeRef.current = gameMode;
 

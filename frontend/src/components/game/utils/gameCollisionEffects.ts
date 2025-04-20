@@ -10,7 +10,7 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { createParticleTexture } from '@game/utils';
+import { GameSoundManager, RetroEffectsManager, createParticleTexture } from '@game/utils';
 
 function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
   if (!paddleMesh) return;
@@ -122,7 +122,7 @@ function applySquishEffect(
 }
 
 function applyLightEffect(
-  ballMesh: any,
+  ballMesh: Mesh,
   collisionType: 'dx' | 'dy',
   speedFactor: number,
   color: Color3,
@@ -182,7 +182,7 @@ function applyLightEffect(
 }
 
 function applyParticleEffect(
-  ballMesh: any,
+  ballMesh: Mesh,
   collisionType: 'dx' | 'dy',
   speedFactor: number,
   color: Color3,
@@ -273,7 +273,7 @@ function applyParticleEffect(
 }
 
 function applyShockwaveEffect(
-  ballMesh: any,
+  ballMesh: Mesh,
   collisionType: 'dx' | 'dy',
   speedFactor: number,
   color: Color3,
@@ -344,8 +344,8 @@ function applyShockwaveEffect(
 }
 
 function applyEdgeDeformEffect(
-  edgeMesh: any,
-  ballMesh: any,
+  edgeMesh: Mesh,
+  ballMesh: Mesh,
   speedFactor: number,
   spinFactor: number,
   scene: Scene
@@ -470,7 +470,7 @@ function applyEdgeDeformEffect(
 }
 
 export function applyCollisionEffects(
-  retroEffectsRef: any,
+  retroEffectsRef: RetroEffectsManager,
   ballMesh: Mesh,
   paddleMesh: Mesh,
   edgeMesh: Mesh,
@@ -479,7 +479,7 @@ export function applyCollisionEffects(
   spin: number,
   color: Color3,
   applyGlitch: boolean,
-  soundManagerRef?: any | null
+  soundManagerRef?: GameSoundManager | null
 ) {
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);
