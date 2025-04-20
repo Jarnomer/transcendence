@@ -49,6 +49,11 @@ export const GameMenu: React.FC = () => {
   const { setMode, setDifficulty, difficulty, mode } = useGameOptionsContext(); // Destructure context functions
   // const { lobby } = location.state || {};
   const { allowInternalNavigation } = useNavigationAccess();
+  const {
+    setLobby,
+
+    resetGameOptions,
+  } = useGameOptionsContext();
 
   const modes = [
     {
@@ -130,6 +135,13 @@ export const GameMenu: React.FC = () => {
     setDifficulty(difficulty);
   };
 
+  // useEffect(() => {
+  //   return () => {
+  //     setMode(null);
+  //     setDifficulty(null);
+  //   };
+  // }, [location]);
+
   useEffect(() => {
     if (mode === 'tournament') {
       allowInternalNavigation();
@@ -138,6 +150,10 @@ export const GameMenu: React.FC = () => {
     if (mode && difficulty) {
       allowInternalNavigation();
       if (mode === '1v1' && difficulty === 'online') {
+        resetGameOptions();
+        setLobby('random');
+        setMode('1v1');
+        setDifficulty('online');
         navigate('/game');
       } else {
         navigate('/gameOptions');
