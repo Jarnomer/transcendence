@@ -7,31 +7,24 @@ import {
   GlowLayer,
   Mesh,
   MeshBuilder,
-  ParticleSystem,
   PBRMaterial,
-  StandardMaterial,
+  ParticleSystem,
   Scene,
+  StandardMaterial,
   Texture,
   Vector3,
 } from 'babylonjs';
 
-import { playerPowerUp, Player, PowerUpType, defaultGameObjectParams } from '@shared/types';
+import { gameToSceneSize } from '@game/utils';
 
-import { gameToSceneSize } from './gameUtilities';
-
-const playerEffectsMap: Map<number, PlayerEffects> = new Map();
-
-interface PowerUpEffect {
-  type: PowerUpType;
-  particleSystem: ParticleSystem | null;
-  glowLayer: GlowLayer | null;
-  icons: Mesh[];
-}
-
-interface PlayerEffects {
-  paddleHeight: number;
-  activeEffects: Map<string, PowerUpEffect>;
-}
+import {
+  Player,
+  PlayerEffects,
+  PowerUpEffect,
+  PowerUpType,
+  defaultGameObjectParams,
+  playerPowerUp,
+} from '@shared/types';
 
 export function applyPlayerEffects(
   scene: Scene,
@@ -39,10 +32,29 @@ export function applyPlayerEffects(
   player2Mesh: Mesh,
   players: { player1: Player; player2: Player },
   primaryColor: Color3,
-  secondaryColor: Color3
+  secondaryColor: Color3,
+  effectsMap: Map<number, PlayerEffects> | null
 ): void {
-  applyPaddleEffects(scene, player1Mesh, players.player1, primaryColor, secondaryColor, 1);
-  applyPaddleEffects(scene, player2Mesh, players.player2, primaryColor, secondaryColor, 2);
+  if (!effectsMap) return;
+
+  applyPaddleEffects(
+    scene,
+    player1Mesh,
+    players.player1,
+    primaryColor,
+    secondaryColor,
+    1,
+    effectsMap
+  );
+  applyPaddleEffects(
+    scene,
+    player2Mesh,
+    players.player2,
+    primaryColor,
+    secondaryColor,
+    2,
+    effectsMap
+  );
 }
 
 function applyPaddleEffects(
@@ -51,16 +63,16 @@ function applyPaddleEffects(
   player: Player,
   primaryColor: Color3,
   secondaryColor: Color3,
-  playerIndex: number
+  playerIndex: number,
+  effectsMap: Map<number, PlayerEffects>
 ): void {
-  // Initialize the map if it doesn't exist
-  if (!playerEffectsMap.has(playerIndex)) {
-    playerEffectsMap.set(playerIndex, {
+  if (!effectsMap.has(playerIndex)) {
+    effectsMap.set(playerIndex, {
       paddleHeight: player.paddleHeight,
       activeEffects: new Map(),
     });
   } else {
-    const playerEffects = playerEffectsMap.get(playerIndex)!;
+    const playerEffects = effectsMap.get(playerIndex)!;
 
     if (playerEffects.paddleHeight !== player.paddleHeight) {
       playerEffects.paddleHeight = player.paddleHeight;
@@ -68,7 +80,7 @@ function applyPaddleEffects(
     }
   }
 
-  const playerEffects = playerEffectsMap.get(playerIndex)!;
+  const playerEffects = effectsMap.get(playerIndex)!;
   const currentEffectTypes = new Set(player.activePowerUps.map((p) => p.type));
 
   const hadEffects = playerEffects.activeEffects.size > 0;
@@ -108,8 +120,8 @@ function applyPaddleEffects(
 
   // Check and dispose expired effects
   const expiredEffects: string[] = [];
-  playerEffects.activeEffects.forEach((_, type) => {
-    if (!currentEffectTypes.has(type)) {
+  playerEffects.activeEffects.forEach((_: PowerUpEffect, type: string) => {
+    if (!currentEffectTypes.has(type as PowerUpType)) {
       expiredEffects.push(type);
     }
   });
@@ -702,37 +714,3 @@ function getPowerUpSignPath(powerUpType: PowerUpType) {
       return '/power-up/sign_unknown.png';
   }
 }
-
-// import { off } from 'node:process';
-
-// interface LogConfig {
-//   enabled: boolean;
-//   logFrequency: number;
-// }
-
-// const loggingConfig: LogConfig = {
-//   enabled: true,
-//   logFrequency: 3000, // ms
-// };
-
-// let lastLogTime = 0;
-
-// const currentTime = Date.now();
-// if (loggingConfig.enabled && currentTime - lastLogTime > loggingConfig.logFrequency) {
-//   logPlayerState(players.player1);
-//   logPlayerState(players.player2);
-//   lastLogTime = currentTime;
-// }
-
-// function logPlayerState(player: Player): void {
-//   const powerUpsInfo =
-//     player.activePowerUps.length > 0
-//       ? player.activePowerUps
-//           .map((p) => `      - ${p.type} (expires in: ${p.timeToExpire}ms)`)
-//           .join('\n')
-//       : '      - None';
-
-//   console.log(`    Player: ${player.id}
-//     Power-Ups:
-// ${powerUpsInfo}`);
-// }

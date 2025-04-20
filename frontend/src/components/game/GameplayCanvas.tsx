@@ -15,11 +15,9 @@ import {
 } from 'babylonjs';
 
 import {
+  GameSoundManager,
   PowerUpEffectsManager,
   RetroEffectsManager,
-  GameSoundManager,
-  createPongRetroEffects,
-  getGameSoundManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -29,28 +27,31 @@ import {
   createEdge,
   createFloor,
   createPaddle,
+  createPongRetroEffects,
+  detectCollision,
+  detectScore,
+  enableRequiredExtensions,
+  gameToSceneX,
+  gameToSceneY,
+  getGameSoundManager,
+  getThemeColorsFromDOM,
+  parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  detectCollision,
-  detectScore,
-  gameToSceneX,
-  gameToSceneY,
-  parseColor,
-  getThemeColorsFromDOM,
-  enableRequiredExtensions,
 } from '@game/utils';
 
 import {
   Ball,
   GameState,
   GameStatus,
+  PlayerEffects,
   PowerUp,
   RetroEffectsLevels,
   defaultGameParams,
-  defaultRetroEffectsLevels,
   defaultRetroEffectsBaseParams,
+  defaultRetroEffectsLevels,
   retroEffectsPresets,
 } from '@shared/types';
 
@@ -85,15 +86,17 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
+
+  const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
   const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
   const prevPowerUpsRef = useRef<PowerUp[]>([]);
 
-  const floorRef = useRef<any>(null);
-  const topEdgeRef = useRef<any>(null);
-  const bottomEdgeRef = useRef<any>(null);
-  const player1Ref = useRef<any>(null);
-  const player2Ref = useRef<any>(null);
-  const ballRef = useRef<any>(null);
+  const floorRef = useRef<Mesh | null>(null);
+  const topEdgeRef = useRef<Mesh | null>(null);
+  const bottomEdgeRef = useRef<Mesh | null>(null);
+  const player1Ref = useRef<Mesh | null>(null);
+  const player2Ref = useRef<Mesh | null>(null);
+  const ballRef = useRef<Mesh | null>(null);
 
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
@@ -294,7 +297,17 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   // Handle game objects
   useEffect(() => {
-    if (!canvasRef.current || !sceneRef.current || !cameraRef.current || !themeColors.current)
+    if (
+      !canvasRef.current ||
+      !sceneRef.current ||
+      !cameraRef.current ||
+      !themeColors.current ||
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current ||
+      !topEdgeRef.current ||
+      !bottomEdgeRef.current
+    )
       return;
 
     const { players, ball } = gameState;
@@ -386,7 +399,8 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       player2Ref.current,
       players,
       primaryColor,
-      secondaryColor
+      secondaryColor,
+      playerEffectsMapRef.current
     );
 
     prevBallState.current = {

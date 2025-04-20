@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@sinclair/typebox": "0.34.30"
+    "@sinclair/typebox": "0.34.30",
+    "babylonjs": "^7.50.0"
   }
 }

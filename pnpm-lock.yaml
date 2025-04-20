@@ -516,6 +516,9 @@ importers:
       '@sinclair/typebox':
         specifier: 0.34.30
         version: 0.34.30
+      babylonjs:
+        specifier: ^7.50.0
+        version: 7.54.0
 
 packages:
 

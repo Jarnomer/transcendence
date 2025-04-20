@@ -1,3 +1,5 @@
+import { ParticleSystem, GlowLayer, Mesh } from 'babylonjs';
+
 export interface Player {
   id: string;
   y: number;
@@ -98,6 +100,18 @@ export interface PowerUpEffects {
 export interface GameRules {
   maxScore: number;
   countdown: number;
+}
+
+export interface PowerUpEffect {
+  type: PowerUpType;
+  particleSystem: ParticleSystem | null;
+  glowLayer: GlowLayer | null;
+  icons: Mesh[];
+}
+
+export interface PlayerEffects {
+  paddleHeight: number;
+  activeEffects: Map<string, PowerUpEffect>;
 }
 
 export interface GameSettings {
