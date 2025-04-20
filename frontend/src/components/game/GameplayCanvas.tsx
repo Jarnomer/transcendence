@@ -31,12 +31,14 @@ import {
   getGameSoundManager,
   gameToSceneX,
   gameToSceneY,
-  getThemeColors,
   parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
   setupScenelights,
+  detectCollision,
+  detectScore,
+  getThemeColorsFromDOM,
   GameSoundManager,
 } from '@game/utils';
 
@@ -57,49 +59,6 @@ interface GameplayCanvasProps {
   gameStatus: GameStatus;
   theme?: 'light' | 'dark';
 }
-
-const getThemeColorsFromDOM = (theme: 'light' | 'dark' = 'dark') => {
-  const computedStyle = getComputedStyle(document.documentElement);
-
-  document.documentElement.setAttribute('data-theme', theme);
-
-  const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
-  const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
-  const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
-
-  return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
-};
-
-const detectCollision = (prevDx: number, newDx: number, newY: number): 'dx' | 'dy' | null => {
-  const gameHeight = defaultGameParams.dimensions.gameHeight;
-  const ballSize = defaultGameParams.ball.size;
-  const dxCollision = Math.sign(prevDx) !== Math.sign(newDx);
-  const dyCollision = newY === 0 || newY === gameHeight - ballSize;
-
-  if (dxCollision) return 'dx';
-  if (dyCollision) return 'dy';
-
-  return null;
-};
-
-const detectScore = (
-  player1Score: number,
-  player2Score: number,
-  lastScoreRef: { value: number },
-  ballDx: number
-): 'player1' | 'player2' | null => {
-  const currentScore = player1Score + player2Score;
-
-  if (currentScore === lastScoreRef.value) return null;
-
-  if (ballDx < 0) {
-    lastScoreRef.value = currentScore;
-    return 'player2';
-  } else {
-    lastScoreRef.value = currentScore;
-    return 'player1';
-  }
-};
 
 const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   gameState,
