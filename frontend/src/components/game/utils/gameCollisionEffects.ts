@@ -470,7 +470,7 @@ function applyEdgeDeformEffect(
 }
 
 export function applyCollisionEffects(
-  retroEffectsRef: RetroEffectsManager,
+  retroEffectsRef: RetroEffectsManager | null,
   ballMesh: Mesh,
   paddleMesh: Mesh,
   edgeMesh: Mesh,

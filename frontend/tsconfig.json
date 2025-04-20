@@ -11,7 +11,6 @@
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
     "noEmit": true,
-    "noUncheckedSideEffectImports": true,
 
     /* Frontend path aliases */
     /* Remember to update vite config */

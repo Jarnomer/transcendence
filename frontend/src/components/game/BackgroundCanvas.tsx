@@ -57,14 +57,14 @@ import {
   retroEffectsPresets,
 } from '@shared/types';
 
-interface UnifiedGameCanvasProps {
+interface BackgroundCanvasProps {
   gameState: GameState;
   gameMode: GameMode;
   gameStatus: GameStatus;
   theme?: 'light' | 'dark';
 }
 
-const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
+const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   gameState,
   gameMode,
   gameStatus,
@@ -436,7 +436,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     };
   }, [gameState]);
 
-  return <canvas ref={canvasRef} className="w-full h-full pointer-events-none bg-[#33353e]" />;
+  return <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />;
 };
 
-export default UnifiedGameCanvas;
+export default BackgroundCanvas;
