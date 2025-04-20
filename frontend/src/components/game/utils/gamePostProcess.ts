@@ -65,7 +65,7 @@ export function setupPostProcessing(scene: Scene, camera: Camera) {
 
   pipeline.fxaaEnabled = true;
 
-  pipeline.depthOfFieldEnabled = true;
+  pipeline.depthOfFieldEnabled = false;
   pipeline.depthOfField.focalLength = dofSettings.focalLength;
   pipeline.depthOfField.fStop = dofSettings.fStop;
   pipeline.depthOfField.focusDistance = dofSettings.focusDistance;

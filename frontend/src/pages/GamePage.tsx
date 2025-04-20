@@ -8,6 +8,7 @@ import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@ho
 
 import { createReadyInputMessage } from '@shared/messages';
 
+import GameplayCanvas from '../components/game/GameplayCanvas';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -23,6 +24,7 @@ export const GamePage: React.FC = () => {
   const {
     hideBackgroundGame,
     showBackgroundGame,
+    isGameCanvasActive,
     isGameCanvasVisible,
     showGameCanvas,
     hideGameCanvas,
@@ -101,6 +103,17 @@ export const GamePage: React.FC = () => {
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
       ) : null}
+
+      {/* GameplayCanvas is always rendered but visibility is controlled */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-1000 ${
+          isGameCanvasVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {isGameCanvasActive && gameState && (
+          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+        )}
+      </div>
 
       {/* Show countdown conditionally */}
       {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
