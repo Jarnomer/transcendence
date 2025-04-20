@@ -1,8 +1,49 @@
-import { Engine, Mesh, Scene, Texture, DefaultRenderingPipeline } from 'babylonjs';
+import {
+  Engine,
+  Mesh,
+  Scene,
+  Texture,
+  Color3,
+  DynamicTexture,
+  DefaultRenderingPipeline,
+  ShadowGenerator,
+} from 'babylonjs';
 
 import { getThemeColors } from '@game/utils';
 
 import { defaultGameParams } from '@shared/types';
+
+export function createParticleTexture(scene: Scene, color: Color3): Texture {
+  const textureSize = 64;
+  const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
+  const context = texture.getContext();
+
+  // Create a radial gradient
+  const gradient = context.createRadialGradient(
+    textureSize / 2,
+    textureSize / 2,
+    0,
+    textureSize / 2,
+    textureSize / 2,
+    textureSize / 2
+  );
+
+  // Convert Color3 to CSS color strings
+  const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
+  const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
+
+  // Color stops - Center, "middle" and edge
+  gradient.addColorStop(0, 'white');
+  gradient.addColorStop(0.3, rgbColor);
+  gradient.addColorStop(1, rgbaColorTransparent);
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, textureSize, textureSize);
+
+  texture.update();
+
+  return texture;
+}
 
 export function gameToSceneX(gameX: number, mesh: Mesh): number {
   const gameWidth = defaultGameParams.dimensions.gameWidth;
@@ -93,8 +134,24 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
   return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
 }
 
-export function applyLowQualitySettings(scene: Scene, pipeline: DefaultRenderingPipeline | null) {
-  scene.getEngine().setHardwareScalingLevel(2.0);
+function optimizeShadowGenerators(shadowGenerators: ShadowGenerator[]) {
+  shadowGenerators.forEach((generator) => {
+    generator.useBlurExponentialShadowMap = true;
+    generator.blurKernel = 8;
+    generator.bias = 0.01;
+    generator.mapSize = 512;
+    generator.forceBackFacesOnly = true;
+    generator.usePercentageCloserFiltering = false;
+  });
+}
+
+export function applyLowQualitySettings(
+  scene: Scene,
+  scalingLevel: number,
+  pipeline: DefaultRenderingPipeline,
+  shadowGenerators: ShadowGenerator[]
+) {
+  scene.getEngine().setHardwareScalingLevel(scalingLevel);
 
   scene.shadowsEnabled = true;
   scene.lightsEnabled = true;
@@ -114,15 +171,6 @@ export function applyLowQualitySettings(scene: Scene, pipeline: DefaultRendering
   scene.autoClear = false;
   scene.autoClearDepthAndStencil = false;
   scene.blockMaterialDirtyMechanism = true;
-}
 
-export function optimizeShadowGenerators(shadowGenerators: any[]) {
-  shadowGenerators.forEach((generator) => {
-    generator.useBlurExponentialShadowMap = true;
-    generator.blurKernel = 8;
-    generator.bias = 0.01;
-    generator.mapSize = 512;
-    generator.forceBackFacesOnly = true;
-    generator.usePercentageCloserFiltering = false;
-  });
+  optimizeShadowGenerators(shadowGenerators);
 }

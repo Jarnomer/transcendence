@@ -156,11 +156,11 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     }
   };
 
-  const setupRenderLoop = (engine: Engine, scene: Scene, mode: GameMode) => {
+  const setupRenderLoop = (engine: Engine, scene: Scene) => {
     engine.stopRenderLoop();
 
-    const targetFps = mode === 'background' ? 30 : 60;
-    const interval = 1000 / targetFps;
+    const frameRate = 30;
+    const interval = 1000 / frameRate;
 
     let lastTime = 0;
 
@@ -232,8 +232,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
-    applyLowQualitySettings(scene, pipeline);
-    optimizeShadowGenerators(shadowGenerators);
+    applyLowQualitySettings(scene, 2.0, pipeline, shadowGenerators);
     enableRequiredExtensions(engine);
 
     engineRef.current = engine;
@@ -270,7 +269,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
 
-    setupRenderLoop(engine, scene, gameMode);
+    setupRenderLoop(engine, scene);
     setupCamera();
 
     if (gameMode === 'background') {
@@ -281,7 +280,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       if (engineRef.current) {
         engineRef.current.resize();
         if (sceneRef.current) {
-          setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+          setupRenderLoop(engineRef.current, sceneRef.current);
         }
       }
     };
@@ -292,7 +291,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       } else {
         if (engineRef.current && sceneRef.current) {
           engineRef.current.renderEvenInBackground = true;
-          setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+          setupRenderLoop(engineRef.current, sceneRef.current);
         }
       }
     };
@@ -335,7 +334,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         isAnimatingBallRef.current = false;
       }
 
-      setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+      setupRenderLoop(engineRef.current, sceneRef.current);
       setupCamera();
 
       if (gameMode === 'background') {

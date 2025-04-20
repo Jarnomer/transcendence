@@ -14,10 +14,9 @@ import {
   CubicEase,
 } from 'babylonjs';
 
-import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
+import { gameToSceneSize, gameToSceneX, gameToSceneY, createParticleTexture } from '@game/utils';
 
-import { createParticleTexture } from './gamePostProcess';
-import { gameToSceneSize, gameToSceneX, gameToSceneY } from './gameUtilities';
+import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
 
 interface PowerUpEffect {
   powerUpId: number;

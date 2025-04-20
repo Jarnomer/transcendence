@@ -292,7 +292,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     }
   }, [gameState]);
 
-  // Handle game object updates
+  // Handle game objects
   useEffect(() => {
     if (!canvasRef.current || !sceneRef.current || !cameraRef.current || !themeColors.current)
       return;
