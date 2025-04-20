@@ -261,17 +261,17 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     });
   };
 
-  const updateRetroEffects = () => {
-    if (!retroEffectsRef.current) return;
+  // const updateRetroEffects = () => {
+  //   if (!retroEffectsRef.current) return;
 
-    if (gameMode === 'active') {
-      retroEffectsRef.current.updateLevels(retroEffectsPresets.default);
-      retroLevelsRef.current = defaultRetroEffectsLevels;
-    } else {
-      retroEffectsRef.current.updateLevels(retroEffectsPresets.cinematic);
-      retroLevelsRef.current = retroEffectsPresets.cinematic;
-    }
-  };
+  //   if (gameMode === 'active') {
+  //     retroEffectsRef.current.updateLevels(retroEffectsPresets.default);
+  //     retroLevelsRef.current = defaultRetroEffectsLevels;
+  //   } else {
+  //     retroEffectsRef.current.updateLevels(retroEffectsPresets.cinematic);
+  //     retroLevelsRef.current = retroEffectsPresets.cinematic;
+  //   }
+  // };
 
   const setupRandomGlitchEffects = () => {
     if (!retroEffectsRef.current) return;
@@ -415,7 +415,27 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     const bgColor = parseColor('#33353e');
     scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
+    soundManagerRef.current = getGameSoundManager();
+    soundManagerRef.current.playBackgroundMusic('menu');
+
+    // if (soundManagerRef.current) {
+    //   if (gameMode === 'active') {
+    //     soundManagerRef.current.playBackgroundMusic('game');
+    //   } else {
+    //   }
+    // }
+
     const camera = setupSceneCamera(scene);
+
+    retroLevelsRef.current = retroEffectsPresets.cinematic;
+    retroEffectsRef.current = createPongRetroEffects(
+      scene,
+      camera,
+      'cinematic',
+      retroLevelsRef.current,
+      defaultRetroCinematicBaseParams
+    );
+
     const pipeline = setupPostProcessing(scene, camera);
 
     applyLowQualitySettings(scene, pipeline);
@@ -451,22 +471,12 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     cameraRef.current = camera;
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
-    soundManagerRef.current = getGameSoundManager();
+    lastGameModeRef.current = gameMode;
 
     topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
     topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
-
-    lastGameModeRef.current = gameMode;
-    retroLevelsRef.current = retroEffectsPresets.cinematic;
-    retroEffectsRef.current = createPongRetroEffects(
-      scene,
-      camera,
-      'cinematic',
-      retroLevelsRef.current,
-      defaultRetroCinematicBaseParams
-    );
 
     powerUpEffectsRef.current = new PowerUpEffectsManager(
       scene,
@@ -483,14 +493,6 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
     if (gameMode === 'background') {
       setupRandomGlitchEffects();
-    }
-
-    if (soundManagerRef.current) {
-      if (gameMode === 'active') {
-        soundManagerRef.current.playBackgroundMusic('game');
-      } else {
-        soundManagerRef.current.playBackgroundMusic('menu');
-      }
     }
 
     const handleResize = () => {
@@ -555,7 +557,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       }
 
       setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
-      updateRetroEffects();
+      // updateRetroEffects();
       setupCamera();
 
       if (gameMode === 'background') {
@@ -674,17 +676,16 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       applyScoreEffects(
         retroEffectsRef.current,
         sceneRef.current,
+        cameraRef.current,
         topEdgeRef.current,
         bottomEdgeRef.current,
         scoringPlayerPaddle,
         scoredAgainstPaddle,
         players[scoringPlayer].score,
         ballSpeed,
-        players,
         ball,
         primaryColor,
-        soundManagerRef.current,
-        cameraRef.current
+        soundManagerRef.current
       );
     }
 

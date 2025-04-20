@@ -33,17 +33,17 @@ export interface CameraDOFSettings {
 }
 
 export const defaultCameraDOFSettings: CameraDOFSettings = {
-  focalLength: 30,
-  fStop: 1.5,
-  focusDistance: 50,
-  dofBlurLevel: 5,
+  focalLength: 1, // Higher value for more defined focus plane
+  fStop: 3.0, // Standard aperture value
+  focusDistance: 5, // This should match your camera radius
+  dofBlurLevel: 1, // Moderate blur amount
 };
 
 export const gameplayCameraDOFSettings: CameraDOFSettings = {
-  focalLength: 5,
-  fStop: 20.0,
-  focusDistance: 10,
-  dofBlurLevel: 3,
+  focalLength: 50, // Higher value for more defined focus plane
+  fStop: 3.0, // Standard aperture value
+  focusDistance: 50, // This should match your camera radius
+  dofBlurLevel: 1.2, // Moderate blur amount
 };
 
 export const cinematicCameraAngles: PosCameraAngle[] = [
@@ -90,7 +90,7 @@ export const gameplayCameraAngles: ArcCameraAngle[] = [
     alpha: -Math.PI / 2,
     beta: Math.PI / 2,
     radius: 50,
-    target: new Vector3(0, 0, 0),
+    target: new Vector3(0, 0, -10),
   },
   {
     // Player 1 perspective
@@ -113,8 +113,8 @@ export function setupSceneCamera(scene: Scene): ArcRotateCamera {
     'camera',
     -Math.PI / 2,
     Math.PI / 2,
-    32,
-    new Vector3(0, 0, 0),
+    28,
+    new Vector3(0, 0, -5),
     scene
   );
 

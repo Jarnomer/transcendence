@@ -558,17 +558,16 @@ function calculateScoreEffectIntensity(
 export function applyScoreEffects(
   retroEffectsRef: any,
   scene: Scene,
+  camera: ArcRotateCamera,
   topEdge: Mesh,
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
   scoredAgainstPaddle: Mesh,
   ballSpeed: number,
   playerScore: number,
-  players: { player1: Player; player2: Player },
   ball: Ball,
   primaryColor: Color3,
-  soundManagerRef?: any | null,
-  camera?: ArcRotateCamera
+  soundManagerRef?: any | null
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
@@ -595,7 +594,11 @@ export function applyScoreEffects(
     primaryColor
   );
 
-  soundManagerRef.playScoreSound(volumeFactor);
+  if (soundManagerRef) {
+    setTimeout(() => {
+      soundManagerRef.playScoreSound(volumeFactor);
+    }, effectDelay);
+  }
 
   if (camera) {
     const shakeIntensity = 0.5 + intensityFactor * 1.0;

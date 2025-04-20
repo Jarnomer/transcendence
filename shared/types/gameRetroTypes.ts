@@ -10,7 +10,7 @@ export interface RetroEffectsLevels {
 
 export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 3,
-  curvature: 3,
+  curvature: 0,
   glitch: 3,
   colorBleed: 3,
   flicker: 3,
@@ -37,11 +37,6 @@ export interface RetroEffectsBaseParams {
     vignette: number;
     flicker: number;
     colorBleed: number;
-  };
-  phosphorDots: {
-    dotSize: number;
-    dotIntensity: number;
-    nonSquareRatio: number;
   };
   crtDistortion: {
     curvatureAmount: number;
@@ -73,11 +68,6 @@ export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
     flicker: 0.15,
     colorBleed: 0.05,
   },
-  phosphorDots: {
-    dotSize: 3.0,
-    dotIntensity: 0.15,
-    nonSquareRatio: 0.5,
-  },
   crtDistortion: {
     curvatureAmount: 0.3,
     scanlineIntensity: 0.0,
@@ -107,11 +97,6 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     vignette: 0,
     flicker: 0.05,
     colorBleed: 0,
-  },
-  phosphorDots: {
-    dotSize: 5,
-    dotIntensity: 0.2,
-    nonSquareRatio: 0.2,
   },
   crtDistortion: {
     curvatureAmount: 0.2,
