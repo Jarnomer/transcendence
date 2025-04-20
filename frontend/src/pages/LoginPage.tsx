@@ -65,7 +65,7 @@ export const LoginPage: React.FC = () => {
           navigate(`/signUp`);
         } else {
           await updateUser({ status: 'online' });
-          navigate(`/profile/${localStorage.getItem('userID')}`);
+          navigate(`/gameMenu`);
         }
       } catch (error: any) {
         // alert('Login failed!');

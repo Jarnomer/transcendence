@@ -29,7 +29,7 @@ const App: React.FC = () => {
               id="app-main-container"
               className={`flex flex-col relative items-center min-h-screen w-full overflow-hidden text-primary p-2 `}
             >
-              <div id="app-content" className="relative p-5 w-full h-full max-w-screen-lg">
+              <div id="app-content" className="relative w-full h-full max-w-screen-lg">
                 <Header />
                 <AnimatePresence>
                   <motion.div
