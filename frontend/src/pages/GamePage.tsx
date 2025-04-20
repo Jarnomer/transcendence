@@ -106,7 +106,7 @@ export const GamePage: React.FC = () => {
 
       {/* GameplayCanvas is always rendered but visibility is controlled */}
       <div
-        className={`absolute inset-0 transition-opacity duration-1000 ${
+        className={`w-full h-full transition-opacity duration-1000 ${
           isGameCanvasVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
