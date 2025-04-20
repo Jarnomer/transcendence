@@ -16,7 +16,7 @@ import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 import { useGameVisibility } from '../hooks/useGameVisibility';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
+  const { gameState, gameStatus, connections, sendMessage } = useWebSocketContext();
   const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);

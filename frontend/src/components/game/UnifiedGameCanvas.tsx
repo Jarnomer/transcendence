@@ -43,6 +43,7 @@ import {
 } from '@game/utils';
 
 import {
+  GameMode,
   GameState,
   GameStatus,
   PlayerEffects,
@@ -55,8 +56,6 @@ import {
   defaultRetroEffectTimings,
   retroEffectsPresets,
 } from '@shared/types';
-
-type GameMode = 'background' | 'active';
 
 interface UnifiedGameCanvasProps {
   gameState: GameState;

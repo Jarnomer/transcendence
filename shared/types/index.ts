@@ -6,6 +6,7 @@ export * from './gameRetroTypes';
 export * from './gameObjectTypes';
 export * from './gameTimingTypes';
 export * from './gameSoundTypes';
+export * from './gameMusicTypes';
 export * from './gameTypes';
 export * from './queueTypes';
 export * from './userTypes';

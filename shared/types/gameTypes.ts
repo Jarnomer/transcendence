@@ -195,6 +195,8 @@ export const defaultGameParams: GameParams = {
   },
 };
 
+export type GameMode = 'background' | 'active';
+
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 
 export type GameEvent =
