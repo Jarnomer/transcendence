@@ -59,6 +59,7 @@ import {
   defaultRetroEffectsLevels,
   defaultRetroEffectTimings,
   retroEffectsPresets,
+  defaultGameObjectParams,
   defaultCinematicGlitchTimings,
 } from '@shared/types';
 
@@ -311,6 +312,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
   ) => {
     if (gameMode !== 'active') return;
 
+    const originalBallZ = ballMesh.position.z;
     isAnimatingBallRef.current = true;
 
     const ballX = ballMesh.position.x;
@@ -356,7 +358,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     const xOffset = scoringPlayer === 'player1' ? xOffsetAmount : -xOffsetAmount;
     const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
     const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
-    const dropFinalPos = new Vector3(centerX, centerY, ballZ);
+    const dropFinalPos = new Vector3(centerX, centerY, originalBallZ);
 
     dropStartPos.x = centerX + xOffset;
     dropStartPos.z += 5;
@@ -387,8 +389,16 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       ballMesh.animations = [dropAnim];
       scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
         isAnimatingBallRef.current = false;
+        ballMesh.position.z = originalBallZ;
       });
     });
+
+    setTimeout(() => {
+      if (isAnimatingBallRef.current) {
+        isAnimatingBallRef.current = false;
+        ballMesh.position.z = originalBallZ;
+      }
+    }, 2000);
   };
 
   // Initial render setup
@@ -536,8 +546,15 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       return;
 
     if (lastGameModeRef.current !== gameMode) {
-      setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+      if (isAnimatingBallRef.current && ballRef.current) {
+        const defaultBallZ = defaultGameObjectParams.ball.animation.bottomValue;
 
+        if (ballRef.current.animations) ballRef.current.animations = [];
+        ballRef.current.position.z = defaultBallZ;
+        isAnimatingBallRef.current = false;
+      }
+
+      setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
       updateRetroEffects();
       setupCamera();
 
