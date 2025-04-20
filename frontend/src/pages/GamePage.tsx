@@ -16,7 +16,7 @@ import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
   const { gameState, gameStatus, connections, sendMessage, gameEvent } = useWebSocketContext();
-  const { gameId, mode, difficulty, tournamentOptions } = useGameOptionsContext();
+  const { gameId, mode, difficulty, tournamentOptions, resetGameOptions } = useGameOptionsContext();
   const { loadingStates } = useLoading();
   const [animate, setAnimate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -41,7 +41,9 @@ export const GamePage: React.FC = () => {
         showBackgroundGame();
       }, 5000); // 5 seconds delay
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [gameStatus]);
 

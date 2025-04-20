@@ -4,12 +4,12 @@ import {
   GameState,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
-  retroEffectsPresets,
   defaultRetroEffectTimings,
+  retroEffectsPresets,
 } from '@shared/types';
 
-import BackgroundGameCanvas from './BackgroundGameCanvas';
 import { useBackgroundGameVisibility } from '../../hooks/useBackgroundGameVisibility';
+import BackgroundGameCanvas from './BackgroundGameCanvas';
 
 const BackgroundGameProvider: React.FC = () => {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -145,7 +145,7 @@ const BackgroundGameProvider: React.FC = () => {
 
   return (
     <div
-      className={`background-game-container absolute pointer-events-none w-screen h-screen bg-[#33353e] ${
+      className={`background-game-container fixed pointer-events-none w-screen h-screen bg-[#33353e] ${
         !isBackgroundGameVisible ? 'opacity-0' : 'opacity-100'
       } transition-opacity duration-1000`}
       aria-hidden="true"

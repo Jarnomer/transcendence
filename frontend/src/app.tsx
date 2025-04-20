@@ -24,9 +24,8 @@ const App: React.FC = () => {
       <ChatProvider>
         <GameOptionsProvider>
           <Router>
-            <div className="fixed pointer-events-none" aria-hidden="true">
-              <BackgroundGameProvider />
-            </div>
+            <BackgroundGameProvider />
+
             <div
               id="app-main-container"
               className={`flex flex-col relative items-center min-h-screen w-full overflow-hidden text-primary p-2 `}
