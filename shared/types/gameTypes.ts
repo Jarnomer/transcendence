@@ -34,15 +34,14 @@ export interface playerPowerUp {
   isNegative: boolean;
 }
 
-// rename this to boardPowerUp?
 export interface PowerUp {
-  id: number; // needed!
-  x: number; // needed!
-  y: number; // needed!
-  isCollected: boolean; // Added this
-  isNegative: boolean; // Added this
-  timeToDespawn: number; // needed!
-  type: PowerUpType; // needed!
+  id: number;
+  x: number;
+  y: number;
+  isCollected: boolean;
+  isNegative: boolean;
+  timeToDespawn: number;
+  type: PowerUpType;
 }
 
 export interface GameState {

@@ -1,4 +1,4 @@
-import { defaultGameSoundOptions } from '@shared/types';
+import { defaultGameAudioOptions } from '@shared/types';
 
 let soundManagerInstance: GameSoundManager | null = null;
 
@@ -21,8 +21,8 @@ export class GameSoundManager {
   private countDown2Sound: HTMLAudioElement | null = null;
   private countDown3Sound: HTMLAudioElement | null = null;
 
-  private soundEffectsVolume: number = defaultGameSoundOptions.soundEffects?.volume || 1.0;
-  private soundEffectsEnabled: boolean = defaultGameSoundOptions.soundEffects?.enabled || true;
+  private soundEffectsVolume: number = defaultGameAudioOptions.soundEffects?.volume || 1.0;
+  private soundEffectsEnabled: boolean = defaultGameAudioOptions.soundEffects?.enabled || true;
 
   private lastSoundTimes: Record<string, number> = {};
   private soundDebounceTime: number = 100; // ms
