@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
+import { PageWrapper } from './PageWrapper.tsx';
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
@@ -19,13 +20,20 @@ import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
-import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
-  const { loading } = useUser(); // Retrieve user from context
+  const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();
   const user = localStorage.getItem('token');
   const { fromAppNavigation } = useNavigationAccess();
+
+  useEffect(() => {
+    checkAuth();
+    console.log('location change');
+    return () => {
+      console.log('Cleanup');
+    };
+  }, [location]);
 
   return (
     <AnimatePresence mode="wait">

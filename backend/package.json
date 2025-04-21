@@ -6,9 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pnpm --filter @my-backend/main_server run dev",
+    "build": "pnpm --filter @my-backend/main_server run build && pnpm --filter @my-backend/game_service run build && pnpm --filter @my-backend/matchmaking_service run build && pnpm --filter @my-backend/user_service run build && pnpm --filter @my-backend/remote_service run build",
+    "start": "node services/main_server/dist/index.js",
     "test:create-users": "pnpm --filter @my-backend/tests run test:create-users",
     "test:create-tournaments": "pnpm --filter @my-backend/tests run test:create-tournaments",
-    "test:run-all": "pnpm --filter @my-backend/tests run test:run-all"
+    "test:run-all": "pnpm --filter @my-backend/tests run test:run-all",
+    "typecheck": "tsc --project tsconfig.prod.json --noEmit",
+    "typecheck:all": "pnpm -r run typecheck",
+    "test:prod": "NODE_ENV=production pnpm typecheck && pnpm -r run typecheck"
   },
   "keywords": [],
   "author": "",

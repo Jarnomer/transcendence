@@ -3,18 +3,18 @@ import {
   Color3,
   CubeTexture,
   DefaultRenderingPipeline,
-  DynamicTexture,
+  DirectionalLight,
   HemisphericLight,
+  Mesh,
   MirrorTexture,
-  MotionBlurPostProcess,
   Plane,
-  SSAO2RenderingPipeline,
   Scene,
   ShadowGenerator,
-  DirectionalLight,
   Texture,
   Vector3,
 } from 'babylonjs';
+
+import { CameraDOFSettings, defaultCameraDOFSettings } from '@game/utils';
 
 function createCubeTexture(rootUrl: string, scene: Scene) {
   const envTexture = new CubeTexture(rootUrl, scene);
@@ -46,56 +46,30 @@ export function setupEnvironmentMap(scene: Scene) {
   });
 }
 
-export function setupPostProcessing(scene: Scene, camera: Camera, enableDOF: boolean = false) {
+export function setupPostProcessing(scene: Scene, camera: Camera) {
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
+  const dofSettings: CameraDOFSettings = defaultCameraDOFSettings;
 
-  // Enable bloom effect
-  pipeline.bloomEnabled = true;
   pipeline.bloomThreshold = 0.6;
   pipeline.bloomWeight = 0.05;
   pipeline.bloomKernel = 64;
   pipeline.bloomScale = 0.2;
 
-  // Enable chromatic aberration
   pipeline.chromaticAberrationEnabled = true;
   pipeline.chromaticAberration.aberrationAmount = 10;
   pipeline.chromaticAberration.radialIntensity = 0.2;
 
-  // Enable grain effect
   pipeline.grainEnabled = true;
   pipeline.grain.intensity = 8;
   pipeline.grain.animated = true;
 
-  pipeline.fxaaEnabled = true; // Enable anti-aliasing
+  pipeline.fxaaEnabled = true;
 
-  // Enable depth of field if requested
-  if (enableDOF) {
-    pipeline.depthOfFieldEnabled = true;
-    pipeline.depthOfField.focalLength = 50;
-    pipeline.depthOfField.fStop = 1.4;
-    pipeline.depthOfField.focusDistance = 50;
-    pipeline.depthOfFieldBlurLevel = 2;
-  }
-
-  // Enable motion blur
-  const motionBlur = new MotionBlurPostProcess('motionBlur', scene, 1.0, camera);
-  motionBlur.motionStrength = 0.1;
-  motionBlur.motionBlurSamples = 15;
-
-  // Screen Space Ambient Occlusion
-  const ssaoRatio = {
-    ssaoRatio: 1.0,
-    blurRatio: 0.5,
-  };
-  const ssao = new SSAO2RenderingPipeline('ssao', scene, ssaoRatio);
-  pipeline.imageProcessingEnabled = true;
-  pipeline.samples = 4;
-  ssao.totalStrength = 2.0;
-  ssao.expensiveBlur = true;
-  ssao.samples = 16;
-  ssao.radius = 8;
-
-  scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', camera);
+  pipeline.depthOfFieldEnabled = false;
+  pipeline.depthOfField.focalLength = dofSettings.focalLength;
+  pipeline.depthOfField.fStop = dofSettings.fStop;
+  pipeline.depthOfField.focusDistance = dofSettings.focusDistance;
+  pipeline.depthOfFieldBlurLevel = dofSettings.dofBlurLevel;
 
   return pipeline;
 }
@@ -136,7 +110,7 @@ export function setupScenelights(scene: Scene, primaryColor: Color3) {
   };
 }
 
-export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: any[]) {
+export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: Mesh[]) {
   const mirrorTexture = new MirrorTexture('floorMirror', 1024, scene, true);
   const floorMaterial = floorMesh.material;
 
@@ -150,36 +124,4 @@ export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects
   floorMaterial.environmentIntensity = 0.8;
 
   return mirrorTexture;
-}
-
-export function createParticleTexture(scene: Scene, color: Color3): Texture {
-  const textureSize = 64;
-  const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
-  const context = texture.getContext();
-
-  // Create a radial gradient
-  const gradient = context.createRadialGradient(
-    textureSize / 2,
-    textureSize / 2,
-    0,
-    textureSize / 2,
-    textureSize / 2,
-    textureSize / 2
-  );
-
-  // Convert Color3 to CSS color strings
-  const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
-  const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
-
-  // Color stops - Center, "middle" and edge
-  gradient.addColorStop(0, 'white');
-  gradient.addColorStop(0.3, rgbColor);
-  gradient.addColorStop(1, rgbaColorTransparent);
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, textureSize, textureSize);
-
-  texture.update();
-
-  return texture;
 }

@@ -1,46 +1,31 @@
 export interface RetroEffectsLevels {
   scanlines: number;
-  phosphor: number;
   curvature: number;
   glitch: number;
   colorBleed: number;
   flicker: number;
   vignette: number;
   noise: number;
-  dust: number;
-  crtTurnOnEffect: number;
-  crtTurnOffEffect: number;
-  crtChannelSwitchEffect: number;
 }
 
 export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 3,
-  phosphor: 3,
-  curvature: 0,
+  curvature: 3,
   glitch: 3,
   colorBleed: 3,
   flicker: 3,
   vignette: 3,
   noise: 3,
-  dust: 0,
-  crtTurnOnEffect: 0,
-  crtTurnOffEffect: 0,
-  crtChannelSwitchEffect: 1,
 };
 
 export const cinematicRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 5,
-  phosphor: 5,
   curvature: 5,
   glitch: 5,
   colorBleed: 5,
   flicker: 5,
   vignette: 5,
   noise: 5,
-  dust: 1,
-  crtTurnOnEffect: 1,
-  crtTurnOffEffect: 1,
-  crtChannelSwitchEffect: 1,
 };
 
 export interface RetroEffectsBaseParams {
@@ -52,11 +37,6 @@ export interface RetroEffectsBaseParams {
     vignette: number;
     flicker: number;
     colorBleed: number;
-  };
-  phosphorDots: {
-    dotSize: number;
-    dotIntensity: number;
-    nonSquareRatio: number;
   };
   crtDistortion: {
     curvatureAmount: number;
@@ -76,13 +56,6 @@ export interface RetroEffectsBaseParams {
     distortion: number;
     colorBleed: number;
   };
-  dustScratch: {
-    dustAmount: number;
-    scratchAmount: number;
-    dustSize: number;
-    edgeIntensity: number;
-    movementSpeed: number;
-  };
 }
 
 export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
@@ -95,13 +68,8 @@ export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
     flicker: 0.15,
     colorBleed: 0.05,
   },
-  phosphorDots: {
-    dotSize: 3.0,
-    dotIntensity: 0.15,
-    nonSquareRatio: 0.5,
-  },
   crtDistortion: {
-    curvatureAmount: 0.3,
+    curvatureAmount: 0.0,
     scanlineIntensity: 0.0,
     vignette: 0.4,
     colorBleed: 0.3,
@@ -118,13 +86,6 @@ export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
     distortion: 0.15,
     colorBleed: 0.4,
   },
-  dustScratch: {
-    dustAmount: 0.5,
-    scratchAmount: 0.4,
-    dustSize: 0.7,
-    edgeIntensity: 0.6,
-    movementSpeed: 1.0,
-  },
 };
 
 export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
@@ -136,11 +97,6 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     vignette: 0,
     flicker: 0.05,
     colorBleed: 0,
-  },
-  phosphorDots: {
-    dotSize: 5,
-    dotIntensity: 0.2,
-    nonSquareRatio: 0.2,
   },
   crtDistortion: {
     curvatureAmount: 0.2,
@@ -159,13 +115,6 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     staticNoise: 0.08,
     distortion: 0.08,
     colorBleed: 1.6,
-  },
-  dustScratch: {
-    dustAmount: 1.2,
-    scratchAmount: 1.2,
-    dustSize: 0.4,
-    edgeIntensity: 1.0,
-    movementSpeed: 2.0,
   },
 };
 

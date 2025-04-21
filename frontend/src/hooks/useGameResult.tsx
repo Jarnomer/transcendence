@@ -47,10 +47,10 @@ export const useGameResult = () => {
     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
       console.log('Game finished, submitting result');
       dispatch({ type: 'GAME_RESET' });
-      if (mode !== 'tournamnet') {
-        navigate('/home');
-      }
       resetGameOptions();
+      if (mode !== 'tournamnet') {
+        navigate('/gameMenu');
+      }
       hasSubmittedResult.current = true;
     }
   }, [gameStatus, dispatch, navigate]);
@@ -94,8 +94,9 @@ export const useGameResult = () => {
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
+        resetGameOptions();
         if (mode !== 'tournamnet') {
-          navigate('/home');
+          navigate('/gameMenu');
         }
         return;
       }
@@ -126,8 +127,9 @@ export const useGameResult = () => {
           console.error('Error submitting game result:', err);
         })
         .finally(() => {
+          resetGameOptions();
           if (mode !== 'tournamnet') {
-            navigate('/home');
+            navigate('/gameMenu');
           }
         });
     };

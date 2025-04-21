@@ -201,10 +201,7 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
         exit="hidden"
         transition={{ duration: 0.4 }}
       >
-        <motion.li
-          className="my-1 text-gray-500 h-[57px] min-w-[282px]"
-          variants={listItemVariants}
-        >
+        <motion.li className="my-1 text-gray-500 h-[57px] w-[282px]" variants={listItemVariants}>
           <ListSvgContainer>
             <div className="flex w-full h-full items-center gap-2">
               <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">

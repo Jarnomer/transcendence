@@ -26,6 +26,12 @@ interface UserContextType {
   // setToken: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+const cleanLocalStorage = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userID');
+  localStorage.removeItem('username');
+};
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const useUser = () => {
@@ -41,6 +47,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
 
+  console.log('------ USER PROVIDER MOUNTED -----');
+
   const fetchUser = useCallback(() => {
     if (!userId) {
       setUser(null);
@@ -55,9 +63,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       .catch((err) => {
         console.error('Failed to fetch user data', err);
-        localStorage.removeItem('token');
-        localStorage.removeItem('userID');
-        localStorage.removeItem('username');
+        cleanLocalStorage();
         setUser(null);
       });
   }, [userId]);
@@ -85,9 +91,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchUser();
       fetchRequestsSent();
     } catch (error) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userID');
-      localStorage.removeItem('username');
       setUser(null);
       setLoading(false);
     } finally {
@@ -106,9 +109,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userID');
-      localStorage.removeItem('username');
+      cleanLocalStorage();
       setUser(null);
       window.location.href = '/login';
     }

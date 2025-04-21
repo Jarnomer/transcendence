@@ -34,6 +34,7 @@ export const HomePageNav: React.FC<{
     allowInternalNavigation();
     navigate('/game');
   };
+  
   return (
     <motion.div
       id="home-page-nav"

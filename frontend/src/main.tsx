@@ -1,5 +1,3 @@
-import { BrowserRouter as Router } from 'react-router-dom';
-
 import ReactDOM from 'react-dom/client';
 
 import { LoadingProvider } from '@/contexts/gameContext/LoadingContextProvider';
@@ -17,9 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ModalProvider>
       <LoadingProvider>
         <NavigationAccessProvider>
-          <Router>
-            <App />
-          </Router>
+          <App />
         </NavigationAccessProvider>
       </LoadingProvider>
     </ModalProvider>

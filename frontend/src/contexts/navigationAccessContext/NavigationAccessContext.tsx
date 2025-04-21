@@ -15,6 +15,8 @@ export const NavigationAccessProvider: React.FC<{ children: React.ReactNode }> =
 
   const allowInternalNavigation = () => setFromAppNavigation(true);
 
+  console.log('---- NAVIGATION ACCESS PROVIDER MOUNTED ----');
+
   return (
     <NavigationAccessContext.Provider value={{ fromAppNavigation, allowInternalNavigation }}>
       {children}

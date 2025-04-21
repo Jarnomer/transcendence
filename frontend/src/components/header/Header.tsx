@@ -6,7 +6,6 @@ import { HeaderNav } from './HeaderNav';
 
 export const Header: React.FC = () => {
   const location = useLocation();
-
   if (location.pathname !== '/game') {
     return (
       <header

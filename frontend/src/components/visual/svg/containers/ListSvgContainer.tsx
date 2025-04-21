@@ -9,7 +9,6 @@ import { BackgroundGlow } from '../../BackgroundGlow';
 export const ListSvgContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const [supportsForeignObject, setSupportsForeignObject] = useState(true);
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
- // console.log('is safari:', isSafari);
 
   const supportsForeignObject = (() => {
     const ua = navigator.userAgent;
@@ -20,8 +19,6 @@ export const ListSvgContainer: React.FC<{ children: React.ReactNode }> = ({ chil
 
     return !(isSafari || isIE || isOldEdge);
   })();
-
- // console.log('supports foreignObject: ', supportsForeignObject);
 
   // h-[57px] min-w-[282px]
   return supportsForeignObject ? (

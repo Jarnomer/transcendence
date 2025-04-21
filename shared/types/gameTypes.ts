@@ -1,3 +1,5 @@
+import { ParticleSystem, GlowLayer, Mesh } from 'babylonjs';
+
 export interface Player {
   id: string;
   y: number;
@@ -6,7 +8,7 @@ export interface Player {
   paddleSpeed: number;
   spinIntensity: number;
   score: number;
-  activePowerUps: playerPowerUp[]; // Added this
+  activePowerUps: playerPowerUp[];
 }
 
 export interface Ball {
@@ -26,22 +28,20 @@ export enum PowerUpType {
   MoreSpin = 'more_spin',
 }
 
-// Added this interface for player power ups
 export interface playerPowerUp {
   type: PowerUpType;
   timeToExpire: number;
   isNegative: boolean;
 }
 
-// rename this to boardPowerUp?
 export interface PowerUp {
-  id: number; // needed!
-  x: number; // needed!
-  y: number; // needed!
-  isCollected: boolean; // Added this
-  isNegative: boolean; // Added this
-  timeToDespawn: number; // needed!
-  type: PowerUpType; // needed!
+  id: number;
+  x: number;
+  y: number;
+  isCollected: boolean;
+  isNegative: boolean;
+  timeToDespawn: number;
+  type: PowerUpType;
 }
 
 export interface GameState {
@@ -101,6 +101,18 @@ export interface GameRules {
   countdown: number;
 }
 
+export interface PowerUpEffect {
+  type: PowerUpType;
+  particleSystem: ParticleSystem | null;
+  glowLayer: GlowLayer | null;
+  icons: Mesh[];
+}
+
+export interface PlayerEffects {
+  paddleHeight: number;
+  activeEffects: Map<string, PowerUpEffect>;
+}
+
 export interface GameSettings {
   mode: '1v1' | 'singleplayer' | 'AIvsAI';
   difficulty: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
@@ -127,12 +139,6 @@ export const defaultGameSettings: GameSettings = {
   },
 };
 
-export interface GameSoundOptions {
-  enabled?: boolean;
-  muted?: boolean;
-  volume?: number;
-}
-
 export interface GameParams {
   dimensions: GameDimensions;
   paddle: PaddleParams;
@@ -140,7 +146,6 @@ export interface GameParams {
   spin: SpinParams;
   powerUps: PowerUpParams;
   rules: GameRules;
-  sounds: GameSoundOptions;
 }
 
 export const defaultGameParams: GameParams = {
@@ -187,12 +192,9 @@ export const defaultGameParams: GameParams = {
     maxScore: 5,
     countdown: 3, // Seconds
   },
-  sounds: {
-    enabled: true,
-    muted: false,
-    volume: 1.0,
-  } as GameSoundOptions,
 };
+
+export type GameMode = 'background' | 'active';
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 

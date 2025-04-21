@@ -9,7 +9,7 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { createParticleTexture, updateMotionBlur } from '@game/utils';
+import { createParticleTexture } from '@game/utils';
 
 import { BallEffectsParams, defaultBallEffectsParams } from '@shared/types';
 
@@ -360,8 +360,4 @@ export function applyBallEffects(
   applyBallOvality(ballMesh, angle, speed, spin);
   applyBallTrail(ballMesh, speed, color, scene);
   applySpinEffect(ballMesh, spin, speed, color, scene);
-
-  if (scene.activeCamera) {
-    updateMotionBlur(speed, scene.activeCamera);
-  }
 }

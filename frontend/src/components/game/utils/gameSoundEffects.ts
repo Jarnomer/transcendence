@@ -1,10 +1,10 @@
-import { GameSoundOptions } from '@shared/types';
+import { defaultGameAudioOptions } from '@shared/types';
 
 let soundManagerInstance: GameSoundManager | null = null;
 
-export function getGameSoundManager(options?: GameSoundOptions): GameSoundManager {
+export function getGameSoundManager(): GameSoundManager {
   if (!soundManagerInstance) {
-    soundManagerInstance = new GameSoundManager(options);
+    soundManagerInstance = new GameSoundManager();
   }
   return soundManagerInstance;
 }
@@ -12,22 +12,17 @@ export function getGameSoundManager(options?: GameSoundOptions): GameSoundManage
 export class GameSoundManager {
   private edgeSound: HTMLAudioElement | null = null;
   private paddleSound: HTMLAudioElement | null = null;
-
   private negativePowerUpSound: HTMLAudioElement | null = null;
   private positivePowerUpSound: HTMLAudioElement | null = null;
-
   private scoreSound: HTMLAudioElement | null = null;
-
   private gameStartSound: HTMLAudioElement | null = null;
   private gameOverSound: HTMLAudioElement | null = null;
-
   private countDown1Sound: HTMLAudioElement | null = null;
   private countDown2Sound: HTMLAudioElement | null = null;
   private countDown3Sound: HTMLAudioElement | null = null;
 
-  private volumeLevel: number = 1.0;
-  private isMuted: boolean = false;
-  private isEnabled: boolean = true;
+  private soundEffectsVolume: number = defaultGameAudioOptions.soundEffects?.volume || 1.0;
+  private soundEffectsEnabled: boolean = defaultGameAudioOptions.soundEffects?.enabled || true;
 
   private lastSoundTimes: Record<string, number> = {};
   private soundDebounceTime: number = 100; // ms
@@ -35,29 +30,21 @@ export class GameSoundManager {
   private allSounds: HTMLAudioElement[] | null = null;
   private soundsLoaded: boolean = false;
 
-  constructor(options?: GameSoundOptions) {
-    this.volumeLevel = options?.volume ?? 0.7;
-    this.isMuted = options?.muted ?? false;
-    this.isEnabled = options?.enabled ?? true;
-
+  constructor() {
     this.initSounds();
   }
 
   private initSounds(): void {
     if (typeof window !== 'undefined') {
-      const baseUrl = '/src/assets/sounds/';
+      const baseUrl = 'sounds/effects/';
 
-      this.edgeSound = new Audio(baseUrl + 'collision_1.wav');
-      this.paddleSound = new Audio(baseUrl + 'collision_2.wav');
-
-      this.negativePowerUpSound = new Audio(baseUrl + 'powerup.wav');
-      this.positivePowerUpSound = new Audio(baseUrl + 'powerup.wav');
-
-      this.scoreSound = new Audio(baseUrl + 'powerup.wav');
-
-      this.gameStartSound = new Audio(baseUrl + 'powerup.wav');
-      this.gameOverSound = new Audio(baseUrl + 'powerup.wav');
-
+      this.edgeSound = new Audio(baseUrl + 'HIT1.wav');
+      this.paddleSound = new Audio(baseUrl + 'HIT2.wav');
+      this.negativePowerUpSound = new Audio(baseUrl + 'POWERUP.wav');
+      this.positivePowerUpSound = new Audio(baseUrl + 'POWERUP_END.wav');
+      this.scoreSound = new Audio(baseUrl + 'EXPLOSION_1.wav');
+      this.gameStartSound = new Audio(baseUrl + 'BALLDROP.wav');
+      this.gameOverSound = new Audio(baseUrl + 'POWERUP.wav');
       this.countDown1Sound = new Audio(baseUrl + 'countDown.wav');
       this.countDown2Sound = new Audio(baseUrl + 'countDown.wav');
       this.countDown3Sound = new Audio(baseUrl + 'countDown.wav');
@@ -77,7 +64,7 @@ export class GameSoundManager {
 
       this.allSounds.forEach((sound) => {
         if (sound) {
-          sound.volume = this.volumeLevel;
+          sound.volume = this.soundEffectsVolume;
           sound.addEventListener('canplaythrough', () => {
             this.soundsLoaded = true;
           });
@@ -199,7 +186,7 @@ export class GameSoundManager {
   }
 
   private shouldPlaySound(soundType: string): boolean {
-    if (!this.isEnabled || this.isMuted || !this.soundsLoaded) return false;
+    if (!this.soundEffectsEnabled || !this.soundsLoaded) return false;
 
     // Throttle sound playing to avoid performance issues
     const now = Date.now();
@@ -212,10 +199,10 @@ export class GameSoundManager {
   }
 
   private playSound(sound: HTMLAudioElement | null, volumeMultiplier: number = 1.0): void {
-    if (!sound || !this.isEnabled || this.isMuted) return;
+    if (!sound || !this.soundEffectsEnabled) return;
 
     try {
-      sound.volume = Math.min(this.volumeLevel * volumeMultiplier, 1.0);
+      sound.volume = Math.min(this.soundEffectsVolume * volumeMultiplier, 1.0);
       sound.currentTime = 0;
 
       const playPromise = sound.play();
@@ -230,27 +217,26 @@ export class GameSoundManager {
     }
   }
 
-  setVolume(volume: number): void {
+  setSoundEffectsVolume(volume: number): void {
     if (!this.allSounds) return;
 
-    this.volumeLevel = Math.max(0, Math.min(volume, 1.0));
+    this.soundEffectsVolume = Math.max(0, Math.min(volume, 1.0));
 
     this.allSounds.forEach((sound) => {
-      if (sound) sound.volume = this.volumeLevel;
+      if (sound) sound.volume = this.soundEffectsVolume;
     });
   }
 
-  toggleMute(): boolean {
-    this.isMuted = !this.isMuted;
-    return this.isMuted;
+  setSoundEffectsEnabled(enabled: boolean): void {
+    this.soundEffectsEnabled = enabled;
   }
 
-  setEnabled(enabled: boolean = true): void {
-    this.isEnabled = enabled;
+  setSoundDebounceTime(ms: number): void {
+    this.soundDebounceTime = ms;
   }
 
-  setDisabled(disabled: boolean = true): void {
-    this.isEnabled = !disabled;
+  areSoundsLoaded(): boolean {
+    return this.soundsLoaded;
   }
 
   preloadSounds(): void {
@@ -270,11 +256,15 @@ export class GameSoundManager {
     });
   }
 
-  setSoundDebounceTime(ms: number): void {
-    this.soundDebounceTime = ms;
-  }
-
-  areSoundsLoaded(): boolean {
-    return this.soundsLoaded;
+  dispose(): void {
+    // Clean up all sound resources
+    if (this.allSounds) {
+      this.allSounds.forEach((sound) => {
+        if (sound) {
+          sound.pause();
+          sound.src = '';
+        }
+      });
+    }
   }
 }

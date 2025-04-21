@@ -1,0 +1,38 @@
+FROM node:22-slim AS builder
+
+WORKDIR /app
+
+RUN npm install -g pnpm@latest-10
+
+ENV CI=true
+ENV NODE_ENV=production
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
+COPY frontend/package.json ./frontend/
+COPY shared/package.json ./shared/
+
+# Install ALL dependencies including devDependencies for build
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY frontend ./frontend/
+COPY shared ./shared/
+COPY tsconfig.json ./
+
+# Build the application
+WORKDIR /app/frontend
+RUN pnpm run build
+
+# Production image
+FROM nginx:alpine
+
+# Copy the built assets to nginx
+COPY --from=builder /app/frontend/dist /usr/share/nginx/html
+
+# Use a simple nginx config for serving static files
+COPY ./nginx/frontend.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 5173
+
+CMD ["nginx", "-g", "daemon off;"]

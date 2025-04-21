@@ -419,7 +419,9 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   <span className="flex flex-row relative">
                     <div className="border relative">
                       <label htmlFor="displayName">
-                        <span className="text-xs absolute top-1 left-1">Display Name *</span>
+                        <span className="text-xs absolute top-1 left-1 text-secondary">
+                          Display Name *
+                        </span>
                       </label>
 
                       <input
@@ -434,7 +436,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                       />
                     </div>
                     <div className="border-1 w-full relative border-r-primary">
-                      <span className="text-xs absolute top-1 left-1">Email</span>
+                      <span className="text-xs absolute top-1 left-1 text-secondary">Email</span>
                       {/* <input
                     type="text"
                     name="email"
@@ -448,7 +450,9 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   <span className="flex flex-row relative">
                     <div className="border relative">
                       <label htmlFor="firstName">
-                        <span className="text-xs absolute top-1 left-1">First Name</span>
+                        <span className="text-xs absolute top-1 left-1 text-secondary">
+                          First Name
+                        </span>
                       </label>
                       <input
                         type="text"
@@ -462,7 +466,9 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                     </div>
                     <div className="border relative">
                       <label htmlFor="lastName">
-                        <span className="text-xs absolute top-1 left-1">Last Name</span>
+                        <span className="text-xs absolute top-1 left-1 text-secondary">
+                          Last Name
+                        </span>
                       </label>
                       <input
                         type="text"
@@ -477,7 +483,9 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   </span>
                   <div className="border flex flex-row w-full relative">
                     <label htmlFor="bio">
-                      <span className="text-xs absolute top-1 left-1">Biography</span>
+                      <span className="text-xs absolute top-1 left-1 text-secondary">
+                        Biography
+                      </span>
                     </label>
                     <textarea
                       name="bio"

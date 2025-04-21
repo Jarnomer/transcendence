@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile.prod
+    image: backend-prod
+    container_name: backend-prod
+    env_file:
+      - .env
+    ports:
+      - '${BACKEND_PORT}'
+    volumes:
+      # Only keep uploads volume
+      - uploads:/app/backend/database/uploads
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile.prod
+    image: frontend-prod
+    container_name: frontend-prod
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  nginx:
+    build: ./nginx
+    image: nginx:pong
+    container_name: nginx
+    ports:
+      - '8443:8443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - uploads:/app/backend/database/uploads
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+volumes:
+  uploads:
