@@ -16,8 +16,9 @@ import {
 
 import {
   GameSoundManager,
-  PowerUpEffectsManager,
   RetroEffectsManager,
+  PowerUpEffectsManager,
+  ActivePowerUpIconManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -89,6 +90,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
   const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
+  const powerUpIconsRef = useRef<ActivePowerUpIconManager | null>(null);
   const prevPowerUpsRef = useRef<PowerUp[]>([]);
 
   const floorRef = useRef<Mesh | null>(null);
@@ -260,6 +262,13 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       soundManagerRef.current
     );
 
+    powerUpIconsRef.current = new ActivePowerUpIconManager(
+      scene,
+      colors.primaryColor,
+      colors.secondaryColor,
+      soundManagerRef.current
+    );
+
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
 
     engine.runRenderLoop(() => {
@@ -275,6 +284,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       if (powerUpEffectsRef.current) powerUpEffectsRef.current.disposeAll();
+      if (powerUpIconsRef.current) powerUpIconsRef.current.disposeAll();
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       engine.dispose();
@@ -390,6 +400,13 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       secondaryColor,
       playerEffectsMapRef.current
     );
+
+    if (powerUpIconsRef.current) {
+      powerUpIconsRef.current.updatePowerUpDisplays({
+        player1: gameState.players.player1,
+        player2: gameState.players.player2,
+      });
+    }
 
     // Convert coordinates and update position if not animating
     if (!isAnimatingBallRef.current) {

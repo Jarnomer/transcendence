@@ -14,7 +14,13 @@ import {
   CubicEase,
 } from 'babylonjs';
 
-import { gameToSceneSize, gameToSceneX, gameToSceneY, createParticleTexture } from '@game/utils';
+import {
+  gameToSceneSize,
+  gameToSceneX,
+  gameToSceneY,
+  getPowerUpIconPath,
+  createParticleTexture,
+} from '@game/utils';
 
 import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
 
@@ -89,13 +95,13 @@ export class PowerUpEffectsManager {
 
     const x = gameToSceneX(powerUp.x, icon);
     const y = gameToSceneY(powerUp.y, icon);
-    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor);
+    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
 
     icon.position = basePosition.clone();
 
     const color = this.getPowerUpColor(powerUp.isNegative);
     const cube = this.createCubeMesh(powerUpId, basePosition, cubeSize, 0.6, color);
-    const particleSystem = this.createGlitterParticleSystem(powerUpId, x, y, color);
+    const particleSystem = this.createParticleSystem(powerUpId, x, y, color);
 
     this.effects.set(powerUpId, {
       powerUpId,
@@ -121,7 +127,7 @@ export class PowerUpEffectsManager {
     );
     const color = isNegative ? this.secondaryColor : this.primaryColor;
     const material = new StandardMaterial(`powerUpMaterial-${type}`, this.scene);
-    const iconPath = this.getPowerUpIconPath(type);
+    const iconPath = getPowerUpIconPath(type);
     const texture = new Texture(iconPath, this.scene);
 
     material.emissiveColor = color;
@@ -135,23 +141,6 @@ export class PowerUpEffectsManager {
     mesh.material = material;
 
     return mesh;
-  }
-
-  private getPowerUpIconPath(type: PowerUpType): string {
-    switch (type) {
-      case PowerUpType.BiggerPaddle:
-        return '/power-up/paddle_bigger.png';
-      case PowerUpType.SmallerPaddle:
-        return '/power-up/paddle_smaller.png';
-      case PowerUpType.FasterPaddle:
-        return '/power-up/paddle_faster.png';
-      case PowerUpType.SlowerPaddle:
-        return '/power-up/paddle_slower.png';
-      case PowerUpType.MoreSpin:
-        return '/power-up/paddle_spin.png';
-      default:
-        return '/power-up/unknown_powerup.png';
-    }
   }
 
   private createCubeMesh(
@@ -212,17 +201,12 @@ export class PowerUpEffectsManager {
     cube.metadata = { observer, elapsedTime };
   }
 
-  private createGlitterParticleSystem(
-    id: number,
-    x: number,
-    y: number,
-    color: Color3
-  ): ParticleSystem {
+  private createParticleSystem(id: number, x: number, y: number, color: Color3): ParticleSystem {
     const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 200, this.scene);
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
-    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor);
+    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
 
     const emitBoxSize = 0.03;
     particleSystem.minEmitBox = new Vector3(-emitBoxSize, -emitBoxSize, -emitBoxSize);
@@ -293,7 +277,6 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
-
     const scaleXKeys = [
       { frame: 0, value: 1.0 },
       { frame: 30, value: 1.4 },
@@ -308,7 +291,6 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
-
     const scaleYKeys = [
       { frame: 0, value: 1.0 },
       { frame: 15, value: 1.2 },
@@ -325,7 +307,6 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
-
     const scaleZKeys = [
       { frame: 0, value: 0.5 },
       { frame: 60, value: 0.5 },

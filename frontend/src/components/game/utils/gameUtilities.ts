@@ -11,7 +11,7 @@ import {
 
 import { getThemeColors } from '@game/utils';
 
-import { defaultGameParams } from '@shared/types';
+import { PowerUpType, defaultGameParams } from '@shared/types';
 
 export function createParticleTexture(scene: Scene, color: Color3): Texture {
   const textureSize = 64;
@@ -173,4 +173,38 @@ export function applyLowQualitySettings(
   scene.blockMaterialDirtyMechanism = true;
 
   optimizeShadowGenerators(shadowGenerators);
+}
+
+export function getPowerUpIconPath(powerUpType: PowerUpType) {
+  switch (powerUpType) {
+    case PowerUpType.BiggerPaddle:
+      return '/power-up/paddle_bigger.png';
+    case PowerUpType.SmallerPaddle:
+      return '/power-up/paddle_smaller.png';
+    case PowerUpType.FasterPaddle:
+      return '/power-up/paddle_faster.png';
+    case PowerUpType.SlowerPaddle:
+      return '/power-up/paddle_slower.png';
+    case PowerUpType.MoreSpin:
+      return '/power-up/paddle_spin.png';
+    default:
+      return '/power-up/unknown_powerup.png';
+  }
+}
+
+export function getPowerUpSignPath(powerUpType: PowerUpType) {
+  switch (powerUpType) {
+    case PowerUpType.BiggerPaddle:
+      return '/power-up/sign_plus.png';
+    case PowerUpType.SmallerPaddle:
+      return '/power-up/sign_minus.png';
+    case PowerUpType.FasterPaddle:
+      return '/power-up/sign_fast.png';
+    case PowerUpType.SlowerPaddle:
+      return '/power-up/sign_slow.png';
+    case PowerUpType.MoreSpin:
+      return '/power-up/sign_spin.png';
+    default:
+      return '/power-up/sign_unknown.png';
+  }
 }
