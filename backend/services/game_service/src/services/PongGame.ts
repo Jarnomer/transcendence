@@ -1,12 +1,12 @@
 // import { Any } from '@sinclair/typebox';
 
 import {
+  defaultGameParams,
+  GameParams,
+  GameSettings,
   GameState,
   GameStatus,
-  GameParams,
-  defaultGameParams,
   PowerUpType,
-  GameSettings,
 } from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
@@ -62,6 +62,11 @@ export default class PongGame {
 
   setSettings(settings: GameSettings): void {
     this.settings = settings;
+    if (this.settings.ballSpeed >= this.params.ball.maxDX) {
+      this.settings.ballSpeed = this.params.ball.maxDX;
+    } else if (this.settings.ballSpeed <= this.params.ball.minDX) {
+      this.settings.ballSpeed = this.params.ball.minDX;
+    }
   }
 
   addPlayer(playerId: string): void {
@@ -328,8 +333,8 @@ export default class PongGame {
     this.gameState.ball = {
       x: this.params.dimensions.gameWidth / 2,
       y: this.params.dimensions.gameHeight / 2,
-      dx: direction * this.params.ball.speed * Math.cos(angle),
-      dy: this.params.ball.speed * Math.sin(angle),
+      dx: direction * this.settings.ballSpeed * Math.cos(angle),
+      dy: this.settings.ballSpeed * Math.sin(angle),
       spin: 0,
     };
   }
@@ -432,7 +437,7 @@ export default class PongGame {
   private updateBall(): void {
     if (this.gameStatus !== 'playing') return;
 
-    const { ball, players } = this.gameState;
+    const { ball } = this.gameState;
 
     this.adjustBallMovementForSpin();
     ball.x += ball.dx;
@@ -459,25 +464,28 @@ export default class PongGame {
     this.checkPaddleCollision();
 
     if (ball.x <= 0) {
-      players.player2.score++;
-      console.log('Player 2 scores!');
-      if (this.settings.maxScore !== 0 && players.player2.score >= this.settings.maxScore) {
-        this.stopGame();
-      } else {
-        this.setGameStatus('waiting');
-        this.resetPaddles();
-        // this.resetBall();
-      }
+      this.scorePoint(2);
     } else if (ball.x + this.params.ball.size >= this.params.dimensions.gameWidth) {
-      players.player1.score++;
+      this.scorePoint(1);
+    }
+  }
+
+  private scorePoint(player: number): void {
+    if (player === 1) {
+      this.gameState.players.player1.score++;
       console.log('Player 1 scores!');
-      if (this.settings.maxScore !== 0 && players.player1.score >= this.settings.maxScore) {
-        this.stopGame();
-      } else {
-        this.setGameStatus('waiting');
-        this.resetPaddles();
-        // this.resetBall();
-      }
+    } else {
+      this.gameState.players.player2.score++;
+      console.log('Player 2 scores!');
+    }
+    if (
+      this.gameState.players.player1.score >= this.settings.maxScore ||
+      this.gameState.players.player2.score >= this.settings.maxScore
+    ) {
+      console.log('Game over!');
+      this.stopGame();
+    } else {
+      this.setGameStatus('waiting');
     }
   }
 
@@ -558,7 +566,7 @@ export default class PongGame {
       this.params.ball.maxSpeedMultiplier
     );
 
-    const newSpeed = this.params.ball.speed * this.params.ball.speedMultiplier;
+    const newSpeed = this.settings.ballSpeed * this.params.ball.speedMultiplier;
     const direction = isLeftPaddle ? 1 : -1;
     const paddle = isLeftPaddle ? players.player1 : players.player2;
 
