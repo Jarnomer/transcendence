@@ -16,9 +16,17 @@ import { useBackgroundGameVisibility } from '../hooks/useBackgroundGameVisibilit
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, sendMessage, gameSocket, closeConnection } =
-    useWebSocketContext();
-  const { gameId, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
+  const {
+    gameState,
+    gameStatus,
+    connections,
+    sendMessage,
+    gameSocket,
+    closeConnection,
+    phase,
+    startGame,
+  } = useWebSocketContext();
+  const { mode, difficulty, lobby, tournamentOptions, gameSettings } = useGameOptionsContext();
   const { userId } = useUser();
   const { loadingStates } = useLoading();
   const [animate, setAnimate] = useState<boolean>(false);
@@ -35,7 +43,7 @@ export const GamePage: React.FC = () => {
     console.log('GamePage mounted');
     console.log('mode: ', mode);
     console.log('difficulty: ', difficulty);
-    console.log('gameId: ', gameId);
+    console.log('gameId: ', phase.gameId);
     console.log('setTournamentOptions', tournamentOptions);
 
     return () => {
@@ -67,16 +75,23 @@ export const GamePage: React.FC = () => {
   // useMatchmaking();
 
   useEffect(() => {
-    if (!gameId) return;
+    if (!phase.gameId) return;
     console.log('connecting to game socket');
     // params.current.set('user_id', userId);
     // params.current.set('token', localStorage.getItem('token') || '');
-    params.current.set('game_id', gameId);
-    gameSocket.connect(params.current);
+    // params.current.set('game_id', phase.gameId);
+    // params.current.set('role', 'player');
+    // gameSocket.connect(params.current);
+    startGame();
     return () => {
       closeConnection('game');
     };
-  }, [gameId]);
+  }, [phase.gameId]);
+
+  // useEffect(() => {
+  //   if (lobby === 'random', mode === '1v1', difficulty === 'online') {
+  //     console.log('Finding match');
+
   useGameResult();
   const localPlayerId = useGameControls();
   const playersData = useFetchPlayerData();
@@ -84,14 +99,14 @@ export const GamePage: React.FC = () => {
   // MAKE SURE THAT THE MATCHMAKING CAROUSEL HAS FINISHED, AND THAT PLAYER SCOREBOARD IS INITALIZED
   // SET LOADING TO FALSE TO RENDER THE GAMECANVAS
   useEffect(() => {
-    if (!gameId) return;
+    if (!phase.gameId) return;
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
       setLoading(false);
     }
-  }, [animate, loadingStates, gameId]);
+  }, [animate, loadingStates, phase.gameId]);
 
   useEffect(() => {
-    if (!gameId || !localPlayerId) return;
+    if (!phase.gameId || !localPlayerId) return;
 
     let isMounted = true; // Track if component is mounted
 
@@ -109,7 +124,7 @@ export const GamePage: React.FC = () => {
         clearTimeout(readyMessageDelay);
       };
     }
-  }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
+  }, [loading, gameStatus, phase.gameId, localPlayerId, sendMessage, connections.game]);
 
   return (
     <div

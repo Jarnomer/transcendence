@@ -3,6 +3,8 @@ import { FastifyRequest } from 'fastify';
 import 'module-alias/register';
 import { Database } from 'sqlite';
 
+import { UserRole } from '@shared/types/gameTypes';
+
 import { GameManager } from '@my-backend/game_service';
 
 export class GameController {
@@ -21,18 +23,22 @@ export class GameController {
   }
 
   async play(socket: WebSocket, request: FastifyRequest) {
-    const { game_id, mode, difficulty, user_id } = request.query as {
+    const { game_id, mode, difficulty, user_id, role } = request.query as {
       game_id: string;
       mode: string;
       difficulty: string;
       user_id: string;
+      role: UserRole;
     };
     request.log.trace(`Client connected to game ${game_id}`);
-
-    if (!this.gameManager.isGameExists(game_id)) {
-      await this.gameManager.createGame(game_id, mode, difficulty);
+    if (role === 'player') {
+      if (!this.gameManager.isGameExists(game_id)) {
+        await this.gameManager.createGame(game_id, mode, difficulty);
+      }
+      console.log('Adding client to game:', game_id, user_id);
+      await this.gameManager.addClient(game_id, user_id, socket);
+    } else if (role === 'spectator') {
+      this.gameManager.addSpectator(game_id, user_id, socket);
     }
-    console.log('Adding client to game:', game_id, user_id);
-    await this.gameManager.addClient(game_id, user_id, socket);
   }
 }

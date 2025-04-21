@@ -1,5 +1,7 @@
 class WebSocketManager {
   private static instances: Record<string, WebSocketManager> = {};
+  private queue: any[] = [];
+
   private ws: WebSocket | null = null;
   private url: string;
   private reconnectAttempts = 0;
@@ -42,6 +44,7 @@ class WebSocketManager {
 
     this.ws.onopen = () => {
       console.log('WebSocket connected:', this.url);
+      this.flushQueue();
       this.reconnectAttempts = 0;
       this.notifyHandlers('open', null);
     };
@@ -83,11 +86,22 @@ class WebSocketManager {
           this.notifyHandlers(data.type, data.state);
         } else {
           console.warn('Received invalid WebSocket message:', data);
+          this.queue.push(data);
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
       }
     };
+  }
+
+  flushQueue() {
+    if (this.queue.length > 0) {
+      console.log('Flushing WebSocket queue:', this.queue);
+      this.queue.forEach((data) => {
+        this.notifyHandlers(data.type, data.state);
+      });
+      this.queue = [];
+    }
   }
 
   reset() {

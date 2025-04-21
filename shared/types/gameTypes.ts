@@ -202,3 +202,26 @@ export type GameEvent =
   | 'player_left'
   | 'players_matched'
   | 'matching_players';
+
+export type UserRole = 'player' | 'spectator' | 'admin';
+
+export type MatchmakingOptionsType = {
+  mode: string;
+  difficulty: string;
+  queueId: string | null;
+};
+
+export type TournamentOptionsType = {
+  playerCount: number;
+  tournamentName: string;
+  isPrivate: boolean;
+  password: string | null;
+};
+
+export type GameOptionsType = {
+  lobby: string;
+  mode: string;
+  difficulty: string;
+  queueId: string | null;
+  tournamentOptions: TournamentOptionsType | null;
+};

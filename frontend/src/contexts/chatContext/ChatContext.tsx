@@ -261,7 +261,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           message: newMessage,
         },
       };
-
       console.log('Sending message:', messageData);
       sendMessage('chat', messageData);
       setMessages((prev) => ({

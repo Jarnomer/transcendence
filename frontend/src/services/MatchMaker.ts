@@ -1,4 +1,5 @@
-import { GameOptionsType } from '../contexts/gameContext/GameOptionsContext';
+import { GameOptionsType } from '@shared/types/gameTypes';
+
 import { cancelQueue, createQueue, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
@@ -122,7 +123,6 @@ class TournamentGame extends GameMode {
   async findMatch() {
     console.log('Finding tournament game...');
     if (this.lobby === 'create') {
-      console.log('Creating tournament game...');
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining tournament game...');
@@ -176,21 +176,15 @@ class GameFactory {
   }
 }
 
-// Step 5: Implement the Game Manager with a State Machine
 class MatchMaker {
   private state: MatchMakerState = MatchMakerState.SEARCHING;
   private gameMode: GameMode;
   private gameId: string | null = null;
   private queueId: string | null = null;
-  private mode: string;
-  private difficulty: string;
-  private lobby: string;
+  private options: GameOptionsType;
   constructor(options: GameOptionsType) {
-    const { mode, difficulty, lobby } = options;
-    this.mode = mode;
-    this.difficulty = difficulty;
-    this.lobby = lobby;
     this.gameMode = GameFactory.createMode(this, options);
+    this.options = options;
   }
 
   getGameId(): string | null {
@@ -215,6 +209,14 @@ class MatchMaker {
 
   getQueueId(): string | null {
     return this.queueId;
+  }
+
+  getPlayerOptions() {
+    return {
+      queueId: this.options.queueId,
+      mode: this.options.mode,
+      difficulty: this.options.difficulty,
+    };
   }
 
   async startMatchMake() {

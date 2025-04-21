@@ -67,9 +67,9 @@ export const TournamentLobbyNav: React.FC<{
   const navigate = useNavigate();
   const { setLobby, setDifficulty, setMode, resetGameOptions } = useGameOptionsContext();
 
-  useEffect(() => {
-    resetGameOptions();
-  }, []);
+  // useEffect(() => {
+  //   resetGameOptions();
+  // }, []);
 
   return (
     <motion.div
@@ -180,23 +180,23 @@ export const TournamentLobby: React.FC = () => {
   //   setPlayers([user?.user_id]);
   // }, [user]);
 
-  useEffect(() => {
-    if (!user) return;
+  // useEffect(() => {
+  //   if (!user) return;
 
-    const setupChat = async () => {
-      console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
-      const chatId = await createRoom(
-        'tournamentChat_' + Math.floor(Math.random() * 50),
-        true,
-        null
-      );
-      if (chatId) {
-        setTournamentChatId(chatId);
-      }
-    };
+  //   const setupChat = async () => {
+  //     console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
+  //     const chatId = await createRoom(
+  //       'tournamentChat_' + Math.floor(Math.random() * 50),
+  //       true,
+  //       null
+  //     );
+  //     if (chatId) {
+  //       setTournamentChatId(chatId);
+  //     }
+  //   };
 
-    setupChat();
-  }, [user]);
+  //   setupChat();
+  // }, [user]);
 
   useEffect(() => {}, [tournamentChatId]);
 
