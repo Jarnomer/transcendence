@@ -10,7 +10,10 @@
     "start": "node services/main_server/dist/index.js",
     "test:create-users": "pnpm --filter @my-backend/tests run test:create-users",
     "test:create-tournaments": "pnpm --filter @my-backend/tests run test:create-tournaments",
-    "test:run-all": "pnpm --filter @my-backend/tests run test:run-all"
+    "test:run-all": "pnpm --filter @my-backend/tests run test:run-all",
+    "typecheck": "tsc --project tsconfig.prod.json --noEmit",
+    "typecheck:all": "pnpm -r run typecheck",
+    "test:prod": "NODE_ENV=production pnpm typecheck && pnpm -r run typecheck"
   },
   "keywords": [],
   "author": "",
