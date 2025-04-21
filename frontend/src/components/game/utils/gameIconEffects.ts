@@ -48,12 +48,14 @@ export class ActivePowerUpIconManager {
   private soundManager: any;
   private gameWidth: number;
   private gameHeight: number;
-  private ySpacing: number = 2.0;
-  private xOffset: number = -1.0;
-  private xOffsetMultiplier: number = 1;
-  private iconSize: number = 1.0;
-  private barWidth: number = 0.25;
-  private barHeight: number = 1.5;
+  private iconSize: number;
+  private ySpacing: number;
+  private barHeight: number;
+  private barWidth: number;
+
+  private barOffsetMultiplier: number = 0.7; // based on icon size
+  private fieldXSideOffset: number = 9.0; // Side offset to place icons clearly at sides
+  private iconYOffset: number = 0.0; // Starting from top of game area
 
   constructor(scene: Scene, primaryColor: Color3, secondaryColor: Color3, soundManager?: any) {
     this.scene = scene;
@@ -62,6 +64,10 @@ export class ActivePowerUpIconManager {
     this.soundManager = soundManager;
     this.gameWidth = defaultGameParams.dimensions.gameWidth;
     this.gameHeight = defaultGameParams.dimensions.gameHeight;
+    this.iconSize = gameToSceneSize(defaultGameParams.powerUps.size);
+    this.ySpacing = this.iconSize * 1.5;
+    this.barHeight = this.iconSize * 0.8;
+    this.barWidth = this.iconSize * 0.1;
   }
 
   updatePowerUpDisplays(players: { player1: Player; player2: Player }): void {
@@ -76,8 +82,14 @@ export class ActivePowerUpIconManager {
   private updatePlayerPowerUps(player: Player, playerType: 'player1' | 'player2'): void {
     const currentPowerUpIds = new Set<string>();
 
+    // Sort active power-ups by timeToExpire (descending)
+    // This ensures the newest power-ups (with highest timeToExpire) are at higher indices
+    const sortedPowerUps = [...player.activePowerUps].sort(
+      (a, b) => b.timeToExpire - a.timeToExpire
+    );
+
     // Process current active power-ups
-    player.activePowerUps.forEach((powerUp, index) => {
+    sortedPowerUps.forEach((powerUp, index) => {
       const id = `${playerType}-${powerUp.type}-${index}`;
       currentPowerUpIds.add(id);
 
@@ -113,24 +125,28 @@ export class ActivePowerUpIconManager {
     index: number
   ): void {
     const isPlayer1 = playerType === 'player1';
-    const xPosition = isPlayer1 ? this.xOffset : this.gameWidth - this.xOffset;
-    const yPosition = this.gameHeight / 2 - (index + 1) * this.ySpacing;
     const id = `${playerType}-${powerUp.type}-${index}`;
 
-    const position = new Vector3(
-      gameToSceneSize(xPosition),
-      gameToSceneSize(yPosition),
-      defaultGameObjectParams.distanceFromFloor
-    );
+    // Use absolute positioning in scene units, since the game uses a centered coordinate system
+    // (0,0) is at the center of the screen
+
+    // Calculate base X position - positioned at sides of screen
+    const xOffset = isPlayer1 ? -this.fieldXSideOffset : this.fieldXSideOffset;
+
+    // Calculate Y position - negative values are toward the top of screen
+    // Add spacing for multiple icons
+    const yPos = this.iconYOffset + index * this.ySpacing;
+
+    const position = new Vector3(xOffset, yPos, defaultGameObjectParams.distanceFromFloor);
 
     const icon = this.createPowerUpIcon(powerUp.type, position, powerUp.isNegative, id);
 
     // Choose progress bar position
     const barPosition = position.clone();
     if (isPlayer1) {
-      barPosition.x -= this.iconSize * this.xOffsetMultiplier;
+      barPosition.x -= this.iconSize * this.barOffsetMultiplier;
     } else {
-      barPosition.x += this.iconSize * this.xOffsetMultiplier;
+      barPosition.x += this.iconSize * this.barOffsetMultiplier;
     }
 
     const { progressBar, progressMaterial } = this.createProgressBar(
@@ -249,11 +265,12 @@ export class ActivePowerUpIconManager {
     particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.7);
     particleSystem.colorDead = new Color4(color.r * 0.5, color.g * 0.5, color.b * 0.5, 0);
 
-    particleSystem.minSize = 0.05;
-    particleSystem.maxSize = 0.15;
+    // Increased particle size for better visibility
+    particleSystem.minSize = 0.1;
+    particleSystem.maxSize = 0.25;
     particleSystem.minLifeTime = 0.3;
     particleSystem.maxLifeTime = 0.6;
-    particleSystem.emitRate = 15;
+    particleSystem.emitRate = 20; // Increased emit rate
 
     particleSystem.direction1 = direction.scale(0.8);
     particleSystem.direction2 = direction.scale(1.2);
@@ -343,14 +360,16 @@ export class ActivePowerUpIconManager {
       display.index = index;
 
       const isPlayer1 = playerType === 'player1';
-      const xPosition = isPlayer1 ? this.xOffset : this.gameWidth - this.xOffset;
-      const yPosition = this.gameHeight / 2 - (index + 1) * this.ySpacing;
 
-      const newPosition = new Vector3(
-        gameToSceneSize(xPosition),
-        gameToSceneSize(yPosition),
-        defaultGameObjectParams.distanceFromFloor
-      );
+      // Use absolute positioning in scene units
+      // Calculate base X position - positioned at sides of screen
+      const xOffset = isPlayer1 ? -this.fieldXSideOffset : this.fieldXSideOffset;
+
+      // Calculate Y position - negative values are toward the top of screen
+      // Add spacing for multiple icons
+      const yPos = this.iconYOffset + index * this.ySpacing;
+
+      const newPosition = new Vector3(xOffset, yPos, defaultGameObjectParams.distanceFromFloor);
 
       this.animatePositionChange(display, newPosition);
     });
@@ -379,10 +398,12 @@ export class ActivePowerUpIconManager {
 
     // Choose progress bar position
     const barPosition = newPosition.clone();
+    const barOffset = this.iconSize * this.barOffsetMultiplier;
+
     if (display.player === 'player1') {
-      barPosition.x -= this.iconSize * this.xOffsetMultiplier;
+      barPosition.x -= barOffset;
     } else {
-      barPosition.x += this.iconSize * this.xOffsetMultiplier;
+      barPosition.x += barOffset;
     }
 
     // Progress bar position animation
