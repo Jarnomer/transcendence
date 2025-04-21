@@ -6,6 +6,11 @@ DATABASE     := ./backend/database/data.db
 
 RM = rm -rf
 
+LOG_DIR      := ./logs
+BACKEND_LOG  := $(LOG_DIR)/error-backend.log
+FRONTEND_LOG := $(LOG_DIR)/error-frontend.log
+ESLINT_LOG   := $(LOG_DIR)/error-eslint.log
+
 all: dev
 
 dev: dep-up
@@ -53,21 +58,46 @@ nuke:
 	@echo "Deleted database"
 	@$(RM) $(DATABASE)
 
-test: test-back test-front test-lint
+prep-logs:
+	@mkdir -p $(LOG_DIR)
+	@echo "" > $(BACKEND_LOG)
+	@echo "" > $(FRONTEND_LOG)
+	@echo "" > $(ESLINT_LOG)
+
+test: prep-logs test-back test-front test-lint
 
 test-back:
-	@cd backend && NODE_ENV=production pnpm exec tsc --project tsconfig.prod.json --noEmit && echo "✅ Backend TypeScript check passed"
-	@cd backend/services/main_server && NODE_ENV=production pnpm exec tsc --noEmit && echo "✅ Main server check passed"
-	@cd backend/services/game_service && NODE_ENV=production pnpm exec tsc --noEmit && echo "✅ Game service check passed"
-	@cd backend/services/matchmaking_service && NODE_ENV=production pnpm exec tsc --noEmit && echo "✅ Matchmaking service check passed"
-	@cd backend/services/user_service && NODE_ENV=production pnpm exec tsc --noEmit && echo "✅ User service check passed"
+	@echo "Testing backend..."
+	@(cd backend && NODE_ENV=production pnpm exec tsc --project tsconfig.prod.json --noEmit && \
+	 cd services/main_server && NODE_ENV=production pnpm exec tsc --noEmit && \
+	 cd ../game_service && NODE_ENV=production pnpm exec tsc --noEmit && \
+	 cd ../matchmaking_service && NODE_ENV=production pnpm exec tsc --noEmit && \
+	 cd ../user_service && NODE_ENV=production pnpm exec tsc --noEmit && \
+	 cd ../remote_service && NODE_ENV=production pnpm exec tsc --noEmit) > $(BACKEND_LOG) 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		echo "✅ All backend checks passed"; \
+	else \
+		echo "❌ Backend check(s) failed, see $(BACKEND_LOG) for details"; \
+	fi
 
 test-front:
-	@cd frontend && NODE_ENV=production pnpm tsc --noEmit && echo "✅ Frontend TypeScript check passed"
-	@cd frontend && NODE_ENV=production pnpm exec vite build --dry-run && echo "✅ Frontend build check passed"
+	@echo "Testing frontend..."
+	@(cd frontend && NODE_ENV=production pnpm tsc --noEmit && \
+	  cd frontend && NODE_ENV=production pnpm exec vite build --dry-run) > $(FRONTEND_LOG) 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		echo "✅ All frontend checks passed"; \
+	else \
+		echo "❌ Frontend check(s) failed, see $(FRONTEND_LOG) for details"; \
+	fi
 
 test-lint:
-	@cd frontend && NODE_ENV=production pnpm exec eslint . --max-warnings=0 && echo "✅ All linting checks passed"
+	@echo "Running linting checks..."
+	@(cd frontend && NODE_ENV=production pnpm exec eslint . --max-warnings=0) > $(ESLINT_LOG) 2>&1; \
+	if [ $$? -eq 0 ]; then \
+		echo "✅ All linting checks passed"; \
+	else \
+		echo "❌ Linting check(s) failed, see $(ESLINT_LOG) for details"; \
+	fi
 
 .PHONY: dev-up dev-down dev-ps dev-logs
 .PHONY: prod-up prod-down prod-ps prod-logs
