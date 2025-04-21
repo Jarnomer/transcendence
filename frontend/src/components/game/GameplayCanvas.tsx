@@ -315,18 +315,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
 
-    // Convert coordinates to Babylon coordinate system
-    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
-    player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
-    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
-    player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
-
-    // Only update ball position if not in custom animation
-    if (!isAnimatingBallRef.current) {
-      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
-      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
-    }
-
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
@@ -402,6 +390,16 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       secondaryColor,
       playerEffectsMapRef.current
     );
+
+    // Convert coordinates and update position if not animating
+    if (!isAnimatingBallRef.current) {
+      player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+      player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
+      player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+      player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
+      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
+    }
 
     prevBallState.current = {
       x: ball.x,
