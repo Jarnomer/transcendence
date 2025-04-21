@@ -13,7 +13,7 @@ ESLINT_LOG   := $(LOG_DIR)/error-eslint.log
 
 all: dev
 
-dev: dep-up
+dev: dev-up
 prod: prod-up
 
 dev-up:
