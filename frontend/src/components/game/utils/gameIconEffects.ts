@@ -27,12 +27,10 @@ import {
 interface ActivePowerUpDisplay {
   id: string;
   powerUpType: PowerUpType;
-  icon: Mesh;
-  progressBar: Mesh;
-  progressMaterial: StandardMaterial;
-  particleSystem: ParticleSystem;
+  iconMesh: Mesh;
+  barMesh: Mesh;
+  barParticles: ParticleSystem;
   glowLayer: GlowLayer;
-  isNegative: boolean;
   timeToExpire: number;
   initialTime: number;
   position: Vector3;
@@ -47,24 +45,23 @@ export class ActivePowerUpIconManager {
   private secondaryColor: Color3;
   private soundManager: any;
   private gameWidth: number;
-  private gameHeight: number;
   private iconSize: number;
   private ySpacing: number;
   private barHeight: number;
   private barWidth: number;
 
-  private barOffsetMultiplier: number = 0.7; // based on icon size
-  private fieldXSideOffset: number = 9.0; // Side offset to place icons clearly at sides
-  private iconYOffset: number = 0.0; // Starting from top of game area
+  private iconXOffset: number = 3.5;
+  private iconYOffset: number = 9.0;
+  private iconSizeMultiplier: number = 1.5;
+  private barOffsetMultiplier: number = 0.7;
 
   constructor(scene: Scene, primaryColor: Color3, secondaryColor: Color3, soundManager?: any) {
     this.scene = scene;
     this.primaryColor = primaryColor;
     this.secondaryColor = secondaryColor;
     this.soundManager = soundManager;
-    this.gameWidth = defaultGameParams.dimensions.gameWidth;
-    this.gameHeight = defaultGameParams.dimensions.gameHeight;
-    this.iconSize = gameToSceneSize(defaultGameParams.powerUps.size);
+    this.gameWidth = gameToSceneSize(defaultGameParams.dimensions.gameWidth) / 2;
+    this.iconSize = gameToSceneSize(defaultGameParams.powerUps.size) * this.iconSizeMultiplier;
     this.ySpacing = this.iconSize * 1.5;
     this.barHeight = this.iconSize * 0.8;
     this.barWidth = this.iconSize * 0.1;
@@ -82,14 +79,8 @@ export class ActivePowerUpIconManager {
   private updatePlayerPowerUps(player: Player, playerType: 'player1' | 'player2'): void {
     const currentPowerUpIds = new Set<string>();
 
-    // Sort active power-ups by timeToExpire (descending)
-    // This ensures the newest power-ups (with highest timeToExpire) are at higher indices
-    const sortedPowerUps = [...player.activePowerUps].sort(
-      (a, b) => b.timeToExpire - a.timeToExpire
-    );
-
     // Process current active power-ups
-    sortedPowerUps.forEach((powerUp, index) => {
+    player.activePowerUps.forEach((powerUp, index) => {
       const id = `${playerType}-${powerUp.type}-${index}`;
       currentPowerUpIds.add(id);
 
@@ -127,60 +118,43 @@ export class ActivePowerUpIconManager {
     const isPlayer1 = playerType === 'player1';
     const id = `${playerType}-${powerUp.type}-${index}`;
 
-    // Use absolute positioning in scene units, since the game uses a centered coordinate system
-    // (0,0) is at the center of the screen
+    const xOffset = this.gameWidth + this.iconXOffset;
+    const xPosition = isPlayer1 ? -xOffset : xOffset;
+    const yPosition = this.iconYOffset + index * this.ySpacing;
+    const zPosition = defaultGameObjectParams.distanceFromFloor;
 
-    // Calculate base X position - positioned at sides of screen
-    const xOffset = isPlayer1 ? -this.fieldXSideOffset : this.fieldXSideOffset;
+    const effectColor = powerUp.isNegative ? this.secondaryColor : this.primaryColor;
 
-    // Calculate Y position - negative values are toward the top of screen
-    // Add spacing for multiple icons
-    const yPos = this.iconYOffset + index * this.ySpacing;
+    const iconPosition = new Vector3(xPosition, yPosition, zPosition);
+    const barPosition = iconPosition.clone();
 
-    const position = new Vector3(xOffset, yPos, defaultGameObjectParams.distanceFromFloor);
-
-    const icon = this.createPowerUpIcon(powerUp.type, position, powerUp.isNegative, id);
-
-    // Choose progress bar position
-    const barPosition = position.clone();
     if (isPlayer1) {
       barPosition.x -= this.iconSize * this.barOffsetMultiplier;
     } else {
       barPosition.x += this.iconSize * this.barOffsetMultiplier;
     }
 
-    const { progressBar, progressMaterial } = this.createProgressBar(
-      barPosition,
-      powerUp.isNegative,
-      id
-    );
+    const iconMesh = this.createPowerUpIcon(powerUp.type, iconPosition, effectColor, id);
+    const barMesh = this.createProgressBar(barPosition, effectColor, id);
 
-    const particleSystem = this.createParticleSystem(
-      barPosition,
-      position,
-      powerUp.isNegative ? this.secondaryColor : this.primaryColor,
-      id
-    );
+    const barParticles = this.createParticleSystem(barPosition, iconPosition, effectColor, id);
 
     const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
     glowLayer.intensity = 0.2;
     glowLayer.blurKernelSize = 32;
-    glowLayer.addIncludedOnlyMesh(icon);
-    glowLayer.addIncludedOnlyMesh(progressBar);
+    glowLayer.addIncludedOnlyMesh(barMesh);
 
     // Store the display
     const display: ActivePowerUpDisplay = {
       id,
       powerUpType: powerUp.type,
-      icon,
-      progressBar,
-      progressMaterial,
-      particleSystem,
+      iconMesh: iconMesh,
+      barMesh: barMesh,
+      barParticles: barParticles,
       glowLayer,
-      isNegative: powerUp.isNegative,
       timeToExpire: powerUp.timeToExpire,
       initialTime: powerUp.timeToExpire,
-      position,
+      position: iconPosition,
       player: playerType,
       index,
     };
@@ -193,7 +167,7 @@ export class ActivePowerUpIconManager {
   private createPowerUpIcon(
     powerUpType: PowerUpType,
     position: Vector3,
-    isNegative: boolean,
+    effectColor: Color3,
     id: string
   ): Mesh {
     const icon = MeshBuilder.CreatePlane(
@@ -202,13 +176,12 @@ export class ActivePowerUpIconManager {
       this.scene
     );
 
-    const color = isNegative ? this.secondaryColor : this.primaryColor;
     const material = new StandardMaterial(`powerUpIconMat-${id}`, this.scene);
-
     const texture = new Texture(getPowerUpIconPath(powerUpType), this.scene);
+
+    material.emissiveColor = effectColor;
     material.diffuseTexture = texture;
     material.opacityTexture = texture;
-    material.emissiveColor = color;
 
     material.useAlphaFromDiffuseTexture = true;
     material.disableLighting = true;
@@ -221,28 +194,25 @@ export class ActivePowerUpIconManager {
     return icon;
   }
 
-  private createProgressBar(
-    position: Vector3,
-    isNegative: boolean,
-    id: string
-  ): { progressBar: Mesh; progressMaterial: StandardMaterial } {
-    const progressBar = MeshBuilder.CreateBox(
+  private createProgressBar(position: Vector3, effectColor: Color3, id: string): Mesh {
+    const bar = MeshBuilder.CreateBox(
       `powerUpBar-${id}`,
       { width: this.barWidth, height: this.barHeight, depth: 0.05 },
       this.scene
     );
 
-    const progressMaterial = new StandardMaterial(`powerUpBarMat-${id}`, this.scene);
-    progressMaterial.emissiveColor = isNegative ? this.secondaryColor : this.primaryColor;
+    const material = new StandardMaterial(`powerUpBarMat-${id}`, this.scene);
 
-    progressBar.material = progressMaterial;
-    progressBar.position = position.clone();
+    material.emissiveColor = effectColor;
+
+    bar.material = material;
+    bar.position = position.clone();
+    bar.scaling = new Vector3(1, 0, 1);
 
     // Create transformation point at bottom for scaling
-    progressBar.setPivotPoint(new Vector3(0, -this.barHeight / 2, 0));
-    progressBar.scaling = new Vector3(1, 0, 1); // Start zero height
+    bar.setPivotPoint(new Vector3(0, -this.barHeight / 2, 0));
 
-    return { progressBar, progressMaterial };
+    return bar;
   }
 
   private createParticleSystem(
@@ -252,10 +222,9 @@ export class ActivePowerUpIconManager {
     id: string
   ): ParticleSystem {
     const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 50, this.scene);
-    particleSystem.particleTexture = createParticleTexture(this.scene, color);
-
-    // Set direction from bar to icon
     const direction = targetPosition.subtract(sourcePosition).normalize();
+
+    particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
     particleSystem.emitter = sourcePosition.clone();
     particleSystem.minEmitBox = new Vector3(-0.1, -this.barHeight / 2, 0);
@@ -265,12 +234,11 @@ export class ActivePowerUpIconManager {
     particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.7);
     particleSystem.colorDead = new Color4(color.r * 0.5, color.g * 0.5, color.b * 0.5, 0);
 
-    // Increased particle size for better visibility
     particleSystem.minSize = 0.1;
     particleSystem.maxSize = 0.25;
     particleSystem.minLifeTime = 0.3;
     particleSystem.maxLifeTime = 0.6;
-    particleSystem.emitRate = 20; // Increased emit rate
+    particleSystem.emitRate = 20;
 
     particleSystem.direction1 = direction.scale(0.8);
     particleSystem.direction2 = direction.scale(1.2);
@@ -287,16 +255,16 @@ export class ActivePowerUpIconManager {
   private updateProgressBar(display: ActivePowerUpDisplay): void {
     const percentRemaining = Math.max(0, display.timeToExpire / display.initialTime);
 
-    if (display.progressBar) {
-      display.progressBar.scaling.y = percentRemaining;
+    if (display.barMesh) {
+      display.barMesh.scaling.y = percentRemaining;
 
-      if (display.particleSystem && percentRemaining < 0.25) {
+      if (display.barParticles && percentRemaining < 0.25) {
         const pulseFrequency = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
-        display.particleSystem.emitRate = 20 + Math.floor(pulseFrequency * 10);
+        display.barParticles.emitRate = 20 + Math.floor(pulseFrequency * 10);
       }
 
-      if (display.timeToExpire <= 50 && !display.progressBar.metadata?.expiring) {
-        display.progressBar.metadata = { expiring: true };
+      if (display.timeToExpire <= 50 && !display.barMesh.metadata?.expiring) {
+        display.barMesh.metadata = { expiring: true };
         setTimeout(() => {
           // Give a slight delay before disposing
           if (this.activeDisplays.has(display.id)) {
@@ -312,11 +280,11 @@ export class ActivePowerUpIconManager {
 
     if (!display) return;
 
-    this.scene.stopAnimation(display.icon);
-    this.scene.stopAnimation(display.progressBar);
+    this.scene.stopAnimation(display.iconMesh);
+    this.scene.stopAnimation(display.barMesh);
 
-    if (display.progressBar.material) {
-      this.scene.stopAnimation(display.progressBar.material);
+    if (display.barMesh.material) {
+      this.scene.stopAnimation(display.barMesh.material);
     }
 
     const easingFunction = new CubicEase();
@@ -331,23 +299,23 @@ export class ActivePowerUpIconManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
     const keys = [
-      { frame: 0, value: display.icon.scaling.clone() },
+      { frame: 0, value: display.iconMesh.scaling.clone() },
       { frame: 30, value: new Vector3(0, 0, 0) },
     ];
 
     scaleAnim.setKeys(keys);
     scaleAnim.setEasingFunction(easingFunction);
 
-    display.icon.animations = [scaleAnim];
-    display.progressBar.animations = [scaleAnim.clone()];
+    display.iconMesh.animations = [scaleAnim];
+    display.barMesh.animations = [scaleAnim.clone()];
 
-    if (display.particleSystem) display.particleSystem.emitRate = 0;
+    if (display.barParticles) display.barParticles.emitRate = 0;
 
-    this.scene.beginAnimation(display.icon, 0, 30, false, 1, () => {
+    this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
       this.disposeDisplay(id);
     });
 
-    this.scene.beginAnimation(display.progressBar, 0, 30, false);
+    this.scene.beginAnimation(display.barMesh, 0, 30, false);
   }
 
   private repositionPlayerDisplays(playerType: 'player1' | 'player2'): void {
@@ -363,7 +331,7 @@ export class ActivePowerUpIconManager {
 
       // Use absolute positioning in scene units
       // Calculate base X position - positioned at sides of screen
-      const xOffset = isPlayer1 ? -this.fieldXSideOffset : this.fieldXSideOffset;
+      const xOffset = isPlayer1 ? -this.iconXOffset : this.iconXOffset;
 
       // Calculate Y position - negative values are toward the top of screen
       // Add spacing for multiple icons
@@ -376,8 +344,8 @@ export class ActivePowerUpIconManager {
   }
 
   private animatePositionChange(display: ActivePowerUpDisplay, newPosition: Vector3): void {
-    this.scene.stopAnimation(display.icon);
-    this.scene.stopAnimation(display.progressBar);
+    this.scene.stopAnimation(display.iconMesh);
+    this.scene.stopAnimation(display.barMesh);
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -390,7 +358,7 @@ export class ActivePowerUpIconManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
     const keys = [
-      { frame: 0, value: display.icon.position.clone() },
+      { frame: 0, value: display.iconMesh.position.clone() },
       { frame: 30, value: newPosition },
     ];
     posAnim.setKeys(keys);
@@ -415,21 +383,21 @@ export class ActivePowerUpIconManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
     const barKeys = [
-      { frame: 0, value: display.progressBar.position.clone() },
+      { frame: 0, value: display.barMesh.position.clone() },
       { frame: 30, value: barPosition },
     ];
     barPosAnim.setKeys(barKeys);
     barPosAnim.setEasingFunction(easingFunction);
 
-    display.icon.animations = [posAnim];
-    display.progressBar.animations = [barPosAnim];
+    display.iconMesh.animations = [posAnim];
+    display.barMesh.animations = [barPosAnim];
 
-    this.scene.beginAnimation(display.icon, 0, 30, false, 1, () => {
+    this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
       display.position = newPosition.clone();
     });
 
-    this.scene.beginAnimation(display.progressBar, 0, 30, false, 1, () => {
-      if (display.particleSystem) display.particleSystem.emitter = barPosition;
+    this.scene.beginAnimation(display.barMesh, 0, 30, false, 1, () => {
+      if (display.barParticles) display.barParticles.emitter = barPosition;
     });
   }
 
@@ -497,11 +465,11 @@ export class ActivePowerUpIconManager {
     scaleYAnim.setEasingFunction(easingFunction);
     barScaleYAnim.setEasingFunction(easingFunction);
 
-    display.icon.animations = [scaleXAnim, scaleYAnim, scaleZAnim];
-    display.progressBar.animations = [barScaleYAnim];
+    display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim];
+    display.barMesh.animations = [barScaleYAnim];
 
-    this.scene.beginAnimation(display.icon, 0, 30, true);
-    this.scene.beginAnimation(display.progressBar, 0, 30, true);
+    this.scene.beginAnimation(display.iconMesh, 0, 30, true);
+    this.scene.beginAnimation(display.barMesh, 0, 30, true);
   }
 
   private disposeDisplay(id: string): void {
@@ -509,20 +477,20 @@ export class ActivePowerUpIconManager {
 
     if (!display) return;
 
-    this.scene.stopAnimation(display.icon);
-    this.scene.stopAnimation(display.progressBar);
+    this.scene.stopAnimation(display.iconMesh);
+    this.scene.stopAnimation(display.barMesh);
 
-    if (display.progressBar.material) {
-      this.scene.stopAnimation(display.progressBar.material);
+    if (display.barMesh.material) {
+      this.scene.stopAnimation(display.barMesh.material);
     }
 
-    if (display.icon.material) display.icon.material.dispose();
-    if (display.progressBar.material) display.progressBar.material.dispose();
+    if (display.iconMesh.material) display.iconMesh.material.dispose();
+    if (display.barMesh.material) display.barMesh.material.dispose();
 
-    display.icon.dispose();
-    display.progressBar.dispose();
+    display.iconMesh.dispose();
+    display.barMesh.dispose();
 
-    if (display.particleSystem) display.particleSystem.dispose();
+    if (display.barParticles) display.barParticles.dispose();
     if (display.glowLayer) display.glowLayer.dispose();
 
     this.activeDisplays.delete(id);
