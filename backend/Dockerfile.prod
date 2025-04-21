@@ -1,0 +1,68 @@
+FROM node:22-slim AS builder
+
+WORKDIR /app
+
+RUN npm install -g pnpm@latest-10
+
+ENV CI=true
+ENV NODE_ENV=production
+
+# Copy package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json ./backend/
+COPY backend/services/main_server/package.json ./backend/services/main_server/
+COPY backend/services/game_service/package.json ./backend/services/game_service/
+COPY backend/services/matchmaking_service/package.json ./backend/services/matchmaking_service/
+COPY backend/services/user_service/package.json ./backend/services/user_service/
+COPY backend/services/remote_service/package.json ./backend/services/remote_service/
+COPY shared/package.json ./shared/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy source code
+COPY backend ./backend/
+COPY shared ./shared/
+COPY tsconfig.json ./
+
+# Build the application using production-optimized tsconfig
+WORKDIR /app/backend
+# Copy the production tsconfig
+COPY backend/tsconfig.prod.json ./
+# Run build for each service with the production config
+RUN pnpm --filter @my-backend/main_server exec -- tsc --project tsconfig.prod.json && \
+    pnpm --filter @my-backend/game_service exec -- tsc --project ../tsconfig.prod.json && \
+    pnpm --filter @my-backend/matchmaking_service exec -- tsc --project ../tsconfig.prod.json && \
+    pnpm --filter @my-backend/user_service exec -- tsc --project ../tsconfig.prod.json && \
+    pnpm --filter @my-backend/remote_service exec -- tsc --project ../tsconfig.prod.json
+
+# Production image
+FROM node:22-slim
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy built files and production dependencies
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+
+# Create uploads directory
+RUN mkdir -p /app/backend/database/uploads
+
+# Set up database directory
+COPY backend/database/init.sql ./backend/database/
+COPY backend/database/uploads/default_avatar.png ./backend/database/uploads/
+
+# Create logs directory
+RUN mkdir -p /app/backend/logs
+
+# Copy startup script
+COPY backend/start-prod.js ./backend/
+
+# Make the startup script executable
+RUN chmod +x ./backend/start-prod.js
+
+# Start all services using the production startup script
+CMD ["node", "backend/start-prod.js"]
