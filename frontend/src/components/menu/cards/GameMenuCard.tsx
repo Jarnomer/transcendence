@@ -72,8 +72,8 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
                 }}
               ></div>
               {/* Content positioned at the bottom of the card */}
-              <div className="content @sm:text-xs absolute bottom-0 w-full flex flex-col items-center gap-10 p-5">
-                <h2 className="text-3xl  font-heading">{content}</h2>
+              <div className="content @sm:text-xs absolute bottom-0 w-full flex flex-col justify-center items-center gap-10 p-5">
+                <h2 className="text-5xl  font-heading">{content}</h2>
               </div>
             </foreignObject>
           </g>

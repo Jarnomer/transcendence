@@ -135,12 +135,29 @@ export const GameMenu: React.FC = () => {
     setDifficulty(difficulty);
   };
 
-  // useEffect(() => {
-  //   return () => {
-  //     setMode(null);
-  //     setDifficulty(null);
-  //   };
-  // }, [location]);
+  useEffect(() => {
+    resetGameOptions();
+    setLobby('create');
+  }, []);
+
+  useEffect(() => {
+    if (mode === 'tournament') {
+      allowInternalNavigation();
+      navigate('/tournament');
+    }
+    if (mode && difficulty) {
+      allowInternalNavigation();
+      if (mode === '1v1' && difficulty === 'online') {
+        resetGameOptions();
+        setLobby('random');
+        setMode('1v1');
+        setDifficulty('online');
+        navigate('/game');
+      } else {
+        navigate('/gameOptions');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (mode === 'tournament') {
@@ -166,7 +183,7 @@ export const GameMenu: React.FC = () => {
       <motion.div
         key={mode && !difficulty ? `${mode}-submenu` : 'main-menu'}
         id="game-menu-container"
-        className="flex flex-wrap w-full h-full justify-center gap-4 items-center p-0"
+        className="flex flex-wrap w-full h-screen justify-center gap-4 items-center justify-center p-0"
         variants={pageVariants}
         initial="initial"
         animate="animate"
@@ -177,7 +194,7 @@ export const GameMenu: React.FC = () => {
             <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
 
             {subMenus[mode].map((option, index) => (
-              <motion.div key={index} style={{ flexBasis: '250px' }}>
+              <motion.div key={index} style={{ flexBasis: '300px' }}>
                 <GameMenuCard
                   content={option.content}
                   imageUrl={option.imageUrl}
@@ -190,7 +207,7 @@ export const GameMenu: React.FC = () => {
         ) : (
           <>
             {modes.map((mode, index) => (
-              <motion.div key={index} style={{ flexBasis: '250px' }}>
+              <motion.div key={index} style={{ flexBasis: '300px' }}>
                 <GameMenuCard
                   content={mode.content}
                   imageUrl={mode.imageUrl}
