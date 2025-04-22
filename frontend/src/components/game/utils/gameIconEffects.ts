@@ -595,9 +595,9 @@ export class ActivePowerUpIconManager {
     );
     const iconScaleKeys = [
       { frame: 0, value: display.iconMesh.scaling.clone() },
-      { frame: 15, value: display.iconMesh.scaling.scale(1.2) },
-      { frame: 45, value: display.iconMesh.scaling.scale(0.5) },
-      { frame: 60, value: new Vector3(0, 0, 0) },
+      { frame: 10, value: display.iconMesh.scaling.scale(1.1) },
+      { frame: 20, value: display.iconMesh.scaling.scale(0.6) },
+      { frame: 30, value: new Vector3(0, 0, 0) },
     ];
     iconScaleAnim.setKeys(iconScaleKeys);
     iconScaleAnim.setEasingFunction(easingFunction);
@@ -612,9 +612,9 @@ export class ActivePowerUpIconManager {
     );
     const torusScaleKeys = [
       { frame: 0, value: display.torusMesh.scaling.clone() },
-      { frame: 15, value: display.torusMesh.scaling.scale(0.8) },
-      { frame: 30, value: display.torusMesh.scaling.scale(0.8) },
-      { frame: 60, value: new Vector3(0, 0, 0) },
+      { frame: 10, value: display.torusMesh.scaling.scale(0.9) },
+      { frame: 20, value: display.torusMesh.scaling.scale(0.7) },
+      { frame: 30, value: new Vector3(0, 0, 0) },
     ];
     torusScaleAnim.setKeys(torusScaleKeys);
     torusScaleAnim.setEasingFunction(easingFunction);
@@ -629,8 +629,7 @@ export class ActivePowerUpIconManager {
     );
     const tubeScaleKeys = [
       { frame: 0, value: display.tubeMesh.scaling.clone() },
-      { frame: 10, value: display.tubeMesh.scaling.scale(0.7) },
-      { frame: 20, value: new Vector3(0, 0, 0) },
+      { frame: 10, value: new Vector3(0, 0, 0) },
     ];
     tubeScaleAnim.setKeys(tubeScaleKeys);
     tubeScaleAnim.setEasingFunction(easingFunction);
@@ -685,12 +684,11 @@ export class ActivePowerUpIconManager {
       display.particleSystem.emitRate = 0;
     }
 
-    scene.beginAnimation(display.iconMesh, 0, 60, false, 1, () => {
+    scene.beginAnimation(display.tubeMesh, 0, 10, false);
+    scene.beginAnimation(display.torusMesh, 0, 30, false);
+    scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
       this.finalizeDisposal(id);
     });
-
-    scene.beginAnimation(display.tubeMesh, 0, 20, false);
-    scene.beginAnimation(display.torusMesh, 0, 60, false);
   }
 
   private finalizeDisposal(id: string): void {
