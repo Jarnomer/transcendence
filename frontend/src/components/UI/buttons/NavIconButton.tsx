@@ -44,7 +44,7 @@ interface NavIconButtonProps {
     | 'PencilSquareIcon'
     | 'UserGroupIcon'
     | 'Send';
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const iconSizeResponsive = 'size-4 sm:size-6';
@@ -76,9 +76,9 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick,
     <button
       className="hover:text-secondary"
       id={id}
-      onClick={() => {
+      onClick={(event) => {
         playSelectSound();
-        onClick();
+        onClick(event); // forward the click event
       }}
       aria-label={ariaLabel}
     >
