@@ -55,6 +55,7 @@ export default class PongGame {
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
       powerUps: [],
+      countdown: this.params.rules.countdown,
     };
     this.gameStatus = 'loading';
     this.resetBall();
@@ -359,6 +360,7 @@ export default class PongGame {
     this.gameState.players.player1.activePowerUps = [];
     this.gameState.players.player2.activePowerUps = [];
     this.gameState.powerUps = [];
+    this.gameState.countdown = this.params.rules.countdown;
 
     console.log('Starting countdown...');
     console.log('Countdown length:', this.params.rules.countdown);
@@ -368,10 +370,16 @@ export default class PongGame {
 
     console.log('Game starting with max score:', this.params.rules.maxScore);
 
-    setTimeout(() => {
-      this.setGameStatus('playing');
-      this.startGameLoop();
-    }, this.params.rules.countdown * 1000);
+    const countdownInterval = setInterval(() => {
+      console.log('Countdown:', this.gameState.countdown);
+      this.gameState.countdown--;
+
+      if (this.gameState.countdown <= 0) {
+        clearInterval(countdownInterval);
+        this.setGameStatus('playing');
+        this.startGameLoop();
+      }
+    }, 1000);
   }
 
   startGameLoop(): void {
@@ -483,6 +491,9 @@ export default class PongGame {
       this.gameState.players.player2.score >= this.settings.maxScore
     ) {
       console.log('Game over!');
+      console.log('Player 1 score:', this.gameState.players.player1.score);
+      console.log('Player 2 score:', this.gameState.players.player2.score);
+      console.log('Max score:', this.settings.maxScore);
       this.stopGame();
     } else {
       this.setGameStatus('waiting');

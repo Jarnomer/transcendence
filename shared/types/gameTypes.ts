@@ -48,6 +48,7 @@ export interface GameState {
   players: { player1: Player; player2: Player };
   ball: Ball;
   powerUps: PowerUp[];
+  countdown: number;
 }
 
 export interface GameDimensions {

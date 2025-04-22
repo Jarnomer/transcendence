@@ -131,10 +131,10 @@ export default class PongGameSession {
       this.clients.size === 1 &&
       (this.mode === 'singleplayer' || (this.mode === '1v1' && this.difficulty === 'local'))
     ) {
-      console.log('Single player connected');
+      console.log('Single player is connected');
       return true;
     } else if (this.clients.size === 2 && this.mode === '1v1') {
-      console.log('Both players connected');
+      console.log('Both players are connected');
       return true;
     } else if (this.clients.size === 2 && this.mode === 'tournament') {
       // console.log('Both players connected for tournament');
