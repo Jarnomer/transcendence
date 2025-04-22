@@ -122,7 +122,7 @@ export class ActivePowerUpIconManager {
             // Schedule repositioning after animations
             this.repositionPlayerDisplays(playerType);
           },
-          expiredDisplays.length * 50 + 700
+          800 + expiredDisplays.length * 50
         );
       }
     });
@@ -279,7 +279,7 @@ export class ActivePowerUpIconManager {
     tube.material = pbr;
 
     const progressGlowLayer = new GlowLayer(`progress-glow-${id}`, this.scene);
-    progressGlowLayer.intensity = 0.8;
+    progressGlowLayer.intensity = 1.0;
     progressGlowLayer.blurKernelSize = 32;
     progressGlowLayer.addIncludedOnlyMesh(tube);
 
@@ -317,7 +317,7 @@ export class ActivePowerUpIconManager {
     glowTorus.rotation.x = Math.PI / 2;
 
     const constantGlowLayer = new GlowLayer(`constant-glow-${id}`, this.scene);
-    constantGlowLayer.intensity = 0.8;
+    constantGlowLayer.intensity = 1.2;
     constantGlowLayer.blurKernelSize = 64;
     constantGlowLayer.addIncludedOnlyMesh(glowTorus);
 
@@ -814,7 +814,7 @@ export class ActivePowerUpIconManager {
         if (this.activeDisplays.has(id)) {
           this.disposeDisplayWithAnimation(id);
         }
-      }, index * 100); // Stagger by 100ms
+      }, index * 50);
     });
   }
 }
