@@ -582,10 +582,10 @@ export class ActivePowerUpIconManager {
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
     const scaleXKeys = [
-      { frame: 0, value: 0.95 },
-      { frame: 15, value: 1.05 },
-      { frame: 45, value: 1.0 },
-      { frame: 60, value: 0.95 },
+      { frame: 0, value: 1.0 },
+      { frame: 15, value: 1.1 },
+      { frame: 45, value: 1.05 },
+      { frame: 60, value: 1.0 },
     ];
     scaleXAnim.setKeys(scaleXKeys);
     scaleXAnim.setEasingFunction(easingFunction);
@@ -598,10 +598,10 @@ export class ActivePowerUpIconManager {
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
     const scaleYKeys = [
-      { frame: 0, value: 0.95 },
-      { frame: 15, value: 1.0 },
-      { frame: 45, value: 1.05 },
-      { frame: 60, value: 0.95 },
+      { frame: 0, value: 1.0 },
+      { frame: 15, value: 1.05 },
+      { frame: 45, value: 1.1 },
+      { frame: 60, value: 1.0 },
     ];
     scaleYAnim.setKeys(scaleYKeys);
     scaleYAnim.setEasingFunction(easingFunction);
