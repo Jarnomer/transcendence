@@ -66,7 +66,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
             id="go-back-button"
             ariaLabel="back to chat list"
             icon="arrowLeft"
-            onClick={handleClickNewChat}
+            onClick={() => handleClickNewChat()}
           />
         </div>
         <div className="mb-2 text-center w-full">
@@ -77,9 +77,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
       <div>
         <>
           <div className="flex w-full">
-            <div
-              className={`${selectedFriend ? 'w-full' : 'sm:w-1/2'} flex flex-col items-center gap-2 mb-2`}
-            >
+            <div className={`w-full flex flex-col items-center gap-2 mb-2`}>
               <input
                 type="text"
                 placeholder="Room name"

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { useChatContext } from '@/contexts/chatContext/ChatContext';
 
+import { NavIconButton } from '../UI/buttons/NavIconButton';
+
 interface MessageInputProps {
   selectedFriendId: string | null;
   roomId: string;
@@ -18,17 +20,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({ selectedFriendId, ro
   };
 
   return (
-    <div className="@container flex gap-2 w-full">
+    <div className="flex gap-2 w-full flex-grow">
       <form
-        className="w-full"
+        className="w-full flex items-center gap-2"
         onSubmit={(e) => {
-          e.preventDefault(); // Prevent page refresh
-          handleSendMessage(); // Call the send message function
+          e.preventDefault();
+          handleSendMessage();
         }}
       >
         <label htmlFor="chat-input" className="sr-only">
           Message input
         </label>
+
+        {/* This will take all remaining space */}
         <input
           type="text"
           id="chat-input"
@@ -36,11 +40,11 @@ export const MessageInput: React.FC<MessageInputProps> = ({ selectedFriendId, ro
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 text-xs @md-text-2xl p-2 border-2 border-primary  rounded focus:outline-none"
+          className="flex-1 text-xs p-2 border-2 border-primary rounded focus:outline-none"
         />
-        <button type="submit" aria-label="send" className="ml-2 bg-primary/25 px-4 py-2 rounded">
-          send
-        </button>
+
+        {/* Fixed-size icon button */}
+        <NavIconButton id="send-message" icon="Send" ariaLabel="send" onClick={handleSendMessage} />
       </form>
     </div>
   );

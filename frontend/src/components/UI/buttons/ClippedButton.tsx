@@ -17,12 +17,18 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
   onClick,
 }) => {
   const playHoverSound = useSound('/sounds/effects/button_hover.wav');
+  const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
+
+  const handleOnClik = () => {
+    playSubmitSound();
+    onClick();
+  };
   return (
     <button
       id={id}
       type={type}
       className={`relative glitch-svg w-[202px] h-[40px] flex items-center justify-center ${className} hover:scale-105 hover:shadow-lg transition-all duration-300 ease-in-out`}
-      onClick={onClick}
+      onClick={handleOnClik}
       onMouseEnter={playHoverSound}
     >
       {/* SVG with Glitch Effect */}

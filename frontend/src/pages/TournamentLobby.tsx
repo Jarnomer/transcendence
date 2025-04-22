@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { ChatWindow } from '../components/chat/ChatWindow';
 import { GameOptions } from '../components/gameOptions/GameOptions';
 import TournamentBracket from '../components/tournament/TournamentBracket';
 import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
@@ -60,6 +59,45 @@ export const slideFromRightVariants = {
   },
 };
 
+export const SpectateSmallCanvas: React.FC = () => {
+  return (
+    <>
+      <p>asd vs asd 0 - 0</p>
+      <img src="images/gameplay.gif" className="glass-box"></img>
+    </>
+  );
+};
+
+type Props = {
+  players: string[]; // or whatever type your players are
+};
+
+export const SpectateMatchesList: React.FC<Props> = ({ players }) => {
+  if (!players) return;
+  const matchCount = Math.floor(players.length / 2); // one match = two players
+
+  return (
+    <div className="h-full w-full flex items-center justify-center">
+      <motion.ul className="p-2  flex flex-wrap gap-2 justify-start items-center">
+        {Array.from({ length: matchCount }).map((_, index) => (
+          <li key={index} className="w-[300px] h-[200px] hover:text-secondary">
+            <SpectateSmallCanvas />
+          </li>
+        ))}
+      </motion.ul>
+    </div>
+  );
+};
+
+export const Spectate: React.FC<Props> = ({ players }) => {
+  const [selectedMatch, setSelectedMatch] = useState(null);
+
+  if (!selectedMatch) {
+    return <SpectateMatchesList players={players}></SpectateMatchesList>;
+  }
+  return <></>;
+};
+
 export const TournamentLobbyNav: React.FC<{
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
@@ -109,7 +147,7 @@ export const TournamentPlayerList: React.FC = () => {
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   return (
     <div className="h-full w-full">
-      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2overflow-y-scroll">
+      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2 overflow-y-scroll">
         <motion.li
           className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.02] p-1 hover:text-secondary"
           // onClick={() => navigate(`/profile/${user.user_id}`)}
@@ -140,16 +178,16 @@ export const TournamentMatchList: React.FC = ({ players }) => {
   return (
     <motion.div>
       <div className="flex gap-3">
-        <button className="text-xs" onClick={() => setActiveTab('bracket')}>
+        <button className="text-xs hover:text-secondary" onClick={() => setActiveTab('bracket')}>
           bracket
         </button>
-        <button className="text-xs" onClick={() => setActiveTab('list')}>
+        <button className="text-xs hover:text-secondary" onClick={() => setActiveTab('list')}>
           list
         </button>
       </div>
       <motion.div
         key="tournamentBracket"
-        className="w-full h-full  border-1 border-primary bg-black/30"
+        className="w-full h-full "
         variants={slideFromRightVariants}
         initial="initial"
         animate="animate"
@@ -231,7 +269,7 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
-              ) : activeTab == 'matches' ? (
+              ) : activeTab == 'players' ? (
                 <TournamentMatchList players={players}></TournamentMatchList>
               ) : (
                 <motion.div
@@ -242,21 +280,20 @@ export const TournamentLobby: React.FC = () => {
                   animate="animate"
                   exit="exit"
                 >
-                  <TournamentPlayerList></TournamentPlayerList>
+                  <Spectate players={players}></Spectate>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
-          <div className="@container glass-box h-[200px] w-full">
-            <p>chat</p>
-            {user && tournamentChatId && (
-              <ChatWindow
-                selectedFriendId={selectedFriendId}
-                friends={friends}
-                roomId={tournamentChatId}
-              ></ChatWindow>
-            )}
-          </div>
+
+          {/* removed the chat for now, need to think about where to place it */}
+
+          {/* <FloatingChat
+            user={user}
+            selectedFriendId={selectedFriendId}
+            friends={friends}
+            roomId={tournamentChatId}
+          ></FloatingChat> */}
         </div>
       </motion.div>
     </>

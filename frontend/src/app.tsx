@@ -5,6 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { FloatingChat } from './components/chat/FloatingChat.tsx';
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider';
 import { Header } from './components/header/Header.tsx';
@@ -45,6 +46,7 @@ const App: React.FC = () => {
               </div>
               {location.pathname !== '/game' ? <Footer /> : null}
             </div>
+            <FloatingChat></FloatingChat>
           </Router>
         </GameOptionsProvider>
         <ChatModal></ChatModal>

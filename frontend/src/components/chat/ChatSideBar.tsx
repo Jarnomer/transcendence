@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Room, User } from '@/shared/types';
 
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
+import { useSound } from '../../hooks/useSound';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';
 
@@ -31,6 +32,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
     setRoomId,
     joinRoom,
   } = useChatContext();
+  const playSelectSound = useSound('/sounds/effects/select.wav');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
@@ -45,8 +47,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
         id="chatSideBar"
         className={`w-full h-full ${selectedFriend ? 'hidden lg:block' : 'md:block border-l-0'} border-r p-2 overflow-y-auto`}
       >
-        <div className={`flex  ${selectedFriend ? 'w-full' : 'sm:w-1/2'}  items-center gap-2 mb-2`}>
-          <SearchBar value={searchQuery} onChange={handleSearchChange} placeholder="Search users" />
+        <div className={`flex  ${selectedFriend ? 'w-full' : 'w-full'}  items-center gap-2 mb-2`}>
+          <SearchBar value={searchQuery} onChange={handleSearchChange} placeholder="Search" />
           <div className="w-8 h-8">
             <NavIconButton
               id="new-chat-button"
@@ -70,6 +72,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
               </div>
               <button
                 onClick={() => {
+                  playSelectSound();
                   setSelectedFriend(user.user_id);
                   setRoomId(null);
                 }}
@@ -89,6 +92,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
             <button
               key={room.chat_room_id}
               onClick={() => {
+                playSelectSound();
                 joinRoom(room.chat_room_id);
                 setSelectedFriend(null);
                 setRoomId(room.chat_room_id);

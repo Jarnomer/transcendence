@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { UserDataResponseType } from '../../../../shared/types';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useUser } from '../../contexts/user/UserContext';
+import { useSound } from '../../hooks/useSound';
+import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { MessageInput } from './MessageInput';
 import { MessageList } from './MessageList';
 
@@ -27,15 +29,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const { messages } = useChatContext();
   const navigate = useNavigate();
   const { user } = useUser();
+  const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
 
   console.log(roomId);
   return (
-    <div className="h-full flex flex-col flex-1">
+    <div className="h-full w-full flex flex-col flex-1">
       <div className="p-2 border-b flex justify-between items-center ">
-        <button className="text-sm text-gray-500" onClick={onBack}>
-          Back
-        </button>
-        <div className="text-lg font-semibold">
+        <NavIconButton
+          icon="arrowLeft"
+          onClick={() => {
+            playUnSelectSound();
+            onBack();
+          }}
+          id="chat-back-button"
+          ariaLabel="back to conversations"
+        ></NavIconButton>
+        <div className="text-sm">
           {selectedFriendId ? (
             <span onClick={() => navigate(`/profile/${selectedFriendId}`)}>
               {friends.find((f) => f.user_id === selectedFriendId)?.display_name}

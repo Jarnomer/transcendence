@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 import { ClippedButton } from '../UI/buttons/ClippedButton';
+import { CheckBox } from '../UI/forms/CheckBox';
+import { Slider } from '../UI/forms/Slider';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
 export const animationVariants = {
   initial: {
@@ -21,10 +23,6 @@ export const animationVariants = {
   },
 };
 
-const VolumeSlider: React.FC = () => {
-  return <></>;
-};
-
 interface soundSettingsProps {
   level: number;
   isEnabled: boolean;
@@ -41,38 +39,18 @@ const GameSoundSettings: React.FC<soundSettingsProps> = ({
   return (
     <div className="p-2 max-w-md">
       <div className="flex items-center mb-4">
-        <input
-          type="checkbox"
-          id="enableSound"
-          checked={isEnabled}
-          onChange={() => setIsEnabled(!isEnabled)}
-          className="w-5 h-5 border-2 border-current bg-transparent appearance-none cursor-pointer checked:bg-transparent checked:border-current checked:text-current checked:after:content-['✔'] checked:after:text-current checked:after:block checked:after:text-center"
-        />
-        <label htmlFor="enableSound" className="ml-2 cursor-pointer">
-          {isEnabled ? 'on' : 'off'}
-        </label>
+        <CheckBox isEnabled={isEnabled} setIsEnabled={setIsEnabled} id={'enableSound'}></CheckBox>
       </div>
 
-      {/* Slider Input */}
-      <input
-        type="range"
+      <Slider
         id="gameVolume"
-        min="0"
-        max="5"
-        step="1"
-        value={level}
-        onChange={(e) => setLevel(parseInt(e.target.value))}
-        disabled={!isEnabled}
-        className={`w-full appearance-none h-2 rounded-lg cursor-pointer ${
-          isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
-        }`}
-      />
-      <label
-        htmlFor="gameVolume"
-        className={`block text-xs font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
-      >
-        <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
-      </label>
+        level={level}
+        min={0}
+        max={5}
+        step={1}
+        setLevel={setLevel}
+        isEnabled={isEnabled}
+      ></Slider>
     </div>
   );
 };
@@ -86,38 +64,18 @@ const MusicSettings: React.FC<soundSettingsProps> = ({
   return (
     <div className="p-2 max-w-md">
       <div className="flex items-center mb-4">
-        <input
-          type="checkbox"
-          id="enableMusic"
-          checked={isEnabled}
-          onChange={() => setIsEnabled(!isEnabled)}
-          className="w-5 h-5 border-2 border-current bg-transparent appearance-none cursor-pointer checked:bg-transparent checked:border-current checked:text-current checked:after:content-['✔'] checked:after:text-current checked:after:block checked:after:text-center"
-        />
-        <label htmlFor="enableMusic" className="ml-2 cursor-pointer">
-          {isEnabled ? 'on' : 'off'}
-        </label>
+        <CheckBox isEnabled={isEnabled} setIsEnabled={setIsEnabled} id={'enableMusic'}></CheckBox>
       </div>
 
-      {/* Slider Input */}
-      <input
-        type="range"
+      <Slider
         id="musicVolume"
-        min="0"
-        max="5"
-        step="1"
-        value={level}
-        onChange={(e) => setLevel(parseInt(e.target.value))}
-        disabled={!isEnabled}
-        className={`w-full  appearance-none h-2  cursor-pointer ${
-          isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
-        }`}
-      />
-      <label
-        htmlFor="musicVolume"
-        className={`block text-xs font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
-      >
-        <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
-      </label>
+        level={level}
+        min={0}
+        max={5}
+        step={1}
+        setLevel={setLevel}
+        isEnabled={isEnabled}
+      ></Slider>
     </div>
   );
 };
@@ -131,38 +89,17 @@ const UISoundSetting: React.FC<soundSettingsProps> = ({
   return (
     <div className="p-2 max-w-md">
       <div className="flex items-center mb-4">
-        <input
-          type="checkbox"
-          id="enableSound"
-          checked={isEnabled}
-          onChange={() => setIsEnabled(!isEnabled)}
-          className="w-5 h-5 border-2 border-current bg-transparent appearance-none cursor-pointer checked:bg-transparent checked:border-current checked:text-current checked:after:content-['✔'] checked:after:text-current checked:after:block checked:after:text-center"
-        />
-        <label htmlFor="enableEffect" className="ml-2 cursor-pointer">
-          {isEnabled ? 'on' : 'off'}
-        </label>
+        <CheckBox isEnabled={isEnabled} setIsEnabled={setIsEnabled} id={'enableUiSound'}></CheckBox>
       </div>
-
-      {/* Slider Input */}
-      <input
-        type="range"
-        id="gameVolume"
-        min="0"
-        max="5"
-        step="1"
-        value={level}
-        onChange={(e) => setLevel(parseInt(e.target.value))}
-        disabled={!isEnabled}
-        className={`w-full appearance-none h-2 rounded-lg cursor-pointer ${
-          isEnabled ? 'bg-gray-700' : 'bg-gray-500 opacity-50 cursor-not-allowed'
-        }`}
-      />
-      <label
-        htmlFor="effectLevel"
-        className={`block text-xs font-medium ${isEnabled ? 'text-secondary' : 'text-gray-400'} `}
-      >
-        <span className="font-semibold">{isEnabled ? 'volume: ' + level : 'Disabled'}</span>
-      </label>
+      <Slider
+        id="UISoundVolume"
+        level={level}
+        min={0}
+        max={5}
+        step={1}
+        setLevel={setLevel}
+        isEnabled={isEnabled}
+      ></Slider>
     </div>
   );
 };
@@ -179,10 +116,10 @@ export const Soundsettings: React.FC = () => {
 
   const handleSaveSettings = () => {
     console.log('---- Saving Sound settings -------');
-    console.log('UI Sound Enabled: ', UISoundEnabled);
-    console.log('UI Sound Volume: ', UISoundVolume);
     console.log('Game Sound Enabled: ', gameSoundEnabled);
     console.log('Game Sound Volume: ', gameSoundVolume);
+    console.log('UI Sound Enabled: ', UISoundEnabled);
+    console.log('UI Sound Volume: ', UISoundVolume);
     console.log('Music Enabled: ', musicEnabled);
     console.log('Game Volume: ', musicVolume);
   };
