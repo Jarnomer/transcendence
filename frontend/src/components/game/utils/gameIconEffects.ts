@@ -36,7 +36,6 @@ interface ActivePowerUpDisplay {
   iconMesh: Mesh;
   tubeMesh: Mesh;
   particleSystem: ParticleSystem;
-  glowLayer: GlowLayer;
   timeToExpire: number;
   initialTime: number;
   position: Vector3;
@@ -142,12 +141,6 @@ export class ActivePowerUpIconManager {
     const tubeMesh = this.createTubeRing(iconPosition, effectColor, id);
     const particleSystem = this.createRingParticles(tubeMesh, effectColor, id);
 
-    const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
-
-    glowLayer.intensity = 0.6;
-    glowLayer.blurKernelSize = 32;
-    glowLayer.addIncludedOnlyMesh(tubeMesh);
-
     // Store the display
     const display: ActivePowerUpDisplay = {
       id,
@@ -155,7 +148,6 @@ export class ActivePowerUpIconManager {
       iconMesh: iconMesh,
       tubeMesh: tubeMesh,
       particleSystem: particleSystem,
-      glowLayer,
       timeToExpire: powerUp.timeToExpire,
       initialTime: powerUp.timeToExpire,
       position: iconPosition,
@@ -213,6 +205,7 @@ export class ActivePowerUpIconManager {
       );
     }
 
+    // Create main progress tube
     const tube = MeshBuilder.CreateTube(
       `powerUpTube-${id}`,
       {
@@ -234,27 +227,64 @@ export class ActivePowerUpIconManager {
       effectColor.g * emissiveMultipler,
       effectColor.b * emissiveMultipler
     );
+
     pbr.emissiveIntensity = 0.5;
     pbr.environmentIntensity = 1.0;
 
     pbr.metallic = 0.0;
     pbr.roughness = 0.1;
+    pbr.alpha = 0.8;
 
     pbr.subSurface.isRefractionEnabled = true;
     pbr.subSurface.refractionIntensity = 0.8;
     pbr.subSurface.indexOfRefraction = 1.5;
     pbr.subSurface.isTranslucencyEnabled = true;
     pbr.subSurface.translucencyIntensity = 1.0;
-
-    pbr.alpha = 0.8;
     pbr.disableLighting = false;
 
     tube.position = position.clone();
     tube.material = pbr;
 
+    // Create constant glow torus
+    const glowTorus = MeshBuilder.CreateTorus(
+      `glowTorus-${id}`,
+      {
+        diameter: radius * 2,
+        thickness: this.tubeRadius * 2,
+        tessellation: 32,
+      },
+      this.scene
+    );
+
+    // Create material for glow torus
+    const glowMaterial = new StandardMaterial(`glowTorusMat-${id}`, this.scene);
+
+    glowMaterial.emissiveColor = effectColor.clone();
+    glowMaterial.disableLighting = true;
+    glowMaterial.alpha = 0.1;
+
+    glowTorus.material = glowMaterial;
+    glowTorus.position = position.clone();
+    glowTorus.rotation.x = Math.PI / 2;
+
+    // Create glow layers
+    const progressGlowLayer = new GlowLayer(`progress-glow-${id}`, this.scene);
+    progressGlowLayer.intensity = 0.8;
+    progressGlowLayer.blurKernelSize = 32;
+    progressGlowLayer.addIncludedOnlyMesh(tube);
+
+    const constantGlowLayer = new GlowLayer(`constant-glow-${id}`, this.scene);
+    constantGlowLayer.intensity = 0.8;
+    constantGlowLayer.blurKernelSize = 64;
+    constantGlowLayer.addIncludedOnlyMesh(glowTorus);
+
+    // Store everything in metadata
     tube.metadata = {
       fullPath: path,
       effectColor: effectColor,
+      glowTorus: glowTorus,
+      progressGlowLayer: progressGlowLayer,
+      constantGlowLayer: constantGlowLayer,
     };
 
     return tube;
@@ -416,6 +446,8 @@ export class ActivePowerUpIconManager {
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
+    const glowTorus = display.tubeMesh.metadata?.glowTorus;
+
     // Icon position animation
     const iconPosAnim = new Animation(
       `powerUpRepositionAnim-${display.id}`,
@@ -448,6 +480,12 @@ export class ActivePowerUpIconManager {
 
     display.iconMesh.animations = [iconPosAnim];
     display.tubeMesh.animations = [tubePosAnim];
+
+    if (glowTorus) {
+      // If we have a glow torus, animate it too
+      glowTorus.animations = [tubePosAnim.clone()];
+      this.scene.beginAnimation(glowTorus, 0, 60, false);
+    }
 
     this.scene.beginAnimation(display.iconMesh, 0, 60, false, 1, () => {
       display.position = newPosition.clone();
@@ -521,14 +559,31 @@ export class ActivePowerUpIconManager {
 
     if (!display) return;
 
-    if (display.iconMesh.material) display.iconMesh.material.dispose();
-    if (display.tubeMesh.material) display.tubeMesh.material.dispose();
+    if (display.particleSystem) display.particleSystem.dispose();
 
+    if (display.tubeMesh.material) display.tubeMesh.material.dispose();
+    if (display.iconMesh.material) display.iconMesh.material.dispose();
+
+    // Dispose glow torus if it exists
+    if (display.tubeMesh.metadata?.glowTorus) {
+      if (display.tubeMesh.metadata.glowTorus.material) {
+        display.tubeMesh.metadata.glowTorus.material.dispose();
+      }
+      display.tubeMesh.metadata.glowTorus.dispose();
+    }
+
+    // Dispose glow layers if they exist
+    if (display.tubeMesh.metadata?.progressGlowLayer) {
+      display.tubeMesh.metadata.progressGlowLayer.dispose();
+    }
+
+    if (display.tubeMesh.metadata?.constantGlowLayer) {
+      display.tubeMesh.metadata.constantGlowLayer.dispose();
+    }
+
+    // Dispose main meshes
     display.iconMesh.dispose();
     display.tubeMesh.dispose();
-
-    if (display.particleSystem) display.particleSystem.dispose();
-    if (display.glowLayer) display.glowLayer.dispose();
 
     this.activeDisplays.delete(id);
   }
