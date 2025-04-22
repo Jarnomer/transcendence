@@ -137,7 +137,7 @@ export class ActivePowerUpIconManager {
     const iconMesh = this.createPowerUpIcon(powerUp.type, iconPosition, effectColor, id);
     const barMesh = this.createProgressBar(barPosition, effectColor, id);
 
-    const barParticles = this.createParticleSystem(barPosition, iconPosition, effectColor, id);
+    const barParticles = this.createBarParticle(barPosition, effectColor, id);
 
     const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
     glowLayer.intensity = 0.2;
@@ -215,14 +215,8 @@ export class ActivePowerUpIconManager {
     return bar;
   }
 
-  private createParticleSystem(
-    sourcePosition: Vector3,
-    targetPosition: Vector3,
-    color: Color3,
-    id: string
-  ): ParticleSystem {
+  private createBarParticle(sourcePosition: Vector3, color: Color3, id: string): ParticleSystem {
     const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 50, this.scene);
-    const direction = targetPosition.subtract(sourcePosition).normalize();
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
@@ -234,16 +228,18 @@ export class ActivePowerUpIconManager {
     particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.7);
     particleSystem.colorDead = new Color4(color.r * 0.5, color.g * 0.5, color.b * 0.5, 0);
 
-    particleSystem.minSize = 0.1;
-    particleSystem.maxSize = 0.25;
-    particleSystem.minLifeTime = 0.3;
-    particleSystem.maxLifeTime = 0.6;
+    particleSystem.minSize = 0.05;
+    particleSystem.maxSize = 0.2;
+    particleSystem.minEmitPower = 0.3;
+    particleSystem.maxEmitPower = 0.7;
+    particleSystem.minLifeTime = 0.8;
+    particleSystem.maxLifeTime = 1.5;
     particleSystem.emitRate = 20;
 
-    particleSystem.direction1 = direction.scale(0.8);
-    particleSystem.direction2 = direction.scale(1.2);
-    particleSystem.minEmitPower = 0.5;
-    particleSystem.maxEmitPower = 1;
+    particleSystem.direction1 = new Vector3(-0.1, 0.8, 0);
+    particleSystem.direction2 = new Vector3(0.1, 1.2, 0);
+
+    particleSystem.gravity = new Vector3(0, -0.1, 0);
 
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
@@ -279,13 +275,6 @@ export class ActivePowerUpIconManager {
     const display = this.activeDisplays.get(id);
 
     if (!display) return;
-
-    this.scene.stopAnimation(display.iconMesh);
-    this.scene.stopAnimation(display.barMesh);
-
-    if (display.barMesh.material) {
-      this.scene.stopAnimation(display.barMesh.material);
-    }
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -344,8 +333,8 @@ export class ActivePowerUpIconManager {
   }
 
   private animatePositionChange(display: ActivePowerUpDisplay, newPosition: Vector3): void {
-    this.scene.stopAnimation(display.iconMesh);
-    this.scene.stopAnimation(display.barMesh);
+    // this.scene.stopAnimation(display.iconMesh);
+    // this.scene.stopAnimation(display.barMesh);
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -476,13 +465,6 @@ export class ActivePowerUpIconManager {
     const display = this.activeDisplays.get(id);
 
     if (!display) return;
-
-    this.scene.stopAnimation(display.iconMesh);
-    this.scene.stopAnimation(display.barMesh);
-
-    if (display.barMesh.material) {
-      this.scene.stopAnimation(display.barMesh.material);
-    }
 
     if (display.iconMesh.material) display.iconMesh.material.dispose();
     if (display.barMesh.material) display.barMesh.material.dispose();

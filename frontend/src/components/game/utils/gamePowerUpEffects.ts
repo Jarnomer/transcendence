@@ -270,6 +270,9 @@ export class PowerUpEffectsManager {
   }
 
   private animatePowerUpIcon(mesh: Mesh): void {
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
     const scaleXAnim = new Animation(
       'powerUpScaleXAnimation',
       'scaling.x',
@@ -331,8 +334,6 @@ export class PowerUpEffectsManager {
     positionAnim.setKeys(positionKeys);
 
     // Easing functions - smoother animations
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     scaleXAnim.setEasingFunction(easingFunction);
     scaleYAnim.setEasingFunction(easingFunction);
     positionAnim.setEasingFunction(easingFunction);
@@ -537,13 +538,12 @@ export class PowerUpEffectsManager {
   // Clean up the effects completely
   disposeEffect(powerUpId: number): void {
     const effect = this.effects.get(powerUpId);
+
     if (!effect) return;
 
     effect.particleSystem.dispose();
 
-    if (effect.icon.material) {
-      effect.icon.material.dispose();
-    }
+    if (effect.icon.material) effect.icon.material.dispose();
     effect.icon.dispose();
 
     // Clean up the cube
@@ -551,9 +551,8 @@ export class PowerUpEffectsManager {
     if (cube.metadata && cube.metadata.observer) {
       this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
     }
-    if (cube.material) {
-      cube.material.dispose();
-    }
+
+    if (cube.material) cube.material.dispose();
     cube.dispose();
 
     this.effects.delete(powerUpId);
