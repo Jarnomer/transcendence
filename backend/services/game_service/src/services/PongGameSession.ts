@@ -265,7 +265,6 @@ export default class PongGameSession {
   }
 
   readyGame(playerId: string, state: boolean): void {
-    //console.log(`Player ${playerId} is ready: ${state}`);
     this.game.setReadyState(playerId, state);
     if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
       this.startGameLoop();
@@ -291,8 +290,6 @@ export default class PongGameSession {
       clearInterval(this.interval);
       this.interval = null;
     }
-    // console.log('Starting updateGame interval');
-    // this.updateGame();
     this.interval = setInterval(() => this.updateGame(), 1000 / 60);
   }
 }

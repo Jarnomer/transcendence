@@ -27,6 +27,7 @@ export default class PongGame {
   private powerUpManager: PowerUpManager;
 
   constructor(settings: GameSettings) {
+    console.log('Initializing PongGame with settings:', settings);
     this.params = structuredClone(defaultGameParams);
     this.settings = settings;
     this.powerUpManager = new PowerUpManager(this, this.settings);
@@ -68,6 +69,7 @@ export default class PongGame {
     } else if (this.settings.ballSpeed <= this.params.ball.minDX) {
       this.settings.ballSpeed = this.params.ball.minDX;
     }
+    this.powerUpManager.setSettings(settings);
   }
 
   addPlayer(playerId: string): void {
@@ -86,14 +88,12 @@ export default class PongGame {
 
   setReadyState(playerId: string, state: boolean): void {
     if (playerId === this.gameState.players.player1.id) {
-      //console.log('Setting player1 ready state:', state);
       this.readyState.set(1, state);
     } else if (playerId === this.gameState.players.player2.id) {
       console.log('Setting player2 ready state:', state);
       this.readyState.set(2, state);
     }
     if (this.areAllPlayersReady()) {
-      //console.log('All players are ready!');
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
@@ -103,7 +103,6 @@ export default class PongGame {
   }
 
   areAllPlayersReady(): boolean {
-    // console.log('Checking if all players are ready, mode:', this.mode);
     if (this.settings.mode === 'AIvsAI') {
       return true;
     } else if (
@@ -292,33 +291,18 @@ export default class PongGame {
   }
 
   private repositionPaddleForHeightChange(player: number, height: number): void {
-    // console.log('Correcting paddle position after height change:', player, height);
-    if (player === 1) {
-      if (height > this.gameState.players.player1.paddleHeight) {
-        this.gameState.players.player1.y -=
-          (height - this.gameState.players.player1.paddleHeight) / 2;
-        if (this.gameState.players.player1.y < 0) {
-          this.gameState.players.player1.y = 0;
-        } else if (this.gameState.players.player1.y + height > this.params.dimensions.gameHeight) {
-          this.gameState.players.player1.y = this.params.dimensions.gameHeight - height;
-        }
-      } else {
-        this.gameState.players.player1.y +=
-          (this.gameState.players.player1.paddleHeight - height) / 2;
+    const playerState =
+      player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
+
+    if (height > playerState.paddleHeight) {
+      playerState.y -= (height - playerState.paddleHeight) / 2;
+      if (playerState.y < 0) {
+        playerState.y = 0;
+      } else if (playerState.y + height > this.params.dimensions.gameHeight) {
+        playerState.y = this.params.dimensions.gameHeight - height;
       }
-    } else if (player === 2) {
-      if (height > this.gameState.players.player2.paddleHeight) {
-        this.gameState.players.player2.y -=
-          (height - this.gameState.players.player2.paddleHeight) / 2;
-        if (this.gameState.players.player2.y < 0) {
-          this.gameState.players.player2.y = 0;
-        } else if (this.gameState.players.player2.y + height > this.params.dimensions.gameHeight) {
-          this.gameState.players.player2.y = this.params.dimensions.gameHeight - height;
-        }
-      } else {
-        this.gameState.players.player2.y +=
-          (this.gameState.players.player2.paddleHeight - height) / 2;
-      }
+    } else {
+      playerState.y += (playerState.paddleHeight - height) / 2;
     }
   }
 
@@ -383,9 +367,8 @@ export default class PongGame {
   }
 
   startGameLoop(): void {
-    // console.log('Starting game loop...');
-    // Prevent multiple intervals
-    if (this.updateInterval) return;
+    if (this.updateInterval) return; // Prevent multiple intervals
+
     this.updateInterval = setInterval(() => {
       if (this.gameStatus === 'playing') {
         this.updateBall();
@@ -400,23 +383,17 @@ export default class PongGame {
       return this.getGameState();
     }
 
-    // Update player positions based on moves
-    this.updatePaddlePosition('player1', playerMoves.player1 ?? null);
-    this.updatePaddlePosition('player2', playerMoves.player2 ?? null);
+    this.updatePaddlePosition(1, playerMoves.player1 ?? null);
+    this.updatePaddlePosition(2, playerMoves.player2 ?? null);
 
-    // Return the updated state (deep copy for safety)
     return this.getGameState();
   }
 
-  private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
+  private updatePaddlePosition(player: number, move: PlayerMove): void {
     if (this.gameStatus !== 'playing') return;
 
-    let paddleState;
-    if (player === 'player1') {
-      paddleState = this.gameState.players.player1;
-    } else {
-      paddleState = this.gameState.players.player2;
-    }
+    const paddleState =
+      player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
 
     if (move === 'up') {
       if (paddleState.y - this.params.paddle.speed < 0) {
@@ -450,11 +427,9 @@ export default class PongGame {
     this.adjustBallMovementForSpin();
     ball.x += ball.dx;
     ball.y += ball.dy;
-    // console.log('Ball position:', ball.x, ball.y);
 
     // Top wall collision
     if (ball.y <= 0) {
-      // Prevent going inside the wall
       ball.y = 0;
       ball.dy *= -1;
       this.adjustBounceForSpin(true);
@@ -462,10 +437,8 @@ export default class PongGame {
 
     // Bottom wall collision
     if (ball.y + this.params.ball.size >= this.params.dimensions.gameHeight) {
-      // Prevent going inside the wall
       ball.y = this.params.dimensions.gameHeight - this.params.ball.size;
       ball.dy *= -1;
-      // Spin effect
       this.adjustBounceForSpin(false);
     }
 
