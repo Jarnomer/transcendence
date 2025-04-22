@@ -503,6 +503,10 @@ export class ActivePowerUpIconManager {
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
+    display.tubeMesh.scaling = new Vector3(1, 1, 1);
+    display.torusMesh.scaling = new Vector3(1, 1, 1);
+    display.iconMesh.scaling = new Vector3(1, 1, 1);
+
     // Icon position animation
     const iconPosAnim = new Animation(
       `powerUpRepositionAnim-${display.id}`,
@@ -561,6 +565,7 @@ export class ActivePowerUpIconManager {
       if (display.particleSystem && display.particleSystem.emitter) {
         display.particleSystem.emitter = display.tubeMesh;
       }
+      this.animateActiveDisplay(display);
     });
   }
 
