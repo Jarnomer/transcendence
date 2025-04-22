@@ -18,20 +18,12 @@ interface ChatSidebarProps {
   onFriendSelect: (id: string) => void;
   onRoomSelect: (id: string) => void;
   handleClickNewChat: () => void;
+  onOpenChat: (friendId: string) => void;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) => {
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, onOpenChat }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const {
-    friends,
-    selectedFriend,
-    roomId,
-    rooms,
-    myRooms,
-    setSelectedFriend,
-    setRoomId,
-    joinRoom,
-  } = useChatContext();
+  const { friends, rooms, myRooms, roomId, joinRoom } = useChatContext();
   const playSelectSound = useSound('/sounds/effects/select.wav');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,11 +35,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
   );
   return (
     <>
-      <div
-        id="chatSideBar"
-        className={`w-full h-full ${selectedFriend ? 'hidden lg:block' : 'md:block border-l-0'} border-r p-2 overflow-y-auto`}
-      >
-        <div className={`flex  ${selectedFriend ? 'w-full' : 'w-full'}  items-center gap-2 mb-2`}>
+      <div id="chatSideBar" className={`w-full h-full  border-r p-2 overflow-y-auto`}>
+        <div className={`flex  items-center gap-2 mb-2`}>
           <SearchBar value={searchQuery} onChange={handleSearchChange} placeholder="Search" />
           <div className="w-8 h-8">
             <NavIconButton
@@ -73,12 +62,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
               <button
                 onClick={() => {
                   playSelectSound();
-                  setSelectedFriend(user.user_id);
-                  setRoomId(null);
+                  onOpenChat(user.user_id);
                 }}
-                className={`block w-full text-left text-sm p-1 rounded ${
-                  selectedFriend === user.user_id ? 'text-secondary' : ''
-                }`}
+                className={`block w-full text-left text-sm p-1 rounded `}
               >
                 {user.display_name}
               </button>
@@ -94,8 +80,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat }) 
               onClick={() => {
                 playSelectSound();
                 joinRoom(room.chat_room_id);
-                setSelectedFriend(null);
-                setRoomId(room.chat_room_id);
+                // setSelectedFriend(null);
+                // setRoomId(room.chat_room_id);
               }}
               className={`block w-full text-sm text-left p-1 rounded hover:bg-secondary/20 ${
                 roomId === room.chat_room_id ? 'text-secondary' : ''
