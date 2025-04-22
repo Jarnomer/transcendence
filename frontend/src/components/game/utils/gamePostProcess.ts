@@ -3,13 +3,13 @@ import {
   Color3,
   CubeTexture,
   DefaultRenderingPipeline,
-  DynamicTexture,
+  DirectionalLight,
   HemisphericLight,
+  Mesh,
   MirrorTexture,
   Plane,
   Scene,
   ShadowGenerator,
-  DirectionalLight,
   Texture,
   Vector3,
 } from 'babylonjs';
@@ -110,7 +110,7 @@ export function setupScenelights(scene: Scene, primaryColor: Color3) {
   };
 }
 
-export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: any[]) {
+export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects: Mesh[]) {
   const mirrorTexture = new MirrorTexture('floorMirror', 1024, scene, true);
   const floorMaterial = floorMesh.material;
 
@@ -124,36 +124,4 @@ export function setupReflections(scene: Scene, floorMesh: any, reflectingObjects
   floorMaterial.environmentIntensity = 0.8;
 
   return mirrorTexture;
-}
-
-export function createParticleTexture(scene: Scene, color: Color3): Texture {
-  const textureSize = 64;
-  const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
-  const context = texture.getContext();
-
-  // Create a radial gradient
-  const gradient = context.createRadialGradient(
-    textureSize / 2,
-    textureSize / 2,
-    0,
-    textureSize / 2,
-    textureSize / 2,
-    textureSize / 2
-  );
-
-  // Convert Color3 to CSS color strings
-  const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
-  const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
-
-  // Color stops - Center, "middle" and edge
-  gradient.addColorStop(0, 'white');
-  gradient.addColorStop(0.3, rgbColor);
-  gradient.addColorStop(1, rgbaColorTransparent);
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, textureSize, textureSize);
-
-  texture.update();
-
-  return texture;
 }

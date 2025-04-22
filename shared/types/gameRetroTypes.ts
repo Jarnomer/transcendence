@@ -10,7 +10,7 @@ export interface RetroEffectsLevels {
 
 export const defaultRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 3,
-  curvature: 0,
+  curvature: 3,
   glitch: 3,
   colorBleed: 3,
   flicker: 3,
@@ -69,7 +69,7 @@ export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
     colorBleed: 0.05,
   },
   crtDistortion: {
-    curvatureAmount: 0.3,
+    curvatureAmount: 0.0,
     scanlineIntensity: 0.0,
     vignette: 0.4,
     colorBleed: 0.3,

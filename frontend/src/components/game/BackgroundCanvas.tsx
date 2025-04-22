@@ -6,66 +6,65 @@ import {
   Color4,
   DefaultRenderingPipeline,
   Engine,
+  Mesh,
   Scene,
 } from 'babylonjs';
 
 import {
   RetroEffectsManager,
-  createPongRetroEffects,
-  applyBallEffects,
-  applyCollisionEffects,
-  applyPlayerEffects,
-  applyScoreEffects,
-  applyCinematicCameraAngle,
-  applyGameplayCameraAngle,
   animateCinematicCamera,
   animateGameplayCamera,
-  gameplayCameraAngles,
-  gameplayCameraDOFSettings,
-  getNextCinematicCameraAngle,
+  applyBallEffects,
+  applyCinematicCameraAngle,
+  applyCollisionEffects,
+  applyGameplayCameraAngle,
+  applyLowQualitySettings,
+  applyPlayerEffects,
+  applyScoreEffects,
   createBall,
   createEdge,
   createFloor,
   createPaddle,
+  createPongRetroEffects,
+  detectCollision,
+  detectScore,
+  enableRequiredExtensions,
+  gameToSceneX,
+  gameToSceneY,
+  gameplayCameraAngles,
+  gameplayCameraDOFSettings,
+  getNextCinematicCameraAngle,
+  getThemeColorsFromDOM,
+  parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  detectCollision,
-  detectScore,
-  gameToSceneX,
-  gameToSceneY,
-  parseColor,
-  getThemeColorsFromDOM,
-  applyLowQualitySettings,
-  optimizeShadowGenerators,
-  enableRequiredExtensions,
 } from '@game/utils';
 
 import {
+  GameMode,
   GameState,
   GameStatus,
+  PlayerEffects,
   RetroEffectsLevels,
+  cinematicRetroEffectsLevels,
   defaultCameraTimings,
+  defaultCinematicGlitchTimings,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
-  cinematicRetroEffectsLevels,
   defaultRetroEffectTimings,
   retroEffectsPresets,
-  defaultGameObjectParams,
-  defaultCinematicGlitchTimings,
 } from '@shared/types';
 
-type GameMode = 'background' | 'active';
-
-interface UnifiedGameCanvasProps {
+interface BackgroundCanvasProps {
   gameState: GameState;
   gameMode: GameMode;
   gameStatus: GameStatus;
   theme?: 'light' | 'dark';
 }
 
-const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
+const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   gameState,
   gameMode,
   gameStatus,
@@ -89,16 +88,17 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
   const cameraMoveTimerRef = useRef<number | null>(null);
   const randomGlitchTimerRef = useRef<number | null>(null);
-  const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
   const lastGameModeRef = useRef<GameMode>('background');
 
-  const floorRef = useRef<any>(null);
-  const topEdgeRef = useRef<any>(null);
-  const bottomEdgeRef = useRef<any>(null);
-  const player1Ref = useRef<any>(null);
-  const player2Ref = useRef<any>(null);
-  const ballRef = useRef<any>(null);
+  const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
+
+  const floorRef = useRef<Mesh | null>(null);
+  const topEdgeRef = useRef<Mesh | null>(null);
+  const bottomEdgeRef = useRef<Mesh | null>(null);
+  const player1Ref = useRef<Mesh | null>(null);
+  const player2Ref = useRef<Mesh | null>(null);
+  const ballRef = useRef<Mesh | null>(null);
 
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
@@ -156,11 +156,11 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     }
   };
 
-  const setupRenderLoop = (engine: Engine, scene: Scene, mode: GameMode) => {
+  const setupRenderLoop = (engine: Engine, scene: Scene) => {
     engine.stopRenderLoop();
 
-    const targetFps = mode === 'background' ? 30 : 60;
-    const interval = 1000 / targetFps;
+    const frameRate = 30;
+    const interval = 1000 / frameRate;
 
     let lastTime = 0;
 
@@ -232,14 +232,14 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
-    applyLowQualitySettings(scene, pipeline);
-    optimizeShadowGenerators(shadowGenerators);
+    applyLowQualitySettings(scene, 2.0, pipeline, shadowGenerators);
     enableRequiredExtensions(engine);
 
     engineRef.current = engine;
     sceneRef.current = scene;
     cameraRef.current = camera;
     themeColors.current = colors;
+
     postProcessingRef.current = pipeline;
     lastGameModeRef.current = gameMode;
 
@@ -270,18 +270,15 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
     bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
 
-    setupRenderLoop(engine, scene, gameMode);
+    setupRenderLoop(engine, scene);
+    setupRandomGlitchEffects();
     setupCamera();
-
-    if (gameMode === 'background') {
-      setupRandomGlitchEffects();
-    }
 
     const handleResize = () => {
       if (engineRef.current) {
         engineRef.current.resize();
         if (sceneRef.current) {
-          setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+          setupRenderLoop(engineRef.current, sceneRef.current);
         }
       }
     };
@@ -292,7 +289,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       } else {
         if (engineRef.current && sceneRef.current) {
           engineRef.current.renderEvenInBackground = true;
-          setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+          setupRenderLoop(engineRef.current, sceneRef.current);
         }
       }
     };
@@ -327,20 +324,9 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
       return;
 
     if (lastGameModeRef.current !== gameMode) {
-      if (isAnimatingBallRef.current && ballRef.current) {
-        const defaultBallZ = defaultGameObjectParams.ball.animation.bottomValue;
-
-        if (ballRef.current.animations) ballRef.current.animations = [];
-        ballRef.current.position.z = defaultBallZ;
-        isAnimatingBallRef.current = false;
-      }
-
-      setupRenderLoop(engineRef.current, sceneRef.current, gameMode);
+      setupRenderLoop(engineRef.current, sceneRef.current);
+      setupRandomGlitchEffects();
       setupCamera();
-
-      if (gameMode === 'background') {
-        setupRandomGlitchEffects();
-      }
 
       lastGameModeRef.current = gameMode;
     }
@@ -348,7 +334,17 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
 
   // Handle game objects
   useEffect(() => {
-    if (!canvasRef.current || !sceneRef.current || !cameraRef.current || !themeColors.current)
+    if (
+      !canvasRef.current ||
+      !sceneRef.current ||
+      !cameraRef.current ||
+      !themeColors.current ||
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current ||
+      !topEdgeRef.current ||
+      !bottomEdgeRef.current
+    )
       return;
 
     const { players, ball } = gameState;
@@ -356,17 +352,13 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
 
-    // Update paddle positions
+    // Update paddle and ball positions
     player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
     player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
     player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
     player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
-
-    // Only update ball position if not in custom animation
-    if (!isAnimatingBallRef.current) {
-      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
-      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
-    }
+    ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+    ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
 
     // Calculate current speed and angle, detect collision and score
     const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
@@ -397,7 +389,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         ball.spin,
         primaryColor,
         applyGlitch,
-        null // Removed soundManager
+        null
       );
     }
 
@@ -419,7 +411,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         ballSpeed,
         ball,
         primaryColor,
-        null // Removed soundManager
+        null
       );
     }
 
@@ -430,7 +422,8 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
         player2Ref.current,
         players,
         primaryColor,
-        secondaryColor
+        secondaryColor,
+        playerEffectsMapRef.current
       );
     }
 
@@ -443,7 +436,7 @@ const UnifiedGameCanvas: React.FC<UnifiedGameCanvasProps> = ({
     };
   }, [gameState]);
 
-  return <canvas ref={canvasRef} className="w-full h-full pointer-events-none bg-[#33353e]" />;
+  return <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />;
 };
 
-export default UnifiedGameCanvas;
+export default BackgroundCanvas;

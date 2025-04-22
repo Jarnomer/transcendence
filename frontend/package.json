@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test:prod": "tsc --noEmit && vite build --dry-run"
   },
   "devDependencies": {
     "@types/node": "^22.13.8",

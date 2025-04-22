@@ -10,5 +10,6 @@ export * from './gamePostProcess';
 export * from './gameRetroEffects';
 export * from './gameScoreEffects';
 export * from './gameSoundEffects';
+export * from './gameMusicManager';
 export * from './gameShaders';
 export * from './gameUtilities';

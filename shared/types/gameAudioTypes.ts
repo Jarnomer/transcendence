@@ -1,4 +1,6 @@
-export interface GameSoundOptions {
+export type MusicTrack = 'menu' | 'game';
+
+export interface GameAudioOptions {
   gameMusic?: {
     volume?: number;
     enabled?: boolean;
@@ -13,13 +15,13 @@ export interface GameSoundOptions {
   };
 }
 
-export const defaultGameSoundOptions: GameSoundOptions = {
+export const defaultGameAudioOptions: GameAudioOptions = {
   gameMusic: {
-    volume: 1.0,
+    volume: 0.5,
     enabled: true,
   },
   backgroundMusic: {
-    volume: 1.0,
+    volume: 0.5,
     enabled: true,
   },
   soundEffects: {

@@ -1,3 +1,5 @@
+import { ParticleSystem, GlowLayer, Mesh } from 'babylonjs';
+
 export interface Player {
   id: string;
   y: number;
@@ -32,15 +34,14 @@ export interface playerPowerUp {
   isNegative: boolean;
 }
 
-// rename this to boardPowerUp?
 export interface PowerUp {
-  id: number; // needed!
-  x: number; // needed!
-  y: number; // needed!
-  isCollected: boolean; // Added this
-  isNegative: boolean; // Added this
-  timeToDespawn: number; // needed!
-  type: PowerUpType; // needed!
+  id: number;
+  x: number;
+  y: number;
+  isCollected: boolean;
+  isNegative: boolean;
+  timeToDespawn: number;
+  type: PowerUpType;
 }
 
 export interface GameState {
@@ -98,6 +99,18 @@ export interface PowerUpEffects {
 export interface GameRules {
   maxScore: number;
   countdown: number;
+}
+
+export interface PowerUpEffect {
+  type: PowerUpType;
+  particleSystem: ParticleSystem | null;
+  glowLayer: GlowLayer | null;
+  icons: Mesh[];
+}
+
+export interface PlayerEffects {
+  paddleHeight: number;
+  activeEffects: Map<string, PowerUpEffect>;
 }
 
 export interface GameSettings {
@@ -180,6 +193,8 @@ export const defaultGameParams: GameParams = {
     countdown: 3, // Seconds
   },
 };
+
+export type GameMode = 'background' | 'active';
 
 export type GameStatus = 'loading' | 'waiting' | 'countdown' | 'playing' | 'paused' | 'finished';
 

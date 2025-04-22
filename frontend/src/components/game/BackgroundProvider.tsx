@@ -1,20 +1,23 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { GameState, GameStatus, defaultGameParams } from '@shared/types';
+import { GameState, GameStatus, GameMode, defaultGameParams } from '@shared/types';
 
-import UnifiedGameCanvas from './UnifiedGameCanvas';
+import BackgroundCanvas from './BackgroundCanvas';
 import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
+import { useGameMusic } from '../../hooks/useGameMusic';
 
-interface UnifiedGameProviderProps {}
+interface BackgroundProviderProps {}
 
-const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
+const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
   const { gameState: activeGameState, gameStatus, connections } = useWebSocketContext();
-  const { gameId, mode, difficulty } = useGameOptionsContext();
+  const { gameId } = useGameOptionsContext();
 
   const [backgroundGameState, setBackgroundGameState] = useState<GameState | null>(null);
-  const [currentMode, setCurrentMode] = useState<'background' | 'active'>('background');
+  const [currentMode, setCurrentMode] = useState<GameMode>('background');
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useGameMusic(currentMode, gameStatus);
 
   const bgWsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
@@ -222,7 +225,7 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
   return (
     <>
       <div className="absolute w-screen h-screen pointer-events-none">
-        <UnifiedGameCanvas
+        <BackgroundCanvas
           gameState={currentGameState}
           gameMode={currentMode}
           gameStatus={currentGameStatus}
@@ -232,4 +235,4 @@ const UnifiedGameProvider: React.FC<UnifiedGameProviderProps> = () => {
   );
 };
 
-export default UnifiedGameProvider;
+export default BackgroundProvider;
