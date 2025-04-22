@@ -51,15 +51,13 @@ export class ActivePowerUpIconManager {
   private secondaryColor: Color3;
   private soundManager?: GameSoundManager;
   private gameWidth: number;
-  private iconSize: number;
+  private iconSize: number = 4.0;
   private ySpacing: number;
   private circleSize: number;
-  private tubeRadius: number;
+  private tubeRadius: number = 0.05;
   private numSegments: number = 64;
-
   private iconXOffset: number = 3.5;
   private iconYOffset: number = 9.0;
-  private iconSizeMultiplier: number = 1.5;
 
   constructor(
     scene: Scene,
@@ -72,10 +70,8 @@ export class ActivePowerUpIconManager {
     this.secondaryColor = secondaryColor;
     this.soundManager = soundManager;
     this.gameWidth = gameToSceneSize(defaultGameParams.dimensions.gameWidth) / 2;
-    this.iconSize = gameToSceneSize(defaultGameParams.powerUps.size) * this.iconSizeMultiplier;
     this.ySpacing = this.iconSize * 1.5;
     this.circleSize = this.iconSize * 1.25;
-    this.tubeRadius = this.iconSize * 0.025;
   }
 
   updatePowerUpDisplays(players: { player1: Player; player2: Player }): void {
@@ -170,7 +166,28 @@ export class ActivePowerUpIconManager {
 
     this.activeDisplays.set(id, display);
 
-    this.animateActiveDisplay(display);
+    iconMesh.scaling = new Vector3(0, 0, 0);
+    tubeMesh.scaling = new Vector3(0, 0, 0);
+    torusMesh.scaling = new Vector3(0, 0, 0);
+
+    particleSystem.emitRate = 0;
+
+    const iconAnimations = this.createSpawnAnimations(iconMesh, effectColor, `icon-${id}`);
+    const tubeAnimations = this.createSpawnAnimations(tubeMesh, effectColor, `tube-${id}`);
+    const torusAnimations = this.createSpawnAnimations(torusMesh, effectColor, `torus-${id}`);
+
+    iconMesh.animations = iconAnimations;
+    tubeMesh.animations = tubeAnimations;
+    torusMesh.animations = torusAnimations;
+
+    const scene = iconMesh.getScene();
+
+    scene.beginAnimation(iconMesh, 0, 30, false);
+    scene.beginAnimation(tubeMesh, 0, 30, false);
+    scene.beginAnimation(torusMesh, 0, 30, false, 1, () => {
+      particleSystem.emitRate = 150;
+      this.animateActiveDisplay(display);
+    });
   }
 
   private createPowerUpIcon(
@@ -347,6 +364,55 @@ export class ActivePowerUpIconManager {
     particleSystem.start();
 
     return particleSystem;
+  }
+
+  private createSpawnAnimations(mesh: Mesh, effectColor: Color3, id: string): Animation[] {
+    const frameRate = 30;
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+    const spawnScaleAnim = new Animation(
+      `powerUpSpawnScaleAnim-${id}`,
+      'scaling',
+      frameRate,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    const spawnScaleKeys = [
+      { frame: 0, value: new Vector3(0, 0, 0) },
+      { frame: 15, value: new Vector3(0.7, 0.7, 0.7) },
+      { frame: 20, value: new Vector3(1.1, 1.1, 1.1) },
+      { frame: 30, value: new Vector3(1, 1, 1) },
+    ];
+
+    spawnScaleAnim.setKeys(spawnScaleKeys);
+    spawnScaleAnim.setEasingFunction(easingFunction);
+
+    if (mesh.material && mesh.material instanceof StandardMaterial) {
+      const flashColor = new Color3(2, 1, 1);
+      const colorAnim = new Animation(
+        `powerUpSpawnColorAnim-${id}`,
+        'material.emissiveColor',
+        frameRate,
+        Animation.ANIMATIONTYPE_COLOR3,
+        Animation.ANIMATIONLOOPMODE_CONSTANT
+      );
+      const colorKeys = [
+        { frame: 0, value: effectColor.clone() },
+        { frame: 15, value: effectColor.clone() },
+        { frame: 20, value: flashColor },
+        { frame: 30, value: effectColor.clone() },
+      ];
+
+      colorAnim.setKeys(colorKeys);
+      colorAnim.setEasingFunction(easingFunction);
+
+      return [spawnScaleAnim, colorAnim];
+    }
+
+    return [spawnScaleAnim];
   }
 
   private updateProgressRing(display: ActivePowerUpDisplay): void {
@@ -596,7 +662,7 @@ export class ActivePowerUpIconManager {
     const iconScaleKeys = [
       { frame: 0, value: display.iconMesh.scaling.clone() },
       { frame: 10, value: display.iconMesh.scaling.scale(1.1) },
-      { frame: 20, value: display.iconMesh.scaling.scale(0.6) },
+      { frame: 20, value: display.iconMesh.scaling.scale(0.3) },
       { frame: 30, value: new Vector3(0, 0, 0) },
     ];
     iconScaleAnim.setKeys(iconScaleKeys);
@@ -613,7 +679,7 @@ export class ActivePowerUpIconManager {
     const torusScaleKeys = [
       { frame: 0, value: display.torusMesh.scaling.clone() },
       { frame: 10, value: display.torusMesh.scaling.scale(0.9) },
-      { frame: 20, value: display.torusMesh.scaling.scale(0.7) },
+      { frame: 20, value: display.torusMesh.scaling.scale(0.5) },
       { frame: 30, value: new Vector3(0, 0, 0) },
     ];
     torusScaleAnim.setKeys(torusScaleKeys);
