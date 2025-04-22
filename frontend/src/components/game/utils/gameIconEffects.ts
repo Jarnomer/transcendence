@@ -4,6 +4,7 @@ import {
   Color4,
   CubicEase,
   EasingFunction,
+  PBRMaterial,
   GlowLayer,
   Mesh,
   MeshBuilder,
@@ -143,6 +144,7 @@ export class ActivePowerUpIconManager {
     const particleSystem = this.createRingParticles(tubeMesh, effectColor, id);
 
     const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
+
     glowLayer.intensity = 0.5;
     glowLayer.blurKernelSize = 64;
     glowLayer.addIncludedOnlyMesh(tubeMesh);
@@ -209,7 +211,7 @@ export class ActivePowerUpIconManager {
         new Vector3(
           Math.cos(angle) * radius,
           Math.sin(angle) * radius,
-          defaultGameObjectParams.distanceFromFloor // Constant Z
+          0 // Constant Z
         )
       );
     }
@@ -220,7 +222,7 @@ export class ActivePowerUpIconManager {
       {
         path: path,
         radius: this.tubeRadius,
-        tessellation: 8,
+        tessellation: 16, // Match edge tessellation value
         cap: Mesh.CAP_ALL,
         updatable: true,
         sideOrientation: Mesh.DOUBLESIDE,
@@ -228,20 +230,39 @@ export class ActivePowerUpIconManager {
       this.scene
     );
 
-    // Create visible material for the tube
-    const material = new StandardMaterial(`tubeMat-${id}`, this.scene);
+    // Create PBR material like the edge material
+    const pbr = new PBRMaterial(`tubeRingMat-${id}`, this.scene);
 
-    if (this.showTubeRing) {
-      // Visible tube with transparency
-      material.alpha = 0.4; // Partial transparency
-      material.emissiveColor = effectColor;
-      material.disableLighting = true;
-    } else {
-      // Invisible tube (particles only)
-      material.alpha = 0;
+    // Use the exact edge material settings from defaultGameObjectParams
+    pbr.albedoColor = effectColor;
+    pbr.emissiveColor = new Color3(
+      effectColor.r * 1.8, // emissiveColorMultiplier from edge
+      effectColor.g * 1.8,
+      effectColor.b * 1.8
+    );
+    pbr.emissiveIntensity = 0.5; // from edge params
+    pbr.environmentIntensity = 1.0; // from edge params
+
+    pbr.metallic = 0.0; // materialMetallic from edge
+    pbr.roughness = 0.1; // materialRoughness from edge
+
+    // Set up subsurface properties like the edge
+    pbr.subSurface.isRefractionEnabled = true;
+    pbr.subSurface.refractionIntensity = 0.8; // from edge params
+    pbr.subSurface.indexOfRefraction = 1.5; // from edge params
+    pbr.subSurface.isTranslucencyEnabled = true;
+    pbr.subSurface.translucencyIntensity = 1.0; // from edge params
+
+    // Enable alpha blending for the glow effect
+    pbr.alpha = this.showTubeRing ? 0.8 : 0; // Slightly more opaque than before
+    pbr.disableLighting = false; // Allow lighting for PBR
+
+    // Add environment reflection if available
+    if (this.scene.environmentTexture) {
+      pbr.reflectionTexture = this.scene.environmentTexture;
     }
 
-    tube.material = material;
+    tube.material = pbr;
 
     // Position the tube at the icon's position
     tube.position = position.clone();
