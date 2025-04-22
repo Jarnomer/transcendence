@@ -256,97 +256,35 @@ export class ActivePowerUpIconManager {
   }
 
   private createRingParticles(tubeMesh: Mesh, effectColor: Color3, id: string): ParticleSystem {
-    const particleSystem = new ParticleSystem(`ringParticles-${id}`, 2000, this.scene);
+    const particleSystem = new ParticleSystem(`ringParticles-${id}`, 300, this.scene);
 
     particleSystem.particleTexture = createParticleTexture(this.scene, effectColor);
-    particleSystem.createPointEmitter(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
-    particleSystem.createCylinderEmitter(0.1, 0, 0.1, 0);
-    particleSystem.emitter = tubeMesh;
 
-    tubeMesh.metadata = {
-      ...tubeMesh.metadata,
-      maxAngle: Math.PI * 2,
-      currentAngle: Math.PI * 2,
-    };
+    const emitterPosition = tubeMesh.position.clone();
+    const radius = this.circleSize / 2;
 
-    particleSystem.startPositionFunction = (worldMatrix, positionToUpdate) => {
-      // This will be called for each particle
-      if (tubeMesh.getVerticesData) {
-        const positions = tubeMesh.getVerticesData('position');
-        if (positions && positions.length > 0) {
-          const vertexCount = positions.length / 3;
+    particleSystem.createSphereEmitter(radius, 0.1);
 
-          // Try multiple times to find a valid vertex (within the visible arc)
-          for (let attempt = 0; attempt < 10; attempt++) {
-            const randomIndex = Math.floor(Math.random() * vertexCount) * 3;
+    particleSystem.emitter = emitterPosition;
 
-            // Get position from vertex
-            const localPos = new Vector3(
-              positions[randomIndex],
-              positions[randomIndex + 1],
-              positions[randomIndex + 2]
-            );
-
-            // Calculate angle of this vertex on the ring
-            const vertexAngle = Math.atan2(localPos.y, localPos.x);
-            const normalizedAngle = vertexAngle < 0 ? vertexAngle + Math.PI * 2 : vertexAngle;
-
-            // Only emit from vertices within the current progress angle
-            // The startAngle is always 0, so we check if the vertex angle is less than current angle
-            const maxAngle = tubeMesh.metadata.currentAngle || Math.PI * 2;
-
-            if (normalizedAngle <= maxAngle) {
-              // Add some small randomness
-              localPos.x += (Math.random() - 0.5) * 0.08;
-              localPos.y += (Math.random() - 0.5) * 0.08;
-              localPos.z += (Math.random() - 0.5) * 0.08;
-
-              // Transform to world space
-              Vector3.TransformCoordinatesToRef(localPos, worldMatrix, positionToUpdate);
-              return;
-            }
-          }
-
-          // If we couldn't find a valid vertex after several attempts, use a fallback
-          const validIndex = Math.floor(Math.random() * (vertexCount / 2)) * 3;
-          const fallbackPos = new Vector3(
-            positions[validIndex],
-            positions[validIndex + 1],
-            positions[validIndex + 2]
-          );
-          Vector3.TransformCoordinatesToRef(fallbackPos, worldMatrix, positionToUpdate);
-        }
-      }
-    };
-
-    particleSystem.color1 = new Color4(effectColor.r, effectColor.g, effectColor.b, 0.9);
+    particleSystem.color1 = new Color4(effectColor.r, effectColor.g, effectColor.b, 1.0);
     particleSystem.color2 = new Color4(
-      effectColor.r * 1.8,
-      effectColor.g * 1.8,
-      effectColor.b * 1.8,
-      0.9
-    );
-    particleSystem.colorDead = new Color4(
-      effectColor.r * 0.7,
-      effectColor.g * 0.7,
-      effectColor.b * 0.7,
-      0
+      Math.min(effectColor.r * 2.0, 1.0),
+      Math.min(effectColor.g * 2.0, 1.0),
+      Math.min(effectColor.b * 2.0, 1.0),
+      1.0
     );
 
-    particleSystem.emitRate = 500;
-    particleSystem.minSize = 0.04;
-    particleSystem.maxSize = 0.12;
-    particleSystem.minLifeTime = 0.7;
-    particleSystem.maxLifeTime = 1.8;
-    particleSystem.minEmitPower = 0.15;
-    particleSystem.maxEmitPower = 0.4;
-
-    particleSystem.direction1 = new Vector3(-0.2, -0.2, -0.2);
-    particleSystem.direction2 = new Vector3(0.2, 0.2, 0.2);
-
-    particleSystem.gravity = new Vector3(0, 0.1, 0);
-
+    particleSystem.minSize = 0.05;
+    particleSystem.maxSize = 0.15;
+    particleSystem.emitRate = 120;
+    particleSystem.minLifeTime = 0.4;
+    particleSystem.maxLifeTime = 1.0;
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
+
+    tubeMesh.onAfterWorldMatrixUpdateObservable.add(() => {
+      particleSystem.emitter = tubeMesh.position.clone();
+    });
 
     particleSystem.start();
 
