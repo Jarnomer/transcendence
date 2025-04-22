@@ -1,4 +1,4 @@
-import { MusicTrack, defaultGameMusicOptions } from '@shared/types';
+import { MusicTrack, defaultGameAudioOptions } from '@shared/types';
 
 let musicManagerInstance: GameMusicManager | null = null;
 
@@ -20,12 +20,12 @@ export class GameMusicManager {
     currentTrack: null,
   };
 
-  private gameMusicVolume: number = defaultGameMusicOptions.gameMusic?.volume || 0.3;
-  private backgroundMusicVolume: number = defaultGameMusicOptions.backgroundMusic?.volume || 0.3;
+  private gameMusicVolume: number = defaultGameAudioOptions.gameMusic?.volume || 0.3;
+  private backgroundMusicVolume: number = defaultGameAudioOptions.backgroundMusic?.volume || 0.3;
 
-  private gameMusicEnabled: boolean = defaultGameMusicOptions.gameMusic?.enabled || true;
+  private gameMusicEnabled: boolean = defaultGameAudioOptions.gameMusic?.enabled || true;
   private backgroundMusicEnabled: boolean =
-    defaultGameMusicOptions.backgroundMusic?.enabled || true;
+    defaultGameAudioOptions.backgroundMusic?.enabled || true;
 
   private readonly FADE_DURATION = 400; // ms
 

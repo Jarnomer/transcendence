@@ -28,14 +28,15 @@ export const useGameMusic = (gameMode: GameMode, gameStatus?: GameStatus) => {
     lastModeRef.current = gameMode;
   }, [gameMode]);
 
-  // Optional: Handle game status changes to adjust music (like pausing during countdown)
+  // Optional: Handle game status changes to adjust music
+  // Example: Pausing during countdown
   useEffect(() => {
     if (!gameStatus) return;
 
     const musicManager = musicManagerRef.current;
 
     if (gameStatus === 'finished' && gameMode === 'active') {
-      // Could do special handling for end of game
+      // Optional: Could do special handling for end of game
       // Example: play short victory jingle then return to menu music
       setTimeout(() => {
         musicManager.playBackgroundMusic('menu');
