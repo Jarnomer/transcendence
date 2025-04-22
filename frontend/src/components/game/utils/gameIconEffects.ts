@@ -142,7 +142,7 @@ export class ActivePowerUpIconManager {
 
     const xOffset = this.gameWidth + this.iconXOffset;
     const xPosition = isPlayer1 ? -xOffset : xOffset;
-    const yPosition = this.iconYOffset + index * this.ySpacing;
+    const yPosition = this.iconYOffset - index * this.ySpacing;
     const zPosition = defaultGameObjectParams.distanceFromFloor;
 
     const effectColor = powerUp.isNegative ? this.secondaryColor : this.primaryColor;
@@ -419,7 +419,7 @@ export class ActivePowerUpIconManager {
 
       const xOffset = this.gameWidth + this.iconXOffset;
       const xPosition = playerType === 'player1' ? -xOffset : xOffset;
-      const yPosition = this.iconYOffset + index * this.ySpacing;
+      const yPosition = this.iconYOffset - index * this.ySpacing;
 
       const newPosition = new Vector3(
         xPosition,
