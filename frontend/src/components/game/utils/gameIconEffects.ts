@@ -226,9 +226,14 @@ export class ActivePowerUpIconManager {
     );
 
     const pbr = new PBRMaterial(`tubeRingMat-${id}`, this.scene);
+    const emissiveMultipler = 1.5;
 
     pbr.albedoColor = effectColor;
-    pbr.emissiveColor = new Color3(effectColor.r * 1.8, effectColor.g * 1.8, effectColor.b * 1.8);
+    pbr.emissiveColor = new Color3(
+      effectColor.r * emissiveMultipler,
+      effectColor.g * emissiveMultipler,
+      effectColor.b * emissiveMultipler
+    );
     pbr.emissiveIntensity = 0.5;
     pbr.environmentIntensity = 1.0;
 
