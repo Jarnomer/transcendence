@@ -383,7 +383,7 @@ export class ActivePowerUpIconManager {
     const spawnScaleKeys = [
       { frame: 0, value: new Vector3(0, 0, 0) },
       { frame: 15, value: new Vector3(0.7, 0.7, 0.7) },
-      { frame: 20, value: new Vector3(1.1, 1.1, 1.1) },
+      { frame: 25, value: new Vector3(1.1, 1.1, 1.1) },
       { frame: 30, value: new Vector3(1, 1, 1) },
     ];
 
@@ -401,8 +401,8 @@ export class ActivePowerUpIconManager {
       );
       const colorKeys = [
         { frame: 0, value: effectColor.clone() },
-        { frame: 15, value: effectColor.clone() },
-        { frame: 20, value: flashColor },
+        { frame: 20, value: effectColor.clone() },
+        { frame: 25, value: flashColor },
         { frame: 30, value: effectColor.clone() },
       ];
 
@@ -668,6 +668,31 @@ export class ActivePowerUpIconManager {
     iconScaleAnim.setKeys(iconScaleKeys);
     iconScaleAnim.setEasingFunction(easingFunction);
 
+    const iconMaterial = display.iconMesh.material as StandardMaterial;
+    if (iconMaterial) {
+      const originalColor = iconMaterial.emissiveColor.clone();
+      const flashColor = new Color3(2, 1, 1);
+      const iconColorAnim = new Animation(
+        `powerUpRemoveIconColorAnim-${id}`,
+        'material.emissiveColor',
+        30,
+        Animation.ANIMATIONTYPE_COLOR3,
+        Animation.ANIMATIONLOOPMODE_CONSTANT
+      );
+      const iconColorKeys = [
+        { frame: 0, value: originalColor },
+        { frame: 20, value: originalColor },
+        { frame: 25, value: flashColor },
+        { frame: 30, value: originalColor },
+      ];
+      iconColorAnim.setKeys(iconColorKeys);
+      iconColorAnim.setEasingFunction(easingFunction);
+
+      display.iconMesh.animations = [iconScaleAnim, iconColorAnim];
+    } else {
+      display.iconMesh.animations = [iconScaleAnim];
+    }
+
     // Setup torus animations
     const torusScaleAnim = new Animation(
       `powerUpTorusRemoveAnim-${id}`,
@@ -700,7 +725,6 @@ export class ActivePowerUpIconManager {
     tubeScaleAnim.setKeys(tubeScaleKeys);
     tubeScaleAnim.setEasingFunction(easingFunction);
 
-    display.iconMesh.animations = [iconScaleAnim];
     display.tubeMesh.animations = [tubeScaleAnim];
     display.torusMesh.animations = [torusScaleAnim];
 
