@@ -20,6 +20,7 @@ import {
   gameToSceneY,
   getPowerUpIconPath,
   createParticleTexture,
+  GameSoundManager,
 } from '@game/utils';
 
 import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
@@ -39,7 +40,7 @@ export class PowerUpEffectsManager {
   private primaryColor: Color3;
   private secondaryColor: Color3;
   private powerUpSize: number;
-  private soundManager: any;
+  private soundManager?: GameSoundManager;
 
   private isPowerUpNegative(type: PowerUpType): boolean {
     return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
@@ -50,7 +51,7 @@ export class PowerUpEffectsManager {
     primaryColor: Color3,
     secondaryColor: Color3,
     powerUpSize: number,
-    soundManager?: any
+    soundManager?: GameSoundManager
   ) {
     this.scene = scene;
     this.primaryColor = primaryColor;
@@ -350,9 +351,9 @@ export class PowerUpEffectsManager {
     effect.collected = true;
 
     if (this.isPowerUpNegative(effect.type)) {
-      this.soundManager.playNegativePowerUpSound();
+      if (this.soundManager) this.soundManager.playNegativePowerUpSound();
     } else {
-      this.soundManager.playPositivePowerUpSound();
+      if (this.soundManager) this.soundManager.playPositivePowerUpSound();
     }
 
     // Animate icon scaling
@@ -450,6 +451,7 @@ export class PowerUpEffectsManager {
 
   disposeEffectWithAnimation(powerUpId: number): void {
     const effect = this.effects.get(powerUpId);
+
     if (!effect) return;
 
     // If already collected, just dispose normally
@@ -459,6 +461,9 @@ export class PowerUpEffectsManager {
     }
 
     effect.collected = true;
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
     // Animate icon scaling
     const scaleAnim = new Animation(
@@ -473,12 +478,7 @@ export class PowerUpEffectsManager {
       { frame: 15, value: new Vector3(0, 0, 0) },
     ];
     scaleAnim.setKeys(scaleKeys);
-
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     scaleAnim.setEasingFunction(easingFunction);
-
-    effect.icon.animations = [scaleAnim];
 
     // Animate cube scaling
     const cube = effect.cube;
@@ -496,6 +496,7 @@ export class PowerUpEffectsManager {
     cubeScaleAnim.setKeys(cubeScaleKeys);
     cubeScaleAnim.setEasingFunction(easingFunction);
 
+    effect.icon.animations = [scaleAnim];
     cube.animations = [cubeScaleAnim];
 
     // Stop the orbit animation

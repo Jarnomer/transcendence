@@ -34,8 +34,8 @@ interface ActivePowerUpDisplay {
   id: string;
   powerUpType: PowerUpType;
   iconMesh: Mesh;
-  tubeMesh: Mesh; // Tube ring mesh
-  particleSystem: ParticleSystem; // Single particle system for the ring
+  tubeMesh: Mesh;
+  particleSystem: ParticleSystem;
   glowLayer: GlowLayer;
   timeToExpire: number;
   initialTime: number;
@@ -53,10 +53,9 @@ export class ActivePowerUpIconManager {
   private gameWidth: number;
   private iconSize: number;
   private ySpacing: number;
-  private circleSize: number; // Size of the circle
-  private tubeRadius: number; // Radius of the tube itself
-  private numSegments: number = 64; // Higher segment count for smoother circle
-  private showTubeRing: boolean = true; // Flag to control tube visibility
+  private circleSize: number;
+  private tubeRadius: number;
+  private numSegments: number = 64;
 
   private iconXOffset: number = 3.5;
   private iconYOffset: number = 9.0;
@@ -145,8 +144,8 @@ export class ActivePowerUpIconManager {
 
     const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
 
-    glowLayer.intensity = 0.5;
-    glowLayer.blurKernelSize = 64;
+    glowLayer.intensity = 0.6;
+    glowLayer.blurKernelSize = 32;
     glowLayer.addIncludedOnlyMesh(tubeMesh);
 
     // Store the display
@@ -200,74 +199,54 @@ export class ActivePowerUpIconManager {
   }
 
   private createTubeRing(position: Vector3, effectColor: Color3, id: string): Mesh {
-    // Create a circular path for the tube
-    const path = [];
     const radius = this.circleSize / 2;
+    const path = [];
 
     for (let i = 0; i <= this.numSegments; i++) {
       const angle = (i / this.numSegments) * Math.PI * 2;
-      // Create circle in XY plane with constant Z
       path.push(
         new Vector3(
           Math.cos(angle) * radius,
           Math.sin(angle) * radius,
-          0 // Constant Z
+          defaultGameObjectParams.distanceFromFloor
         )
       );
     }
 
-    // Create a tube along this path
     const tube = MeshBuilder.CreateTube(
       `powerUpTube-${id}`,
       {
         path: path,
         radius: this.tubeRadius,
-        tessellation: 16, // Match edge tessellation value
+        tessellation: 4,
         cap: Mesh.CAP_ALL,
         updatable: true,
-        sideOrientation: Mesh.DOUBLESIDE,
       },
       this.scene
     );
 
-    // Create PBR material like the edge material
     const pbr = new PBRMaterial(`tubeRingMat-${id}`, this.scene);
 
-    // Use the exact edge material settings from defaultGameObjectParams
     pbr.albedoColor = effectColor;
-    pbr.emissiveColor = new Color3(
-      effectColor.r * 1.8, // emissiveColorMultiplier from edge
-      effectColor.g * 1.8,
-      effectColor.b * 1.8
-    );
-    pbr.emissiveIntensity = 0.5; // from edge params
-    pbr.environmentIntensity = 1.0; // from edge params
+    pbr.emissiveColor = new Color3(effectColor.r * 1.8, effectColor.g * 1.8, effectColor.b * 1.8);
+    pbr.emissiveIntensity = 0.5;
+    pbr.environmentIntensity = 1.0;
 
-    pbr.metallic = 0.0; // materialMetallic from edge
-    pbr.roughness = 0.1; // materialRoughness from edge
+    pbr.metallic = 0.0;
+    pbr.roughness = 0.1;
 
-    // Set up subsurface properties like the edge
     pbr.subSurface.isRefractionEnabled = true;
-    pbr.subSurface.refractionIntensity = 0.8; // from edge params
-    pbr.subSurface.indexOfRefraction = 1.5; // from edge params
+    pbr.subSurface.refractionIntensity = 0.8;
+    pbr.subSurface.indexOfRefraction = 1.5;
     pbr.subSurface.isTranslucencyEnabled = true;
-    pbr.subSurface.translucencyIntensity = 1.0; // from edge params
+    pbr.subSurface.translucencyIntensity = 1.0;
 
-    // Enable alpha blending for the glow effect
-    pbr.alpha = this.showTubeRing ? 0.8 : 0; // Slightly more opaque than before
-    pbr.disableLighting = false; // Allow lighting for PBR
+    pbr.alpha = 0.8;
+    pbr.disableLighting = false;
 
-    // Add environment reflection if available
-    if (this.scene.environmentTexture) {
-      pbr.reflectionTexture = this.scene.environmentTexture;
-    }
-
+    tube.position = position.clone();
     tube.material = pbr;
 
-    // Position the tube at the icon's position
-    tube.position = position.clone();
-
-    // Store the full path for later updates
     tube.metadata = {
       fullPath: path,
       effectColor: effectColor,
@@ -279,18 +258,11 @@ export class ActivePowerUpIconManager {
   private createRingParticles(tubeMesh: Mesh, effectColor: Color3, id: string): ParticleSystem {
     const particleSystem = new ParticleSystem(`ringParticles-${id}`, 2000, this.scene);
 
-    // Use tube mesh as emitter
-    particleSystem.emitter = tubeMesh;
     particleSystem.particleTexture = createParticleTexture(this.scene, effectColor);
-
-    // Configure to emit from vertices
     particleSystem.createPointEmitter(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
-    particleSystem.emitFromSpawnPointOnly = false;
-
-    // Use tube vertices as emission points
     particleSystem.createCylinderEmitter(0.1, 0, 0.1, 0);
+    particleSystem.emitter = tubeMesh;
 
-    // Store angle information in metadata for progress tracking
     tubeMesh.metadata = {
       ...tubeMesh.metadata,
       maxAngle: Math.PI * 2,
@@ -347,7 +319,6 @@ export class ActivePowerUpIconManager {
       }
     };
 
-    // Enhanced particle appearance
     particleSystem.color1 = new Color4(effectColor.r, effectColor.g, effectColor.b, 0.9);
     particleSystem.color2 = new Color4(
       effectColor.r * 1.8,
@@ -362,25 +333,18 @@ export class ActivePowerUpIconManager {
       0
     );
 
-    // Increase particle size range
+    particleSystem.emitRate = 500;
     particleSystem.minSize = 0.04;
     particleSystem.maxSize = 0.12;
-
-    // Slightly increase particle lifetime
     particleSystem.minLifeTime = 0.7;
     particleSystem.maxLifeTime = 1.8;
-
-    // Higher emission rate for denser effect
-    particleSystem.emitRate = 500;
-
-    // Enhance movement for more dynamic effect
-    particleSystem.direction1 = new Vector3(-0.15, -0.15, -0.15);
-    particleSystem.direction2 = new Vector3(0.15, 0.15, 0.15);
     particleSystem.minEmitPower = 0.15;
     particleSystem.maxEmitPower = 0.4;
 
-    // Add gravity to create a slight "falling off" effect
-    particleSystem.gravity = new Vector3(0, -0.03, 0);
+    particleSystem.direction1 = new Vector3(-0.2, -0.2, -0.2);
+    particleSystem.direction2 = new Vector3(0.2, 0.2, 0.2);
+
+    particleSystem.gravity = new Vector3(0, 0.1, 0);
 
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
@@ -392,41 +356,26 @@ export class ActivePowerUpIconManager {
   private updateProgressRing(display: ActivePowerUpDisplay): void {
     const percentRemaining = Math.max(0, display.timeToExpire / display.initialTime);
 
-    // Only update the tube if necessary
     if (display.tubeMesh && display.tubeMesh.metadata) {
       const tube = display.tubeMesh;
       const fullPath = tube.metadata.fullPath;
 
-      // Calculate how much of the path should be visible
       const segmentsToShow = Math.ceil(percentRemaining * this.numSegments);
-
-      // Calculate the current progress angle (for particles)
       const currentAngle = (segmentsToShow / this.numSegments) * Math.PI * 2;
 
-      // Update the metadata with current angle for particle emission
       tube.metadata.currentAngle = currentAngle;
 
-      // If we need to update the tube
       if (tube.metadata.currentSegments !== segmentsToShow) {
         tube.metadata.currentSegments = segmentsToShow;
 
         if (segmentsToShow <= 0) {
-          // Hide tube completely
-          tube.visibility = 0;
           display.particleSystem.emitRate = 0;
+          tube.visibility = 0;
         } else {
-          // Create the path for the visible portion of the ring
           let partialPath = [];
 
-          if (segmentsToShow >= this.numSegments) {
-            // Full circle - use all points
-            partialPath = fullPath.slice();
-          } else {
-            // Partial circle - create a clean arc
-            partialPath = fullPath.slice(0, segmentsToShow + 1);
-          }
+          partialPath = fullPath.slice(0, segmentsToShow + 1);
 
-          // Update the tube mesh
           MeshBuilder.CreateTube(
             tube.name,
             {
@@ -435,40 +384,23 @@ export class ActivePowerUpIconManager {
               tessellation: 8,
               cap: Mesh.CAP_ALL,
               instance: tube,
-              sideOrientation: Mesh.DOUBLESIDE,
             },
             this.scene
           );
 
-          // Dynamically adjust particle parameters based on progress
-
-          // Adjust emission rate based on progress
           const baseEmitRate = 500;
+
           display.particleSystem.emitRate = baseEmitRate * percentRemaining;
 
-          // Increase particle energy as progress decreases to create urgency
-          if (percentRemaining < 0.5) {
+          if (percentRemaining < 0.3) {
             const intensityFactor = 1 + (0.5 - percentRemaining) * 0.8;
             display.particleSystem.minEmitPower = 0.15 * intensityFactor;
             display.particleSystem.maxEmitPower = 0.4 * intensityFactor;
-
-            // Optional: change color as time runs out
-            if (percentRemaining < 0.25) {
-              const material = tube.material as StandardMaterial;
-              if (material) {
-                const urgencyColor = display.tubeMesh.metadata.effectColor.clone();
-                // Make it more intense (whiter/brighter)
-                const intensity = 1 + (0.25 - percentRemaining) * 2;
-                urgencyColor.scaleToRef(intensity, urgencyColor);
-                material.emissiveColor = urgencyColor;
-              }
-            }
           }
         }
       }
     }
 
-    // Check if time has expired
     if (display.timeToExpire <= 50 && !display.tubeMesh.metadata?.expiring) {
       display.tubeMesh.metadata.expiring = true;
       setTimeout(() => {
@@ -485,13 +417,6 @@ export class ActivePowerUpIconManager {
 
     if (!display) return;
 
-    this.scene.stopAnimation(display.iconMesh);
-    this.scene.stopAnimation(display.tubeMesh);
-
-    if (display.tubeMesh.material) {
-      this.scene.stopAnimation(display.tubeMesh.material);
-    }
-
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
@@ -507,14 +432,12 @@ export class ActivePowerUpIconManager {
       { frame: 0, value: display.iconMesh.scaling.clone() },
       { frame: 30, value: new Vector3(0, 0, 0) },
     ];
-
     scaleAnim.setKeys(keys);
     scaleAnim.setEasingFunction(easingFunction);
 
     display.iconMesh.animations = [scaleAnim];
     display.tubeMesh.animations = [scaleAnim.clone()];
 
-    // Turn off particles
     display.particleSystem.emitRate = 0;
 
     this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
@@ -525,7 +448,6 @@ export class ActivePowerUpIconManager {
   }
 
   private repositionPlayerDisplays(playerType: 'player1' | 'player2'): void {
-    // Get all displays for this player
     const playerDisplays = Array.from(this.activeDisplays.values())
       .filter((d) => d.player === playerType)
       .sort((a, b) => a.index - b.index);
@@ -533,43 +455,38 @@ export class ActivePowerUpIconManager {
     playerDisplays.forEach((display, index) => {
       display.index = index;
 
-      const isPlayer1 = playerType === 'player1';
-
-      // Use absolute positioning in scene units
-      // Calculate base X position - positioned at sides of screen
       const xOffset = this.gameWidth + this.iconXOffset;
-      const xPos = isPlayer1 ? -xOffset : xOffset;
+      const xPosition = playerType === 'player1' ? -xOffset : xOffset;
+      const yPosition = this.iconYOffset + index * this.ySpacing;
 
-      // Calculate Y position - negative values are toward the top of screen
-      // Add spacing for multiple icons
-      const yPos = this.iconYOffset + index * this.ySpacing;
-
-      const newPosition = new Vector3(xPos, yPos, defaultGameObjectParams.distanceFromFloor);
+      const newPosition = new Vector3(
+        xPosition,
+        yPosition,
+        defaultGameObjectParams.distanceFromFloor
+      );
 
       this.animatePositionChange(display, newPosition);
     });
   }
 
   private animatePositionChange(display: ActivePowerUpDisplay, newPosition: Vector3): void {
-    this.scene.stopAnimation(display.iconMesh);
-    this.scene.stopAnimation(display.tubeMesh);
-
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
-    const posAnim = new Animation(
+    // Icon position animation
+    const iconPosAnim = new Animation(
       `powerUpRepositionAnim-${display.id}`,
       'position',
       30,
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
-    const keys = [
+    const iconKeys = [
       { frame: 0, value: display.iconMesh.position.clone() },
-      { frame: 30, value: newPosition },
+      { frame: 60, value: newPosition },
     ];
-    posAnim.setKeys(keys);
-    posAnim.setEasingFunction(easingFunction);
+    iconPosAnim.setKeys(iconKeys);
+    iconPosAnim.setEasingFunction(easingFunction);
 
     // Tube position animation
     const tubePosAnim = new Animation(
@@ -579,23 +496,21 @@ export class ActivePowerUpIconManager {
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
-
     const tubeKeys = [
       { frame: 0, value: display.tubeMesh.position.clone() },
-      { frame: 30, value: newPosition.clone() },
+      { frame: 60, value: newPosition.clone() },
     ];
     tubePosAnim.setKeys(tubeKeys);
     tubePosAnim.setEasingFunction(easingFunction);
 
-    display.iconMesh.animations = [posAnim];
+    display.iconMesh.animations = [iconPosAnim];
     display.tubeMesh.animations = [tubePosAnim];
 
-    this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
+    this.scene.beginAnimation(display.iconMesh, 0, 60, false, 1, () => {
       display.position = newPosition.clone();
     });
 
-    this.scene.beginAnimation(display.tubeMesh, 0, 30, false, 1, () => {
-      // After animation, update particle system emitter
+    this.scene.beginAnimation(display.tubeMesh, 0, 60, false, 1, () => {
       if (display.particleSystem && display.particleSystem.emitter) {
         display.particleSystem.emitter = display.tubeMesh;
       }
@@ -603,6 +518,9 @@ export class ActivePowerUpIconManager {
   }
 
   private animateActiveDisplay(display: ActivePowerUpDisplay): void {
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
     // Power-up icon animations
     const scaleXAnim = new Animation(
       `powerUpScaleXAnim-${display.id}`,
@@ -613,8 +531,8 @@ export class ActivePowerUpIconManager {
     );
     const scaleXKeys = [
       { frame: 0, value: 0.8 },
-      { frame: 15, value: 1.2 },
-      { frame: 30, value: 1.0 },
+      { frame: 30, value: 1.2 },
+      { frame: 60, value: 1.0 },
     ];
     scaleXAnim.setKeys(scaleXKeys);
 
@@ -627,8 +545,8 @@ export class ActivePowerUpIconManager {
     );
     const scaleYKeys = [
       { frame: 0, value: 0.8 },
-      { frame: 15, value: 1.2 },
-      { frame: 30, value: 1.0 },
+      { frame: 30, value: 1.2 },
+      { frame: 60, value: 1.0 },
     ];
     scaleYAnim.setKeys(scaleYKeys);
 
@@ -641,36 +559,18 @@ export class ActivePowerUpIconManager {
     );
     const scaleZKeys = [
       { frame: 0, value: 0.5 },
-      { frame: 30, value: 0.5 },
+      { frame: 60, value: 0.5 },
     ];
     scaleZAnim.setKeys(scaleZKeys);
 
-    // Tube ring subtle rotation animation
-    // Since we're now in XY plane, we rotate around Z axis for a spinning effect
-    const tubeRotationAnim = new Animation(
-      `tubeRotationAnim-${display.id}`,
-      'rotation.z',
-      240,
-      Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CYCLE
-    );
-
-    const rotationKeys = [
-      { frame: 0, value: 0 },
-      { frame: 240, value: Math.PI * 2 },
-    ];
-    tubeRotationAnim.setKeys(rotationKeys);
-
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     scaleXAnim.setEasingFunction(easingFunction);
     scaleYAnim.setEasingFunction(easingFunction);
 
-    display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim];
-    display.tubeMesh.animations = [tubeRotationAnim];
+    // TODO Tube ring animations
 
-    this.scene.beginAnimation(display.iconMesh, 0, 30, true);
-    this.scene.beginAnimation(display.tubeMesh, 0, 240, true);
+    display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim];
+
+    this.scene.beginAnimation(display.iconMesh, 0, 60, true);
   }
 
   private disposeDisplay(id: string): void {
@@ -678,24 +578,13 @@ export class ActivePowerUpIconManager {
 
     if (!display) return;
 
-    this.scene.stopAnimation(display.iconMesh);
-    this.scene.stopAnimation(display.tubeMesh);
-
-    if (display.tubeMesh.material) {
-      this.scene.stopAnimation(display.tubeMesh.material);
-    }
-
     if (display.iconMesh.material) display.iconMesh.material.dispose();
     if (display.tubeMesh.material) display.tubeMesh.material.dispose();
 
     display.iconMesh.dispose();
     display.tubeMesh.dispose();
 
-    // Dispose particle system
-    if (display.particleSystem) {
-      display.particleSystem.dispose();
-    }
-
+    if (display.particleSystem) display.particleSystem.dispose();
     if (display.glowLayer) display.glowLayer.dispose();
 
     this.activeDisplays.delete(id);
@@ -705,23 +594,7 @@ export class ActivePowerUpIconManager {
     this.activeDisplays.forEach((_, id) => {
       this.disposeDisplay(id);
     });
+
     this.activeDisplays.clear();
-  }
-
-  // Add method to toggle tube visibility
-  public setTubeRingVisibility(visible: boolean): void {
-    this.showTubeRing = visible;
-
-    // Update all existing tube materials
-    this.activeDisplays.forEach((display) => {
-      const material = display.tubeMesh.material as StandardMaterial;
-      if (material) {
-        if (visible) {
-          material.alpha = 0.4;
-        } else {
-          material.alpha = 0;
-        }
-      }
-    });
   }
 }
