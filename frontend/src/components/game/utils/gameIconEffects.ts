@@ -35,6 +35,7 @@ interface ActivePowerUpDisplay {
   powerUpType: PowerUpType;
   iconMesh: Mesh;
   tubeMesh: Mesh;
+  torusMesh: Mesh;
   particleSystem: ParticleSystem;
   timeToExpire: number;
   initialTime: number;
@@ -104,7 +105,7 @@ export class ActivePowerUpIconManager {
       }
     });
 
-    // Remove expired displays
+    // Check and remove expired displays
     const expiredDisplays: string[] = [];
     this.activeDisplays.forEach((display, id) => {
       if (display.player === playerType && !currentPowerUpIds.has(id)) {
@@ -112,12 +113,23 @@ export class ActivePowerUpIconManager {
       }
     });
 
-    expiredDisplays.forEach((id) => {
-      this.removePowerUpDisplay(id);
-    });
+    expiredDisplays.forEach((id, index) => {
+      const display = this.activeDisplays.get(id);
+      if (display && !display.tubeMesh.metadata?.disposing) {
+        setTimeout(() => {
+          this.disposeDisplayWithAnimation(id);
+          // Use small stagger for multiple disposals
+        }, index * 50);
 
-    // Reposition remaining displays
-    this.repositionPlayerDisplays(playerType);
+        setTimeout(
+          () => {
+            // Schedule repositioning after animations
+            this.repositionPlayerDisplays(playerType);
+          },
+          expiredDisplays.length * 50 + 700
+        );
+      }
+    });
   }
 
   private createPowerUpDisplay(
@@ -139,14 +151,15 @@ export class ActivePowerUpIconManager {
 
     const iconMesh = this.createPowerUpIcon(powerUp.type, iconPosition, effectColor, id);
     const tubeMesh = this.createTubeRing(iconPosition, effectColor, id);
+    const torusMesh = this.createTorusRing(iconPosition, effectColor, id);
     const particleSystem = this.createRingParticles(tubeMesh, effectColor, id);
 
-    // Store the display
     const display: ActivePowerUpDisplay = {
       id,
       powerUpType: powerUp.type,
       iconMesh: iconMesh,
       tubeMesh: tubeMesh,
+      torusMesh: torusMesh,
       particleSystem: particleSystem,
       timeToExpire: powerUp.timeToExpire,
       initialTime: powerUp.timeToExpire,
@@ -187,6 +200,10 @@ export class ActivePowerUpIconManager {
     icon.position = position.clone();
     icon.scaling = new Vector3(1, 1, 1);
 
+    icon.metadata = {
+      disposing: false,
+    };
+
     return icon;
   }
 
@@ -205,7 +222,6 @@ export class ActivePowerUpIconManager {
       );
     }
 
-    // Create main progress tube
     const tube = MeshBuilder.CreateTube(
       `powerUpTube-${id}`,
       {
@@ -245,7 +261,24 @@ export class ActivePowerUpIconManager {
     tube.position = position.clone();
     tube.material = pbr;
 
-    // Create constant glow torus
+    const progressGlowLayer = new GlowLayer(`progress-glow-${id}`, this.scene);
+    progressGlowLayer.intensity = 0.8;
+    progressGlowLayer.blurKernelSize = 32;
+    progressGlowLayer.addIncludedOnlyMesh(tube);
+
+    tube.metadata = {
+      fullPath: path,
+      effectColor: effectColor,
+      progressGlowLayer: progressGlowLayer,
+      disposing: false,
+    };
+
+    return tube;
+  }
+
+  private createTorusRing(position: Vector3, effectColor: Color3, id: string): Mesh {
+    const radius = this.circleSize / 2;
+
     const glowTorus = MeshBuilder.CreateTorus(
       `glowTorus-${id}`,
       {
@@ -256,7 +289,6 @@ export class ActivePowerUpIconManager {
       this.scene
     );
 
-    // Create material for glow torus
     const glowMaterial = new StandardMaterial(`glowTorusMat-${id}`, this.scene);
 
     glowMaterial.emissiveColor = effectColor.clone();
@@ -267,27 +299,17 @@ export class ActivePowerUpIconManager {
     glowTorus.position = position.clone();
     glowTorus.rotation.x = Math.PI / 2;
 
-    // Create glow layers
-    const progressGlowLayer = new GlowLayer(`progress-glow-${id}`, this.scene);
-    progressGlowLayer.intensity = 0.8;
-    progressGlowLayer.blurKernelSize = 32;
-    progressGlowLayer.addIncludedOnlyMesh(tube);
-
     const constantGlowLayer = new GlowLayer(`constant-glow-${id}`, this.scene);
     constantGlowLayer.intensity = 0.8;
     constantGlowLayer.blurKernelSize = 64;
     constantGlowLayer.addIncludedOnlyMesh(glowTorus);
 
-    // Store everything in metadata
-    tube.metadata = {
-      fullPath: path,
-      effectColor: effectColor,
-      glowTorus: glowTorus,
-      progressGlowLayer: progressGlowLayer,
-      constantGlowLayer: constantGlowLayer,
+    glowTorus.metadata = {
+      glowLayer: constantGlowLayer,
+      disposing: false,
     };
 
-    return tube;
+    return glowTorus;
   }
 
   private createRingParticles(tubeMesh: Mesh, effectColor: Color3, id: string): ParticleSystem {
@@ -310,11 +332,12 @@ export class ActivePowerUpIconManager {
       1.0
     );
 
-    particleSystem.minSize = 0.05;
-    particleSystem.maxSize = 0.15;
-    particleSystem.emitRate = 120;
-    particleSystem.minLifeTime = 0.4;
+    particleSystem.minSize = 0.1;
+    particleSystem.maxSize = 0.2;
+    particleSystem.emitRate = 150;
+    particleSystem.minLifeTime = 0.5;
     particleSystem.maxLifeTime = 1.0;
+
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
     tubeMesh.onAfterWorldMatrixUpdateObservable.add(() => {
@@ -327,6 +350,8 @@ export class ActivePowerUpIconManager {
   }
 
   private updateProgressRing(display: ActivePowerUpDisplay): void {
+    if (display.tubeMesh.metadata?.disposing) return;
+
     const percentRemaining = Math.max(0, display.timeToExpire / display.initialTime);
 
     if (display.tubeMesh && display.tubeMesh.metadata) {
@@ -360,64 +385,28 @@ export class ActivePowerUpIconManager {
             },
             this.scene
           );
-
-          const baseEmitRate = 500;
-
-          display.particleSystem.emitRate = baseEmitRate * percentRemaining;
-
-          if (percentRemaining < 0.3) {
-            const intensityFactor = 1 + (0.5 - percentRemaining) * 0.8;
-            display.particleSystem.minEmitPower = 0.15 * intensityFactor;
-            display.particleSystem.maxEmitPower = 0.4 * intensityFactor;
-          }
         }
       }
     }
 
-    if (display.timeToExpire <= 50 && !display.tubeMesh.metadata?.expiring) {
+    if (
+      display.timeToExpire <= 50 &&
+      !display.tubeMesh.metadata?.expiring &&
+      !display.tubeMesh.metadata?.disposing
+    ) {
       display.tubeMesh.metadata.expiring = true;
       setTimeout(() => {
-        // Give a slight delay before disposing
         if (this.activeDisplays.has(display.id)) {
-          this.removePowerUpDisplay(display.id);
+          // Give a slight delay before disposing
+          this.disposeDisplayWithAnimation(display.id);
+
+          setTimeout(() => {
+            // Schedule repositioning after animation
+            this.repositionPlayerDisplays(display.player);
+          }, 700);
         }
       }, 200);
     }
-  }
-
-  private removePowerUpDisplay(id: string): void {
-    const display = this.activeDisplays.get(id);
-
-    if (!display) return;
-
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-
-    // Animate disappearance
-    const scaleAnim = new Animation(
-      `powerUpRemoveAnim-${id}`,
-      'scaling',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-    const keys = [
-      { frame: 0, value: display.iconMesh.scaling.clone() },
-      { frame: 30, value: new Vector3(0, 0, 0) },
-    ];
-    scaleAnim.setKeys(keys);
-    scaleAnim.setEasingFunction(easingFunction);
-
-    display.iconMesh.animations = [scaleAnim];
-    display.tubeMesh.animations = [scaleAnim.clone()];
-
-    display.particleSystem.emitRate = 0;
-
-    this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
-      this.disposeDisplay(id);
-    });
-
-    this.scene.beginAnimation(display.tubeMesh, 0, 30, false);
   }
 
   private repositionPlayerDisplays(playerType: 'player1' | 'player2'): void {
@@ -443,10 +432,10 @@ export class ActivePowerUpIconManager {
   }
 
   private animatePositionChange(display: ActivePowerUpDisplay, newPosition: Vector3): void {
+    if (display.tubeMesh.metadata?.disposing) return;
+
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-
-    const glowTorus = display.tubeMesh.metadata?.glowTorus;
 
     // Icon position animation
     const iconPosAnim = new Animation(
@@ -478,20 +467,31 @@ export class ActivePowerUpIconManager {
     tubePosAnim.setKeys(tubeKeys);
     tubePosAnim.setEasingFunction(easingFunction);
 
+    // Torus position animation
+    const torusPosAnim = new Animation(
+      `torusRepositionAnim-${display.id}`,
+      'position',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const torusKeys = [
+      { frame: 0, value: display.torusMesh.position.clone() },
+      { frame: 60, value: newPosition.clone() },
+    ];
+    torusPosAnim.setKeys(torusKeys);
+    torusPosAnim.setEasingFunction(easingFunction);
+
     display.iconMesh.animations = [iconPosAnim];
     display.tubeMesh.animations = [tubePosAnim];
-
-    if (glowTorus) {
-      // If we have a glow torus, animate it too
-      glowTorus.animations = [tubePosAnim.clone()];
-      this.scene.beginAnimation(glowTorus, 0, 60, false);
-    }
+    display.torusMesh.animations = [torusPosAnim];
 
     this.scene.beginAnimation(display.iconMesh, 0, 60, false, 1, () => {
       display.position = newPosition.clone();
     });
 
-    this.scene.beginAnimation(display.tubeMesh, 0, 60, false, 1, () => {
+    this.scene.beginAnimation(display.tubeMesh, 0, 60, false);
+    this.scene.beginAnimation(display.torusMesh, 0, 60, false, 1, () => {
       if (display.particleSystem && display.particleSystem.emitter) {
         display.particleSystem.emitter = display.tubeMesh;
       }
@@ -506,55 +506,194 @@ export class ActivePowerUpIconManager {
     const scaleXAnim = new Animation(
       `powerUpScaleXAnim-${display.id}`,
       'scaling.x',
-      30,
+      60,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
+      Animation.ANIMATIONLOOPMODE_CYCLE
     );
     const scaleXKeys = [
-      { frame: 0, value: 0.8 },
-      { frame: 30, value: 1.2 },
-      { frame: 60, value: 1.0 },
+      { frame: 0, value: 0.95 },
+      { frame: 15, value: 1.05 },
+      { frame: 45, value: 1.0 },
+      { frame: 60, value: 0.95 },
     ];
     scaleXAnim.setKeys(scaleXKeys);
+    scaleXAnim.setEasingFunction(easingFunction);
 
     const scaleYAnim = new Animation(
       `powerUpScaleYAnim-${display.id}`,
       'scaling.y',
-      30,
+      60,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
+      Animation.ANIMATIONLOOPMODE_CYCLE
     );
     const scaleYKeys = [
-      { frame: 0, value: 0.8 },
-      { frame: 30, value: 1.2 },
-      { frame: 60, value: 1.0 },
+      { frame: 0, value: 0.95 },
+      { frame: 15, value: 1.0 },
+      { frame: 45, value: 1.05 },
+      { frame: 60, value: 0.95 },
     ];
     scaleYAnim.setKeys(scaleYKeys);
+    scaleYAnim.setEasingFunction(easingFunction);
 
+    // Keep Z scale consistent
     const scaleZAnim = new Animation(
       `powerUpScaleZAnim-${display.id}`,
       'scaling.z',
       30,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
+      Animation.ANIMATIONLOOPMODE_CYCLE
     );
     const scaleZKeys = [
-      { frame: 0, value: 0.5 },
-      { frame: 60, value: 0.5 },
+      { frame: 0, value: 1.0 },
+      { frame: 60, value: 1.0 },
     ];
     scaleZAnim.setKeys(scaleZKeys);
 
-    scaleXAnim.setEasingFunction(easingFunction);
-    scaleYAnim.setEasingFunction(easingFunction);
+    // Add hover animation
+    const positionAnim = new Animation(
+      `powerUpHoverAnim-${display.id}`,
+      'position.y',
+      30,
+      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONLOOPMODE_CYCLE
+    );
+    const originalY = display.iconMesh.position.y;
+    const positionKeys = [
+      { frame: 0, value: originalY },
+      { frame: 15, value: originalY + 0.08 },
+      { frame: 45, value: originalY - 0.08 },
+      { frame: 60, value: originalY },
+    ];
+    positionAnim.setKeys(positionKeys);
+    positionAnim.setEasingFunction(easingFunction);
 
-    // TODO Tube ring animations
-
-    display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim];
+    display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, positionAnim];
 
     this.scene.beginAnimation(display.iconMesh, 0, 60, true);
   }
 
-  private disposeDisplay(id: string): void {
+  private disposeDisplayWithAnimation(id: string): void {
+    const display = this.activeDisplays.get(id);
+    const scene = this.scene;
+
+    if (!display || display.tubeMesh.metadata?.disposing) return;
+
+    if (display.tubeMesh.metadata) display.tubeMesh.metadata.disposing = true;
+    if (display.torusMesh.metadata) display.torusMesh.metadata.disposing = true;
+    if (display.iconMesh.metadata) display.iconMesh.metadata.disposing = true;
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+    // Setup icon animations
+    const iconScaleAnim = new Animation(
+      `powerUpRemoveIconAnim-${id}`,
+      'scaling',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const iconScaleKeys = [
+      { frame: 0, value: display.iconMesh.scaling.clone() },
+      { frame: 15, value: display.iconMesh.scaling.scale(1.2) },
+      { frame: 45, value: display.iconMesh.scaling.scale(0.5) },
+      { frame: 60, value: new Vector3(0, 0, 0) },
+    ];
+    iconScaleAnim.setKeys(iconScaleKeys);
+    iconScaleAnim.setEasingFunction(easingFunction);
+
+    // Setup torus animations
+    const torusScaleAnim = new Animation(
+      `powerUpTorusRemoveAnim-${id}`,
+      'scaling',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const torusScaleKeys = [
+      { frame: 0, value: display.torusMesh.scaling.clone() },
+      { frame: 15, value: display.torusMesh.scaling.scale(0.8) },
+      { frame: 30, value: display.torusMesh.scaling.scale(0.8) },
+      { frame: 60, value: new Vector3(0, 0, 0) },
+    ];
+    torusScaleAnim.setKeys(torusScaleKeys);
+    torusScaleAnim.setEasingFunction(easingFunction);
+
+    // Setup tube animation
+    const tubeScaleAnim = new Animation(
+      `powerUpTubeRemoveAnim-${id}`,
+      'scaling',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    const tubeScaleKeys = [
+      { frame: 0, value: display.tubeMesh.scaling.clone() },
+      { frame: 10, value: display.tubeMesh.scaling.scale(0.7) },
+      { frame: 20, value: new Vector3(0, 0, 0) },
+    ];
+    tubeScaleAnim.setKeys(tubeScaleKeys);
+    tubeScaleAnim.setEasingFunction(easingFunction);
+
+    display.iconMesh.animations = [iconScaleAnim];
+    display.tubeMesh.animations = [tubeScaleAnim];
+    display.torusMesh.animations = [torusScaleAnim];
+
+    // Handle particle fadeout
+    if (display.particleSystem) {
+      const startTime = Date.now();
+      const fadeOutDuration = 800;
+      const iconCenter = display.iconMesh.position.clone();
+
+      const originalUpdateFn = display.particleSystem.updateFunction;
+
+      display.particleSystem.updateFunction = (particles) => {
+        // Call original update function if it exists
+        if (originalUpdateFn) originalUpdateFn(particles);
+
+        const elapsedTime = Date.now() - startTime;
+        const progress = Math.min(elapsedTime / fadeOutDuration, 1);
+        const easedProgress = progress * progress * progress;
+
+        for (let i = 0; i < particles.length; i++) {
+          const particle = particles[i];
+
+          const directionX = iconCenter.x - particle.position.x;
+          const directionY = iconCenter.y - particle.position.y;
+          const directionZ = iconCenter.z - particle.position.z;
+
+          const distance = Math.sqrt(
+            directionX * directionX + directionY * directionY + directionZ * directionZ
+          );
+
+          const speedFactor = 0.01 + easedProgress * 0.2 + distance * 0.01;
+
+          particle.position.x += directionX * speedFactor;
+          particle.position.y += directionY * speedFactor;
+          particle.position.z += directionZ * speedFactor;
+
+          particle.size *= 1 - easedProgress * 0.5; // Shrink particles
+
+          if (distance < 0.3) {
+            particle.color.a *= 1 - (0.3 - distance) / 0.3;
+          } else {
+            particle.color.a = Math.max(0.1, 1 - easedProgress * 1.2);
+          }
+        }
+      };
+
+      display.particleSystem.emitRate = 0;
+    }
+
+    scene.beginAnimation(display.iconMesh, 0, 60, false, 1, () => {
+      this.finalizeDisposal(id);
+    });
+
+    scene.beginAnimation(display.tubeMesh, 0, 20, false);
+    scene.beginAnimation(display.torusMesh, 0, 60, false);
+  }
+
+  private finalizeDisposal(id: string): void {
     const display = this.activeDisplays.get(id);
 
     if (!display) return;
@@ -563,36 +702,31 @@ export class ActivePowerUpIconManager {
 
     if (display.tubeMesh.material) display.tubeMesh.material.dispose();
     if (display.iconMesh.material) display.iconMesh.material.dispose();
+    if (display.torusMesh.material) display.torusMesh.material.dispose();
 
-    // Dispose glow torus if it exists
-    if (display.tubeMesh.metadata?.glowTorus) {
-      if (display.tubeMesh.metadata.glowTorus.material) {
-        display.tubeMesh.metadata.glowTorus.material.dispose();
-      }
-      display.tubeMesh.metadata.glowTorus.dispose();
-    }
-
-    // Dispose glow layers if they exist
     if (display.tubeMesh.metadata?.progressGlowLayer) {
       display.tubeMesh.metadata.progressGlowLayer.dispose();
     }
-
-    if (display.tubeMesh.metadata?.constantGlowLayer) {
-      display.tubeMesh.metadata.constantGlowLayer.dispose();
+    if (display.torusMesh.metadata?.glowLayer) {
+      display.torusMesh.metadata.glowLayer.dispose();
     }
 
-    // Dispose main meshes
     display.iconMesh.dispose();
     display.tubeMesh.dispose();
+    display.torusMesh.dispose();
 
     this.activeDisplays.delete(id);
   }
 
   public disposeAll(): void {
-    this.activeDisplays.forEach((_, id) => {
-      this.disposeDisplay(id);
-    });
+    const displayIds = Array.from(this.activeDisplays.keys());
 
-    this.activeDisplays.clear();
+    displayIds.forEach((id, index) => {
+      setTimeout(() => {
+        if (this.activeDisplays.has(id)) {
+          this.disposeDisplayWithAnimation(id);
+        }
+      }, index * 100); // Stagger by 100ms
+    });
   }
 }
