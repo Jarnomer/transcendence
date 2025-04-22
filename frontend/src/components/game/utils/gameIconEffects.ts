@@ -14,7 +14,12 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { createParticleTexture, gameToSceneSize, getPowerUpIconPath } from '@game/utils';
+import {
+  GameSoundManager,
+  createParticleTexture,
+  gameToSceneSize,
+  getPowerUpIconPath,
+} from '@game/utils';
 
 import {
   Player,
@@ -28,8 +33,8 @@ interface ActivePowerUpDisplay {
   id: string;
   powerUpType: PowerUpType;
   iconMesh: Mesh;
-  barMesh: Mesh;
-  barParticles: ParticleSystem;
+  tubeMesh: Mesh; // Tube ring mesh
+  particleSystem: ParticleSystem; // Single particle system for the ring
   glowLayer: GlowLayer;
   timeToExpire: number;
   initialTime: number;
@@ -43,19 +48,25 @@ export class ActivePowerUpIconManager {
   private activeDisplays: Map<string, ActivePowerUpDisplay> = new Map();
   private primaryColor: Color3;
   private secondaryColor: Color3;
-  private soundManager: any;
+  private soundManager?: GameSoundManager;
   private gameWidth: number;
   private iconSize: number;
   private ySpacing: number;
-  private barHeight: number;
-  private barWidth: number;
+  private circleSize: number; // Size of the circle
+  private tubeRadius: number; // Radius of the tube itself
+  private numSegments: number = 64; // Higher segment count for smoother circle
+  private showTubeRing: boolean = true; // Flag to control tube visibility
 
   private iconXOffset: number = 3.5;
   private iconYOffset: number = 9.0;
   private iconSizeMultiplier: number = 1.5;
-  private barOffsetMultiplier: number = 0.7;
 
-  constructor(scene: Scene, primaryColor: Color3, secondaryColor: Color3, soundManager?: any) {
+  constructor(
+    scene: Scene,
+    primaryColor: Color3,
+    secondaryColor: Color3,
+    soundManager?: GameSoundManager
+  ) {
     this.scene = scene;
     this.primaryColor = primaryColor;
     this.secondaryColor = secondaryColor;
@@ -63,8 +74,8 @@ export class ActivePowerUpIconManager {
     this.gameWidth = gameToSceneSize(defaultGameParams.dimensions.gameWidth) / 2;
     this.iconSize = gameToSceneSize(defaultGameParams.powerUps.size) * this.iconSizeMultiplier;
     this.ySpacing = this.iconSize * 1.5;
-    this.barHeight = this.iconSize * 0.8;
-    this.barWidth = this.iconSize * 0.1;
+    this.circleSize = this.iconSize * 1.25;
+    this.tubeRadius = this.iconSize * 0.025;
   }
 
   updatePowerUpDisplays(players: { player1: Player; player2: Player }): void {
@@ -72,7 +83,7 @@ export class ActivePowerUpIconManager {
     this.updatePlayerPowerUps(players.player2, 'player2');
 
     this.activeDisplays.forEach((display) => {
-      this.updateProgressBar(display);
+      this.updateProgressRing(display);
     });
   }
 
@@ -126,31 +137,23 @@ export class ActivePowerUpIconManager {
     const effectColor = powerUp.isNegative ? this.secondaryColor : this.primaryColor;
 
     const iconPosition = new Vector3(xPosition, yPosition, zPosition);
-    const barPosition = iconPosition.clone();
-
-    if (isPlayer1) {
-      barPosition.x -= this.iconSize * this.barOffsetMultiplier;
-    } else {
-      barPosition.x += this.iconSize * this.barOffsetMultiplier;
-    }
 
     const iconMesh = this.createPowerUpIcon(powerUp.type, iconPosition, effectColor, id);
-    const barMesh = this.createProgressBar(barPosition, effectColor, id);
-
-    const barParticles = this.createBarParticle(barPosition, effectColor, id);
+    const tubeMesh = this.createTubeRing(iconPosition, effectColor, id);
+    const particleSystem = this.createRingParticles(tubeMesh, effectColor, id);
 
     const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
     glowLayer.intensity = 0.2;
     glowLayer.blurKernelSize = 32;
-    glowLayer.addIncludedOnlyMesh(barMesh);
+    glowLayer.addIncludedOnlyMesh(tubeMesh);
 
     // Store the display
     const display: ActivePowerUpDisplay = {
       id,
       powerUpType: powerUp.type,
       iconMesh: iconMesh,
-      barMesh: barMesh,
-      barParticles: barParticles,
+      tubeMesh: tubeMesh,
+      particleSystem: particleSystem,
       glowLayer,
       timeToExpire: powerUp.timeToExpire,
       initialTime: powerUp.timeToExpire,
@@ -194,52 +197,135 @@ export class ActivePowerUpIconManager {
     return icon;
   }
 
-  private createProgressBar(position: Vector3, effectColor: Color3, id: string): Mesh {
-    const bar = MeshBuilder.CreateBox(
-      `powerUpBar-${id}`,
-      { width: this.barWidth, height: this.barHeight, depth: 0.05 },
+  private createTubeRing(position: Vector3, effectColor: Color3, id: string): Mesh {
+    // Create a circular path for the tube
+    const path = [];
+    const radius = this.circleSize / 2;
+
+    for (let i = 0; i <= this.numSegments; i++) {
+      const angle = (i / this.numSegments) * Math.PI * 2;
+      // Create circle in XY plane with constant Z
+      path.push(
+        new Vector3(
+          Math.cos(angle) * radius,
+          Math.sin(angle) * radius,
+          defaultGameObjectParams.distanceFromFloor // Constant Z
+        )
+      );
+    }
+
+    // Create a tube along this path
+    const tube = MeshBuilder.CreateTube(
+      `powerUpTube-${id}`,
+      {
+        path: path,
+        radius: this.tubeRadius,
+        tessellation: 8,
+        cap: Mesh.CAP_ALL,
+        updatable: true,
+        sideOrientation: Mesh.DOUBLESIDE,
+      },
       this.scene
     );
 
-    const material = new StandardMaterial(`powerUpBarMat-${id}`, this.scene);
+    // Create visible material for the tube
+    const material = new StandardMaterial(`tubeMat-${id}`, this.scene);
 
-    material.emissiveColor = effectColor;
+    if (this.showTubeRing) {
+      // Visible tube with transparency
+      material.alpha = 0.4; // Partial transparency
+      material.emissiveColor = effectColor;
+      material.disableLighting = true;
+    } else {
+      // Invisible tube (particles only)
+      material.alpha = 0;
+    }
 
-    bar.material = material;
-    bar.position = position.clone();
-    bar.scaling = new Vector3(1, 0, 1);
+    tube.material = material;
 
-    // Create transformation point at bottom for scaling
-    bar.setPivotPoint(new Vector3(0, -this.barHeight / 2, 0));
+    // Position the tube at the icon's position
+    tube.position = position.clone();
 
-    return bar;
+    // Store the full path for later updates
+    tube.metadata = {
+      fullPath: path,
+      effectColor: effectColor,
+    };
+
+    return tube;
   }
 
-  private createBarParticle(sourcePosition: Vector3, color: Color3, id: string): ParticleSystem {
-    const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 50, this.scene);
+  private createRingParticles(tubeMesh: Mesh, effectColor: Color3, id: string): ParticleSystem {
+    const particleSystem = new ParticleSystem(`ringParticles-${id}`, 1000, this.scene);
 
-    particleSystem.particleTexture = createParticleTexture(this.scene, color);
+    // Use tube mesh as emitter
+    particleSystem.emitter = tubeMesh;
+    particleSystem.particleTexture = createParticleTexture(this.scene, effectColor);
 
-    particleSystem.emitter = sourcePosition.clone();
-    particleSystem.minEmitBox = new Vector3(-0.1, -this.barHeight / 2, 0);
-    particleSystem.maxEmitBox = new Vector3(0.1, this.barHeight / 2, 0);
+    // Configure to emit from vertices
+    particleSystem.createPointEmitter(new Vector3(0, 0, 0), new Vector3(0, 0, 0));
+    particleSystem.emitFromSpawnPointOnly = false;
 
-    particleSystem.color1 = new Color4(color.r, color.g, color.b, 0.7);
-    particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.7);
-    particleSystem.colorDead = new Color4(color.r * 0.5, color.g * 0.5, color.b * 0.5, 0);
+    // Use tube vertices as emission points
+    particleSystem.createCylinderEmitter(0.1, 0, 0.1, 0);
+    particleSystem.startPositionFunction = (worldMatrix, positionToUpdate) => {
+      // This will be called for each particle
+      // Get random vertex from the tube
+      if (tubeMesh.getVerticesData) {
+        const positions = tubeMesh.getVerticesData('position');
+        if (positions && positions.length > 0) {
+          const vertexCount = positions.length / 3;
+          const randomIndex = Math.floor(Math.random() * vertexCount) * 3;
 
-    particleSystem.minSize = 0.05;
-    particleSystem.maxSize = 0.2;
-    particleSystem.minEmitPower = 0.3;
-    particleSystem.maxEmitPower = 0.7;
+          // Get position from vertex
+          const localPos = new Vector3(
+            positions[randomIndex],
+            positions[randomIndex + 1],
+            positions[randomIndex + 2]
+          );
+
+          // Add some small randomness
+          localPos.x += (Math.random() - 0.5) * 0.05;
+          localPos.y += (Math.random() - 0.5) * 0.05;
+          localPos.z += (Math.random() - 0.5) * 0.05;
+
+          // Transform to world space
+          Vector3.TransformCoordinatesToRef(localPos, worldMatrix, positionToUpdate);
+        }
+      }
+    };
+
+    // Particle appearance
+    particleSystem.color1 = new Color4(effectColor.r, effectColor.g, effectColor.b, 0.7);
+    particleSystem.color2 = new Color4(
+      effectColor.r * 1.5,
+      effectColor.g * 1.5,
+      effectColor.b * 1.5,
+      0.7
+    );
+    particleSystem.colorDead = new Color4(
+      effectColor.r * 0.5,
+      effectColor.g * 0.5,
+      effectColor.b * 0.5,
+      0
+    );
+
+    // Small particles for a dense look
+    particleSystem.minSize = 0.03;
+    particleSystem.maxSize = 0.08;
+
+    // Longer lifetime for particles to build up density
     particleSystem.minLifeTime = 0.8;
     particleSystem.maxLifeTime = 1.5;
-    particleSystem.emitRate = 20;
 
-    particleSystem.direction1 = new Vector3(-0.1, 0.8, 0);
-    particleSystem.direction2 = new Vector3(0.1, 1.2, 0);
+    // High emission rate for dense particle cloud
+    particleSystem.emitRate = 300;
 
-    particleSystem.gravity = new Vector3(0, -0.1, 0);
+    // Small random movement to give a sparkly effect
+    particleSystem.direction1 = new Vector3(-0.1, -0.1, -0.1);
+    particleSystem.direction2 = new Vector3(0.1, 0.1, 0.1);
+    particleSystem.minEmitPower = 0.1;
+    particleSystem.maxEmitPower = 0.3;
 
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
@@ -248,26 +334,71 @@ export class ActivePowerUpIconManager {
     return particleSystem;
   }
 
-  private updateProgressBar(display: ActivePowerUpDisplay): void {
+  private updateProgressRing(display: ActivePowerUpDisplay): void {
     const percentRemaining = Math.max(0, display.timeToExpire / display.initialTime);
 
-    if (display.barMesh) {
-      display.barMesh.scaling.y = percentRemaining;
+    // Only update the tube if necessary
+    if (display.tubeMesh && display.tubeMesh.metadata) {
+      const tube = display.tubeMesh;
+      const fullPath = tube.metadata.fullPath;
 
-      if (display.barParticles && percentRemaining < 0.25) {
-        const pulseFrequency = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
-        display.barParticles.emitRate = 20 + Math.floor(pulseFrequency * 10);
-      }
+      // Calculate how much of the path should be visible
+      const segmentsToShow = Math.ceil(percentRemaining * this.numSegments);
 
-      if (display.timeToExpire <= 50 && !display.barMesh.metadata?.expiring) {
-        display.barMesh.metadata = { expiring: true };
-        setTimeout(() => {
-          // Give a slight delay before disposing
-          if (this.activeDisplays.has(display.id)) {
-            this.removePowerUpDisplay(display.id);
+      // If we need to update the tube
+      if (tube.metadata.currentSegments !== segmentsToShow) {
+        tube.metadata.currentSegments = segmentsToShow;
+
+        if (segmentsToShow <= 0) {
+          // Hide tube completely
+          tube.visibility = 0;
+          display.particleSystem.emitRate = 0;
+        } else {
+          // Create the path for the visible portion of the ring
+          let partialPath = [];
+
+          if (segmentsToShow >= this.numSegments) {
+            // Full circle - use all points
+            partialPath = fullPath.slice();
+          } else {
+            // Partial circle - create a clean arc
+
+            // First add the visible portion of the circle
+            partialPath = fullPath.slice(0, segmentsToShow + 1);
+
+            // No need to close to center - just leave as open arc
+            // This avoids the line connecting to the center
           }
-        }, 200);
+
+          // Update the tube mesh
+          MeshBuilder.CreateTube(
+            tube.name,
+            {
+              path: partialPath,
+              radius: this.tubeRadius,
+              tessellation: 8,
+              cap: Mesh.CAP_ALL, // Cap the ends properly
+              instance: tube, // Update existing mesh
+              sideOrientation: Mesh.DOUBLESIDE,
+            },
+            this.scene
+          );
+
+          // Adjust particle emission rate based on progress
+          display.particleSystem.emitRate = 300 * percentRemaining;
+        }
       }
+    }
+
+    // Check if time has expired
+    if (display.timeToExpire <= 50 && !display.tubeMesh.metadata?.expiring) {
+      display.tubeMesh.metadata.expiring = true;
+      setTimeout(() => {
+        // Give a slight delay before disposing
+        if (this.activeDisplays.has(display.id)) {
+          this.removePowerUpDisplay(display.id);
+        }
+      }, 200);
     }
   }
 
@@ -275,6 +406,13 @@ export class ActivePowerUpIconManager {
     const display = this.activeDisplays.get(id);
 
     if (!display) return;
+
+    this.scene.stopAnimation(display.iconMesh);
+    this.scene.stopAnimation(display.tubeMesh);
+
+    if (display.tubeMesh.material) {
+      this.scene.stopAnimation(display.tubeMesh.material);
+    }
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -296,15 +434,16 @@ export class ActivePowerUpIconManager {
     scaleAnim.setEasingFunction(easingFunction);
 
     display.iconMesh.animations = [scaleAnim];
-    display.barMesh.animations = [scaleAnim.clone()];
+    display.tubeMesh.animations = [scaleAnim.clone()];
 
-    if (display.barParticles) display.barParticles.emitRate = 0;
+    // Turn off particles
+    display.particleSystem.emitRate = 0;
 
     this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
       this.disposeDisplay(id);
     });
 
-    this.scene.beginAnimation(display.barMesh, 0, 30, false);
+    this.scene.beginAnimation(display.tubeMesh, 0, 30, false);
   }
 
   private repositionPlayerDisplays(playerType: 'player1' | 'player2'): void {
@@ -320,21 +459,22 @@ export class ActivePowerUpIconManager {
 
       // Use absolute positioning in scene units
       // Calculate base X position - positioned at sides of screen
-      const xOffset = isPlayer1 ? -this.iconXOffset : this.iconXOffset;
+      const xOffset = this.gameWidth + this.iconXOffset;
+      const xPos = isPlayer1 ? -xOffset : xOffset;
 
       // Calculate Y position - negative values are toward the top of screen
       // Add spacing for multiple icons
       const yPos = this.iconYOffset + index * this.ySpacing;
 
-      const newPosition = new Vector3(xOffset, yPos, defaultGameObjectParams.distanceFromFloor);
+      const newPosition = new Vector3(xPos, yPos, defaultGameObjectParams.distanceFromFloor);
 
       this.animatePositionChange(display, newPosition);
     });
   }
 
   private animatePositionChange(display: ActivePowerUpDisplay, newPosition: Vector3): void {
-    // this.scene.stopAnimation(display.iconMesh);
-    // this.scene.stopAnimation(display.barMesh);
+    this.scene.stopAnimation(display.iconMesh);
+    this.scene.stopAnimation(display.tubeMesh);
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
@@ -353,40 +493,34 @@ export class ActivePowerUpIconManager {
     posAnim.setKeys(keys);
     posAnim.setEasingFunction(easingFunction);
 
-    // Choose progress bar position
-    const barPosition = newPosition.clone();
-    const barOffset = this.iconSize * this.barOffsetMultiplier;
-
-    if (display.player === 'player1') {
-      barPosition.x -= barOffset;
-    } else {
-      barPosition.x += barOffset;
-    }
-
-    // Progress bar position animation
-    const barPosAnim = new Animation(
-      `progressBarRepositionAnim-${display.id}`,
+    // Tube position animation
+    const tubePosAnim = new Animation(
+      `tubeRepositionAnim-${display.id}`,
       'position',
       30,
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
-    const barKeys = [
-      { frame: 0, value: display.barMesh.position.clone() },
-      { frame: 30, value: barPosition },
+
+    const tubeKeys = [
+      { frame: 0, value: display.tubeMesh.position.clone() },
+      { frame: 30, value: newPosition.clone() },
     ];
-    barPosAnim.setKeys(barKeys);
-    barPosAnim.setEasingFunction(easingFunction);
+    tubePosAnim.setKeys(tubeKeys);
+    tubePosAnim.setEasingFunction(easingFunction);
 
     display.iconMesh.animations = [posAnim];
-    display.barMesh.animations = [barPosAnim];
+    display.tubeMesh.animations = [tubePosAnim];
 
     this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
       display.position = newPosition.clone();
     });
 
-    this.scene.beginAnimation(display.barMesh, 0, 30, false, 1, () => {
-      if (display.barParticles) display.barParticles.emitter = barPosition;
+    this.scene.beginAnimation(display.tubeMesh, 0, 30, false, 1, () => {
+      // After animation, update particle system emitter
+      if (display.particleSystem && display.particleSystem.emitter) {
+        display.particleSystem.emitter = display.tubeMesh;
+      }
     });
   }
 
@@ -433,32 +567,32 @@ export class ActivePowerUpIconManager {
     ];
     scaleZAnim.setKeys(scaleZKeys);
 
-    // Progress bar animations
-    const barScaleYAnim = new Animation(
-      `powerUpBarAppearAnim-${display.id}`,
-      'scaling.y',
-      30,
+    // Tube ring subtle rotation animation
+    // Since we're now in XY plane, we rotate around Z axis for a spinning effect
+    const tubeRotationAnim = new Animation(
+      `tubeRotationAnim-${display.id}`,
+      'rotation.z',
+      240,
       Animation.ANIMATIONTYPE_FLOAT,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
+      Animation.ANIMATIONLOOPMODE_CYCLE
     );
-    const barScaleKeys = [
-      { frame: 0, value: 0.8 },
-      { frame: 15, value: 1.2 },
-      { frame: 30, value: 1.0 },
+
+    const rotationKeys = [
+      { frame: 0, value: 0 },
+      { frame: 240, value: Math.PI * 2 },
     ];
-    barScaleYAnim.setKeys(barScaleKeys);
+    tubeRotationAnim.setKeys(rotationKeys);
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     scaleXAnim.setEasingFunction(easingFunction);
     scaleYAnim.setEasingFunction(easingFunction);
-    barScaleYAnim.setEasingFunction(easingFunction);
 
     display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim];
-    display.barMesh.animations = [barScaleYAnim];
+    display.tubeMesh.animations = [tubeRotationAnim];
 
     this.scene.beginAnimation(display.iconMesh, 0, 30, true);
-    this.scene.beginAnimation(display.barMesh, 0, 30, true);
+    this.scene.beginAnimation(display.tubeMesh, 0, 240, true);
   }
 
   private disposeDisplay(id: string): void {
@@ -466,13 +600,24 @@ export class ActivePowerUpIconManager {
 
     if (!display) return;
 
+    this.scene.stopAnimation(display.iconMesh);
+    this.scene.stopAnimation(display.tubeMesh);
+
+    if (display.tubeMesh.material) {
+      this.scene.stopAnimation(display.tubeMesh.material);
+    }
+
     if (display.iconMesh.material) display.iconMesh.material.dispose();
-    if (display.barMesh.material) display.barMesh.material.dispose();
+    if (display.tubeMesh.material) display.tubeMesh.material.dispose();
 
     display.iconMesh.dispose();
-    display.barMesh.dispose();
+    display.tubeMesh.dispose();
 
-    if (display.barParticles) display.barParticles.dispose();
+    // Dispose particle system
+    if (display.particleSystem) {
+      display.particleSystem.dispose();
+    }
+
     if (display.glowLayer) display.glowLayer.dispose();
 
     this.activeDisplays.delete(id);
@@ -483,5 +628,22 @@ export class ActivePowerUpIconManager {
       this.disposeDisplay(id);
     });
     this.activeDisplays.clear();
+  }
+
+  // Add method to toggle tube visibility
+  public setTubeRingVisibility(visible: boolean): void {
+    this.showTubeRing = visible;
+
+    // Update all existing tube materials
+    this.activeDisplays.forEach((display) => {
+      const material = display.tubeMesh.material as StandardMaterial;
+      if (material) {
+        if (visible) {
+          material.alpha = 0.4;
+        } else {
+          material.alpha = 0;
+        }
+      }
+    });
   }
 }
