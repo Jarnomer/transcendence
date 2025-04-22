@@ -143,8 +143,8 @@ export class ActivePowerUpIconManager {
     const particleSystem = this.createRingParticles(tubeMesh, effectColor, id);
 
     const glowLayer = new GlowLayer(`powerUp-glow-${id}`, this.scene);
-    glowLayer.intensity = 0.2;
-    glowLayer.blurKernelSize = 32;
+    glowLayer.intensity = 0.5;
+    glowLayer.blurKernelSize = 64;
     glowLayer.addIncludedOnlyMesh(tubeMesh);
 
     // Store the display
@@ -256,7 +256,7 @@ export class ActivePowerUpIconManager {
   }
 
   private createRingParticles(tubeMesh: Mesh, effectColor: Color3, id: string): ParticleSystem {
-    const particleSystem = new ParticleSystem(`ringParticles-${id}`, 1000, this.scene);
+    const particleSystem = new ParticleSystem(`ringParticles-${id}`, 2000, this.scene);
 
     // Use tube mesh as emitter
     particleSystem.emitter = tubeMesh;
@@ -268,64 +268,98 @@ export class ActivePowerUpIconManager {
 
     // Use tube vertices as emission points
     particleSystem.createCylinderEmitter(0.1, 0, 0.1, 0);
+
+    // Store angle information in metadata for progress tracking
+    tubeMesh.metadata = {
+      ...tubeMesh.metadata,
+      maxAngle: Math.PI * 2,
+      currentAngle: Math.PI * 2,
+    };
+
     particleSystem.startPositionFunction = (worldMatrix, positionToUpdate) => {
       // This will be called for each particle
-      // Get random vertex from the tube
       if (tubeMesh.getVerticesData) {
         const positions = tubeMesh.getVerticesData('position');
         if (positions && positions.length > 0) {
           const vertexCount = positions.length / 3;
-          const randomIndex = Math.floor(Math.random() * vertexCount) * 3;
 
-          // Get position from vertex
-          const localPos = new Vector3(
-            positions[randomIndex],
-            positions[randomIndex + 1],
-            positions[randomIndex + 2]
+          // Try multiple times to find a valid vertex (within the visible arc)
+          for (let attempt = 0; attempt < 10; attempt++) {
+            const randomIndex = Math.floor(Math.random() * vertexCount) * 3;
+
+            // Get position from vertex
+            const localPos = new Vector3(
+              positions[randomIndex],
+              positions[randomIndex + 1],
+              positions[randomIndex + 2]
+            );
+
+            // Calculate angle of this vertex on the ring
+            const vertexAngle = Math.atan2(localPos.y, localPos.x);
+            const normalizedAngle = vertexAngle < 0 ? vertexAngle + Math.PI * 2 : vertexAngle;
+
+            // Only emit from vertices within the current progress angle
+            // The startAngle is always 0, so we check if the vertex angle is less than current angle
+            const maxAngle = tubeMesh.metadata.currentAngle || Math.PI * 2;
+
+            if (normalizedAngle <= maxAngle) {
+              // Add some small randomness
+              localPos.x += (Math.random() - 0.5) * 0.08;
+              localPos.y += (Math.random() - 0.5) * 0.08;
+              localPos.z += (Math.random() - 0.5) * 0.08;
+
+              // Transform to world space
+              Vector3.TransformCoordinatesToRef(localPos, worldMatrix, positionToUpdate);
+              return;
+            }
+          }
+
+          // If we couldn't find a valid vertex after several attempts, use a fallback
+          const validIndex = Math.floor(Math.random() * (vertexCount / 2)) * 3;
+          const fallbackPos = new Vector3(
+            positions[validIndex],
+            positions[validIndex + 1],
+            positions[validIndex + 2]
           );
-
-          // Add some small randomness
-          localPos.x += (Math.random() - 0.5) * 0.05;
-          localPos.y += (Math.random() - 0.5) * 0.05;
-          localPos.z += (Math.random() - 0.5) * 0.05;
-
-          // Transform to world space
-          Vector3.TransformCoordinatesToRef(localPos, worldMatrix, positionToUpdate);
+          Vector3.TransformCoordinatesToRef(fallbackPos, worldMatrix, positionToUpdate);
         }
       }
     };
 
-    // Particle appearance
-    particleSystem.color1 = new Color4(effectColor.r, effectColor.g, effectColor.b, 0.7);
+    // Enhanced particle appearance
+    particleSystem.color1 = new Color4(effectColor.r, effectColor.g, effectColor.b, 0.9);
     particleSystem.color2 = new Color4(
-      effectColor.r * 1.5,
-      effectColor.g * 1.5,
-      effectColor.b * 1.5,
-      0.7
+      effectColor.r * 1.8,
+      effectColor.g * 1.8,
+      effectColor.b * 1.8,
+      0.9
     );
     particleSystem.colorDead = new Color4(
-      effectColor.r * 0.5,
-      effectColor.g * 0.5,
-      effectColor.b * 0.5,
+      effectColor.r * 0.7,
+      effectColor.g * 0.7,
+      effectColor.b * 0.7,
       0
     );
 
-    // Small particles for a dense look
-    particleSystem.minSize = 0.03;
-    particleSystem.maxSize = 0.08;
+    // Increase particle size range
+    particleSystem.minSize = 0.04;
+    particleSystem.maxSize = 0.12;
 
-    // Longer lifetime for particles to build up density
-    particleSystem.minLifeTime = 0.8;
-    particleSystem.maxLifeTime = 1.5;
+    // Slightly increase particle lifetime
+    particleSystem.minLifeTime = 0.7;
+    particleSystem.maxLifeTime = 1.8;
 
-    // High emission rate for dense particle cloud
-    particleSystem.emitRate = 300;
+    // Higher emission rate for denser effect
+    particleSystem.emitRate = 500;
 
-    // Small random movement to give a sparkly effect
-    particleSystem.direction1 = new Vector3(-0.1, -0.1, -0.1);
-    particleSystem.direction2 = new Vector3(0.1, 0.1, 0.1);
-    particleSystem.minEmitPower = 0.1;
-    particleSystem.maxEmitPower = 0.3;
+    // Enhance movement for more dynamic effect
+    particleSystem.direction1 = new Vector3(-0.15, -0.15, -0.15);
+    particleSystem.direction2 = new Vector3(0.15, 0.15, 0.15);
+    particleSystem.minEmitPower = 0.15;
+    particleSystem.maxEmitPower = 0.4;
+
+    // Add gravity to create a slight "falling off" effect
+    particleSystem.gravity = new Vector3(0, -0.03, 0);
 
     particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
@@ -345,6 +379,12 @@ export class ActivePowerUpIconManager {
       // Calculate how much of the path should be visible
       const segmentsToShow = Math.ceil(percentRemaining * this.numSegments);
 
+      // Calculate the current progress angle (for particles)
+      const currentAngle = (segmentsToShow / this.numSegments) * Math.PI * 2;
+
+      // Update the metadata with current angle for particle emission
+      tube.metadata.currentAngle = currentAngle;
+
       // If we need to update the tube
       if (tube.metadata.currentSegments !== segmentsToShow) {
         tube.metadata.currentSegments = segmentsToShow;
@@ -362,12 +402,7 @@ export class ActivePowerUpIconManager {
             partialPath = fullPath.slice();
           } else {
             // Partial circle - create a clean arc
-
-            // First add the visible portion of the circle
             partialPath = fullPath.slice(0, segmentsToShow + 1);
-
-            // No need to close to center - just leave as open arc
-            // This avoids the line connecting to the center
           }
 
           // Update the tube mesh
@@ -377,15 +412,37 @@ export class ActivePowerUpIconManager {
               path: partialPath,
               radius: this.tubeRadius,
               tessellation: 8,
-              cap: Mesh.CAP_ALL, // Cap the ends properly
-              instance: tube, // Update existing mesh
+              cap: Mesh.CAP_ALL,
+              instance: tube,
               sideOrientation: Mesh.DOUBLESIDE,
             },
             this.scene
           );
 
-          // Adjust particle emission rate based on progress
-          display.particleSystem.emitRate = 300 * percentRemaining;
+          // Dynamically adjust particle parameters based on progress
+
+          // Adjust emission rate based on progress
+          const baseEmitRate = 500;
+          display.particleSystem.emitRate = baseEmitRate * percentRemaining;
+
+          // Increase particle energy as progress decreases to create urgency
+          if (percentRemaining < 0.5) {
+            const intensityFactor = 1 + (0.5 - percentRemaining) * 0.8;
+            display.particleSystem.minEmitPower = 0.15 * intensityFactor;
+            display.particleSystem.maxEmitPower = 0.4 * intensityFactor;
+
+            // Optional: change color as time runs out
+            if (percentRemaining < 0.25) {
+              const material = tube.material as StandardMaterial;
+              if (material) {
+                const urgencyColor = display.tubeMesh.metadata.effectColor.clone();
+                // Make it more intense (whiter/brighter)
+                const intensity = 1 + (0.25 - percentRemaining) * 2;
+                urgencyColor.scaleToRef(intensity, urgencyColor);
+                material.emissiveColor = urgencyColor;
+              }
+            }
+          }
         }
       }
     }
