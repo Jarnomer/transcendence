@@ -10,6 +10,7 @@ import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the Ga
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
+import { useSound } from '../hooks/useSound';
 
 interface GameMenuOption {
   content: string;
@@ -54,6 +55,8 @@ export const GameMenu: React.FC = () => {
 
     resetGameOptions,
   } = useGameOptionsContext();
+  const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
+  const playGoBackSound = useSound('/sounds/effects/button_go_back.wav');
 
   const modes = [
     {
@@ -128,19 +131,20 @@ export const GameMenu: React.FC = () => {
   };
 
   const handleModeClick = (mode: string | null) => {
+    if (mode === null) playGoBackSound();
+    playSubmitSound();
     setMode(mode);
   };
 
   const handleDifficultyClick = (difficulty: string | null) => {
+    playSubmitSound();
     setDifficulty(difficulty);
   };
 
-  // useEffect(() => {
-  //   return () => {
-  //     setMode(null);
-  //     setDifficulty(null);
-  //   };
-  // }, [location]);
+  useEffect(() => {
+    resetGameOptions();
+    setLobby('create');
+  }, []);
 
   useEffect(() => {
     if (mode === 'tournament') {
@@ -150,7 +154,6 @@ export const GameMenu: React.FC = () => {
     if (mode && difficulty) {
       allowInternalNavigation();
       if (mode === '1v1' && difficulty === 'online') {
-        resetGameOptions();
         setLobby('random');
         setMode('1v1');
         setDifficulty('online');

@@ -1,12 +1,12 @@
 // import { Any } from '@sinclair/typebox';
 
 import {
+  defaultGameParams,
+  GameParams,
+  GameSettings,
   GameState,
   GameStatus,
-  GameParams,
-  defaultGameParams,
   PowerUpType,
-  GameSettings,
 } from '@shared/types';
 
 import { PowerUpManager } from './PowerUpManager';
@@ -27,6 +27,7 @@ export default class PongGame {
   private powerUpManager: PowerUpManager;
 
   constructor(settings: GameSettings) {
+    console.log('Initializing PongGame with settings:', settings);
     this.params = structuredClone(defaultGameParams);
     this.settings = settings;
     this.powerUpManager = new PowerUpManager(this, this.settings);
@@ -55,6 +56,7 @@ export default class PongGame {
       },
       ball: { x: 0, y: 0, dx: 0, dy: 0, spin: 0 },
       powerUps: [],
+      countdown: this.params.rules.countdown,
     };
     this.gameStatus = 'loading';
     this.resetBall();
@@ -62,6 +64,12 @@ export default class PongGame {
 
   setSettings(settings: GameSettings): void {
     this.settings = settings;
+    if (this.settings.ballSpeed >= this.params.ball.maxDX) {
+      this.settings.ballSpeed = this.params.ball.maxDX;
+    } else if (this.settings.ballSpeed <= this.params.ball.minDX) {
+      this.settings.ballSpeed = this.params.ball.minDX;
+    }
+    this.powerUpManager.setSettings(settings);
   }
 
   addPlayer(playerId: string): void {
@@ -80,14 +88,12 @@ export default class PongGame {
 
   setReadyState(playerId: string, state: boolean): void {
     if (playerId === this.gameState.players.player1.id) {
-      //console.log('Setting player1 ready state:', state);
       this.readyState.set(1, state);
     } else if (playerId === this.gameState.players.player2.id) {
       console.log('Setting player2 ready state:', state);
       this.readyState.set(2, state);
     }
     if (this.areAllPlayersReady()) {
-      //console.log('All players are ready!');
       this.startCountdown();
     } else {
       console.log('Not all players are ready');
@@ -97,7 +103,6 @@ export default class PongGame {
   }
 
   areAllPlayersReady(): boolean {
-    // console.log('Checking if all players are ready, mode:', this.mode);
     if (this.settings.mode === 'AIvsAI') {
       return true;
     } else if (
@@ -286,33 +291,18 @@ export default class PongGame {
   }
 
   private repositionPaddleForHeightChange(player: number, height: number): void {
-    // console.log('Correcting paddle position after height change:', player, height);
-    if (player === 1) {
-      if (height > this.gameState.players.player1.paddleHeight) {
-        this.gameState.players.player1.y -=
-          (height - this.gameState.players.player1.paddleHeight) / 2;
-        if (this.gameState.players.player1.y < 0) {
-          this.gameState.players.player1.y = 0;
-        } else if (this.gameState.players.player1.y + height > this.params.dimensions.gameHeight) {
-          this.gameState.players.player1.y = this.params.dimensions.gameHeight - height;
-        }
-      } else {
-        this.gameState.players.player1.y +=
-          (this.gameState.players.player1.paddleHeight - height) / 2;
+    const playerState =
+      player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
+
+    if (height > playerState.paddleHeight) {
+      playerState.y -= (height - playerState.paddleHeight) / 2;
+      if (playerState.y < 0) {
+        playerState.y = 0;
+      } else if (playerState.y + height > this.params.dimensions.gameHeight) {
+        playerState.y = this.params.dimensions.gameHeight - height;
       }
-    } else if (player === 2) {
-      if (height > this.gameState.players.player2.paddleHeight) {
-        this.gameState.players.player2.y -=
-          (height - this.gameState.players.player2.paddleHeight) / 2;
-        if (this.gameState.players.player2.y < 0) {
-          this.gameState.players.player2.y = 0;
-        } else if (this.gameState.players.player2.y + height > this.params.dimensions.gameHeight) {
-          this.gameState.players.player2.y = this.params.dimensions.gameHeight - height;
-        }
-      } else {
-        this.gameState.players.player2.y +=
-          (this.gameState.players.player2.paddleHeight - height) / 2;
-      }
+    } else {
+      playerState.y += (playerState.paddleHeight - height) / 2;
     }
   }
 
@@ -328,8 +318,8 @@ export default class PongGame {
     this.gameState.ball = {
       x: this.params.dimensions.gameWidth / 2,
       y: this.params.dimensions.gameHeight / 2,
-      dx: direction * this.params.ball.speed * Math.cos(angle),
-      dy: this.params.ball.speed * Math.sin(angle),
+      dx: direction * this.settings.ballSpeed * Math.cos(angle),
+      dy: this.settings.ballSpeed * Math.sin(angle),
       spin: 0,
     };
   }
@@ -354,6 +344,7 @@ export default class PongGame {
     this.gameState.players.player1.activePowerUps = [];
     this.gameState.players.player2.activePowerUps = [];
     this.gameState.powerUps = [];
+    this.gameState.countdown = this.params.rules.countdown;
 
     console.log('Starting countdown...');
     console.log('Countdown length:', this.params.rules.countdown);
@@ -363,16 +354,21 @@ export default class PongGame {
 
     console.log('Game starting with max score:', this.params.rules.maxScore);
 
-    setTimeout(() => {
-      this.setGameStatus('playing');
-      this.startGameLoop();
-    }, this.params.rules.countdown * 1000);
+    const countdownInterval = setInterval(() => {
+      console.log('Countdown:', this.gameState.countdown);
+      this.gameState.countdown--;
+
+      if (this.gameState.countdown <= 0) {
+        clearInterval(countdownInterval);
+        this.setGameStatus('playing');
+        this.startGameLoop();
+      }
+    }, 1000);
   }
 
   startGameLoop(): void {
-    // console.log('Starting game loop...');
-    // Prevent multiple intervals
-    if (this.updateInterval) return;
+    if (this.updateInterval) return; // Prevent multiple intervals
+
     this.updateInterval = setInterval(() => {
       if (this.gameStatus === 'playing') {
         this.updateBall();
@@ -387,23 +383,17 @@ export default class PongGame {
       return this.getGameState();
     }
 
-    // Update player positions based on moves
-    this.updatePaddlePosition('player1', playerMoves.player1 ?? null);
-    this.updatePaddlePosition('player2', playerMoves.player2 ?? null);
+    this.updatePaddlePosition(1, playerMoves.player1 ?? null);
+    this.updatePaddlePosition(2, playerMoves.player2 ?? null);
 
-    // Return the updated state (deep copy for safety)
     return this.getGameState();
   }
 
-  private updatePaddlePosition(player: 'player1' | 'player2', move: PlayerMove): void {
+  private updatePaddlePosition(player: number, move: PlayerMove): void {
     if (this.gameStatus !== 'playing') return;
 
-    let paddleState;
-    if (player === 'player1') {
-      paddleState = this.gameState.players.player1;
-    } else {
-      paddleState = this.gameState.players.player2;
-    }
+    const paddleState =
+      player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
 
     if (move === 'up') {
       if (paddleState.y - this.params.paddle.speed < 0) {
@@ -432,16 +422,14 @@ export default class PongGame {
   private updateBall(): void {
     if (this.gameStatus !== 'playing') return;
 
-    const { ball, players } = this.gameState;
+    const { ball } = this.gameState;
 
     this.adjustBallMovementForSpin();
     ball.x += ball.dx;
     ball.y += ball.dy;
-    // console.log('Ball position:', ball.x, ball.y);
 
     // Top wall collision
     if (ball.y <= 0) {
-      // Prevent going inside the wall
       ball.y = 0;
       ball.dy *= -1;
       this.adjustBounceForSpin(true);
@@ -449,35 +437,39 @@ export default class PongGame {
 
     // Bottom wall collision
     if (ball.y + this.params.ball.size >= this.params.dimensions.gameHeight) {
-      // Prevent going inside the wall
       ball.y = this.params.dimensions.gameHeight - this.params.ball.size;
       ball.dy *= -1;
-      // Spin effect
       this.adjustBounceForSpin(false);
     }
 
     this.checkPaddleCollision();
 
     if (ball.x <= 0) {
-      players.player2.score++;
-      console.log('Player 2 scores!');
-      if (this.settings.maxScore !== 0 && players.player2.score >= this.settings.maxScore) {
-        this.stopGame();
-      } else {
-        this.setGameStatus('waiting');
-        this.resetPaddles();
-        // this.resetBall();
-      }
+      this.scorePoint(2);
     } else if (ball.x + this.params.ball.size >= this.params.dimensions.gameWidth) {
-      players.player1.score++;
+      this.scorePoint(1);
+    }
+  }
+
+  private scorePoint(player: number): void {
+    if (player === 1) {
+      this.gameState.players.player1.score++;
       console.log('Player 1 scores!');
-      if (this.settings.maxScore !== 0 && players.player1.score >= this.settings.maxScore) {
-        this.stopGame();
-      } else {
-        this.setGameStatus('waiting');
-        this.resetPaddles();
-        // this.resetBall();
-      }
+    } else {
+      this.gameState.players.player2.score++;
+      console.log('Player 2 scores!');
+    }
+    if (
+      this.gameState.players.player1.score >= this.settings.maxScore ||
+      this.gameState.players.player2.score >= this.settings.maxScore
+    ) {
+      console.log('Game over!');
+      console.log('Player 1 score:', this.gameState.players.player1.score);
+      console.log('Player 2 score:', this.gameState.players.player2.score);
+      console.log('Max score:', this.settings.maxScore);
+      this.stopGame();
+    } else {
+      this.setGameStatus('waiting');
     }
   }
 
@@ -558,7 +550,7 @@ export default class PongGame {
       this.params.ball.maxSpeedMultiplier
     );
 
-    const newSpeed = this.params.ball.speed * this.params.ball.speedMultiplier;
+    const newSpeed = this.settings.ballSpeed * this.params.ball.speedMultiplier;
     const direction = isLeftPaddle ? 1 : -1;
     const paddle = isLeftPaddle ? players.player1 : players.player2;
 

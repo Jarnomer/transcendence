@@ -15,6 +15,7 @@
   --color-primary: #ea355a;
   --color-secondary: #76f7fd;
   --color-background: black;
+  --color-error: #ff0000;
 }
 
 @theme {
@@ -28,6 +29,7 @@
   --color-background: black;
   --font-primary: 'JetBrains Mono', 'italic';
   --font-heading: 'Teko', 'normal';
+  --color-error: #ff0000;
 
   --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);

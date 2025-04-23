@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -6,6 +6,7 @@ import { GameSettings } from '../components/settings/GameSettings';
 import { GraphicSettings } from '../components/settings/GraphicSettings';
 import { Soundsettings } from '../components/settings/SoundSettings';
 import { UserSettings } from '../components/settings/UserSettings';
+import { useSound } from '../hooks/useSound';
 
 export const slideFromLeftVariants = {
   initial: {
@@ -88,6 +89,12 @@ export const SettingsNav: React.FC<{
 
 export const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('soundSettings');
+
+  const playSelectSound = useSound('/sounds/effects/select.wav');
+
+  useEffect(() => {
+    playSelectSound();
+  }, [activeTab]);
 
   return (
     <>

@@ -7,7 +7,7 @@ import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
 const Competitor: React.FC<CompetitorProps> = ({ name }) => {
   return (
     <motion.li
-      className={`flex items-center m-4 p-1`}
+      className={`flex items-center m-4 p-1 hover:text-secondary`}
       // onClick={() => navigate(`/profile/${user.user_id}`)}
     >
       <ListSvgContainer>
@@ -84,6 +84,8 @@ const TournamentBracket: React.FC = ({ players }) => {
     }));
   };
 
+  const container = document.getElementById('app-main-container');
+  if (!container) return null;
   const rounds = generateRounds(players);
   const maxRounds = players.length / 2;
   const gridCols = maxRounds + 2;

@@ -88,7 +88,13 @@ export const Notifications: React.FC = () => {
 
   console.log('notficitations: ', notifications);
   return (
-    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
+    <motion.div
+      className="backdrop-blur-sm"
+      variants={animationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <ul>
         {notifications.length > 0 ? (
           notifications.map((request: any, index: number) => (

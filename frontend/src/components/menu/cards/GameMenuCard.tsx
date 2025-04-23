@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useSound } from '../../../hooks/useSound';
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
 
 interface GameMenuCardProps {
@@ -12,6 +13,12 @@ interface GameMenuCardProps {
 const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInfo, onClick }) => {
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   console.log('is safari:', isSafari);
+  const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
+
+  const handleOnClick = () => {
+    playSubmitSound();
+    onClick();
+  };
 
   return !isSafari ? (
     <div
@@ -72,8 +79,8 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
                 }}
               ></div>
               {/* Content positioned at the bottom of the card */}
-              <div className="content @sm:text-xs absolute bottom-0 w-full flex flex-col items-center gap-10 p-5">
-                <h2 className="text-3xl  font-heading">{content}</h2>
+              <div className="content @sm:text-xs absolute bottom-0 w-full flex flex-col justify-center items-center gap-10 p-5">
+                <h2 className="text-5xl  font-heading">{content}</h2>
               </div>
             </foreignObject>
           </g>
@@ -93,7 +100,7 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
   ) : (
     <div
       className="game-mode-modal @container-normal p-0 m-0 relative inline-block overflow-hidden"
-      onClick={onClick}
+      onClick={handleOnClick}
     >
       <div className="svg-card-wrapper relative w-full h-full min-w-[300px] grid overflow-hidden place-items-center text-center">
         <svg

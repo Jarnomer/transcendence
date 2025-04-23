@@ -59,8 +59,6 @@ export const HeaderNav: React.FC = () => {
   }, [isDropdownOpen]);
 
   const handleCreateGameClick = () => {
-    console.log('Create game clicked');
-    setLobby('create');
     navigate('/gameMenu');
   };
 
@@ -72,7 +70,7 @@ export const HeaderNav: React.FC = () => {
             id="nav-play-button"
             ariaLabel="play"
             icon="play"
-            onClick={() => handleCreateGameClick()}
+            onClick={() => navigate('/gameMenu')}
           ></NavIconButton>
           <NavIconButton
             id="nav-home-button"
@@ -96,7 +94,7 @@ export const HeaderNav: React.FC = () => {
             {isDropdownOpen ? (
               <motion.div
                 ref={dropdownRef}
-                className="absolute h-[200px] right-0 top-15 glass-box p-2"
+                className="absolute h-[200px] right-0 top-15 glass-box p-2 z-50 backdrop-blur-md"
                 variants={animationVariants}
                 initial="initial"
                 animate="animate"

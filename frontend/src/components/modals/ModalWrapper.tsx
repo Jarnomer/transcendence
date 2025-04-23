@@ -22,7 +22,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex items-center justify-center z-50"
+      className="fixed top-0 left-0 w-screen h-screen bg-black/50 backdrop-blur-md flex items-center justify-center z-40"
       onClick={handleOverlayClick}
     >
       <div

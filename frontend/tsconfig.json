@@ -3,7 +3,7 @@
   "compilerOptions": {
     /* Frontend-specific options */
     "jsx": "react-jsx",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "dom"],
     "useDefineForClassFields": true,
 
     /* Bundler mode for frontend */
