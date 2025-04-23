@@ -58,6 +58,8 @@ export class ActivePowerUpIconManager {
   private numSegments: number = 64;
   private iconXOffset: number = 3.5;
   private iconYOffset: number = 9.0;
+  private torusXOffset: number = 0;
+  private tubeXOffset: number = 0.1;
 
   constructor(
     scene: Scene,
@@ -128,6 +130,27 @@ export class ActivePowerUpIconManager {
     });
   }
 
+  private applyRingOffsets(
+    basePosition: Vector3,
+    playerType: 'player1' | 'player2'
+  ): {
+    torusPosition: Vector3;
+    tubePosition: Vector3;
+  } {
+    const offsetDirection = playerType === 'player1' ? 1 : -1;
+
+    const torusPosition = basePosition.clone();
+    torusPosition.x += this.torusXOffset * offsetDirection;
+
+    const tubePosition = basePosition.clone();
+    tubePosition.x += this.tubeXOffset * offsetDirection;
+
+    return {
+      torusPosition,
+      tubePosition,
+    };
+  }
+
   private createPowerUpDisplay(
     powerUp: playerPowerUp,
     playerType: 'player1' | 'player2',
@@ -145,9 +168,11 @@ export class ActivePowerUpIconManager {
 
     const iconPosition = new Vector3(xPosition, yPosition, zPosition);
 
+    const { torusPosition, tubePosition } = this.applyRingOffsets(iconPosition, playerType);
+
     const iconMesh = this.createPowerUpIcon(powerUp.type, iconPosition, effectColor, id);
-    const tubeMesh = this.createTubeRing(iconPosition, effectColor, id);
-    const torusMesh = this.createTorusRing(iconPosition, effectColor, id);
+    const tubeMesh = this.createTubeRing(tubePosition, effectColor, id);
+    const torusMesh = this.createTorusRing(torusPosition, effectColor, id);
     const particleSystem = this.createRingParticles(tubeMesh, effectColor, id);
 
     const display: ActivePowerUpDisplay = {
@@ -488,17 +513,24 @@ export class ActivePowerUpIconManager {
       const xPosition = playerType === 'player1' ? -xOffset : xOffset;
       const yPosition = this.iconYOffset - index * this.ySpacing;
 
-      const newPosition = new Vector3(
+      const newIconPosition = new Vector3(
         xPosition,
         yPosition,
         defaultGameObjectParams.distanceFromFloor
       );
 
-      this.animatePositionChange(display, newPosition);
+      const { torusPosition, tubePosition } = this.applyRingOffsets(newIconPosition, playerType);
+
+      this.animatePositionChange(display, newIconPosition, torusPosition, tubePosition);
     });
   }
 
-  private animatePositionChange(display: ActivePowerUpDisplay, newPosition: Vector3): void {
+  private animatePositionChange(
+    display: ActivePowerUpDisplay,
+    newIconPosition: Vector3,
+    newTorusPosition: Vector3,
+    newTubePosition: Vector3
+  ): void {
     if (display.tubeMesh.metadata?.disposing) return;
 
     const easingFunction = new CubicEase();
@@ -527,26 +559,26 @@ export class ActivePowerUpIconManager {
     ]);
     baseScaleAnim.setEasingFunction(easingFunction);
 
-    // Clone position animations
+    // Clone position animations with specific destinations for each mesh
     const iconPosAnim = basePositionAnim.clone();
     iconPosAnim.name = `iconRepositionAnim-${display.id}`;
     iconPosAnim.setKeys([
       { frame: 0, value: display.iconMesh.position.clone() },
-      { frame: 30, value: newPosition.clone() },
+      { frame: 30, value: newIconPosition.clone() },
     ]);
 
     const tubePosAnim = basePositionAnim.clone();
     tubePosAnim.name = `tubeRepositionAnim-${display.id}`;
     tubePosAnim.setKeys([
       { frame: 0, value: display.tubeMesh.position.clone() },
-      { frame: 30, value: newPosition.clone() },
+      { frame: 30, value: newTubePosition.clone() },
     ]);
 
     const torusPosAnim = basePositionAnim.clone();
     torusPosAnim.name = `torusRepositionAnim-${display.id}`;
     torusPosAnim.setKeys([
       { frame: 0, value: display.torusMesh.position.clone() },
-      { frame: 30, value: newPosition.clone() },
+      { frame: 30, value: newTorusPosition.clone() },
     ]);
 
     // Clone scale animations
@@ -578,7 +610,7 @@ export class ActivePowerUpIconManager {
 
     // Start animations
     this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
-      display.position = newPosition.clone();
+      display.position = newIconPosition.clone();
     });
 
     this.scene.beginAnimation(display.tubeMesh, 0, 30, false);
