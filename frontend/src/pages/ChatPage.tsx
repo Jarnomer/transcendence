@@ -5,8 +5,8 @@ import { useLocation } from 'react-router-dom';
 import { useChatContext } from '@/contexts/chatContext/ChatContext';
 
 import { BackgroundGlow } from '../components';
+import { ChatWindow } from '../components/chat/chatPage/ChatWindow';
 import { ChatSidebar } from '../components/chat/ChatSideBar';
-import { ChatWindow } from '../components/chat/ChatWindow';
 import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
 
 export const ChatPage: React.FC = () => {

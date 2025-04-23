@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
+import { useSound } from '../../hooks/useSound';
 import { getUsersWithRank } from '../../services/userService';
 import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
 import SearchBar from '../UI/SearchBar';
@@ -46,6 +47,7 @@ export const LeaderBoard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const playSelectPowerUpSound = useSound('/sounds/effects/select.wav');
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
@@ -103,7 +105,10 @@ export const LeaderBoard: React.FC = () => {
                     <motion.li
                       key={user.user_id}
                       className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
-                      onClick={() => navigate(`/profile/${user.user_id}`)}
+                      onClick={() => {
+                        playSelectPowerUpSound();
+                        navigate(`/profile/${user.user_id}`);
+                      }}
                       variants={itemVariants}
                     >
                       <div className="flex items-center justify-center text-center ml-2">

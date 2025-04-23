@@ -48,6 +48,7 @@ export interface GameState {
   players: { player1: Player; player2: Player };
   ball: Ball;
   powerUps: PowerUp[];
+  countdown: number;
 }
 
 export interface GameDimensions {
@@ -66,6 +67,7 @@ export interface BallParams {
   size: number;
   speed: number;
   minDX: number;
+  maxDX: number;
   speedMultiplier: number;
   maxSpeedMultiplier: number;
   speedIncreaseFactor: number;
@@ -162,7 +164,8 @@ export const defaultGameParams: GameParams = {
   ball: {
     size: 15,
     speed: 7,
-    minDX: 7,
+    minDX: 4,
+    maxDX: 15,
     speedMultiplier: 1,
     maxSpeedMultiplier: 3,
     speedIncreaseFactor: 1.015, // Ball speed increase on paddle hit

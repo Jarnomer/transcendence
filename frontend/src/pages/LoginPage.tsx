@@ -11,6 +11,7 @@ import { updateUser } from '@services/userService.ts';
 
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { useSound } from '../hooks/useSound';
 
 interface inputWrapperProps {
   children: ReactNode;
@@ -32,6 +33,7 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const playErrorSound = useSound('/sounds/effects/error.wav');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,7 @@ export const LoginPage: React.FC = () => {
         } catch (error: any) {
           // alert('Registration failed!');
           setLoading(false);
+          playErrorSound();
           if (error.status === 400) {
             setError('userExists');
           }
@@ -71,6 +74,7 @@ export const LoginPage: React.FC = () => {
         }
       } catch (error: any) {
         // alert('Login failed!');
+        playErrorSound();
         console.log('error: ', error);
         setLoading(false);
         if (error.status === 400) {
@@ -102,27 +106,27 @@ export const LoginPage: React.FC = () => {
               <input
                 type="text"
                 placeholder="Username"
-                className="border p-2"
+                className={`border p-2  ${error && (error === 'invalidUser' || error === 'userExists') && 'text-error'}`}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
               />
               {error && error === 'invalidUser' && (
-                <p className="text-xs text-left">User not found</p>
+                <p className="text-xs text-left text-error">User not found</p>
               )}
               {isRegistering && error && error === 'userExists' && (
-                <p className="text-xs text-left">Username taken</p>
+                <p className="text-xs text-left text-error">Username taken</p>
               )}
               <input
                 type="password"
                 placeholder="Password"
-                className="border p-2"
+                className={`border p-2  ${error && error === 'invalidPassword' && 'text-error'}`}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
               {error && error === 'invalidPassword' && (
-                <p className="text-xs text-left">invalid password</p>
+                <p className="text-xs text-left text-error">invalid password</p>
               )}
               <ClippedButton label={isRegistering ? 'Register' : 'Login'} type="submit" />
             </form>

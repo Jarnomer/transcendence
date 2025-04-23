@@ -11,6 +11,7 @@ import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { useSound } from '../hooks/useSound';
 
 interface GameMenuOption {
   content: string;
@@ -50,6 +51,8 @@ export const GameMenu: React.FC = () => {
     useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
   const { phase, cancelGame, cancelQueue } = useWebSocketContext();
+  const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
+  const playGoBackSound = useSound('/sounds/effects/button_go_back.wav');
 
   const modes = [
     {
@@ -124,10 +127,13 @@ export const GameMenu: React.FC = () => {
   };
 
   const handleModeClick = (mode: string | null) => {
+    if (mode === null) playGoBackSound();
+    playSubmitSound();
     setMode(mode);
   };
 
   const handleDifficultyClick = (difficulty: string | null) => {
+    playSubmitSound();
     setDifficulty(difficulty);
   };
 

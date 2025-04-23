@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 
 import { PowerUpType } from '@shared/types';
 
+import { useSound } from '../../hooks/useSound';
 import { BoxDiv } from '../visual/svg/containers/SvgBoxContainer';
 import { PaddleBiggerIcon } from '../visual/svg/icons/PaddleBiggerIcon';
 import { PaddleFasterIcon } from '../visual/svg/icons/PaddleFasterIcont';
@@ -40,9 +41,12 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
   setSelectedPowerUps,
   isSpinEnabled,
 }) => {
+  const playSelectPowerUpSound = useSound('/sounds/effects/select.wav');
+
   const handlePowerUpToggle = (powerUp: string) => {
     if (!isEnabled || (powerUp === PowerUpType.MoreSpin && !isSpinEnabled)) return;
 
+    playSelectPowerUpSound();
     console.log(selectedPowerUps);
     setSelectedPowerUps((prev) =>
       prev.includes(powerUp) ? prev.filter((p) => p !== powerUp) : [...prev, powerUp]

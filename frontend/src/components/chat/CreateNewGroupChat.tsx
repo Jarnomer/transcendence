@@ -6,9 +6,7 @@ import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';
 
 type CreateRoomPopupProps = {
-  isVisible: boolean;
   onClose: () => void;
-  friends: any[];
   handleClickNewChat: () => void;
 };
 
@@ -44,7 +42,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
     if (roomName.trim() === '') return;
 
     createRoom(roomName, isPrivate, selectedMembers);
-    handleClickNewChat(); // Close the popup after room creation
+    handleClickNewChat();
   };
 
   const handleToggleMember = (friendId: string) => {
@@ -66,7 +64,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
             id="go-back-button"
             ariaLabel="back to chat list"
             icon="arrowLeft"
-            onClick={handleClickNewChat}
+            onClick={() => handleClickNewChat()}
           />
         </div>
         <div className="mb-2 text-center w-full">
@@ -77,9 +75,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
       <div>
         <>
           <div className="flex w-full">
-            <div
-              className={`${selectedFriend ? 'w-full' : 'sm:w-1/2'} flex flex-col items-center gap-2 mb-2`}
-            >
+            <div className={`w-full flex flex-col items-center gap-2 mb-2`}>
               <input
                 type="text"
                 placeholder="Room name"

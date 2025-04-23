@@ -9,6 +9,7 @@ import {
   CogIcon,
   HomeIcon,
   NoSymbolIcon,
+  PaperAirplaneIcon,
   PauseIcon,
   PencilSquareIcon,
   PlayIcon,
@@ -19,6 +20,8 @@ import {
   XCircleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+
+import { useSound } from '../../../hooks/useSound';
 
 interface NavIconButtonProps {
   id: string;
@@ -39,8 +42,9 @@ interface NavIconButtonProps {
     | 'xCircle'
     | 'block'
     | 'PencilSquareIcon'
-    | 'UserGroupIcon';
-  onClick: () => void;
+    | 'UserGroupIcon'
+    | 'Send';
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const iconSizeResponsive = 'size-4 sm:size-6';
@@ -64,10 +68,20 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick,
     xCircle: <XCircleIcon className={iconSizeResponsive}></XCircleIcon>,
     PencilSquareIcon: <PencilSquareIcon className={`w-full h-full`}></PencilSquareIcon>,
     UserGroupIcon: <UserGroupIcon className={`w-full h-full`}></UserGroupIcon>,
+    Send: <PaperAirplaneIcon className={iconSizeResponsive}></PaperAirplaneIcon>,
   };
 
+  const playSelectSound = useSound('/sounds/effects/select.wav');
   return (
-    <button className="hover:text-secondary" id={id} onClick={onClick} aria-label={ariaLabel}>
+    <button
+      className="hover:text-secondary"
+      id={id}
+      onClick={(event) => {
+        playSelectSound();
+        onClick(event); // forward the click event
+      }}
+      aria-label={ariaLabel}
+    >
       {icons[icon]}
     </button>
   );

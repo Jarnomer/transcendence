@@ -4,9 +4,9 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
-import { PageWrapper } from './PageWrapper.tsx';
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
+import { useSound } from '../../hooks/useSound.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreateTournament } from '../../pages/CreateTournament.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
@@ -19,15 +19,19 @@ import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
+import { TestGameResult } from '../../pages/TestGameResult.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
+import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();
   const user = localStorage.getItem('token');
   const { fromAppNavigation } = useNavigationAccess();
+  const playPageChangeSound = useSound('/sounds/effects/page_change_1.wav');
 
   useEffect(() => {
+    playPageChangeSound();
     checkAuth();
     console.log('location change');
     return () => {
@@ -51,10 +55,15 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Protected routes - Redirect to login if no user is authenticated */}
         <Route
           path="/"
+          element={user ? <Navigate to="/gameMenu" replace /> : <Navigate to="/login" replace />}
+        />
+
+        <Route
+          path="/testGameResult"
           element={
             user ? (
               <PageWrapper>
-                <HomePage />
+                <TestGameResult />
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />

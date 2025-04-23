@@ -9,6 +9,7 @@ import { useGameControls, useGameResult } from '@hooks';
 import { createReadyInputMessage } from '@shared/messages';
 
 import GameplayCanvas from '../components/game/GameplayCanvas';
+import { GameResults } from '../components/game/GameResults';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -93,8 +94,9 @@ export const GamePage: React.FC = () => {
     });
   }, [connections.game, gameSettings]);
 
-  useGameResult();
   const localPlayerId = useGameControls();
+  const { gameResult } = useGameResult();
+
   const playersData = useFetchPlayerData();
 
   // SET LOADING TO FALSE TO RENDER THE GAME
@@ -143,7 +145,7 @@ export const GamePage: React.FC = () => {
           isGameCanvasVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {isGameCanvasActive && gameState && (
+        {isGameCanvasActive && gameState && gameStatus !== 'finished' && (
           <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
         )}
       </div>
@@ -151,6 +153,8 @@ export const GamePage: React.FC = () => {
       {/* Show countdown conditionally */}
       {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
         <CountDown gameStatus={gameStatus} />
+      ) : gameResult ? (
+        <GameResults result={gameResult} playersData={playersData} />
       ) : (
         <MatchMakingCarousel playersData={playersData} />
       )}
