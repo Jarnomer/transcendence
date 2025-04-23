@@ -20,10 +20,16 @@ export class PowerUpManager {
     this.game = game;
     this.params = structuredClone(defaultGameParams);
     this.settings = settings;
+    console.log('PowerUpManager initialized with settings:', this.settings);
   }
 
   getPowerUps(): PowerUp[] {
     return this.powerUps;
+  }
+
+  setSettings(settings: GameSettings): void {
+    this.settings = settings;
+    console.log('PowerUpManager settings updated:', this.settings);
   }
 
   startSpawning() {
@@ -56,6 +62,9 @@ export class PowerUpManager {
   // }
 
   private getRandomPowerUpType(): PowerUpType | null {
+    Object.entries(this.settings.powerUpTypes).forEach(([type, enabled]) => {
+      console.log(`${type}:`, enabled, 'Type:', typeof enabled);
+    });
     const enabledTypes = Object.entries(this.settings.powerUpTypes)
       .filter(([, enabled]) => enabled)
       .map(([type]) => type as PowerUpType);
@@ -63,6 +72,9 @@ export class PowerUpManager {
     if (enabledTypes.length === 0) return null; // or throw error / fallback type
 
     const index = Math.floor(Math.random() * enabledTypes.length);
+    console.log('Enabled power-up types:', enabledTypes);
+    console.log('Random index:', index);
+    console.log('Random power-up type:', enabledTypes[index]);
     return enabledTypes[index];
   }
 
