@@ -43,6 +43,7 @@ export const useGameResult = (userId: string | null) => {
 
   useEffect(() => {
     if (
+      gameStateRef.current &&
       gameStatusRef.current &&
       gameStatusRef?.current === 'finished' &&
       !hasSubmittedResult.current
