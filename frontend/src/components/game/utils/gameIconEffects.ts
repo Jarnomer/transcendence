@@ -187,6 +187,7 @@ export class ActivePowerUpIconManager {
     scene.beginAnimation(torusMesh, 0, 30, false, 1, () => {
       particleSystem.emitRate = 150;
       this.animateActiveDisplay(display);
+      this.animateRingEffects(display);
     });
   }
 
@@ -586,6 +587,7 @@ export class ActivePowerUpIconManager {
         display.particleSystem.emitter = display.tubeMesh;
       }
       this.animateActiveDisplay(display);
+      this.animateRingEffects(display);
     });
   }
 
@@ -593,7 +595,7 @@ export class ActivePowerUpIconManager {
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
-    // Power-up icon scaling animations
+    // Create scaling animations
     const scaleXAnim = new Animation(
       `powerUpScaleXAnim-${display.id}`,
       'scaling.x',
@@ -640,9 +642,8 @@ export class ActivePowerUpIconManager {
     ];
     scaleZAnim.setKeys(scaleZKeys);
 
+    // Create hover animation
     const originalY = display.iconMesh.position.y;
-
-    // Create hover animation for the icon
     const iconPosAnim = new Animation(
       `powerUpHoverAnim-${display.id}-icon`,
       'position.y',
@@ -660,19 +661,82 @@ export class ActivePowerUpIconManager {
     iconPosAnim.setKeys(positionKeys);
     iconPosAnim.setEasingFunction(easingFunction);
 
-    const tubePosAnim = iconPosAnim.clone();
-    tubePosAnim.name = `powerUpHoverAnim-${display.id}-tube`;
-
-    const torusPosAnim = iconPosAnim.clone();
-    torusPosAnim.name = `powerUpHoverAnim-${display.id}-torus`;
-
     display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, iconPosAnim];
-    display.tubeMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, iconPosAnim];
-    display.torusMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, iconPosAnim];
 
     this.scene.beginAnimation(display.iconMesh, 0, 60, true);
-    this.scene.beginAnimation(display.tubeMesh, 0, 60, true);
-    this.scene.beginAnimation(display.torusMesh, 0, 60, true);
+  }
+
+  private animateRingEffects(display: ActivePowerUpDisplay): void {
+    if (display.tubeMesh.metadata?.disposing) return;
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+    const scaleAnim = new Animation(
+      `ringScale-${display.id}`,
+      'scaling',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CYCLE
+    );
+    const breathKeys = [
+      { frame: 0, value: new Vector3(1.0, 1.0, 1.0) },
+      { frame: 45, value: new Vector3(1.1, 1.1, 1.1) },
+      { frame: 90, value: new Vector3(1.0, 1.0, 1.0) },
+    ];
+    scaleAnim.setKeys(breathKeys);
+    scaleAnim.setEasingFunction(easingFunction);
+
+    const originalY = display.iconMesh.position.y;
+    const positionAnim = new Animation(
+      `powerUpHoverAnim-${display.id}-icon`,
+      'position.y',
+      30,
+      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONLOOPMODE_CYCLE
+    );
+    const positionKeys = [
+      { frame: 0, value: originalY },
+      { frame: 30, value: originalY + 0.05 },
+      { frame: 45, value: originalY },
+      { frame: 60, value: originalY - 0.05 },
+      { frame: 90, value: originalY },
+    ];
+    positionAnim.setKeys(positionKeys);
+    positionAnim.setEasingFunction(easingFunction);
+
+    const tubeColorAnim = new Animation(
+      `tubeEmissive-${display.id}`,
+      'material.emissiveIntensity',
+      30,
+      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONLOOPMODE_CYCLE
+    );
+    const colorIntensityKeys = [
+      { frame: 0, value: 0.6 },
+      { frame: 45, value: 0.9 },
+      { frame: 90, value: 0.6 },
+    ];
+    tubeColorAnim.setKeys(colorIntensityKeys);
+    tubeColorAnim.setEasingFunction(easingFunction);
+
+    const torusScaleAnim = scaleAnim.clone();
+    torusScaleAnim.name = `torusScale-${display.id}`;
+
+    const tubeScaleAnim = scaleAnim.clone();
+    tubeScaleAnim.name = `tubeScale-${display.id}`;
+
+    const torusPosAnim = positionAnim.clone();
+    torusScaleAnim.name = `torusPos-${display.id}`;
+
+    const tubePosAnim = positionAnim.clone();
+    tubeScaleAnim.name = `tubePos-${display.id}`;
+
+    display.tubeMesh.animations = [tubeScaleAnim, tubePosAnim, tubeColorAnim];
+    display.torusMesh.animations = [torusScaleAnim, torusPosAnim];
+
+    this.scene.beginAnimation(display.tubeMesh, 0, 90, true);
+    this.scene.beginAnimation(display.torusMesh, 0, 90, true);
   }
 
   private disposeDisplayWithAnimation(id: string): void {
