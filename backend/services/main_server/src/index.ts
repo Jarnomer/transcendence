@@ -16,6 +16,7 @@ import authPlugin from './middlewares/auth';
 import errorHandlerPlugin from './middlewares/errorHandler';
 import loggerPlugin from './middlewares/logger';
 import adminRoutes from './routes/adminRoutes';
+export * from './middlewares/errorHandler';
 
 dotenv.config();
 

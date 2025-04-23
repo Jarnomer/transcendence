@@ -65,18 +65,22 @@ export class GameManager {
   }
 
   async setGameResult(gameResult: any) {
-    console.log('Game result:', gameResult);
-    const { game_id, players } = gameResult;
-    if (game_id === 'local_game_id') return; // Skip local game result
-    const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
-    const winner_id = sortedPlayers[0].id;
-    const loser_id = sortedPlayers[1].id;
-    const winner_score = sortedPlayers[0].score;
-    const loser_score = sortedPlayers[1].score;
-    await this.gameService.resultGame(game_id, winner_id, loser_id, winner_score, loser_score);
-    this.matchmakingService.handleGameResult(game_id, winner_id, loser_id);
+    try {
+      console.log('Game result:', gameResult);
+      const { game_id, players } = gameResult;
+      if (game_id === 'local_game_id') return; // Skip local game result
+      const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
+      const winner_id = sortedPlayers[0].id;
+      const loser_id = sortedPlayers[1].id;
+      const winner_score = sortedPlayers[0].score;
+      const loser_score = sortedPlayers[1].score;
+      await this.gameService.resultGame(game_id, winner_id, loser_id, winner_score, loser_score);
+      this.matchmakingService.handleGameResult(game_id, winner_id, loser_id);
 
-    console.log('Game result submitted:', gameResult);
+      console.log('Game result submitted:', gameResult);
+    } catch (error) {
+      console.error('Error submitting game result:', error);
+    }
   }
 
   addSpectator(gameId: string, userId: string, connection: any): void {

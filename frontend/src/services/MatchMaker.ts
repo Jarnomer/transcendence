@@ -1,6 +1,6 @@
 import { GameOptionsType } from '@shared/types/gameTypes';
 
-import { cancelQueue, createQueue, joinQueue, singlePlayer } from './gameService';
+import { cancelQueue, createQueue, deleteGame, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
 export enum MatchMakerState {
@@ -211,26 +211,58 @@ class MatchMaker {
     return this.queueId;
   }
 
-  getPlayerOptions() {
-    return {
-      queueId: this.options.queueId,
-      mode: this.options.mode,
-      difficulty: this.options.difficulty,
-    };
-  }
-
   async startMatchMake() {
     console.log(`start Match Making . Current state: ${this.state}`);
     await this.gameMode.findMatch();
   }
 
+  async leaveQueue() {
+    console.log('Leaving queue...');
+    if (this.state === MatchMakerState.WAITING_FOR_PLAYERS) {
+      console.log('Leaving queue...');
+      cancelQueue()
+        .then(() => {
+          console.log('Queue left');
+          this.state = MatchMakerState.SEARCHING;
+          this.gameId = null;
+          this.queueId = null;
+        })
+        .catch((err) => {
+          console.error('Error leaving queue:', err);
+        });
+    }
+  }
+
   stopMatchMake() {
     console.log('Game stopped');
     if (this.state === MatchMakerState.WAITING_FOR_PLAYERS) {
-      console.log('Cancelling queue...');
-      cancelQueue();
-      this.state = MatchMakerState.SEARCHING;
-      this.gameId = null;
+      cancelQueue()
+        .then(() => {
+          console.log('Queue cancelled');
+        })
+        .catch((err) => {
+          console.error('Error cancelling queue:', err);
+        })
+        .finally(() => {
+          this.state = MatchMakerState.SEARCHING;
+          this.gameId = null;
+          this.queueId = null;
+        });
+    }
+    if (this.state === MatchMakerState.MATCHED && this.gameId) {
+      console.log('Deleting game...');
+      deleteGame(this.gameId)
+        .then(() => {
+          console.log('Game deleted');
+        })
+        .catch((err) => {
+          console.error('Error deleting game:', err);
+        })
+        .finally(() => {
+          this.state = MatchMakerState.SEARCHING;
+          this.gameId = null;
+          this.queueId = null;
+        });
     }
   }
 }

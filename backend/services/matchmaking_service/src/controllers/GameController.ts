@@ -68,6 +68,16 @@ export class GameController {
     reply.code(200).send(game);
   }
 
+  async status(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting game for user ${user_id}`);
+    const game = await this.gameService.status(user_id);
+    if (!game) {
+      throw new NotFoundError('Game not found');
+    }
+    reply.code(200).send(game);
+  }
+
   /**
    * post result of the game
    * @param request post: game_id, winner_id, player1_score, player2_score
@@ -88,5 +98,15 @@ export class GameController {
     console.log(game_id, winner_id, loser_id, winner_score, loser_score);
     await this.gameService.resultGame(game_id, winner_id, loser_id, winner_score, loser_score);
     reply.code(200).send({ status: 'completed' });
+  }
+
+  async deleteGame(request: FastifyRequest, reply: FastifyReply) {
+    const { game_id } = request.params as { game_id: string };
+    request.log.trace(`Deleting game ${game_id}`);
+    const game = await this.gameService.deleteGame(game_id);
+    if (!game) {
+      throw new NotFoundError('Game not found');
+    }
+    reply.code(200).send({ status: 'deleted' });
   }
 }

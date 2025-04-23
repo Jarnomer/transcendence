@@ -12,16 +12,15 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 export const useGameResult = () => {
   const navigate = useNavigate();
-  const { resetGameOptions, gameId, mode } = useGameOptionsContext();
-  const { closeConnection, gameStatus, gameState, dispatch, phase } = useWebSocketContext();
+  const { resetGameOptions, mode } = useGameOptionsContext();
+  const { closeConnection, gameStatus, gameState, dispatch, phase, setGameId, cleanup } =
+    useWebSocketContext();
   const { userId } = useUser();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
-
-
 
   useEffect(() => {
     if (!userId) return;
@@ -47,6 +46,7 @@ export const useGameResult = () => {
     if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
       console.log('Game finished, submitting result');
       dispatch({ type: 'GAME_RESET' });
+      cleanup();
       resetGameOptions();
       if (mode !== 'tournamnet') {
         navigate('/gameMenu');
@@ -94,6 +94,7 @@ export const useGameResult = () => {
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
+        cleanup();
         resetGameOptions();
         if (mode !== 'tournamnet') {
           navigate('/gameMenu');
@@ -128,6 +129,8 @@ export const useGameResult = () => {
         })
         .finally(() => {
           resetGameOptions();
+          setGameId('');
+          cleanup();
           if (mode !== 'tournamnet') {
             navigate('/gameMenu');
           }

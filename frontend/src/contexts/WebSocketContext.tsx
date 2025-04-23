@@ -8,8 +8,7 @@ import {
   useState,
 } from 'react';
 
-import { GameEvent, GameState, GameStatus } from '@shared/types';
-import { MatchmakingOptionsType } from '@shared/types/gameTypes';
+import { GameEvent, GameOptionsType, GameState, GameStatus } from '@shared/types';
 
 import { useChatSocket } from '../hooks/useChatSocket';
 import { useGameSocket } from '../hooks/useGameSocket';
@@ -39,10 +38,12 @@ interface WebSocketContextType {
   setGameId: (gameId: string) => void;
   cleanup: () => void;
   phase: any;
-  startMatchMaking: (options: any) => void;
+  startMatchMaking: () => void;
   startGame: () => void;
   startSpectating: (gameId: string) => void;
-  setMatchmakingOptions: (options: MatchmakingOptionsType) => void;
+  setGameOptions: (options: GameOptionsType) => void;
+  cancelGame: () => Promise<void>;
+  cancelQueue: () => Promise<void>;
 }
 
 // Create the context
@@ -60,7 +61,9 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
     startMatchMaking,
     startGame,
     startSpectating,
-    setMatchmakingOptions,
+    setGameOptions,
+    cancelGame,
+    cancelQueue,
   } = useWebSocketStore();
 
   // Send messages based on socket type
@@ -113,7 +116,9 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
         startMatchMaking,
         startGame,
         startSpectating,
-        setMatchmakingOptions,
+        setGameOptions,
+        cancelGame,
+        cancelQueue,
       }}
     >
       {children}

@@ -21,15 +21,15 @@ export const GamePage: React.FC = () => {
     gameStatus,
     connections,
     sendMessage,
-    gameSocket,
     closeConnection,
     phase,
     startGame,
+    startMatchMaking,
   } = useWebSocketContext();
   const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { mode, difficulty, tournamentOptions } = useGameOptionsContext();
+  const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
 
   const {
     hideBackgroundGame,
@@ -58,6 +58,16 @@ export const GamePage: React.FC = () => {
     };
   }, []);
 
+  // Show game canvas when ready to play
+  useEffect(() => {
+    if (!loading && gameState && connections.game === 'connected' && gameStatus !== 'finished') {
+      // console.log('Game is ready to play, showing game canvas');
+      if (!isGameCanvasVisible) {
+        showGameCanvas();
+      }
+    }
+  }, [loading, gameStatus, gameState, connections.game, isGameCanvasVisible, showGameCanvas]);
+
   useEffect(() => {
     if (!phase.gameId) return;
     console.log('connecting to game socket');
@@ -67,18 +77,22 @@ export const GamePage: React.FC = () => {
     };
   }, [phase.gameId]);
 
-  // Show game canvas when ready to play
   useEffect(() => {
-    if (!loading && gameState && connections.game === 'connected' && gameStatus !== 'finished') {
-      console.log('Game is ready to play, showing game canvas');
-      if (!isGameCanvasVisible) {
-        showGameCanvas();
-      }
+    if (!lobby || !mode || !difficulty) return;
+    if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
+      startMatchMaking();
     }
-  }, [loading, gameStatus, gameState, connections.game, isGameCanvasVisible, showGameCanvas]);
+  }, [lobby, mode, difficulty]);
 
-  // const { userId, localPlayerId, remotePlayerId } = useGameUser();
-  // useMatchmaking(userId);
+  useEffect(() => {
+    if (connections.game !== 'connected') return;
+    console.log('Game connected sending settings');
+    sendMessage('game', {
+      type: 'settings',
+      settings: gameSettings,
+    });
+  }, [connections.game, gameSettings]);
+
   useGameResult();
   const localPlayerId = useGameControls();
   const playersData = useFetchPlayerData();

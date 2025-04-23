@@ -1,8 +1,6 @@
 import { WebSocket } from '@fastify/websocket';
 import { FastifyInstance } from 'fastify';
 
-import { GameManager } from '@my-backend/game_service';
-
 import { GameController } from '../controllers/GameController';
 
 export async function gameRoutes(fastify: FastifyInstance) {

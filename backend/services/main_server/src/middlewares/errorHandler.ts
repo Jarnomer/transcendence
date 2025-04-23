@@ -40,6 +40,25 @@ class ErrorHandler {
     }
     return reply.status(500).send({ error: 'An unexpected error occurred' });
   }
+
+  public handleWsError(error: any, socket: any) {
+    const code =
+      error instanceof ServiceError ? error.statusCode || ErrorCode.UNKNOWN : ErrorCode.UNKNOWN;
+
+    const payload = JSON.stringify({
+      type: 'error',
+      error: error.message || 'Unexpected error',
+      code,
+    });
+
+    try {
+      socket.send(payload);
+    } catch (e) {
+      console.error('Failed to send WebSocket error response:', e);
+    }
+
+    console.error('[WebSocket Error]', error);
+  }
 }
 
 // ✅ Export Singleton Instance
@@ -51,4 +70,5 @@ async function errorHandlerPlugin(fastify: FastifyInstance) {
     errorHandler.handleError(error, request, reply);
   });
 }
+
 export default fp(errorHandlerPlugin);

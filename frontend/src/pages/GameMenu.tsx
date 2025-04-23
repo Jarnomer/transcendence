@@ -10,6 +10,7 @@ import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the Ga
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 interface GameMenuOption {
   content: string;
@@ -45,15 +46,10 @@ export const GameMenu: React.FC = () => {
   // const [selectedMode, setSelectedMode] = useState<string | null>(null);
   //const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
   const navigate = useNavigate(); // Hook to navigate to different routes
-  // const location = useLocation();
-  const { setMode, setDifficulty, difficulty, mode } = useGameOptionsContext(); // Destructure context functions
-  // const { lobby } = location.state || {};
+  const { setMode, setDifficulty, setLobby, resetGameOptions, difficulty, mode, queueId } =
+    useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
-  const {
-    setLobby,
-
-    resetGameOptions,
-  } = useGameOptionsContext();
+  const { phase, cancelGame, cancelQueue } = useWebSocketContext();
 
   const modes = [
     {
@@ -135,14 +131,35 @@ export const GameMenu: React.FC = () => {
     setDifficulty(difficulty);
   };
 
-  // useEffect(() => {
-  //   return () => {
-  //     setMode(null);
-  //     setDifficulty(null);
-  //   };
-  // }, [location]);
+  useEffect(() => {
+    setLobby('create');
+  }, []);
 
   useEffect(() => {
+    const cancelQueueGame = async () => {
+      if (phase.gameId) {
+        await cancelGame();
+      } else if (queueId) {
+        await cancelQueue();
+      }
+    };
+    console.log('queueId:', queueId);
+    console.log('phase.gameId:', phase.gameId);
+    if (queueId || phase.gameId) {
+      const confirm = window.confirm('You are already in a game or queue. continue?');
+      console.log('confirmLeave:', confirm);
+      if (confirm) {
+        console.log('User chose not to leave the game or queue.');
+        navigate('/game');
+      } else {
+        cancelQueueGame();
+        resetGameOptions();
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (queueId || phase.gameId) return;
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
@@ -150,12 +167,12 @@ export const GameMenu: React.FC = () => {
     if (mode && difficulty) {
       allowInternalNavigation();
       if (mode === '1v1' && difficulty === 'online') {
-        resetGameOptions();
         setLobby('random');
         setMode('1v1');
         setDifficulty('online');
         navigate('/game');
       } else {
+        console.log('Game options:', mode, difficulty);
         navigate('/gameOptions');
       }
     }

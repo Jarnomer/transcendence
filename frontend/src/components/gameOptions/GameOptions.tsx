@@ -3,10 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
+import { useWebSocketContext } from '@/contexts/WebSocketContext';
 
-import useMatchmaking from '@hooks/useMatchmaking';
+import { saveGameSettings } from '@services/userService';
 
-import { PowerUpType } from '../../../../shared/types';
+import { useMatchmaking } from '@hooks';
+
+import { PowerUpType } from '@shared/types';
+
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
 import { PowerUpSelection } from './PowerUpSelection';
@@ -17,7 +21,8 @@ export const GameOptions: React.FC = () => {
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
-  const { setGameSettings } = useGameOptionsContext();
+  const { setGameSettings, gameSettings, setConfirmGame } = useGameOptionsContext();
+  const { startMatchMaking } = useWebSocketContext();
   const navigate = useNavigate();
   useMatchmaking();
 
@@ -44,6 +49,18 @@ export const GameOptions: React.FC = () => {
   };
 
   useEffect(() => {
+    setMaxScore(gameSettings.maxScore);
+    setBallSpeed(gameSettings.ballSpeed);
+    setEnableSpin(gameSettings.enableSpin);
+    setEnablePowerUps(gameSettings.enablePowerUps);
+    setSelectedPowerUps(
+      Object.keys(gameSettings.powerUpTypes).filter(
+        (key) => gameSettings.powerUpTypes[key as PowerUpType]
+      )
+    );
+  }, []);
+
+  useEffect(() => {
     setGameSettings((prev) => ({
       ...prev,
       maxScore: maxScore,
@@ -51,11 +68,11 @@ export const GameOptions: React.FC = () => {
       enableSpin: enableSpin,
       enablePowerUps: enablePowerUps,
       powerUpTypes: {
-        [PowerUpType.SlowerPaddle]: selectedPowerUps.includes('Paddle Slower'),
-        [PowerUpType.SmallerPaddle]: selectedPowerUps.includes('Paddle Smaller'),
-        [PowerUpType.BiggerPaddle]: selectedPowerUps.includes('Paddle Bigger'),
-        [PowerUpType.FasterPaddle]: selectedPowerUps.includes('Paddle Faster'),
-        [PowerUpType.MoreSpin]: selectedPowerUps.includes('Extra Spin'),
+        [PowerUpType.SlowerPaddle]: selectedPowerUps.includes(PowerUpType.SlowerPaddle),
+        [PowerUpType.SmallerPaddle]: selectedPowerUps.includes(PowerUpType.SmallerPaddle),
+        [PowerUpType.BiggerPaddle]: selectedPowerUps.includes(PowerUpType.BiggerPaddle),
+        [PowerUpType.FasterPaddle]: selectedPowerUps.includes(PowerUpType.FasterPaddle),
+        [PowerUpType.MoreSpin]: selectedPowerUps.includes(PowerUpType.MoreSpin),
       },
     }));
   }, [maxScore, ballSpeed, enableSpin, enablePowerUps, selectedPowerUps, setGameSettings]);
@@ -66,13 +83,32 @@ export const GameOptions: React.FC = () => {
     }
   }, [enableSpin]);
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
     console.log('--- sending game options ----');
     console.log('Max score: ', maxScore);
     console.log('Ball speed: ', ballSpeed);
     console.log('Enable spin: ', enableSpin);
     console.log('Enable powerups: ', enablePowerUps);
     console.log('selected powerups: ', selectedPowerUps);
+    await saveGameSettings({
+      maxScore,
+      ballSpeed,
+      enableSpin,
+      enablePowerUps,
+      powerUpTypes: {
+        [PowerUpType.SlowerPaddle]: selectedPowerUps.includes(PowerUpType.SlowerPaddle),
+        [PowerUpType.SmallerPaddle]: selectedPowerUps.includes(PowerUpType.SmallerPaddle),
+        [PowerUpType.BiggerPaddle]: selectedPowerUps.includes(PowerUpType.BiggerPaddle),
+        [PowerUpType.FasterPaddle]: selectedPowerUps.includes(PowerUpType.FasterPaddle),
+        [PowerUpType.MoreSpin]: selectedPowerUps.includes(PowerUpType.MoreSpin),
+      },
+    }).catch((err) => {
+      console.error('Error saving game settings:', err);
+    });
+  };
+
+  const handleGameStart = async () => {
+    console.log('--- starting game ----');
     navigate('/game');
   };
 
@@ -127,6 +163,9 @@ export const GameOptions: React.FC = () => {
       </div>
       <div className="flex justify-end p-4">
         <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
+      </div>
+      <div className="flex justify-end p-4">
+        <ClippedButton label={'Start Game'} onClick={() => handleGameStart()} />
       </div>
     </div>
   );

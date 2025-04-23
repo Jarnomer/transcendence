@@ -16,6 +16,8 @@ export function useWebSocketStore() {
     startMatchMaking: matchmakingManager.startMatchmaking.bind(matchmakingManager),
     startSpectating: matchmakingManager.startSpectating.bind(matchmakingManager),
     startGame: matchmakingManager.startGame.bind(matchmakingManager),
-    setMatchmakingOptions: matchmakingManager.setMatchmakingOptions.bind(matchmakingManager),
+    setGameOptions: matchmakingManager.setGameOptions.bind(matchmakingManager),
+    cancelQueue: matchmakingManager.cancelQueue.bind(matchmakingManager),
+    cancelGame: matchmakingManager.cancelGame.bind(matchmakingManager),
   };
 }

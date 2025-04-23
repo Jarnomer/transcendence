@@ -18,17 +18,17 @@ export class QueueModel {
     return QueueModel.instance;
   }
 
-  async runTransaction(callback: (db: Database) => Promise<any>) {
-    try {
-      await this.db.run('BEGIN TRANSACTION'); // Start transaction
-      const result = await callback(this.db); // Run the transaction logic
-      await this.db.run('COMMIT'); // Commit transaction if successful
-      return result;
-    } catch (error) {
-      await this.db.run('ROLLBACK'); // Rollback transaction on error
-      throw error; // Rethrow error for handling
-    }
-  }
+  // async runTransaction(callback: (db: Database) => Promise<any>) {
+  //   try {
+  //     await this.db.run('BEGIN TRANSACTION'); // Start transaction
+  //     const result = await callback(this.db); // Run the transaction logic
+  //     await this.db.run('COMMIT'); // Commit transaction if successful
+  //     return result;
+  //   } catch (error) {
+  //     await this.db.run('ROLLBACK'); // Rollback transaction on error
+  //     throw error; // Rethrow error for handling
+  //   }
+  // }
 
   /**
    * Get all users in the match making queue with pagination

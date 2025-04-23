@@ -21,6 +21,7 @@ CREATE TABLE  IF NOT EXISTS user_profiles (
     bio TEXT,
     avatar_url VARCHAR(255) DEFAULT '/uploads/default_avatar.png',
     status TEXT CHECK(status IN ('online', 'offline', 'away', 'busy')) DEFAULT 'offline',
+    game_settings TEXT DEFAULT '{}', -- JSON or TEXT for game settings
     last_active DATETIME DEFAULT (CURRENT_TIMESTAMP),
     updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );

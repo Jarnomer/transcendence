@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 
+import { PowerUpType } from '@shared/types';
+
 import { BoxDiv } from '../visual/svg/containers/SvgBoxContainer';
 import { PaddleBiggerIcon } from '../visual/svg/icons/PaddleBiggerIcon';
 import { PaddleFasterIcon } from '../visual/svg/icons/PaddleFasterIcont';
@@ -8,19 +10,19 @@ import { PaddleSmallerIcon } from '../visual/svg/icons/PaddleSmallerIcon';
 import { SpinPowerUp } from '../visual/svg/icons/SpinPowerUp';
 
 const powerUps = [
-  'Paddle Slower',
-  'Paddle Smaller',
-  'Paddle Bigger',
-  'Paddle Faster',
-  'Extra Spin',
+  PowerUpType.SmallerPaddle,
+  PowerUpType.SlowerPaddle,
+  PowerUpType.BiggerPaddle,
+  PowerUpType.FasterPaddle,
+  PowerUpType.MoreSpin,
 ];
 
 const powerUpIcons: Record<string, React.ReactNode> = {
-  'Paddle Slower': <PaddleSlowerIcon />,
-  'Paddle Faster': <PaddleFasterIcon />,
-  'Paddle Bigger': <PaddleBiggerIcon />,
-  'Paddle Smaller': <PaddleSmallerIcon />,
-  'Extra Spin': <SpinPowerUp />,
+  [PowerUpType.SlowerPaddle]: <PaddleSlowerIcon />,
+  [PowerUpType.FasterPaddle]: <PaddleFasterIcon />,
+  [PowerUpType.BiggerPaddle]: <PaddleBiggerIcon />,
+  [PowerUpType.SmallerPaddle]: <PaddleSmallerIcon />,
+  [PowerUpType.MoreSpin]: <SpinPowerUp />,
 };
 
 type PowerUpSelectionProps = {
@@ -39,7 +41,7 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
   isSpinEnabled,
 }) => {
   const handlePowerUpToggle = (powerUp: string) => {
-    if (!isEnabled || (powerUp === 'Extra Spin' && !isSpinEnabled)) return;
+    if (!isEnabled || (powerUp === PowerUpType.MoreSpin && !isSpinEnabled)) return;
 
     console.log(selectedPowerUps);
     setSelectedPowerUps((prev) =>

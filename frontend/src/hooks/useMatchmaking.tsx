@@ -20,7 +20,8 @@ const useMatchmaking = () => {
     startMatchMaking,
     startSpectating,
   } = useWebSocketContext();
-  const { mode, difficulty, lobby, queueId, tournamentOptions } = useGameOptionsContext();
+  const { mode, difficulty, lobby, queueId, tournamentOptions, confirmGame } =
+    useGameOptionsContext();
   const matchmaker = useRef<MatchMaker>(null);
   const params = useRef<URLSearchParams>(new URLSearchParams());
 
@@ -106,7 +107,7 @@ const useMatchmaking = () => {
           case MatchMakerState.WAITING_FOR_PLAYERS:
           case MatchMakerState.JOINING_RANDOM:
             console.log('Waiting for players');
-            startMatchMaking(matchmaker.current.getPlayerOptions());
+            startMatchMaking();
             // params.current.set('queue_id', matchmaker.current.getQueueId() || '');
             // matchmakingSocket.connect(params.current);
             break;
@@ -119,12 +120,16 @@ const useMatchmaking = () => {
         console.error('Matchmaking failed:', err);
         navigate('/home');
       });
-    return () => {
-      if (!matchmaker.current) return;
-      matchmaker.current.stopMatchMake();
-      // closeConnection('matchmaking');
-    };
   }, [userId]);
+
+  // useEffect(() => {
+  //   console.log('Cleaning up matchmaking api');
+  //   return () => {
+  //     if (!matchmaker.current) return;
+  //     if (confirmGame) return;
+  //     matchmaker.current.stopMatchMake();
+  //   };
+  // }, [confirmGame]);
 
   // sending a message when the matchmaking connection is established
   // useEffect(() => {

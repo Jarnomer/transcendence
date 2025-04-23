@@ -16,10 +16,6 @@ export const HomePageNav: React.FC<{
   const { setLobby, setDifficulty, setMode, resetGameOptions } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
 
-  useEffect(() => {
-    resetGameOptions();
-  }, []);
-
   const handleCreateGameClick = () => {
     console.log('Create game clicked');
     setLobby('create');
@@ -34,7 +30,7 @@ export const HomePageNav: React.FC<{
     allowInternalNavigation();
     navigate('/game');
   };
-  
+
   return (
     <motion.div
       id="home-page-nav"

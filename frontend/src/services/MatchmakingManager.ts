@@ -1,5 +1,6 @@
-import { MatchmakingOptionsType, UserRole } from '@shared/types';
+import { GameOptionsType, UserRole } from '@shared/types';
 
+import { cancelQueue, deleteGame } from './gameService';
 import WebSocketManager from './webSocket/WebSocketManager';
 
 export type Phase =
@@ -70,6 +71,7 @@ class MatchmakingManager {
   }
 
   private notifyListeners() {
+    console.log('Notifying listeners with state:', this.snapshot);
     this.listeners.forEach((listener) => listener());
   }
 
@@ -85,7 +87,7 @@ class MatchmakingManager {
     // this.notifyListeners();
   }
 
-  setMatchmakingOptions(options: MatchmakingOptionsType) {
+  setGameOptions(options: GameOptionsType) {
     const { queueId, mode, difficulty } = options;
     this.mode = mode;
     this.difficulty = difficulty;
@@ -93,9 +95,9 @@ class MatchmakingManager {
   }
 
   startMatchmaking() {
-    if (!this.mode) return;
+    if (!this.mode || !this.difficulty) return;
     this.matchmakingSocket.connect(
-      new URLSearchParams({ mode: this.mode, queue_id: this.queueId })
+      new URLSearchParams({ mode: this.mode, difficulty: this.difficulty, queue_id: this.queueId })
     );
     this.attachListeners();
     this.setState({ phase: 'matchmaking', role: 'player' });
@@ -137,7 +139,7 @@ class MatchmakingManager {
 
   handleMatchFound = (game: any) => {
     console.info('Match found:', game);
-    this.setState({ gameId: game.gameId, phase: 'in_game', role: 'player' });
+    this.setState({ gameId: game.game_id, phase: 'in_game', role: 'player' });
   };
 
   handleGameWinner = () => {
@@ -147,6 +149,7 @@ class MatchmakingManager {
     } else {
       console.info('Congratulations! You won the game!');
       this.setState({ phase: 'completed', role: 'spectator' });
+      this.cleanup();
     }
     // this.notifyListeners();
   };
@@ -154,14 +157,37 @@ class MatchmakingManager {
   handleGameLoser = () => {
     console.info('You lost the game. You can Spectate...');
     this.setState({ phase: 'completed', role: 'spectator', gameId: '' });
+    this.cleanup();
     // this.notifyListeners();
   };
 
   handleTournamentWinner = (data: any) => {
     console.info('Congratulations! You won the tournament!', data);
     this.setState({ phase: 'completed', role: 'spectator', gameId: '' });
+    this.cleanup();
     // this.notifyListeners();
   };
+
+  async cancelQueue() {
+    try {
+      const res = await cancelQueue();
+      console.log('Matchmaking cancelled:', res);
+    } catch (error) {
+      console.error('Error cancelling matchmaking:', error);
+    }
+  }
+
+  async cancelGame() {
+    if (this.snapshot.phase === 'in_game') {
+      try {
+        const res = await deleteGame(this.snapshot.gameId);
+        console.log('Game cancelled:', res);
+      } catch (error) {
+        console.error('Error cancelling game:', error);
+      }
+      this.setState({ phase: 'idle', role: 'player', gameId: '' });
+    }
+  }
 
   attachListeners() {
     this.matchmakingSocket.addEventListener('match_found', this.handleMatchFound);

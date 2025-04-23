@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ export const CreateTournament: React.FC = () => {
   const [enablePowerUps, setEnablePowerUps] = useState(false);
   const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   const [tournamentName, setTournamentName] = useState('');
-  const { setTournamentOptions, setDifficulty } = useGameOptionsContext();
+  const { setTournamentOptions, setDifficulty, resetGameOptions } = useGameOptionsContext();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,6 +32,12 @@ export const CreateTournament: React.FC = () => {
     navigate('/tournamentLobby');
     console.log('Submitting tournament data:', formData);
   };
+
+  // useEffect(() => {
+  //   return () => {
+  //     resetGameOptions();
+  //   };
+  // }, []);
 
   return (
     <motion.div className="h-full  w-full min-h-[450px] relative glass-box mt-10 text-sm">

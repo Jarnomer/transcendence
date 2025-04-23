@@ -114,8 +114,8 @@ export interface PlayerEffects {
 }
 
 export interface GameSettings {
-  mode: '1v1' | 'singleplayer' | 'AIvsAI';
-  difficulty: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
+  mode?: '1v1' | 'singleplayer' | 'AIvsAI';
+  difficulty?: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
   maxScore: number;
   ballSpeed: number;
   enableSpin: boolean;

@@ -1,14 +1,10 @@
 // FlowContext.tsx
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-import {
-  defaultGameSettings,
-  GameSettings,
-  MatchmakingOptionsType,
-  TournamentOptionsType,
-  UserRole,
-} from '@shared/types/gameTypes';
+import { defaultGameSettings, GameSettings, TournamentOptionsType } from '@shared/types/gameTypes';
 
+import { getGameSettings } from '../../services/userService';
+import { useUser } from '../user/UserContext';
 import { useWebSocketContext } from '../WebSocketContext';
 
 type GameOptionsContextType = {
@@ -25,6 +21,8 @@ type GameOptionsContextType = {
   setTournamentOptions: React.Dispatch<React.SetStateAction<TournamentOptionsType | null>>;
   gameSettings: GameSettings;
   setGameSettings: React.Dispatch<React.SetStateAction<GameSettings>>;
+  confirmGame: boolean;
+  setConfirmGame: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const GameOptionsContext = createContext<GameOptionsContextType | undefined>(undefined);
@@ -36,9 +34,34 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
   const [tournamentOptions, setTournamentOptions] = useState<TournamentOptionsType | null>(null);
   const [queueId, setQueueId] = useState<string | null>(null);
   const [gameSettings, setGameSettings] = useState<GameSettings>(defaultGameSettings);
-  const { setMatchmakingOptions } = useWebSocketContext();
+  const [confirmGame, setConfirmGame] = useState(false);
+  const { setGameOptions, cleanup } = useWebSocketContext();
+  const { userId } = useUser();
   // const [gameId, setGameId] = useState<string | null>(null);
   // const [matchmakingOptions, setMatchmakingOptions] = useState<MatchmakingOptionsType | null>(null);
+
+  useEffect(() => {
+    console.log('GameOptionsContext mounted');
+    console.log('mode: ', mode);
+    console.log('difficulty: ', difficulty);
+    console.log('lobby: ', lobby);
+    console.log('queueId: ', queueId);
+  }, [mode, difficulty, lobby, queueId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    console.info('Fetching game settings on mount');
+    getGameSettings()
+      .then((res) => {
+        if (res) {
+          console.info('Game settings fetched successfully:', res);
+          setGameSettings(res);
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching game settings:', err);
+      });
+  }, [userId]);
 
   useEffect(() => {
     if (mode && difficulty) {
@@ -51,23 +74,24 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
   }, [mode, difficulty]);
 
   useEffect(() => {
-    if (mode && difficulty) {
-      setMatchmakingOptions({
-        mode: mode,
-        difficulty: difficulty,
-        queueId: queueId ? queueId : '',
-      });
-    }
-  }, [mode, difficulty]);
+    if (!mode || !difficulty || !lobby) return;
+    setGameOptions({
+      mode: mode,
+      difficulty: difficulty,
+      queueId: queueId ? queueId : '',
+      lobby: lobby,
+      tournamentOptions: tournamentOptions,
+    });
+  }, [mode, difficulty, lobby, queueId, tournamentOptions]);
 
   const resetGameOptions = () => {
     setMode(null);
     setDifficulty(null);
-    setLobby(null);
+    setLobby('create');
     setQueueId(null);
-    // setGameId(null);
     setTournamentOptions(null);
-    setGameSettings(defaultGameSettings);
+    setConfirmGame(false);
+    cleanup();
   };
 
   return (
@@ -86,6 +110,8 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
         setTournamentOptions,
         gameSettings,
         setGameSettings,
+        confirmGame,
+        setConfirmGame,
       }}
     >
       {children}
