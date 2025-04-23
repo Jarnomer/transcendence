@@ -382,7 +382,7 @@ export class ActivePowerUpIconManager {
 
     const spawnScaleKeys = [
       { frame: 0, value: new Vector3(0, 0, 0) },
-      { frame: 15, value: new Vector3(0.7, 0.7, 0.7) },
+      { frame: 15, value: new Vector3(0.9, 0.9, 0.9) },
       { frame: 25, value: new Vector3(1.1, 1.1, 1.1) },
       { frame: 30, value: new Vector3(1, 1, 1) },
     ];
@@ -503,59 +503,79 @@ export class ActivePowerUpIconManager {
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
-    display.tubeMesh.scaling = new Vector3(1, 1, 1);
-    display.torusMesh.scaling = new Vector3(1, 1, 1);
-    display.iconMesh.scaling = new Vector3(1, 1, 1);
-
-    // Icon position animation
-    const iconPosAnim = new Animation(
-      `powerUpRepositionAnim-${display.id}`,
+    // Create a base animations
+    const basePositionAnim = new Animation(
+      `baseRepositionAnim-${display.id}`,
       'position',
       30,
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
-    const iconKeys = [
+    basePositionAnim.setEasingFunction(easingFunction);
+
+    const baseScaleAnim = new Animation(
+      `baseScaleMaintainAnim-${display.id}`,
+      'scaling',
+      30,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+    baseScaleAnim.setKeys([
+      { frame: 0, value: new Vector3(1, 1, 1) },
+      { frame: 30, value: new Vector3(1, 1, 1) },
+    ]);
+    baseScaleAnim.setEasingFunction(easingFunction);
+
+    // Clone position animations
+    const iconPosAnim = basePositionAnim.clone();
+    iconPosAnim.name = `iconRepositionAnim-${display.id}`;
+    iconPosAnim.setKeys([
       { frame: 0, value: display.iconMesh.position.clone() },
-      { frame: 30, value: newPosition },
-    ];
-    iconPosAnim.setKeys(iconKeys);
-    iconPosAnim.setEasingFunction(easingFunction);
+      { frame: 30, value: newPosition.clone() },
+    ]);
 
-    // Tube position animation
-    const tubePosAnim = new Animation(
-      `tubeRepositionAnim-${display.id}`,
-      'position',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-    const tubeKeys = [
+    const tubePosAnim = basePositionAnim.clone();
+    tubePosAnim.name = `tubeRepositionAnim-${display.id}`;
+    tubePosAnim.setKeys([
       { frame: 0, value: display.tubeMesh.position.clone() },
       { frame: 30, value: newPosition.clone() },
-    ];
-    tubePosAnim.setKeys(tubeKeys);
-    tubePosAnim.setEasingFunction(easingFunction);
+    ]);
 
-    // Torus position animation
-    const torusPosAnim = new Animation(
-      `torusRepositionAnim-${display.id}`,
-      'position',
-      30,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-    const torusKeys = [
+    const torusPosAnim = basePositionAnim.clone();
+    torusPosAnim.name = `torusRepositionAnim-${display.id}`;
+    torusPosAnim.setKeys([
       { frame: 0, value: display.torusMesh.position.clone() },
       { frame: 30, value: newPosition.clone() },
-    ];
-    torusPosAnim.setKeys(torusKeys);
-    torusPosAnim.setEasingFunction(easingFunction);
+    ]);
 
-    display.iconMesh.animations = [iconPosAnim];
-    display.tubeMesh.animations = [tubePosAnim];
-    display.torusMesh.animations = [torusPosAnim];
+    // Clone scale animations
+    const iconScaleAnim = baseScaleAnim.clone();
+    iconScaleAnim.name = `iconScaleMaintainAnim-${display.id}`;
+    iconScaleAnim.setKeys([
+      { frame: 0, value: display.iconMesh.scaling.clone() },
+      { frame: 30, value: new Vector3(1, 1, 1) },
+    ]);
 
+    const tubeScaleAnim = baseScaleAnim.clone();
+    tubeScaleAnim.name = `tubeScaleMaintainAnim-${display.id}`;
+    tubeScaleAnim.setKeys([
+      { frame: 0, value: display.tubeMesh.scaling.clone() },
+      { frame: 30, value: new Vector3(1, 1, 1) },
+    ]);
+
+    const torusScaleAnim = baseScaleAnim.clone();
+    torusScaleAnim.name = `torusScaleMaintainAnim-${display.id}`;
+    torusScaleAnim.setKeys([
+      { frame: 0, value: display.torusMesh.scaling.clone() },
+      { frame: 30, value: new Vector3(1, 1, 1) },
+    ]);
+
+    // Apply animations
+    display.iconMesh.animations = [iconPosAnim, iconScaleAnim];
+    display.tubeMesh.animations = [tubePosAnim, tubeScaleAnim];
+    display.torusMesh.animations = [torusPosAnim, torusScaleAnim];
+
+    // Start animations
     this.scene.beginAnimation(display.iconMesh, 0, 30, false, 1, () => {
       display.position = newPosition.clone();
     });
@@ -647,8 +667,8 @@ export class ActivePowerUpIconManager {
     torusPosAnim.name = `powerUpHoverAnim-${display.id}-torus`;
 
     display.iconMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, iconPosAnim];
-    display.tubeMesh.animations = [tubePosAnim];
-    display.torusMesh.animations = [torusPosAnim];
+    display.tubeMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, iconPosAnim];
+    display.torusMesh.animations = [scaleXAnim, scaleYAnim, scaleZAnim, iconPosAnim];
 
     this.scene.beginAnimation(display.iconMesh, 0, 60, true);
     this.scene.beginAnimation(display.tubeMesh, 0, 60, true);
