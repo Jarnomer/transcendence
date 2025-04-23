@@ -56,7 +56,7 @@ export class ActivePowerUpIconManager {
   private circleSize: number;
   private tubeRadius: number = 0.05;
   private numSegments: number = 64;
-  private iconXOffset: number = 3.5;
+  private iconXOffset: number = 3.8;
   private iconYOffset: number = 9.0;
   private torusXOffset: number = 0;
   private tubeXOffset: number = 0.1;
@@ -270,7 +270,7 @@ export class ActivePowerUpIconManager {
       {
         path: path,
         radius: this.tubeRadius,
-        tessellation: 4,
+        tessellation: 8,
         cap: Mesh.CAP_ALL,
         updatable: true,
       },
@@ -327,7 +327,7 @@ export class ActivePowerUpIconManager {
       {
         diameter: radius * 2,
         thickness: this.tubeRadius * 2,
-        tessellation: 32,
+        tessellation: this.numSegments / 2,
       },
       this.scene
     );
@@ -377,7 +377,7 @@ export class ActivePowerUpIconManager {
 
     particleSystem.minSize = 0.1;
     particleSystem.maxSize = 0.2;
-    particleSystem.emitRate = 150;
+    particleSystem.emitRate = 200;
     particleSystem.minLifeTime = 0.5;
     particleSystem.maxLifeTime = 1.0;
 
@@ -393,15 +393,13 @@ export class ActivePowerUpIconManager {
   }
 
   private createSpawnAnimations(mesh: Mesh, effectColor: Color3, id: string): Animation[] {
-    const frameRate = 30;
-
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
     const spawnScaleAnim = new Animation(
       `powerUpSpawnScaleAnim-${id}`,
       'scaling',
-      frameRate,
+      30,
       Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
@@ -421,7 +419,7 @@ export class ActivePowerUpIconManager {
       const colorAnim = new Animation(
         `powerUpSpawnColorAnim-${id}`,
         'material.emissiveColor',
-        frameRate,
+        30,
         Animation.ANIMATIONTYPE_COLOR3,
         Animation.ANIMATIONLOOPMODE_CONSTANT
       );
@@ -479,25 +477,6 @@ export class ActivePowerUpIconManager {
           );
         }
       }
-    }
-
-    if (
-      display.timeToExpire <= 50 &&
-      !display.tubeMesh.metadata?.expiring &&
-      !display.tubeMesh.metadata?.disposing
-    ) {
-      display.tubeMesh.metadata.expiring = true;
-      setTimeout(() => {
-        if (this.activeDisplays.has(display.id)) {
-          // Give a slight delay before disposing
-          this.disposeDisplayWithAnimation(display.id);
-
-          setTimeout(() => {
-            // Schedule repositioning after animation
-            this.repositionPlayerDisplays(display.player);
-          }, 700);
-        }
-      }, 200);
     }
   }
 
@@ -947,7 +926,7 @@ export class ActivePowerUpIconManager {
         if (this.activeDisplays.has(id)) {
           this.disposeDisplayWithAnimation(id);
         }
-      }, index * 200);
+      }, index * 200); // cascade disposal
     });
   }
 }
