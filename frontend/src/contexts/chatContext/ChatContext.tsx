@@ -178,6 +178,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     sendMessage('chat', messageData);
+    console.log('sending message: ', messageData);
     const key = selectedFriend || roomId;
     setMessages((prev) => ({
       ...prev,

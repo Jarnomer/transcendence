@@ -13,7 +13,6 @@ import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
-import { ChatModal } from './components/modals/ChatModal.tsx';
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');
@@ -22,18 +21,20 @@ const App: React.FC = () => {
     <>
       <GameOptionsProvider>
         <Router>
+          {/* <div className="fixed"> */}
           <BackgroundProvider />
+          {/* </div> */}
           <div
             id="app-main-container"
-            className={`flex flex-col relative items-center h-full min-h-screen w-full overflow-hidden text-primary p-2 `}
+            className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full  text-primary md:p-2 `}
           >
-            <div id="app-content" className="relative flex flex-col  w-full h-full max-w-screen-lg">
+            <div id="app-content" className="relative flex grow flex-col w-full  max-w-screen-lg">
               <Header />
               <AnimatePresence>
                 <motion.div
                   id="backgroundGlitch"
                   aria-hidden="true"
-                  className="absolute top-12 w-full h-full point pointer-events-none"
+                  className="absolute  top-12 w-full h-full point pointer-events-none"
                 >
                   <BackgroundGlitch duration={1100} />
                 </motion.div>

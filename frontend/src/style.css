@@ -75,7 +75,7 @@ body,
 
 @layer components {
   .glass-box {
-    @apply border-1 bg-primary/15 border-primary shadow-[0_0_3px] shadow-primary/80 inset-shadow-[0_0_3px] inset-shadow-primary/80;
+    @apply backdrop-blur-lg border-1 bg-primary/15 border-primary shadow-[0_0_3px] shadow-primary/80 inset-shadow-[0_0_3px] inset-shadow-primary/80;
   }
 }
 

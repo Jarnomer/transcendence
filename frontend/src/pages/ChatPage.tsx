@@ -37,19 +37,26 @@ export const ChatPage: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="flex border-1 w-2xl h-full max-h-2xl glass-box">
-      <div className="w-full h-full relative flex items-center justify-center">
-        <div className="absolute w-full h-full overflow-hidden pointer-events-none">
-          <BackgroundGlow />
-        </div>
-        <div className="w-full h-full overflow-y-auto">
-          {createNewGroupChat ? (
-            <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
-          ) : (
-            <ChatSidebar onOpenChat={handleOpenChat} handleClickNewChat={handleClickNewChat} />
-          )}
-        </div>
+    <div className="flex border-1 w-2xl relative h-full max-h-2xl glass-box">
+      <div className="absolute w-full h-full overflow-hidden pointer-events-none">
+        <BackgroundGlow />
       </div>
+
+      {createNewGroupChat && !selectedFriendId ? (
+        <div className="w-full h-full relative flex items-center">
+          <div className="h-full overflow-y-auto">
+            <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
+          </div>
+        </div>
+      ) : (
+        !selectedFriendId && (
+          <div className="w-full h-full relative flex items-center">
+            <div className="h-full overflow-y-auto">
+              <ChatSidebar onOpenChat={handleOpenChat} handleClickNewChat={handleClickNewChat} />
+            </div>
+          </div>
+        )
+      )}
 
       {selectedFriendId && (
         <ChatWindow
