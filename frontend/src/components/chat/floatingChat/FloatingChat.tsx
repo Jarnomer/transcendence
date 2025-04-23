@@ -57,8 +57,7 @@ export const FloatingChat = () => {
 
   return (
     <div className="flex gap-2 items-end fixed bottom-4 right-4 z-50">
-      {!minimized &&
-        openChatWindows &&
+      {openChatWindows &&
         Object.entries(openChatWindows)
           .filter(([_, isOpen]) => isOpen)
           .map(([friendId]) => (

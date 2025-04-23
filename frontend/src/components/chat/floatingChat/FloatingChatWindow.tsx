@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -28,11 +28,13 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
   const [input, setInput] = useState('');
   const [minimized, setMinimized] = useState(false);
   const { messages } = useChatContext();
-  const chatMessages = messages[selectedFriendId] || [];
+  // const chatMessages = messages[selectedFriendId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
 
-
+  const chatMessages = useMemo(() => {
+    return messages[selectedFriendId] || [];
+  }, [messages, selectedFriendId]);
 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
   const playSelectSound = useSound('/sounds/effects/select.wav');

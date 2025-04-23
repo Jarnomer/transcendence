@@ -3,7 +3,6 @@ import React from 'react';
 import { UserDataResponseType } from '@shared/types/userTypes';
 
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { acceptFriendRequest, sendFriendRequest } from '../../services/friendService';
 import { AddFriend } from '../UI/buttons/AddFriend';
@@ -34,16 +33,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   editProfile,
   sent,
 }) => {
-  const { setUser, refetchUser } = useUser();
-  const { setSelectedFriend, setRoomId } = useChatContext();
-  const { openModal } = useModal();
-  const {
-    messages,
-    user: loggedInUser,
-    friends,
-    selectedFriendId,
-    sendChatMessage,
-  } = useChatContext();
+  const { user: loggedInUser, setUser, refetchUser } = useUser();
+  const { setOpenChatWindows, messages, fetchDmHistory } = useChatContext();
 
   const handleAddFriendClick = (user_id: string) => {
     if (
@@ -65,16 +56,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     }
   };
 
-  const handleChatClick = (user_id: string) => {
-    setSelectedFriend(user.user_id);
-    setRoomId(null);
-    console.log('Sending message to user: ', user_id);
-    openModal('chatModal', {
-      loggedInUser,
-      friends,
-      selectedFriendId: user?.user_id,
-      sendChatMessage,
-    });
+  const handleChatClick = async (friendId: string) => {
+    console.log('opening chat', friendId);
+    setOpenChatWindows((prev) => ({
+      ...prev,
+      [friendId]: true,
+    }));
+
+    if (!messages[friendId]) {
+      await fetchDmHistory(friendId);
+    }
   };
 
   const handleBlockUserClick = (user_id: string) => {

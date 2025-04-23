@@ -13,7 +13,6 @@ import {
 } from '@/services/chatService';
 
 import { MessageNotification } from '../../components/chat/MessageNotification';
-import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useSound } from '../../hooks/useSound';
 import { useUser } from '../user/UserContext';
 
@@ -22,7 +21,6 @@ const ChatContext = createContext<any>(null);
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage, closeConnection } = useWebSocketContext();
   const { user } = useUser();
-  const { openModal } = useModal();
 
   const [friends, setFriends] = useState<any[]>([]);
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -73,13 +71,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleNotificationClick = (senderId: string) => {
     setOpenChatWindows((prev) => ({ ...prev, [senderId]: true }));
-    openModal('chatModal', {
-      user,
-      friends,
-      selectedFriendId: senderId,
-      onsend: sendChatMessage,
-      messages,
-    });
+    // openModal('chatModal', {
+    //   user,
+    //   friends,
+    //   selectedFriendId: senderId,
+    //   onsend: sendChatMessage,
+    //   messages,
+    // });
   };
 
   const notifyMessage = (event: MessageEvent) => {
