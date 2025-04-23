@@ -89,7 +89,7 @@ export const Notifications: React.FC = () => {
   console.log('notficitations: ', notifications);
   return (
     <motion.div
-      className="backdrop-blur-sm"
+      className=" shadow-black shadow-lg "
       variants={animationVariants}
       initial="initial"
       animate="animate"

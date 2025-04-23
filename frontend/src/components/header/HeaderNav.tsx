@@ -94,7 +94,7 @@ export const HeaderNav: React.FC = () => {
             {isDropdownOpen ? (
               <motion.div
                 ref={dropdownRef}
-                className="absolute h-[200px] right-0 top-15 glass-box p-2 z-50 backdrop-blur-md"
+                className="absolute h-[200px] right-0 top-15 glass-box p-2 z-50 shadow-black shadow-lg backdrop-blur-md "
                 variants={animationVariants}
                 initial="initial"
                 animate="animate"

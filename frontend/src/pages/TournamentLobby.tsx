@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { GameOptions } from '../components/gameOptions/GameOptions';
-import TournamentBracket from '../components/tournament/TournamentBracket';
+import TournamentBracket from '../components/tournamentPage/TournamentBracket';
 import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -137,14 +137,10 @@ export const TournamentLobbyNav: React.FC<{
 };
 
 export const TournamentSettings: React.FC = () => {
-  const [enablePowerUps, setEnablePowerUps] = useState(false);
-  const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   return <GameOptions></GameOptions>;
 };
 
 export const TournamentPlayerList: React.FC = () => {
-  const [enablePowerUps, setEnablePowerUps] = useState(false);
-  const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
   return (
     <div className="h-full w-full">
       <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2 overflow-y-scroll">
@@ -285,15 +281,6 @@ export const TournamentLobby: React.FC = () => {
               )}
             </AnimatePresence>
           </motion.div>
-
-          {/* removed the chat for now, need to think about where to place it */}
-
-          {/* <FloatingChat
-            user={user}
-            selectedFriendId={selectedFriendId}
-            friends={friends}
-            roomId={tournamentChatId}
-          ></FloatingChat> */}
         </div>
       </motion.div>
     </>

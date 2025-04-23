@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { PlayerQueue } from '../../../home/Tournaments';
+import { PlayerQueue } from '../../../tournamentPage/Tournaments';
 import { BoxDiv } from './SvgBoxContainer';
 
 export const fillVariants = {

@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { LeaderBoard } from '@components';
 
-import { Tournaments } from '../components/home/Tournaments';
 import { Updates } from '../components/home/Updates';
 
 export const slideFromLeftVariants = {
@@ -60,14 +59,14 @@ export const HomePage: React.FC = () => {
 
   return (
     <>
-      <motion.div className="w-full relative flex flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
+      <motion.div className="w-full max-h-full relative flex flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
         {/* <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav> */}
         <motion.div id="home-page-content" className="flex flex-col md:flex-row h-full gap-2">
           {activeTab === 'leaderboard' && (
             <AnimatePresence>
               <motion.div
                 key="leaderboard"
-                className="md:min-w-1/2 flex justify-center md:justify-end  p-0"
+                className="md:min-w-1/2 flex overflow-y-scroll justify-center md:justify-end  p-0"
                 variants={slideFromLeftVariants}
                 initial="initial"
                 animate="animate"
@@ -84,7 +83,6 @@ export const HomePage: React.FC = () => {
                 exit="exit"
                 layout
               >
-                <Tournaments></Tournaments>
                 <Updates></Updates>
               </motion.div>
             </AnimatePresence>
