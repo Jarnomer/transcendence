@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+
 import { toast } from 'react-hot-toast';
 
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
@@ -13,6 +14,7 @@ import {
 
 import { MessageNotification } from '../../components/chat/MessageNotification';
 import { useModal } from '../../contexts/modalContext/ModalContext';
+import { useSound } from '../../hooks/useSound';
 import { useUser } from '../user/UserContext';
 
 const ChatContext = createContext<any>(null);
@@ -29,6 +31,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [myRooms, setMyRooms] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [openChatWindows, setOpenChatWindows] = useState<Record<string, boolean>>({});
+  const playMessageSound = useSound('/sounds/effects/message.wav');
 
   const roomIdRef = useRef(roomId);
 
@@ -49,6 +52,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev,
         [friendId]: data,
       }));
+      return data;
     } catch (error) {
       console.error('Failed to fetch DM history:', error);
     }
@@ -61,6 +65,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev,
         [roomId]: data,
       }));
+      return data;
     } catch (error) {
       console.error('Failed to fetch chat history:', error);
     }
@@ -82,6 +87,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isCurrentRoom || openChatWindows[event.sender_id]) return;
 
+    playMessageSound();
     toast.custom((t) => (
       <MessageNotification>
         <div
@@ -104,6 +110,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleChatMessage = (event: MessageEvent) => {
+    console.log('handling chat message');
     if (event.room_id) {
       setMessages((prev) => ({
         ...prev,
@@ -217,6 +224,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createRoom,
         openChatWindows,
         setOpenChatWindows,
+        fetchDmHistory,
+        fetchChatHistory,
       }}
     >
       {children}

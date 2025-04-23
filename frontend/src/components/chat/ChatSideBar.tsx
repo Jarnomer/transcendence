@@ -1,22 +1,11 @@
 import React, { useState } from 'react';
 
-import { Room, User } from '@/shared/types';
-
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useSound } from '../../hooks/useSound';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';
 
 interface ChatSidebarProps {
-  searchQuery: string;
-  onSearchChange: (val: string) => void;
-  filteredUsers: User[];
-  rooms: Room[];
-  myRooms: Room[];
-  selectedFriend: string | null;
-  roomId: string | null;
-  onFriendSelect: (id: string) => void;
-  onRoomSelect: (id: string) => void;
   handleClickNewChat: () => void;
   onOpenChat: (friendId: string) => void;
 }

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
   const navigate = useNavigate();
+  if (location.pathname === '/game') return;
 
   return (
     <footer className="h-15 text-xs sm:text-sm  w-screen flex items-center justify-center mt-auto  border-primary border-t-1 text-center">

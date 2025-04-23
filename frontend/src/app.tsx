@@ -5,7 +5,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { FloatingChat } from './components/chat/floatingChat/FloatingChat.tsx';
+import { FloatingChatWrapper } from './components/chat/floatingChat/FloatingChatWrapper.tsx';
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider';
 import { Header } from './components/header/Header.tsx';
@@ -44,13 +44,13 @@ const App: React.FC = () => {
 
                 <AnimatedRoutes></AnimatedRoutes>
               </div>
-              {location.pathname !== '/game' ? <Footer /> : null}
+              <Footer />
             </div>
-            <FloatingChat></FloatingChat>
+            <FloatingChatWrapper />
           </Router>
         </GameOptionsProvider>
         <ChatModal></ChatModal>
-        <SettingsModal></SettingsModal>
+        <SettingsModal></SettingsModal>a
         <Toaster position="bottom-right" />
       </ChatProvider>
     </WebSocketProvider>

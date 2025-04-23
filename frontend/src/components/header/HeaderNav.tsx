@@ -59,8 +59,6 @@ export const HeaderNav: React.FC = () => {
   }, [isDropdownOpen]);
 
   const handleCreateGameClick = () => {
-    console.log('Create game clicked');
-    setLobby('create');
     navigate('/gameMenu');
   };
 
@@ -72,7 +70,7 @@ export const HeaderNav: React.FC = () => {
             id="nav-play-button"
             ariaLabel="play"
             icon="play"
-            onClick={() => handleCreateGameClick()}
+            onClick={() => navigate('/gameMenu')}
           ></NavIconButton>
           <NavIconButton
             id="nav-home-button"

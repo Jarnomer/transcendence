@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +18,8 @@ export const useGameResult = (userId: string | null) => {
   const userIdRef = useRef(userId);
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
+
+  const [gameResult, setGameResult] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -40,12 +42,30 @@ export const useGameResult = (userId: string | null) => {
   }, [gameState]);
 
   useEffect(() => {
-    if (gameStatusRef.current === 'finished' && !hasSubmittedResult.current) {
+    if (
+      gameStatusRef.current &&
+      gameStatusRef?.current === 'finished' &&
+      !hasSubmittedResult.current
+    ) {
       console.log('Game finished, submitting result');
+      const { players } = gameStateRef.current;
+      const playerArray = [players.player1, players.player2];
+      const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
+      const loserIndex = winnerIndex === 0 ? 1 : 0;
+      const result = {
+        game_id: gameIdRef.current,
+        winner_id: playerArray[winnerIndex].id,
+        loser_id: playerArray[loserIndex].id,
+        winner_score: playerArray[winnerIndex].score,
+        loser_score: playerArray[loserIndex].score,
+        game_mode: mode,
+      };
+
+      setGameResult(result);
       dispatch({ type: 'GAME_RESET' });
-      resetGameOptions();
+
       if (mode !== 'tournamnet') {
-        navigate('/gameMenu');
+        // navigate('/gameMenu');
       }
       hasSubmittedResult.current = true;
     }
@@ -90,9 +110,9 @@ export const useGameResult = (userId: string | null) => {
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
-        resetGameOptions();
+
         if (mode !== 'tournamnet') {
-          navigate('/gameMenu');
+          // navigate('/gameMenu');
         }
         return;
       }
@@ -102,13 +122,8 @@ export const useGameResult = (userId: string | null) => {
       const playerArray = [players.player1, players.player2];
       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
       const loserIndex = winnerIndex === 0 ? 1 : 0;
-      console.log(
-        'Submitting game result:',
-        gameIdRef.current,
-        playerArray,
-        winnerIndex,
-        loserIndex
-      );
+
+      console.log('Submitting game result:', gameResult);
       submitResult({
         game_id: gameIdRef.current,
         winner_id: playerArray[winnerIndex].id,
@@ -125,11 +140,12 @@ export const useGameResult = (userId: string | null) => {
         .finally(() => {
           resetGameOptions();
           if (mode !== 'tournamnet') {
-            navigate('/gameMenu');
+            // navigate('/gameMenu');
           }
         });
     };
   }, []);
+  return { gameResult };
 };
 
 export default useGameResult;

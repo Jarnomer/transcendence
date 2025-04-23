@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useModal } from '../../contexts/modalContext/ModalContext';
-import { ChatWindow } from '../chat/ChatWindow';
+import { ChatWindow } from '../chat/chatPage/ChatWindow';
 import { ModalWrapper } from './ModalWrapper';
 
 export const ChatModal: React.FC = () => {

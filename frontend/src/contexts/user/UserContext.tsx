@@ -45,8 +45,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
 
-  console.log('------ USER PROVIDER MOUNTED -----');
-
   const fetchUser = useCallback(() => {
     if (!userId) {
       setUser(null);

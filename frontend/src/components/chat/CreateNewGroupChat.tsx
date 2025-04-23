@@ -6,9 +6,7 @@ import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';
 
 type CreateRoomPopupProps = {
-  isVisible: boolean;
   onClose: () => void;
-  friends: any[];
   handleClickNewChat: () => void;
 };
 
@@ -44,7 +42,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
     if (roomName.trim() === '') return;
 
     createRoom(roomName, isPrivate, selectedMembers);
-    handleClickNewChat(); // Close the popup after room creation
+    handleClickNewChat();
   };
 
   const handleToggleMember = (friendId: string) => {

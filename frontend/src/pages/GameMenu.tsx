@@ -141,12 +141,10 @@ export const GameMenu: React.FC = () => {
     setDifficulty(difficulty);
   };
 
-  // useEffect(() => {
-  //   return () => {
-  //     setMode(null);
-  //     setDifficulty(null);
-  //   };
-  // }, [location]);
+  useEffect(() => {
+    resetGameOptions();
+    setLobby('create');
+  }, []);
 
   useEffect(() => {
     if (mode === 'tournament') {
@@ -156,7 +154,6 @@ export const GameMenu: React.FC = () => {
     if (mode && difficulty) {
       allowInternalNavigation();
       if (mode === '1v1' && difficulty === 'online') {
-        resetGameOptions();
         setLobby('random');
         setMode('1v1');
         setDifficulty('online');

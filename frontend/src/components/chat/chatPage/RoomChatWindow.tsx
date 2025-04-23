@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { useUser } from '../../contexts/user/UserContext';
-import { MessageInput } from './MessageInput';
-import { MessageList } from './MessageList';
+import { useUser } from '../../../contexts/user/UserContext';
+import { MessageInput } from '../MessageInput';
+import { MessageList } from '../MessageList';
 
 interface RoomChatWindowProps {
   messages: Message[];

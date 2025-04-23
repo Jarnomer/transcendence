@@ -28,8 +28,12 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
   const [input, setInput] = useState('');
   const [minimized, setMinimized] = useState(false);
   const { messages } = useChatContext();
+  const chatMessages = messages[selectedFriendId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
+
+
+
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
   const playSelectSound = useSound('/sounds/effects/select.wav');
 
@@ -44,14 +48,14 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
   console.log(roomId);
   return (
     <div
-      className={` w-[300px] glass-box  text-primary backdrop-blur-sm ${
+      className={`p-0 w-[300px] glass-box  text-primary backdrop-blur-sm ${
         minimized ? 'h-12' : ' h-[400px]'
       } glass-box overflow-hidden`}
     >
-      <div className="h-full w-full flex flex-col flex-1">
-        <div className=" border-b flex justify-between items-center ">
+      <div className="p-0 h-full w-full flex flex-col flex-1">
+        <div className="p-0 flex justify-between items-center ">
           <div
-            className="w-full bg-primary text-black p-2 flex justify-between items-center cursor-pointer"
+            className="w-full text-sm bg-primary text-black p-2 flex justify-between items-center cursor-pointer"
             onClick={minimized ? handleChatMinimize : undefined}
           >
             {selectedFriendId ? (
@@ -84,7 +88,7 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
         {!minimized && (
           <>
             <MessageList
-              messages={messages}
+              messages={chatMessages}
               user={user}
               selectedFriendId={selectedFriendId}
               roomId={roomId}
@@ -98,33 +102,3 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
     </div>
   );
 };
-
-// interface ChatWindowProps {
-//   friends: UserDataResponseType[];
-//   selectedFriendId: string | null;
-//   roomId: string | null;
-//   onBack: () => void;
-//   onSend: (text: string) => void;
-// }
-
-// export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
-//   messages,
-//   user,
-//   friends,
-//   selectedFriendId,
-//   onBack,
-// }) => {
-//   return (
-//     <div className="h-[400px] w-[300px] glass-box  transition-all duration-300 text-primary">
-//       <ChatWindow
-//         friends={friends}
-//         selectedFriendId={selectedFriend}
-//         onBack={() => {
-//           setSelectedFriend(null);
-//           setRoomId(null);
-//         }}
-//         onSend={sendChatMessage}
-//       />
-//     </div>
-//   );
-// };

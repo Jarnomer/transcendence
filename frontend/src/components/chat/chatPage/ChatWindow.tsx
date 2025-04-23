@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { UserDataResponseType } from '../../../../shared/types';
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { useUser } from '../../contexts/user/UserContext';
-import { useSound } from '../../hooks/useSound';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
-import { MessageInput } from './MessageInput';
-import { MessageList } from './MessageList';
+import { UserDataResponseType } from '../../../../../shared/types';
+import { useChatContext } from '../../../contexts/chatContext/ChatContext';
+import { useUser } from '../../../contexts/user/UserContext';
+import { useSound } from '../../../hooks/useSound';
+import { NavIconButton } from '../../UI/buttons/NavIconButton';
+import { MessageInput } from '../MessageInput';
+import { MessageList } from '../MessageList';
 
 interface ChatWindowProps {
   friends: UserDataResponseType[];

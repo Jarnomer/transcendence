@@ -19,6 +19,7 @@ import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
+import { TestGameResult } from '../../pages/TestGameResult.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
 
@@ -54,10 +55,15 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Protected routes - Redirect to login if no user is authenticated */}
         <Route
           path="/"
+          element={user ? <Navigate to="/gameMenu" replace /> : <Navigate to="/login" replace />}
+        />
+
+        <Route
+          path="/testGameResult"
           element={
             user ? (
               <PageWrapper>
-                <HomePage />
+                <TestGameResult />
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />
