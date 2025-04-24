@@ -27,6 +27,7 @@ export const TournamentList: React.FC = () => {
   async function fetchData() {
     setLoading(true);
     const fetchedQueueData = await getTournaments();
+    console.log(fetchedQueueData);
     setDataInQueue(fetchedQueueData.tournaments);
     setLoading(false);
   }

@@ -144,6 +144,7 @@ export const GameMenu: React.FC = () => {
   const [readyForNextEffect, setReadyForNextEffect] = useState(false);
 
   useEffect(() => {
+ 
     const cancelQueueGame = async () => {
       if (phase.gameId) {
         await cancelGame();
