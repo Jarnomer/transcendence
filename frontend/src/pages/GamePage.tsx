@@ -38,12 +38,9 @@ export const GamePage: React.FC = () => {
     console.log('gameId: ', gameId);
     console.log('tournamentOptions', tournamentOptions);
 
-    // Signal that we want to hide the background game
-    // This will trigger the transition in UnifiedGameProvider
     hideBackgroundGame();
 
     return () => {
-      // When unmounting, signal that we want to show the background game again
       showBackgroundGame();
       hideGameCanvas();
     };
@@ -65,7 +62,7 @@ export const GamePage: React.FC = () => {
   useGameControls(localPlayerId, remotePlayerId);
   const playersData = useFetchPlayerData();
 
-  // SET LOADING TO FALSE TO RENDER THE GAME
+  // Set loading to false to render the game
   useEffect(() => {
     if (!gameId) return;
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
@@ -81,17 +78,15 @@ export const GamePage: React.FC = () => {
 
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
       console.log('Ready to send player ready message');
-      const readyMessageDelay = setTimeout(() => {
-        if (isMounted) {
-          console.log('Sending delayed player ready for player:', localPlayerId);
-          sendMessage('game', createReadyInputMessage(localPlayerId, true));
-        }
-      }, 2000); // 2s delay
 
-      // Clean up the timeout if component unmounts
+      if (isMounted) {
+        console.log('Sending player ready for player:', localPlayerId);
+        sendMessage('game', createReadyInputMessage(localPlayerId, true));
+      }
+
       return () => {
+        // Clean up if component unmounts
         isMounted = false;
-        clearTimeout(readyMessageDelay);
       };
     }
   }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
