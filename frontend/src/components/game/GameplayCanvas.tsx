@@ -15,10 +15,10 @@ import {
 } from 'babylonjs';
 
 import {
-  GameSoundManager,
-  RetroEffectsManager,
-  PowerUpEffectsManager,
   ActivePowerUpIconManager,
+  GameSoundManager,
+  PowerUpEffectsManager,
+  RetroEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
