@@ -52,7 +52,7 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
     <div
       className={`p-0 w-[300px] glass-box  text-primary backdrop-blur-sm shadow-black shadow-lg ${
         minimized ? 'h-12' : ' h-[400px]'
-      } glass-box overflow-hidden`}
+      } glass-box overflow-y-scroll`}
     >
       <div className="p-0 h-full w-full flex flex-col flex-1">
         <div className="p-0 flex justify-between items-center ">

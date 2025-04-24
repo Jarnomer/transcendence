@@ -63,11 +63,11 @@ export const SettingsNav: React.FC<{
   return (
     <motion.div
       id="settings-nav"
-      className="flex m-2 relative w-full h-full overflow-hidden items-center justify-center   gap-3  md:gap-6"
+      className="flex p:m-2 relative w-full h-full overflow-hidden items-center justify-center   gap-3  md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
-      <span className="relative p-2 px-3 flex gap-4">
+      <span className="relative md:p-2 px-3 flex gap-4">
         <button onClick={() => setActiveTab('userSettings')}>
           <span className={`${activeTab === 'userSettings' ? 'text-secondary' : ''}`}>User</span>
         </button>
@@ -98,7 +98,7 @@ export const Settings: React.FC = () => {
 
   return (
     <>
-      <motion.div className="relative w-full h-full z-10 gap-5 md:gap-10 md:p-4">
+      <motion.div className="relative w-full  max-w-screen z-10 gap-5 md:gap-10 p-0 md:p-4">
         <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
 
         <motion.div id="home-page-content" className="w-full h-full lg:px-20  gap-20">
@@ -119,7 +119,7 @@ export const Settings: React.FC = () => {
             {activeTab === 'gameSettings' && (
               <motion.div
                 key="gameSettings"
-                className="w-full"
+                className="w-full h-full max-h-screen"
                 // variants={slideFromRightVariants}
                 // initial="initial"
                 // animate="animate"

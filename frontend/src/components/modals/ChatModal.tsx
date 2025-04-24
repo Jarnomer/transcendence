@@ -24,7 +24,7 @@ export const ChatModal: React.FC = () => {
           key={selectedFriendId}
           friends={friends}
           selectedFriendId={selectedFriendId}
-          onBack={onBack}
+          onBack={() => closeModal('chatModal')}
         />
       </div>
     </ModalWrapper>
