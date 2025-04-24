@@ -7,6 +7,8 @@ import {
   Color4,
   CubicEase,
   DefaultRenderingPipeline,
+  SSAORenderingPipeline,
+  BlurPostProcess,
   EasingFunction,
   Engine,
   Mesh,
@@ -41,6 +43,8 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
+  setupSSAO,
+  setupBlurEffect,
 } from '@game/utils';
 
 import {
@@ -84,6 +88,12 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
+
+  const ssaoRef = useRef<SSAORenderingPipeline>(null);
+  const blurEffectsRef = useRef<{
+    horizontalBlur: BlurPostProcess;
+    verticalBlur: BlurPostProcess;
+  } | null>(null);
 
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
@@ -206,7 +216,9 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
     const camera = setupSceneCamera(scene);
 
-    const pipeline = setupPostProcessing(scene, camera);
+    const pipeline = setupPostProcessing(scene, camera, true);
+    const ssaoPipeline = setupSSAO(scene, camera);
+    const blurEffects = setupBlurEffect(camera);
 
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
@@ -226,6 +238,8 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     cameraRef.current = camera;
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
+    ssaoRef.current = ssaoPipeline;
+    blurEffectsRef.current = blurEffects;
 
     floorRef.current = createFloor(scene, backgroundColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
@@ -287,6 +301,13 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       if (powerUpIconsRef.current) powerUpIconsRef.current.disposeAll();
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
+
+      if (ssaoRef.current) ssaoRef.current.dispose();
+      if (blurEffectsRef.current) {
+        if (blurEffectsRef.current.horizontalBlur) blurEffectsRef.current.horizontalBlur.dispose();
+        if (blurEffectsRef.current.verticalBlur) blurEffectsRef.current.verticalBlur.dispose();
+      }
+
       engine.dispose();
       scene.dispose();
     };

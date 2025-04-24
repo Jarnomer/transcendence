@@ -12,27 +12,26 @@ import {
 
 import {
   RetroEffectsManager,
+  createPongRetroEffects,
   animateCinematicCamera,
   animateGameplayCamera,
-  applyBallEffects,
   applyCinematicCameraAngle,
-  applyCollisionEffects,
   applyGameplayCameraAngle,
+  gameplayCameraAngles,
+  getNextCinematicCameraAngle,
+  applyCollisionEffects,
   applyLowQualitySettings,
+  applyBallEffects,
   applyScoreEffects,
   createBall,
   createEdge,
   createFloor,
   createPaddle,
-  createPongRetroEffects,
-  detectCollision,
   detectScore,
-  enableRequiredExtensions,
+  detectCollision,
   gameToSceneX,
   gameToSceneY,
-  gameplayCameraAngles,
-  // gameplayCameraDOFSettings,
-  getNextCinematicCameraAngle,
+  enableRequiredExtensions,
   getThemeColorsFromDOM,
   parseColor,
   setupPostProcessing,
@@ -219,11 +218,11 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       defaultRetroCinematicBaseParams
     );
 
-    const pipeline = setupPostProcessing(scene, camera);
+    const pipeline = setupPostProcessing(scene, camera, false);
 
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
-    applyLowQualitySettings(scene, 5.0, pipeline, shadowGenerators);
+    applyLowQualitySettings(scene, 2.0, pipeline, shadowGenerators);
     enableRequiredExtensions(engine);
 
     engineRef.current = engine;

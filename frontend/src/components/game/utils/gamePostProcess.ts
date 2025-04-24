@@ -9,8 +9,11 @@ import {
   MirrorTexture,
   Plane,
   Scene,
+  SSAORenderingPipeline,
+  BlurPostProcess,
   ShadowGenerator,
   Texture,
+  Vector2,
   Vector3,
 } from 'babylonjs';
 
@@ -44,25 +47,101 @@ export function setupEnvironmentMap(scene: Scene) {
   });
 }
 
-export function setupPostProcessing(scene: Scene, camera: Camera) {
+export function setupPostProcessing(scene: Scene, camera: Camera, isGameplay: boolean = true) {
   const pipeline = new DefaultRenderingPipeline('defaultPipeline', true, scene, [camera]);
-
-  pipeline.bloomThreshold = 0.6;
-  pipeline.bloomWeight = 0.05;
-  pipeline.bloomKernel = 64;
-  pipeline.bloomScale = 0.2;
-
-  pipeline.chromaticAberrationEnabled = true;
-  pipeline.chromaticAberration.aberrationAmount = 10;
-  pipeline.chromaticAberration.radialIntensity = 0.2;
-
-  pipeline.grainEnabled = true;
-  pipeline.grain.intensity = 8;
-  pipeline.grain.animated = true;
 
   pipeline.fxaaEnabled = true;
 
+  if (isGameplay) {
+    pipeline.samples = 4;
+
+    pipeline.bloomEnabled = true;
+    pipeline.bloomThreshold = 1.0;
+    pipeline.bloomWeight = 0.1;
+    pipeline.bloomKernel = 64;
+    pipeline.bloomScale = 2.0;
+
+    pipeline.chromaticAberrationEnabled = true;
+    pipeline.chromaticAberration.aberrationAmount = 10;
+    pipeline.chromaticAberration.radialIntensity = 0.2;
+
+    pipeline.grainEnabled = true;
+    pipeline.grain.intensity = 10;
+    pipeline.grain.animated = true;
+
+    pipeline.sharpenEnabled = true;
+    pipeline.sharpen.edgeAmount = 0.3;
+    pipeline.sharpen.colorAmount = 1.0;
+  } else {
+    pipeline.samples = 1;
+
+    pipeline.bloomEnabled = true;
+    pipeline.bloomThreshold = 1.2;
+    pipeline.bloomWeight = 0.05;
+    pipeline.bloomKernel = 32;
+    pipeline.bloomScale = 1.0;
+
+    pipeline.chromaticAberrationEnabled = true;
+    pipeline.chromaticAberration.aberrationAmount = 15;
+    pipeline.chromaticAberration.radialIntensity = 0.2;
+
+    pipeline.grainEnabled = true;
+    pipeline.grain.intensity = 10;
+    pipeline.grain.animated = true;
+
+    pipeline.depthOfFieldEnabled = true;
+    pipeline.depthOfField.focalLength = 50;
+    pipeline.depthOfField.fStop = 3.0;
+    pipeline.depthOfField.focusDistance = 50;
+    pipeline.depthOfFieldBlurLevel = 1.0;
+  }
+
   return pipeline;
+}
+
+export function setupSSAO(scene: Scene, camera: Camera) {
+  const ssaoPipeline = new SSAORenderingPipeline(
+    'ssao',
+    scene,
+    {
+      ssaoRatio: 0.5,
+      combineRatio: 1.0,
+    },
+    [camera]
+  );
+
+  ssaoPipeline.radius = 2.0;
+  ssaoPipeline.totalStrength = 1.0;
+  ssaoPipeline.area = 0.15;
+  ssaoPipeline.fallOff = 0.000001;
+  ssaoPipeline.base = 0.5;
+
+  return ssaoPipeline;
+}
+
+export function setupBlurEffect(camera: Camera) {
+  const effectiveBlurSize = 2;
+
+  const horizontalBlur = new BlurPostProcess(
+    'horizontalBlur',
+    new Vector2(1.0, 0),
+    effectiveBlurSize,
+    1.0,
+    camera
+  );
+
+  const verticalBlur = new BlurPostProcess(
+    'verticalBlur',
+    new Vector2(0, 1.0),
+    effectiveBlurSize,
+    1.0,
+    camera
+  );
+
+  return {
+    horizontalBlur,
+    verticalBlur,
+  };
 }
 
 export function setupScenelights(scene: Scene, primaryColor: Color3) {
