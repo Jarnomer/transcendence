@@ -71,6 +71,12 @@ class WebSocketManager {
       this.notifyHandlers('error', error);
     };
 
+    this.ws.onping = () => {
+      console.log('WebSocket ping received:', this.url);
+      this.ws?.pong();
+      this.notifyHandlers('pong', null);
+    };
+
     /**
      * This function is called whenever a message is received from the WebSocket server.
      * It parses the message and notifies the event handlers.

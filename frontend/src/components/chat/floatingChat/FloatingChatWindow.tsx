@@ -33,8 +33,13 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
   const { user } = useUser();
 
   const chatMessages = useMemo(() => {
-    return messages[selectedFriendId] || [];
-  }, [messages, selectedFriendId]);
+    if (roomId) {
+      return messages[roomId] || [];
+    }
+    if (selectedFriendId) {
+      return messages[selectedFriendId] || [];
+    }
+  }, [messages, selectedFriendId, roomId]);
 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
   const playSelectSound = useSound('/sounds/effects/select.wav');

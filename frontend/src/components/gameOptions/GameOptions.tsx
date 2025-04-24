@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
-import { useWebSocketContext } from '@/contexts/WebSocketContext';
 
 import { saveGameSettings } from '@services/userService';
 
@@ -21,8 +20,7 @@ export const GameOptions: React.FC = () => {
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
-  const { setGameSettings, gameSettings, setConfirmGame } = useGameOptionsContext();
-  const { startMatchMaking } = useWebSocketContext();
+  const { setGameSettings, gameSettings } = useGameOptionsContext();
   const navigate = useNavigate();
   useMatchmaking();
 
@@ -49,6 +47,8 @@ export const GameOptions: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('--- loading game options ----');
+    console.log('gamesettings: ', gameSettings);
     setMaxScore(gameSettings.maxScore);
     setBallSpeed(gameSettings.ballSpeed);
     setEnableSpin(gameSettings.enableSpin);

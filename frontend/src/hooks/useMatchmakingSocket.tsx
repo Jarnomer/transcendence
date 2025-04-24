@@ -45,5 +45,5 @@ export const useMatchmakingSocket = (
       // matchmakingSocket.removeEventListener('match_declined', handleMatchDeclined);
       // matchmakingSocket.removeEventListener('game_start', handleGameStart);
     };
-  }, [matchmakingSocket, dispatch]);
+  }, []);
 };

@@ -34,6 +34,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const roomIdRef = useRef(roomId);
 
   useEffect(() => {
+    console.log('ChatProvider mounted');
+    return () => {
+      console.log('ChatProvider unmounted');
+    };
+  }, []);
+
+  useEffect(() => {
     if (user) {
       setFriends(user.friends);
     }
@@ -46,6 +53,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchDmHistory = async (friendId: string) => {
     try {
       const data = (await getDm(friendId)) as any;
+      console.log('Fetched DM history:', data);
       setMessages((prev) => ({
         ...prev,
         [friendId]: data,
@@ -59,6 +67,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchChatHistory = async (roomId: string) => {
     try {
       const data = (await getChat(roomId)) as any;
+      console.log('Fetched chat history:', data);
       setMessages((prev) => ({
         ...prev,
         [roomId]: data,

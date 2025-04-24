@@ -53,9 +53,12 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
     console.info('Fetching game settings on mount');
     getGameSettings()
       .then((res) => {
-        if (res) {
+        if (res && Object.keys(res).length > 0) {
           console.info('Game settings fetched successfully:', res);
           setGameSettings(res);
+        } else {
+          console.warn('No game settings found, using default settings');
+          setGameSettings(defaultGameSettings);
         }
       })
       .catch((err) => {

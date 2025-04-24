@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -11,6 +11,8 @@ import { MessageInput } from '../MessageInput';
 import { MessageList } from '../MessageList';
 
 interface ChatWindowProps {
+  messages: any[];
+  user: any;
   friends: UserDataResponseType[];
   selectedFriendId: string | null;
   roomId: string | null;
@@ -30,6 +32,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const navigate = useNavigate();
   const { user } = useUser();
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
+
+  const chatMessages = useMemo(() => {
+    if (roomId) {
+      return messages[roomId] || [];
+    }
+    if (selectedFriendId) {
+      return messages[selectedFriendId] || [];
+    }
+  }, [messages, selectedFriendId, roomId]);
 
   console.log(roomId);
   return (
@@ -56,7 +67,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div />
       </div>
       <MessageList
-        messages={messages}
+        messages={chatMessages}
         user={user}
         selectedFriendId={selectedFriendId}
         roomId={roomId}
