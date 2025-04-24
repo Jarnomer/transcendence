@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { ClippedButton } from '../components/UI/buttons/ClippedButton';
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
+import { ClippedButton } from '../UI/buttons/ClippedButton';
 
 export const CreateTournament: React.FC = () => {
   const [playerCount, setPlayerCount] = useState(8);

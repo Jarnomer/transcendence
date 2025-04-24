@@ -3,7 +3,9 @@ import React from 'react';
 import { UserDataResponseType } from '@shared/types/userTypes';
 
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
+import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { acceptFriendRequest, sendFriendRequest } from '../../services/friendService';
 import { AddFriend } from '../UI/buttons/AddFriend';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
@@ -34,7 +36,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   sent,
 }) => {
   const { user: loggedInUser, setUser, refetchUser } = useUser();
-  const { setOpenChatWindows, messages, fetchDmHistory } = useChatContext();
+  const { setOpenChatWindows, messages, fetchDmHistory, friends } = useChatContext();
+  const isDesktop = useMediaQuery('(min-width: 600px)');
+  const { openModal, closeModal } = useModal();
 
   const handleAddFriendClick = (user_id: string) => {
     if (
@@ -58,13 +62,22 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const handleChatClick = async (friendId: string) => {
     console.log('opening chat', friendId);
-    setOpenChatWindows((prev) => ({
-      ...prev,
-      [friendId]: true,
-    }));
+    if (!isDesktop) {
+      openModal('chatModal', {
+        loggedInUser,
+        friends,
+        selectedFriendId: user?.user_id,
+        onClose: closeModal,
+      });
+    } else {
+      setOpenChatWindows((prev) => ({
+        ...prev,
+        [friendId]: true,
+      }));
 
-    if (!messages[friendId]) {
-      await fetchDmHistory(friendId);
+      if (!messages[friendId]) {
+        await fetchDmHistory(friendId);
+      }
     }
   };
 

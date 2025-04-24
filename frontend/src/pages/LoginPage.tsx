@@ -51,6 +51,8 @@ export const LoginPage: React.FC = () => {
           playErrorSound();
           if (error.status === 400) {
             setError('userExists');
+          } else {
+            alert(error);
           }
           return;
         }
@@ -83,6 +85,8 @@ export const LoginPage: React.FC = () => {
         }
         if (error.status === 401) {
           setError('invalidPassword');
+        } else {
+          alert(error);
         }
         return;
       }
@@ -92,7 +96,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex justify-center p-10">
+    <div className="w-full flex justify-center p-10">
       <div className="w-[300px]">
         <ClippedCornerCard>
           <div className="text-center">

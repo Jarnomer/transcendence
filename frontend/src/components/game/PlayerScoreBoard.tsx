@@ -93,7 +93,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   }
 
   return (
-    <div id="player-scores" className="w-full h-full flex justify-between gap-2 text-primary mb-2">
+    <div id="player-scores" className="w-full flex justify-between gap-2 text-primary mb-2">
       <PlayerCard
         name={player1Ref.current?.display_name || 'Guest'}
         score={playerScores.current.player1Score}

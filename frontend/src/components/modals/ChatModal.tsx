@@ -7,30 +7,24 @@ import { ModalWrapper } from './ModalWrapper';
 
 export const ChatModal: React.FC = () => {
   const { isModalOpen, getModalProps, closeModal } = useModal();
-  const { setSelectedFriend, setRoomId, sendChatMessage, user, messages } = useChatContext();
+  const { setSelectedFriend, setRoomId, sendChatMessage, user } = useChatContext();
 
   if (!isModalOpen('chatModal')) return null;
 
   const props = getModalProps('chatModal');
   if (!props) return null;
 
-  const { friends, selectedFriendId, onSend } = props;
+  const { friends, selectedFriendId, onBack } = props;
   console.log(user, friends, selectedFriendId);
 
   return (
     <ModalWrapper modalName="chatModal">
-      <div className="glass-box text-primary md:h-[600px] md:max-h-[600px] min-w-2xl max-w-4xl overflow-hidden">
+      <div className="glass-box grow text-primary w-full h-full overflow-hidden">
         <ChatWindow
-          messages={messages}
-          user={user}
+          key={selectedFriendId}
           friends={friends}
           selectedFriendId={selectedFriendId}
-          onBack={() => {
-            setSelectedFriend(null);
-            setRoomId(null);
-            closeModal('chatModal');
-          }}
-          onSend={sendChatMessage}
+          onBack={onBack}
         />
       </div>
     </ModalWrapper>

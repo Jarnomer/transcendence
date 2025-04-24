@@ -94,7 +94,7 @@ export const GamePage: React.FC = () => {
   return (
     <div
       id="game-page"
-      className="w-full h-full pt-0 flex flex-col flex-grow items-center justify-center overflow-hidden"
+      className="w-full h-auto max-h-full p-2 pt-0 flex flex-col items-center justify-center overflow-hidden"
     >
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />
@@ -102,11 +102,11 @@ export const GamePage: React.FC = () => {
 
       {/* GameplayCanvas is always rendered but visibility is controlled */}
       <div
-        className={`w-full h-full transition-opacity duration-1000 ${
+        className={`w-full transition-opacity duration-1000 ${
           isGameCanvasVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {isGameCanvasActive && gameState && gameStatus !== 'finished' && (
+        {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
           <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
         )}
       </div>
