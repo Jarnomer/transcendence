@@ -105,10 +105,6 @@ export const TournamentLobbyNav: React.FC<{
   const navigate = useNavigate();
   const { setLobby, setDifficulty, setMode, resetGameOptions } = useGameOptionsContext();
 
-  useEffect(() => {
-    resetGameOptions();
-  }, []);
-
   return (
     <motion.div
       id="home-page-nav"

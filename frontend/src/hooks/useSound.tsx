@@ -15,5 +15,4 @@ export const useSound = (url: string) => {
   }, [soundId]);
 
   return play;
-  return;
 };
