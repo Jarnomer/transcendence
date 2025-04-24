@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -141,6 +141,8 @@ export const GameMenu: React.FC = () => {
     setLobby('create');
   }, []);
 
+  const [readyForNextEffect, setReadyForNextEffect] = useState(false);
+
   useEffect(() => {
     const cancelQueueGame = async () => {
       if (phase.gameId) {
@@ -149,28 +151,30 @@ export const GameMenu: React.FC = () => {
         await cancelQueue();
       }
     };
-    console.log('queueId:', queueId);
-    console.log('phase.gameId:', phase.gameId);
+
     if (queueId || phase.gameId) {
       const confirm = window.confirm('You are already in a game or queue. continue?');
-      console.log('confirmLeave:', confirm);
       if (confirm) {
-        console.log('User chose not to leave the game or queue.');
         navigate('/game');
       } else {
         cancelQueueGame();
-        resetGameOptions();
+        resetGameOptions(); // <- sets mode/difficulty to null or default
+        setReadyForNextEffect(true); // <- signal second effect to proceed
       }
+    } else {
+      // No queue/game, safe to proceed immediately
+      setReadyForNextEffect(true);
     }
   }, []);
 
+  // Effect that only runs after state is reset
   useEffect(() => {
-    if (queueId || phase.gameId) return;
+    if (!readyForNextEffect) return;
+
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
-    }
-    if (mode && difficulty) {
+    } else if (mode && difficulty) {
       allowInternalNavigation();
       if (mode === '1v1' && difficulty === 'online') {
         setLobby('random');
@@ -182,7 +186,7 @@ export const GameMenu: React.FC = () => {
         navigate('/gameOptions');
       }
     }
-  }, [mode, difficulty]);
+  }, [readyForNextEffect, mode, difficulty]);
 
   return (
     <AnimatePresence mode="wait">

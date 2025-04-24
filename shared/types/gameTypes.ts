@@ -193,7 +193,7 @@ export const defaultGameParams: GameParams = {
   },
   rules: {
     maxScore: 5,
-    countdown: 3, // Seconds
+    countdown: 4, // Seconds
   },
 };
 

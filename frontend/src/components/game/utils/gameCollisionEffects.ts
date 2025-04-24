@@ -470,7 +470,7 @@ function applyEdgeDeformEffect(
 }
 
 export function applyCollisionEffects(
-  retroEffectsRef: RetroEffectsManager | null,
+  retroEffectsRef: RetroEffectsManager | null | undefined,
   ballMesh: Mesh,
   paddleMesh: Mesh,
   edgeMesh: Mesh,
@@ -479,12 +479,11 @@ export function applyCollisionEffects(
   spin: number,
   color: Color3,
   applyGlitch: boolean,
-  soundManagerRef?: GameSoundManager | null
+  soundManagerRef?: GameSoundManager | null | undefined
 ) {
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);
   const combinedFactor = speedFactor + spinFactor;
-  const volumeFactor = Math.min(0.5 + combinedFactor * 0.1, 1.2);
   const scene = ballMesh.getScene();
 
   applySquishEffect(ballMesh, collisionType, speedFactor, scene);
@@ -494,13 +493,14 @@ export function applyCollisionEffects(
 
   if (collisionType === 'dx') {
     applyPaddleRecoil(paddleMesh, speedFactor, scene);
-    if (soundManagerRef && applyGlitch) soundManagerRef.playPaddleSound(volumeFactor);
+    // if (soundManagerRef && applyGlitch) soundManagerRef.playPaddleSound();
   } else if (collisionType === 'dy') {
     applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
-    if (soundManagerRef && applyGlitch) soundManagerRef.playEdgeSound(volumeFactor);
+    // if (soundManagerRef && applyGlitch) soundManagerRef.playEdgeSound();
   }
 
   if (retroEffectsRef && applyGlitch) {
-    retroEffectsRef.setGlitchAmount(combinedFactor / 8);
+    const shakeIntensity = combinedFactor / 5;
+    retroEffectsRef.setGlitchAmount(shakeIntensity);
   }
 }

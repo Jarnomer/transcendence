@@ -21,6 +21,7 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
 
   const bgWsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
+  const connectionDelayTimeoutRef = useRef<number | null>(null);
   const currentGameStateRef = useRef<GameState | null>(null);
   const lastGameIdRef = useRef<string | null>(null);
   const modeChangeRequestedRef = useRef<boolean>(false);
@@ -57,6 +58,7 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
       spin: 0,
     },
     powerUps: [],
+    countdown: 0,
   };
 
   // Setup WebSocket for background game
@@ -65,6 +67,12 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
     if (reconnectTimeoutRef.current !== null) {
       window.clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
+    }
+
+    // Clear any existing connection delay timeout
+    if (connectionDelayTimeoutRef.current !== null) {
+      window.clearTimeout(connectionDelayTimeoutRef.current);
+      connectionDelayTimeoutRef.current = null;
     }
 
     // Close existing connection
@@ -79,54 +87,60 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
       bgWsRef.current = null;
     }
 
-    console.log('Setting up background WebSocket connection');
-    const wsUrl = `wss://${window.location.host}/ws/background-game?`;
+    const connectWithDelay = () => {
+      const wsUrl = `wss://${window.location.host}/ws/background-game?`;
 
-    try {
-      const ws = new WebSocket(wsUrl);
+      try {
+        const ws = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
-        console.log('Background game connection established');
-      };
+        ws.onopen = () => {
+          console.log('Background game connection established');
+        };
 
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'game_state') {
-            // Only update state in background mode
-            if (currentMode === 'background') {
-              setBackgroundGameState(data.state);
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'game_state') {
+              // Only update state in background mode
+              if (currentMode === 'background') {
+                setBackgroundGameState(data.state);
+              }
             }
+          } catch (error) {
+            console.error('Error parsing background game message:', error);
           }
-        } catch (error) {
-          console.error('Error parsing background game message:', error);
-        }
-      };
+        };
 
-      ws.onclose = () => {
-        console.log('Background game connection closed');
-        // Only attempt to reconnect if we're still in background mode
-        if (currentMode === 'background' && !modeChangeRequestedRef.current) {
-          console.log('Attempting to reconnect to background game...');
-          reconnectTimeoutRef.current = window.setTimeout(() => {
-            reconnectTimeoutRef.current = null;
-            if (currentMode === 'background') setupBackgroundWebSocket();
-          }, 3000);
-        }
-      };
+        ws.onclose = () => {
+          // Only attempt to reconnect if we're still in background mode
+          if (currentMode === 'background' && !modeChangeRequestedRef.current) {
+            console.log('Attempting to reconnect to background game...');
+            reconnectTimeoutRef.current = window.setTimeout(() => {
+              reconnectTimeoutRef.current = null;
+              if (currentMode === 'background') setupBackgroundWebSocket();
+            }, 3000);
+          }
+        };
 
-      ws.onerror = (error) => {
-        console.error('Background WebSocket error:', error);
-      };
+        ws.onerror = (error) => {
+          console.error('Background WebSocket error:', error);
+        };
 
-      bgWsRef.current = ws;
-    } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
-      reconnectTimeoutRef.current = window.setTimeout(() => {
-        reconnectTimeoutRef.current = null;
-        if (currentMode === 'background') setupBackgroundWebSocket();
-      }, 3000);
-    }
+        bgWsRef.current = ws;
+      } catch (error) {
+        console.error('Failed to create WebSocket connection:', error);
+        reconnectTimeoutRef.current = window.setTimeout(() => {
+          reconnectTimeoutRef.current = null;
+          if (currentMode === 'background') setupBackgroundWebSocket();
+        }, 3000);
+      }
+    };
+
+    const connectionDelay = 500;
+    connectionDelayTimeoutRef.current = window.setTimeout(() => {
+      connectionDelayTimeoutRef.current = null;
+      connectWithDelay();
+    }, connectionDelay);
   }, [currentMode]);
 
   // Handle mode changes
@@ -134,7 +148,6 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
     (newMode: 'background' | 'active') => {
       if (currentMode === newMode || isTransitioning) return;
 
-      console.log(`Switching game mode from ${currentMode} to ${newMode}`);
       modeChangeRequestedRef.current = true;
       setIsTransitioning(true);
 
@@ -147,7 +160,6 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
           (!bgWsRef.current || bgWsRef.current.readyState !== WebSocket.OPEN) &&
           newMode === 'background'
         ) {
-          console.log('Reconnecting to background game after mode switch');
           setupBackgroundWebSocket();
         }
       }, 100); // Small delay to allow for animations
@@ -173,7 +185,6 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
   // Handle game finish
   useEffect(() => {
     if (gameStatus === 'finished' && currentMode === 'active' && !isTransitioning) {
-      console.log('Game finished, returning to background mode');
       // Using a slightly longer delay for end-game transition
       setTimeout(() => {
         switchToMode('background');
@@ -203,8 +214,12 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
         reconnectTimeoutRef.current = null;
       }
 
+      if (connectionDelayTimeoutRef.current !== null) {
+        window.clearTimeout(connectionDelayTimeoutRef.current);
+        connectionDelayTimeoutRef.current = null;
+      }
+
       if (bgWsRef.current) {
-        console.log('Closing WebSocket connection on cleanup');
         bgWsRef.current.onclose = null;
         bgWsRef.current.close();
         bgWsRef.current = null;

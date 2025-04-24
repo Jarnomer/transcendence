@@ -4,10 +4,10 @@ import {
   Color4,
   CubicEase,
   EasingFunction,
-  PBRMaterial,
   GlowLayer,
   Mesh,
   MeshBuilder,
+  PBRMaterial,
   ParticleSystem,
   Scene,
   StandardMaterial,
@@ -49,7 +49,7 @@ export class ActivePowerUpIconManager {
   private activeDisplays: Map<string, ActivePowerUpDisplay> = new Map();
   private primaryColor: Color3;
   private secondaryColor: Color3;
-  private soundManager?: GameSoundManager;
+  private soundManager?: GameSoundManager | null | undefined;
   private gameWidth: number;
   private iconSize: number = 4.0;
   private ySpacing: number;
@@ -65,7 +65,7 @@ export class ActivePowerUpIconManager {
     scene: Scene,
     primaryColor: Color3,
     secondaryColor: Color3,
-    soundManager?: GameSoundManager
+    soundManager?: GameSoundManager | null | undefined
   ) {
     this.scene = scene;
     this.primaryColor = primaryColor;
