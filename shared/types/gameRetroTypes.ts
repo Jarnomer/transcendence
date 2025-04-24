@@ -99,7 +99,7 @@ export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
     colorBleed: 0,
   },
   crtDistortion: {
-    curvatureAmount: 0.2,
+    curvatureAmount: 0.3,
     scanlineIntensity: 0.05,
     vignette: 1.2,
     colorBleed: 0.0,

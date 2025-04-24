@@ -173,7 +173,7 @@ export function createFloor(
   floor.material = pbr;
 
   const frameRate = 30;
-  const tiltAmount = 0.02;
+  const tiltAmount = 0.004;
   const floatAmount = 0.1;
 
   const rotationAnimationY = new Animation(

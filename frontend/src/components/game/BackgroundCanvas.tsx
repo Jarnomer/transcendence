@@ -31,7 +31,7 @@ import {
   gameToSceneX,
   gameToSceneY,
   gameplayCameraAngles,
-  gameplayCameraDOFSettings,
+  // gameplayCameraDOFSettings,
   getNextCinematicCameraAngle,
   getThemeColorsFromDOM,
   parseColor,
@@ -134,12 +134,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       if (cameraRef.current) {
         const gameplayAngle = gameplayCameraAngles[0];
 
-        applyGameplayCameraAngle(
-          cameraRef.current,
-          gameplayAngle,
-          postProcessingRef.current,
-          gameplayCameraDOFSettings
-        );
+        applyGameplayCameraAngle(cameraRef.current, gameplayAngle);
         animateGameplayCamera(cameraRef.current, gameplayAngle);
 
         if (retroEffectsRef.current) {
@@ -228,7 +223,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
-    applyLowQualitySettings(scene, 2.0, pipeline, shadowGenerators);
+    applyLowQualitySettings(scene, 5.0, pipeline, shadowGenerators);
     enableRequiredExtensions(engine);
 
     engineRef.current = engine;
