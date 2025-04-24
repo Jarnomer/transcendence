@@ -1,18 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 
 import {
-  Animation,
   ArcRotateCamera,
   Color3,
   Color4,
-  CubicEase,
   DefaultRenderingPipeline,
   BlurPostProcess,
-  EasingFunction,
   Engine,
   Mesh,
   Scene,
-  Vector3,
 } from 'babylonjs';
 
 import {
@@ -46,7 +42,6 @@ import {
 } from '@game/utils';
 
 import {
-  Ball,
   GameState,
   GameStatus,
   PlayerEffects,
@@ -81,7 +76,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
-  // const soundManagerRef = useRef<GameSoundManager>(null);
+  const soundManagerRef = useRef<GameSoundManager>(null);
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
@@ -110,91 +105,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
 
-  const animateBallAfterScore = (
-    scene: Scene,
-    ballMesh: Mesh,
-    ballState: Ball,
-    camera: ArcRotateCamera,
-    scoringPlayer: 'player1' | 'player2',
-    gameWidth: number = defaultGameParams.dimensions.gameWidth,
-    gameHeight: number = defaultGameParams.dimensions.gameHeight,
-    scaleFactor: number = defaultGameParams.dimensions.scaleFactor
-  ) => {
-    isAnimatingBallRef.current = true;
-
-    const ballX = ballMesh.position.x;
-    const ballY = ballMesh.position.y;
-    const ballZ = ballMesh.position.z;
-
-    const ballDx = ballState.dx / scaleFactor;
-    const ballDy = -ballState.dy / scaleFactor;
-
-    const frameRate = 30;
-
-    const continueStartPos = new Vector3(ballX, ballY, ballZ);
-    const continueFinalPos = new Vector3(
-      ballX + ballDx * frameRate,
-      ballY + ballDy * frameRate,
-      ballZ
-    );
-
-    const continueAnim = new Animation(
-      'ballContinueMovement',
-      'position',
-      frameRate,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-    const continueKeys = [
-      { frame: 0, value: continueStartPos },
-      { frame: frameRate, value: continueFinalPos },
-    ];
-    continueAnim.setKeys(continueKeys);
-
-    const cameraPos = camera.position.clone();
-    const cameraTarget = camera.target.clone();
-    const centerX = gameToSceneX(gameWidth / 2, ballMesh);
-    const centerY = gameToSceneY(gameHeight / 2, ballMesh);
-
-    const distanceBehindCamera = 8;
-    const xOffsetAmount = 3;
-
-    const xOffset = scoringPlayer === 'player1' ? xOffsetAmount : -xOffsetAmount;
-    const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
-    const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
-    const dropFinalPos = new Vector3(centerX, centerY, ballZ);
-
-    dropStartPos.x = centerX + xOffset;
-    dropStartPos.z += 5;
-
-    const dropAnim = new Animation(
-      'ballDropAnimation',
-      'position',
-      frameRate,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-    const dropKeys = [
-      { frame: 0, value: dropStartPos },
-      { frame: frameRate, value: dropFinalPos },
-    ];
-    dropAnim.setKeys(dropKeys);
-
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-    dropAnim.setEasingFunction(easingFunction);
-
-    // Execute animations in sequence
-    ballMesh.animations = [continueAnim];
-    scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
-      ballMesh.position = dropStartPos;
-      ballMesh.animations = [dropAnim];
-      scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
-        isAnimatingBallRef.current = false;
-      });
-    });
-  };
-
   // initial render setup
   useEffect(() => {
     if (!canvasRef.current || !gameState) return;
@@ -218,7 +128,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
     enableRequiredExtensions(engine);
 
-    // soundManagerRef.current = getGameSoundManager();
+    soundManagerRef.current = getGameSoundManager();
 
     retroLevelsRef.current = retroEffectsPresets.default;
     retroEffectsRef.current = createPongRetroEffects(
@@ -268,14 +178,14 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       colors.primaryColor,
       colors.secondaryColor,
       defaultGameParams.powerUps.size,
-      null
+      soundManagerRef.current
     );
 
     powerUpIconsRef.current = new ActivePowerUpIconManager(
       scene,
       colors.primaryColor,
       colors.secondaryColor,
-      null
+      soundManagerRef.current
     );
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
@@ -371,7 +281,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
         ball.spin,
         primaryColor,
         true,
-        null
+        soundManagerRef.current
       );
     }
 
@@ -381,13 +291,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       const scoredAgainstPaddle =
         scoringPlayer === 'player1' ? player2Ref.current : player1Ref.current;
 
-      animateBallAfterScore(
-        sceneRef.current,
-        ballRef.current,
-        ball,
-        cameraRef.current,
-        scoringPlayer
-      );
+      isAnimatingBallRef.current = true;
 
       applyScoreEffects(
         retroEffectsRef.current,
@@ -397,11 +301,17 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
         bottomEdgeRef.current,
         scoringPlayerPaddle,
         scoredAgainstPaddle,
+        ballRef.current,
         players[scoringPlayer].score,
         speed,
         ball,
         primaryColor,
-        null
+        gameWidth,
+        gameHeight,
+        () => {
+          isAnimatingBallRef.current = false;
+        },
+        soundManagerRef.current
       );
     }
 

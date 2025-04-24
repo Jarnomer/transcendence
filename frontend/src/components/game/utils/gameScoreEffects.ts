@@ -4,6 +4,8 @@ import {
   Color3,
   Color4,
   DirectionalLight,
+  CubicEase,
+  EasingFunction,
   GlowLayer,
   Mesh,
   MeshBuilder,
@@ -23,6 +25,147 @@ import {
 } from '@game/utils';
 
 import { Ball, defaultGameParams } from '@shared/types';
+
+export function animateBallAfterScore(
+  scene: Scene,
+  ballMesh: Mesh,
+  ballState: Ball,
+  camera: ArcRotateCamera,
+  scoringPlayer: 'player1' | 'player2',
+  gameWidth: number = defaultGameParams.dimensions.gameWidth,
+  gameHeight: number = defaultGameParams.dimensions.gameHeight,
+  scaleFactor: number = defaultGameParams.dimensions.scaleFactor,
+  onAnimationComplete?: () => void
+): void {
+  const ballX = ballMesh.position.x;
+  const ballY = ballMesh.position.y;
+  const ballZ = ballMesh.position.z;
+
+  const ballDx = ballState.dx / scaleFactor;
+  const ballDy = -ballState.dy / scaleFactor;
+
+  const frameRate = 30;
+
+  // Continue movement animation
+  const continueStartPos = new Vector3(ballX, ballY, ballZ);
+  const continueFinalPos = new Vector3(
+    ballX + ballDx * frameRate,
+    ballY + ballDy * frameRate,
+    ballZ
+  );
+
+  const continueAnim = new Animation(
+    'ballContinueMovement',
+    'position',
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const continueKeys = [
+    { frame: 0, value: continueStartPos },
+    { frame: frameRate, value: continueFinalPos },
+  ];
+  continueAnim.setKeys(continueKeys);
+
+  // Drop animation setup
+  const cameraPos = camera.position.clone();
+  const cameraTarget = camera.target.clone();
+  const centerX = gameToSceneX(gameWidth / 2, ballMesh);
+  const centerY = gameToSceneY(gameHeight / 2, ballMesh);
+
+  const distanceBehindCamera = 8;
+  const xOffsetAmount = 3;
+
+  const xOffset = scoringPlayer === 'player1' ? xOffsetAmount : -xOffsetAmount;
+  const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
+  const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
+  const dropFinalPos = new Vector3(centerX, centerY, ballZ);
+
+  dropStartPos.x = centerX + xOffset;
+  dropStartPos.z += 5;
+
+  const dropAnim = new Animation(
+    'ballDropAnimation',
+    'position',
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const dropKeys = [
+    { frame: 0, value: dropStartPos },
+    { frame: frameRate, value: dropFinalPos },
+  ];
+  dropAnim.setKeys(dropKeys);
+
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+  dropAnim.setEasingFunction(easingFunction);
+
+  // Execute animations in sequence
+  ballMesh.animations = [continueAnim];
+  scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
+    ballMesh.position = dropStartPos;
+    ballMesh.animations = [dropAnim];
+    scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
+      if (onAnimationComplete) onAnimationComplete();
+    });
+  });
+}
+
+export function animatePaddleAfterScore(
+  scene: Scene,
+  paddle: Mesh,
+  camera: ArcRotateCamera,
+  scoringDirection: 'left' | 'right',
+  gameWidth: number = defaultGameParams.dimensions.gameWidth,
+  gameHeight: number = defaultGameParams.dimensions.gameHeight
+): void {
+  const frameRate = 30;
+
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+  const centerX = gameToSceneX(scoringDirection === 'right' ? gameWidth : 0, paddle);
+  const centerY = gameToSceneY(gameHeight / 2, paddle);
+  const paddleZ = paddle.position.z;
+
+  const cameraPos = camera.position.clone();
+  const cameraTarget = camera.target.clone();
+
+  const distanceBehindCamera = 8;
+
+  // Apply offset in the proper direction
+  const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
+  const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
+  const dropFinalPos = new Vector3(centerX, centerY, paddleZ);
+
+  const xOffsetAmount = 3;
+  const xOffset = scoringDirection === 'right' ? xOffsetAmount : -xOffsetAmount;
+
+  dropStartPos.x = centerX + xOffset;
+  dropStartPos.z += 5;
+
+  paddle.position = dropStartPos;
+  paddle.visibility = 1;
+
+  const dropAnim = new Animation(
+    'paddleDropAnimation',
+    'position',
+    frameRate,
+    Animation.ANIMATIONTYPE_VECTOR3,
+    Animation.ANIMATIONLOOPMODE_CONSTANT
+  );
+  const dropKeys = [
+    { frame: 0, value: dropStartPos },
+    { frame: frameRate, value: dropFinalPos },
+  ];
+  dropAnim.setKeys(dropKeys);
+  dropAnim.setEasingFunction(easingFunction);
+
+  paddle.animations = [dropAnim];
+
+  scene.beginAnimation(paddle, 0, frameRate, false);
+}
 
 function applyLightEffect(
   scene: Scene,
@@ -113,7 +256,6 @@ function applyBallParticles(
 
   const particleSystem = new ParticleSystem('ballExplosionParticles', 150, scene);
 
-  // particleSystem.particleTexture = createParticleTexture(scene, primaryColor);
   particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
   particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
 
@@ -161,24 +303,28 @@ export function applyPaddleExplosion(
   scoringDirection: 'left' | 'right',
   ballY: number,
   effectDelay: number,
+  camera: ArcRotateCamera | null | undefined,
   duration: number = 2000
 ): void {
-  const originalPosition = paddle.position.clone();
-
+  // First make the paddle explode into fragments
   setTimeout(() => {
     paddle.visibility = 0;
     const fragments = createPaddleFragments(scene, paddle, intensity);
     animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY, duration);
   }, effectDelay);
 
+  // After explosion completes, drop in a new paddle
   setTimeout(() => {
-    const gameWidth = defaultGameParams.dimensions.gameWidth;
-    const x: number = originalPosition.x < 0 ? 0 : gameWidth;
-    const y = defaultGameParams.dimensions.gameHeight / 2;
-
-    paddle.visibility = 1;
-    paddle.position.x = gameToSceneX(x, paddle);
-    paddle.position.y = gameToSceneY(y, paddle);
+    if (camera) {
+      animatePaddleAfterScore(
+        scene,
+        paddle,
+        camera,
+        scoringDirection,
+        defaultGameParams.dimensions.gameWidth,
+        defaultGameParams.dimensions.gameHeight
+      );
+    }
   }, duration);
 }
 
@@ -569,15 +715,34 @@ export function applyScoreEffects(
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
   scoredAgainstPaddle: Mesh,
+  ballMesh: Mesh,
   playerScore: number,
   ballSpeed: number,
   ball: Ball,
   primaryColor: Color3,
+  gameWidth: number = defaultGameParams.dimensions.gameWidth,
+  gameHeight: number = defaultGameParams.dimensions.gameHeight,
+  onAnimationComplete?: () => void, // Completion callback
   soundManagerRef?: GameSoundManager | null | undefined
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
+  const scoringPlayer: 'player1' | 'player2' = ballDirection === 'right' ? 'player2' : 'player1';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
   const effectDelay = calculateScoreEffectDelay(ballSpeed);
+
+  if (camera && ballMesh) {
+    animateBallAfterScore(
+      scene,
+      ballMesh,
+      ball,
+      camera,
+      scoringPlayer,
+      gameWidth,
+      gameHeight,
+      defaultGameParams.dimensions.scaleFactor,
+      onAnimationComplete
+    );
+  }
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
   applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
@@ -588,7 +753,9 @@ export function applyScoreEffects(
     intensityFactor,
     ballDirection,
     ball.y,
-    effectDelay
+    effectDelay,
+    camera,
+    2000
   );
 
   applyBallParticles(
@@ -601,11 +768,11 @@ export function applyScoreEffects(
     primaryColor
   );
 
-  // if (soundManagerRef) {
-  //   setTimeout(() => {
-  //     soundManagerRef.playScoreSound();
-  //   }, effectDelay);
-  // }
+  if (soundManagerRef) {
+    setTimeout(() => {
+      soundManagerRef.playScoreSound();
+    }, effectDelay);
+  }
 
   if (camera) {
     const shakeIntensity = 0.5 + intensityFactor * 1.0;
