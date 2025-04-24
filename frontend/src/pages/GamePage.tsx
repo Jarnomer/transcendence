@@ -4,7 +4,7 @@ import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { CountDown, PlayerScoreBoard } from '@components';
 
-import { useGameControls, useGameResult, useGameUser, useMatchmaking } from '@hooks';
+import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
@@ -17,10 +17,20 @@ import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 import { useGameVisibility } from '../hooks/useGameVisibility';
 
 export const GamePage: React.FC = () => {
-  const { gameState, gameStatus, connections, sendMessage } = useWebSocketContext();
-  const { gameId, mode, difficulty, tournamentOptions, resetGameOptions } = useGameOptionsContext();
-  const { loadingStates, setLoadingState } = useLoading();
+  const {
+    gameState,
+    gameStatus,
+    connections,
+    sendMessage,
+    closeConnection,
+    phase,
+    startGame,
+    startMatchMaking,
+  } = useWebSocketContext();
+  const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
+
+  const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
 
   const {
     hideBackgroundGame,
@@ -35,8 +45,9 @@ export const GamePage: React.FC = () => {
     console.log('GamePage mounted');
     console.log('mode: ', mode);
     console.log('difficulty: ', difficulty);
-    console.log('gameId: ', gameId);
+    console.log('gameId: ', phase.gameId);
     console.log('tournamentOptions', tournamentOptions);
+    console.log('lobby ', lobby);
 
     hideBackgroundGame();
 
@@ -55,22 +66,46 @@ export const GamePage: React.FC = () => {
     }
   }, [loading, gameStatus, gameState, connections.game, isGameCanvasVisible, showGameCanvas]);
 
-  const { userId, localPlayerId, remotePlayerId } = useGameUser();
-  useMatchmaking(userId);
-  const { gameResult } = useGameResult(userId);
-  useGameControls(localPlayerId, remotePlayerId);
+  useEffect(() => {
+    if (!phase.gameId) return;
+    console.log('connecting to game socket');
+    startGame();
+    return () => {
+      closeConnection('game');
+    };
+  }, [phase.gameId]);
+
+  useEffect(() => {
+    if (!lobby || !mode || !difficulty) return;
+    if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
+      startMatchMaking();
+    }
+  }, [lobby, mode, difficulty]);
+
+  useEffect(() => {
+    if (connections.game !== 'connected') return;
+    console.log('Game connected sending settings');
+    sendMessage('game', {
+      type: 'settings',
+      settings: gameSettings,
+    });
+  }, [connections.game, gameSettings]);
+
+  const localPlayerId = useGameControls();
+  const { gameResult } = useGameResult();
+
   const playersData = useFetchPlayerData();
 
   // Set loading to false to render the game
   useEffect(() => {
-    if (!gameId) return;
+    if (!phase.gameId) return;
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
       setLoading(false);
     }
-  }, [loadingStates, gameId]);
+  }, [loadingStates, phase.gameId]);
 
   useEffect(() => {
-    if (!gameId || !localPlayerId) return;
+    if (!phase.gameId || !localPlayerId) return;
 
     let isMounted = true; // Track if component is mounted
 
@@ -84,7 +119,7 @@ export const GamePage: React.FC = () => {
         isMounted = false;
       };
     }
-  }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
+  }, [loading, gameStatus, phase.gameId, localPlayerId, sendMessage, connections.game]);
 
   return (
     <div

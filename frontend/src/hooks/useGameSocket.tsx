@@ -49,5 +49,5 @@ export const useGameSocket = (
       gameSocket.removeEventListener('game_state', handleGameUpdate);
       gameSocket.removeEventListener('game_status', handleGameStatus);
     };
-  }, [gameSocket, dispatch]);
+  }, []);
 };

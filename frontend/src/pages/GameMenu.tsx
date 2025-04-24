@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -10,6 +10,7 @@ import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the Ga
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useSound } from '../hooks/useSound';
 
 interface GameMenuOption {
@@ -46,15 +47,10 @@ export const GameMenu: React.FC = () => {
   // const [selectedMode, setSelectedMode] = useState<string | null>(null);
   //const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null); // Track the selected difficulty
   const navigate = useNavigate(); // Hook to navigate to different routes
-  // const location = useLocation();
-  const { setMode, setDifficulty, difficulty, mode } = useGameOptionsContext(); // Destructure context functions
-  // const { lobby } = location.state || {};
+  const { setMode, setDifficulty, setLobby, resetGameOptions, difficulty, mode, queueId } =
+    useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
-  const {
-    setLobby,
-
-    resetGameOptions,
-  } = useGameOptionsContext();
+  const { phase, cancelGame, cancelQueue } = useWebSocketContext();
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
   const playGoBackSound = useSound('/sounds/effects/button_go_back.wav');
 
@@ -142,16 +138,44 @@ export const GameMenu: React.FC = () => {
   };
 
   useEffect(() => {
-    resetGameOptions();
     setLobby('create');
   }, []);
 
+  const [readyForNextEffect, setReadyForNextEffect] = useState(false);
+
   useEffect(() => {
+ 
+    const cancelQueueGame = async () => {
+      if (phase.gameId) {
+        await cancelGame();
+      } else if (queueId) {
+        await cancelQueue();
+      }
+    };
+
+    if (queueId || phase.gameId) {
+      const confirm = window.confirm('You are already in a game or queue. continue?');
+      if (confirm) {
+        navigate('/game');
+      } else {
+        cancelQueueGame();
+        resetGameOptions(); // <- sets mode/difficulty to null or default
+        setReadyForNextEffect(true); // <- signal second effect to proceed
+      }
+    } else {
+      // No queue/game, safe to proceed immediately
+      setReadyForNextEffect(true);
+    }
+  }, []);
+
+  // Effect that only runs after state is reset
+  useEffect(() => {
+    if (!readyForNextEffect) return;
+
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
-    }
-    if (mode && difficulty) {
+    } else if (mode && difficulty) {
       allowInternalNavigation();
       if (mode === '1v1' && difficulty === 'online') {
         setLobby('random');
@@ -159,10 +183,11 @@ export const GameMenu: React.FC = () => {
         setDifficulty('online');
         navigate('/game');
       } else {
+        console.log('Game options:', mode, difficulty);
         navigate('/gameOptions');
       }
     }
-  }, [mode, difficulty]);
+  }, [readyForNextEffect, mode, difficulty]);
 
   return (
     <AnimatePresence mode="wait">

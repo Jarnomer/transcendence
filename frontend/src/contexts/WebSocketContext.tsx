@@ -8,13 +8,14 @@ import {
   useState,
 } from 'react';
 
-import { GameEvent, GameState, GameStatus } from '@shared/types';
+import { GameEvent, GameOptionsType, GameState, GameStatus } from '@shared/types';
 
 import { useChatSocket } from '../hooks/useChatSocket';
 import { useGameSocket } from '../hooks/useGameSocket';
 import { useMatchmakingSocket } from '../hooks/useMatchmakingSocket';
 import WebSocketManager from '../services/webSocket/WebSocketManager';
 import webSocketReducer, { initialState } from '../services/webSocket/WebSocketReducer';
+import { useWebSocketStore } from '../services/webSocket/WebSocketStore';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 
@@ -34,6 +35,15 @@ interface WebSocketContextType {
   gameState: GameState | null;
   gameEvent: GameEvent;
   dispatch: React.Dispatch<any>;
+  setGameId: (gameId: string) => void;
+  cleanup: () => void;
+  phase: any;
+  startMatchMaking: () => void;
+  startGame: () => void;
+  startSpectating: (gameId: string) => void;
+  setGameOptions: (options: GameOptionsType) => void;
+  cancelGame: () => Promise<void>;
+  cancelQueue: () => Promise<void>;
 }
 
 // Create the context
@@ -44,6 +54,17 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const [chatSocket] = useState(() => WebSocketManager.getInstance('chat'));
   const [matchmakingSocket] = useState(() => WebSocketManager.getInstance('matchmaking'));
   const [state, dispatch] = useReducer(webSocketReducer, initialState);
+  const {
+    phase,
+    setGameId,
+    cleanup,
+    startMatchMaking,
+    startGame,
+    startSpectating,
+    setGameOptions,
+    cancelGame,
+    cancelQueue,
+  } = useWebSocketStore();
 
   // Send messages based on socket type
   const sendMessage = useCallback(
@@ -75,6 +96,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
       gameSocket.deleteInstance();
       chatSocket.deleteInstance();
       matchmakingSocket.deleteInstance();
+      cleanup();
     };
   }, []);
 
@@ -88,6 +110,15 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
         ...state,
         dispatch,
         closeConnection,
+        setGameId,
+        cleanup,
+        phase,
+        startMatchMaking,
+        startGame,
+        startSpectating,
+        setGameOptions,
+        cancelGame,
+        cancelQueue,
       }}
     >
       {children}

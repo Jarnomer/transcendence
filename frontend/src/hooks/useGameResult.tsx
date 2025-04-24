@@ -7,12 +7,15 @@ import { submitResult } from '@/services/gameService';
 
 import { GameState } from '@types';
 
+import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
-export const useGameResult = (userId: string | null) => {
+export const useGameResult = () => {
   const navigate = useNavigate();
-  const { resetGameOptions, gameId, mode } = useGameOptionsContext();
-  const { closeConnection, gameStatus, gameState, dispatch } = useWebSocketContext();
+  const { resetGameOptions, mode } = useGameOptionsContext();
+  const { closeConnection, gameStatus, gameState, dispatch, phase, setGameId, cleanup } =
+    useWebSocketContext();
+  const { userId } = useUser();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const userIdRef = useRef(userId);
@@ -27,9 +30,9 @@ export const useGameResult = (userId: string | null) => {
   }, [userId]);
 
   useEffect(() => {
-    if (!gameId) return;
-    gameIdRef.current = gameId;
-  }, [gameId]);
+    if (!phase.gameId) return;
+    gameIdRef.current = phase.gameId;
+  }, [phase.gameId]);
 
   useEffect(() => {
     if (!gameStatus) return;
@@ -64,7 +67,8 @@ export const useGameResult = (userId: string | null) => {
 
       setGameResult(result);
       dispatch({ type: 'GAME_RESET' });
-
+      cleanup();
+      resetGameOptions();
       if (mode !== 'tournamnet') {
         // navigate('/gameMenu');
       }
@@ -111,7 +115,8 @@ export const useGameResult = (userId: string | null) => {
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
-
+        cleanup();
+        resetGameOptions();
         if (mode !== 'tournamnet') {
           // navigate('/gameMenu');
         }
@@ -140,6 +145,8 @@ export const useGameResult = (userId: string | null) => {
         })
         .finally(() => {
           resetGameOptions();
+          setGameId('');
+          cleanup();
           if (mode !== 'tournamnet') {
             // navigate('/gameMenu');
           }

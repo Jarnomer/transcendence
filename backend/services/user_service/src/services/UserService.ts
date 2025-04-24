@@ -3,6 +3,7 @@ import { Database } from 'sqlite';
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
 import { UserModel } from '../models/UserModel';
+import { GameSettings } from '@shared/types';
 
 export class UserService {
   private userModel: UserModel;
@@ -105,4 +106,13 @@ export class UserService {
     }
     return res;
   }
+
+  async saveGameSettings(user_id: string, gameSettings: GameSettings) {
+    const res = await this.userModel.saveGameSettings(user_id, gameSettings);
+    if (!res) {
+      throw new BadRequestError('Could not save game settings');
+    }
+    return res;
+  }
+
 }

@@ -44,17 +44,15 @@ export class GameService {
    * Single player mode
    */
   async singlePlayer(user_id: string, difficulty: string) {
-    return await this.gameModel.runTransaction(async () => {
-      const data = await this.gameModel.getOngoingGame(user_id);
-      if (data.ongoing_games > 0) {
-        throw new BadRequestError('Game already exists');
-      }
-      const game = await this.gameModel.createGame(user_id, difficulty);
-      if (!game) {
-        throw new DatabaseError('Game not create');
-      }
-      return game;
-    });
+    const data = await this.gameModel.getOngoingGame(user_id);
+    if (data.ongoing_games > 0) {
+      throw new BadRequestError('Game already exists');
+    }
+    const game = await this.gameModel.createGame(user_id, difficulty);
+    if (!game) {
+      throw new DatabaseError('Game not create');
+    }
+    return game;
   }
 
   /**
@@ -83,6 +81,14 @@ export class GameService {
       throw new NotFoundError('Game not found');
     }
     return game;
+  }
+
+  async status(user_id: string) {
+    const games = await this.gameModel.getOngoingGame(user_id);
+    if (!games) {
+      throw new NotFoundError('Games not found');
+    }
+    return games;
   }
 
   async resultGame(
@@ -138,5 +144,13 @@ export class GameService {
       throw new NotFoundError('User not found');
     }
     return user;
+  }
+
+  async deleteGame(game_id: string) {
+    const res = await this.gameModel.deleteGame(game_id);
+    if (!res) {
+      throw new DatabaseError('Game not found');
+    }
+    return res;
   }
 }

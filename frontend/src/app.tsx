@@ -21,9 +21,9 @@ const App: React.FC = () => {
     <>
       <GameOptionsProvider>
         <Router>
-          {/* <div className="fixed"> */}
-          <BackgroundProvider />
-          {/* </div> */}
+          <div className="fixed">
+            <BackgroundProvider />
+          </div>
           <div
             id="app-main-container"
             className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full  text-primary md:p-2 `}

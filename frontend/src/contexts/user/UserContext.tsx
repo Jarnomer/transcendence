@@ -14,6 +14,7 @@ interface FriendRequest {
 }
 
 interface UserContextType {
+  userId: string | null;
   user: UserDataResponseType | null;
   setUser: React.Dispatch<React.SetStateAction<UserDataResponseType | null>>;
   sentRequests: FriendRequest[];
@@ -41,6 +42,7 @@ export const useUser = () => {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
+
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
@@ -120,6 +122,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <UserContext.Provider
       value={{
+        userId,
         user,
         setUser,
         sentRequests,

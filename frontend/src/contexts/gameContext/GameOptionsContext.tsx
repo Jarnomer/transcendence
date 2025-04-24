@@ -1,7 +1,11 @@
 // FlowContext.tsx
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-import { defaultGameSettings, GameSettings } from '@shared/types/gameTypes';
+import { defaultGameSettings, GameSettings, TournamentOptionsType } from '@shared/types/gameTypes';
+
+import { getGameSettings } from '../../services/userService';
+import { useUser } from '../user/UserContext';
+import { useWebSocketContext } from '../WebSocketContext';
 
 type GameOptionsContextType = {
   mode: string | null;
@@ -12,40 +16,55 @@ type GameOptionsContextType = {
   setLobby: React.Dispatch<React.SetStateAction<string | null>>;
   queueId: string | null;
   setQueueId: React.Dispatch<React.SetStateAction<string | null>>;
-  gameId: string | null;
-  setGameId: React.Dispatch<React.SetStateAction<string | null>>;
   resetGameOptions: () => void;
   tournamentOptions: TournamentOptionsType | null;
   setTournamentOptions: React.Dispatch<React.SetStateAction<TournamentOptionsType | null>>;
   gameSettings: GameSettings;
   setGameSettings: React.Dispatch<React.SetStateAction<GameSettings>>;
-};
-
-export type TournamentOptionsType = {
-  playerCount: number;
-  tournamentName: string;
-  isPrivate: boolean;
-  password: string | null;
-};
-
-export type GameOptionsType = {
-  mode: string;
-  difficulty: string;
-  lobby: string;
-  queueId: string | null;
-  tournamentOptions: TournamentOptionsType | null;
+  confirmGame: boolean;
+  setConfirmGame: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const GameOptionsContext = createContext<GameOptionsContextType | undefined>(undefined);
 
 export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
+  const [lobby, setLobby] = useState<string | null>(null);
   const [mode, setMode] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<string | null>(null);
-  const [lobby, setLobby] = useState<string | null>(null);
-  const [queueId, setQueueId] = useState<string | null>(null);
-  const [gameId, setGameId] = useState<string | null>(null);
   const [tournamentOptions, setTournamentOptions] = useState<TournamentOptionsType | null>(null);
+  const [queueId, setQueueId] = useState<string | null>(null);
   const [gameSettings, setGameSettings] = useState<GameSettings>(defaultGameSettings);
+  const [confirmGame, setConfirmGame] = useState(false);
+  const { setGameOptions, cleanup } = useWebSocketContext();
+  const { userId } = useUser();
+  // const [gameId, setGameId] = useState<string | null>(null);
+  // const [matchmakingOptions, setMatchmakingOptions] = useState<MatchmakingOptionsType | null>(null);
+
+  useEffect(() => {
+    console.log('GameOptionsContext mounted');
+    console.log('mode: ', mode);
+    console.log('difficulty: ', difficulty);
+    console.log('lobby: ', lobby);
+    console.log('queueId: ', queueId);
+  }, [mode, difficulty, lobby, queueId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    console.info('Fetching game settings on mount');
+    getGameSettings()
+      .then((res) => {
+        if (res && Object.keys(res).length > 0) {
+          console.info('Game settings fetched successfully:', res);
+          setGameSettings(res);
+        } else {
+          console.warn('No game settings found, using default settings');
+          setGameSettings(defaultGameSettings);
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching game settings:', err);
+      });
+  }, [userId]);
 
   useEffect(() => {
     if (mode && difficulty) {
@@ -55,16 +74,29 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
         difficulty: difficulty as 'easy' | 'normal' | 'brutal' | 'local' | 'online',
       }));
     }
-  }, [mode, difficulty, lobby]);
+  }, [mode, difficulty]);
+
+  useEffect(() => {
+    if (!mode || !difficulty || !lobby) return;
+    setGameOptions({
+      mode: mode,
+      difficulty: difficulty,
+      queueId: queueId ? queueId : '',
+      lobby: lobby,
+      tournamentOptions: tournamentOptions,
+    });
+  }, [mode, difficulty, lobby, queueId, tournamentOptions]);
 
   const resetGameOptions = () => {
     setMode(null);
     setDifficulty(null);
-    setLobby(null);
+    setLobby('create');
     setQueueId(null);
-    setGameId(null);
     setTournamentOptions(null);
+    setConfirmGame(false);
+    cleanup();
   };
+
   return (
     <GameOptionsContext.Provider
       value={{
@@ -76,13 +108,13 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
         setLobby,
         queueId,
         setQueueId,
-        gameId,
-        setGameId,
         resetGameOptions,
         tournamentOptions,
         setTournamentOptions,
         gameSettings,
         setGameSettings,
+        confirmGame,
+        setConfirmGame,
       }}
     >
       {children}

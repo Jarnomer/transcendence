@@ -1,5 +1,7 @@
 class WebSocketManager {
   private static instances: Record<string, WebSocketManager> = {};
+  private queue: any[] = [];
+
   private ws: WebSocket | null = null;
   private url: string;
   private reconnectAttempts = 0;
@@ -13,6 +15,8 @@ class WebSocketManager {
 
   private constructor(type: string) {
     this.url = `wss://${window.location.host}/ws/${type}/`;
+    this.authParams.set('user_id', localStorage.getItem('userID') || '');
+    this.authParams.set('token', localStorage.getItem('token') || '');
   }
 
   static getInstance(type: string): WebSocketManager {
@@ -28,17 +32,19 @@ class WebSocketManager {
     });
   }
 
-  connect(params: URLSearchParams = this.authParams) {
+  connect(params: URLSearchParams = new URLSearchParams()) {
     if (this.ws) {
       console.log('Closing existing WebSocket:', this.url);
       this.ws.close();
     }
     this.params = params;
+    console.log(`params before connection: ${params.toString()}`);
     console.log('Connecting to WebSocket:', this.url + `?${params.toString()}`);
-    this.ws = new WebSocket(`${this.url}?${this.authParams}${params.toString()}`);
+    this.ws = new WebSocket(`${this.url}?${this.authParams}&${params.toString()}`);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected:', this.url);
+      this.flushQueue();
       this.reconnectAttempts = 0;
       this.notifyHandlers('open', null);
     };
@@ -65,6 +71,12 @@ class WebSocketManager {
       this.notifyHandlers('error', error);
     };
 
+    this.ws.onping = () => {
+      console.log('WebSocket ping received:', this.url);
+      this.ws?.pong();
+      this.notifyHandlers('pong', null);
+    };
+
     /**
      * This function is called whenever a message is received from the WebSocket server.
      * It parses the message and notifies the event handlers.
@@ -80,11 +92,22 @@ class WebSocketManager {
           this.notifyHandlers(data.type, data.state);
         } else {
           console.warn('Received invalid WebSocket message:', data);
+          this.queue.push(data);
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
       }
     };
+  }
+
+  flushQueue() {
+    if (this.queue.length > 0) {
+      console.log('Flushing WebSocket queue:', this.queue);
+      this.queue.forEach((data) => {
+        this.notifyHandlers(data.type, data.state);
+      });
+      this.queue = [];
+    }
   }
 
   reset() {

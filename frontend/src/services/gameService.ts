@@ -5,7 +5,7 @@ import {
   GameResultResType,
   GameSinglePlayerResType,
   QueueStatusResType,
-} from '@types';
+} from '@shared/types';
 
 import { api } from './api';
 
@@ -27,6 +27,28 @@ export async function createQueue(options: CreateQueueParams) {
     return res.data;
   } catch (err) {
     console.error('Failed to join game:', err);
+    throw err;
+  }
+}
+
+export async function getStatusQueue() {
+  try {
+    const res = await api.get<QueueStatusResType>(`/matchmaking/status`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get queue status:', err);
+    throw err;
+  }
+}
+
+export async function getStatusGame() {
+  try {
+    const res = await api.get(`/game/status`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get game status:', err);
     throw err;
   }
 }
@@ -130,6 +152,17 @@ export async function submitResult({
     return res.data;
   } catch (err) {
     console.error('Failed to submit result:', err);
+    throw err;
+  }
+}
+
+export async function deleteGame(game_id: string) {
+  try {
+    const res = await api.delete<GameResultResType>(`/game/delete/${game_id}`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to delete game:', err);
     throw err;
   }
 }

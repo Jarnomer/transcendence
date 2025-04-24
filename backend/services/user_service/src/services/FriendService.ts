@@ -1,6 +1,6 @@
 import { Database } from 'sqlite';
 
-import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError } from '@my-backend/main_server/src/middlewares/errors';
 
 import { FriendModel } from '../models/FriendModel';
 
@@ -20,18 +20,16 @@ export class FriendService {
   }
 
   async sendFriendRequest(user_id: string, receiver_id: string) {
-    return await this.friendModel.runTransaction(async () => {
-      const requestPair = await this.friendModel.getRequestPairAccepted(user_id, receiver_id);
-      if (requestPair) {
-        throw new BadRequestError('Friend request already exists');
-      }
-      const res = await this.friendModel.sendFriendRequest(user_id, receiver_id);
-      if (!res) {
-        throw new BadRequestError('Could not send friend request');
-      }
+    const requestPair = await this.friendModel.getRequestPairAccepted(user_id, receiver_id);
+    if (requestPair) {
+      throw new BadRequestError('Friend request already exists');
+    }
+    const res = await this.friendModel.sendFriendRequest(user_id, receiver_id);
+    if (!res) {
+      throw new BadRequestError('Could not send friend request');
+    }
 
-      return res;
-    });
+    return res;
   }
 
   async getSentFriendRequests(user_id: string) {

@@ -6,6 +6,8 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import '@fastify/jwt';
 
+import { GameSettings } from '@shared/types';
+
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
 import { UserService } from '../services/UserService';
@@ -189,5 +191,27 @@ export class UserController {
       throw new NotFoundError('Notification not found');
     }
     reply.code(200).send(notification);
+  }
+
+  async saveGameSettings(request: FastifyRequest, reply: FastifyReply) {
+    const settings = request.body as GameSettings;
+    console.log(request.body);
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Saving game settings for user ${user_id}`);
+    request.log.trace(`Settings ${settings}`);
+    request.log.trace(`Settings ${JSON.stringify(settings)}`);
+    await this.userService.saveGameSettings(user_id, settings);
+    reply.code(200).send({ status: 'saved' });
+  }
+
+  async getGameSettings(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting game settings for user ${user_id}`);
+    const user = await this.userService.getUserByID(user_id);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+    const gameSettings = user.game_settings;
+    reply.code(200).send(gameSettings);
   }
 }

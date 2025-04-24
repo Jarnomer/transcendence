@@ -18,17 +18,17 @@ export class GameModel {
     return GameModel.instance;
   }
 
-  async runTransaction(callback: (db: Database) => Promise<any>) {
-    try {
-      await this.db.run('BEGIN TRANSACTION'); // Start transaction
-      const result = await callback(this.db); // Run the transaction logic
-      await this.db.run('COMMIT'); // Commit transaction if successful
-      return result;
-    } catch (error) {
-      await this.db.run('ROLLBACK'); // Rollback transaction on error
-      throw error; // Rethrow error for handling
-    }
-  }
+  // async runTransaction(callback: (db: Database) => Promise<any>) {
+  //   try {
+  //     await this.db.run('BEGIN TRANSACTION'); // Start transaction
+  //     const result = await callback(this.db); // Run the transaction logic
+  //     await this.db.run('COMMIT'); // Commit transaction if successful
+  //     return result;
+  //   } catch (error) {
+  //     await this.db.run('ROLLBACK'); // Rollback transaction on error
+  //     throw error; // Rethrow error for handling
+  //   }
+  // }
 
   /**
    *
@@ -167,5 +167,14 @@ export class GameModel {
 
   async getPlayerElo(user_id: string) {
     return await this.db.get('SELECT elo FROM user_stats WHERE user_id = ?', [user_id]);
+  }
+
+  async deleteGame(game_id: string) {
+    const game = await this.db.get('SELECT * FROM games WHERE game_id = ?', [game_id]);
+    if (!game) {
+      return null;
+    }
+    await this.db.run('DELETE FROM games WHERE game_id = ?', [game_id]);
+    return game;
   }
 }

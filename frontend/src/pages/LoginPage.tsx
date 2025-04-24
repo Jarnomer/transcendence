@@ -26,7 +26,7 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, setUser, refetchUser, checkAuth, logout, setToken } = useUser();
-  const { chatSocket } = useWebSocketContext();
+  const { chatSocket, gameSocket, matchmakingSocket } = useWebSocketContext();
 
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState<string>('');
@@ -64,6 +64,8 @@ export const LoginPage: React.FC = () => {
         const userId = localStorage.getItem('userID');
         const param = new URLSearchParams({ token: token.token, user_id: userId! });
         chatSocket.setAuthParams(param);
+        gameSocket.setAuthParams(param);
+        matchmakingSocket.setAuthParams(param);
         chatSocket.connect();
         // setToken(token.token); // Update the token in the context
         if (isRegistering) {

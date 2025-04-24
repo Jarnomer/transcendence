@@ -69,4 +69,6 @@ export async function userRoutes(fastify: FastifyInstance) {
     '/notification/seen/:notification_id',
     userController.markNotificationAsSeen.bind(userController)
   );
+  fastify.post('/saveGameSettings', userController.saveGameSettings.bind(userController));
+  fastify.get('/getGameSettings', userController.getGameSettings.bind(userController));
 }

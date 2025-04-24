@@ -1,5 +1,7 @@
 import { Database } from 'sqlite';
 
+import { GameSettings } from '@shared/types';
+
 import { queryWithJsonParsingObject } from '../../../utils/utils';
 
 export class UserModel {
@@ -17,17 +19,17 @@ export class UserModel {
     return UserModel.instance;
   }
 
-  async runTransaction(callback: (db: Database) => Promise<any>) {
-    try {
-      await this.db.run('BEGIN TRANSACTION'); // Start transaction
-      const result = await callback(this.db); // Run the transaction logic
-      await this.db.run('COMMIT'); // Commit transaction if successful
-      return result;
-    } catch (error) {
-      await this.db.run('ROLLBACK'); // Rollback transaction on error
-      throw error; // Rethrow error for handling
-    }
-  }
+  // async runTransaction(callback: (db: Database) => Promise<any>) {
+  //   try {
+  //     await this.db.run('BEGIN TRANSACTION'); // Start transaction
+  //     const result = await callback(this.db); // Run the transaction logic
+  //     await this.db.run('COMMIT'); // Commit transaction if successful
+  //     return result;
+  //   } catch (error) {
+  //     await this.db.run('ROLLBACK'); // Rollback transaction on error
+  //     throw error; // Rethrow error for handling
+  //   }
+  // }
 
   async createUser(user_id: string) {
     // const profile_id = uuidv4();
@@ -206,6 +208,25 @@ export class UserModel {
     return await this.db.get(
       `UPDATE notifications SET seen = 1 WHERE notification_id = ? RETURNING *`,
       [notification_id]
+    );
+  }
+
+  // maxScore: 5,
+  // ballSpeed: 7,
+  // enableSpin: true,
+  // enablePowerUps: true,
+  // powerUpTypes: {
+  //   [PowerUpType.BiggerPaddle]: true,
+  //   [PowerUpType.SmallerPaddle]: true,
+  //   [PowerUpType.FasterPaddle]: true,
+  //   [PowerUpType.SlowerPaddle]: true,
+  //   [PowerUpType.MoreSpin]: true,
+  // },
+  async saveGameSettings(user_id: string, settings: GameSettings) {
+    const settingsString = JSON.stringify(settings);
+    return await this.db.get(
+      `UPDATE user_profiles SET game_settings = ? WHERE user_id = ? RETURNING *`,
+      [settingsString, user_id]
     );
   }
 }

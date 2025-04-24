@@ -14,7 +14,6 @@ import {
   GameSinglePlayerReqType,
   GameSinglePlayerResSchema,
   GameSinglePlayerResType,
-  UserIdSchema,
   UserIdType,
 } from '@shared/types';
 
@@ -56,4 +55,7 @@ export async function gameRoutes(fastify: FastifyInstance) {
     },
     gameController.singlePlayer.bind(gameController)
   );
+
+  fastify.delete('/delete/:game_id', gameController.deleteGame.bind(gameController));
+  fastify.get('/status', gameController.status.bind(gameController));
 }

@@ -29,9 +29,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [myRooms, setMyRooms] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [openChatWindows, setOpenChatWindows] = useState<Record<string, boolean>>({});
-  const playMessageSound = useSound('/sounds/effects/message.wav');
+  // const playMessageSound = useSound('/sounds/effects/message.wav');
 
   const roomIdRef = useRef(roomId);
+
+  useEffect(() => {
+    console.log('ChatProvider mounted');
+    return () => {
+      console.log('ChatProvider unmounted');
+    };
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -45,7 +52,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchDmHistory = async (friendId: string) => {
     try {
-      const data = await getDm(friendId);
+      const data = (await getDm(friendId)) as any;
+      console.log('Fetched DM history:', data);
       setMessages((prev) => ({
         ...prev,
         [friendId]: data,
@@ -58,7 +66,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchChatHistory = async (roomId: string) => {
     try {
-      const data = await getChat(roomId);
+      const data = (await getChat(roomId)) as any;
+      console.log('Fetched chat history:', data);
       setMessages((prev) => ({
         ...prev,
         [roomId]: data,
@@ -85,7 +94,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isCurrentRoom || openChatWindows[event.sender_id]) return;
 
-    playMessageSound();
+    // playMessageSound();
     toast.custom((t) => (
       <MessageNotification>
         <div

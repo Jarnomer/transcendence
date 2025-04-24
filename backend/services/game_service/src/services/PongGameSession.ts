@@ -1,11 +1,11 @@
 import { isPlayerInputMessage } from '@shared/messages';
 import { isGameSettingsMessage } from '@shared/messages/gameSettingsMessage';
-import { GameStatus, GameSettings, defaultGameSettings } from '@shared/types';
+import { GameSettings, GameStatus, defaultGameSettings } from '@shared/types';
 
-import PongGame from './PongGame';
 import { AIController } from '../controllers/AIController';
 import { handleGameSettingsMessage } from '../handlers/gameSettingsHandler';
 import { handlePlayerInputMessage } from '../handlers/playerInputHandler';
+import PongGame from './PongGame';
 
 export default class PongGameSession {
   private gameId: string;

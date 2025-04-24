@@ -1,5 +1,6 @@
-import { GameOptionsType } from '../contexts/gameContext/GameOptionsContext';
-import { cancelQueue, createQueue, joinQueue, singlePlayer } from './gameService';
+import { GameOptionsType } from '@shared/types/gameTypes';
+
+import { cancelQueue, createQueue, deleteGame, joinQueue, singlePlayer } from './gameService';
 
 // Step 1: Define Game States
 export enum MatchMakerState {
@@ -122,7 +123,6 @@ class TournamentGame extends GameMode {
   async findMatch() {
     console.log('Finding tournament game...');
     if (this.lobby === 'create') {
-      console.log('Creating tournament game...');
       await this.createGame();
     } else if (this.lobby === 'join' && this.queueId) {
       console.log('Joining tournament game...');
@@ -176,21 +176,15 @@ class GameFactory {
   }
 }
 
-// Step 5: Implement the Game Manager with a State Machine
 class MatchMaker {
   private state: MatchMakerState = MatchMakerState.SEARCHING;
   private gameMode: GameMode;
   private gameId: string | null = null;
   private queueId: string | null = null;
-  private mode: string;
-  private difficulty: string;
-  private lobby: string;
+  private options: GameOptionsType;
   constructor(options: GameOptionsType) {
-    const { mode, difficulty, lobby } = options;
-    this.mode = mode;
-    this.difficulty = difficulty;
-    this.lobby = lobby;
     this.gameMode = GameFactory.createMode(this, options);
+    this.options = options;
   }
 
   getGameId(): string | null {
@@ -222,13 +216,53 @@ class MatchMaker {
     await this.gameMode.findMatch();
   }
 
+  async leaveQueue() {
+    console.log('Leaving queue...');
+    if (this.state === MatchMakerState.WAITING_FOR_PLAYERS) {
+      console.log('Leaving queue...');
+      cancelQueue()
+        .then(() => {
+          console.log('Queue left');
+          this.state = MatchMakerState.SEARCHING;
+          this.gameId = null;
+          this.queueId = null;
+        })
+        .catch((err) => {
+          console.error('Error leaving queue:', err);
+        });
+    }
+  }
+
   stopMatchMake() {
     console.log('Game stopped');
     if (this.state === MatchMakerState.WAITING_FOR_PLAYERS) {
-      console.log('Cancelling queue...');
-      cancelQueue();
-      this.state = MatchMakerState.SEARCHING;
-      this.gameId = null;
+      cancelQueue()
+        .then(() => {
+          console.log('Queue cancelled');
+        })
+        .catch((err) => {
+          console.error('Error cancelling queue:', err);
+        })
+        .finally(() => {
+          this.state = MatchMakerState.SEARCHING;
+          this.gameId = null;
+          this.queueId = null;
+        });
+    }
+    if (this.state === MatchMakerState.MATCHED && this.gameId) {
+      console.log('Deleting game...');
+      deleteGame(this.gameId)
+        .then(() => {
+          console.log('Game deleted');
+        })
+        .catch((err) => {
+          console.error('Error deleting game:', err);
+        })
+        .finally(() => {
+          this.state = MatchMakerState.SEARCHING;
+          this.gameId = null;
+          this.queueId = null;
+        });
     }
   }
 }

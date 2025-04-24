@@ -1,6 +1,7 @@
 import {
   AllResponseRankType,
   AllResponseType,
+  GameSettings,
   QueueResType,
   UserDataResponseType,
   UserNotificationType,
@@ -150,6 +151,33 @@ export async function updateUser(data: Partial<UpdateUserType>) {
     return res.data;
   } catch (err) {
     console.error('Failed to update user:', err);
+    throw err;
+  }
+}
+
+export async function saveGameSettings(settings: GameSettings) {
+  try {
+    delete settings.mode;
+    delete settings.difficulty;
+    console.log('Saving game settings for user:', settings);
+    const res = await api.post(`/user/saveGameSettings`, settings);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to save game settings:', err);
+    throw err;
+  }
+}
+
+export async function getGameSettings() {
+  try {
+    const res = await api.get<GameSettings>(`/user/getGameSettings`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch game settings`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get game settings:', err);
     throw err;
   }
 }

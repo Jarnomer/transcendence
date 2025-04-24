@@ -19,13 +19,16 @@ export class MatchmakingController {
   }
 
   async matchmake(ws: WebSocket, req: FastifyRequest) {
-    const { user_id, mode, difficulty } = req.query as {
+    const { user_id, mode, queue_id } = req.query as {
       user_id: string;
       mode: string;
-      difficulty: string;
+      queue_id: string;
     };
     console.log(`Matchmaking for ${user_id} in ${mode} mode`);
     this.matchmakingService.addClient(user_id, ws);
+    queue_id
+      ? this.matchmakingService.joinQueue(user_id, queue_id, mode)
+      : this.matchmakingService.findMatch(user_id, mode);
     ws.on('close', () => {
       this.matchmakingService.removePlayerFromQueue(user_id, mode);
       this.matchmakingService.deleteClient(user_id);

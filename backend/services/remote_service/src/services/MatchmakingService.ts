@@ -297,6 +297,10 @@ class TournamentMatchmaking extends MatchmakingMode {
     const winner = session.nextRoundPlayers[0];
     if (winner) {
       console.log(`Tournament ${session.name} won by ${winner.user_id}`);
+      this.matchmaking.broadcast([winner.user_id], {
+        type: 'tournament_winner',
+        state: { tournament_id: tournamentId, winner_id: winner.user_id },
+      });
       // Save winner to DB, notify all participants
     }
     this.tournaments.delete(tournamentId);
