@@ -53,16 +53,16 @@ export const useGameResult = (userId: string | null) => {
       const playerArray = [players.player1, players.player2];
       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
       const loserIndex = winnerIndex === 0 ? 1 : 0;
-      const result = {
-        game_id: gameIdRef.current,
-        winner_id: playerArray[winnerIndex].id,
-        loser_id: playerArray[loserIndex].id,
-        winner_score: playerArray[winnerIndex].score,
-        loser_score: playerArray[loserIndex].score,
-        game_mode: mode,
-      };
+      // const result = {
+      //   game_id: gameIdRef.current,
+      //   winner_id: playerArray[winnerIndex].id,
+      //   loser_id: playerArray[loserIndex].id,
+      //   winner_score: playerArray[winnerIndex].score,
+      //   loser_score: playerArray[loserIndex].score,
+      //   game_mode: mode,
+      // };
 
-      setGameResult(result);
+      // setGameResult(result);
       dispatch({ type: 'GAME_RESET' });
 
       if (mode !== 'tournamnet') {
@@ -146,7 +146,6 @@ export const useGameResult = (userId: string | null) => {
         });
     };
   }, []);
-  return { gameResult };
 };
 
 export default useGameResult;
