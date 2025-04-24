@@ -67,7 +67,7 @@ const Round: React.FC<{
   );
 };
 
-const TournamentBracket: React.FC = ({ players }) => {
+export const TournamentBracket: React.FC = ({ players }) => {
   // Create rounds based on number of players
   const generateRounds = (initialPlayers: string[]) => {
     const rounds = [];

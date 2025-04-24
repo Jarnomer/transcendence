@@ -1,201 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
-import { useNavigate } from 'react-router-dom';
-
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { GameOptions } from '../components/gameOptions/GameOptions';
-import TournamentBracket from '../components/tournamentPage/TournamentBracket';
-import { ListSvgContainer } from '../components/visual/svg/containers/ListSvgContainer';
+import {
+  slideFromLeftVariants,
+  slideFromRightVariants,
+} from '../components/tournamentLobby/animationVariants';
+import { Spectate } from '../components/tournamentLobby/Spectate';
+import { TournamentLobbyNav } from '../components/tournamentLobby/TournamentLobbyNav';
+import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
+import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
-
-export const slideFromLeftVariants = {
-  initial: {
-    x: '-100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '-100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
-
-export const slideFromRightVariants = {
-  initial: {
-    x: '100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
-
-export const SpectateSmallCanvas: React.FC = () => {
-  return (
-    <>
-      <p>asd vs asd 0 - 0</p>
-      <img src="images/gameplay.gif" className="glass-box"></img>
-    </>
-  );
-};
-
-type Props = {
-  players: string[]; // or whatever type your players are
-};
-
-export const SpectateMatchesList: React.FC<Props> = ({ players }) => {
-  if (!players) return;
-  const matchCount = Math.floor(players.length / 2); // one match = two players
-
-  return (
-    <div className="h-full w-full flex items-center justify-center">
-      <motion.ul className="p-2  flex flex-wrap gap-2 justify-start items-center">
-        {Array.from({ length: matchCount }).map((_, index) => (
-          <li key={index} className="w-[300px] h-[200px] hover:text-secondary">
-            <SpectateSmallCanvas />
-          </li>
-        ))}
-      </motion.ul>
-    </div>
-  );
-};
-
-export const Spectate: React.FC<Props> = ({ players }) => {
-  const [selectedMatch, setSelectedMatch] = useState(null);
-
-  if (!selectedMatch) {
-    return <SpectateMatchesList players={players}></SpectateMatchesList>;
-  }
-  return <></>;
-};
-
-export const TournamentLobbyNav: React.FC<{
-  activeTab: string;
-  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
-}> = ({ activeTab, setActiveTab }) => {
-  const navigate = useNavigate();
-  const { setLobby, setDifficulty, setMode, resetGameOptions } = useGameOptionsContext();
-
-  return (
-    <motion.div
-      id="home-page-nav"
-      className="flex relative overflow-hidden p-0 items-center text-lg gap-3 md:gap-6"
-      layout
-      transition={{ duration: 0.4, ease: 'easeInOut' }}
-    >
-      <span className="relative p-0 flex gap-4">
-        <button
-          className={`btn btn-primary ${activeTab === 'settings' ? ' text-secondary' : ''}`}
-          onClick={() => setActiveTab('settings')}
-        >
-          Settings
-        </button>
-
-        <button onClick={() => setActiveTab('players')}>
-          <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
-        </button>
-
-        <button onClick={() => setActiveTab('matches')}>
-          <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
-        </button>
-      </span>
-    </motion.div>
-  );
-};
-
-export const TournamentSettings: React.FC = () => {
-  return <GameOptions></GameOptions>;
-};
-
-export const TournamentPlayerList: React.FC = () => {
-  return (
-    <div className="h-full w-full">
-      <motion.ul className="p-2 w-full h-full flex flex-col justify-items-start gap-2 overflow-y-scroll">
-        <motion.li
-          className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.02] p-1 hover:text-secondary"
-          // onClick={() => navigate(`/profile/${user.user_id}`)}
-        >
-          <ListSvgContainer>
-            <div className="flex items-center gap-2">
-              <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
-                <img
-                  className="object-cover w-full h-full"
-                  src={'./src/assets/images/default_avatar.png'}
-                  alt={`users's profile picture`}
-                />
-              </div>
-              <p className="text-xs">
-                dummy user <br />
-              </p>
-            </div>
-          </ListSvgContainer>
-        </motion.li>
-      </motion.ul>
-    </div>
-  );
-};
-
-export const TournamentMatchList: React.FC = ({ players }) => {
-  const [activeTab, setActiveTab] = useState('bracket');
-
-  return (
-    <motion.div>
-      <div className="flex gap-3">
-        <button className="text-xs hover:text-secondary" onClick={() => setActiveTab('bracket')}>
-          bracket
-        </button>
-        <button className="text-xs hover:text-secondary" onClick={() => setActiveTab('list')}>
-          list
-        </button>
-      </div>
-      <motion.div
-        key="tournamentBracket"
-        className="w-full h-full "
-        variants={slideFromRightVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        {activeTab == 'bracket' ? (
-          <TournamentBracket players={players}></TournamentBracket>
-        ) : (
-          <>
-            <h1>not implemented :)</h1>
-          </>
-        )}
-      </motion.div>
-    </motion.div>
-  );
-};
 
 export const TournamentLobby: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('settings');
@@ -207,26 +23,22 @@ export const TournamentLobby: React.FC = () => {
   const { createRoom } = useChatContext();
 
   // useEffect(() => {
-  //   setPlayers([user?.user_id]);
+  //   if (!user) return;
+
+  //   const setupChat = async () => {
+  //     console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
+  //     const chatId = await createRoom(
+  //       'tournamentChat_' + Math.floor(Math.random() * 50),
+  //       true,
+  //       null
+  //     );
+  //     if (chatId) {
+  //       setTournamentChatId(chatId);
+  //     }
+  //   };
+
+  //   setupChat();
   // }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const setupChat = async () => {
-      console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
-      const chatId = await createRoom(
-        'tournamentChat_' + Math.floor(Math.random() * 50),
-        true,
-        null
-      );
-      if (chatId) {
-        setTournamentChatId(chatId);
-      }
-    };
-
-    setupChat();
-  }, [user]);
 
   useEffect(() => {}, [tournamentChatId]);
 
@@ -262,7 +74,7 @@ export const TournamentLobby: React.FC = () => {
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
               ) : activeTab == 'players' ? (
-                <TournamentMatchList players={players}></TournamentMatchList>
+                <TournamentPlayerList players={players}></TournamentPlayerList>
               ) : (
                 <motion.div
                   key="tournamentPlayerList"
