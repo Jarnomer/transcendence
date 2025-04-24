@@ -493,10 +493,10 @@ export function applyCollisionEffects(
 
   if (collisionType === 'dx') {
     applyPaddleRecoil(paddleMesh, speedFactor, scene);
-    if (soundManagerRef && applyGlitch) soundManagerRef.playPaddleSound();
+    // if (soundManagerRef && applyGlitch) soundManagerRef.playPaddleSound();
   } else if (collisionType === 'dy') {
     applyEdgeDeformEffect(edgeMesh, ballMesh, speedFactor, spinFactor, scene);
-    if (soundManagerRef && applyGlitch) soundManagerRef.playEdgeSound();
+    // if (soundManagerRef && applyGlitch) soundManagerRef.playEdgeSound();
   }
 
   if (retroEffectsRef && applyGlitch) {

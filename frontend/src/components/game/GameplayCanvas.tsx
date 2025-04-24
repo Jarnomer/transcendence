@@ -79,7 +79,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
-  const soundManagerRef = useRef<GameSoundManager>(null);
+  // const soundManagerRef = useRef<GameSoundManager>(null);
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
@@ -202,7 +202,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const bgColor = parseColor('#33353e');
     scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
-    soundManagerRef.current = getGameSoundManager();
+    // soundManagerRef.current = getGameSoundManager();
 
     const camera = setupSceneCamera(scene);
 
@@ -259,14 +259,14 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       colors.primaryColor,
       colors.secondaryColor,
       defaultGameParams.powerUps.size,
-      soundManagerRef.current
+      null
     );
 
     powerUpIconsRef.current = new ActivePowerUpIconManager(
       scene,
       colors.primaryColor,
       colors.secondaryColor,
-      soundManagerRef.current
+      null
     );
 
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
@@ -356,7 +356,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
         ball.spin,
         primaryColor,
         true,
-        soundManagerRef.current
+        null
       );
     }
 
@@ -386,7 +386,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
         speed,
         ball,
         primaryColor,
-        soundManagerRef.current
+        null
       );
     }
 

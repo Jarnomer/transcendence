@@ -578,7 +578,6 @@ export function applyScoreEffects(
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
   const effectDelay = calculateScoreEffectDelay(ballSpeed);
-  const volumeFactor = intensityFactor * 1.2;
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
   applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
@@ -602,11 +601,11 @@ export function applyScoreEffects(
     primaryColor
   );
 
-  if (soundManagerRef) {
-    setTimeout(() => {
-      soundManagerRef.playScoreSound(volumeFactor);
-    }, effectDelay);
-  }
+  // if (soundManagerRef) {
+  //   setTimeout(() => {
+  //     soundManagerRef.playScoreSound();
+  //   }, effectDelay);
+  // }
 
   if (camera) {
     const shakeIntensity = 0.5 + intensityFactor * 1.0;
