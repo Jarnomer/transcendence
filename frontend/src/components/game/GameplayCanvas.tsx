@@ -16,8 +16,9 @@ import {
 
 import {
   GameSoundManager,
-  PowerUpEffectsManager,
   RetroEffectsManager,
+  PowerUpEffectsManager,
+  ActivePowerUpIconManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -89,6 +90,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
   const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
+  const powerUpIconsRef = useRef<ActivePowerUpIconManager | null>(null);
   const prevPowerUpsRef = useRef<PowerUp[]>([]);
 
   const floorRef = useRef<Mesh | null>(null);
@@ -260,6 +262,13 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       soundManagerRef.current
     );
 
+    powerUpIconsRef.current = new ActivePowerUpIconManager(
+      scene,
+      colors.primaryColor,
+      colors.secondaryColor,
+      soundManagerRef.current
+    );
+
     sparkEffectsRef.current = ballSparkEffect(ballRef.current, primaryColor, scene, 0, 0);
 
     engine.runRenderLoop(() => {
@@ -275,6 +284,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       if (powerUpEffectsRef.current) powerUpEffectsRef.current.disposeAll();
+      if (powerUpIconsRef.current) powerUpIconsRef.current.disposeAll();
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
       engine.dispose();
@@ -314,18 +324,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
-
-    // Convert coordinates to Babylon coordinate system
-    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
-    player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
-    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
-    player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
-
-    // Only update ball position if not in custom animation
-    if (!isAnimatingBallRef.current) {
-      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
-      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
-    }
 
     // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
@@ -402,6 +400,23 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       secondaryColor,
       playerEffectsMapRef.current
     );
+
+    if (powerUpIconsRef.current) {
+      powerUpIconsRef.current.updatePowerUpDisplays({
+        player1: gameState.players.player1,
+        player2: gameState.players.player2,
+      });
+    }
+
+    // Convert coordinates and update position if not animating
+    if (!isAnimatingBallRef.current) {
+      player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+      player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
+      player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+      player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
+      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
+    }
 
     prevBallState.current = {
       x: ball.x,

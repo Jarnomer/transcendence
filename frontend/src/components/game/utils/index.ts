@@ -7,6 +7,7 @@ export * from './gameCamera.ts';
 export * from './gamePlayerEffects.ts';
 export * from './gamePowerUpEffects';
 export * from './gamePostProcess';
+export * from './gameIconEffects';
 export * from './gameRetroEffects';
 export * from './gameScoreEffects';
 export * from './gameSoundEffects';
