@@ -501,6 +501,7 @@ export function applyCollisionEffects(
   }
 
   if (retroEffectsRef && applyGlitch) {
-    retroEffectsRef.setGlitchAmount(combinedFactor / 2);
+    const shakeIntensity = combinedFactor / 5;
+    retroEffectsRef.setGlitchAmount(shakeIntensity);
   }
 }
