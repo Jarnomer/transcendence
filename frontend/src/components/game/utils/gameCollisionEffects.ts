@@ -470,7 +470,7 @@ function applyEdgeDeformEffect(
 }
 
 export function applyCollisionEffects(
-  retroEffectsRef: RetroEffectsManager | null,
+  retroEffectsRef: RetroEffectsManager | null | undefined,
   ballMesh: Mesh,
   paddleMesh: Mesh,
   edgeMesh: Mesh,
@@ -479,7 +479,7 @@ export function applyCollisionEffects(
   spin: number,
   color: Color3,
   applyGlitch: boolean,
-  soundManagerRef?: GameSoundManager | null
+  soundManagerRef?: GameSoundManager | null | undefined
 ) {
   const speedFactor = Math.min(Math.max(speed / 5, 1.5), 4.0);
   const spinFactor = Math.min(Math.max(spin / 5, 1.0), 3.0);

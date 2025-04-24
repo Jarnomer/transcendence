@@ -562,18 +562,18 @@ function calculateScoreEffectIntensity(
 }
 
 export function applyScoreEffects(
-  retroEffectsRef: RetroEffectsManager,
+  retroEffectsRef: RetroEffectsManager | null | undefined,
   scene: Scene,
-  camera: ArcRotateCamera,
+  camera: ArcRotateCamera | null | undefined,
   topEdge: Mesh,
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
   scoredAgainstPaddle: Mesh,
-  ballSpeed: number,
   playerScore: number,
+  ballSpeed: number,
   ball: Ball,
   primaryColor: Color3,
-  soundManagerRef?: GameSoundManager | null
+  soundManagerRef?: GameSoundManager | null | undefined
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);

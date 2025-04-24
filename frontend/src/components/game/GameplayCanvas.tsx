@@ -328,12 +328,19 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
 
+    const collisionType =
+      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
+
+    const scoringPlayer = detectScore(
+      players.player1.score,
+      players.player2.score,
+      lastScoreRef.current,
+      ball.dx
+    );
+
     applyBallEffects(ballRef.current, speed, angle, ball.spin, primaryColor);
 
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
-
-    const collisionType =
-      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
 
     if (collisionType) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
@@ -352,13 +359,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
         soundManagerRef.current
       );
     }
-
-    const scoringPlayer = detectScore(
-      players.player1.score,
-      players.player2.score,
-      lastScoreRef.current,
-      ball.dx
-    );
 
     if (scoringPlayer) {
       const scoringPlayerPaddle =

@@ -357,10 +357,15 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const ballAngle = Math.atan2(ball.dx, -ball.dy);
 
-    applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
-
     const collisionType =
       gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
+
+    // const scoringPlayer =
+    //   gameMode === 'active'
+    //     ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
+    //     : null;
+
+    applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
 
     if (collisionType) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
@@ -380,11 +385,6 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         null
       );
     }
-
-    // const scoringPlayer =
-    //   gameMode === 'active'
-    //     ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
-    //     : null;
 
     // if (gameMode === 'active' && scoringPlayer) {
     //   const scoringPlayerPaddle =
