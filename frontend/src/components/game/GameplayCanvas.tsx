@@ -15,10 +15,10 @@ import {
 } from 'babylonjs';
 
 import {
-  ActivePowerUpIconManager,
   GameSoundManager,
-  PowerUpEffectsManager,
   RetroEffectsManager,
+  PowerUpEffectsManager,
+  ActivePowerUpIconManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -332,15 +332,8 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
 
-    const collisionType = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
-
-    prevBallState.current = {
-      x: ball.x,
-      y: ball.y,
-      dx: ball.dx,
-      dy: ball.dy,
-      spin: ball.spin,
-    };
+    const collisionType =
+      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
 
     if (collisionType) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
@@ -422,6 +415,14 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
       ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
     }
+
+    prevBallState.current = {
+      x: ball.x,
+      y: ball.y,
+      dx: ball.dx,
+      dy: ball.dy,
+      spin: ball.spin,
+    };
   }, [gameState]);
 
   return <canvas ref={canvasRef} className="w-full h-full" />;
