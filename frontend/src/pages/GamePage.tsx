@@ -49,7 +49,6 @@ export const GamePage: React.FC = () => {
   // Show game canvas when ready to play
   useEffect(() => {
     if (!loading && gameState && connections.game === 'connected' && gameStatus !== 'finished') {
-      console.log('Game is ready to play, showing game canvas');
       if (!isGameCanvasVisible) {
         showGameCanvas();
       }
@@ -66,7 +65,6 @@ export const GamePage: React.FC = () => {
   useEffect(() => {
     if (!gameId) return;
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
-      console.log('Setting loading to false - game ready to render');
       setLoading(false);
     }
   }, [loadingStates, gameId]);
@@ -77,10 +75,7 @@ export const GamePage: React.FC = () => {
     let isMounted = true; // Track if component is mounted
 
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
-      console.log('Ready to send player ready message');
-
       if (isMounted) {
-        console.log('Sending player ready for player:', localPlayerId);
         sendMessage('game', createReadyInputMessage(localPlayerId, true));
       }
 

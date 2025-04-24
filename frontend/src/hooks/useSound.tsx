@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 
 export const useSound = (url: string) => {
   const audioRef = useRef(new Audio(url));
+  console.log('Creating useSound instance');
 
   const play = useCallback(() => {
     const audio = audioRef.current;
