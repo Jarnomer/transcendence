@@ -15,10 +15,10 @@ import {
 } from 'babylonjs';
 
 import {
-  GameSoundManager,
-  RetroEffectsManager,
-  PowerUpEffectsManager,
   ActivePowerUpIconManager,
+  GameSoundManager,
+  PowerUpEffectsManager,
+  RetroEffectsManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -325,23 +325,22 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const primaryColor = themeColors.current.primaryColor;
     const secondaryColor = themeColors.current.secondaryColor;
 
-    // Calculate current speed and angle, detect collision and score
     const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const angle = Math.atan2(ball.dx, -ball.dy);
-
-    const collisionType =
-      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
-
-    const scoringPlayer = detectScore(
-      players.player1.score,
-      players.player2.score,
-      lastScoreRef.current,
-      ball.dx
-    );
 
     applyBallEffects(ballRef.current, speed, angle, ball.spin, primaryColor);
 
     if (sparkEffectsRef.current) sparkEffectsRef.current(speed, ball.spin);
+
+    const collisionType = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
+
+    prevBallState.current = {
+      x: ball.x,
+      y: ball.y,
+      dx: ball.dx,
+      dy: ball.dy,
+      spin: ball.spin,
+    };
 
     if (collisionType) {
       const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
@@ -360,6 +359,13 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
         soundManagerRef.current
       );
     }
+
+    const scoringPlayer = detectScore(
+      players.player1.score,
+      players.player2.score,
+      lastScoreRef.current,
+      ball.dx
+    );
 
     if (scoringPlayer) {
       const scoringPlayerPaddle =
@@ -408,7 +414,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       });
     }
 
-    // Convert coordinates and update position if not animating
     if (!isAnimatingBallRef.current) {
       player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
       player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
@@ -417,14 +422,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
       ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
     }
-
-    prevBallState.current = {
-      x: ball.x,
-      y: ball.y,
-      dx: ball.dx,
-      dy: ball.dy,
-      spin: ball.spin,
-    };
   }, [gameState]);
 
   return <canvas ref={canvasRef} className="w-full h-full" />;

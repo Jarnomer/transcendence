@@ -1,22 +1,28 @@
 import {
   Animation,
   ArcRotateCamera,
-  MeshBuilder,
-  Mesh,
   Color3,
   Color4,
+  DirectionalLight,
   GlowLayer,
+  Mesh,
+  MeshBuilder,
   PBRMaterial,
   ParticleSystem,
-  DirectionalLight,
   Scene,
   Texture,
   Vector3,
 } from 'babylonjs';
 
-import { gameToSceneX, gameToSceneY, applyCameraShake, createParticleTexture } from '@game/utils';
+import {
+  GameSoundManager,
+  RetroEffectsManager,
+  applyCameraShake,
+  gameToSceneX,
+  gameToSceneY,
+} from '@game/utils';
 
-import { Ball, Player, defaultGameParams } from '@shared/types';
+import { Ball, defaultGameParams } from '@shared/types';
 
 function applyLightEffect(
   scene: Scene,
@@ -524,7 +530,7 @@ export function applyNeonEdgeFlicker(
   }, duration);
 }
 
-function calculateEffectDelay(ballSpeed: number): number {
+function calculateScoreEffectDelay(ballSpeed: number): number {
   const minDelay = 50;
   const maxDelay = 400;
   const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
@@ -556,7 +562,7 @@ function calculateScoreEffectIntensity(
 }
 
 export function applyScoreEffects(
-  retroEffectsRef: any,
+  retroEffectsRef: RetroEffectsManager,
   scene: Scene,
   camera: ArcRotateCamera,
   topEdge: Mesh,
@@ -567,15 +573,16 @@ export function applyScoreEffects(
   playerScore: number,
   ball: Ball,
   primaryColor: Color3,
-  soundManagerRef?: any | null
+  soundManagerRef?: GameSoundManager | null
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
-  const effectDelay = calculateEffectDelay(ballSpeed);
+  const effectDelay = calculateScoreEffectDelay(ballSpeed);
   const volumeFactor = intensityFactor * 1.2;
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
   applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
+
   applyPaddleExplosion(
     scene,
     scoredAgainstPaddle,
@@ -584,6 +591,7 @@ export function applyScoreEffects(
     ball.y,
     effectDelay
   );
+
   applyBallParticles(
     scene,
     scoredAgainstPaddle,
@@ -609,6 +617,6 @@ export function applyScoreEffects(
   if (retroEffectsRef) {
     setTimeout(() => {
       retroEffectsRef.simulateTrackingDistortion(intensityFactor);
-    }, 300);
+    }, effectDelay);
   }
 }
