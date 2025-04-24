@@ -172,6 +172,64 @@ export function createFloor(
   floor.receiveShadows = true;
   floor.material = pbr;
 
+  const frameRate = 30;
+  const tiltAmount = 0.02;
+  const floatAmount = 0.1;
+
+  const rotationAnimationY = new Animation(
+    'floorRotationAnimationY',
+    'rotation.y',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const rotationAnimationZ = new Animation(
+    'floorRotationAnimationZ',
+    'rotation.z',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const positionAnimation = new Animation(
+    'floorPositionAnimation',
+    'position.y',
+    frameRate,
+    Animation.ANIMATIONTYPE_FLOAT,
+    Animation.ANIMATIONLOOPMODE_CYCLE
+  );
+
+  const rotationKeysY = [];
+  rotationKeysY.push({ frame: 0, value: 0 });
+  rotationKeysY.push({ frame: frameRate / 2, value: tiltAmount });
+  rotationKeysY.push({ frame: frameRate, value: 0 });
+  rotationKeysY.push({ frame: frameRate * 1.5, value: -tiltAmount });
+  rotationKeysY.push({ frame: frameRate * 2, value: 0 });
+
+  const rotationKeysZ = [];
+  rotationKeysZ.push({ frame: 0, value: 0 });
+  rotationKeysZ.push({ frame: frameRate / 3, value: tiltAmount / 2 });
+  rotationKeysZ.push({ frame: frameRate, value: 0 });
+  rotationKeysZ.push({ frame: (frameRate * 5) / 3, value: -tiltAmount / 2 });
+  rotationKeysZ.push({ frame: frameRate * 2, value: 0 });
+
+  const positionKeys = [];
+  const initialPositionY = floor.position.y || 0;
+  positionKeys.push({ frame: 0, value: initialPositionY });
+  positionKeys.push({ frame: frameRate / 2, value: initialPositionY - floatAmount });
+  positionKeys.push({ frame: frameRate, value: initialPositionY });
+  positionKeys.push({ frame: frameRate * 1.5, value: initialPositionY + floatAmount });
+  positionKeys.push({ frame: frameRate * 2, value: initialPositionY });
+
+  rotationAnimationY.setKeys(rotationKeysY);
+  rotationAnimationZ.setKeys(rotationKeysZ);
+  positionAnimation.setKeys(positionKeys);
+
+  floor.animations = [rotationAnimationY, rotationAnimationZ, positionAnimation];
+
+  scene.beginAnimation(floor, 0, frameRate * 2, true);
+
   return floor;
 }
 
