@@ -20,7 +20,7 @@ export const defaultRetroEffectsLevels: RetroEffectsLevels = {
 
 export const cinematicRetroEffectsLevels: RetroEffectsLevels = {
   scanlines: 5,
-  curvature: 5,
+  curvature: 4,
   glitch: 5,
   colorBleed: 5,
   flicker: 5,
