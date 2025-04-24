@@ -153,7 +153,7 @@ export function createFloor(
   floor.receiveShadows = true;
   floor.material = pbr;
 
-  createFloorHoverAnimation(floor, scene, params);
+  createFloorHoverAnimation(floor, scene);
 
   return floor;
 }
