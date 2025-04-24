@@ -61,12 +61,12 @@ export interface RetroEffectsBaseParams {
 export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
   scanlines: {
     intensity: 0.06,
-    density: 2.0,
+    density: 3.0,
     speed: 5.0,
-    noise: 0.5,
-    vignette: 1.2,
+    noise: 0.8,
+    vignette: 1.4,
     flicker: 0.15,
-    colorBleed: 0.05,
+    colorBleed: 0.1,
   },
   crtDistortion: {
     curvatureAmount: 0.0,
@@ -90,17 +90,17 @@ export const defaultRetroEffectsBaseParams: RetroEffectsBaseParams = {
 
 export const defaultRetroCinematicBaseParams: RetroEffectsBaseParams = {
   scanlines: {
-    intensity: 0.6,
+    intensity: 1.1,
     density: 1,
-    speed: 100,
-    noise: 0.1,
+    speed: 10,
+    noise: 0.2,
     vignette: 0,
-    flicker: 0.05,
+    flicker: 0.07,
     colorBleed: 0,
   },
   crtDistortion: {
     curvatureAmount: 0.3,
-    scanlineIntensity: 0.05,
+    scanlineIntensity: 0.1,
     vignette: 1.2,
     colorBleed: 0.0,
   },

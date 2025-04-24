@@ -7,7 +7,6 @@ import {
   Color4,
   CubicEase,
   DefaultRenderingPipeline,
-  SSAORenderingPipeline,
   BlurPostProcess,
   EasingFunction,
   Engine,
@@ -43,7 +42,6 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  setupSSAO,
   setupBlurEffect,
 } from '@game/utils';
 
@@ -89,7 +87,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
 
-  const ssaoRef = useRef<SSAORenderingPipeline>(null);
   const blurEffectsRef = useRef<{
     horizontalBlur: BlurPostProcess;
     verticalBlur: BlurPostProcess;
@@ -212,17 +209,16 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const bgColor = parseColor('#33353e');
     scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
 
-    // soundManagerRef.current = getGameSoundManager();
-
     const camera = setupSceneCamera(scene);
 
     const pipeline = setupPostProcessing(scene, camera, true);
-    const ssaoPipeline = setupSSAO(scene, camera);
     const blurEffects = setupBlurEffect(camera);
 
     const { shadowGenerators } = setupScenelights(scene, primaryColor);
 
     enableRequiredExtensions(engine);
+
+    // soundManagerRef.current = getGameSoundManager();
 
     retroLevelsRef.current = retroEffectsPresets.default;
     retroEffectsRef.current = createPongRetroEffects(
@@ -238,7 +234,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     cameraRef.current = camera;
     themeColors.current = colors;
     postProcessingRef.current = pipeline;
-    ssaoRef.current = ssaoPipeline;
     blurEffectsRef.current = blurEffects;
 
     floorRef.current = createFloor(scene, backgroundColor);
@@ -302,7 +297,6 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
 
-      if (ssaoRef.current) ssaoRef.current.dispose();
       if (blurEffectsRef.current) {
         if (blurEffectsRef.current.horizontalBlur) blurEffectsRef.current.horizontalBlur.dispose();
         if (blurEffectsRef.current.verticalBlur) blurEffectsRef.current.verticalBlur.dispose();
