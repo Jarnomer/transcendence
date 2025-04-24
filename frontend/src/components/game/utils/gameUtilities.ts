@@ -18,7 +18,6 @@ export function createParticleTexture(scene: Scene, color: Color3): Texture {
   const texture = new DynamicTexture('particleTexture', textureSize, scene, false);
   const context = texture.getContext();
 
-  // Create a radial gradient
   const gradient = context.createRadialGradient(
     textureSize / 2,
     textureSize / 2,
@@ -28,11 +27,9 @@ export function createParticleTexture(scene: Scene, color: Color3): Texture {
     textureSize / 2
   );
 
-  // Convert Color3 to CSS color strings
   const rgbColor = `rgb(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)})`;
   const rgbaColorTransparent = `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0)`;
 
-  // Color stops - Center, "middle" and edge
   gradient.addColorStop(0, 'white');
   gradient.addColorStop(0.3, rgbColor);
   gradient.addColorStop(1, rgbaColorTransparent);

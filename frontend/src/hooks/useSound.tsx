@@ -1,16 +1,18 @@
-import { useCallback } from 'react';
-export const useSound = (url: string) => {
-  // const audioRef = useRef(new Audio(url));
+import { useCallback, useEffect } from 'react';
 
+import SoundManager from '../services/SoundManager';
+
+export const useSound = (url: string) => {
+  const soundId = url;
+
+  useEffect(() => {
+    SoundManager.loadSound(soundId, url);
+  }, [soundId, url]);
+
+  // Return a function that plays the sound through the manager
   const play = useCallback(() => {
-    // const audio = audioRef.current;
-    // audio.currentTime = 0; // Rewind to start
-    // audio.play().catch((err) => {
-    //   // Handle autoplay restrictions or other issues
-    //   console.warn("Couldn't play sound:", err);
-    // });
-    return;
-  }, []);
+    SoundManager.playSound(soundId);
+  }, [soundId]);
 
   return play;
   return;

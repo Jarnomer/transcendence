@@ -320,6 +320,10 @@ export class GameSoundManager {
     this.soundDebounceTime = ms;
   }
 
+  getSoundEffectsVolume(): number {
+    return this.soundEffectsVolume;
+  }
+
   areSoundsLoaded(): boolean {
     return this.soundsLoaded;
   }

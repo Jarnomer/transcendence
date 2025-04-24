@@ -2,8 +2,9 @@ import {
   Animation,
   Color3,
   Color4,
-  GlowLayer,
+  CubicEase,
   EasingFunction,
+  GlowLayer,
   Mesh,
   MeshBuilder,
   ParticleSystem,
@@ -11,19 +12,18 @@ import {
   StandardMaterial,
   Texture,
   Vector3,
-  CubicEase,
 } from 'babylonjs';
 
 import {
+  GameSoundManager,
+  createParticleTexture,
   gameToSceneSize,
   gameToSceneX,
   gameToSceneY,
   getPowerUpIconPath,
-  createParticleTexture,
-  GameSoundManager,
 } from '@game/utils';
 
-import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
+import { PowerUp, PowerUpType, defaultGameObjectParams, defaultGameParams } from '@shared/types';
 
 interface PowerUpEffect {
   powerUpId: number;
@@ -40,7 +40,7 @@ export class PowerUpEffectsManager {
   private primaryColor: Color3;
   private secondaryColor: Color3;
   private powerUpSize: number;
-  private soundManager?: GameSoundManager;
+  private soundManager?: GameSoundManager | null | undefined;
 
   private isPowerUpNegative(type: PowerUpType): boolean {
     return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
@@ -51,7 +51,7 @@ export class PowerUpEffectsManager {
     primaryColor: Color3,
     secondaryColor: Color3,
     powerUpSize: number,
-    soundManager?: GameSoundManager
+    soundManager?: GameSoundManager | null | undefined
   ) {
     this.scene = scene;
     this.primaryColor = primaryColor;
@@ -350,11 +350,11 @@ export class PowerUpEffectsManager {
 
     effect.collected = true;
 
-    if (this.isPowerUpNegative(effect.type)) {
-      if (this.soundManager) this.soundManager.playNegativePowerUpSound();
-    } else {
-      if (this.soundManager) this.soundManager.playPositivePowerUpSound();
-    }
+    // if (this.isPowerUpNegative(effect.type)) {
+    //   if (this.soundManager) this.soundManager.playNegativePowerUpSound();
+    // } else {
+    //   if (this.soundManager) this.soundManager.playPositivePowerUpSound();
+    // }
 
     // Animate icon scaling
     const scaleAnim = new Animation(

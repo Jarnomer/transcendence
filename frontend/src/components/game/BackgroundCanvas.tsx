@@ -346,9 +346,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const { players, ball } = gameState;
 
     const primaryColor = themeColors.current.primaryColor;
-    const secondaryColor = themeColors.current.secondaryColor;
 
-    // Update paddle and ball positions
     player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
     player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
     player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
@@ -356,17 +354,16 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
     ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
 
-    // Calculate current speed and angle, detect collision and score
     const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const ballAngle = Math.atan2(ball.dx, -ball.dy);
 
     const collisionType =
       gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
 
-    const scoringPlayer =
-      gameMode === 'active'
-        ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
-        : null;
+    // const scoringPlayer =
+    //   gameMode === 'active'
+    //     ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
+    //     : null;
 
     applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
 
@@ -389,27 +386,27 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       );
     }
 
-    if (gameMode === 'active' && scoringPlayer) {
-      const scoringPlayerPaddle =
-        scoringPlayer === 'player1' ? player1Ref.current : player2Ref.current;
-      const scoredAgainstPaddle =
-        scoringPlayer === 'player1' ? player2Ref.current : player1Ref.current;
+    // if (gameMode === 'active' && scoringPlayer) {
+    //   const scoringPlayerPaddle =
+    //     scoringPlayer === 'player1' ? player1Ref.current : player2Ref.current;
+    //   const scoredAgainstPaddle =
+    //     scoringPlayer === 'player1' ? player2Ref.current : player1Ref.current;
 
-      applyScoreEffects(
-        retroEffectsRef.current,
-        sceneRef.current,
-        cameraRef.current,
-        topEdgeRef.current,
-        bottomEdgeRef.current,
-        scoringPlayerPaddle,
-        scoredAgainstPaddle,
-        players[scoringPlayer].score,
-        ballSpeed,
-        ball,
-        primaryColor,
-        null
-      );
-    }
+    //   applyScoreEffects(
+    //     retroEffectsRef.current,
+    //     sceneRef.current,
+    //     cameraRef.current,
+    //     topEdgeRef.current,
+    //     bottomEdgeRef.current,
+    //     scoringPlayerPaddle,
+    //     scoredAgainstPaddle,
+    //     players[scoringPlayer].score,
+    //     ballSpeed,
+    //     ball,
+    //     primaryColor,
+    //     null
+    //   );
+    // }
 
     prevBallState.current = {
       x: ball.x,
