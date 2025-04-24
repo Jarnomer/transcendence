@@ -460,8 +460,9 @@ export default class PongGame {
       console.log('Player 2 scores!');
     }
     if (
-      this.gameState.players.player1.score >= this.settings.maxScore ||
-      this.gameState.players.player2.score >= this.settings.maxScore
+      this.settings.maxScore > 0 &&
+      (this.gameState.players.player1.score >= this.settings.maxScore ||
+        this.gameState.players.player2.score >= this.settings.maxScore)
     ) {
       console.log('Game over!');
       console.log('Player 1 score:', this.gameState.players.player1.score);
