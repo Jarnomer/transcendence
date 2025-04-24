@@ -178,11 +178,11 @@ export const defaultGameParams: GameParams = {
     reductionFactor: 0.5, // Spin reduction on static surfaces
   },
   powerUps: {
-    minSpawnInterval: 5000, // Milliseconds
-    maxSpawnInterval: 10000,
+    minSpawnInterval: 4000, // Milliseconds
+    maxSpawnInterval: 5000,
     despawnTime: 10000,
     expireTime: 10000,
-    size: 40,
+    size: 80,
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,

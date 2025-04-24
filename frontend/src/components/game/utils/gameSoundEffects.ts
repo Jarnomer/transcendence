@@ -10,16 +10,41 @@ export function getGameSoundManager(): GameSoundManager {
 }
 
 export class GameSoundManager {
-  private edgeSound: HTMLAudioElement | null = null;
-  private paddleSound: HTMLAudioElement | null = null;
-  private negativePowerUpSound: HTMLAudioElement | null = null;
-  private positivePowerUpSound: HTMLAudioElement | null = null;
-  private scoreSound: HTMLAudioElement | null = null;
+  private readonly BASEURL = 'sounds/effects/game/';
+
+  private readonly SOUND_CONFIGS = {
+    edge: { base: 'hit_edge', count: 4 },
+    paddle: { base: 'hit_paddle', count: 3 },
+    ballFizzle: { base: 'ball_fizzle', count: 2 },
+    score: { base: 'ball_explode', count: 2 },
+  };
+
+  private readonly SOUND_NAMES = {
+    gameStart: 'game_start.wav',
+    gameOver: 'game_over.wav',
+    countDown1: 'count_down1.wav',
+    countDown2: 'count_down2.wav',
+    countDown3: 'count_down3.wav',
+    negativePowerUp: 'power_up_neg.wav',
+    positivePowerUp: 'power_up_pos.wav',
+    negativePowerUpExpire: 'power_up_expire_neg.wav',
+    positivePowerUpExpire: 'power_up_expire_pos.wav',
+  };
+
   private gameStartSound: HTMLAudioElement | null = null;
   private gameOverSound: HTMLAudioElement | null = null;
   private countDown1Sound: HTMLAudioElement | null = null;
   private countDown2Sound: HTMLAudioElement | null = null;
   private countDown3Sound: HTMLAudioElement | null = null;
+  private negativePowerUpSound: HTMLAudioElement | null = null;
+  private positivePowerUpSound: HTMLAudioElement | null = null;
+  private negativePowerUpExpireSound: HTMLAudioElement | null = null;
+  private positivePowerUpExpireSound: HTMLAudioElement | null = null;
+
+  private edgeSounds: HTMLAudioElement[] = [];
+  private paddleSounds: HTMLAudioElement[] = [];
+  private ballFizzleSounds: HTMLAudioElement[] = [];
+  private scoreSounds: HTMLAudioElement[] = [];
 
   private soundEffectsVolume: number = defaultGameAudioOptions.soundEffects?.volume || 1.0;
   private soundEffectsEnabled: boolean = defaultGameAudioOptions.soundEffects?.enabled || true;
@@ -27,7 +52,7 @@ export class GameSoundManager {
   private lastSoundTimes: Record<string, number> = {};
   private soundDebounceTime: number = 100; // ms
 
-  private allSounds: HTMLAudioElement[] | null = null;
+  private allSounds: HTMLAudioElement[] = [];
   private soundsLoaded: boolean = false;
 
   constructor() {
@@ -36,30 +61,37 @@ export class GameSoundManager {
 
   private initSounds(): void {
     if (typeof window !== 'undefined') {
-      const baseUrl = 'sounds/effects/';
+      const baseUrl = this.BASEURL;
 
-      this.edgeSound = new Audio(baseUrl + 'HIT1.wav');
-      this.paddleSound = new Audio(baseUrl + 'HIT2.wav');
-      this.negativePowerUpSound = new Audio(baseUrl + 'POWERUP.wav');
-      this.positivePowerUpSound = new Audio(baseUrl + 'POWERUP_END.wav');
-      this.scoreSound = new Audio(baseUrl + 'EXPLOSION_1.wav');
-      this.gameStartSound = new Audio(baseUrl + 'BALLDROP.wav');
-      this.gameOverSound = new Audio(baseUrl + 'POWERUP.wav');
-      this.countDown1Sound = new Audio(baseUrl + 'countDown.wav');
-      this.countDown2Sound = new Audio(baseUrl + 'countDown.wav');
-      this.countDown3Sound = new Audio(baseUrl + 'countDown.wav');
+      this.gameStartSound = new Audio(baseUrl + this.SOUND_NAMES.gameStart);
+      this.gameOverSound = new Audio(baseUrl + this.SOUND_NAMES.gameOver);
+      this.countDown1Sound = new Audio(baseUrl + this.SOUND_NAMES.countDown1);
+      this.countDown2Sound = new Audio(baseUrl + this.SOUND_NAMES.countDown2);
+      this.countDown3Sound = new Audio(baseUrl + this.SOUND_NAMES.countDown3);
+      this.negativePowerUpSound = new Audio(baseUrl + this.SOUND_NAMES.negativePowerUp);
+      this.positivePowerUpSound = new Audio(baseUrl + this.SOUND_NAMES.positivePowerUp);
+      this.negativePowerUpExpireSound = new Audio(baseUrl + this.SOUND_NAMES.negativePowerUpExpire);
+      this.positivePowerUpExpireSound = new Audio(baseUrl + this.SOUND_NAMES.positivePowerUpExpire);
+
+      this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.edge, this.edgeSounds);
+      this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.paddle, this.paddleSounds);
+      this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.ballFizzle, this.ballFizzleSounds);
+      this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.score, this.scoreSounds);
 
       this.allSounds = [
-        this.edgeSound,
-        this.paddleSound,
-        this.negativePowerUpSound,
-        this.positivePowerUpSound,
-        this.scoreSound,
         this.gameStartSound,
         this.gameOverSound,
         this.countDown1Sound,
         this.countDown2Sound,
         this.countDown3Sound,
+        this.negativePowerUpSound,
+        this.positivePowerUpSound,
+        this.negativePowerUpExpireSound,
+        this.positivePowerUpExpireSound,
+        ...this.edgeSounds,
+        ...this.paddleSounds,
+        ...this.ballFizzleSounds,
+        ...this.scoreSounds,
       ];
 
       this.allSounds.forEach((sound) => {
@@ -75,12 +107,29 @@ export class GameSoundManager {
     }
   }
 
+  private loadSoundVariations(
+    baseUrl: string,
+    config: { base: string; count: number },
+    targetArray: HTMLAudioElement[]
+  ): void {
+    for (let i = 1; i <= config.count; i++) {
+      targetArray.push(new Audio(baseUrl + `${config.base}${i}.wav`));
+    }
+  }
+
+  private getRandomSound(sounds: HTMLAudioElement[]): HTMLAudioElement | null {
+    if (!sounds || sounds.length === 0) return null;
+    const randomIndex = Math.floor(Math.random() * sounds.length);
+    return sounds[randomIndex];
+  }
+
   playEdgeSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('edge')) return;
 
-    if (this.edgeSound) {
-      this.edgeSound.playbackRate = playbackRate;
-      this.playSound(this.edgeSound, volumeMultiplier);
+    const sound = this.getRandomSound(this.edgeSounds);
+    if (sound) {
+      sound.playbackRate = playbackRate;
+      this.playSound(sound, volumeMultiplier);
     }
 
     this.updateLastSoundTime('edge');
@@ -89,12 +138,25 @@ export class GameSoundManager {
   playPaddleSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('paddle')) return;
 
-    if (this.paddleSound) {
-      this.paddleSound.playbackRate = playbackRate;
-      this.playSound(this.paddleSound, volumeMultiplier);
+    const sound = this.getRandomSound(this.paddleSounds);
+    if (sound) {
+      sound.playbackRate = playbackRate;
+      this.playSound(sound, volumeMultiplier);
     }
 
     this.updateLastSoundTime('paddle');
+  }
+
+  playBallFizzleSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
+    if (!this.shouldPlaySound('ballFizzle')) return;
+
+    const sound = this.getRandomSound(this.ballFizzleSounds);
+    if (sound) {
+      sound.playbackRate = playbackRate;
+      this.playSound(sound, volumeMultiplier);
+    }
+
+    this.updateLastSoundTime('ballFizzle');
   }
 
   playNegativePowerUpSound(volumeMultiplier: number = 1.0, playbackRate: number = 0.8): void {
@@ -119,12 +181,35 @@ export class GameSoundManager {
     this.updateLastSoundTime('positivePowerUp');
   }
 
+  playNegativePowerUpExpireSound(volumeMultiplier: number = 1.0, playbackRate: number = 0.8): void {
+    if (!this.shouldPlaySound('negativePowerUpExpire')) return;
+
+    if (this.negativePowerUpExpireSound) {
+      this.negativePowerUpExpireSound.playbackRate = playbackRate;
+      this.playSound(this.negativePowerUpExpireSound, volumeMultiplier);
+    }
+
+    this.updateLastSoundTime('negativePowerUpExpire');
+  }
+
+  playPositivePowerUpExpireSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.2): void {
+    if (!this.shouldPlaySound('positivePowerUpExpire')) return;
+
+    if (this.positivePowerUpExpireSound) {
+      this.positivePowerUpExpireSound.playbackRate = playbackRate;
+      this.playSound(this.positivePowerUpExpireSound, volumeMultiplier);
+    }
+
+    this.updateLastSoundTime('positivePowerUpExpire');
+  }
+
   playScoreSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('score')) return;
 
-    if (this.scoreSound) {
-      this.scoreSound.playbackRate = playbackRate;
-      this.playSound(this.scoreSound, volumeMultiplier);
+    const sound = this.getRandomSound(this.scoreSounds);
+    if (sound) {
+      sound.playbackRate = playbackRate;
+      this.playSound(sound, volumeMultiplier);
     }
 
     this.updateLastSoundTime('score');
@@ -188,9 +273,11 @@ export class GameSoundManager {
   private shouldPlaySound(soundType: string): boolean {
     if (!this.soundEffectsEnabled || !this.soundsLoaded) return false;
 
-    // Throttle sound playing to avoid performance issues
     const now = Date.now();
+
+    // Throttle sound playing to avoid performance issues
     const lastTime = this.lastSoundTimes[soundType] || 0;
+
     return now - lastTime >= this.soundDebounceTime;
   }
 
@@ -218,8 +305,6 @@ export class GameSoundManager {
   }
 
   setSoundEffectsVolume(volume: number): void {
-    if (!this.allSounds) return;
-
     this.soundEffectsVolume = Math.max(0, Math.min(volume, 1.0));
 
     this.allSounds.forEach((sound) => {
@@ -240,8 +325,6 @@ export class GameSoundManager {
   }
 
   preloadSounds(): void {
-    if (!this.allSounds) return;
-
     this.allSounds.forEach((sound) => {
       if (sound) {
         sound.load();
@@ -257,14 +340,11 @@ export class GameSoundManager {
   }
 
   dispose(): void {
-    // Clean up all sound resources
-    if (this.allSounds) {
-      this.allSounds.forEach((sound) => {
-        if (sound) {
-          sound.pause();
-          sound.src = '';
-        }
-      });
-    }
+    this.allSounds.forEach((sound) => {
+      if (sound) {
+        sound.pause();
+        sound.src = '';
+      }
+    });
   }
 }

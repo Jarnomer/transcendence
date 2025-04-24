@@ -9,9 +9,9 @@ import {
   Path3D,
 } from 'babylonjs';
 
-import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
+import { createSafeTexture } from '@game/utils';
 
-import { createSafeTexture } from './gameUtilities.ts';
+import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
 
 export function createEdge(
   scene: Scene,

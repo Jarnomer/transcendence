@@ -212,11 +212,11 @@ export class AIController {
     let errorFactor = 0;
 
     if (this.difficulty === 'easy') {
-      errorFactor = 4;
+      errorFactor = 7;
     } else if (this.difficulty === 'normal') {
-      errorFactor = 2;
+      errorFactor = 4;
     } else if (this.difficulty === 'brutal') {
-      errorFactor = 0;
+      errorFactor = 0.1;
     }
 
     const errorAmount =

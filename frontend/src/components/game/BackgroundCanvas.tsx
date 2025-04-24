@@ -19,7 +19,6 @@ import {
   applyCollisionEffects,
   applyGameplayCameraAngle,
   applyLowQualitySettings,
-  applyPlayerEffects,
   applyScoreEffects,
   createBall,
   createEdge,
@@ -46,7 +45,6 @@ import {
   GameMode,
   GameState,
   GameStatus,
-  PlayerEffects,
   RetroEffectsLevels,
   cinematicRetroEffectsLevels,
   defaultCameraTimings,
@@ -90,8 +88,6 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const randomGlitchTimerRef = useRef<number | null>(null);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
   const lastGameModeRef = useRef<GameMode>('background');
-
-  const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
 
   const floorRef = useRef<Mesh | null>(null);
   const topEdgeRef = useRef<Mesh | null>(null);
@@ -412,18 +408,6 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         ball,
         primaryColor,
         null
-      );
-    }
-
-    if (gameMode === 'active') {
-      applyPlayerEffects(
-        sceneRef.current,
-        player1Ref.current,
-        player2Ref.current,
-        players,
-        primaryColor,
-        secondaryColor,
-        playerEffectsMapRef.current
       );
     }
 
