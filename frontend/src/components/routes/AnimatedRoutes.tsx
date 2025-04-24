@@ -8,7 +8,6 @@ import { useNavigationAccess } from '../../contexts/navigationAccessContext/Navi
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { useSound } from '../../hooks/useSound.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
-import { CreateTournament } from '../../pages/CreateTournament.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
 import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
@@ -21,6 +20,7 @@ import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
 import { TestGameResult } from '../../pages/TestGameResult.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
+import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
 
 export const AnimatedRoutes: React.FC = () => {
@@ -89,7 +89,7 @@ export const AnimatedRoutes: React.FC = () => {
           element={
             user && fromAppNavigation ? (
               <PageWrapper>
-                <CreateTournament />
+                <TournamentMenu />
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />

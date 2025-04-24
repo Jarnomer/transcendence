@@ -14,7 +14,14 @@ import {
   CubicEase,
 } from 'babylonjs';
 
-import { gameToSceneSize, gameToSceneX, gameToSceneY, createParticleTexture } from '@game/utils';
+import {
+  gameToSceneSize,
+  gameToSceneX,
+  gameToSceneY,
+  getPowerUpIconPath,
+  createParticleTexture,
+  GameSoundManager,
+} from '@game/utils';
 
 import { PowerUp, PowerUpType, defaultGameParams, defaultGameObjectParams } from '@shared/types';
 
@@ -33,7 +40,7 @@ export class PowerUpEffectsManager {
   private primaryColor: Color3;
   private secondaryColor: Color3;
   private powerUpSize: number;
-  private soundManager: any;
+  private soundManager?: GameSoundManager;
 
   private isPowerUpNegative(type: PowerUpType): boolean {
     return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
@@ -44,7 +51,7 @@ export class PowerUpEffectsManager {
     primaryColor: Color3,
     secondaryColor: Color3,
     powerUpSize: number,
-    soundManager?: any
+    soundManager?: GameSoundManager
   ) {
     this.scene = scene;
     this.primaryColor = primaryColor;
@@ -89,13 +96,13 @@ export class PowerUpEffectsManager {
 
     const x = gameToSceneX(powerUp.x, icon);
     const y = gameToSceneY(powerUp.y, icon);
-    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor);
+    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
 
     icon.position = basePosition.clone();
 
     const color = this.getPowerUpColor(powerUp.isNegative);
     const cube = this.createCubeMesh(powerUpId, basePosition, cubeSize, 0.6, color);
-    const particleSystem = this.createGlitterParticleSystem(powerUpId, x, y, color);
+    const particleSystem = this.createParticleSystem(powerUpId, x, y, color);
 
     this.effects.set(powerUpId, {
       powerUpId,
@@ -121,7 +128,7 @@ export class PowerUpEffectsManager {
     );
     const color = isNegative ? this.secondaryColor : this.primaryColor;
     const material = new StandardMaterial(`powerUpMaterial-${type}`, this.scene);
-    const iconPath = this.getPowerUpIconPath(type);
+    const iconPath = getPowerUpIconPath(type);
     const texture = new Texture(iconPath, this.scene);
 
     material.emissiveColor = color;
@@ -135,23 +142,6 @@ export class PowerUpEffectsManager {
     mesh.material = material;
 
     return mesh;
-  }
-
-  private getPowerUpIconPath(type: PowerUpType): string {
-    switch (type) {
-      case PowerUpType.BiggerPaddle:
-        return '/power-up/paddle_bigger.png';
-      case PowerUpType.SmallerPaddle:
-        return '/power-up/paddle_smaller.png';
-      case PowerUpType.FasterPaddle:
-        return '/power-up/paddle_faster.png';
-      case PowerUpType.SlowerPaddle:
-        return '/power-up/paddle_slower.png';
-      case PowerUpType.MoreSpin:
-        return '/power-up/paddle_spin.png';
-      default:
-        return '/power-up/unknown_powerup.png';
-    }
   }
 
   private createCubeMesh(
@@ -212,17 +202,12 @@ export class PowerUpEffectsManager {
     cube.metadata = { observer, elapsedTime };
   }
 
-  private createGlitterParticleSystem(
-    id: number,
-    x: number,
-    y: number,
-    color: Color3
-  ): ParticleSystem {
+  private createParticleSystem(id: number, x: number, y: number, color: Color3): ParticleSystem {
     const particleSystem = new ParticleSystem(`powerUpParticles-${id}`, 200, this.scene);
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
-    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor);
+    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
 
     const emitBoxSize = 0.03;
     particleSystem.minEmitBox = new Vector3(-emitBoxSize, -emitBoxSize, -emitBoxSize);
@@ -286,6 +271,9 @@ export class PowerUpEffectsManager {
   }
 
   private animatePowerUpIcon(mesh: Mesh): void {
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
     const scaleXAnim = new Animation(
       'powerUpScaleXAnimation',
       'scaling.x',
@@ -293,7 +281,6 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
-
     const scaleXKeys = [
       { frame: 0, value: 1.0 },
       { frame: 30, value: 1.4 },
@@ -308,7 +295,6 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
-
     const scaleYKeys = [
       { frame: 0, value: 1.0 },
       { frame: 15, value: 1.2 },
@@ -325,7 +311,6 @@ export class PowerUpEffectsManager {
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CYCLE
     );
-
     const scaleZKeys = [
       { frame: 0, value: 0.5 },
       { frame: 60, value: 0.5 },
@@ -350,8 +335,6 @@ export class PowerUpEffectsManager {
     positionAnim.setKeys(positionKeys);
 
     // Easing functions - smoother animations
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     scaleXAnim.setEasingFunction(easingFunction);
     scaleYAnim.setEasingFunction(easingFunction);
     positionAnim.setEasingFunction(easingFunction);
@@ -368,9 +351,9 @@ export class PowerUpEffectsManager {
     effect.collected = true;
 
     if (this.isPowerUpNegative(effect.type)) {
-      this.soundManager.playNegativePowerUpSound();
+      if (this.soundManager) this.soundManager.playNegativePowerUpSound();
     } else {
-      this.soundManager.playPositivePowerUpSound();
+      if (this.soundManager) this.soundManager.playPositivePowerUpSound();
     }
 
     // Animate icon scaling
@@ -468,6 +451,7 @@ export class PowerUpEffectsManager {
 
   disposeEffectWithAnimation(powerUpId: number): void {
     const effect = this.effects.get(powerUpId);
+
     if (!effect) return;
 
     // If already collected, just dispose normally
@@ -477,6 +461,9 @@ export class PowerUpEffectsManager {
     }
 
     effect.collected = true;
+
+    const easingFunction = new CubicEase();
+    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
     // Animate icon scaling
     const scaleAnim = new Animation(
@@ -491,12 +478,7 @@ export class PowerUpEffectsManager {
       { frame: 15, value: new Vector3(0, 0, 0) },
     ];
     scaleAnim.setKeys(scaleKeys);
-
-    const easingFunction = new CubicEase();
-    easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
     scaleAnim.setEasingFunction(easingFunction);
-
-    effect.icon.animations = [scaleAnim];
 
     // Animate cube scaling
     const cube = effect.cube;
@@ -514,6 +496,7 @@ export class PowerUpEffectsManager {
     cubeScaleAnim.setKeys(cubeScaleKeys);
     cubeScaleAnim.setEasingFunction(easingFunction);
 
+    effect.icon.animations = [scaleAnim];
     cube.animations = [cubeScaleAnim];
 
     // Stop the orbit animation
@@ -556,13 +539,12 @@ export class PowerUpEffectsManager {
   // Clean up the effects completely
   disposeEffect(powerUpId: number): void {
     const effect = this.effects.get(powerUpId);
+
     if (!effect) return;
 
     effect.particleSystem.dispose();
 
-    if (effect.icon.material) {
-      effect.icon.material.dispose();
-    }
+    if (effect.icon.material) effect.icon.material.dispose();
     effect.icon.dispose();
 
     // Clean up the cube
@@ -570,9 +552,8 @@ export class PowerUpEffectsManager {
     if (cube.metadata && cube.metadata.observer) {
       this.scene.onBeforeRenderObservable.remove(cube.metadata.observer);
     }
-    if (cube.material) {
-      cube.material.dispose();
-    }
+
+    if (cube.material) cube.material.dispose();
     cube.dispose();
 
     this.effects.delete(powerUpId);

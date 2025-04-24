@@ -103,7 +103,7 @@ export const ProfilePage: React.FC = () => {
   return (
     <>
       <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
-      <motion.div className="flex flex-col h-full w-full justify-center items-center">
+      <motion.div className="flex flex-col h-full w-full items-center">
         {loggedInUser?.friend_requests &&
         loggedInUser.friend_requests.some((req) => req.user_id === user?.user_id) ? (
           <span className="p-1">{user?.display_name + ' sent you a friend request'}</span>

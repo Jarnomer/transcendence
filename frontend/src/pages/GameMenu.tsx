@@ -189,7 +189,7 @@ export const GameMenu: React.FC = () => {
       <motion.div
         key={mode && !difficulty ? `${mode}-submenu` : 'main-menu'}
         id="game-menu-container"
-        className="flex flex-wrap w-full h-full justify-center gap-4 items-center p-0"
+        className="flex grow flex-wrap w-full h-full justify-center gap-4 items-center p-0"
         variants={pageVariants}
         initial="initial"
         animate="animate"

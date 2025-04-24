@@ -25,55 +25,66 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   selectedFriendId,
   roomId,
   onBack,
-  onSend,
 }) => {
   const [input, setInput] = useState('');
+  const [minimized, setMinimized] = useState(false);
   const { messages } = useChatContext();
+  // const chatMessages = messages[selectedFriendId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
-  const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
 
   const chatMessages = useMemo(() => {
-    if (roomId) {
-      return messages[roomId] || [];
-    }
-    if (selectedFriendId) {
-      return messages[selectedFriendId] || [];
-    }
-  }, [messages, selectedFriendId, roomId]);
+    return messages[selectedFriendId] || [];
+  }, [messages, selectedFriendId]);
+
+  const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
+  const playSelectSound = useSound('/sounds/effects/select.wav');
+
+  const playZoomSound = useSound('/sounds/effects/zoom.wav');
+
+  const handleChatMinimize = () => {
+    if (!minimized) playUnSelectSound();
+    else playSelectSound();
+    setMinimized(!minimized);
+  };
 
   console.log(roomId);
   return (
-    <div className="h-full w-full flex flex-col flex-1">
-      <div className="p-2 border-b flex justify-between items-center ">
-        <NavIconButton
-          icon="arrowLeft"
-          onClick={() => {
-            playUnSelectSound();
-            onBack();
-          }}
-          id="chat-back-button"
-          ariaLabel="back to conversations"
-        ></NavIconButton>
-        <div className="text-sm">
-          {selectedFriendId ? (
-            <span onClick={() => navigate(`/profile/${selectedFriendId}`)}>
-              {friends.find((f) => f.user_id === selectedFriendId)?.display_name}
-            </span>
-          ) : (
-            roomId
-          )}
+    <div className={`p-0 w-full h-full max-h-fit text-primary backdrop-blur-sm overflow-hidden`}>
+      <div className="p-0 h-full w-full flex flex-col flex-1">
+        <div className="p-0 flex justify-between items-center ">
+          <div className="w-full text-sm bg-primary text-black p-2 flex justify-between items-center cursor-pointer">
+            {selectedFriendId ? (
+              <span onClick={() => navigate(`/profile/${selectedFriendId}`)}>
+                {friends.find((f) => f.user_id === selectedFriendId)?.display_name}
+              </span>
+            ) : (
+              roomId
+            )}
+            <div className="flex items-center gap-2">
+              <NavIconButton
+                icon="close"
+                onClick={() => {
+                  playUnSelectSound();
+                  onBack();
+                }}
+                id="chat-back-button"
+                ariaLabel="back to conversations"
+              ></NavIconButton>
+            </div>
+          </div>
+          <div />
         </div>
-        <div />
-      </div>
-      <MessageList
-        messages={chatMessages}
-        user={user}
-        selectedFriendId={selectedFriendId}
-        roomId={roomId}
-      />
-      <div className="p-2 border-t flex gap-2">
-        <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
+
+        <MessageList
+          messages={chatMessages}
+          user={user}
+          selectedFriendId={selectedFriendId}
+          roomId={roomId}
+        />
+        <div className="p-2 border-t flex gap-2">
+          <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
+        </div>
       </div>
     </div>
   );

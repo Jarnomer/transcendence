@@ -29,7 +29,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [myRooms, setMyRooms] = useState<any[]>([]);
   const [members, setMembers] = useState<any[]>([]);
   const [openChatWindows, setOpenChatWindows] = useState<Record<string, boolean>>({});
-  const playMessageSound = useSound('/sounds/effects/message.wav');
+  // const playMessageSound = useSound('/sounds/effects/message.wav');
 
   const roomIdRef = useRef(roomId);
 
@@ -94,7 +94,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isCurrentRoom || openChatWindows[event.sender_id]) return;
 
-    playMessageSound();
+    // playMessageSound();
     toast.custom((t) => (
       <MessageNotification>
         <div

@@ -56,7 +56,7 @@ export const FloatingChat = () => {
   if (!user) return null;
 
   return (
-    <div className="flex gap-2 items-end fixed bottom-4 right-4 z-50">
+    <div className="flex gap-2 items-end fixed bottom-4 right-4 z-40">
       {openChatWindows &&
         Object.entries(openChatWindows)
           .filter(([_, isOpen]) => isOpen)
@@ -73,7 +73,7 @@ export const FloatingChat = () => {
 
       {/* Header with toggle */}
       <div
-        className={`glass-box backdrop-blur-sm z-50 shadow-lg w-[300px] ${
+        className={`glass-box backdrop-blur-sm z-40 shadow-lg w-[300px] ${
           minimized ? 'h-12' : 'h-[400px]'
         } transition-all duration-300 overflow-hidden`}
       >

@@ -1,84 +1,66 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
-
-import { useChatContext } from '@/contexts/chatContext/ChatContext';
 
 import { BackgroundGlow } from '../components';
 import { ChatWindow } from '../components/chat/chatPage/ChatWindow';
 import { ChatSidebar } from '../components/chat/ChatSideBar';
 import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
+import { useChatContext } from '../contexts/chatContext/ChatContext';
+import { useUser } from '../contexts/user/UserContext';
+import { useSound } from '../hooks/useSound';
 
 export const ChatPage: React.FC = () => {
-  const {
-    friends,
-    messages,
-    user,
-    selectedFriend,
-    roomId,
-    rooms,
-    myRooms,
-    setSelectedFriend,
-    setRoomId,
-    sendChatMessage,
-    joinRoom,
-    createRoom,
-    setMembers,
-  } = useChatContext();
-
-  const [isRoomPopupVisible, setRoomPopupVisible] = useState(false);
+  const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
+  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
   const location = useLocation();
-  const isChatPage = location.pathname === '/chat' ? true : false;
-  console.log('isChatPage:', isChatPage);
+  const { user } = useUser();
 
-  useEffect(() => {}, [isRoomPopupVisible]);
+  const { friends, sendChatMessage, messages, fetchDmHistory } = useChatContext();
+  const playZoomSound = useSound('/sounds/effects/zoom.wav');
 
   const handleClickNewChat = () => {
-    setRoomPopupVisible(!isRoomPopupVisible);
+    setCreateNewGroupChat(!createNewGroupChat);
   };
 
+  const handleOpenChat = async (friendId: string) => {
+    setSelectedFriendId(friendId);
+    if (!messages[friendId]) {
+      await fetchDmHistory(friendId);
+    }
+  };
+
+  const handleCloseChat = () => {
+    setSelectedFriendId(null);
+  };
+
+  if (!user) return null;
+
   return (
-    <div className="p-2 w-full h-full flex items-center justify-center">
-      <div className="flex h-[600px] w-3xl  glass-box overflow-hidden relative">
-        <BackgroundGlow />
-        <div
-          className={` w-full h-full ${!selectedFriend && !roomId ? 'w-full md:block' : 'hidden lg:block md:w-1/3 lg:1/5'} overflow-y-auto`}
-        >
-          {isRoomPopupVisible ? (
+    <div className="flex border-1 w-2xl h-full max-h-2xl glass-box">
+      <div className="w-full h-full relative flex items-center justify-center">
+        <div className="absolute w-full h-full overflow-hidden pointer-events-none">
+          <BackgroundGlow />
+        </div>
+        <div className="w-full h-full overflow-y-auto">
+          {createNewGroupChat ? (
             <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
           ) : (
-            <>
-              <ChatSidebar handleClickNewChat={handleClickNewChat}></ChatSidebar>
-            </>
+            <ChatSidebar onOpenChat={handleOpenChat} handleClickNewChat={handleClickNewChat} />
           )}
         </div>
-
-        {selectedFriend ? (
-          <ChatWindow
-            messages={messages}
-            user={user}
-            friends={friends}
-            selectedFriendId={selectedFriend}
-            onBack={() => {
-              setSelectedFriend(null);
-              setRoomId(null);
-            }}
-            onSend={sendChatMessage}
-          />
-        ) : roomId ? (
-          <ChatWindow
-            messages={messages}
-            user={user}
-            roomId={roomId}
-            members={friends}
-            onBack={() => {
-              setSelectedFriend(null);
-              setRoomId(null);
-            }}
-            onSend={sendChatMessage}
-          />
-        ) : null}
       </div>
+
+      {selectedFriendId && (
+        <ChatWindow
+          key={selectedFriendId}
+          user={user}
+          friends={friends}
+          selectedFriendId={selectedFriendId}
+          onBack={handleCloseChat}
+          onSend={sendChatMessage}
+        />
+      )}
     </div>
   );
 };
