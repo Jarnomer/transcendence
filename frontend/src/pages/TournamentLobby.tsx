@@ -2,19 +2,15 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import {
-  slideFromLeftVariants,
-  slideFromRightVariants,
-} from '../components/tournamentLobby/animationVariants';
+import { slideFromRightVariants } from '../components/tournamentLobby/animationVariants';
 import { Spectate } from '../components/tournamentLobby/Spectate';
 import { TournamentLobbyNav } from '../components/tournamentLobby/TournamentLobbyNav';
 import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
-import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useUser } from '../contexts/user/UserContext';
 
 export const TournamentLobby: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('settings');
+  const [activeTab, setActiveTab] = useState<string>('players');
   const { user } = useUser();
   const { friends, selectedFriendId, roomId } = useChatContext();
   const [players, setPlayers] = useState<any[]>();
@@ -62,18 +58,7 @@ export const TournamentLobby: React.FC = () => {
         <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
           <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">
-              {activeTab === 'settings' ? (
-                <motion.div
-                  key="tournamentSettings"
-                  className="w-full h-full"
-                  variants={slideFromLeftVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                >
-                  <TournamentSettings></TournamentSettings>
-                </motion.div>
-              ) : activeTab == 'players' ? (
+              {activeTab == 'players' ? (
                 <TournamentPlayerList players={players}></TournamentPlayerList>
               ) : (
                 <motion.div

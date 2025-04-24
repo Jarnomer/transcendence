@@ -15,7 +15,7 @@ export const GameOptions: React.FC = () => {
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
-  const { setGameSettings } = useGameOptionsContext();
+  const { setGameSettings, mode } = useGameOptionsContext();
   const navigate = useNavigate();
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +70,11 @@ export const GameOptions: React.FC = () => {
     console.log('Enable spin: ', enableSpin);
     console.log('Enable powerups: ', enablePowerUps);
     console.log('selected powerups: ', selectedPowerUps);
-    navigate('/game');
+    if (mode === 'tournament') {
+      navigate('/tournamentLobby');
+    } else {
+      navigate('/game');
+    }
   };
 
   return (

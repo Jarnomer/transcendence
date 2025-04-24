@@ -14,13 +14,6 @@ export const TournamentLobbyNav: React.FC<{
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
       <span className="relative p-0 flex gap-4">
-        <button
-          className={`btn btn-primary ${activeTab === 'settings' ? ' text-secondary' : ''}`}
-          onClick={() => setActiveTab('settings')}
-        >
-          Settings
-        </button>
-
         <button onClick={() => setActiveTab('players')}>
           <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
         </button>
