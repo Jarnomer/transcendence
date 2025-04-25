@@ -17,11 +17,12 @@ import {
 import {
   GameSoundManager,
   RetroEffectsManager,
-  applyCameraShake,
-  gameToSceneX,
-  gameToSceneY,
   animateBallAfterScore,
   animatePaddleAfterScore,
+  applyCameraShake,
+  createParticleTexture,
+  gameToSceneX,
+  gameToSceneY,
 } from '@game/utils';
 
 import { Ball, defaultGameParams } from '@shared/types';
@@ -115,7 +116,7 @@ function applyBallParticles(
 
   const particleSystem = new ParticleSystem('ballExplosionParticles', 150, scene);
 
-  particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
+  particleSystem.particleTexture = createParticleTexture(scene, primaryColor);
   particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
 
   particleSystem.color1 = new Color4(primaryColor.r, primaryColor.g, primaryColor.b, 1.0);
@@ -144,6 +145,56 @@ function applyBallParticles(
 
   particleSystem.minAngularSpeed = -3.0;
   particleSystem.maxAngularSpeed = 3.0;
+
+  particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
+
+  setTimeout(() => {
+    particleSystem.start();
+    setTimeout(() => {
+      particleSystem.dispose();
+    }, duration);
+  }, effectDelay);
+}
+
+function createParticleFlares(
+  scene: Scene,
+  paddle: Mesh,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  ball: Ball,
+  effectDelay: number,
+  duration: number = 3000
+): void {
+  const ballSceneX = gameToSceneX(ball.x, paddle);
+  const ballSceneY = gameToSceneY(ball.y, paddle);
+  const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
+
+  const particleSystem = new ParticleSystem('whiteFlareParticles', 100, scene);
+
+  particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
+  particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
+
+  particleSystem.color1 = new Color4(1, 1, 1, 1.0);
+  particleSystem.color2 = new Color4(1, 1, 1, 1.0);
+  particleSystem.colorDead = new Color4(0.8, 0.8, 0.8, 0);
+
+  particleSystem.minSize = (0.2 + intensity * 0.5) * (2 / 3);
+  particleSystem.maxSize = (0.8 + intensity * 1.5) * (2 / 3);
+  particleSystem.minLifeTime = (1.5 + intensity * 1.5) * (2 / 3);
+  particleSystem.maxLifeTime = (3.0 + intensity * 2.0) * (2 / 3);
+  particleSystem.minEmitPower = (2 + intensity * 2.0) * (2 / 3);
+  particleSystem.maxEmitPower = (6 + intensity * 4.0) * (2 / 3);
+
+  particleSystem.manualEmitCount = Math.floor((100 + Math.floor(intensity * 100)) * (2 / 3));
+  particleSystem.emitRate = 0; // Emit all at once
+
+  particleSystem.minEmitBox = new Vector3(-0.5, -0.5, -0.5);
+  particleSystem.maxEmitBox = new Vector3(0.5, 0.5, 0.5);
+  particleSystem.direction1 = new Vector3(5, 5, 5);
+  particleSystem.direction2 = new Vector3(-5, -5, -5);
+
+  particleSystem.minAngularSpeed = -3.0 * (2 / 3);
+  particleSystem.maxAngularSpeed = 3.0 * (2 / 3);
 
   particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
@@ -623,6 +674,15 @@ export function applyScoreEffects(
     ball,
     effectDelay,
     primaryColor
+  );
+
+  createParticleFlares(
+    scene,
+    scoredAgainstPaddle,
+    intensityFactor,
+    ballDirection,
+    ball,
+    effectDelay
   );
 
   if (soundManagerRef) {
