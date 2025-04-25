@@ -21,6 +21,13 @@ export const TournamentLobbyNav: React.FC<{
         <button onClick={() => setActiveTab('matches')}>
           <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
         </button>
+
+        <button
+          className={`btn btn-primary ${activeTab === 'settings' ? ' text-secondary' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Settings
+        </button>
       </span>
     </motion.div>
   );

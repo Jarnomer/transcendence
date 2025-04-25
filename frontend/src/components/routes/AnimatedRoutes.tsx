@@ -21,8 +21,8 @@ import { SignUpPage } from '../../pages/SignUpPage.tsx';
 import { TestGameResult } from '../../pages/TestGameResult.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
+import { SessionManager } from '../../services/SessionManager.ts';
 import { PageWrapper } from './PageWrapper.tsx';
-
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();
@@ -38,6 +38,7 @@ export const AnimatedRoutes: React.FC = () => {
       console.log('Cleanup');
     };
   }, [location]);
+
 
   return (
     <AnimatePresence mode="wait">

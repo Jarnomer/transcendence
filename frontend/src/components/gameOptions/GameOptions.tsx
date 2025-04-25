@@ -20,7 +20,7 @@ export const GameOptions: React.FC = () => {
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
-  const { setGameSettings, gameSettings } = useGameOptionsContext();
+  const { setGameSettings, gameSettings, mode } = useGameOptionsContext();
   const navigate = useNavigate();
   useMatchmaking();
 
@@ -109,7 +109,11 @@ export const GameOptions: React.FC = () => {
 
   const handleGameStart = async () => {
     console.log('--- starting game ----');
-    navigate('/game');
+    if (mode === 'tournament') {
+      navigate('/tournamentLobby');
+    } else {
+      navigate('/game');
+    }
   };
 
   return (

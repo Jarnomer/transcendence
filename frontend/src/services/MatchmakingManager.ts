@@ -23,7 +23,7 @@ class MatchmakingManager {
   // private phase: Phase = 'idle';
   // private role: UserRole = 'player';
   // private gameId: string | null = null;
-  private queueId: string = '';
+  // private queueId: string = '';
   private mode: string | null = null;
   private difficulty: string | null = null;
   // private participants: string[] = [];
@@ -91,13 +91,13 @@ class MatchmakingManager {
     const { queueId, mode, difficulty } = options;
     this.mode = mode;
     this.difficulty = difficulty;
-    this.queueId = queueId ? queueId : '';
+    // this.queueId = queueId ? queueId : '';
   }
 
   startMatchmaking() {
     if (!this.mode || !this.difficulty) return;
     this.matchmakingSocket.connect(
-      new URLSearchParams({ mode: this.mode, difficulty: this.difficulty, queue_id: this.queueId })
+      new URLSearchParams({ mode: this.mode, difficulty: this.difficulty })
     );
     this.attachListeners();
     this.setState({ phase: 'matchmaking', role: 'player' });
@@ -168,6 +168,27 @@ class MatchmakingManager {
     // this.notifyListeners();
   };
 
+  handleParticipants = (participants: any) => {
+    console.info('Participants:', participants);
+    this.setState({ participants: [...this.snapshot.participants, participants] });
+  };
+
+  attachListeners() {
+    this.matchmakingSocket.addEventListener('match_found', this.handleMatchFound);
+    this.matchmakingSocket.addEventListener('game_winner', this.handleGameWinner);
+    this.matchmakingSocket.addEventListener('game_loser', this.handleGameLoser);
+    this.matchmakingSocket.addEventListener('tournament_winner', this.handleTournamentWinner);
+    this.matchmakingSocket.addEventListener('participants', this.handleParticipants);
+  }
+
+  detachListeners() {
+    this.matchmakingSocket.removeEventListener('match_found', this.handleMatchFound);
+    this.matchmakingSocket.removeEventListener('game_winner', this.handleGameWinner);
+    this.matchmakingSocket.removeEventListener('game_loser', this.handleGameLoser);
+    this.matchmakingSocket.removeEventListener('tournament_winner', this.handleTournamentWinner);
+    this.matchmakingSocket.removeEventListener('participants', this.handleParticipants);
+  }
+
   async cancelQueue() {
     try {
       const res = await cancelQueue();
@@ -187,20 +208,6 @@ class MatchmakingManager {
       }
       this.setState({ phase: 'idle', role: 'player', gameId: '' });
     }
-  }
-
-  attachListeners() {
-    this.matchmakingSocket.addEventListener('match_found', this.handleMatchFound);
-    this.matchmakingSocket.addEventListener('game_winner', this.handleGameWinner);
-    this.matchmakingSocket.addEventListener('game_loser', this.handleGameLoser);
-    this.matchmakingSocket.addEventListener('tournament_winner', this.handleTournamentWinner);
-  }
-
-  detachListeners() {
-    this.matchmakingSocket.removeEventListener('match_found', this.handleMatchFound);
-    this.matchmakingSocket.removeEventListener('game_winner', this.handleGameWinner);
-    this.matchmakingSocket.removeEventListener('game_loser', this.handleGameLoser);
-    this.matchmakingSocket.removeEventListener('tournament_winner', this.handleTournamentWinner);
   }
 
   cleanup() {

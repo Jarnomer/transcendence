@@ -109,4 +109,15 @@ export class GameController {
     }
     reply.code(200).send({ status: 'deleted' });
   }
+
+  async sessionStatus(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    const { game_id, queue_id } = request.query as { game_id: string; queue_id: string };
+    const userGame = await this.gameService.getGameID(user_id);
+    const isGameValid = (userGame && userGame.game_id === game_id) as boolean;
+    const userQueue = await this.queueService.isInQueue(user_id);
+    const isQueueValid = (userQueue && userQueue.queue_id === queue_id) as boolean;
+    request.log.trace(`Getting game session status for user ${user_id}`);
+    reply.code(200).send({ game_session: isGameValid, queue_session: isQueueValid });
+  }
 }

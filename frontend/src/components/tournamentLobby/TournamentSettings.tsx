@@ -1,7 +1,7 @@
-// import React from 'react';
+import React from 'react';
 
-// import { GameOptions } from '../gameOptions/GameOptions';
+import { GameOptions } from '../gameOptions/GameOptions';
 
-// export const TournamentSettings: React.FC = () => {
-//   return <GameOptions></GameOptions>;
-// };
+export const TournamentSettings: React.FC = () => {
+  return <GameOptions></GameOptions>;
+};

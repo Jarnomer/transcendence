@@ -63,6 +63,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
     let interval: NodeJS.Timeout;
 
     if (opponentFound) {
+      console.log('Opponent found');
       hideBackgroundGame();
       setTimeout(() => {
         setLoadingState('matchMakingAnimationLoading', false);

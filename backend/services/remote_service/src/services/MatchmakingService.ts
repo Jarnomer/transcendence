@@ -56,6 +56,10 @@ abstract class MatchmakingMode {
   abstract createMatch(playerIds: string[]): Promise<string>;
   abstract handleGameResult(gameId: string, winnerId: string): void;
 
+  getQueueMatches(queueId: string) {
+    return this.queueMatches.get(queueId);
+  }
+
   protected addUserToQueue(queueKey: string, player: Player): number {
     if (!this.queueMatches.has(queueKey)) {
       this.queueMatches.set(queueKey, []);
@@ -399,7 +403,8 @@ export class MatchmakingService {
    * matchmaking Find match for player based on players Elo
    * Elo range is expanded every by 50 until match is found
    */
-  async findMatch(user_id: string, mode: string) {
+  async findMatch(payload: any) {
+    const { user_id, mode } = payload;
     console.log(`Finding match for ${user_id} in ${mode} mode`);
     const playerElo = await this.gameService.getPlayerElo(user_id);
     console.log(`Player Elo: ${playerElo.elo}`);
@@ -417,8 +422,9 @@ export class MatchmakingService {
    * player joins a queue for a match
    * no match making is done
    */
-  async joinQueue(queueId: string, user_id: string, mode: string) {
-    console.log(`Joining match for ${user_id} in queue: ${queueId}`);
+  async joinQueue(payload: any) {
+    const { queue_id, user_id, mode, avatar_url, display_name } = payload;
+    console.log(`Joining match for ${user_id} in queue: ${queue_id}`);
     const playerElo = await this.gameService.getPlayerElo(user_id);
     const player: Player = {
       user_id,
@@ -426,7 +432,20 @@ export class MatchmakingService {
       elo: playerElo.elo,
       joinedAt: new Date(),
     };
-    this.matchmakers[mode].joinQueue(queueId, player);
+    this.matchmakers[mode].joinQueue(queue_id, player);
+    const matches = this.matchmakers[mode].getQueueMatches(queue_id);
+    const message = {
+      type: 'participants',
+      state: {
+        user_id,
+        avatar_url,
+        display_name,
+      },
+    };
+    if (matches) {
+      const players = matches.map((p) => p.user_id);
+      this.broadcast(players, message);
+    }
   }
 
   /**
@@ -448,15 +467,15 @@ export class MatchmakingService {
       this.removePlayerFromQueue(data.user_id, data.mode);
     }
     if (data.type === 'find_match') {
-      await this.findMatch(data.payload.user_id, data.payload.mode);
+      await this.findMatch(data.payload);
     }
     if (data.type === 'join_match') {
-      await this.joinQueue(data.payload.queue_id, data.payload.user_id, data.payload.mode);
+      await this.joinQueue(data.payload);
     }
   }
 
-  broadcast(players: string[], message: object): void {
-    for (const playerId of players) {
+  broadcast(playerIds: string[], message: object): void {
+    for (const playerId of playerIds) {
       const connection = this.clients.get(playerId);
       if (!connection) {
         console.error('Player not found:', playerId);
