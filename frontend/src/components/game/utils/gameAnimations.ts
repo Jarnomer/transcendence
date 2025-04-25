@@ -296,11 +296,12 @@ export function animatePaddleAfterScore(
 
   const distanceBehindCamera = 8;
   const xOffsetAmount = 3;
+  const paddleY = centerY + 2; // FIX temporary solution for right height
 
   const xOffset = scoringDirection === 'right' ? xOffsetAmount : -xOffsetAmount;
   const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
   const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
-  const dropFinalPos = new Vector3(centerX, centerY, paddleZ);
+  const dropFinalPos = new Vector3(centerX, paddleY, paddleZ);
 
   dropStartPos.x = centerX + xOffset;
   dropStartPos.z += 5;

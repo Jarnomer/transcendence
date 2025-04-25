@@ -48,6 +48,7 @@ import {
   PowerUp,
   RetroEffectsLevels,
   defaultGameParams,
+  defaultGameObjectParams,
   defaultRetroEffectsBaseParams,
   defaultRetroEffectsLevels,
   retroEffectsPresets,
@@ -339,6 +340,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
       ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
       ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
+      ballRef.current.position.z = defaultGameObjectParams.distanceFromFloor;
     }
 
     prevBallState.current = {
