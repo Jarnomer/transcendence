@@ -90,6 +90,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchRequestsSent();
     } catch (error) {
       setUser(null);
+      cleanLocalStorage();
       setLoading(false);
     } finally {
       setLoading(false);
