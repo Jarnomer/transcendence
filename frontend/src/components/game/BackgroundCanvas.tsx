@@ -19,10 +19,10 @@ import {
   applyGameplayCameraAngle,
   gameplayCameraAngles,
   getNextCinematicCameraAngle,
-  applyCollisionEffects,
+  applyBackgroundCollisionEffects,
+  applyBackgroundScoreEffects,
   applyLowQualitySettings,
   applyBallEffects,
-  applyScoreEffects,
   createBall,
   createEdge,
   createFloor,
@@ -106,19 +106,17 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       cameraMoveTimerRef.current = null;
     }
 
-    const pipeline = postProcessingRef.current;
-
     if (gameMode === 'background') {
       const cinematicAngle = getNextCinematicCameraAngle();
 
-      applyCinematicCameraAngle(cameraRef.current, cinematicAngle, pipeline);
+      applyCinematicCameraAngle(cameraRef.current, cinematicAngle);
       animateCinematicCamera(cameraRef.current, cinematicAngle);
 
       cameraMoveTimerRef.current = window.setInterval(() => {
         if (cameraRef.current) {
           const nextCinematicAngle = getNextCinematicCameraAngle();
 
-          applyCinematicCameraAngle(cameraRef.current, nextCinematicAngle, pipeline);
+          applyCinematicCameraAngle(cameraRef.current, nextCinematicAngle);
           animateCinematicCamera(cameraRef.current, nextCinematicAngle);
 
           if (retroEffectsRef.current) {
@@ -341,74 +339,49 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
     const primaryColor = themeColors.current.primaryColor;
 
-    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
-    player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
-    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
-    player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
-    ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
-    ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
-
     const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const ballAngle = Math.atan2(ball.dx, -ball.dy);
 
-    const collisionType =
-      gameStatus === 'playing' ? detectCollision(prevBallState.current.dx, ball.dx, ball.y) : null;
+    if (gameMode === 'background') {
+      player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+      player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
+      player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+      player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
+      ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+      ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
 
-    // const scoringPlayer =
-    //   gameMode === 'active'
-    //     ? detectScore(players.player1.score, players.player2.score, lastScoreRef.current, ball.dx)
-    //     : null;
+      applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
 
-    applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
+      prevBallState.current = {
+        x: ball.x,
+        y: ball.y,
+        dx: ball.dx,
+        dy: ball.dy,
+        spin: ball.spin,
+      };
+    } else {
+      const collisionType = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
 
-    if (collisionType) {
-      const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
-      const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
-      const applyGlitch = gameMode === 'active' ? true : false;
+      if (collisionType) {
+        applyBackgroundCollisionEffects(retroEffectsRef.current, ballSpeed, ball.spin, true);
+      }
 
-      applyCollisionEffects(
-        retroEffectsRef.current,
-        ballRef.current,
-        paddleToRecoil,
-        edgeToDeform,
-        collisionType,
-        ballSpeed,
-        ball.spin,
-        primaryColor,
-        applyGlitch,
-        null
+      const scoringPlayer = detectScore(
+        players.player1.score,
+        players.player2.score,
+        lastScoreRef.current,
+        ball.dx
       );
+
+      if (scoringPlayer) {
+        applyBackgroundScoreEffects(
+          retroEffectsRef.current,
+          players[scoringPlayer].score,
+          ballSpeed,
+          ball.spin
+        );
+      }
     }
-
-    // if (gameMode === 'active' && scoringPlayer) {
-    //   const scoringPlayerPaddle =
-    //     scoringPlayer === 'player1' ? player1Ref.current : player2Ref.current;
-    //   const scoredAgainstPaddle =
-    //     scoringPlayer === 'player1' ? player2Ref.current : player1Ref.current;
-
-    //   applyScoreEffects(
-    //     retroEffectsRef.current,
-    //     sceneRef.current,
-    //     cameraRef.current,
-    //     topEdgeRef.current,
-    //     bottomEdgeRef.current,
-    //     scoringPlayerPaddle,
-    //     scoredAgainstPaddle,
-    //     players[scoringPlayer].score,
-    //     ballSpeed,
-    //     ball,
-    //     primaryColor,
-    //     null
-    //   );
-    // }
-
-    prevBallState.current = {
-      x: ball.x,
-      y: ball.y,
-      dx: ball.dx,
-      dy: ball.dy,
-      spin: ball.spin,
-    };
   }, [gameState]);
 
   return <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />;

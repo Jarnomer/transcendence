@@ -15,3 +15,4 @@ export * from './gameSoundEffects';
 export * from './gameMusicManager';
 export * from './gameShaders';
 export * from './gameUtilities';
+export * from './gameBackgroundEffects';
