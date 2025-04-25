@@ -7,33 +7,34 @@ import {
   DefaultRenderingPipeline,
   Engine,
   Mesh,
+  PBRMaterial,
   Scene,
 } from 'babylonjs';
 
 import {
   RetroEffectsManager,
-  createPongRetroEffects,
   animateCinematicCamera,
   animateGameplayCamera,
-  applyCinematicCameraAngle,
-  applyGameplayCameraAngle,
-  gameplayCameraAngles,
-  getNextCinematicCameraAngle,
   applyBackgroundCollisionEffects,
   applyBackgroundScoreEffects,
-  applyLowQualitySettings,
   applyBallEffects,
+  applyCinematicCameraAngle,
+  applyCollisionEffects,
+  applyGameplayCameraAngle,
+  applyLowQualitySettings,
   createBall,
   createEdge,
   createFloor,
   createPaddle,
-  detectScore,
+  createPongRetroEffects,
   detectCollision,
+  detectScore,
+  enableRequiredExtensions,
   gameToSceneX,
   gameToSceneY,
-  enableRequiredExtensions,
+  gameplayCameraAngles,
+  getNextCinematicCameraAngle,
   getThemeColorsFromDOM,
-  parseColor,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
@@ -48,6 +49,7 @@ import {
   cinematicRetroEffectsLevels,
   defaultCameraTimings,
   defaultCinematicGlitchTimings,
+  defaultGameObjectParams,
   defaultGameParams,
   defaultRetroCinematicBaseParams,
   defaultRetroEffectTimings,
@@ -200,10 +202,14 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
-    const { primaryColor, backgroundColor } = colors;
+    const { primaryColor, gameboardColor, sceneBackgroundColor } = colors;
 
-    const bgColor = parseColor('#33353e');
-    scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
+    scene.clearColor = new Color4(
+      sceneBackgroundColor.r,
+      sceneBackgroundColor.g,
+      sceneBackgroundColor.b,
+      1.0
+    );
 
     const camera = setupSceneCamera(scene);
 
@@ -231,7 +237,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     postProcessingRef.current = pipeline;
     lastGameModeRef.current = gameMode;
 
-    floorRef.current = createFloor(scene, backgroundColor);
+    floorRef.current = createFloor(scene, gameboardColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
     bottomEdgeRef.current = createEdge(scene, primaryColor);
     player1Ref.current = createPaddle(scene, primaryColor);
@@ -320,6 +326,71 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     }
   }, [gameMode]);
 
+  // Handle theme changes
+  useEffect(() => {
+    if (!sceneRef.current || !themeColors.current) return;
+
+    const colors = getThemeColorsFromDOM(theme);
+    const { primaryColor, gameboardColor, sceneBackgroundColor } = colors;
+
+    themeColors.current = colors;
+
+    if (sceneRef.current) {
+      sceneRef.current.clearColor = new Color4(
+        sceneBackgroundColor.r,
+        sceneBackgroundColor.g,
+        sceneBackgroundColor.b,
+        1.0
+      );
+    }
+
+    if (floorRef.current && floorRef.current.material) {
+      const floorMaterial = floorRef.current.material as PBRMaterial;
+      const multipleColor = defaultGameObjectParams.floor.colorMultiplier;
+      const adjustedColor = new Color3(
+        Math.max(multipleColor, gameboardColor.r),
+        Math.max(multipleColor, gameboardColor.g),
+        Math.max(multipleColor, gameboardColor.b)
+      );
+      floorMaterial.albedoColor = adjustedColor;
+      floorMaterial.emissiveColor = new Color3(
+        gameboardColor.r * defaultGameObjectParams.floor.emissiveColorMultiplier,
+        gameboardColor.g * defaultGameObjectParams.floor.emissiveColorMultiplier,
+        gameboardColor.b * defaultGameObjectParams.floor.emissiveColorMultiplier
+      );
+    }
+
+    const gameObjects = [
+      topEdgeRef.current,
+      bottomEdgeRef.current,
+      player1Ref.current,
+      player2Ref.current,
+      ballRef.current,
+    ];
+
+    gameObjects.forEach((mesh) => {
+      if (mesh && mesh.material) {
+        const material = mesh.material as PBRMaterial;
+        material.albedoColor = primaryColor;
+
+        let emissiveMultiplier;
+        if (mesh === ballRef.current) {
+          emissiveMultiplier = defaultGameObjectParams.ball.emissiveColorMultiplier;
+        } else if (mesh === topEdgeRef.current || mesh === bottomEdgeRef.current) {
+          emissiveMultiplier = defaultGameObjectParams.edge.emissiveColorMultiplier;
+        } else {
+          emissiveMultiplier = defaultGameObjectParams.paddle.emissiveColorMultiplier;
+        }
+
+        material.emissiveColor = new Color3(
+          primaryColor.r * emissiveMultiplier,
+          primaryColor.g * emissiveMultiplier,
+          primaryColor.b * emissiveMultiplier
+        );
+      }
+    });
+  }, [theme]);
+
   // Handle game objects
   useEffect(() => {
     if (
@@ -342,6 +413,8 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const ballSpeed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
     const ballAngle = Math.atan2(ball.dx, -ball.dy);
 
+    const collisionType = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
+
     if (gameMode === 'background') {
       player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
       player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
@@ -352,6 +425,24 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
       applyBallEffects(ballRef.current, ballSpeed, ballAngle, ball.spin, primaryColor);
 
+      if (collisionType) {
+        const paddleToRecoil = ball.dx > 0 ? player1Ref.current : player2Ref.current;
+        const edgeToDeform = ball.dy > 0 ? topEdgeRef.current : bottomEdgeRef.current;
+
+        applyCollisionEffects(
+          retroEffectsRef.current,
+          ballRef.current,
+          paddleToRecoil,
+          edgeToDeform,
+          collisionType,
+          ballSpeed,
+          ball.spin,
+          primaryColor,
+          true,
+          null
+        );
+      }
+
       prevBallState.current = {
         x: ball.x,
         y: ball.y,
@@ -360,8 +451,6 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         spin: ball.spin,
       };
     } else {
-      const collisionType = detectCollision(prevBallState.current.dx, ball.dx, ball.y);
-
       if (collisionType) {
         applyBackgroundCollisionEffects(retroEffectsRef.current, ballSpeed, ball.spin, true);
       }

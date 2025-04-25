@@ -1,12 +1,12 @@
 import {
+  Color3,
+  DefaultRenderingPipeline,
+  DynamicTexture,
   Engine,
   Mesh,
   Scene,
-  Texture,
-  Color3,
-  DynamicTexture,
-  DefaultRenderingPipeline,
   ShadowGenerator,
+  Texture,
 } from 'babylonjs';
 
 import { getThemeColors } from '@game/utils';
@@ -127,8 +127,16 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
+  const gameboardColor = computedStyle.getPropertyValue('--color-gameboard').trim();
+  const sceneBackgroundColor = computedStyle.getPropertyValue('--color-scene-background').trim();
 
-  return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
+  return getThemeColors(
+    primaryColor,
+    secondaryColor,
+    backgroundColor,
+    gameboardColor,
+    sceneBackgroundColor
+  );
 }
 
 function optimizeShadowGenerators(shadowGenerators: ShadowGenerator[]) {

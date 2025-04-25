@@ -2,10 +2,9 @@ import React, { useEffect, useRef } from 'react';
 
 import {
   ArcRotateCamera,
-  Color3,
-  Color4,
-  DefaultRenderingPipeline,
   BlurPostProcess,
+  Color3,
+  DefaultRenderingPipeline,
   Engine,
   Mesh,
   Scene,
@@ -33,12 +32,11 @@ import {
   gameToSceneY,
   getGameSoundManager,
   getThemeColorsFromDOM,
-  parseColor,
+  setupBlurEffect,
   setupPostProcessing,
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  setupBlurEffect,
 } from '@game/utils';
 
 import {
@@ -47,8 +45,8 @@ import {
   PlayerEffects,
   PowerUp,
   RetroEffectsLevels,
-  defaultGameParams,
   defaultGameObjectParams,
+  defaultGameParams,
   defaultRetroEffectsBaseParams,
   defaultRetroEffectsLevels,
   retroEffectsPresets,
@@ -115,10 +113,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const scene = new Scene(engine);
 
     const colors = getThemeColorsFromDOM(theme);
-    const { primaryColor, backgroundColor } = colors;
-
-    const bgColor = parseColor('#33353e');
-    scene.clearColor = new Color4(bgColor.r, bgColor.g, bgColor.b, 1.0);
+    const { primaryColor, gameboardColor } = colors;
 
     const camera = setupSceneCamera(scene);
 
@@ -147,7 +142,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     postProcessingRef.current = pipeline;
     blurEffectsRef.current = blurEffects;
 
-    floorRef.current = createFloor(scene, backgroundColor);
+    floorRef.current = createFloor(scene, gameboardColor);
     topEdgeRef.current = createEdge(scene, primaryColor);
     bottomEdgeRef.current = createEdge(scene, primaryColor);
     player1Ref.current = createPaddle(scene, primaryColor);
