@@ -350,11 +350,11 @@ export class PowerUpEffectsManager {
 
     effect.collected = true;
 
-    // if (this.isPowerUpNegative(effect.type)) {
-    //   if (this.soundManager) this.soundManager.playNegativePowerUpSound();
-    // } else {
-    //   if (this.soundManager) this.soundManager.playPositivePowerUpSound();
-    // }
+    if (this.isPowerUpNegative(effect.type)) {
+      if (this.soundManager) this.soundManager.playNegativePowerUpSound();
+    } else {
+      if (this.soundManager) this.soundManager.playPositivePowerUpSound();
+    }
 
     // Animate icon scaling
     const scaleAnim = new Animation(

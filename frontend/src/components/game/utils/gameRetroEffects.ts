@@ -422,7 +422,7 @@ export function createPongRetroEffects(
 
   switch (preset) {
     case 'default':
-      manager.enableCRT().enableScanlines().enableVHS();
+      manager.enableScanlines().enableVHS();
       break;
 
     case 'cinematic':

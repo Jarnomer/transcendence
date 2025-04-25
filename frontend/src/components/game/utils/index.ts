@@ -4,6 +4,7 @@ export * from './gameCollisionEffects';
 export * from './gameColorConverter';
 export * from './gameObjects';
 export * from './gameCamera.ts';
+export * from './gameAnimations.ts';
 export * from './gamePlayerEffects.ts';
 export * from './gamePowerUpEffects';
 export * from './gamePostProcess';

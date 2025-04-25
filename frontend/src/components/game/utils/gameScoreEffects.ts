@@ -20,6 +20,8 @@ import {
   applyCameraShake,
   gameToSceneX,
   gameToSceneY,
+  animateBallAfterScore,
+  animatePaddleAfterScore,
 } from '@game/utils';
 
 import { Ball, defaultGameParams } from '@shared/types';
@@ -113,7 +115,6 @@ function applyBallParticles(
 
   const particleSystem = new ParticleSystem('ballExplosionParticles', 150, scene);
 
-  // particleSystem.particleTexture = createParticleTexture(scene, primaryColor);
   particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
   particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
 
@@ -161,10 +162,9 @@ export function applyPaddleExplosion(
   scoringDirection: 'left' | 'right',
   ballY: number,
   effectDelay: number,
+  camera: ArcRotateCamera | null | undefined,
   duration: number = 2000
 ): void {
-  const originalPosition = paddle.position.clone();
-
   setTimeout(() => {
     paddle.visibility = 0;
     const fragments = createPaddleFragments(scene, paddle, intensity);
@@ -172,13 +172,16 @@ export function applyPaddleExplosion(
   }, effectDelay);
 
   setTimeout(() => {
-    const gameWidth = defaultGameParams.dimensions.gameWidth;
-    const x: number = originalPosition.x < 0 ? 0 : gameWidth;
-    const y = defaultGameParams.dimensions.gameHeight / 2;
-
-    paddle.visibility = 1;
-    paddle.position.x = gameToSceneX(x, paddle);
-    paddle.position.y = gameToSceneY(y, paddle);
+    if (camera) {
+      animatePaddleAfterScore(
+        scene,
+        paddle,
+        camera,
+        scoringDirection,
+        defaultGameParams.dimensions.gameWidth,
+        defaultGameParams.dimensions.gameHeight
+      );
+    }
   }, duration);
 }
 
@@ -569,15 +572,34 @@ export function applyScoreEffects(
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
   scoredAgainstPaddle: Mesh,
+  ballMesh: Mesh,
   playerScore: number,
   ballSpeed: number,
   ball: Ball,
   primaryColor: Color3,
+  gameWidth: number = defaultGameParams.dimensions.gameWidth,
+  gameHeight: number = defaultGameParams.dimensions.gameHeight,
+  onAnimationComplete?: () => void,
   soundManagerRef?: GameSoundManager | null | undefined
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
+  const scoringPlayer: 'player1' | 'player2' = ballDirection === 'right' ? 'player2' : 'player1';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
   const effectDelay = calculateScoreEffectDelay(ballSpeed);
+
+  if (camera && ballMesh) {
+    animateBallAfterScore(
+      scene,
+      ballMesh,
+      ball,
+      camera,
+      scoringPlayer,
+      gameWidth,
+      gameHeight,
+      defaultGameParams.dimensions.scaleFactor,
+      onAnimationComplete
+    );
+  }
 
   applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
   applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
@@ -588,7 +610,9 @@ export function applyScoreEffects(
     intensityFactor,
     ballDirection,
     ball.y,
-    effectDelay
+    effectDelay,
+    camera,
+    2000
   );
 
   applyBallParticles(
@@ -601,11 +625,11 @@ export function applyScoreEffects(
     primaryColor
   );
 
-  // if (soundManagerRef) {
-  //   setTimeout(() => {
-  //     soundManagerRef.playScoreSound();
-  //   }, effectDelay);
-  // }
+  if (soundManagerRef) {
+    setTimeout(() => {
+      soundManagerRef.playScoreSound();
+    }, effectDelay);
+  }
 
   if (camera) {
     const shakeIntensity = 0.5 + intensityFactor * 1.0;

@@ -149,7 +149,7 @@ export const defaultGameObjectParams: GameObjectParams = {
     depth:
       (defaultGameParams.dimensions.gameHeight / defaultGameParams.dimensions.scaleFactor) * 1.55,
     positionZ: 1.2,
-    colorMultiplier: 0.25,
+    colorMultiplier: 0.15,
     emissiveColorMultiplier: 0.1,
     metallic: 0.8,
     roughness: 0.2,

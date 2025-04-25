@@ -1,15 +1,12 @@
-import {
-  Vector3,
-  Animation,
-  Color3,
-  GlowLayer,
-  MeshBuilder,
-  PBRMaterial,
-  Scene,
-  Path3D,
-} from 'babylonjs';
+import { Vector3, Color3, GlowLayer, MeshBuilder, PBRMaterial, Scene, Path3D } from 'babylonjs';
 
-import { createSafeTexture } from '@game/utils';
+import {
+  createFloorHoverAnimation,
+  createEdgeHoverAnimation,
+  createPaddleHoverAnimation,
+  createBallHoverAnimation,
+  createSafeTexture,
+} from '@game/utils';
 
 import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
 
@@ -68,23 +65,7 @@ export function createEdge(
   glowLayer.blurKernelSize = params.edge.glowLayerBlurKernelSize;
   glowLayer.addIncludedOnlyMesh(tube);
 
-  const frameRate = 30;
-  const hoverAnimation = new Animation(
-    `edgeHoverAnimation`,
-    'position.z',
-    frameRate,
-    Animation.ANIMATIONTYPE_FLOAT,
-    Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-
-  const keys = [];
-  keys.push({ frame: 0, value: params.edge.animation.bottomValue });
-  keys.push({ frame: frameRate, value: params.edge.animation.topValue });
-  keys.push({ frame: frameRate * 2, value: params.edge.animation.bottomValue });
-
-  hoverAnimation.setKeys(keys);
-  tube.animations = [hoverAnimation];
-  scene.beginAnimation(tube, 0, frameRate * 2, true);
+  createEdgeHoverAnimation(tube, scene, params);
 
   // Save the original points for deformation
   tube.metadata = {
@@ -172,63 +153,7 @@ export function createFloor(
   floor.receiveShadows = true;
   floor.material = pbr;
 
-  const frameRate = 30;
-  const tiltAmount = 0.02;
-  const floatAmount = 0.1;
-
-  const rotationAnimationY = new Animation(
-    'floorRotationAnimationY',
-    'rotation.y',
-    frameRate,
-    Animation.ANIMATIONTYPE_FLOAT,
-    Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-
-  const rotationAnimationZ = new Animation(
-    'floorRotationAnimationZ',
-    'rotation.z',
-    frameRate,
-    Animation.ANIMATIONTYPE_FLOAT,
-    Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-
-  const positionAnimation = new Animation(
-    'floorPositionAnimation',
-    'position.y',
-    frameRate,
-    Animation.ANIMATIONTYPE_FLOAT,
-    Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-
-  const rotationKeysY = [];
-  rotationKeysY.push({ frame: 0, value: 0 });
-  rotationKeysY.push({ frame: frameRate / 2, value: tiltAmount });
-  rotationKeysY.push({ frame: frameRate, value: 0 });
-  rotationKeysY.push({ frame: frameRate * 1.5, value: -tiltAmount });
-  rotationKeysY.push({ frame: frameRate * 2, value: 0 });
-
-  const rotationKeysZ = [];
-  rotationKeysZ.push({ frame: 0, value: 0 });
-  rotationKeysZ.push({ frame: frameRate / 3, value: tiltAmount / 2 });
-  rotationKeysZ.push({ frame: frameRate, value: 0 });
-  rotationKeysZ.push({ frame: (frameRate * 5) / 3, value: -tiltAmount / 2 });
-  rotationKeysZ.push({ frame: frameRate * 2, value: 0 });
-
-  const positionKeys = [];
-  const initialPositionY = floor.position.y || 0;
-  positionKeys.push({ frame: 0, value: initialPositionY });
-  positionKeys.push({ frame: frameRate / 2, value: initialPositionY - floatAmount });
-  positionKeys.push({ frame: frameRate, value: initialPositionY });
-  positionKeys.push({ frame: frameRate * 1.5, value: initialPositionY + floatAmount });
-  positionKeys.push({ frame: frameRate * 2, value: initialPositionY });
-
-  rotationAnimationY.setKeys(rotationKeysY);
-  rotationAnimationZ.setKeys(rotationKeysZ);
-  positionAnimation.setKeys(positionKeys);
-
-  floor.animations = [rotationAnimationY, rotationAnimationZ, positionAnimation];
-
-  scene.beginAnimation(floor, 0, frameRate * 2, true);
+  createFloorHoverAnimation(floor, scene);
 
   return floor;
 }
@@ -278,23 +203,7 @@ export function createPaddle(
   glowLayer.blurKernelSize = params.paddle.glowLayerBlurKernelSize;
   glowLayer.addIncludedOnlyMesh(paddle);
 
-  const frameRate = 30;
-  const hoverAnimation = new Animation(
-    'paddleHoverAnimation',
-    'position.z',
-    frameRate,
-    Animation.ANIMATIONTYPE_FLOAT,
-    Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-
-  const keys = [];
-  keys.push({ frame: 0, value: params.paddle.animation.bottomValue });
-  keys.push({ frame: frameRate, value: params.paddle.animation.topValue });
-  keys.push({ frame: frameRate * 2, value: params.paddle.animation.bottomValue });
-
-  hoverAnimation.setKeys(keys);
-  paddle.animations = [hoverAnimation];
-  scene.beginAnimation(paddle, 0, frameRate * 2, true);
+  createPaddleHoverAnimation(paddle, scene, params);
 
   return paddle;
 }
@@ -344,26 +253,7 @@ export function createBall(
   glowLayer.blurKernelSize = params.ball.glowLayerBlurKernelSize;
   glowLayer.addIncludedOnlyMesh(ball);
 
-  const frameRate = 30;
-  const hoverAnimation = new Animation(
-    'ballHoverAnimation',
-    'position.z',
-    frameRate,
-    Animation.ANIMATIONTYPE_FLOAT,
-    Animation.ANIMATIONLOOPMODE_CYCLE
-  );
-
-  const keys = [];
-
-  keys.push({ frame: 0, value: params.ball.animation.bottomValue });
-  keys.push({ frame: frameRate, value: params.ball.animation.topValue });
-  keys.push({ frame: frameRate * 2, value: params.ball.animation.bottomValue });
-
-  hoverAnimation.setKeys(keys);
-
-  ball.animations = [hoverAnimation];
-
-  scene.beginAnimation(ball, 0, frameRate * 2, true);
+  createBallHoverAnimation(ball, scene, params);
 
   return ball;
 }
