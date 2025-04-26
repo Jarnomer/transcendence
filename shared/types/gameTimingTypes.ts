@@ -1,18 +1,15 @@
 export interface RetroEffectTimings {
   trackingDistortionIntensity: number;
   trackingDistortionDuration: number;
-  standardGlitchDuration: number;
-  scoreGlitchDuration: number;
   collisionGlitchDuration: number;
 }
 
 export interface CameraTimings {
-  cameraMoveInterval: number;
+  cameraSwitchAngleInterval: number;
   cameraTransitionDuration: number;
-  cameraInitialDelay: number;
-  cameraAnimationDuration: number;
 }
 
+// Used for background random glitch
 export interface CinematicGlitchTimings {
   baseEffectInterval: number;
   additiveEffectInterval: number;
@@ -25,29 +22,17 @@ export interface CinematicGlitchTimings {
 export interface GameAnimationTimings {
   retroEffects: RetroEffectTimings;
   camera: CameraTimings;
-
-  fadeInDuration: number;
-  fadeOutDuration: number;
-  matchmakingAnimationDuration: number;
-  countdownDuration: number;
-  scoreDisplayDuration: number;
-  gameOverAnimationDuration: number;
 }
 
 export const defaultRetroEffectTimings: RetroEffectTimings = {
   trackingDistortionIntensity: 4,
   trackingDistortionDuration: 800,
-
-  standardGlitchDuration: 200,
-  scoreGlitchDuration: 400,
   collisionGlitchDuration: 300,
 };
 
 export const defaultCameraTimings: CameraTimings = {
-  cameraMoveInterval: 12000,
+  cameraSwitchAngleInterval: 12000,
   cameraTransitionDuration: 2000,
-  cameraInitialDelay: 500,
-  cameraAnimationDuration: 5000,
 };
 
 export const defaultCinematicGlitchTimings: CinematicGlitchTimings = {
@@ -62,11 +47,4 @@ export const defaultCinematicGlitchTimings: CinematicGlitchTimings = {
 export const defaultGameAnimationTimings: GameAnimationTimings = {
   retroEffects: defaultRetroEffectTimings,
   camera: defaultCameraTimings,
-
-  fadeInDuration: 1000,
-  fadeOutDuration: 1000,
-  matchmakingAnimationDuration: 3000,
-  countdownDuration: 3000,
-  scoreDisplayDuration: 5000,
-  gameOverAnimationDuration: 5000,
 };

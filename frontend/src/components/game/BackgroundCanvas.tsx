@@ -128,7 +128,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
             );
           }
         }
-      }, defaultCameraTimings.cameraMoveInterval);
+      }, defaultCameraTimings.cameraSwitchAngleInterval);
     } else {
       if (cameraRef.current) {
         const gameplayAngle = gameplayCameraAngles[0];

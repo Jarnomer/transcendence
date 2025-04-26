@@ -127,7 +127,7 @@ export function applyCinematicCameraAngle(camera: ArcRotateCamera, cameraAngle: 
 export const animateCinematicCamera = (
   camera: ArcRotateCamera,
   targetAngle: ArcCameraAngle,
-  duration: number = defaultGameAnimationTimings.camera.cameraAnimationDuration
+  duration: number = defaultGameAnimationTimings.camera.cameraTransitionDuration
 ) => {
   const scene = camera.getScene();
   const animations = [];
@@ -233,7 +233,7 @@ export function applyGameplayCameraAngle(camera: ArcRotateCamera, arcAngle: ArcC
 export function animateGameplayCamera(
   camera: ArcRotateCamera,
   targetAngle: ArcCameraAngle,
-  duration: number = defaultGameAnimationTimings.camera.cameraAnimationDuration
+  duration: number = defaultGameAnimationTimings.camera.cameraTransitionDuration
 ) {
   const scene = camera.getScene();
   const animations = [];

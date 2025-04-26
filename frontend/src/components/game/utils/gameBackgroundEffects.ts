@@ -36,7 +36,10 @@ export function applyBackgroundCollisionEffects(
   const spinFactor = Math.min(Math.max(spin / 5, 0.5), 2.0);
   const combinedFactor = Math.min(Math.max((speedFactor + spinFactor) / 5, 0.5), 1.0);
 
-  retroEffectsRef.setGlitchAmount(baseFactor + combinedFactor, 150);
+  retroEffectsRef.setGlitchAmount(
+    baseFactor + combinedFactor,
+    defaultRetroEffectTimings.collisionGlitchDuration
+  );
 }
 
 export function applyBackgroundScoreEffects(
