@@ -40,7 +40,7 @@ function applyLightEffect(
   effectDelay: number
 ): void {
   setTimeout(() => {
-    const direction = new Vector3(scoringDirection === 'right' ? -1 : 1, 0, -0.5).normalize();
+    const direction = new Vector3(scoringDirection === 'right' ? -2 : 2, 0, -3.0).normalize();
     const light = new DirectionalLight('scoreDirectionalLight', direction, scene);
 
     light.diffuse = color.clone().scale(1.5);
@@ -48,7 +48,7 @@ function applyLightEffect(
     light.intensity = 0;
 
     const frameRate = 60;
-    const maxIntensity = 1000 * intensity;
+    const maxIntensity = 100 * intensity;
 
     const lightAnimation = new Animation(
       'lightIntensityAnimation',
@@ -607,8 +607,8 @@ export function animateScoringPaddle(
   const originalScale = paddle.scaling.clone();
   const originalPosition = paddle.position.clone();
 
-  const maxScale = 1 + intensity;
-  const xShift = scoringDirection === 'right' ? 2 : -2;
+  const maxScale = 2 + intensity;
+  const xShift = scoringDirection === 'right' ? -2 : 2;
 
   const startTime = Date.now();
   const endGrowTime = startTime + growDuration;
@@ -674,9 +674,11 @@ export function animateScoringPaddle(
     }
     // End of animation
     else {
-      paddle.scaling.copyFrom(originalScale);
       paddle.position.x = originalPosition.x;
       paddle.position.y = 0;
+      paddle.scaling.x = 1;
+      paddle.scaling.y = 1;
+      paddle.scaling.z = 1;
 
       scene.onBeforeRenderObservable.remove(animationObserver);
     }
@@ -765,6 +767,10 @@ export function applyScoreEffects(
   applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
 
   applySoundEffects(effectDelay, soundManagerRef, scoreEffectTimings);
+
+  setTimeout(() => {
+    ballMesh.visibility = 0;
+  }, effectDelay);
 
   animateBallAfterScore(
     scene,

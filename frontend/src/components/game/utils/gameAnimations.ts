@@ -266,6 +266,7 @@ export function animateBallAfterScore(
   ballMesh.animations = [continueAnim];
   scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
     ballMesh.position = dropStartPos;
+    ballMesh.visibility = 1;
     ballMesh.animations = [dropAnim];
     scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
       restartHoverAnimation(ballMesh, scene);
