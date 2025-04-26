@@ -13,8 +13,8 @@ export class GameSoundManager {
   private readonly BASEURL = 'sounds/effects/game/';
 
   private readonly SOUND_CONFIGS = {
-    edge: { base: 'hit_edge', count: 4 },
-    paddle: { base: 'hit_paddle', count: 3 },
+    edge: { base: 'hit_edge', count: 3 },
+    paddle: { base: 'hit_paddle', count: 2 },
     ballFizzle: { base: 'ball_fizzle', count: 2 },
     score: { base: 'ball_explode', count: 2 },
   };

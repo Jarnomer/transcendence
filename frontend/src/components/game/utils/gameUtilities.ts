@@ -180,6 +180,10 @@ export function applyLowQualitySettings(
   optimizeShadowGenerators(shadowGenerators);
 }
 
+export function isPowerUpNegative(type: PowerUpType): boolean {
+  return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
+}
+
 export function getPowerUpIconPath(powerUpType: PowerUpType) {
   switch (powerUpType) {
     case PowerUpType.BiggerPaddle:

@@ -21,6 +21,7 @@ import {
   gameToSceneX,
   gameToSceneY,
   getPowerUpIconPath,
+  isPowerUpNegative,
 } from '@game/utils';
 
 import { PowerUp, PowerUpType, defaultGameObjectParams, defaultGameParams } from '@shared/types';
@@ -41,10 +42,6 @@ export class PowerUpEffectsManager {
   private secondaryColor: Color3;
   private powerUpSize: number;
   private soundManager?: GameSoundManager | null | undefined;
-
-  private isPowerUpNegative(type: PowerUpType): boolean {
-    return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
-  }
 
   constructor(
     scene: Scene,
@@ -350,7 +347,7 @@ export class PowerUpEffectsManager {
 
     effect.collected = true;
 
-    if (this.isPowerUpNegative(effect.type)) {
+    if (isPowerUpNegative(effect.type)) {
       if (this.soundManager) this.soundManager.playNegativePowerUpSound();
     } else {
       if (this.soundManager) this.soundManager.playPositivePowerUpSound();

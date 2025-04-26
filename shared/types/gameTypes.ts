@@ -1,4 +1,4 @@
-import { ParticleSystem, GlowLayer, Mesh } from 'babylonjs';
+import { GlowLayer, Mesh, ParticleSystem } from 'babylonjs';
 
 export interface Player {
   id: string;
@@ -178,11 +178,11 @@ export const defaultGameParams: GameParams = {
     reductionFactor: 0.5, // Spin reduction on static surfaces
   },
   powerUps: {
-    minSpawnInterval: 5000, // Milliseconds
-    maxSpawnInterval: 10000,
+    minSpawnInterval: 4000, // Milliseconds
+    maxSpawnInterval: 6000,
     despawnTime: 10000,
     expireTime: 10000,
-    size: 40,
+    size: 120,
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,
