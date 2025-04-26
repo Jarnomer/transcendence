@@ -18,6 +18,9 @@ export interface ScoreEffectTimings {
   paddleFizzleSoundDelay: number;
   ballFizzleSoundDelay: number;
   scoreSoundDelay: number;
+  scorePlayerAnimDuration: number;
+  scorePlayerGrowDuration: number;
+  scorePlayerShakeDuration: number;
 }
 
 // Used for background random glitch
@@ -65,6 +68,9 @@ export const defaultScoreEffectTimings: ScoreEffectTimings = {
   paddleFizzleSoundDelay: 2100,
   ballFizzleSoundDelay: 1300,
   scoreSoundDelay: 100,
+  scorePlayerAnimDuration: 2500,
+  scorePlayerGrowDuration: 300,
+  scorePlayerShakeDuration: 600
 };
 
 export const defaultGameAnimationTimings: GameAnimationTimings = {

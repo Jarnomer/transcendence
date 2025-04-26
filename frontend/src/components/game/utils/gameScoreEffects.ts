@@ -28,6 +28,7 @@ import {
 import {
   Ball,
   ScoreEffectTimings,
+  defaultGameAnimationTimings,
   defaultGameParams,
   defaultScoreEffectTimings,
 } from '@shared/types';
@@ -601,6 +602,97 @@ function calculateScoreEffectDelay(ballSpeed: number): number {
   return delay;
 }
 
+export function animateScoringPaddle(
+  scene: Scene,
+  paddle: Mesh,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): void {
+  const duration = scoreEffectTimings.scorePlayerAnimDuration;
+  const growDuration = scoreEffectTimings.scorePlayerGrowDuration;
+  const shakeDuration = scoreEffectTimings.scorePlayerShakeDuration;
+  const returnDuration = duration - growDuration - shakeDuration;
+
+  const originalScale = paddle.scaling.clone();
+  const originalPosition = paddle.position.clone();
+
+  const maxScale = 1 + intensity;
+  const xShift = scoringDirection === 'right' ? 2 : -2;
+
+  const startTime = Date.now();
+  const endGrowTime = startTime + growDuration;
+  const endShakeTime = endGrowTime + shakeDuration;
+  const endAnimTime = endShakeTime + returnDuration;
+
+  const easeOutQuad = (t: number) => t * (2 - t);
+  const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+  const animationObserver = scene.onBeforeRenderObservable.add(() => {
+    const currentTime = Date.now();
+
+    // Grow phase
+    if (currentTime < endGrowTime) {
+      const progress = (currentTime - startTime) / growDuration;
+      const easedProgress = easeOutQuad(Math.min(1, progress));
+      const currentScale = 1 + (maxScale - 1) * easedProgress;
+
+      paddle.scaling.x = originalScale.x * currentScale;
+      paddle.scaling.y = originalScale.y * currentScale;
+      paddle.scaling.z = originalScale.z * currentScale;
+
+      paddle.position.x = originalPosition.x + xShift * easedProgress;
+    }
+    // Shake phase
+    else if (currentTime < endShakeTime) {
+      const shakeProgress = (currentTime - endGrowTime) / shakeDuration;
+      const shakeAmplitude = 0.1 * intensity * Math.pow(1 - shakeProgress, 1.5);
+      const shakeFrequency = 15;
+
+      paddle.scaling.x =
+        originalScale.x *
+        maxScale *
+        (1 + Math.sin(shakeProgress * shakeFrequency * Math.PI * 2) * shakeAmplitude);
+      paddle.scaling.y =
+        originalScale.y *
+        maxScale *
+        (1 + Math.cos(shakeProgress * (shakeFrequency + 2) * Math.PI * 2) * shakeAmplitude);
+      paddle.scaling.z =
+        originalScale.z *
+        maxScale *
+        (1 + Math.sin(shakeProgress * (shakeFrequency - 2) * Math.PI * 2) * shakeAmplitude);
+
+      const posShake = 0.2 * intensity * Math.pow(1 - shakeProgress, 1.5);
+      paddle.position.x =
+        originalPosition.x +
+        xShift +
+        Math.sin(shakeProgress * (shakeFrequency + 1) * Math.PI * 2) * posShake;
+      paddle.position.y =
+        originalPosition.y + Math.cos(shakeProgress * shakeFrequency * Math.PI * 2) * posShake;
+    }
+    // Return phase
+    else if (currentTime < endAnimTime) {
+      const returnProgress = (currentTime - endShakeTime) / returnDuration;
+      const easedProgress = easeInOutQuad(Math.min(1, returnProgress));
+
+      paddle.scaling.x = originalScale.x * (maxScale - (maxScale - 1) * easedProgress);
+      paddle.scaling.y = originalScale.y * (maxScale - (maxScale - 1) * easedProgress);
+      paddle.scaling.z = originalScale.z * (maxScale - (maxScale - 1) * easedProgress);
+
+      paddle.position.x = originalPosition.x + xShift * (1 - easedProgress);
+      paddle.position.y = originalPosition.y * (1 - easedProgress);
+    }
+    // End of animation
+    else {
+      paddle.scaling.copyFrom(originalScale);
+      paddle.position.x = originalPosition.x;
+      paddle.position.y = 0;
+
+      scene.onBeforeRenderObservable.remove(animationObserver);
+    }
+  });
+}
+
 function calculateScoreEffectIntensity(
   playerScore: number,
   ballSpeed: number,
@@ -703,6 +795,14 @@ export function applyScoreEffects(
     ball.y,
     effectDelay,
     camera,
+    scoreEffectTimings
+  );
+
+  animateScoringPaddle(
+    scene,
+    scoringPlayerPaddle,
+    intensityFactor,
+    ballDirection,
     scoreEffectTimings
   );
 
