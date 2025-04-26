@@ -268,9 +268,7 @@ export function animateBallAfterScore(
     ballMesh.position = dropStartPos;
     ballMesh.animations = [dropAnim];
     scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
-      // Restart hover animation after drop completes
       restartHoverAnimation(ballMesh, scene);
-
       if (onAnimationComplete) onAnimationComplete();
     });
   });
@@ -284,7 +282,7 @@ export function animatePaddleAfterScore(
   onAnimationComplete?: () => void
 ): void {
   const frameRate = 30;
-  const gameWidth = defaultGameParams.dimensions.gameHeight;
+  const gameWidth = defaultGameParams.dimensions.gameWidth;
 
   const centerX = gameToSceneX(scoringDirection === 'right' ? gameWidth : 0, paddle);
   const centerY = 0;
@@ -328,9 +326,7 @@ export function animatePaddleAfterScore(
 
   paddle.animations = [dropAnim];
   scene.beginAnimation(paddle, 0, frameRate, false, 1, () => {
-    // Restart hover animation after drop completes
     restartHoverAnimation(paddle, scene);
-
     if (onAnimationComplete) onAnimationComplete();
   });
 }
