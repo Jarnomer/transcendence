@@ -452,6 +452,8 @@ export function applyNeonEdgeFlicker(
   effectIntensity: number,
   scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  effectIntensity /= 3; // Adjusting intensity
+
   const duration = scoreEffectTimings.edgeFlickerDuration;
   const edgeMaterial = topEdgeMesh.material as PBRMaterial;
   const originalEmissiveColor = edgeMaterial.emissiveColor.clone();
