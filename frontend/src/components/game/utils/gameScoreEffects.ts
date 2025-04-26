@@ -25,7 +25,12 @@ import {
   gameToSceneY,
 } from '@game/utils';
 
-import { Ball, defaultGameParams } from '@shared/types';
+import {
+  Ball,
+  ScoreEffectTimings,
+  defaultGameParams,
+  defaultScoreEffectTimings,
+} from '@shared/types';
 
 function applyLightEffect(
   scene: Scene,
@@ -35,7 +40,7 @@ function applyLightEffect(
   effectDelay: number
 ): void {
   setTimeout(() => {
-    const direction = new Vector3(scoringDirection === 'right' ? -1 : 1, -0.3, 0.5).normalize();
+    const direction = new Vector3(scoringDirection === 'right' ? -1 : 1, 0, -0.5).normalize();
     const light = new DirectionalLight('scoreDirectionalLight', direction, scene);
 
     light.diffuse = color.clone().scale(1.5);
@@ -43,7 +48,7 @@ function applyLightEffect(
     light.intensity = 0;
 
     const frameRate = 60;
-    const maxIntensity = 100 * intensity;
+    const maxIntensity = 1000 * intensity;
 
     const lightAnimation = new Animation(
       'lightIntensityAnimation',
@@ -108,8 +113,9 @@ function applyBallParticles(
   ball: Ball,
   effectDelay: number,
   primaryColor: Color3,
-  duration: number = 3000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scoreBallExplosionDuration;
   const ballSceneX = gameToSceneX(ball.x, paddle);
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
@@ -163,8 +169,9 @@ function createParticleFlares(
   scoringDirection: 'left' | 'right',
   ball: Ball,
   effectDelay: number,
-  duration: number = 3000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scoreBallExplosionDuration;
   const ballSceneX = gameToSceneX(ball.x, paddle);
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
@@ -214,12 +221,13 @@ export function applyPaddleExplosion(
   ballY: number,
   effectDelay: number,
   camera: ArcRotateCamera | null | undefined,
-  duration: number = 2000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scorePaddleExplosionDuration;
   setTimeout(() => {
     paddle.visibility = 0;
     const fragments = createPaddleFragments(scene, paddle, intensity);
-    animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY, duration);
+    animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY);
   }, effectDelay);
 
   setTimeout(() => {
@@ -322,8 +330,9 @@ function animatePaddleFragments(
   intensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  duration: number = 2000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scorePaddleExplosionDuration;
   const ballAbovePaddle = ballY < defaultGameParams.dimensions.gameHeight / 2;
   const baseDirection = scoringDirection === 'right' ? Math.PI : 0;
 
@@ -415,8 +424,9 @@ function animatePaddleFragments(
 
       fragment.metadata.lifeTime += deltaTime; // Track lifetime of fragment
 
+      const fadeProgressPhase = scoreEffectTimings.fadeStartPaddleMultiplier;
       const timeRatio = timeRemaining / duration;
-      const fadeProgressPhase = 0.4;
+
       let velocityScaleFactor = 1;
 
       if (timeRatio < fadeProgressPhase) {
@@ -438,8 +448,9 @@ export function applyNeonEdgeFlicker(
   bottomEdgeMesh: Mesh,
   playerColor: Color3,
   effectIntensity: number,
-  duration: number = 1800
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.edgeFlickerDuration;
   const edgeMaterial = topEdgeMesh.material as PBRMaterial;
   const originalEmissiveColor = edgeMaterial.emissiveColor.clone();
   const originalEmissiveIntensity = edgeMaterial.emissiveIntensity;
@@ -585,7 +596,7 @@ export function applyNeonEdgeFlicker(
 }
 
 function calculateScoreEffectDelay(ballSpeed: number): number {
-  const minDelay = 50;
+  const minDelay = 200;
   const maxDelay = 400;
   const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
   const delay = maxDelay - normalizedSpeed * (maxDelay - minDelay);
@@ -615,6 +626,26 @@ function calculateScoreEffectIntensity(
   return Math.min(scoreIntensity + endgameIntensity + physicsIntensity, 1.0);
 }
 
+export function applySoundEffects(
+  effectDelay: number,
+  soundManagerRef?: GameSoundManager | null | undefined,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): void {
+  if (!soundManagerRef) return;
+
+  setTimeout(() => {
+    soundManagerRef.playScoreSound();
+  }, effectDelay + scoreEffectTimings.scoreSoundDelay);
+
+  setTimeout(() => {
+    soundManagerRef.playPaddleFizzleSound();
+  }, scoreEffectTimings.paddleFizzleSoundDelay);
+
+  setTimeout(() => {
+    soundManagerRef.playBallFizzleSound();
+  }, scoreEffectTimings.ballFizzleSoundDelay);
+}
+
 export function applyScoreEffects(
   retroEffectsRef: RetroEffectsManager | null | undefined,
   scene: Scene,
@@ -631,14 +662,19 @@ export function applyScoreEffects(
   gameWidth: number = defaultGameParams.dimensions.gameWidth,
   gameHeight: number = defaultGameParams.dimensions.gameHeight,
   onAnimationComplete?: () => void,
-  soundManagerRef?: GameSoundManager | null | undefined
+  soundManagerRef?: GameSoundManager | null | undefined,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const scoringPlayer: 'player1' | 'player2' = ballDirection === 'right' ? 'player2' : 'player1';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
   const effectDelay = calculateScoreEffectDelay(ballSpeed);
 
-  if (camera && ballMesh) {
+  applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
+
+  applySoundEffects(effectDelay, soundManagerRef, scoreEffectTimings);
+
+  if (camera) {
     animateBallAfterScore(
       scene,
       ballMesh,
@@ -652,8 +688,14 @@ export function applyScoreEffects(
     );
   }
 
-  applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
-  applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
+  applyNeonEdgeFlicker(
+    scene,
+    topEdge,
+    bottomEdge,
+    primaryColor,
+    intensityFactor,
+    scoreEffectTimings
+  );
 
   applyPaddleExplosion(
     scene,
@@ -663,7 +705,7 @@ export function applyScoreEffects(
     ball.y,
     effectDelay,
     camera,
-    2000
+    scoreEffectTimings
   );
 
   applyBallParticles(
@@ -673,7 +715,8 @@ export function applyScoreEffects(
     ballDirection,
     ball,
     effectDelay,
-    primaryColor
+    primaryColor,
+    scoreEffectTimings
   );
 
   createParticleFlares(
@@ -682,14 +725,9 @@ export function applyScoreEffects(
     intensityFactor,
     ballDirection,
     ball,
-    effectDelay
+    effectDelay,
+    scoreEffectTimings
   );
-
-  if (soundManagerRef) {
-    setTimeout(() => {
-      soundManagerRef.playScoreSound();
-    }, effectDelay);
-  }
 
   if (camera) {
     const shakeIntensity = 0.5 + intensityFactor * 1.0;

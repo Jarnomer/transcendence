@@ -16,6 +16,7 @@ export class GameSoundManager {
     edge: { base: 'hit_edge', count: 3 },
     paddle: { base: 'hit_paddle', count: 2 },
     ballFizzle: { base: 'ball_fizzle', count: 2 },
+    paddleFizzle: { base: 'paddle_fizzle', count: 2 },
     score: { base: 'ball_explode', count: 2 },
   };
 
@@ -44,6 +45,7 @@ export class GameSoundManager {
   private edgeSounds: HTMLAudioElement[] = [];
   private paddleSounds: HTMLAudioElement[] = [];
   private ballFizzleSounds: HTMLAudioElement[] = [];
+  private paddleFizzleSounds: HTMLAudioElement[] = [];
   private scoreSounds: HTMLAudioElement[] = [];
 
   private soundEffectsVolume: number = defaultGameAudioOptions.soundEffects?.volume || 1.0;
@@ -76,6 +78,7 @@ export class GameSoundManager {
       this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.edge, this.edgeSounds);
       this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.paddle, this.paddleSounds);
       this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.ballFizzle, this.ballFizzleSounds);
+      this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.paddleFizzle, this.paddleFizzleSounds);
       this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.score, this.scoreSounds);
 
       this.allSounds = [
@@ -91,6 +94,7 @@ export class GameSoundManager {
         ...this.edgeSounds,
         ...this.paddleSounds,
         ...this.ballFizzleSounds,
+        ...this.paddleFizzleSounds,
         ...this.scoreSounds,
       ];
 
@@ -157,6 +161,18 @@ export class GameSoundManager {
     }
 
     this.updateLastSoundTime('ballFizzle');
+  }
+
+  playPaddleFizzleSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
+    if (!this.shouldPlaySound('paddleFizzle')) return;
+
+    const sound = this.getRandomSound(this.paddleFizzleSounds);
+    if (sound) {
+      sound.playbackRate = playbackRate;
+      this.playSound(sound, volumeMultiplier);
+    }
+
+    this.updateLastSoundTime('paddleFizzle');
   }
 
   playNegativePowerUpSound(volumeMultiplier: number = 1.0, playbackRate: number = 0.8): void {

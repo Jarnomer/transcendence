@@ -9,6 +9,17 @@ export interface CameraTimings {
   cameraTransitionDuration: number;
 }
 
+export interface ScoreEffectTimings {
+  scorePaddleExplosionDuration: number;
+  scoreBallExplosionDuration: number;
+  fadeStartPaddleMultiplier: number;
+  fadeStartBallMultiplier: number;
+  edgeFlickerDuration: number;
+  paddleFizzleSoundDelay: number;
+  ballFizzleSoundDelay: number;
+  scoreSoundDelay: number;
+}
+
 // Used for background random glitch
 export interface CinematicGlitchTimings {
   baseEffectInterval: number;
@@ -22,6 +33,7 @@ export interface CinematicGlitchTimings {
 export interface GameAnimationTimings {
   retroEffects: RetroEffectTimings;
   camera: CameraTimings;
+  scoreEffects: ScoreEffectTimings;
 }
 
 export const defaultRetroEffectTimings: RetroEffectTimings = {
@@ -44,7 +56,19 @@ export const defaultCinematicGlitchTimings: CinematicGlitchTimings = {
   randomDurationMultiplier: 200,
 };
 
+export const defaultScoreEffectTimings: ScoreEffectTimings = {
+  scorePaddleExplosionDuration: 2000,
+  scoreBallExplosionDuration: 3000,
+  fadeStartPaddleMultiplier: 0.9,
+  fadeStartBallMultiplier: 0.7,
+  edgeFlickerDuration: 2000,
+  paddleFizzleSoundDelay: 2100,
+  ballFizzleSoundDelay: 1300,
+  scoreSoundDelay: 100,
+};
+
 export const defaultGameAnimationTimings: GameAnimationTimings = {
   retroEffects: defaultRetroEffectTimings,
   camera: defaultCameraTimings,
+  scoreEffects: defaultScoreEffectTimings,
 };
