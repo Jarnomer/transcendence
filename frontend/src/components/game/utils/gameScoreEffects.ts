@@ -741,7 +741,7 @@ export function applySoundEffects(
 export function applyScoreEffects(
   retroEffectsRef: RetroEffectsManager | null | undefined,
   scene: Scene,
-  camera: ArcRotateCamera | null | undefined,
+  camera: ArcRotateCamera,
   topEdge: Mesh,
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
@@ -766,19 +766,17 @@ export function applyScoreEffects(
 
   applySoundEffects(effectDelay, soundManagerRef, scoreEffectTimings);
 
-  if (camera) {
-    animateBallAfterScore(
-      scene,
-      ballMesh,
-      ball,
-      camera,
-      scoringPlayer,
-      gameWidth,
-      gameHeight,
-      defaultGameParams.dimensions.scaleFactor,
-      onAnimationComplete
-    );
-  }
+  animateBallAfterScore(
+    scene,
+    ballMesh,
+    ball,
+    camera,
+    scoringPlayer,
+    gameWidth,
+    gameHeight,
+    defaultGameParams.dimensions.scaleFactor,
+    onAnimationComplete
+  );
 
   applyNeonEdgeFlicker(
     scene,
