@@ -9,7 +9,7 @@ import {
   ArcRotateCamera,
 } from 'babylonjs';
 
-import { gameToSceneX, gameToSceneY } from '@game/utils';
+import { gameToSceneSize, gameToSceneX, gameToSceneY } from '@game/utils';
 
 import { defaultGameParams, GameObjectParams, defaultGameObjectParams, Ball } from '@shared/types';
 
@@ -281,14 +281,13 @@ export function animatePaddleAfterScore(
   paddle: Mesh,
   camera: ArcRotateCamera,
   scoringDirection: 'left' | 'right',
-  gameWidth: number = defaultGameParams.dimensions.gameWidth,
-  gameHeight: number = defaultGameParams.dimensions.gameHeight,
   onAnimationComplete?: () => void
 ): void {
   const frameRate = 30;
+  const gameWidth = defaultGameParams.dimensions.gameHeight;
 
   const centerX = gameToSceneX(scoringDirection === 'right' ? gameWidth : 0, paddle);
-  const centerY = gameToSceneY(gameHeight / 2, paddle);
+  const centerY = 0;
   const paddleZ = paddle.position.z;
 
   const cameraPos = camera.position.clone();
@@ -296,12 +295,11 @@ export function animatePaddleAfterScore(
 
   const distanceBehindCamera = 8;
   const xOffsetAmount = 3;
-  const paddleY = centerY + 2; // FIX temporary solution for right height
 
   const xOffset = scoringDirection === 'right' ? xOffsetAmount : -xOffsetAmount;
   const cameraDirection = cameraPos.subtract(cameraTarget).normalize();
   const dropStartPos = cameraPos.add(cameraDirection.scale(distanceBehindCamera));
-  const dropFinalPos = new Vector3(centerX, paddleY, paddleZ);
+  const dropFinalPos = new Vector3(centerX, centerY, paddleZ);
 
   dropStartPos.x = centerX + xOffset;
   dropStartPos.z += 5;

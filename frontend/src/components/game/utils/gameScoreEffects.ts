@@ -232,14 +232,7 @@ export function applyPaddleExplosion(
 
   setTimeout(() => {
     if (camera) {
-      animatePaddleAfterScore(
-        scene,
-        paddle,
-        camera,
-        scoringDirection,
-        defaultGameParams.dimensions.gameWidth,
-        defaultGameParams.dimensions.gameHeight
-      );
+      animatePaddleAfterScore(scene, paddle, camera, scoringDirection);
     }
   }, duration);
 }
