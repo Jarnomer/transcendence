@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { GameMode, GameState, GameStatus, defaultGameParams } from '@shared/types';
 
+import BackgroundCanvas from './BackgroundCanvas';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useGameMusic } from '../../hooks/useGameMusic';
-import BackgroundCanvas from './BackgroundCanvas';
 
 interface BackgroundProviderProps {}
 
@@ -188,13 +188,16 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
 
   // Handle game finish
   useEffect(() => {
-    if (gameStatus === 'finished' && currentMode === 'active' && !isTransitioning) {
-      // Using a slightly longer delay for end-game transition
-      setTimeout(() => {
-        switchToMode('background');
-      }, 1000);
+    const hasActiveGame = gameId && activeGameState && connections.game === 'connected';
+
+    lastGameIdRef.current = gameId;
+
+    if (hasActiveGame && currentMode === 'background') {
+      switchToMode('active');
+    } else if ((!hasActiveGame || connections.game !== 'connected') && currentMode === 'active') {
+      switchToMode('background');
     }
-  }, [gameStatus, currentMode, isTransitioning, switchToMode]);
+  }, [gameId, activeGameState, connections.game, currentMode, switchToMode]);
 
   // Initialize background WebSocket
   useEffect(() => {
