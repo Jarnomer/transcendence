@@ -674,11 +674,9 @@ export function animateScoringPaddle(
     }
     // End of animation
     else {
+      paddle.scaling = new Vector3(1, 1, 1);
       paddle.position.x = originalPosition.x;
       paddle.position.y = 0;
-      paddle.scaling.x = 1;
-      paddle.scaling.y = 1;
-      paddle.scaling.z = 1;
 
       scene.onBeforeRenderObservable.remove(animationObserver);
     }
