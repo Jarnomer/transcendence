@@ -442,14 +442,6 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
           null
         );
       }
-
-      prevBallState.current = {
-        x: ball.x,
-        y: ball.y,
-        dx: ball.dx,
-        dy: ball.dy,
-        spin: ball.spin,
-      };
     } else {
       if (collisionType) {
         applyBackgroundCollisionEffects(retroEffectsRef.current, ballSpeed, ball.spin, true);
@@ -471,6 +463,14 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         );
       }
     }
+
+    prevBallState.current = {
+      x: ball.x,
+      y: ball.y,
+      dx: ball.dx,
+      dy: ball.dy,
+      spin: ball.spin,
+    };
   }, [gameState]);
 
   return <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />;

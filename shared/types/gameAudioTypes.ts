@@ -17,11 +17,11 @@ export interface GameAudioOptions {
 
 export const defaultGameAudioOptions: GameAudioOptions = {
   gameMusic: {
-    volume: 0.5,
+    volume: 0.3,
     enabled: true,
   },
   backgroundMusic: {
-    volume: 0.5,
+    volume: 0.3,
     enabled: true,
   },
   soundEffects: {
