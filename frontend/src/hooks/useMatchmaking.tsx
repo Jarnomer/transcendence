@@ -123,6 +123,7 @@ const useMatchmaking = () => {
           case MatchMakerState.WAITING_FOR_PLAYERS:
           case MatchMakerState.JOINING_RANDOM:
             console.log('Waiting for players');
+            setQueueId(matchmaker.current.getQueueId()!);
             sessionManager.set('queueId', matchmaker.current.getQueueId()!);
             startMatchMaking();
             // params.current.set('queue_id', matchmaker.current.getQueueId() || '');

@@ -109,11 +109,7 @@ export const GameOptions: React.FC = () => {
 
   const handleGameStart = async () => {
     console.log('--- starting game ----');
-    if (mode === 'tournament') {
-      navigate('/tournamentLobby');
-    } else {
       navigate('/game');
-    }
   };
 
   return (

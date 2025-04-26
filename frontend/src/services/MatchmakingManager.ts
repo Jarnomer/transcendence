@@ -173,12 +173,17 @@ class MatchmakingManager {
     this.setState({ participants: [...this.snapshot.participants, participants] });
   };
 
+  handleTournamentMatches = (matches: any) => {
+    console.info('Tournament matches:', matches);
+  };
+
   attachListeners() {
     this.matchmakingSocket.addEventListener('match_found', this.handleMatchFound);
     this.matchmakingSocket.addEventListener('game_winner', this.handleGameWinner);
     this.matchmakingSocket.addEventListener('game_loser', this.handleGameLoser);
     this.matchmakingSocket.addEventListener('tournament_winner', this.handleTournamentWinner);
     this.matchmakingSocket.addEventListener('participants', this.handleParticipants);
+    this.matchmakingSocket.addEventListener('tournament_matches', this.handleTournamentMatches);
   }
 
   detachListeners() {
@@ -187,6 +192,7 @@ class MatchmakingManager {
     this.matchmakingSocket.removeEventListener('game_loser', this.handleGameLoser);
     this.matchmakingSocket.removeEventListener('tournament_winner', this.handleTournamentWinner);
     this.matchmakingSocket.removeEventListener('participants', this.handleParticipants);
+    this.matchmakingSocket.removeEventListener('tournament_matches', this.handleTournamentMatches);
   }
 
   async cancelQueue() {

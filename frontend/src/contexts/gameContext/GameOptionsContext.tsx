@@ -55,7 +55,8 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
     const sessionManager = SessionManager.getInstance();
     sessionManager.set('mode', mode);
     sessionManager.set('difficulty', difficulty);
-  }, [mode, difficulty]);
+    if (queueId) sessionManager.set('queueId', queueId);
+  }, [mode, difficulty, queueId]);
 
   useEffect(() => {
     if (!userId) return;

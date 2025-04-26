@@ -5,7 +5,9 @@ import { GameService, QueueService } from '@my-backend/matchmaking_service';
 
 type Player = {
   user_id: string;
-  socket: WebSocket;
+  // socket: WebSocket;
+  avatar_url?: string;
+  display_name?: string;
   elo: number;
   joinedAt: Date;
 };
@@ -259,7 +261,11 @@ class TournamentMatchmaking extends MatchmakingMode {
       };
       matches.push(match);
     }
-
+    const playerIds = session.activePlayers.map((p) => p.user_id);
+    this.matchmaking.broadcast(playerIds, {
+      type: 'tournament_matches',
+      state: { matches },
+    });
     session.matches = matches;
     session.activePlayers = [];
   }
@@ -410,7 +416,7 @@ export class MatchmakingService {
     console.log(`Player Elo: ${playerElo.elo}`);
     const player: Player = {
       user_id,
-      socket: this.clients.get(user_id)!,
+      // socket: this.clients.get(user_id)!,
       elo: playerElo.elo,
       joinedAt: new Date(),
     };
@@ -428,23 +434,21 @@ export class MatchmakingService {
     const playerElo = await this.gameService.getPlayerElo(user_id);
     const player: Player = {
       user_id,
-      socket: this.clients.get(user_id)!,
+      // socket: this.clients.get(user_id)!,
+      avatar_url,
+      display_name,
       elo: playerElo.elo,
       joinedAt: new Date(),
     };
     this.matchmakers[mode].joinQueue(queue_id, player);
-    const matches = this.matchmakers[mode].getQueueMatches(queue_id);
+    const players = this.matchmakers[mode].getQueueMatches(queue_id);
     const message = {
       type: 'participants',
-      state: {
-        user_id,
-        avatar_url,
-        display_name,
-      },
+      state: { players: players },
     };
-    if (matches) {
-      const players = matches.map((p) => p.user_id);
-      this.broadcast(players, message);
+    if (players) {
+      const playerIds = players.map((p) => p.user_id);
+      this.broadcast(playerIds, message);
     }
   }
 
