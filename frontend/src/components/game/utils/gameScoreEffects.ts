@@ -607,7 +607,7 @@ export function animateScoringPaddle(
   const originalScale = paddle.scaling.clone();
   const originalPosition = paddle.position.clone();
 
-  const maxScale = 2 + intensity;
+  const maxScale = 1.5 + intensity;
   const xShift = scoringDirection === 'right' ? -2 : 2;
 
   const startTime = Date.now();
