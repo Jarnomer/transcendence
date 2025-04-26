@@ -327,7 +327,7 @@ function animatePaddleFragments(
   scene: Scene,
   fragments: Mesh[],
   paddle: Mesh,
-  intensity: number,
+  effectIntensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
   scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
@@ -344,6 +344,7 @@ function animatePaddleFragments(
     const deltaTime = scene.getEngine().getDeltaTime() / 1000;
     const currentTime = Date.now();
     const timeRemaining = endTime - currentTime;
+    const animationProgress = 1 - timeRemaining / duration;
 
     if (timeRemaining <= 0) {
       // Dispose all fragments and stop the animation if time is up
@@ -400,21 +401,22 @@ function animatePaddleFragments(
         // Normalize to ensure consistent direction regardless of magnitude
         const direction = new Vector3(dirX, dirY, dirZ).normalize();
 
-        const speed = (5 + Math.random() * 3) * intensity * 3;
+        const speed = (5 + Math.random() * 3) * effectIntensity * 3;
         const initialVelocity = direction.scale(speed);
         const angularVelocity = new Vector3(
-          (Math.random() - 0.5) * Math.PI * 2 * intensity,
-          (Math.random() - 0.5) * Math.PI * 2 * intensity,
-          (Math.random() - 0.5) * Math.PI * 2 * intensity
+          (Math.random() - 0.5) * Math.PI * 2 * effectIntensity,
+          (Math.random() - 0.5) * Math.PI * 2 * effectIntensity,
+          (Math.random() - 0.5) * Math.PI * 2 * effectIntensity
         );
 
         fragment.metadata.velocity = initialVelocity;
         fragment.metadata.angularVelocity = angularVelocity;
         fragment.metadata.initialized = true;
         fragment.metadata.lifeTime = 0;
+        fragment.metadata.initialSpeed = speed;
       }
 
-      fragment.position.x += fragment.metadata.velocity.x * deltaTime;
+      fragment.position.x += fragment.metadata.velocity.x * deltaTime * 1.5;
       fragment.position.y += fragment.metadata.velocity.y * deltaTime;
       fragment.position.z += fragment.metadata.velocity.z * deltaTime;
 
@@ -427,17 +429,17 @@ function animatePaddleFragments(
       const fadeProgressPhase = scoreEffectTimings.fadeStartPaddleMultiplier;
       const timeRatio = timeRemaining / duration;
 
-      let velocityScaleFactor = 1;
+      const gravity = 9.8 * effectIntensity * Math.min(1.0, animationProgress * 2);
+      fragment.metadata.velocity.x += gravity * deltaTime;
 
       if (timeRatio < fadeProgressPhase) {
         const fadeProgress = Math.min((fadeProgressPhase - timeRatio) / fadeProgressPhase, 1);
         const material = fragment.material as PBRMaterial;
         if (material) material.alpha = Math.max(0, 1 - fadeProgress);
-        velocityScaleFactor = 0.99 - fadeProgress * 0.1;
       }
 
-      fragment.metadata.velocity.scaleInPlace(velocityScaleFactor);
-      fragment.metadata.angularVelocity.scaleInPlace(velocityScaleFactor);
+      const angularDrag = 0.98 - animationProgress * 0.1;
+      fragment.metadata.angularVelocity.scaleInPlace(angularDrag);
     }
   });
 }
@@ -609,6 +611,8 @@ function calculateScoreEffectIntensity(
   ballSpeed: number,
   ballSpin: number
 ): number {
+  const baseIntensity = 0.5;
+
   // Base intensity from player's current score (0.1 to 0.3)
   const maxScore = defaultGameParams.rules.maxScore;
   const scoreIntensity = Math.min(0.1 + (playerScore / maxScore) * 0.3, 0.3);
@@ -622,8 +626,7 @@ function calculateScoreEffectIntensity(
   const normalizedSpin = Math.min(Math.abs(ballSpin) / 10, 1);
   const physicsIntensity = normalizedSpeed * 0.2 + normalizedSpin * 0.2;
 
-  // Return combined factor (ensure result is between 0.1 and 1.0)
-  return Math.min(scoreIntensity + endgameIntensity + physicsIntensity, 1.0);
+  return Math.min(baseIntensity + scoreIntensity + endgameIntensity + physicsIntensity, 2.0);
 }
 
 export function applySoundEffects(
