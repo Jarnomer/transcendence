@@ -93,7 +93,7 @@ export class PowerUpEffectsManager {
 
     const x = gameToSceneX(powerUp.x, icon);
     const y = gameToSceneY(powerUp.y, icon);
-    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
+    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 3);
 
     icon.position = basePosition.clone();
 
@@ -204,7 +204,7 @@ export class PowerUpEffectsManager {
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
-    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
+    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 3);
 
     const emitBoxSize = 0.03;
     particleSystem.minEmitBox = new Vector3(-emitBoxSize, -emitBoxSize, -emitBoxSize);
