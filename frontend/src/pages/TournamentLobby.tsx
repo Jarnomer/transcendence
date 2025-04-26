@@ -6,17 +6,22 @@ import { slideFromRightVariants } from '../components/tournamentLobby/animationV
 import { Spectate } from '../components/tournamentLobby/Spectate';
 import { TournamentLobbyNav } from '../components/tournamentLobby/TournamentLobbyNav';
 import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
+import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
+import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 export const TournamentLobby: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('players');
+  const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
   const { friends, selectedFriendId, roomId } = useChatContext();
   const [players, setPlayers] = useState<any[]>();
   const [tournamentChatId, setTournamentChatId] = useState<string | undefined>();
+  const { difficulty } = useGameOptionsContext();
 
   const { createRoom } = useChatContext();
+  const { matchmakingSocket, connections, sendMessage } = useWebSocketContext();
 
   // useEffect(() => {
   //   if (!user) return;
@@ -36,10 +41,14 @@ export const TournamentLobby: React.FC = () => {
   //   setupChat();
   // }, [user]);
 
+  useEffect(() => {
+    if (connections.matchmaking !== 'connected') return;
+  }, [connections]);
+
   useEffect(() => {}, [tournamentChatId]);
 
   useEffect(() => {
-    setPlayers(Array.from({ length: 8 }, (_, i) => `Competitor ${i + 1}`));
+    setPlayers(Array.from({ length: parseInt(difficulty!) }, (_, i) => `Competitor ${i + 1}`));
   }, []);
 
   console.log(selectedFriendId);
@@ -52,13 +61,24 @@ export const TournamentLobby: React.FC = () => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           ></TournamentLobbyNav>
-          <span className="text-secondary">X/X Players</span>
+          <span className="text-secondary">X/{difficulty} Players</span>
         </header>
 
         <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
           <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">
-              {activeTab == 'players' ? (
+              {activeTab === 'settings' ? (
+                <motion.div
+                  key="tournamentSettings"
+                  className="w-full h-full"
+                  variants={slideFromRightVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <TournamentSettings></TournamentSettings>
+                </motion.div>
+              ) : activeTab == 'players' ? (
                 <TournamentPlayerList players={players}></TournamentPlayerList>
               ) : (
                 <motion.div

@@ -1,17 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { GameState, GameStatus, GameMode, defaultGameParams } from '@shared/types';
+import { GameMode, GameState, GameStatus, defaultGameParams } from '@shared/types';
 
-import BackgroundCanvas from './BackgroundCanvas';
-import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useGameMusic } from '../../hooks/useGameMusic';
+import BackgroundCanvas from './BackgroundCanvas';
 
 interface BackgroundProviderProps {}
 
 const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
-  const { gameState: activeGameState, gameStatus, connections } = useWebSocketContext();
-  const { gameId } = useGameOptionsContext();
+  const {
+    gameState: activeGameState,
+    gameStatus,
+    connections,
+    phase: { gameId },
+  } = useWebSocketContext();
+  // const { gameId } = useGameOptionsContext();
 
   const [backgroundGameState, setBackgroundGameState] = useState<GameState | null>(null);
   const [currentMode, setCurrentMode] = useState<GameMode>('background');

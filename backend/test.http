@@ -1,5 +1,5 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODI2ZGIxNzgtNjNkMC00YzE0LWE2ODgtMjg5MjgzOTY2ZGNiIiwidXNlcm5hbWUiOiJqYW4iLCJpYXQiOjE3NDI0ODQxMjgsImV4cCI6MTc0MjQ4NzcyOH0.d3UpFDINr-1yL3TVoZzIcSsxGTRh6dLlbe2dTZSAZpo
-@user = 826db178-63d0-4c14-a688-289283966dcb
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODQ4ZDhlMTUtMWYxMS00MjBlLTk4MjQtOGFjMDQ5MDllOTY3IiwidXNlcm5hbWUiOiJqYW4iLCJpYXQiOjE3NDU1OTMyMDAsImV4cCI6MTc0NTU5NjgwMH0.CpGrzw1tHNuahiM9_KtAQgJMVBeUwThv5KhVn6YMxHU
+@user = 848d8e15-1f11-420e-9824-8ac04909e967
 
 ### user
 ### login
@@ -100,3 +100,10 @@ Authorization: Bearer {{token}}
 post https://localhost:8443/api/game/result
 Authorization: Bearer {{token}}
 
+### get game status
+get https://localhost:8443/api/game/status
+Authorization: Bearer {{token}}
+
+### get queue status
+get https://localhost:8443/api/matchmaking/status
+Authorization: Bearer {{token}}

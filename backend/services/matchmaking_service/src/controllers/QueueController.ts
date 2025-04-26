@@ -78,9 +78,6 @@ export class QueueController {
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Getting user ${user_id}`);
     const queue = await this.queueService.getStatusQueue(user_id);
-    if (!queue) {
-      throw new NotFoundError('User not found');
-    }
     reply.code(200).send(queue);
   }
 
@@ -140,6 +137,9 @@ export class QueueController {
     const { user_id } = request.user as { user_id: string };
     request.log.trace(`Joining queue ${queue_id}`);
     const passwordCheck = await this.queueService.getQueueByID(queue_id);
+    if (!passwordCheck) {
+      throw new NotFoundError('Queue not found');
+    }
     if (passwordCheck.password !== password) {
       throw new NotFoundError('Password is incorrect');
     }
