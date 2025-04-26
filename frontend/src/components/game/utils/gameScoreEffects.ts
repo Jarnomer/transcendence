@@ -28,7 +28,6 @@ import {
 import {
   Ball,
   ScoreEffectTimings,
-  defaultGameAnimationTimings,
   defaultGameParams,
   defaultScoreEffectTimings,
 } from '@shared/types';
@@ -593,15 +592,6 @@ export function applyNeonEdgeFlicker(
   }, duration);
 }
 
-function calculateScoreEffectDelay(ballSpeed: number): number {
-  const minDelay = 200;
-  const maxDelay = 400;
-  const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
-  const delay = maxDelay - normalizedSpeed * (maxDelay - minDelay);
-
-  return delay;
-}
-
 export function animateScoringPaddle(
   scene: Scene,
   paddle: Mesh,
@@ -693,6 +683,18 @@ export function animateScoringPaddle(
   });
 }
 
+function calculateScoreEffectDelay(
+  ballSpeed: number,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): number {
+  const minDelay = scoreEffectTimings.scoreEffectMinDelay;
+  const maxDelay = scoreEffectTimings.scoreEffectMaxDelay;
+  const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
+  const delay = maxDelay - normalizedSpeed * (maxDelay - minDelay);
+
+  return delay;
+}
+
 function calculateScoreEffectIntensity(
   playerScore: number,
   ballSpeed: number,
@@ -713,7 +715,7 @@ function calculateScoreEffectIntensity(
   const normalizedSpin = Math.min(Math.abs(ballSpin) / 10, 1);
   const physicsIntensity = normalizedSpeed * 0.2 + normalizedSpin * 0.2;
 
-  return Math.min(baseIntensity + scoreIntensity + endgameIntensity + physicsIntensity, 2.0);
+  return Math.min(baseIntensity + scoreIntensity + endgameIntensity + physicsIntensity, 1.5);
 }
 
 export function applySoundEffects(

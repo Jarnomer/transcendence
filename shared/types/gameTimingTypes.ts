@@ -21,6 +21,8 @@ export interface ScoreEffectTimings {
   scorePlayerAnimDuration: number;
   scorePlayerGrowDuration: number;
   scorePlayerShakeDuration: number;
+  scoreEffectMinDelay: number;
+  scoreEffectMaxDelay: number;
 }
 
 // Used for background random glitch
@@ -70,7 +72,9 @@ export const defaultScoreEffectTimings: ScoreEffectTimings = {
   scoreSoundDelay: 100,
   scorePlayerAnimDuration: 2500,
   scorePlayerGrowDuration: 300,
-  scorePlayerShakeDuration: 600
+  scorePlayerShakeDuration: 600,
+  scoreEffectMinDelay: 300,
+  scoreEffectMaxDelay: 500,
 };
 
 export const defaultGameAnimationTimings: GameAnimationTimings = {
