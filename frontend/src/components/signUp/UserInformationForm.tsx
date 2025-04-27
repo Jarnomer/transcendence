@@ -37,8 +37,7 @@ export const InformationRequestSvg: React.FC = () => {
   return (
     <>
       <motion.svg
-        width="286"
-        height="73"
+        className="w-full h-auto"
         viewBox="0 0 286 73"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -292,6 +291,10 @@ export const InformationRequestSvg: React.FC = () => {
   );
 };
 
+// export const UserInformationFormHeader: React.FC<> = ({}) => {
+//   return
+// }
+
 export const UserInformationForm: React.FC<EditProfileProps> = ({
   user,
   setEditProfile,
@@ -377,9 +380,9 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
   return (
     <>
       {!loading ? (
-        <div className="justify-center flex flex-col max-w-lg ">
-          <div className="flex justify-between">
-            <div className="flex justify-center items-center relative">
+        <div className="justify-center w-full max-w-lg  flex flex-col ">
+          <div className="flex w-full  justify-between">
+            <div className="flex w-2/3  items-center relative">
               <InformationRequestSvg></InformationRequestSvg>
             </div>
             <div className="relative">
@@ -387,13 +390,16 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
             </div>
           </div>
           <motion.div
-            className="relative overflow-hidden"
+            className="relative w-full overflow-hidden"
             variants={animationVariants}
             initial="initial"
             animate="animate"
             exit="exit"
           >
-            <div id="edit-profile-content" className="relative overflow-hidden border-primary">
+            <div
+              id="edit-profile-content"
+              className="relative w-full overflow-hidden border-primary"
+            >
               {user.display_name ? (
                 <button
                   className="absolute top-0 right-0 px-2 text-xl"
@@ -402,7 +408,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                   x
                 </button>
               ) : null}
-              <div className="">
+              <div className="w-full">
                 <div className="flex mb-2 gap-2 text-left text-xs" aria-hidden="true">
                   <div className="border-1 w-2/3">
                     <p className="px-1 text-xs text-neutral-200 opacity-45">user id</p>
@@ -415,7 +421,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
                     <p className="px-2 text-neutral-200 opacity-45">{user.username}</p>
                   </div>
                 </div>
-                <form className="flex flex-col justify-center" onSubmit={handleSubmit}>
+                <form className="flex w-full flex-col justify-center" onSubmit={handleSubmit}>
                   <span className="flex flex-row relative">
                     <div className="border relative">
                       <label htmlFor="displayName">
