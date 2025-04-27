@@ -96,7 +96,7 @@ export function createFloor(
   floor.position.z = params.floor.positionZ;
   floor.rotation.x = Math.PI / 2;
 
-  const baseUrl = '/floor-metal/';
+  const baseUrl = 'textures/floor-metal/';
 
   const texturesLoaded = { count: 0, total: 4 };
   const checkAllLoaded = () => {

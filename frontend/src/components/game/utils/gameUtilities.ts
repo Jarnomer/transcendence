@@ -187,35 +187,37 @@ export function isPowerUpNegative(type: PowerUpType): boolean {
 }
 
 export function getPowerUpIconPath(powerUpType: PowerUpType) {
+  const baseUrl = 'textures/power-up/';
   switch (powerUpType) {
     case PowerUpType.BiggerPaddle:
-      return '/power-up/paddle_bigger.png';
+      return baseUrl + 'paddle_bigger.png';
     case PowerUpType.SmallerPaddle:
-      return '/power-up/paddle_smaller.png';
+      return baseUrl + 'paddle_smaller.png';
     case PowerUpType.FasterPaddle:
-      return '/power-up/paddle_faster.png';
+      return baseUrl + 'paddle_faster.png';
     case PowerUpType.SlowerPaddle:
-      return '/power-up/paddle_slower.png';
+      return baseUrl + 'paddle_slower.png';
     case PowerUpType.MoreSpin:
-      return '/power-up/paddle_spin.png';
+      return baseUrl + 'paddle_spin.png';
     default:
-      return '/power-up/unknown_powerup.png';
+      return baseUrl + 'unknown_powerup.png';
   }
 }
 
 export function getPowerUpSignPath(powerUpType: PowerUpType) {
+  const baseUrl = 'textures/power-up/';
   switch (powerUpType) {
     case PowerUpType.BiggerPaddle:
-      return '/power-up/sign_plus.png';
+      return baseUrl + 'sign_plus.png';
     case PowerUpType.SmallerPaddle:
-      return '/power-up/sign_minus.png';
+      return baseUrl + 'sign_minus.png';
     case PowerUpType.FasterPaddle:
-      return '/power-up/sign_fast.png';
+      return baseUrl + 'sign_fast.png';
     case PowerUpType.SlowerPaddle:
-      return '/power-up/sign_slow.png';
+      return baseUrl + 'sign_slow.png';
     case PowerUpType.MoreSpin:
-      return '/power-up/sign_spin.png';
+      return baseUrl + 'sign_spin.png';
     default:
-      return '/power-up/sign_unknown.png';
+      return baseUrl + 'sign_unknown.png';
   }
 }
