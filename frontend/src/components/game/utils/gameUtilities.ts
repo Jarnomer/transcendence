@@ -153,8 +153,8 @@ function optimizeShadowGenerators(shadowGenerators: ShadowGenerator[]) {
 export function applyLowQualitySettings(
   scene: Scene,
   scalingLevel: number,
-  pipeline: DefaultRenderingPipeline,
-  shadowGenerators: ShadowGenerator[]
+  pipeline?: DefaultRenderingPipeline | null | undefined,
+  shadowGenerators?: ShadowGenerator[] | null | undefined
 ) {
   scene.getEngine().setHardwareScalingLevel(scalingLevel);
 
@@ -177,7 +177,9 @@ export function applyLowQualitySettings(
   scene.autoClearDepthAndStencil = false;
   scene.blockMaterialDirtyMechanism = true;
 
-  optimizeShadowGenerators(shadowGenerators);
+  if (shadowGenerators) {
+    optimizeShadowGenerators(shadowGenerators);
+  }
 }
 
 export function isPowerUpNegative(type: PowerUpType): boolean {

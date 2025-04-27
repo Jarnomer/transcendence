@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
-import { CountDown, PlayerScoreBoard } from '@components';
+import { PlayerScoreBoard } from '@components';
 
 import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
+import { GameInfoOverlay } from '../components/game/GameInfoOverlay';
 import GameplayCanvas from '../components/game/GameplayCanvas';
 import { GameResults } from '../components/game/GameResults';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
@@ -141,9 +142,9 @@ export const GamePage: React.FC = () => {
         )}
       </div>
 
-      {/* Show countdown conditionally */}
+      {/* Show GameInfoOverlay conditionally */}
       {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
-        <CountDown gameStatus={gameStatus} />
+        <GameInfoOverlay gameStatus={gameStatus} gameState={gameState} />
       ) : gameResult ? (
         <GameResults result={gameResult} playersData={playersData} />
       ) : (

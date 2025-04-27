@@ -1,5 +1,5 @@
 // Core game components
-export * from './CountDown';
+export * from './GameInfoOverlay';
 export * from './GameHeader';
 export * from './MatchMakingCarousel';
 export * from './PlayerScoreBoard';

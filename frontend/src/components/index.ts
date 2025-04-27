@@ -1,5 +1,4 @@
 export * from './footer/Footer';
-export * from './game/CountDown';
 export * from './game/GameHeader';
 export * from './game/PlayerScoreBoard';
 export * from './game/PlayerScoreCard';

@@ -24,6 +24,7 @@ export const useGameSocket = (
           players: data.players || {},
           ball: data.ball || {},
           powerUps: data.powerUps || [],
+          countdown: data.countdown || 0,
         },
       });
     const handleGameStatus = (status: GameStatus) =>
