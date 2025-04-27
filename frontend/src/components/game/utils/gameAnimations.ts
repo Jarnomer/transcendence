@@ -1,17 +1,42 @@
 import {
   Animation,
-  AnimationGroup,
   Mesh,
   Scene,
+  Color3,
   EasingFunction,
+  AnimationGroup,
   CubicEase,
   Vector3,
   ArcRotateCamera,
 } from 'babylonjs';
 
-import { gameToSceneSize, gameToSceneX, gameToSceneY } from '@game/utils';
+import { GameAnimationManager, gameToSceneX, gameToSceneY } from '@game/utils';
 
-import { defaultGameParams, GameObjectParams, defaultGameObjectParams, Ball } from '@shared/types';
+import {
+  AnimationPriority,
+  AnimationGrouping,
+  AnimationOptions,
+  GameObjectParams,
+  Ball,
+  defaultGameParams,
+  defaultGameObjectParams,
+} from '@shared/types';
+
+export class ResourceTracker {
+  private resources: Array<{ dispose: () => void }> = [];
+
+  track<T extends { dispose: () => void }>(resource: T): T {
+    this.resources.push(resource);
+    return resource;
+  }
+
+  disposeAll(): void {
+    while (this.resources.length) {
+      const resource = this.resources.pop();
+      if (resource) resource.dispose();
+    }
+  }
+}
 
 export function applyHoverAnimation(
   mesh: Mesh,
@@ -161,13 +186,8 @@ export function createFloorHoverAnimation(floor: Mesh, scene: Scene): AnimationG
   rotationAnimationZ.setKeys(rotationKeysZ);
   positionAnimation.setKeys(positionKeys);
 
-  const easingY = new CubicEase();
-  easingY.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-  rotationAnimationY.setEasingFunction(easingY);
-
-  const easingZ = new CubicEase();
-  easingZ.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-  rotationAnimationZ.setEasingFunction(easingZ);
+  applyCubicEaseInOut(rotationAnimationY);
+  applyCubicEaseInOut(rotationAnimationY);
 
   animationGroup.addTargetedAnimation(rotationAnimationY, floor);
   animationGroup.addTargetedAnimation(rotationAnimationZ, floor);
@@ -256,11 +276,9 @@ export function animateBallAfterScore(
     { frame: 0, value: dropStartPos },
     { frame: frameRate, value: dropFinalPos },
   ];
-  dropAnim.setKeys(dropKeys);
 
-  const easingFunction = new CubicEase();
-  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-  dropAnim.setEasingFunction(easingFunction);
+  dropAnim.setKeys(dropKeys);
+  applyCubicEaseInOut(dropAnim);
 
   // Execute animations in sequence
   ballMesh.animations = [continueAnim];
@@ -320,14 +338,124 @@ export function animatePaddleAfterScore(
   ];
 
   dropAnim.setKeys(dropKeys);
-
-  const easingFunction = new CubicEase();
-  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
-  dropAnim.setEasingFunction(easingFunction);
-
+  applyCubicEaseInOut(dropAnim);
   paddle.animations = [dropAnim];
+
   scene.beginAnimation(paddle, 0, frameRate, false, 1, () => {
     restartHoverAnimation(paddle, scene);
     if (onAnimationComplete) onAnimationComplete();
   });
+}
+
+export function applyCubicEaseInOut(animation: Animation): void {
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+  animation.setEasingFunction(easingFunction);
+}
+
+export function createCubicEaseInOut(): CubicEase {
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+  return easingFunction;
+}
+
+export function applyEasing(
+  animation: Animation,
+  easingMode: number = EasingFunction.EASINGMODE_EASEINOUT
+): void {
+  const easingFunction = new CubicEase();
+  easingFunction.setEasingMode(easingMode);
+  animation.setEasingFunction(easingFunction);
+}
+
+export function createHoverAnimation(
+  mesh: Mesh,
+  scene: Scene,
+  params: {
+    minHeight: number;
+    maxHeight: number;
+    duration?: number;
+    property?: string;
+  },
+  options: AnimationOptions = {}
+): void {
+  const { minHeight, maxHeight, duration = 2.0, property = 'position.z' } = params;
+
+  const animManager = GameAnimationManager.getInstance(scene);
+  const frameRate = 30;
+  const totalFrames = frameRate * duration;
+
+  const keyframes = [
+    { frame: 0, value: minHeight },
+    { frame: totalFrames / 2, value: maxHeight },
+    { frame: totalFrames, value: minHeight },
+  ];
+
+  const defaultOptions: AnimationOptions = {
+    priority: AnimationPriority.LOWEST,
+    group: AnimationGrouping.HOVER,
+    loop: true,
+    easingMode: EasingFunction.EASINGMODE_EASEINOUT,
+  };
+
+  const animOptions = { ...defaultOptions, ...options };
+
+  animManager.animate(mesh, property, keyframes, animOptions);
+}
+
+export function animateSpringScale(
+  mesh: Mesh,
+  scene: Scene,
+  targetScale: Vector3,
+  options: AnimationOptions = {}
+): void {
+  const animManager = GameAnimationManager.getInstance(scene);
+  const currentScale = mesh.scaling.clone();
+
+  const keyframes = [
+    { frame: 0, value: currentScale },
+    { frame: 5, value: new Vector3(targetScale.x * 1.2, targetScale.y * 1.2, targetScale.z * 1.2) },
+    {
+      frame: 15,
+      value: new Vector3(targetScale.x * 0.9, targetScale.y * 0.9, targetScale.z * 0.9),
+    },
+    { frame: 30, value: targetScale },
+  ];
+
+  const defaultOptions: AnimationOptions = {
+    priority: AnimationPriority.HIGH,
+    group: AnimationGrouping.SCALE,
+    easingMode: EasingFunction.EASINGMODE_EASEINOUT,
+  };
+
+  const animOptions = { ...defaultOptions, ...options };
+
+  animManager.animate(mesh, 'scaling', keyframes, animOptions);
+}
+
+export function createStandardAnimation(
+  name: string,
+  targetProperty: string,
+  frameRate: number,
+  keyframes: any[],
+  loopMode = Animation.ANIMATIONLOOPMODE_CONSTANT,
+  easingMode = EasingFunction.EASINGMODE_EASEINOUT
+): Animation {
+  let animationType = Animation.ANIMATIONTYPE_FLOAT;
+  if (keyframes.length > 0) {
+    const value = keyframes[0].value;
+    if (value instanceof Vector3) {
+      animationType = Animation.ANIMATIONTYPE_VECTOR3;
+    } else if (value instanceof Color3) {
+      animationType = Animation.ANIMATIONTYPE_COLOR3;
+    }
+  }
+
+  const animation = new Animation(name, targetProperty, frameRate, animationType, loopMode);
+
+  animation.setKeys(keyframes);
+
+  if (easingMode !== null) applyCubicEaseInOut(animation);
+
+  return animation;
 }

@@ -15,6 +15,7 @@ import {
   GameSoundManager,
   PowerUpEffectsManager,
   RetroEffectsManager,
+  GameAnimationManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -111,6 +112,8 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     const canvas = canvasRef.current;
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
+
+    GameAnimationManager.getInstance(scene);
 
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, gameboardColor } = colors;

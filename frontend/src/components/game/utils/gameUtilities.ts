@@ -3,6 +3,7 @@ import {
   DefaultRenderingPipeline,
   DynamicTexture,
   Engine,
+  GlowLayer,
   Mesh,
   Scene,
   ShadowGenerator,
@@ -40,6 +41,22 @@ export function createParticleTexture(scene: Scene, color: Color3): Texture {
   texture.update();
 
   return texture;
+}
+
+export function addGlowEffect(
+  mesh: Mesh,
+  scene: Scene,
+  intensity: number = 0.5,
+  blurKernelSize: number = 32
+) {
+  const glowLayer = new GlowLayer(`${mesh.name}GlowLayer`, scene);
+  glowLayer.intensity = intensity;
+  glowLayer.blurKernelSize = blurKernelSize;
+  glowLayer.addIncludedOnlyMesh(mesh);
+
+  if (!mesh.metadata) mesh.metadata = {};
+  if (!mesh.metadata.glowLayers) mesh.metadata.glowLayers = [];
+  mesh.metadata.glowLayers.push(glowLayer);
 }
 
 export function gameToSceneX(gameX: number, mesh: Mesh): number {
