@@ -86,7 +86,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
 
   return (
     <div>
-      <div className=" overflow-hidden relative w-[100px] h-[100px] md:w-[150px] md:h-[150px] border-1 border-primary">
+      <div className=" overflow-hidden relative w-[100px] h-[100px] aspect-square md:w-[150px] md:h-[150px] border-1 border-primary">
         <img
           className="object-cover w-full h-full z-10"
           src={`https://localhost:8443/${user.avatar_url}`}

@@ -11,14 +11,16 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
   const { closeModal } = useModal();
 
   const handleOverlayClick = () => {
-    console.log('Clicked outside the modal');
+    // console.log('Clicked outside the modal');
     closeModal(modalName);
   };
 
   const handleModalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    console.log('modal clicked');
+    // console.log('modal clicked');
   };
+
+  // console.log('modal');
 
   return (
     <div

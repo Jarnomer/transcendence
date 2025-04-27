@@ -9,6 +9,7 @@ import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPl
 import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useModal } from '../contexts/modalContext/ModalContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
@@ -22,6 +23,7 @@ export const TournamentLobby: React.FC = () => {
 
   const { createRoom } = useChatContext();
   const { matchmakingSocket, connections, sendMessage } = useWebSocketContext();
+  const { openModal, closeModal } = useModal();
 
   // useEffect(() => {
   //   if (!user) return;
@@ -40,6 +42,22 @@ export const TournamentLobby: React.FC = () => {
 
   //   setupChat();
   // }, [user]);
+
+  const onAccept = () => {
+    console.log('joining game..');
+  };
+
+  const onDecline = () => {
+    console.log('Declining game..');
+  };
+
+  const handleClickOpenModal = () => {
+    console.log('opening modal');
+    openModal('joinGameModal', {
+      onAccept: onAccept,
+      onDecline: onDecline,
+    });
+  };
 
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
@@ -64,6 +82,9 @@ export const TournamentLobby: React.FC = () => {
           <span className="text-secondary">X/{difficulty} Players</span>
         </header>
 
+        <button onClick={handleClickOpenModal} className="text-green-500">
+          open modal
+        </button>
         <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
           <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">

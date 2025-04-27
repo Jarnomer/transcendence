@@ -9,7 +9,7 @@ type spectateProps = {
 export const SpectateSmallCanvas: React.FC = () => {
   return (
     <>
-      <p>asd vs asd 0 - 0</p>
+      {/* <p>asd vs asd 0 - 0</p> */}
       <img src="images/gameplay.gif" className="glass-box"></img>
     </>
   );
