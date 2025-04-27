@@ -15,9 +15,9 @@ export class GameSoundManager {
   private readonly SOUND_CONFIGS = {
     edge: { base: 'hit_edge', count: 3 },
     paddle: { base: 'hit_paddle', count: 2 },
-    ballFizzle: { base: 'ball_fizzle', count: 2 },
-    paddleFizzle: { base: 'paddle_fizzle', count: 2 },
-    score: { base: 'ball_explode', count: 2 },
+    ballFizzle: { base: 'ball_fizzle', count: 1 },
+    paddleFizzle: { base: 'paddle_fizzle', count: 1 },
+    score: { base: 'ball_explode', count: 3 },
   };
 
   private readonly SOUND_NAMES = {

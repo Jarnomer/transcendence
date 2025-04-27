@@ -23,9 +23,13 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
   const [priorityMessage, setPriorityMessage] = useState<boolean>(false);
 
   const soundManagerRef = useRef(getGameSoundManager());
+
   const prevStatusRef = useRef<GameStatus | null>(null);
+  const prevCountRef = useRef<number | null>(null);
+
   const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const priorityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const animateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle status transitions
   useEffect(() => {
@@ -46,6 +50,21 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
       const countdown = gameState.countdown;
       if (!priorityMessage && countdown !== undefined && countdown <= 3) {
         console.log(`GameInfoOverlay: Setting countdown ${countdown}`);
+
+        if (prevCountRef.current !== countdown) {
+          setAnimate(true);
+          prevCountRef.current = countdown;
+
+          if (animateTimeoutRef.current) {
+            clearTimeout(animateTimeoutRef.current);
+          }
+
+          animateTimeoutRef.current = setTimeout(() => {
+            setAnimate(false);
+            animateTimeoutRef.current = null;
+          }, 500);
+        }
+
         setCount(countdown);
       }
     }
@@ -57,13 +76,13 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
 
     switch (count) {
       case 3:
-        soundManagerRef.current.playCountDown3Sound();
+        soundManagerRef.current.playCountDown3Sound(1.0, 1.2);
         break;
       case 2:
-        soundManagerRef.current.playCountDown2Sound();
+        soundManagerRef.current.playCountDown2Sound(1.0, 1.0);
         break;
       case 1:
-        soundManagerRef.current.playCountDown1Sound();
+        soundManagerRef.current.playCountDown1Sound(1.0, 0.8);
         break;
     }
   }, [count, gameStatus]);
@@ -76,6 +95,9 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
       }
       if (priorityTimeoutRef.current) {
         clearTimeout(priorityTimeoutRef.current);
+      }
+      if (animateTimeoutRef.current) {
+        clearTimeout(animateTimeoutRef.current);
       }
     };
   }, []);
@@ -97,12 +119,12 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
         setMessage('');
         setAnimate(false);
         messageTimeoutRef.current = null;
-      }, 500);
+      }, 600);
 
       priorityTimeoutRef.current = setTimeout(() => {
         setPriorityMessage(false);
         priorityTimeoutRef.current = null;
-      }, 600);
+      }, 800);
     }
     soundManagerRef.current.playGameStartSound();
   };
@@ -124,12 +146,12 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
         setMessage('');
         setAnimate(false);
         messageTimeoutRef.current = null;
-      }, 500);
+      }, 600);
 
       priorityTimeoutRef.current = setTimeout(() => {
         setPriorityMessage(false);
         priorityTimeoutRef.current = null;
-      }, 600);
+      }, 800);
     }
     soundManagerRef.current.playGameOverSound();
   };
