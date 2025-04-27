@@ -28,8 +28,7 @@ CREATE TABLE  IF NOT EXISTS user_profiles (
 
 -- User stats (separate table)
 CREATE TABLE   IF NOT EXISTS user_stats (
-  user_stat_id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  user_id TEXT PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
   wins INTEGER DEFAULT 0,
   losses INTEGER DEFAULT 0,
   elo INTEGER DEFAULT 1000,

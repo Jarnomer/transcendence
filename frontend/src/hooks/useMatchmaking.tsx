@@ -12,6 +12,7 @@ const useMatchmaking = () => {
   const navigate = useNavigate();
   const { userId, user } = useUser();
   const {
+    matchmakingState,
     matchmakingSocket,
     sendMessage,
     closeConnection,
@@ -31,6 +32,15 @@ const useMatchmaking = () => {
   //   if (!mode || !difficulty) return;
   //   params.current = new URLSearchParams({ mode: mode, difficulty: difficulty });
   // }, [mode, difficulty]);
+
+  // useEffect(() => {
+  //   if (matchmakingState.phase === 'in_game') {
+  //     navigate('/game');
+  //   }
+  //   if (matchmakingState.phase === 'spectating') {
+  //     navigate('/game');
+  //   }
+  // }, [matchmakingState.phase]);
 
   useEffect(() => {
     if (!mode || !difficulty || !lobby) return;

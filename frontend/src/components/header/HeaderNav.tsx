@@ -35,7 +35,7 @@ export const HeaderNav: React.FC = () => {
   const { user, logout } = useUser();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { setLobby, setDifficulty, setMode, resetGameOptions, queueId } = useGameOptionsContext();
-  const { phase } = useWebSocketContext();
+  const { matchmakingState } = useWebSocketContext();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {

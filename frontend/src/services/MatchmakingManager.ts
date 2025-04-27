@@ -1,22 +1,22 @@
-import { GameOptionsType, UserRole } from '@shared/types';
+import { GameOptionsType, MatchmakingSnapshot } from '@shared/types';
 
 import { cancelQueue, deleteGame } from './gameService';
 import WebSocketManager from './webSocket/WebSocketManager';
 
-export type Phase =
-  | 'idle'
-  | 'matchmaking'
-  | 'in_game'
-  | 'waiting_next_round'
-  | 'spectating'
-  | 'completed';
+// export type Phase =
+//   | 'idle'
+//   | 'matchmaking'
+//   | 'in_game'
+//   | 'waiting_next_round'
+//   | 'spectating'
+//   | 'completed';
 
-type MatchmakingSnapshot = {
-  phase: Phase;
-  role: UserRole;
-  gameId: string;
-  participants: string[]; // or whatever type
-};
+// type MatchmakingSnapshot = {
+//   phase: Phase;
+//   role: UserRole;
+//   gameId: string;
+//   participants: string[]; // or whatever type
+// };
 
 class MatchmakingManager {
   private static instance: MatchmakingManager;
@@ -157,13 +157,17 @@ class MatchmakingManager {
   handleGameLoser = () => {
     console.info('You lost the game. You can Spectate...');
     this.setState({ phase: 'completed', role: 'spectator', gameId: '' });
-    this.cleanup();
+    if (this.mode === 'tournament') {
+      console.info('You can still participate in the tournament.');
+    } else {
+      this.cleanup();
+    }
     // this.notifyListeners();
   };
 
   handleTournamentWinner = (data: any) => {
     console.info('Congratulations! You won the tournament!', data);
-    this.setState({ phase: 'completed', role: 'spectator', gameId: '' });
+    this.setState({ phase: 'completed', role: 'player', gameId: '' });
     this.cleanup();
     // this.notifyListeners();
   };
@@ -177,6 +181,12 @@ class MatchmakingManager {
     console.info('Tournament matches:', matches);
   };
 
+  handleMatchmakingTimeout = () => {
+    console.info('Matchmaking timed out. Cancelling queue...');
+    // this.cancelQueue();
+    this.setState({ phase: 'idle', role: 'player', gameId: '' });
+  };
+
   attachListeners() {
     this.matchmakingSocket.addEventListener('match_found', this.handleMatchFound);
     this.matchmakingSocket.addEventListener('game_winner', this.handleGameWinner);
@@ -184,6 +194,7 @@ class MatchmakingManager {
     this.matchmakingSocket.addEventListener('tournament_winner', this.handleTournamentWinner);
     this.matchmakingSocket.addEventListener('participants', this.handleParticipants);
     this.matchmakingSocket.addEventListener('tournament_matches', this.handleTournamentMatches);
+    this.matchmakingSocket.addEventListener('matchmaking_timeout', this.handleMatchmakingTimeout);
   }
 
   detachListeners() {
@@ -193,6 +204,10 @@ class MatchmakingManager {
     this.matchmakingSocket.removeEventListener('tournament_winner', this.handleTournamentWinner);
     this.matchmakingSocket.removeEventListener('participants', this.handleParticipants);
     this.matchmakingSocket.removeEventListener('tournament_matches', this.handleTournamentMatches);
+    this.matchmakingSocket.removeEventListener(
+      'matchmaking_timeout',
+      this.handleMatchmakingTimeout
+    );
   }
 
   async cancelQueue() {

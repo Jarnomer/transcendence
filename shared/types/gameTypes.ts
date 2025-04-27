@@ -1,4 +1,4 @@
-import { ParticleSystem, GlowLayer, Mesh } from 'babylonjs';
+import { GlowLayer, Mesh, ParticleSystem } from 'babylonjs';
 
 export interface Player {
   id: string;
@@ -229,4 +229,19 @@ export type GameOptionsType = {
   difficulty: string;
   queueId: string | null;
   tournamentOptions: TournamentOptionsType | null;
+};
+
+export type Phase =
+  | 'idle'
+  | 'matchmaking'
+  | 'in_game'
+  | 'waiting_next_round'
+  | 'spectating'
+  | 'completed';
+
+export type MatchmakingSnapshot = {
+  phase: Phase;
+  role: UserRole;
+  gameId: string;
+  participants: string[]; // or whatever type
 };

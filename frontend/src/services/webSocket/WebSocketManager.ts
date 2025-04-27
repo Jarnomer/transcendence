@@ -86,7 +86,6 @@ class WebSocketManager {
           this.notifyHandlers(data.type, data.state);
         } else {
           console.warn('Received invalid WebSocket message:', data);
-          this.queue.push(data);
         }
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
@@ -98,7 +97,7 @@ class WebSocketManager {
     if (this.queue.length > 0) {
       console.log('Flushing WebSocket queue:', this.queue);
       this.queue.forEach((data) => {
-        this.notifyHandlers(data.type, data.state);
+        this.sendMessage(data);
       });
       this.queue = [];
     }
@@ -143,7 +142,7 @@ class WebSocketManager {
       this.ws.send(JSON.stringify(message));
     } else {
       console.warn('WebSocket not connected, message not sent:', message);
-      alert(`WebSocket ${this.url} not connected, message not sent: ${message}`);
+      this.queue.push(message);
     }
   }
 

@@ -5,12 +5,13 @@ import MatchmakingManager from '../MatchmakingManager';
 
 export function useWebSocketStore() {
   const matchmakingManager = MatchmakingManager.getInstance();
-  const phase = useSyncExternalStore(matchmakingManager.subscribe.bind(matchmakingManager), () =>
-    matchmakingManager.getSnapshot()
+  const matchmakingState = useSyncExternalStore(
+    matchmakingManager.subscribe.bind(matchmakingManager),
+    () => matchmakingManager.getSnapshot()
   );
 
   return {
-    phase,
+    matchmakingState,
     setGameId: matchmakingManager.setGameId.bind(matchmakingManager),
     cleanup: matchmakingManager.cleanup.bind(matchmakingManager),
     startMatchMaking: matchmakingManager.startMatchmaking.bind(matchmakingManager),

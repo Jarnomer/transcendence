@@ -13,8 +13,15 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 export const useGameResult = () => {
   const navigate = useNavigate();
   const { resetGameOptions, mode } = useGameOptionsContext();
-  const { closeConnection, gameStatus, gameState, dispatch, phase, setGameId, cleanup } =
-    useWebSocketContext();
+  const {
+    closeConnection,
+    gameStatus,
+    gameState,
+    dispatch,
+    matchmakingState: { gameId },
+    setGameId,
+    cleanup,
+  } = useWebSocketContext();
   const { userId } = useUser();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
@@ -30,9 +37,9 @@ export const useGameResult = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (!phase.gameId) return;
-    gameIdRef.current = phase.gameId;
-  }, [phase.gameId]);
+    if (!gameId) return;
+    gameIdRef.current = gameId;
+  }, [gameId]);
 
   useEffect(() => {
     if (!gameStatus) return;

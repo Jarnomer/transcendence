@@ -155,9 +155,13 @@ class OneVOneMatchmaking extends MatchmakingMode {
         this.playerIntervals.delete(player.user_id);
         console.log(`Matchmaking timed out for player ${player.user_id}`);
         this.cleanupPlayer(player.user_id);
+        this.matchmaking.broadcast([player.user_id], {
+          type: 'matchmaking_timeout',
+          state: { message: 'Matchmaking timed out. Please try again later.' },
+        });
         //send a message to the player that the matchmaking timed out
       }
-    }, 30000); // Timeout after 30 seconds (adjust as needed)
+    }, 60000); // Timeout after 30 seconds (adjust as needed)
 
     const interval = setInterval(async () => {
       console.log(`Searching for opponent for: ${player.user_id}`);

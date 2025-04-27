@@ -43,7 +43,6 @@ async function updateEloAfterGame(gameId: string) {
   );
 }
 
-
 // WITH RankedUsers AS (
 //   SELECT
 //     user_id,
@@ -53,7 +52,6 @@ async function updateEloAfterGame(gameId: string) {
 // )
 // UPDATE user_stats
 // SET rank = (SELECT rank FROM RankedUsers WHERE RankedUsers.user_id = user_stats.user_id);
-
 
 // SELECT user_id, elo, rank
 // FROM user_stats

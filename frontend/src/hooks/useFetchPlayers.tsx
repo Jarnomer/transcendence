@@ -11,6 +11,7 @@ export const useFetchPlayerData = () => {
   const [fetched, setFetched] = useState(false);
 
   const fetchPlayerData = async () => {
+    if (!gameState) return;
     try {
       const p1 = await getUserByID(gameState.players.player1.id);
       let p2 = null;
