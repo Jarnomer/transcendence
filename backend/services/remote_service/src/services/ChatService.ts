@@ -154,7 +154,7 @@ export class ChatService {
 
   async handleMessage(message: string) {
     const data = JSON.parse(message);
-    console.log('Received message:', data);
+    // console.log('Received message:', data);
     if (data.type === 'join') {
       console.log('Handling join message:', data.payload);
       await this.handleJoin(data.payload);

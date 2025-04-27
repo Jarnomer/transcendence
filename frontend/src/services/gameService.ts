@@ -31,6 +31,23 @@ export async function createQueue(options: CreateQueueParams) {
   }
 }
 
+export async function getSessionStatus({
+  game_id,
+  queue_id,
+}: {
+  game_id: string;
+  queue_id: string;
+}) {
+  try {
+    const res = await api.get(`/game/sessionStatus?game_id=${game_id}&queue_id=${queue_id}`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get session status:', err);
+    throw err;
+  }
+}
+
 export async function getStatusQueue() {
   try {
     const res = await api.get<QueueStatusResType>(`/matchmaking/status`);

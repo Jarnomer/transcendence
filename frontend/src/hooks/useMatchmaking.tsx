@@ -6,10 +6,11 @@ import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContex
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
+import SessionManager from '../services/SessionManager';
 
 const useMatchmaking = () => {
   const navigate = useNavigate();
-  const { userId } = useUser();
+  const { userId, user } = useUser();
   const {
     matchmakingSocket,
     sendMessage,
@@ -20,15 +21,16 @@ const useMatchmaking = () => {
     startMatchMaking,
     startSpectating,
   } = useWebSocketContext();
-  const { mode, difficulty, lobby, queueId, tournamentOptions, confirmGame } =
+  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId } =
     useGameOptionsContext();
   const matchmaker = useRef<MatchMaker>(null);
-  const params = useRef<URLSearchParams>(new URLSearchParams());
+  const sessionManager = SessionManager.getInstance();
+  // const params = useRef<URLSearchParams>(new URLSearchParams());
 
-  useEffect(() => {
-    if (!mode || !difficulty) return;
-    params.current = new URLSearchParams({ mode: mode, difficulty: difficulty });
-  }, [mode, difficulty]);
+  // useEffect(() => {
+  //   if (!mode || !difficulty) return;
+  //   params.current = new URLSearchParams({ mode: mode, difficulty: difficulty });
+  // }, [mode, difficulty]);
 
   useEffect(() => {
     if (!mode || !difficulty || !lobby) return;
@@ -36,13 +38,35 @@ const useMatchmaking = () => {
     matchmaker.current = new MatchMaker({ mode, difficulty, lobby, queueId, tournamentOptions });
   }, [mode, difficulty, lobby]);
 
-  // const handleFindMatch = () => {
-  //   console.log('Finding match');
-  //   sendMessage('matchmaking', {
-  //     type: 'find_match',
-  //     payload: { mode: mode, difficulty: difficulty, user_id: userId },
-  //   });
-  // };
+  const handleFindMatch = () => {
+    console.log('Finding match');
+    sendMessage('matchmaking', {
+      type: 'find_match',
+      payload: {
+        mode: mode,
+        difficulty: difficulty,
+        user_id: userId,
+        avatar_url: user?.avatar_url,
+        display_name: user?.display_name,
+      },
+    });
+  };
+
+  const handleJoinMatch = () => {
+    if (!matchmaker.current) return;
+    console.log('Joining match with queue ID:', matchmaker.current.getQueueId());
+    sendMessage('matchmaking', {
+      type: 'join_match',
+      payload: {
+        queue_id: matchmaker.current.getQueueId(),
+        user_id: userId,
+        mode: mode,
+        difficulty: difficulty,
+        avatar_url: user?.avatar_url,
+        display_name: user?.display_name,
+      },
+    });
+  };
 
   // const handleGameStart = () => {
   //   if (!matchmaker.current) return;
@@ -61,15 +85,6 @@ const useMatchmaking = () => {
   //   // navigate('/game');
   //   // gameSocket.connect(params.current);
   // }, []);
-
-  // const handleJoinMatch = useCallback(() => {
-  //   if (!matchmaker.current) return;
-  //   console.log('Joining match with queue ID:', matchmaker.current.getQueueId());
-  //   sendMessage('matchmaking', {
-  //     type: 'join_match',
-  //     payload: { queue_id: matchmaker.current.getQueueId(), user_id: userId, mode: mode },
-  //   });
-  // }, [userId, mode, matchmaker.current]);
 
   // const handleGameWinner = useCallback(() => {
   //   if (!matchmakingSocket) return;
@@ -103,10 +118,12 @@ const useMatchmaking = () => {
           case MatchMakerState.MATCHED:
             console.log('Matched with a game');
             setGameId(matchmaker.current.getGameId()!);
+            sessionManager.set('gameId', matchmaker.current.getGameId()!);
             break;
           case MatchMakerState.WAITING_FOR_PLAYERS:
           case MatchMakerState.JOINING_RANDOM:
             console.log('Waiting for players');
+            sessionManager.set('queueId', matchmaker.current.getQueueId()!);
             startMatchMaking();
             // params.current.set('queue_id', matchmaker.current.getQueueId() || '');
             // matchmakingSocket.connect(params.current);
@@ -132,25 +149,25 @@ const useMatchmaking = () => {
   // }, [confirmGame]);
 
   // sending a message when the matchmaking connection is established
-  // useEffect(() => {
-  //   if (connections.matchmaking !== 'connected') return;
-  //   console.log('Matchmaking connected');
-  //   if (!matchmaker.current) return;
-  //   switch (matchmaker.current.getMatchMakerState()) {
-  //     case MatchMakerState.WAITING_FOR_PLAYERS:
-  //       handleJoinMatch();
-  //       break;
-  //     case MatchMakerState.JOINING_RANDOM:
-  //       handleFindMatch();
-  //       break;
-  //     case MatchMakerState.MATCHED:
-  //       console.log('Matched with a game');
-  //       break;
-  //     default:
-  //       console.error('Invalid matchmaker state');
-  //       break;
-  //   }
-  // }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
+  useEffect(() => {
+    if (connections.matchmaking !== 'connected') return;
+    console.log('Matchmaking connected');
+    if (!matchmaker.current) return;
+    switch (matchmaker.current.getMatchMakerState()) {
+      case MatchMakerState.WAITING_FOR_PLAYERS:
+        handleJoinMatch();
+        break;
+      case MatchMakerState.JOINING_RANDOM:
+        handleFindMatch();
+        break;
+      case MatchMakerState.MATCHED:
+        console.log('Matched with a game');
+        break;
+      default:
+        console.error('Invalid matchmaker state');
+        break;
+    }
+  }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
 
   // useEffect(() => {
   //   console.log('Attaching matchmaking event listeners');

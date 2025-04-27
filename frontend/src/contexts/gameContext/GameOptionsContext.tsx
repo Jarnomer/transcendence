@@ -3,6 +3,7 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 
 import { defaultGameSettings, GameSettings, TournamentOptionsType } from '@shared/types/gameTypes';
 
+import SessionManager from '../../services/SessionManager';
 import { getGameSettings } from '../../services/userService';
 import { useUser } from '../user/UserContext';
 import { useWebSocketContext } from '../WebSocketContext';
@@ -47,6 +48,14 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
     console.log('lobby: ', lobby);
     console.log('queueId: ', queueId);
   }, [mode, difficulty, lobby, queueId]);
+
+  useEffect(() => {
+    if (!mode || !difficulty) return;
+    console.log('setting sessions');
+    const sessionManager = SessionManager.getInstance();
+    sessionManager.set('mode', mode);
+    sessionManager.set('difficulty', difficulty);
+  }, [mode, difficulty]);
 
   useEffect(() => {
     if (!userId) return;

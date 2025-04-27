@@ -64,9 +64,6 @@ export class GameService {
     //   throw new NotFoundError('User not found in games');
     // }
     const game = await this.gameModel.getGameByUserID(user_id);
-    if (!game) {
-      throw new NotFoundError('Game not found');
-    }
     return game;
   }
 
@@ -77,9 +74,6 @@ export class GameService {
    */
   async getGame(game_id: string) {
     const game = await this.gameModel.getGame(game_id);
-    if (!game) {
-      throw new NotFoundError('Game not found');
-    }
     return game;
   }
 

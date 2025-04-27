@@ -64,7 +64,6 @@ export class QueueService {
    */
   async getStatusQueue(user_id: string) {
     const user = await this.queueModel.getStatusQueue(user_id);
-    if (!user) throw new NotFoundError('User not found in queue');
     return user;
   }
 
@@ -76,7 +75,6 @@ export class QueueService {
 
   async getQueueByID(queue_id: string) {
     const queue = await this.queueModel.getQueueByID(queue_id);
-    if (!queue) throw new NotFoundError('Queue not found');
     return queue;
   }
 
@@ -98,6 +96,11 @@ export class QueueService {
     }
     console.log('created new user in queue', user_id);
     return await this.queueModel.createWaitingQueue(user_id, mode, difficulty, name, password); // insert user into queue
+  }
+
+  async isInQueue(user_id: string) {
+    const user = await this.queueModel.isInQueque(user_id);
+    return user;
   }
 
   /**
