@@ -9,6 +9,7 @@ import { FloatingChatWrapper } from './components/chat/floatingChat/FloatingChat
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider';
 import { Header } from './components/header/Header.tsx';
+import { JoinGameNotificationModal } from './components/modals/JoinGameNotification.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
@@ -48,6 +49,7 @@ const App: React.FC = () => {
         </Router>
       </GameOptionsProvider>
       <SettingsModal></SettingsModal>
+      <JoinGameNotificationModal></JoinGameNotificationModal>
 
       <Toaster position="bottom-right" />
     </>
