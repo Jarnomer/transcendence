@@ -242,6 +242,63 @@ function createPowerUpIconMesh(
   return icon;
 }
 
+function createPowerUpParticles(
+  scene: Scene,
+  paddleMesh: Mesh,
+  powerUpType: PowerUpType,
+  color: Color3,
+  playerIndex: number,
+  effectIndex: number
+): ParticleSystem {
+  const texturePath = getPowerUpSignPath(powerUpType);
+  const paddlePosition = paddleMesh.position.clone();
+
+  const options = {
+    color: color,
+    capacity: 40,
+    emitRate: Math.max(6, 12 - effectIndex * 2),
+    minSize: 0.5 - effectIndex * 0.05,
+    maxSize: 1.5 - effectIndex * 0.1,
+    minLifeTime: 3,
+    maxLifeTime: 5,
+    minEmitPower: 4,
+    maxEmitPower: 8,
+  };
+
+  const particleSystem = createStandardParticleSystem(
+    `powerUpParticles-${playerIndex}-${powerUpType}`,
+    scene,
+    paddlePosition.clone(),
+    options,
+    texturePath
+  );
+
+  particleSystem.minEmitBox = new Vector3(-0.2, -0.3, -0.2);
+  particleSystem.maxEmitBox = new Vector3(0.2, 0.3, 0.2);
+
+  particleSystem.createDirectedCylinderEmitter(
+    0.25,
+    0.15,
+    0.1,
+    new Vector3(0, 1, 0),
+    new Vector3(0, 6, 0)
+  );
+
+  particleSystem.direction1 = new Vector3(-0.5, 1, -0.5);
+  particleSystem.direction2 = new Vector3(0.5, 1, 0.5);
+
+  particleSystem.minAngularSpeed = -0.3;
+  particleSystem.maxAngularSpeed = 0.3;
+
+  scene.onBeforeRenderObservable.add(() => {
+    (particleSystem.emitter as Vector3).y = paddleMesh.position.y;
+  });
+
+  particleSystem.start();
+
+  return particleSystem;
+}
+
 function animatePowerUpIcons(
   scene: Scene,
   icons: Mesh[],
@@ -355,63 +412,6 @@ function animatePowerUpIcons(
     if (iconDown.material) iconDown.material.dispose();
     iconDown.dispose();
   });
-}
-
-function createPowerUpParticles(
-  scene: Scene,
-  paddleMesh: Mesh,
-  powerUpType: PowerUpType,
-  color: Color3,
-  playerIndex: number,
-  effectIndex: number
-): ParticleSystem {
-  const texturePath = getPowerUpSignPath(powerUpType);
-  const paddlePosition = paddleMesh.position.clone();
-
-  const options = {
-    color: color,
-    capacity: 40,
-    emitRate: Math.max(6, 12 - effectIndex * 2),
-    minSize: 0.5 - effectIndex * 0.05,
-    maxSize: 1.5 - effectIndex * 0.1,
-    minLifeTime: 3,
-    maxLifeTime: 5,
-    minEmitPower: 4,
-    maxEmitPower: 8,
-  };
-
-  const particleSystem = createStandardParticleSystem(
-    `powerUpParticles-${playerIndex}-${powerUpType}`,
-    scene,
-    paddlePosition.clone(),
-    options,
-    texturePath
-  );
-
-  particleSystem.minEmitBox = new Vector3(-0.2, -0.3, -0.2);
-  particleSystem.maxEmitBox = new Vector3(0.2, 0.3, 0.2);
-
-  particleSystem.createDirectedCylinderEmitter(
-    0.25,
-    0.15,
-    0.1,
-    new Vector3(0, 1, 0),
-    new Vector3(0, 6, 0)
-  );
-
-  particleSystem.direction1 = new Vector3(-0.5, 1, -0.5);
-  particleSystem.direction2 = new Vector3(0.5, 1, 0.5);
-
-  particleSystem.minAngularSpeed = -0.3;
-  particleSystem.maxAngularSpeed = 0.3;
-
-  scene.onBeforeRenderObservable.add(() => {
-    (particleSystem.emitter as Vector3).y = paddleMesh.position.y;
-  });
-
-  particleSystem.start();
-
-  return particleSystem;
 }
 
 function applyPaddleMaterial(
