@@ -116,6 +116,10 @@ export default class PongGame {
       if (this.readyState.get(1) && this.readyState.get(2)) {
         return true;
       }
+    } else if (this.settings.mode === 'tournament') {
+      if (this.readyState.get(1) && this.readyState.get(2)) {
+        return true;
+      }
     }
     return false;
   }

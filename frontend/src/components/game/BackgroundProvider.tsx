@@ -13,7 +13,7 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
     gameState: activeGameState,
     gameStatus,
     connections,
-    phase: { gameId },
+    matchmakingState: { gameId },
   } = useWebSocketContext();
   // const { gameId } = useGameOptionsContext();
 

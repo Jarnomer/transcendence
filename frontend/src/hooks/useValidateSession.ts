@@ -11,65 +11,62 @@ import SessionManager from '../services/SessionManager';
 type StepType = 'init' | 'validating' | 'restoring' | 'done';
 
 const useValidateSession = () => {
-  const { cancelGame, cancelQueue, setGameId } = useWebSocketContext();
-  const { resetGameOptions, setMode, setDifficulty } = useGameOptionsContext();
+  const { cancelGame, cancelQueue, setGameId, cleanup } = useWebSocketContext();
+  const { resetGameOptions, setMode, setDifficulty, setQueueId } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
 
   const [step, setStep] = useState<StepType>('init');
+  const sessionManager = SessionManager.getInstance();
+  const gameId = sessionManager.get('gameId');
+  const queueId = sessionManager.get('queueId');
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const sessionManager = SessionManager.getInstance();
-    const gameId = sessionManager.get('gameId');
-    const queueId = sessionManager.get('queueId');
+  const validateSession = async () => {
+    try {
+      const res = await getSessionStatus({ game_id: gameId || '', queue_id: queueId || '' });
+      console.log('Validating session...');
+      console.log('Session validation response:', res);
+      if (res.game_session) {
+        setStep('validating'); // Validating session
+        setMode(sessionManager.get('mode') || null);
+        setDifficulty(sessionManager.get('difficulty') || null);
+        setGameId(gameId || '');
+      } else if (res.queue_session) {
+        setStep('validating'); // Restoring session
+        setQueueId(queueId || '');
+      } else {
+        sessionManager.clear();
+        resetGameOptions(); // Reset game options
+        cleanup();
+        setStep('done'); // No ongoing queue, clear session
+      }
+    } catch (err) {
+      console.error('[Session Check] Error:', err);
+      sessionManager.clear(); // Optional: clear session on error
+    }
+  };
 
+  useEffect(() => {
     if (!gameId && !queueId) {
       console.log('No game or queue ID found in session.');
+      resetGameOptions(); // Reset game options if no session
+      sessionManager.clear(); // Clear session
       setStep('done'); // No session to validate, skip loading
+
       return;
     }
-
-    const validateSession = async () => {
-      try {
-        if (gameId) {
-          console.log('Validating session...');
-          const res = await getSessionStatus({ game_id: gameId || '', queue_id: queueId || '' });
-          if (res.game_session) {
-            setStep('validating'); // Validating session
-            setMode(sessionManager.get('mode') || null);
-            setDifficulty(sessionManager.get('difficulty') || null);
-            setGameId(gameId || '');
-          } else {
-            sessionManager.remove('gameId');
-            setStep('done'); // No ongoing game, clear session
-          }
-        }
-        if (queueId) {
-          if (res.queue_session) {
-            setStep('validating'); // Restoring session
-          } else {
-            sessionManager.remove('queueId');
-            setStep('done'); // No ongoing queue, clear session
-          }
-        }
-      } catch (err) {
-        console.error('[Session Check] Error:', err);
-        sessionManager.clear(); // Optional: clear session on error
-      }
-    };
-
     validateSession();
   }, []);
 
   useEffect(() => {
-    const sessionManager = SessionManager.getInstance();
-    const gameId = sessionManager.get('gameId');
-    const queueId = sessionManager.get('queueId');
     const cancelQueueGame = async () => {
+      console.log('Canceling queue/game...', gameId, queueId);
       if (gameId) {
+        console.log('Canceling game...');
         await cancelGame();
       } else if (queueId) {
+        console.log('Canceling queue...');
         await cancelQueue();
       }
     };
@@ -78,18 +75,25 @@ const useValidateSession = () => {
       const confirm = window.confirm('You are already in a game or queue. continue?');
       if (confirm) {
         allowInternalNavigation();
-        navigate('/game');
+        if (gameId) {
+          console.log('Game ID found:', gameId);
+          navigate('/game');
+        } else {
+          console.log('Queue ID found:', queueId);
+          navigate('/tournamentLobby');
+        }
       } else {
-        cancelQueueGame();
-        resetGameOptions(); // <- sets mode/difficulty to null or default
-        setStep('done');
+        console.log('User declined to continue.');
+        cancelQueueGame().then(() => {
+          console.log('Queue/game canceled.');
+          sessionManager.clear(); // Clear session
+          setStep('done'); // Set step to done after canceling
+          resetGameOptions(); // Reset game options
+        });
       }
-      // } else {
-      // No queue/game, safe to proceed immediately
-      // resetGameOptions(); // <- sets mode/difficulty to null or default
-      // setReadyForNextEffect(true);
     }
   }, [step]);
+
   const isNewGame = step === 'done';
   return isNewGame;
 };

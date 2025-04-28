@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { AnimatePresence, motion } from 'framer-motion';
+
+import { useMatchmaking } from '@/hooks';
 
 import { slideFromRightVariants } from '../components/tournamentLobby/animationVariants';
 import { Spectate } from '../components/tournamentLobby/Spectate';
@@ -14,16 +18,27 @@ import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 export const TournamentLobby: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
   const { friends, selectedFriendId, roomId } = useChatContext();
   const [players, setPlayers] = useState<any[]>();
   const [tournamentChatId, setTournamentChatId] = useState<string | undefined>();
-  const { difficulty } = useGameOptionsContext();
+  const { difficulty, lobby, mode } = useGameOptionsContext();
 
   const { createRoom } = useChatContext();
-  const { matchmakingSocket, connections, sendMessage } = useWebSocketContext();
+  const {
+    matchmakingSocket,
+    connections,
+    sendMessage,
+    cleanup,
+    cancelQueue,
+    cancelGame,
+    matchmakingState,
+  } = useWebSocketContext();
   const { openModal, closeModal } = useModal();
+
+  useMatchmaking();
 
   // useEffect(() => {
   //   if (!user) return;
@@ -43,12 +58,34 @@ export const TournamentLobby: React.FC = () => {
   //   setupChat();
   // }, [user]);
 
+  useEffect(() => {
+    if (lobby === 'join' && mode === 'tournament') {
+      setActiveTab('players');
+    }
+  }, [lobby]);
+
+  useEffect(() => {
+    console.log('matchmaking state: ', matchmakingState);
+    if (matchmakingState.phase === 'in_game' && location.pathname !== '/game') {
+      console.log('in game');
+      console.log('participants: ', matchmakingState.participants);
+      handleClickOpenModal();
+    }
+  }, [matchmakingState.phase, location.pathname]);
+
   const onAccept = () => {
     console.log('joining game..');
+    navigate('/game');
   };
 
   const onDecline = () => {
     console.log('Declining game..');
+    cleanup();
+    cancelGame();
+    cancelQueue();
+    if (location.pathname === '/tournamentLobby') {
+      navigate('/home');
+    }
   };
 
   const handleClickOpenModal = () => {
@@ -69,7 +106,6 @@ export const TournamentLobby: React.FC = () => {
     setPlayers(Array.from({ length: parseInt(difficulty!) }, (_, i) => `Competitor ${i + 1}`));
   }, []);
 
-  console.log(selectedFriendId);
 
   return (
     <>

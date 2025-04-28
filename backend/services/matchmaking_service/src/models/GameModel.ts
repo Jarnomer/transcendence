@@ -139,7 +139,7 @@ export class GameModel {
     const players = await this.db.all(
       `SELECT player_id, elo, is_winner
       FROM game_players
-      INNER JOIN user_stats ON game_players.player_id = user_stats.user_id
+      LEFT JOIN user_stats ON game_players.player_id = user_stats.user_id
       WHERE game_id = ?`,
       [game_id]
     );

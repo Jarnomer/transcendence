@@ -49,7 +49,7 @@ export const GameInfoOverlay: React.FC<GameInfoOverlayProps> = ({
     if (gameStatus === 'countdown') {
       const countdown = gameState.countdown;
       if (!priorityMessage && countdown !== undefined && countdown <= 3) {
-        console.log(`GameInfoOverlay: Setting countdown ${countdown}`);
+        // console.log(`GameInfoOverlay: Setting countdown ${countdown}`);
 
         if (prevCountRef.current !== countdown) {
           setAnimate(true);

@@ -1,22 +1,22 @@
-import { GameOptionsType, UserRole } from '@shared/types';
+import { GameOptionsType, MatchmakingSnapshot } from '@shared/types';
 
 import { cancelQueue, deleteGame } from './gameService';
 import WebSocketManager from './webSocket/WebSocketManager';
 
-export type Phase =
-  | 'idle'
-  | 'matchmaking'
-  | 'in_game'
-  | 'waiting_next_round'
-  | 'spectating'
-  | 'completed';
+// export type Phase =
+//   | 'idle'
+//   | 'matchmaking'
+//   | 'in_game'
+//   | 'waiting_next_round'
+//   | 'spectating'
+//   | 'completed';
 
-type MatchmakingSnapshot = {
-  phase: Phase;
-  role: UserRole;
-  gameId: string;
-  participants: string[]; // or whatever type
-};
+// type MatchmakingSnapshot = {
+//   phase: Phase;
+//   role: UserRole;
+//   gameId: string;
+//   participants: string[]; // or whatever type
+// };
 
 class MatchmakingManager {
   private static instance: MatchmakingManager;
@@ -40,6 +40,7 @@ class MatchmakingManager {
   constructor() {
     this.matchmakingSocket = WebSocketManager.getInstance('matchmaking');
     this.gameSocket = WebSocketManager.getInstance('game');
+    this.attachListeners();
   }
 
   static getInstance(): MatchmakingManager {
@@ -99,7 +100,6 @@ class MatchmakingManager {
     this.matchmakingSocket.connect(
       new URLSearchParams({ mode: this.mode, difficulty: this.difficulty })
     );
-    this.attachListeners();
     this.setState({ phase: 'matchmaking', role: 'player' });
     // this.notifyListeners();
   }
@@ -157,20 +157,35 @@ class MatchmakingManager {
   handleGameLoser = () => {
     console.info('You lost the game. You can Spectate...');
     this.setState({ phase: 'completed', role: 'spectator', gameId: '' });
-    this.cleanup();
+    if (this.mode === 'tournament') {
+      console.info('You can still participate in the tournament.');
+    } else {
+      this.cleanup();
+    }
     // this.notifyListeners();
   };
 
   handleTournamentWinner = (data: any) => {
     console.info('Congratulations! You won the tournament!', data);
-    this.setState({ phase: 'completed', role: 'spectator', gameId: '' });
-    this.cleanup();
+    this.setState({ phase: 'completed', role: 'player', gameId: '' });
+    // this.cleanup();
     // this.notifyListeners();
   };
 
   handleParticipants = (participants: any) => {
-    console.info('Participants:', participants);
+    console.info('Participants:', this.snapshot.participants);
+    if (this.snapshot.participants.some((p) => p.user_id === participants.user_id)) return;
     this.setState({ participants: [...this.snapshot.participants, participants] });
+  };
+
+  handleTournamentMatches = (matches: any) => {
+    console.info('Tournament matches:', matches);
+  };
+
+  handleMatchmakingTimeout = () => {
+    console.info('Matchmaking timed out. Cancelling queue...');
+    // this.cancelQueue();
+    this.setState({ phase: 'idle', role: 'player', gameId: '' });
   };
 
   attachListeners() {
@@ -179,6 +194,8 @@ class MatchmakingManager {
     this.matchmakingSocket.addEventListener('game_loser', this.handleGameLoser);
     this.matchmakingSocket.addEventListener('tournament_winner', this.handleTournamentWinner);
     this.matchmakingSocket.addEventListener('participants', this.handleParticipants);
+    this.matchmakingSocket.addEventListener('tournament_matches', this.handleTournamentMatches);
+    this.matchmakingSocket.addEventListener('matchmaking_timeout', this.handleMatchmakingTimeout);
   }
 
   detachListeners() {
@@ -187,6 +204,11 @@ class MatchmakingManager {
     this.matchmakingSocket.removeEventListener('game_loser', this.handleGameLoser);
     this.matchmakingSocket.removeEventListener('tournament_winner', this.handleTournamentWinner);
     this.matchmakingSocket.removeEventListener('participants', this.handleParticipants);
+    this.matchmakingSocket.removeEventListener('tournament_matches', this.handleTournamentMatches);
+    this.matchmakingSocket.removeEventListener(
+      'matchmaking_timeout',
+      this.handleMatchmakingTimeout
+    );
   }
 
   async cancelQueue() {
@@ -211,7 +233,7 @@ class MatchmakingManager {
   }
 
   cleanup() {
-    this.detachListeners();
+    // this.detachListeners();
     this.matchmakingSocket.close();
     this.gameSocket.close();
     this.mode = null;

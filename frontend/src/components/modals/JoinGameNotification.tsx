@@ -44,7 +44,13 @@ export const JoinGameNotificationModal: React.FC = () => {
                 closeModal('joinGameModal');
               }}
             />
-            <ClippedButton label={'Accept'} onClick={() => onAccept()} />
+            <ClippedButton
+              label={'Accept'}
+              onClick={() => {
+                onAccept();
+                closeModal('joinGameModal');
+              }}
+            />
           </div>
         </div>
       </div>
