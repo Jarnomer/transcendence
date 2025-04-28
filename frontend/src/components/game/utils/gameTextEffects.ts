@@ -52,7 +52,7 @@ class GameTextManager {
   private createTextMesh(): void {
     this.textMesh = MeshBuilder.CreatePlane('textPlane', { width: 20, height: 10 }, this.scene);
 
-    this.textMesh.position = new Vector3(0, 0, -5);
+    this.textMesh.position = new Vector3(0, 0, -15);
     this.textMesh.isPickable = false;
 
     this.textTexture = new DynamicTexture(
