@@ -1,8 +1,12 @@
 import {
   Color3,
+  Color4,
   DefaultRenderingPipeline,
   DynamicTexture,
   Engine,
+  ParticleSystem,
+  Vector3,
+  GlowLayer,
   Mesh,
   Scene,
   ShadowGenerator,
@@ -40,6 +44,81 @@ export function createParticleTexture(scene: Scene, color: Color3): Texture {
   texture.update();
 
   return texture;
+}
+
+export function createStandardParticleSystem(
+  name: string,
+  scene: Scene,
+  emitter: Vector3 | Mesh,
+  options: {
+    color: Color3;
+    capacity?: number;
+    emitRate?: number;
+    minSize?: number;
+    maxSize?: number;
+    minLifeTime?: number;
+    maxLifeTime?: number;
+    minEmitPower?: number;
+    maxEmitPower?: number;
+    blendMode?: number;
+  },
+  texturePath?: string
+): ParticleSystem {
+  const {
+    color,
+    capacity = 100,
+    emitRate = 50,
+    minSize = 0.1,
+    maxSize = 0.5,
+    minLifeTime = 0.3,
+    maxLifeTime = 1.5,
+    minEmitPower = 1.0,
+    maxEmitPower = 2.0,
+    blendMode = ParticleSystem.BLENDMODE_ADD,
+  } = options;
+
+  const particleSystem = new ParticleSystem(name, capacity, scene);
+
+  if (texturePath) {
+    particleSystem.particleTexture = new Texture(texturePath, scene);
+  } else {
+    particleSystem.particleTexture = createParticleTexture(scene, color);
+  }
+
+  particleSystem.emitter = emitter;
+  particleSystem.emitRate = emitRate;
+  particleSystem.minSize = minSize;
+  particleSystem.maxSize = maxSize;
+  particleSystem.minLifeTime = minLifeTime;
+  particleSystem.maxLifeTime = maxLifeTime;
+  particleSystem.minEmitPower = minEmitPower;
+  particleSystem.maxEmitPower = maxEmitPower;
+  particleSystem.blendMode = blendMode;
+
+  particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
+  particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.8);
+  particleSystem.colorDead = new Color4(color.r * 0.5, color.g * 0.5, color.b * 0.5, 0);
+
+  return particleSystem;
+}
+
+export function addGlowEffect(
+  name: string,
+  mesh: Mesh,
+  scene: Scene,
+  intensity: number = 0.5,
+  blurKernelSize: number = 32
+): GlowLayer {
+  const glowLayer = new GlowLayer(name, scene);
+  glowLayer.intensity = intensity;
+  glowLayer.blurKernelSize = blurKernelSize;
+  glowLayer.addIncludedOnlyMesh(mesh);
+
+  if (!mesh.metadata) mesh.metadata = {};
+  if (!mesh.metadata.glowLayers) mesh.metadata.glowLayers = [];
+  mesh.metadata.glowLayers.push(glowLayer);
+
+  return glowLayer;
 }
 
 export function gameToSceneX(gameX: number, mesh: Mesh): number {
@@ -126,6 +205,7 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
 
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
+  const thirdColor = computedStyle.getPropertyValue('--color-third').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
   const gameboardColor = computedStyle.getPropertyValue('--color-gameboard').trim();
   const sceneBackgroundColor = computedStyle.getPropertyValue('--color-scene-background').trim();
@@ -133,6 +213,7 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
   return getThemeColors(
     primaryColor,
     secondaryColor,
+    thirdColor,
     backgroundColor,
     gameboardColor,
     sceneBackgroundColor
@@ -187,35 +268,37 @@ export function isPowerUpNegative(type: PowerUpType): boolean {
 }
 
 export function getPowerUpIconPath(powerUpType: PowerUpType) {
+  const baseUrl = 'textures/power-up/';
   switch (powerUpType) {
     case PowerUpType.BiggerPaddle:
-      return '/power-up/paddle_bigger.png';
+      return baseUrl + 'paddle_bigger.png';
     case PowerUpType.SmallerPaddle:
-      return '/power-up/paddle_smaller.png';
+      return baseUrl + 'paddle_smaller.png';
     case PowerUpType.FasterPaddle:
-      return '/power-up/paddle_faster.png';
+      return baseUrl + 'paddle_faster.png';
     case PowerUpType.SlowerPaddle:
-      return '/power-up/paddle_slower.png';
+      return baseUrl + 'paddle_slower.png';
     case PowerUpType.MoreSpin:
-      return '/power-up/paddle_spin.png';
+      return baseUrl + 'paddle_spin.png';
     default:
-      return '/power-up/unknown_powerup.png';
+      return baseUrl + 'unknown_powerup.png';
   }
 }
 
 export function getPowerUpSignPath(powerUpType: PowerUpType) {
+  const baseUrl = 'textures/power-up/';
   switch (powerUpType) {
     case PowerUpType.BiggerPaddle:
-      return '/power-up/sign_plus.png';
+      return baseUrl + 'sign_plus.png';
     case PowerUpType.SmallerPaddle:
-      return '/power-up/sign_minus.png';
+      return baseUrl + 'sign_minus.png';
     case PowerUpType.FasterPaddle:
-      return '/power-up/sign_fast.png';
+      return baseUrl + 'sign_fast.png';
     case PowerUpType.SlowerPaddle:
-      return '/power-up/sign_slow.png';
+      return baseUrl + 'sign_slow.png';
     case PowerUpType.MoreSpin:
-      return '/power-up/sign_spin.png';
+      return baseUrl + 'sign_spin.png';
     default:
-      return '/power-up/sign_unknown.png';
+      return baseUrl + 'sign_unknown.png';
   }
 }

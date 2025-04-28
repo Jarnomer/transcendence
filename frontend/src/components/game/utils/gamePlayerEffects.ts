@@ -15,7 +15,13 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { gameToSceneSize, getPowerUpSignPath, getPowerUpIconPath } from '@game/utils';
+import {
+  gameToSceneSize,
+  getPowerUpSignPath,
+  getPowerUpIconPath,
+  addGlowEffect,
+  createStandardParticleSystem,
+} from '@game/utils';
 
 import {
   Player,
@@ -143,11 +149,13 @@ function createPowerUpVisualEffects(
   playerIndex: number,
   effectIndex: number
 ): { particleSystem: ParticleSystem; glowLayer: GlowLayer; icons: Mesh[] } {
-  const glowLayer = new GlowLayer(`powerUpGlow-${playerIndex}-${powerUpType}`, scene);
-
-  glowLayer.intensity = Math.max(0.2, 0.4 - effectIndex * 0.05);
-  glowLayer.blurKernelSize = 48;
-  glowLayer.addIncludedOnlyMesh(paddleMesh);
+  const glowLayer = addGlowEffect(
+    `powerUpGlow-${playerIndex}-${powerUpType}`,
+    paddleMesh,
+    scene,
+    Math.max(0.2, 0.4 - effectIndex * 0.05),
+    48
+  );
 
   const particleSystem = createPowerUpParticles(
     scene,
@@ -232,6 +240,63 @@ function createPowerUpIconMesh(
   icon.scaling = new Vector3(0, 0, 0);
 
   return icon;
+}
+
+function createPowerUpParticles(
+  scene: Scene,
+  paddleMesh: Mesh,
+  powerUpType: PowerUpType,
+  color: Color3,
+  playerIndex: number,
+  effectIndex: number
+): ParticleSystem {
+  const texturePath = getPowerUpSignPath(powerUpType);
+  const paddlePosition = paddleMesh.position.clone();
+
+  const options = {
+    color: color,
+    capacity: 40,
+    emitRate: Math.max(6, 12 - effectIndex * 2),
+    minSize: 0.5 - effectIndex * 0.05,
+    maxSize: 1.5 - effectIndex * 0.1,
+    minLifeTime: 3,
+    maxLifeTime: 5,
+    minEmitPower: 4,
+    maxEmitPower: 8,
+  };
+
+  const particleSystem = createStandardParticleSystem(
+    `powerUpParticles-${playerIndex}-${powerUpType}`,
+    scene,
+    paddlePosition.clone(),
+    options,
+    texturePath
+  );
+
+  particleSystem.minEmitBox = new Vector3(-0.2, -0.3, -0.2);
+  particleSystem.maxEmitBox = new Vector3(0.2, 0.3, 0.2);
+
+  particleSystem.createDirectedCylinderEmitter(
+    0.25,
+    0.15,
+    0.1,
+    new Vector3(0, 1, 0),
+    new Vector3(0, 6, 0)
+  );
+
+  particleSystem.direction1 = new Vector3(-0.5, 1, -0.5);
+  particleSystem.direction2 = new Vector3(0.5, 1, 0.5);
+
+  particleSystem.minAngularSpeed = -0.3;
+  particleSystem.maxAngularSpeed = 0.3;
+
+  scene.onBeforeRenderObservable.add(() => {
+    (particleSystem.emitter as Vector3).y = paddleMesh.position.y;
+  });
+
+  particleSystem.start();
+
+  return particleSystem;
 }
 
 function animatePowerUpIcons(
@@ -347,67 +412,6 @@ function animatePowerUpIcons(
     if (iconDown.material) iconDown.material.dispose();
     iconDown.dispose();
   });
-}
-
-function createPowerUpParticles(
-  scene: Scene,
-  paddleMesh: Mesh,
-  powerUpType: PowerUpType,
-  color: Color3,
-  playerIndex: number,
-  effectIndex: number
-): ParticleSystem {
-  const particleTexturePath = getPowerUpSignPath(powerUpType);
-  const paddlePosition = paddleMesh.position.clone();
-  const particleSystem = new ParticleSystem(
-    `powerUpParticles-${playerIndex}-${powerUpType}`,
-    40,
-    scene
-  );
-
-  particleSystem.emitter = paddlePosition.clone();
-
-  particleSystem.particleTexture = new Texture(particleTexturePath, scene);
-
-  particleSystem.emitRate = Math.max(6, 12 - effectIndex * 2);
-  particleSystem.minSize = 0.5 - effectIndex * 0.05;
-  particleSystem.maxSize = 1.5 - effectIndex * 0.1;
-
-  particleSystem.minLifeTime = 3;
-  particleSystem.maxLifeTime = 5;
-  particleSystem.minEmitPower = 4;
-  particleSystem.maxEmitPower = 8;
-
-  particleSystem.minEmitBox = new Vector3(-0.2, -0.3, -0.2);
-  particleSystem.maxEmitBox = new Vector3(0.2, 0.3, 0.2);
-
-  particleSystem.createDirectedCylinderEmitter(
-    0.25,
-    0.15,
-    0.1,
-    new Vector3(0, 1, 0),
-    new Vector3(0, 6, 0)
-  );
-
-  particleSystem.direction1 = new Vector3(-0.5, 1, -0.5);
-  particleSystem.direction2 = new Vector3(0.5, 1, 0.5);
-
-  particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
-  particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 1.0);
-  particleSystem.colorDead = new Color4(color.r * 0.3, color.g * 0.3, color.b * 0.3, 0);
-
-  particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
-
-  particleSystem.minAngularSpeed = -0.3;
-  particleSystem.maxAngularSpeed = 0.3;
-
-  scene.onBeforeRenderObservable.add(() => {
-    (particleSystem.emitter as Vector3).y = paddleMesh.position.y;
-  });
-
-  particleSystem.start();
-
-  return particleSystem;
 }
 
 function applyPaddleMaterial(

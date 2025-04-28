@@ -17,7 +17,7 @@ const icons = {
 };
 
 export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) => {
-  const { sentRequests, refetchRequests } = useUser();
+  const { user, sentRequests, refetchRequests, refetchUser } = useUser();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,8 +35,9 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
       console.log('cancelling friend request');
     } else {
       try {
-        await sendFriendRequest(receiverUserId);
-        await refetchRequests();
+        sendFriendRequest(receiverUserId);
+        refetchRequests();
+        refetchUser();
         setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
       } catch (error) {
         console.error('Failed to send friend request:', error);
@@ -45,6 +46,12 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
       }
     }
   };
+
+  console.log(user?.friends);
+  console.log('isPending:', isPending);
+
+  if (user?.friends && user.friends.some((friend) => friend.user_id === receiverUserId))
+    return null;
 
   return (
     <button

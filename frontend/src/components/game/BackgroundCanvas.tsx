@@ -13,6 +13,7 @@ import {
 
 import {
   RetroEffectsManager,
+  GameAnimationManager,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
@@ -200,6 +201,8 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const canvas = canvasRef.current;
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
+
+    GameAnimationManager.getInstance(scene);
 
     const colors = getThemeColorsFromDOM(theme);
     const { primaryColor, gameboardColor, sceneBackgroundColor } = colors;

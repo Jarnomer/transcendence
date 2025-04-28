@@ -1,6 +1,7 @@
 export * from './authTypes';
 export * from './friendTypes';
 export * from './gameAPITypes';
+export * from './gameAnimationTypes';
 export * from './gameEffectTypes';
 export * from './gameRetroTypes';
 export * from './gameObjectTypes';

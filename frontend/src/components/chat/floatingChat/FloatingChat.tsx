@@ -56,7 +56,11 @@ export const FloatingChat = () => {
   if (!user) return null;
 
   return (
-    <div className="flex gap-2 items-end fixed bottom-4 right-4 z-40">
+    <div
+      className={`flex gap-2 items-end fixed bottom-4 right-4 z-40 ${
+        minimized ? 'h-12' : 'h-[400px]'
+      } transition-all duration-300 overflow-hidden`}
+    >
       {openChatWindows &&
         Object.entries(openChatWindows)
           .filter(([_, isOpen]) => isOpen)
@@ -87,12 +91,12 @@ export const FloatingChat = () => {
 
         {/* Chat content */}
         {!minimized && (
-          <div className="relative overflow-y-auto h-[calc(100%-40px)] text-primary">
+          <div className="relative h-[calc(100%-40px)] text-primary">
             <div className="w-full h-full relative flex items-center justify-center bg-primary/20">
               <div className="absolute w-full h-full overflow-hidden pointer-events-none">
                 <BackgroundGlow />
               </div>
-              <div className="w-full h-full overflow-y-auto">
+              <div className="w-full h-full ">
                 {createNewGroupChat ? (
                   <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
                 ) : (

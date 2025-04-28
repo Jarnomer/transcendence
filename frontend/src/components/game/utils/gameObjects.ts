@@ -1,4 +1,4 @@
-import { Vector3, Color3, GlowLayer, MeshBuilder, PBRMaterial, Scene, Path3D } from 'babylonjs';
+import { Vector3, Color3, MeshBuilder, PBRMaterial, Scene, Path3D } from 'babylonjs';
 
 import {
   createFloorHoverAnimation,
@@ -6,6 +6,7 @@ import {
   createPaddleHoverAnimation,
   createBallHoverAnimation,
   createSafeTexture,
+  addGlowEffect,
 } from '@game/utils';
 
 import { GameObjectParams, defaultGameObjectParams } from '@shared/types';
@@ -60,10 +61,13 @@ export function createEdge(
 
   tube.material = pbr;
 
-  const glowLayer = new GlowLayer(`edgeGlowLayer`, scene);
-  glowLayer.intensity = params.edge.glowLayerIntensity;
-  glowLayer.blurKernelSize = params.edge.glowLayerBlurKernelSize;
-  glowLayer.addIncludedOnlyMesh(tube);
+  addGlowEffect(
+    `${tube.name}GlowLayer`,
+    tube,
+    scene,
+    params.edge.glowLayerIntensity,
+    params.edge.glowLayerBlurKernelSize
+  );
 
   createEdgeHoverAnimation(tube, scene, params);
 
@@ -96,7 +100,7 @@ export function createFloor(
   floor.position.z = params.floor.positionZ;
   floor.rotation.x = Math.PI / 2;
 
-  const baseUrl = '/floor-metal/';
+  const baseUrl = 'textures/floor-metal/';
 
   const texturesLoaded = { count: 0, total: 4 };
   const checkAllLoaded = () => {
@@ -198,10 +202,13 @@ export function createPaddle(
 
   paddle.material = pbr;
 
-  const glowLayer = new GlowLayer('paddleGlowLayer', scene);
-  glowLayer.intensity = params.paddle.glowLayerIntensity;
-  glowLayer.blurKernelSize = params.paddle.glowLayerBlurKernelSize;
-  glowLayer.addIncludedOnlyMesh(paddle);
+  addGlowEffect(
+    `${paddle.name}GlowLayer`,
+    paddle,
+    scene,
+    params.paddle.glowLayerIntensity,
+    params.paddle.glowLayerBlurKernelSize
+  );
 
   createPaddleHoverAnimation(paddle, scene, params);
 
@@ -248,10 +255,13 @@ export function createBall(
 
   ball.material = pbr;
 
-  const glowLayer = new GlowLayer('ballGlowLayer', scene);
-  glowLayer.intensity = params.ball.glowLayerIntensity;
-  glowLayer.blurKernelSize = params.ball.glowLayerBlurKernelSize;
-  glowLayer.addIncludedOnlyMesh(ball);
+  addGlowEffect(
+    `${ball.name}GlowLayer`,
+    ball,
+    scene,
+    params.ball.glowLayerIntensity,
+    params.ball.glowLayerBlurKernelSize
+  );
 
   createBallHoverAnimation(ball, scene, params);
 

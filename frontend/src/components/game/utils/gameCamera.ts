@@ -15,21 +15,27 @@ export interface ArcCameraAngle {
 export const cinematicCameraAngles: ArcCameraAngle[] = [
   {
     alpha: -0.5,
-    beta: 1.1,
+    beta: Math.PI / 3,
     radius: 30,
     target: new Vector3(10, 3, 10),
   },
   // {
-  //   alpha: -1,
-  //   beta: 1.1,
-  //   radius: 30,
-  //   target: new Vector3(1, 1, 5),
+  //   alpha: 1.8,
+  //   beta: 2.2,
+  //   radius: 40,
+  //   target: new Vector3(0, 0, 0),
+  // },
+  // {
+  //   alpha: 0,
+  //   beta: 0,
+  //   radius: 40,
+  //   target: new Vector3(0, 0, 0),
   // },
 ];
 
 export const gameplayCameraAngles: ArcCameraAngle[] = [
   {
-    // Background view
+    // Gameplay background view
     alpha: 0,
     beta: 0,
     radius: 0,
@@ -37,17 +43,17 @@ export const gameplayCameraAngles: ArcCameraAngle[] = [
   },
   {
     // Player 2 perspective
-    alpha: 0,
+    alpha: -Math.PI / 8,
     beta: Math.PI / 3,
-    radius: 20,
-    target: new Vector3(5, 0, 0),
+    radius: 35,
+    target: new Vector3(-2, -7, 10),
   },
   {
     // Player 1 perspective
-    alpha: -Math.PI,
+    alpha: Math.PI / 8,
     beta: Math.PI / 3,
-    radius: 20,
-    target: new Vector3(-5, 0, 0),
+    radius: 35,
+    target: new Vector3(-2, -7, -6),
   },
 ];
 
