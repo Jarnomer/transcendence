@@ -205,6 +205,7 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
 
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
+  const thirdColor = computedStyle.getPropertyValue('--color-third').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
   const gameboardColor = computedStyle.getPropertyValue('--color-gameboard').trim();
   const sceneBackgroundColor = computedStyle.getPropertyValue('--color-scene-background').trim();
@@ -212,6 +213,7 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
   return getThemeColors(
     primaryColor,
     secondaryColor,
+    thirdColor,
     backgroundColor,
     gameboardColor,
     sceneBackgroundColor

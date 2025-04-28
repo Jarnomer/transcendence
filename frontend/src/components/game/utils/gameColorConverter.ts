@@ -11,12 +11,14 @@ export interface ThemeColors {
 export function getThemeColors(
   primaryColorStr: string,
   secondaryColorStr: string,
+  thirdColorStr: string,
   backgroundColorStr: string,
   gameboardColorStr: string,
   sceneBackgroundColorStr: string
 ) {
   const primaryColor = parseColor(primaryColorStr);
   const secondaryColor = parseColor(secondaryColorStr);
+  const thirdColor = parseColor(thirdColorStr);
   const backgroundColor = parseColor(backgroundColorStr);
   const gameboardColor = parseColor(gameboardColorStr);
   const sceneBackgroundColor = parseColor(sceneBackgroundColorStr);
@@ -24,6 +26,7 @@ export function getThemeColors(
   return {
     primaryColor,
     secondaryColor,
+    thirdColor,
     backgroundColor,
     gameboardColor,
     sceneBackgroundColor,

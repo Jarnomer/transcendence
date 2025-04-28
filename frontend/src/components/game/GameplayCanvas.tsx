@@ -16,6 +16,7 @@ import {
   PowerUpEffectsManager,
   RetroEffectsManager,
   GameAnimationManager,
+  GameTextManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -38,6 +39,7 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
+  createGameTextManager,
 } from '@game/utils';
 
 import {
@@ -81,6 +83,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   const sparkEffectsRef = useRef<((speed: number, spin: number) => void) | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(defaultRetroEffectsLevels);
+  const textManagerRef = useRef<GameTextManager>(null);
 
   const blurEffectsRef = useRef<{
     horizontalBlur: BlurPostProcess;
@@ -89,6 +92,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
+  const prevGameStatusRef = useRef<GameStatus | null>(null);
 
   const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
   const powerUpEffectsRef = useRef<PowerUpEffectsManager | null>(null);
@@ -116,7 +120,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     GameAnimationManager.getInstance(scene);
 
     const colors = getThemeColorsFromDOM(theme);
-    const { primaryColor, gameboardColor } = colors;
+    const { primaryColor, thirdColor, gameboardColor } = colors;
 
     const camera = setupSceneCamera(scene);
 
@@ -128,6 +132,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     enableRequiredExtensions(engine);
 
     soundManagerRef.current = getGameSoundManager();
+    textManagerRef.current = createGameTextManager(scene, thirdColor);
 
     retroLevelsRef.current = retroEffectsPresets.default;
     retroEffectsRef.current = createPongRetroEffects(
@@ -205,6 +210,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       if (powerUpIconsRef.current) powerUpIconsRef.current.disposeAll();
       if (sparkEffectsRef.current) sparkEffectsRef.current(0, 0);
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
+      if (textManagerRef.current) textManagerRef.current.dispose();
 
       if (blurEffectsRef.current) {
         if (blurEffectsRef.current.horizontalBlur) blurEffectsRef.current.horizontalBlur.dispose();
@@ -228,6 +234,30 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
       prevPowerUpsRef.current = [...powerUps];
     }
   }, [gameState]);
+
+  // Handle text effects
+  useEffect(() => {
+    if (!textManagerRef.current || !gameState) return;
+
+    if (prevGameStatusRef.current !== gameStatus) {
+      textManagerRef.current.handleGameStatus(
+        gameStatus,
+        prevGameStatusRef.current,
+        gameState.countdown
+      );
+      prevGameStatusRef.current = gameStatus;
+    } else if (
+      gameStatus === 'countdown' &&
+      gameState.countdown !== undefined &&
+      gameState.countdown <= 3
+    ) {
+      textManagerRef.current.handleGameStatus(
+        gameStatus,
+        prevGameStatusRef.current,
+        gameState.countdown
+      );
+    }
+  }, [gameStatus, gameState]);
 
   // Handle game objects
   useEffect(() => {

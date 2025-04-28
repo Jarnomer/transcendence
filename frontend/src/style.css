@@ -12,6 +12,7 @@ body,
 #root {
   height: 100%;
 }
+
 :root {
   background-color: black;
 }
@@ -19,7 +20,8 @@ body,
 [data-theme='dark'] {
   --color-primary: #ea355a;
   --color-secondary: #76f7fd;
-  --color-background: black; /* unused */
+  --color-third: #ff9100;
+  --color-background: black;
   --color-gameboard: black;
   --color-scene-background: #33353e;
   --color-error: #ff0000;
@@ -28,7 +30,8 @@ body,
 [data-theme='light'] {
   --color-primary: oklch(88.3% 0.1288 203.73);
   --color-secondary: oklch(100% 0% 1);
-  --color-background: white; /* unused */
+  --color-third: oklch(70% 0.15 60);
+  --color-background: white;
   --color-gameboard: #222222;
   --color-scene-background: #ababab;
   --color-error: #ff0000;
@@ -65,18 +68,22 @@ body,
       background-position: 30% 20%;
       background-size: 150%;
     }
+
     25% {
       background-position: 30% 20%;
       background-size: 150%;
     }
+
     50% {
       background-position: 50% 50%;
       background-size: 300%;
     }
+
     75% {
       background-position: 70% 70%;
       background-size: 200%;
     }
+
     100% {
       background-position: 50% 20%;
       background-size: 150%;
@@ -372,10 +379,12 @@ body {
     transform: scaleX(0);
     opacity: 0;
   }
+
   50% {
     transform: scaleX(1);
     opacity: 1;
   }
+
   100% {
     transform: scaleX(0);
     opacity: 0;
@@ -386,6 +395,7 @@ body {
   0% {
     transform: translateY(-100%);
   }
+
   100% {
     transform: translateY(100%);
   }
@@ -435,18 +445,22 @@ body {
     clip-path: var(--slice-1);
     opacity: 1;
   }
+
   25% {
     clip-path: var(--slice-3);
     opacity: 0;
   }
+
   50% {
     clip-path: var(--slice-3);
     opacity: 1;
   }
+
   75% {
     clip-path: var(--slice-3);
     opacity: 0;
   }
+
   100% {
     clip-path: var(--slice-3);
     opacity: 1;
@@ -459,51 +473,61 @@ body {
     transform: translate(-20px, -10px);
     opacity: 0.8;
   }
+
   10% {
     clip-path: var(--slice-3);
     transform: translate(10px, 10px);
     opacity: 0.5;
   }
+
   20% {
     clip-path: var(--slice-1);
     transform: translate(-10px, 10px);
     opacity: 0.7;
   }
+
   30% {
     clip-path: var(--slice-3);
     transform: translate(0px, 5px);
     opacity: 0.6;
   }
+
   40% {
     clip-path: var(--slice-2);
     transform: translate(-5px, 0px);
     opacity: 0.8;
   }
+
   50% {
     clip-path: var(--slice-3);
     transform: translate(5px, 0px);
     opacity: 0.4;
   }
+
   60% {
     clip-path: var(--slice-4);
     transform: translate(5px, 10px);
     opacity: 0.9;
   }
+
   70% {
     clip-path: var(--slice-2);
     transform: translate(-10px, 10px);
     opacity: 0.5;
   }
+
   80% {
     clip-path: var(--slice-5);
     transform: translate(20px, -10px);
     opacity: 0.6;
   }
+
   90% {
     clip-path: var(--slice-1);
     transform: translate(-10px, 0px);
     opacity: 0.7;
   }
+
   100% {
     clip-path: var(--slice-1);
     transform: translate(0);
@@ -521,14 +545,17 @@ body {
     transform: scale(1.25);
     opacity: 0.5;
   }
+
   50% {
     transform: scale(1.5);
     opacity: 1;
   }
+
   75% {
     transform: scale(1.75);
     opacity: 0.5;
   }
+
   100% {
     transform: scale(2);
     opacity: 0;
@@ -556,9 +583,12 @@ input[type='range'] {
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 4px; /* Narrow width */
-  height: 20px; /* Tall height */
-  background: currentColor; /* Black color */
+  width: 4px;
+  /* Narrow width */
+  height: 20px;
+  /* Tall height */
+  background: currentColor;
+  /* Black color */
   cursor: pointer;
   border-radius: 0px;
 }

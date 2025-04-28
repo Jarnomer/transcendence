@@ -8,7 +8,6 @@ import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
-import { GameInfoOverlay } from '../components/game/GameInfoOverlay';
 import GameplayCanvas from '../components/game/GameplayCanvas';
 import { GameResults } from '../components/game/GameResults';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
@@ -142,13 +141,11 @@ export const GamePage: React.FC = () => {
         )}
       </div>
 
-      {/* Show GameInfoOverlay conditionally */}
-      {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
-        <GameInfoOverlay gameStatus={gameStatus} gameState={gameState} />
-      ) : gameResult ? (
+      {/* Render GameResults or MatchMakingCarousel */}
+      {gameResult ? (
         <GameResults result={gameResult} playersData={playersData} />
       ) : (
-        <MatchMakingCarousel playersData={playersData} />
+        connections.game !== 'connected' && <MatchMakingCarousel playersData={playersData} />
       )}
     </div>
   );
