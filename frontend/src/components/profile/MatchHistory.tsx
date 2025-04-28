@@ -44,9 +44,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
 
   return (
     <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
-      <div className="clipped-corner w-full h-[20px] bg-primary text-black text-sm">
-        Game History
-      </div>
+      <div className=" w-full h-[20px] bg-primary text-black text-sm">Game History</div>
 
       <motion.div className="p-4 glass-box text-sm">
         <h3 className="text-md ">Match History</h3>

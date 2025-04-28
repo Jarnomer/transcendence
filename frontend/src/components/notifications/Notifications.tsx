@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
+import { useUser } from '../../contexts/user/UserContext';
+import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 import { getNotifications, getUserByID, markNotificationAsSeen } from '../../services/userService';
+import { NavIconButton } from '../UI/buttons/NavIconButton';
 
 export const animationVariants = {
   initial: {
@@ -26,7 +29,7 @@ export const animationVariants = {
 
 export const Notifications: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  //const { user } = useUser();
+  const { user, refetchUser, refetchRequests } = useUser();
   const [notifications, setNotifications] = useState<any[]>([]);
   const navigate = useNavigate();
 
@@ -73,6 +76,32 @@ export const Notifications: React.FC = () => {
     return <p>Loading...</p>;
   }
 
+  const handleAcceptFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    acceptFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request accepted');
+        refetchUser();
+        refetchRequests();
+      })
+      .catch((error) => {
+        console.error('Failed to accept friend request: ', error);
+      });
+  };
+
+  const handleRejectFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
+    rejectFriendRequest(sender_id)
+      .then(() => {
+        console.log('Friend request rejected');
+        refetchUser();
+        refetchRequests();
+      })
+      .catch((error) => {
+        console.error('Failed to reject friend request: ', error);
+      });
+  };
+
   const handleNotificationClick = async (event, request: any) => {
     console.log('notification clicked');
     event.stopPropagation();
@@ -86,6 +115,8 @@ export const Notifications: React.FC = () => {
     }
   };
 
+  console.log(user?.friend_requests);
+
   console.log('notficitations: ', notifications);
   return (
     <motion.div
@@ -95,18 +126,34 @@ export const Notifications: React.FC = () => {
       animate="animate"
       exit="exit"
     >
-      <ul>
+      <ul className="flex flex-col gap-1">
         {notifications.length > 0 ? (
           notifications.map((request: any, index: number) => (
             <li key={index}>
               <div
-                className="flex items-center justify-center gap-2"
+                className="flex items-center justify-start gap-2 hover:text-secondary"
                 onClick={(event) => handleNotificationClick(event, request)}
               >
-                <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-primary border-1">
+                <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-primary hover:border-secondary border-1">
                   <img src={request.avatar_url} className="object-contain"></img>
                 </div>
                 <span className="text-xs">{request.display_name} sent you a friend request</span>
+                {user?.friend_requests.some((fr) => fr.user_id === request?.user_id) && (
+                  <div className="ml-5 flex gap-1">
+                    <NavIconButton
+                      id={`accept-friend-${request.user_id}`}
+                      icon="checkCircle"
+                      ariaLabel="accept friend request"
+                      onClick={(event) => handleAcceptFriendClick(event, request.user_id)}
+                    />
+                    <NavIconButton
+                      id={`reject-friend-${request.user_id}`}
+                      icon="xCircle"
+                      ariaLabel="reject friend request"
+                      onClick={(event) => handleRejectFriendClick(event, request.user_id)}
+                    />
+                  </div>
+                )}
               </div>
             </li>
           ))
