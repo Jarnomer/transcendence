@@ -20,6 +20,7 @@ import {
   createParticleTexture,
   gameToSceneSize,
   getPowerUpIconPath,
+  isPowerUpNegative,
 } from '@game/utils';
 
 import {
@@ -197,9 +198,9 @@ export class ActivePowerUpIconManager {
 
     particleSystem.emitRate = 0;
 
-    const iconAnimations = this.createSpawnAnimations(iconMesh, effectColor, `icon-${id}`);
-    const tubeAnimations = this.createSpawnAnimations(tubeMesh, effectColor, `tube-${id}`);
-    const torusAnimations = this.createSpawnAnimations(torusMesh, effectColor, `torus-${id}`);
+    const iconAnimations = this.createSpawnAnimations(`icon-${id}`);
+    const tubeAnimations = this.createSpawnAnimations(`tube-${id}`);
+    const torusAnimations = this.createSpawnAnimations(`torus-${id}`);
 
     iconMesh.animations = iconAnimations;
     tubeMesh.animations = tubeAnimations;
@@ -392,7 +393,7 @@ export class ActivePowerUpIconManager {
     return particleSystem;
   }
 
-  private createSpawnAnimations(mesh: Mesh, effectColor: Color3, id: string): Animation[] {
+  private createSpawnAnimations(id: string): Animation[] {
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
@@ -413,28 +414,6 @@ export class ActivePowerUpIconManager {
 
     spawnScaleAnim.setKeys(spawnScaleKeys);
     spawnScaleAnim.setEasingFunction(easingFunction);
-
-    if (mesh.material && mesh.material instanceof StandardMaterial) {
-      const flashColor = new Color3(2, 1, 1);
-      const colorAnim = new Animation(
-        `powerUpSpawnColorAnim-${id}`,
-        'material.emissiveColor',
-        30,
-        Animation.ANIMATIONTYPE_COLOR3,
-        Animation.ANIMATIONLOOPMODE_CONSTANT
-      );
-      const colorKeys = [
-        { frame: 0, value: effectColor.clone() },
-        { frame: 20, value: effectColor.clone() },
-        { frame: 25, value: flashColor },
-        { frame: 30, value: effectColor.clone() },
-      ];
-
-      colorAnim.setKeys(colorKeys);
-      colorAnim.setEasingFunction(easingFunction);
-
-      return [spawnScaleAnim, colorAnim];
-    }
 
     return [spawnScaleAnim];
   }
@@ -759,6 +738,12 @@ export class ActivePowerUpIconManager {
     if (display.tubeMesh.metadata) display.tubeMesh.metadata.disposing = true;
     if (display.torusMesh.metadata) display.torusMesh.metadata.disposing = true;
     if (display.iconMesh.metadata) display.iconMesh.metadata.disposing = true;
+
+    if (isPowerUpNegative(display.powerUpType)) {
+      if (this.soundManager) this.soundManager.playNegativePowerUpExpireSound();
+    } else {
+      if (this.soundManager) this.soundManager.playPositivePowerUpExpireSound();
+    }
 
     const easingFunction = new CubicEase();
     easingFunction.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);

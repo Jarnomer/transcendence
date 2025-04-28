@@ -3,6 +3,7 @@ import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { motion } from 'framer-motion';
 
 import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
+import { SpectateSmallCanvas } from './Spectate';
 
 const Competitor: React.FC<CompetitorProps> = ({ name }) => {
   return (
@@ -10,6 +11,7 @@ const Competitor: React.FC<CompetitorProps> = ({ name }) => {
       className={`flex items-center m-4 p-1 hover:text-secondary`}
       // onClick={() => navigate(`/profile/${user.user_id}`)}
     >
+      <SpectateSmallCanvas></SpectateSmallCanvas>
       <ListSvgContainer>
         <div className="flex items-center gap-2">
           <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">

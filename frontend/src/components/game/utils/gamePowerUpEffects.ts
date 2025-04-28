@@ -21,6 +21,7 @@ import {
   gameToSceneX,
   gameToSceneY,
   getPowerUpIconPath,
+  isPowerUpNegative,
 } from '@game/utils';
 
 import { PowerUp, PowerUpType, defaultGameObjectParams, defaultGameParams } from '@shared/types';
@@ -41,10 +42,6 @@ export class PowerUpEffectsManager {
   private secondaryColor: Color3;
   private powerUpSize: number;
   private soundManager?: GameSoundManager | null | undefined;
-
-  private isPowerUpNegative(type: PowerUpType): boolean {
-    return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
-  }
 
   constructor(
     scene: Scene,
@@ -96,7 +93,7 @@ export class PowerUpEffectsManager {
 
     const x = gameToSceneX(powerUp.x, icon);
     const y = gameToSceneY(powerUp.y, icon);
-    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
+    const basePosition = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 3);
 
     icon.position = basePosition.clone();
 
@@ -207,7 +204,7 @@ export class PowerUpEffectsManager {
 
     particleSystem.particleTexture = createParticleTexture(this.scene, color);
 
-    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 2);
+    particleSystem.emitter = new Vector3(x, y, defaultGameObjectParams.distanceFromFloor * 3);
 
     const emitBoxSize = 0.03;
     particleSystem.minEmitBox = new Vector3(-emitBoxSize, -emitBoxSize, -emitBoxSize);
@@ -350,7 +347,7 @@ export class PowerUpEffectsManager {
 
     effect.collected = true;
 
-    if (this.isPowerUpNegative(effect.type)) {
+    if (isPowerUpNegative(effect.type)) {
       if (this.soundManager) this.soundManager.playNegativePowerUpSound();
     } else {
       if (this.soundManager) this.soundManager.playPositivePowerUpSound();

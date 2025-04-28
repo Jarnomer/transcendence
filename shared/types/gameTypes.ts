@@ -116,7 +116,7 @@ export interface PlayerEffects {
 }
 
 export interface GameSettings {
-  mode?: '1v1' | 'singleplayer' | 'AIvsAI';
+  mode?: '1v1' | 'singleplayer' | 'AIvsAI' | 'tournament';
   difficulty?: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
   maxScore: number;
   ballSpeed: number;
@@ -182,7 +182,7 @@ export const defaultGameParams: GameParams = {
     maxSpawnInterval: 10000,
     despawnTime: 10000,
     expireTime: 10000,
-    size: 40,
+    size: 50,
     effects: {
       paddleHeightIncrease: 30,
       paddleHeightDecrease: -30,
@@ -243,5 +243,5 @@ export type MatchmakingSnapshot = {
   phase: Phase;
   role: UserRole;
   gameId: string;
-  participants: string[]; // or whatever type
+  participants: any[]; // or whatever type
 };

@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { AnimatePresence, motion } from 'framer-motion';
+
+import { useMatchmaking } from '@/hooks';
 
 import { slideFromRightVariants } from '../components/tournamentLobby/animationVariants';
 import { Spectate } from '../components/tournamentLobby/Spectate';
@@ -9,19 +13,32 @@ import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPl
 import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useModal } from '../contexts/modalContext/ModalContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 export const TournamentLobby: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
   const { friends, selectedFriendId, roomId } = useChatContext();
   const [players, setPlayers] = useState<any[]>();
   const [tournamentChatId, setTournamentChatId] = useState<string | undefined>();
-  const { difficulty } = useGameOptionsContext();
+  const { difficulty, lobby, mode } = useGameOptionsContext();
 
   const { createRoom } = useChatContext();
-  const { matchmakingSocket, connections, sendMessage } = useWebSocketContext();
+  const {
+    matchmakingSocket,
+    connections,
+    sendMessage,
+    cleanup,
+    cancelQueue,
+    cancelGame,
+    matchmakingState,
+  } = useWebSocketContext();
+  const { openModal, closeModal } = useModal();
+
+  useMatchmaking();
 
   // useEffect(() => {
   //   if (!user) return;
@@ -40,6 +57,43 @@ export const TournamentLobby: React.FC = () => {
 
   //   setupChat();
   // }, [user]);
+
+  useEffect(() => {
+    if (lobby === 'join' && mode === 'tournament') {
+      setActiveTab('players');
+    }
+  }, [lobby]);
+
+  useEffect(() => {
+    console.log('matchmaking state: ', matchmakingState);
+    if (matchmakingState.phase === 'in_game' && location.pathname !== '/game') {
+      console.log('in game');
+      handleClickOpenModal();
+    }
+  }, [matchmakingState.phase, location.pathname]);
+
+  const onAccept = () => {
+    console.log('joining game..');
+    navigate('/game');
+  };
+
+  const onDecline = () => {
+    console.log('Declining game..');
+    cleanup();
+    cancelGame();
+    cancelQueue();
+    if (location.pathname === '/tournamentLobby') {
+      navigate('/home');
+    }
+  };
+
+  const handleClickOpenModal = () => {
+    console.log('opening modal');
+    openModal('joinGameModal', {
+      onAccept: onAccept,
+      onDecline: onDecline,
+    });
+  };
 
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
@@ -64,6 +118,9 @@ export const TournamentLobby: React.FC = () => {
           <span className="text-secondary">X/{difficulty} Players</span>
         </header>
 
+        <button onClick={handleClickOpenModal} className="text-green-500">
+          open modal
+        </button>
         <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
           <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
             <AnimatePresence mode="wait">

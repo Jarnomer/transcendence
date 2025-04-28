@@ -12,46 +12,42 @@ type StepType = 'init' | 'validating' | 'restoring' | 'done';
 
 const useValidateSession = () => {
   const { cancelGame, cancelQueue, setGameId } = useWebSocketContext();
-  const { resetGameOptions, setMode, setDifficulty } = useGameOptionsContext();
+  const { resetGameOptions, setMode, setDifficulty, setQueueId } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
 
   const [step, setStep] = useState<StepType>('init');
+  const sessionManager = SessionManager.getInstance();
+  const gameId = sessionManager.get('gameId');
+  const queueId = sessionManager.get('queueId');
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const sessionManager = SessionManager.getInstance();
-    const gameId = sessionManager.get('gameId');
-    const queueId = sessionManager.get('queueId');
-
     if (!gameId && !queueId) {
       console.log('No game or queue ID found in session.');
+      resetGameOptions(); // Reset game options if no session
       setStep('done'); // No session to validate, skip loading
       return;
     }
 
     const validateSession = async () => {
       try {
-        if (gameId) {
-          console.log('Validating session...');
-          const res = await getSessionStatus({ game_id: gameId || '', queue_id: queueId || '' });
-          if (res.game_session) {
-            setStep('validating'); // Validating session
-            setMode(sessionManager.get('mode') || null);
-            setDifficulty(sessionManager.get('difficulty') || null);
-            setGameId(gameId || '');
-          } else {
-            sessionManager.remove('gameId');
-            setStep('done'); // No ongoing game, clear session
-          }
-        }
-        if (queueId) {
-          if (res.queue_session) {
-            setStep('validating'); // Restoring session
-          } else {
-            sessionManager.remove('queueId');
-            setStep('done'); // No ongoing queue, clear session
-          }
+        const res = await getSessionStatus({ game_id: gameId || '', queue_id: queueId || '' });
+        console.log('Validating session...');
+        console.log('Session validation response:', res);
+        if (res.game_session) {
+          setStep('validating'); // Validating session
+          setMode(sessionManager.get('mode') || null);
+          setDifficulty(sessionManager.get('difficulty') || null);
+          setGameId(gameId || '');
+        } else if (res.queue_session) {
+          setStep('validating'); // Restoring session
+          setQueueId(queueId || '');
+        } else {
+          sessionManager.remove('gameId');
+          setStep('done'); // No ongoing game, clear session
+          sessionManager.remove('queueId');
+          setStep('done'); // No ongoing queue, clear session
         }
       } catch (err) {
         console.error('[Session Check] Error:', err);
@@ -63,9 +59,6 @@ const useValidateSession = () => {
   }, []);
 
   useEffect(() => {
-    const sessionManager = SessionManager.getInstance();
-    const gameId = sessionManager.get('gameId');
-    const queueId = sessionManager.get('queueId');
     const cancelQueueGame = async () => {
       if (gameId) {
         await cancelGame();
@@ -78,16 +71,20 @@ const useValidateSession = () => {
       const confirm = window.confirm('You are already in a game or queue. continue?');
       if (confirm) {
         allowInternalNavigation();
-        navigate('/game');
+        if (gameId) {
+          navigate('/game');
+        } else if (queueId) {
+          navigate('/tournamentLobby');
+        }
       } else {
         cancelQueueGame();
         resetGameOptions(); // <- sets mode/difficulty to null or default
         setStep('done');
       }
-      // } else {
-      // No queue/game, safe to proceed immediately
-      // resetGameOptions(); // <- sets mode/difficulty to null or default
-      // setReadyForNextEffect(true);
+    } else {
+      setStep('done'); // No session to validate, skip loading
+      resetGameOptions(); // Reset game options if no session
+      sessionManager.clear(); // Clear session
     }
   }, [step]);
   const isNewGame = step === 'done';

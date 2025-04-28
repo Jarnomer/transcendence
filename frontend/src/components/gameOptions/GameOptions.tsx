@@ -6,8 +6,6 @@ import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext
 
 import { saveGameSettings } from '@services/userService';
 
-import { useMatchmaking } from '@hooks';
-
 import { PowerUpType } from '@shared/types';
 
 import { ClippedButton } from '../UI/buttons/ClippedButton';
@@ -20,9 +18,9 @@ export const GameOptions: React.FC = () => {
   const [maxScore, setMaxScore] = useState<number>(5);
   const [ballSpeed, setBallSpeed] = useState<number>(7);
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
-  const { setGameSettings, gameSettings, mode } = useGameOptionsContext();
+  const { setGameSettings, gameSettings, mode, difficulty } = useGameOptionsContext();
   const navigate = useNavigate();
-  useMatchmaking();
+  // useMatchmaking();
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -109,7 +107,7 @@ export const GameOptions: React.FC = () => {
 
   const handleGameStart = async () => {
     console.log('--- starting game ----');
-      navigate('/game');
+    navigate('/game');
   };
 
   return (
@@ -164,9 +162,11 @@ export const GameOptions: React.FC = () => {
       <div className="flex justify-end p-4">
         <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
       </div>
-      <div className="flex justify-end p-4">
-        <ClippedButton label={'Start Game'} onClick={() => handleGameStart()} />
-      </div>
+      {(mode === 'singleplayer' || (mode === '1v1' && difficulty === 'local')) && (
+        <div className="flex justify-end p-4">
+          <ClippedButton label={'Start Game'} onClick={() => handleGameStart()} />
+        </div>
+      )}
     </div>
   );
 };

@@ -9,7 +9,7 @@ import {
   ArcRotateCamera,
 } from 'babylonjs';
 
-import { gameToSceneX, gameToSceneY } from '@game/utils';
+import { gameToSceneSize, gameToSceneX, gameToSceneY } from '@game/utils';
 
 import { defaultGameParams, GameObjectParams, defaultGameObjectParams, Ball } from '@shared/types';
 
@@ -266,11 +266,10 @@ export function animateBallAfterScore(
   ballMesh.animations = [continueAnim];
   scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
     ballMesh.position = dropStartPos;
+    ballMesh.visibility = 1;
     ballMesh.animations = [dropAnim];
     scene.beginAnimation(ballMesh, 0, frameRate, false, 1, () => {
-      // Restart hover animation after drop completes
       restartHoverAnimation(ballMesh, scene);
-
       if (onAnimationComplete) onAnimationComplete();
     });
   });
@@ -281,14 +280,13 @@ export function animatePaddleAfterScore(
   paddle: Mesh,
   camera: ArcRotateCamera,
   scoringDirection: 'left' | 'right',
-  gameWidth: number = defaultGameParams.dimensions.gameWidth,
-  gameHeight: number = defaultGameParams.dimensions.gameHeight,
   onAnimationComplete?: () => void
 ): void {
   const frameRate = 30;
+  const gameWidth = defaultGameParams.dimensions.gameWidth;
 
   const centerX = gameToSceneX(scoringDirection === 'right' ? gameWidth : 0, paddle);
-  const centerY = gameToSceneY(gameHeight / 2, paddle);
+  const centerY = 0;
   const paddleZ = paddle.position.z;
 
   const cameraPos = camera.position.clone();
@@ -329,9 +327,7 @@ export function animatePaddleAfterScore(
 
   paddle.animations = [dropAnim];
   scene.beginAnimation(paddle, 0, frameRate, false, 1, () => {
-    // Restart hover animation after drop completes
     restartHoverAnimation(paddle, scene);
-
     if (onAnimationComplete) onAnimationComplete();
   });
 }

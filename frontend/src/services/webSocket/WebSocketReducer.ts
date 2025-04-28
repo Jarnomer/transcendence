@@ -66,6 +66,7 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
             ...action.payload.ball,
           },
           powerUps: action.payload.powerUps || [],
+          countdown: action.payload.countdown || 0,
         },
       };
     case 'GAME_STATUS':

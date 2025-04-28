@@ -19,7 +19,18 @@ body,
 [data-theme='dark'] {
   --color-primary: #ea355a;
   --color-secondary: #76f7fd;
-  --color-background: black;
+  --color-background: black; /* unused */
+  --color-gameboard: black;
+  --color-scene-background: #33353e;
+  --color-error: #ff0000;
+}
+
+[data-theme='light'] {
+  --color-primary: oklch(88.3% 0.1288 203.73);
+  --color-secondary: oklch(100% 0% 1);
+  --color-background: white; /* unused */
+  --color-gameboard: #222222;
+  --color-scene-background: #ababab;
   --color-error: #ff0000;
 }
 

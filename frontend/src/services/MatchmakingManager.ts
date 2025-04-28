@@ -168,12 +168,13 @@ class MatchmakingManager {
   handleTournamentWinner = (data: any) => {
     console.info('Congratulations! You won the tournament!', data);
     this.setState({ phase: 'completed', role: 'player', gameId: '' });
-    this.cleanup();
+    // this.cleanup();
     // this.notifyListeners();
   };
 
   handleParticipants = (participants: any) => {
     console.info('Participants:', participants);
+    if (this.snapshot.participants.some((p) => p.user_id === participants.user_id)) return;
     this.setState({ participants: [...this.snapshot.participants, participants] });
   };
 

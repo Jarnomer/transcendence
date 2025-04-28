@@ -45,11 +45,15 @@ const aiOptions: Record<string, { avatar: string; name: string }> = {
 export const GameResults: React.FC<GameResultsProps> = ({ result, playersData }) => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { resetGameOptions } = useGameOptionsContext();
+  const { resetGameOptions, mode } = useGameOptionsContext();
 
   const handleContinueClick = () => {
-    resetGameOptions();
-    navigate('/gameMenu');
+    if (mode === 'tournament') {
+      navigate('/tournamentLobby');
+    } else {
+      resetGameOptions();
+      navigate('/gameMenu');
+    }
   };
 
   const isAI = (id: string) => id in aiOptions;

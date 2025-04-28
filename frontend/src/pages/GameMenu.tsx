@@ -148,6 +148,7 @@ export const GameMenu: React.FC = () => {
   // Effect that only runs after state is reset
   useEffect(() => {
     if (!isNewGame) return;
+    
 
     if (mode === 'tournament') {
       allowInternalNavigation();
@@ -161,7 +162,7 @@ export const GameMenu: React.FC = () => {
         navigate('/game');
       } else {
         console.log('Game options:', mode, difficulty);
-        navigate('/gameOptions');
+        navigate('/tournamentLobby');
       }
     }
   }, [isNewGame, mode, difficulty]);

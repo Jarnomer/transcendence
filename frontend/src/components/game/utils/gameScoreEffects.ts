@@ -17,14 +17,20 @@ import {
 import {
   GameSoundManager,
   RetroEffectsManager,
-  applyCameraShake,
-  gameToSceneX,
-  gameToSceneY,
   animateBallAfterScore,
   animatePaddleAfterScore,
+  applyCameraShake,
+  createParticleTexture,
+  gameToSceneX,
+  gameToSceneY,
 } from '@game/utils';
 
-import { Ball, defaultGameParams } from '@shared/types';
+import {
+  Ball,
+  ScoreEffectTimings,
+  defaultGameParams,
+  defaultScoreEffectTimings,
+} from '@shared/types';
 
 function applyLightEffect(
   scene: Scene,
@@ -34,7 +40,7 @@ function applyLightEffect(
   effectDelay: number
 ): void {
   setTimeout(() => {
-    const direction = new Vector3(scoringDirection === 'right' ? -1 : 1, -0.3, 0.5).normalize();
+    const direction = new Vector3(scoringDirection === 'right' ? -2 : 2, 0, -3.0).normalize();
     const light = new DirectionalLight('scoreDirectionalLight', direction, scene);
 
     light.diffuse = color.clone().scale(1.5);
@@ -107,15 +113,16 @@ function applyBallParticles(
   ball: Ball,
   effectDelay: number,
   primaryColor: Color3,
-  duration: number = 3000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scoreBallExplosionDuration;
   const ballSceneX = gameToSceneX(ball.x, paddle);
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
 
   const particleSystem = new ParticleSystem('ballExplosionParticles', 150, scene);
 
-  particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
+  particleSystem.particleTexture = createParticleTexture(scene, primaryColor);
   particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
 
   particleSystem.color1 = new Color4(primaryColor.r, primaryColor.g, primaryColor.b, 1.0);
@@ -155,6 +162,57 @@ function applyBallParticles(
   }, effectDelay);
 }
 
+function createParticleFlares(
+  scene: Scene,
+  paddle: Mesh,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  ball: Ball,
+  effectDelay: number,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): void {
+  const duration = scoreEffectTimings.scoreBallExplosionDuration;
+  const ballSceneX = gameToSceneX(ball.x, paddle);
+  const ballSceneY = gameToSceneY(ball.y, paddle);
+  const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
+
+  const particleSystem = new ParticleSystem('whiteFlareParticles', 100, scene);
+
+  particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
+  particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
+
+  particleSystem.color1 = new Color4(1, 1, 1, 1.0);
+  particleSystem.color2 = new Color4(1, 1, 1, 1.0);
+  particleSystem.colorDead = new Color4(0.8, 0.8, 0.8, 0);
+
+  particleSystem.minSize = (0.2 + intensity * 0.5) * (2 / 3);
+  particleSystem.maxSize = (0.8 + intensity * 1.5) * (2 / 3);
+  particleSystem.minLifeTime = (1.5 + intensity * 1.5) * (2 / 3);
+  particleSystem.maxLifeTime = (3.0 + intensity * 2.0) * (2 / 3);
+  particleSystem.minEmitPower = (2 + intensity * 2.0) * (2 / 3);
+  particleSystem.maxEmitPower = (6 + intensity * 4.0) * (2 / 3);
+
+  particleSystem.manualEmitCount = Math.floor((100 + Math.floor(intensity * 100)) * (2 / 3));
+  particleSystem.emitRate = 0; // Emit all at once
+
+  particleSystem.minEmitBox = new Vector3(-0.5, -0.5, -0.5);
+  particleSystem.maxEmitBox = new Vector3(0.5, 0.5, 0.5);
+  particleSystem.direction1 = new Vector3(5, 5, 5);
+  particleSystem.direction2 = new Vector3(-5, -5, -5);
+
+  particleSystem.minAngularSpeed = -3.0 * (2 / 3);
+  particleSystem.maxAngularSpeed = 3.0 * (2 / 3);
+
+  particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
+
+  setTimeout(() => {
+    particleSystem.start();
+    setTimeout(() => {
+      particleSystem.dispose();
+    }, duration);
+  }, effectDelay);
+}
+
 export function applyPaddleExplosion(
   scene: Scene,
   paddle: Mesh,
@@ -163,24 +221,18 @@ export function applyPaddleExplosion(
   ballY: number,
   effectDelay: number,
   camera: ArcRotateCamera | null | undefined,
-  duration: number = 2000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scorePaddleExplosionDuration;
   setTimeout(() => {
     paddle.visibility = 0;
     const fragments = createPaddleFragments(scene, paddle, intensity);
-    animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY, duration);
+    animatePaddleFragments(scene, fragments, paddle, intensity, scoringDirection, ballY);
   }, effectDelay);
 
   setTimeout(() => {
     if (camera) {
-      animatePaddleAfterScore(
-        scene,
-        paddle,
-        camera,
-        scoringDirection,
-        defaultGameParams.dimensions.gameWidth,
-        defaultGameParams.dimensions.gameHeight
-      );
+      animatePaddleAfterScore(scene, paddle, camera, scoringDirection);
     }
   }, duration);
 }
@@ -268,11 +320,12 @@ function animatePaddleFragments(
   scene: Scene,
   fragments: Mesh[],
   paddle: Mesh,
-  intensity: number,
+  effectIntensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  duration: number = 2000
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  const duration = scoreEffectTimings.scorePaddleExplosionDuration;
   const ballAbovePaddle = ballY < defaultGameParams.dimensions.gameHeight / 2;
   const baseDirection = scoringDirection === 'right' ? Math.PI : 0;
 
@@ -284,6 +337,7 @@ function animatePaddleFragments(
     const deltaTime = scene.getEngine().getDeltaTime() / 1000;
     const currentTime = Date.now();
     const timeRemaining = endTime - currentTime;
+    const animationProgress = 1 - timeRemaining / duration;
 
     if (timeRemaining <= 0) {
       // Dispose all fragments and stop the animation if time is up
@@ -340,21 +394,22 @@ function animatePaddleFragments(
         // Normalize to ensure consistent direction regardless of magnitude
         const direction = new Vector3(dirX, dirY, dirZ).normalize();
 
-        const speed = (5 + Math.random() * 3) * intensity * 3;
+        const speed = (5 + Math.random() * 3) * effectIntensity * 3;
         const initialVelocity = direction.scale(speed);
         const angularVelocity = new Vector3(
-          (Math.random() - 0.5) * Math.PI * 2 * intensity,
-          (Math.random() - 0.5) * Math.PI * 2 * intensity,
-          (Math.random() - 0.5) * Math.PI * 2 * intensity
+          (Math.random() - 0.5) * Math.PI * 2 * effectIntensity,
+          (Math.random() - 0.5) * Math.PI * 2 * effectIntensity,
+          (Math.random() - 0.5) * Math.PI * 2 * effectIntensity
         );
 
         fragment.metadata.velocity = initialVelocity;
         fragment.metadata.angularVelocity = angularVelocity;
         fragment.metadata.initialized = true;
         fragment.metadata.lifeTime = 0;
+        fragment.metadata.initialSpeed = speed;
       }
 
-      fragment.position.x += fragment.metadata.velocity.x * deltaTime;
+      fragment.position.x += fragment.metadata.velocity.x * deltaTime * 1.5;
       fragment.position.y += fragment.metadata.velocity.y * deltaTime;
       fragment.position.z += fragment.metadata.velocity.z * deltaTime;
 
@@ -364,19 +419,20 @@ function animatePaddleFragments(
 
       fragment.metadata.lifeTime += deltaTime; // Track lifetime of fragment
 
+      const fadeProgressPhase = scoreEffectTimings.fadeStartPaddleMultiplier;
       const timeRatio = timeRemaining / duration;
-      const fadeProgressPhase = 0.4;
-      let velocityScaleFactor = 1;
+
+      const gravity = 9.8 * effectIntensity * Math.min(1.0, animationProgress * 2);
+      fragment.metadata.velocity.x += gravity * deltaTime;
 
       if (timeRatio < fadeProgressPhase) {
         const fadeProgress = Math.min((fadeProgressPhase - timeRatio) / fadeProgressPhase, 1);
         const material = fragment.material as PBRMaterial;
         if (material) material.alpha = Math.max(0, 1 - fadeProgress);
-        velocityScaleFactor = 0.99 - fadeProgress * 0.1;
       }
 
-      fragment.metadata.velocity.scaleInPlace(velocityScaleFactor);
-      fragment.metadata.angularVelocity.scaleInPlace(velocityScaleFactor);
+      const angularDrag = 0.98 - animationProgress * 0.1;
+      fragment.metadata.angularVelocity.scaleInPlace(angularDrag);
     }
   });
 }
@@ -387,8 +443,11 @@ export function applyNeonEdgeFlicker(
   bottomEdgeMesh: Mesh,
   playerColor: Color3,
   effectIntensity: number,
-  duration: number = 1800
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ): void {
+  effectIntensity /= 3; // Adjusting intensity
+
+  const duration = scoreEffectTimings.edgeFlickerDuration;
   const edgeMaterial = topEdgeMesh.material as PBRMaterial;
   const originalEmissiveColor = edgeMaterial.emissiveColor.clone();
   const originalEmissiveIntensity = edgeMaterial.emissiveIntensity;
@@ -533,9 +592,103 @@ export function applyNeonEdgeFlicker(
   }, duration);
 }
 
-function calculateScoreEffectDelay(ballSpeed: number): number {
-  const minDelay = 50;
-  const maxDelay = 400;
+export function animateScoringPaddle(
+  scene: Scene,
+  paddle: Mesh,
+  intensity: number,
+  scoringDirection: 'left' | 'right',
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): void {
+  const duration = scoreEffectTimings.scorePlayerAnimDuration;
+  const growDuration = scoreEffectTimings.scorePlayerGrowDuration;
+  const shakeDuration = scoreEffectTimings.scorePlayerShakeDuration;
+  const returnDuration = duration - growDuration - shakeDuration;
+
+  const originalScale = paddle.scaling.clone();
+  const originalPosition = paddle.position.clone();
+
+  const maxScale = 1.5 + intensity;
+  const xShift = scoringDirection === 'right' ? -2 : 2;
+
+  const startTime = Date.now();
+  const endGrowTime = startTime + growDuration;
+  const endShakeTime = endGrowTime + shakeDuration;
+  const endAnimTime = endShakeTime + returnDuration;
+
+  const easeOutQuad = (t: number) => t * (2 - t);
+  const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+  const animationObserver = scene.onBeforeRenderObservable.add(() => {
+    const currentTime = Date.now();
+
+    // Grow phase
+    if (currentTime < endGrowTime) {
+      const progress = (currentTime - startTime) / growDuration;
+      const easedProgress = easeOutQuad(Math.min(1, progress));
+      const currentScale = 1 + (maxScale - 1) * easedProgress;
+
+      paddle.scaling.x = originalScale.x * currentScale;
+      paddle.scaling.y = originalScale.y * currentScale;
+      paddle.scaling.z = originalScale.z * currentScale;
+
+      paddle.position.x = originalPosition.x + xShift * easedProgress;
+    }
+    // Shake phase
+    else if (currentTime < endShakeTime) {
+      const shakeProgress = (currentTime - endGrowTime) / shakeDuration;
+      const shakeAmplitude = 0.1 * intensity * Math.pow(1 - shakeProgress, 1.5);
+      const shakeFrequency = 15;
+
+      paddle.scaling.x =
+        originalScale.x *
+        maxScale *
+        (1 + Math.sin(shakeProgress * shakeFrequency * Math.PI * 2) * shakeAmplitude);
+      paddle.scaling.y =
+        originalScale.y *
+        maxScale *
+        (1 + Math.cos(shakeProgress * (shakeFrequency + 2) * Math.PI * 2) * shakeAmplitude);
+      paddle.scaling.z =
+        originalScale.z *
+        maxScale *
+        (1 + Math.sin(shakeProgress * (shakeFrequency - 2) * Math.PI * 2) * shakeAmplitude);
+
+      const posShake = 0.2 * intensity * Math.pow(1 - shakeProgress, 1.5);
+      paddle.position.x =
+        originalPosition.x +
+        xShift +
+        Math.sin(shakeProgress * (shakeFrequency + 1) * Math.PI * 2) * posShake;
+      paddle.position.y =
+        originalPosition.y + Math.cos(shakeProgress * shakeFrequency * Math.PI * 2) * posShake;
+    }
+    // Return phase
+    else if (currentTime < endAnimTime) {
+      const returnProgress = (currentTime - endShakeTime) / returnDuration;
+      const easedProgress = easeInOutQuad(Math.min(1, returnProgress));
+
+      paddle.scaling.x = originalScale.x * (maxScale - (maxScale - 1) * easedProgress);
+      paddle.scaling.y = originalScale.y * (maxScale - (maxScale - 1) * easedProgress);
+      paddle.scaling.z = originalScale.z * (maxScale - (maxScale - 1) * easedProgress);
+
+      paddle.position.x = originalPosition.x + xShift * (1 - easedProgress);
+      paddle.position.y = originalPosition.y * (1 - easedProgress);
+    }
+    // End of animation
+    else {
+      paddle.scaling = new Vector3(1, 1, 1);
+      paddle.position.x = originalPosition.x;
+      paddle.position.y = 0;
+
+      scene.onBeforeRenderObservable.remove(animationObserver);
+    }
+  });
+}
+
+function calculateScoreEffectDelay(
+  ballSpeed: number,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): number {
+  const minDelay = scoreEffectTimings.scoreEffectMinDelay;
+  const maxDelay = scoreEffectTimings.scoreEffectMaxDelay;
   const normalizedSpeed = Math.min(Math.max(ballSpeed / 15, 0), 1);
   const delay = maxDelay - normalizedSpeed * (maxDelay - minDelay);
 
@@ -547,6 +700,8 @@ function calculateScoreEffectIntensity(
   ballSpeed: number,
   ballSpin: number
 ): number {
+  const baseIntensity = 0.5;
+
   // Base intensity from player's current score (0.1 to 0.3)
   const maxScore = defaultGameParams.rules.maxScore;
   const scoreIntensity = Math.min(0.1 + (playerScore / maxScore) * 0.3, 0.3);
@@ -560,14 +715,33 @@ function calculateScoreEffectIntensity(
   const normalizedSpin = Math.min(Math.abs(ballSpin) / 10, 1);
   const physicsIntensity = normalizedSpeed * 0.2 + normalizedSpin * 0.2;
 
-  // Return combined factor (ensure result is between 0.1 and 1.0)
-  return Math.min(scoreIntensity + endgameIntensity + physicsIntensity, 1.0);
+  return Math.min(baseIntensity + scoreIntensity + endgameIntensity + physicsIntensity, 1.5);
+}
+
+export function applySoundEffects(
+  effectDelay: number,
+  soundManagerRef?: GameSoundManager | null | undefined,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+): void {
+  if (!soundManagerRef) return;
+
+  setTimeout(() => {
+    soundManagerRef.playScoreSound();
+  }, effectDelay + scoreEffectTimings.scoreSoundDelay);
+
+  setTimeout(() => {
+    soundManagerRef.playPaddleFizzleSound();
+  }, scoreEffectTimings.paddleFizzleSoundDelay);
+
+  setTimeout(() => {
+    soundManagerRef.playBallFizzleSound();
+  }, scoreEffectTimings.ballFizzleSoundDelay);
 }
 
 export function applyScoreEffects(
   retroEffectsRef: RetroEffectsManager | null | undefined,
   scene: Scene,
-  camera: ArcRotateCamera | null | undefined,
+  camera: ArcRotateCamera,
   topEdge: Mesh,
   bottomEdge: Mesh,
   scoringPlayerPaddle: Mesh,
@@ -580,29 +754,42 @@ export function applyScoreEffects(
   gameWidth: number = defaultGameParams.dimensions.gameWidth,
   gameHeight: number = defaultGameParams.dimensions.gameHeight,
   onAnimationComplete?: () => void,
-  soundManagerRef?: GameSoundManager | null | undefined
+  soundManagerRef?: GameSoundManager | null | undefined,
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
 ) {
   const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
   const scoringPlayer: 'player1' | 'player2' = ballDirection === 'right' ? 'player2' : 'player1';
   const intensityFactor = calculateScoreEffectIntensity(playerScore, ballSpeed, ball.spin);
   const effectDelay = calculateScoreEffectDelay(ballSpeed);
 
-  if (camera && ballMesh) {
-    animateBallAfterScore(
-      scene,
-      ballMesh,
-      ball,
-      camera,
-      scoringPlayer,
-      gameWidth,
-      gameHeight,
-      defaultGameParams.dimensions.scaleFactor,
-      onAnimationComplete
-    );
-  }
-
-  applyNeonEdgeFlicker(scene, topEdge, bottomEdge, primaryColor, intensityFactor);
   applyLightEffect(scene, intensityFactor, ballDirection, primaryColor, effectDelay);
+
+  applySoundEffects(effectDelay, soundManagerRef, scoreEffectTimings);
+
+  setTimeout(() => {
+    ballMesh.visibility = 0;
+  }, effectDelay);
+
+  animateBallAfterScore(
+    scene,
+    ballMesh,
+    ball,
+    camera,
+    scoringPlayer,
+    gameWidth,
+    gameHeight,
+    defaultGameParams.dimensions.scaleFactor,
+    onAnimationComplete
+  );
+
+  applyNeonEdgeFlicker(
+    scene,
+    topEdge,
+    bottomEdge,
+    primaryColor,
+    intensityFactor,
+    scoreEffectTimings
+  );
 
   applyPaddleExplosion(
     scene,
@@ -612,7 +799,15 @@ export function applyScoreEffects(
     ball.y,
     effectDelay,
     camera,
-    2000
+    scoreEffectTimings
+  );
+
+  animateScoringPaddle(
+    scene,
+    scoringPlayerPaddle,
+    intensityFactor,
+    ballDirection,
+    scoreEffectTimings
   );
 
   applyBallParticles(
@@ -622,14 +817,19 @@ export function applyScoreEffects(
     ballDirection,
     ball,
     effectDelay,
-    primaryColor
+    primaryColor,
+    scoreEffectTimings
   );
 
-  if (soundManagerRef) {
-    setTimeout(() => {
-      soundManagerRef.playScoreSound();
-    }, effectDelay);
-  }
+  createParticleFlares(
+    scene,
+    scoredAgainstPaddle,
+    intensityFactor,
+    ballDirection,
+    ball,
+    effectDelay,
+    scoreEffectTimings
+  );
 
   if (camera) {
     const shakeIntensity = 0.5 + intensityFactor * 1.0;

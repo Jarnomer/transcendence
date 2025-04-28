@@ -387,7 +387,7 @@ export class MatchmakingService {
     console.log(`Adding player, ${player.user_id} to queue: ${mode}`);
     this.matchmakers[mode].addPlayer(player);
   }
-
+  
   removePlayerFromQueue(user_id: string, mode: string) {
     console.log(`Removing player, ${user_id} from queue: ${mode}`);
     this.matchmakers[mode].removePlayer(user_id);

@@ -137,7 +137,7 @@ export default class PongGameSession {
       console.log('Both players are connected');
       return true;
     } else if (this.clients.size === 2 && this.mode === 'tournament') {
-      // console.log('Both players connected for tournament');
+      console.log('Both players connected for tournament');
       return true;
     }
     console.log('Not all players connected');

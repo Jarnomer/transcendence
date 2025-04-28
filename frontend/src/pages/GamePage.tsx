@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
-import { CountDown, PlayerScoreBoard } from '@components';
+import { PlayerScoreBoard } from '@components';
 
 import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
+import { GameInfoOverlay } from '../components/game/GameInfoOverlay';
 import { GameResults } from '../components/game/GameResults';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -135,6 +136,7 @@ export const GamePage: React.FC = () => {
 
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
       if (isMounted) {
+        console.log('GamePage: sending ready message');
         sendMessage('game', createReadyInputMessage(localPlayerId, true));
       }
 
@@ -168,9 +170,9 @@ export const GamePage: React.FC = () => {
         )}
       </div>
 
-      {/* Show countdown conditionally */}
+      {/* Show GameInfoOverlay conditionally */}
       {connections.game === 'connected' && gameStatus !== 'finished' && !loading && gameState ? (
-        <CountDown gameStatus={gameStatus} />
+        <GameInfoOverlay gameStatus={gameStatus} gameState={gameState} />
       ) : gameResult ? (
         <GameResults result={gameResult} playersData={playersData} />
       ) : (

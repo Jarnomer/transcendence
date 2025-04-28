@@ -1,12 +1,12 @@
 import {
+  Color3,
+  DefaultRenderingPipeline,
+  DynamicTexture,
   Engine,
   Mesh,
   Scene,
-  Texture,
-  Color3,
-  DynamicTexture,
-  DefaultRenderingPipeline,
   ShadowGenerator,
+  Texture,
 } from 'babylonjs';
 
 import { getThemeColors } from '@game/utils';
@@ -127,8 +127,16 @@ export function getThemeColorsFromDOM(theme: 'light' | 'dark' = 'dark') {
   const primaryColor = computedStyle.getPropertyValue('--color-primary').trim();
   const secondaryColor = computedStyle.getPropertyValue('--color-secondary').trim();
   const backgroundColor = computedStyle.getPropertyValue('--color-background').trim();
+  const gameboardColor = computedStyle.getPropertyValue('--color-gameboard').trim();
+  const sceneBackgroundColor = computedStyle.getPropertyValue('--color-scene-background').trim();
 
-  return getThemeColors(theme, primaryColor, secondaryColor, backgroundColor);
+  return getThemeColors(
+    primaryColor,
+    secondaryColor,
+    backgroundColor,
+    gameboardColor,
+    sceneBackgroundColor
+  );
 }
 
 function optimizeShadowGenerators(shadowGenerators: ShadowGenerator[]) {
@@ -145,8 +153,8 @@ function optimizeShadowGenerators(shadowGenerators: ShadowGenerator[]) {
 export function applyLowQualitySettings(
   scene: Scene,
   scalingLevel: number,
-  pipeline: DefaultRenderingPipeline,
-  shadowGenerators: ShadowGenerator[]
+  pipeline?: DefaultRenderingPipeline | null | undefined,
+  shadowGenerators?: ShadowGenerator[] | null | undefined
 ) {
   scene.getEngine().setHardwareScalingLevel(scalingLevel);
 
@@ -169,7 +177,13 @@ export function applyLowQualitySettings(
   scene.autoClearDepthAndStencil = false;
   scene.blockMaterialDirtyMechanism = true;
 
-  optimizeShadowGenerators(shadowGenerators);
+  if (shadowGenerators) {
+    optimizeShadowGenerators(shadowGenerators);
+  }
+}
+
+export function isPowerUpNegative(type: PowerUpType): boolean {
+  return type === PowerUpType.SmallerPaddle || type === PowerUpType.SlowerPaddle;
 }
 
 export function getPowerUpIconPath(powerUpType: PowerUpType) {

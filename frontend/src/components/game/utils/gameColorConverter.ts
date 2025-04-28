@@ -4,22 +4,29 @@ export interface ThemeColors {
   primaryColor: Color3;
   secondaryColor: Color3;
   backgroundColor: Color3;
+  gameboardColor: Color3;
+  sceneBackgroundColor: Color3;
 }
 
 export function getThemeColors(
-  theme: 'light' | 'dark' = 'dark',
-  primaryColorHex?: string,
-  secondaryColorHex?: string,
-  backgroundColorHex?: string
-): ThemeColors {
-  const primaryColor = parseColor(primaryColorHex || '#ea355a');
-  const secondaryColor = parseColor(secondaryColorHex || 'oklch(8% 0% 0)');
-  const backgroundColor = parseColor(backgroundColorHex || 'black');
+  primaryColorStr: string,
+  secondaryColorStr: string,
+  backgroundColorStr: string,
+  gameboardColorStr: string,
+  sceneBackgroundColorStr: string
+) {
+  const primaryColor = parseColor(primaryColorStr);
+  const secondaryColor = parseColor(secondaryColorStr);
+  const backgroundColor = parseColor(backgroundColorStr);
+  const gameboardColor = parseColor(gameboardColorStr);
+  const sceneBackgroundColor = parseColor(sceneBackgroundColorStr);
 
   return {
     primaryColor,
     secondaryColor,
     backgroundColor,
+    gameboardColor,
+    sceneBackgroundColor,
   };
 }
 

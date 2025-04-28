@@ -22,10 +22,11 @@ const useMatchmaking = () => {
     startMatchMaking,
     startSpectating,
   } = useWebSocketContext();
-  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId } =
+  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId, resetGameOptions } =
     useGameOptionsContext();
   const matchmaker = useRef<MatchMaker>(null);
   const sessionManager = SessionManager.getInstance();
+  const hasRegistered = SessionManager.getInstance().get('matchmakingRegistered');
   // const params = useRef<URLSearchParams>(new URLSearchParams());
 
   // useEffect(() => {
@@ -43,7 +44,7 @@ const useMatchmaking = () => {
   // }, [matchmakingState.phase]);
 
   useEffect(() => {
-    if (!mode || !difficulty || !lobby) return;
+    if (!mode || !difficulty || !lobby || hasRegistered) return;
     console.log('Setting matchmaker:', mode, difficulty);
     matchmaker.current = new MatchMaker({ mode, difficulty, lobby, queueId, tournamentOptions });
   }, [mode, difficulty, lobby]);
@@ -117,7 +118,7 @@ const useMatchmaking = () => {
   // }, [matchmakingSocket]);
 
   useEffect(() => {
-    if (!userId || !matchmaker.current) return;
+    if (!userId || !matchmaker.current || hasRegistered) return;
     console.log('Starting matchmaking');
     console.log('mode:', mode, 'difficulty:', difficulty, 'lobby:', lobby, 'queueId:', queueId);
     matchmaker.current
@@ -147,6 +148,9 @@ const useMatchmaking = () => {
       .catch((err) => {
         console.error('Matchmaking failed:', err);
         navigate('/home');
+      })
+      .finally(() => {
+        sessionManager.set('matchmakingRegistered', true);
       });
   }, [userId]);
 
