@@ -68,6 +68,7 @@ export const TournamentLobby: React.FC = () => {
     console.log('matchmaking state: ', matchmakingState);
     if (matchmakingState.phase === 'in_game' && location.pathname !== '/game') {
       console.log('in game');
+      console.log('participants: ', matchmakingState.participants);
       handleClickOpenModal();
     }
   }, [matchmakingState.phase, location.pathname]);
@@ -105,7 +106,6 @@ export const TournamentLobby: React.FC = () => {
     setPlayers(Array.from({ length: parseInt(difficulty!) }, (_, i) => `Competitor ${i + 1}`));
   }, []);
 
-  console.log(selectedFriendId);
 
   return (
     <>

@@ -68,8 +68,11 @@ abstract class MatchmakingMode {
     }
     console.log(`Adding player ${player.user_id} to queue ${queueKey}`);
     const users = this.queueMatches.get(queueKey)!; // Use the "!" to assert non-null
+    if (users.some((p) => p.user_id === player.user_id)) {
+      console.log(`Player ${player.user_id} already in queue ${queueKey}`);
+      return users.length;
+    }
     users.push(player);
-
     return users.length;
   }
 
@@ -387,7 +390,7 @@ export class MatchmakingService {
     console.log(`Adding player, ${player.user_id} to queue: ${mode}`);
     this.matchmakers[mode].addPlayer(player);
   }
-  
+
   removePlayerFromQueue(user_id: string, mode: string) {
     console.log(`Removing player, ${user_id} from queue: ${mode}`);
     this.matchmakers[mode].removePlayer(user_id);

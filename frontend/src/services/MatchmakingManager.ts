@@ -40,6 +40,7 @@ class MatchmakingManager {
   constructor() {
     this.matchmakingSocket = WebSocketManager.getInstance('matchmaking');
     this.gameSocket = WebSocketManager.getInstance('game');
+    this.attachListeners();
   }
 
   static getInstance(): MatchmakingManager {
@@ -99,7 +100,6 @@ class MatchmakingManager {
     this.matchmakingSocket.connect(
       new URLSearchParams({ mode: this.mode, difficulty: this.difficulty })
     );
-    this.attachListeners();
     this.setState({ phase: 'matchmaking', role: 'player' });
     // this.notifyListeners();
   }
@@ -173,7 +173,7 @@ class MatchmakingManager {
   };
 
   handleParticipants = (participants: any) => {
-    console.info('Participants:', participants);
+    console.info('Participants:', this.snapshot.participants);
     if (this.snapshot.participants.some((p) => p.user_id === participants.user_id)) return;
     this.setState({ participants: [...this.snapshot.participants, participants] });
   };
@@ -233,7 +233,7 @@ class MatchmakingManager {
   }
 
   cleanup() {
-    this.detachListeners();
+    // this.detachListeners();
     this.matchmakingSocket.close();
     this.gameSocket.close();
     this.mode = null;

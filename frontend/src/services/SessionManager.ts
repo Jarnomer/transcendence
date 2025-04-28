@@ -1,9 +1,12 @@
+import { MatchMakerState } from '../services/MatchMaker';
+
 export type SessionData = {
   gameId?: string;
   queueId?: string;
   mode?: string;
   difficulty?: string;
   matchmakingRegistered?: boolean;
+  matchmakerState?: MatchMakerState;
 };
 
 const SESSION_KEY = 'game-session';

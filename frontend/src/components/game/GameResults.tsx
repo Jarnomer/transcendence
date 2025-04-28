@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -46,12 +46,14 @@ export const GameResults: React.FC<GameResultsProps> = ({ result, playersData })
   const navigate = useNavigate();
   const { user } = useUser();
   const { resetGameOptions, mode } = useGameOptionsContext();
+  const [winner, setWinner] = React.useState<PlayerData | null>(null);
+  const [loser, setLoser] = React.useState<PlayerData | null>(null);
 
   const handleContinueClick = () => {
     if (mode === 'tournament') {
       navigate('/tournamentLobby');
     } else {
-      resetGameOptions();
+      // resetGameOptions();
       navigate('/gameMenu');
     }
   };
@@ -72,8 +74,10 @@ export const GameResults: React.FC<GameResultsProps> = ({ result, playersData })
     return null;
   };
 
-  const winner = getPlayer(result.winner_id);
-  const loser = getPlayer(result.loser_id);
+  useEffect(() => {
+    setWinner(getPlayer(result.winner_id));
+    setLoser(getPlayer(result.loser_id));
+  }, [result, playersData]);
 
   return (
     <div className="p-2 flex flex-col w-full relative justify-center items-center gap-5 ">
