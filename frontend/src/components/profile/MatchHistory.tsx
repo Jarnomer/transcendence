@@ -43,17 +43,26 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
   };
 
   return (
-    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
-      <div className=" w-full h-[20px] bg-primary text-black text-sm">Game History</div>
+    <motion.div
+      className="min-h-xl h-full w-full"
+      variants={animationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className=" w-full h-[20px] bg-primary text-black text-sm">
+        <h2 className="text-md ">Match History</h2>
+      </div>
 
       <motion.div className="p-4 glass-box text-sm">
-        <h3 className="text-md ">Match History</h3>
         {/* Stats */}
-        <div className="text-center flex items-center justify-center gap-6">
-          <span className="">Wins: {user.stats?.wins}</span>
-          <span className="">Losses: {user.stats?.losses}</span>
-        </div>
         <div className="flex min-h-full flex-col gap-2 mt-2">
+          {user.games && user.games.length > 0 && (
+            <div className="text-center flex items-center justify-center gap-6">
+              <span className="">Wins: {user.stats?.wins}</span>
+              <span className="">Losses: {user.stats?.losses}</span>
+            </div>
+          )}
           {user.games && user.games.length > 0 ? (
             user.games
               .filter((game: any) => game.display_name)

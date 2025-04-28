@@ -47,7 +47,7 @@ interface NavIconButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const iconSizeResponsive = 'size-4 sm:size-6';
+export const iconSizeResponsive = 'size-4 sm:size-6 ';
 
 export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick, ariaLabel }) => {
   const icons = {
@@ -74,7 +74,7 @@ export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick,
   const playSelectSound = useSound('/sounds/effects/select.wav');
   return (
     <button
-      className="hover:text-secondary"
+      className="hover:text-secondary "
       id={id}
       onClick={(event) => {
         playSelectSound();
