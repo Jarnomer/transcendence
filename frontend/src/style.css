@@ -110,6 +110,36 @@ body,
   font-style: normal;
 }
 
+/* Scrollbar Track */
+::-webkit-scrollbar {
+  width: 8px; /* width of vertical scrollbar */
+  height: 8px; /* height of horizontal scrollbar */
+}
+
+/* Scrollbar Track Background */
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+/* Scrollbar Thumb */
+::-webkit-scrollbar-thumb {
+  background-color: currentColor;
+  border-radius: 4px;
+  /* gives some padding */
+}
+
+/* Scrollbar Thumb Hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* Works on the element with overflow */
+.scrollBar {
+  scrollbar-width: thin; /* auto | thin | none */
+  scrollbar-color: currentColor transparent; /* thumb color | track color */
+}
+
 .logo {
   font-family: 'ASIX-FOUNDER', serif;
 }
