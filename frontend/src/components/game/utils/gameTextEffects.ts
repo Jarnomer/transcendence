@@ -7,6 +7,11 @@ import {
   StandardMaterial,
   Vector3,
   Animation,
+  GlowLayer,
+  PBRMaterial,
+  ArcRotateCamera,
+  EasingFunction,
+  CubicEase,
 } from 'babylonjs';
 
 import { GameStatus } from '@shared/types';
@@ -24,11 +29,19 @@ class GameTextManager {
   private currentAnimation: Animation | null = null;
   private currentAnimationKey: string | null = null;
   private soundManager = getGameSoundManager();
+  private glowLayer: GlowLayer | null = null;
+  private camera: ArcRotateCamera;
 
-  constructor(scene: Scene, textColor: Color3) {
+  constructor(scene: Scene, textColor: Color3, camera: ArcRotateCamera) {
     this.scene = scene;
     this.textColor = textColor;
+    this.camera = camera;
     this.loadFont();
+
+    this.glowLayer = new GlowLayer('textGlowLayer', this.scene);
+    this.glowLayer.intensity = 0.4;
+    this.glowLayer.blurKernelSize = 32;
+
     this.createTextMesh();
   }
 
@@ -50,7 +63,11 @@ class GameTextManager {
   }
 
   private createTextMesh(): void {
-    this.textMesh = MeshBuilder.CreatePlane('textPlane', { width: 20, height: 10 }, this.scene);
+    this.textMesh = MeshBuilder.CreatePlane(
+      'textPlane',
+      { width: 28, height: 14, sideOrientation: Mesh.DOUBLESIDE },
+      this.scene
+    );
 
     this.textMesh.position = new Vector3(0, 0, -15);
     this.textMesh.isPickable = false;
@@ -61,19 +78,45 @@ class GameTextManager {
       this.scene,
       true
     );
-
     const textMaterial = new StandardMaterial('textMaterial', this.scene);
 
     textMaterial.diffuseTexture = this.textTexture;
-    textMaterial.specularColor = new Color3(0, 0, 0);
+    textMaterial.emissiveTexture = this.textTexture;
     textMaterial.emissiveColor = this.textColor;
+    textMaterial.specularColor = new Color3(0.2, 0.2, 0.2);
     textMaterial.disableLighting = true;
-    textMaterial.diffuseTexture.hasAlpha = true;
+
     textMaterial.useAlphaFromDiffuseTexture = true;
+    textMaterial.diffuseTexture.hasAlpha = true;
+    textMaterial.backFaceCulling = false;
+
+    // Create a slightly smaller backing mesh for the 3D effect
+    const backingMesh = MeshBuilder.CreatePlane(
+      'textPlaneBack',
+      { width: 27.9, height: 13.9, sideOrientation: Mesh.DOUBLESIDE },
+      this.scene
+    );
+    backingMesh.position.z = -15.1;
+
+    const backingMaterial = new StandardMaterial('textBackingMaterial', this.scene);
+
+    backingMaterial.diffuseColor = this.textColor.scale(0.5);
+    backingMaterial.emissiveColor = this.textColor.scale(0.3);
+    backingMaterial.diffuseTexture = this.textTexture.clone();
+    backingMaterial.diffuseTexture.hasAlpha = true;
+    backingMaterial.useAlphaFromDiffuseTexture = true;
+    backingMaterial.backFaceCulling = false;
+
+    backingMesh.material = backingMaterial;
+    backingMesh.parent = this.textMesh;
 
     this.textMesh.material = textMaterial;
-
     this.textMesh.visibility = 0;
+
+    if (this.glowLayer) {
+      this.glowLayer.intensity = 0.4;
+      this.glowLayer.addIncludedOnlyMesh(this.textMesh);
+    }
   }
 
   // Update the text color
@@ -81,8 +124,19 @@ class GameTextManager {
     this.textColor = color;
 
     if (this.textMesh && this.textMesh.material) {
-      const material = this.textMesh.material as StandardMaterial;
+      const material = this.textMesh.material as PBRMaterial;
       material.emissiveColor = this.textColor;
+      material.albedoColor = this.textColor;
+
+      // Update backing color too
+      if (this.textMesh.getChildMeshes().length > 0) {
+        const backingMesh = this.textMesh.getChildMeshes()[0];
+        if (backingMesh && backingMesh.material) {
+          const backMaterial = backingMesh.material as PBRMaterial;
+          backMaterial.albedoColor = this.textColor.scale(0.7);
+          backMaterial.emissiveColor = this.textColor.scale(0.4);
+        }
+      }
     }
   }
 
@@ -93,6 +147,8 @@ class GameTextManager {
 
     const ctx = this.textTexture.getContext() as unknown as CanvasRenderingContext2D;
 
+    ctx.clearRect(0, 0, 2048, 1024); // Clear with transparent
+
     const fontString = `${fontSize}px ${this.fontName}`;
     ctx.font = fontString;
 
@@ -100,30 +156,124 @@ class GameTextManager {
     ctx.textBaseline = 'middle';
 
     const colorString = `rgb(${Math.floor(this.textColor.r * 255)}, ${Math.floor(this.textColor.g * 255)}, ${Math.floor(this.textColor.b * 255)})`;
-    ctx.fillStyle = colorString;
 
+    // Clear previous shadow state
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Layer 1: Base glow
+    ctx.shadowColor = colorString;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.fillText(text, 1024, 512);
+
+    // Layer 2: Text outline
+    ctx.shadowColor = colorString;
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillText(text, 1024, 512);
+
+    // Layer 3: Main text
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.fillStyle = colorString;
+    ctx.fillText(text, 1024, 512);
+
+    // Layer 4: Highlight
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText(text, 1024, 511);
 
     this.textTexture.update();
   }
 
-  private createFadeInAnimation(): Animation {
+  private createDropAnimation(): Animation[] {
     const frameRate = 30;
+    const animations = [];
 
-    const fadeIn = new Animation(
-      'fadeIn',
-      'visibility',
+    const cameraZ = this.camera.position.z;
+
+    const startY = 8;
+    const startZ = cameraZ + 2;
+    const middleY = 0;
+    const middleZ = -15;
+    const endY = -5;
+    const endZ = 2;
+
+    // Position animation
+    const posAnim = new Animation(
+      'textPositionAnim',
+      'position',
       frameRate,
-      Animation.ANIMATIONTYPE_FLOAT,
+      Animation.ANIMATIONTYPE_VECTOR3,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
 
-    const keyFrames = [];
-    keyFrames.push({ frame: 0, value: 0 });
-    keyFrames.push({ frame: 20, value: 1 });
+    const posKeys = [
+      { frame: 0, value: new Vector3(0, startY, startZ) },
+      { frame: frameRate * 0.3, value: new Vector3(0, middleY, middleZ) },
+      { frame: frameRate * 0.7, value: new Vector3(0, middleY, middleZ) },
+      { frame: frameRate, value: new Vector3(0, endY, endZ) },
+    ];
 
-    fadeIn.setKeys(keyFrames);
-    return fadeIn;
+    posAnim.setKeys(posKeys);
+
+    // Rotation animation for tilt effect
+    const rotAnim = new Animation(
+      'textRotationAnim',
+      'rotation',
+      frameRate,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    const rotKeys = [
+      { frame: 0, value: new Vector3(Math.PI * 0.1, 0, 0) },
+      { frame: frameRate * 0.3, value: new Vector3(0, 0, 0) },
+      { frame: frameRate * 0.7, value: new Vector3(0, 0, 0) },
+      { frame: frameRate, value: new Vector3(-Math.PI * 0.2, 0, 0) },
+    ];
+
+    rotAnim.setKeys(rotKeys);
+
+    // Scale animation for "bounce" effect
+    const scaleAnim = new Animation(
+      'textScaleAnim',
+      'scaling',
+      frameRate,
+      Animation.ANIMATIONTYPE_VECTOR3,
+      Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    const scaleKeys = [
+      { frame: 0, value: new Vector3(0.6, 0.6, 0.6) },
+      { frame: frameRate * 0.15, value: new Vector3(1.1, 1.1, 1.1) },
+      { frame: frameRate * 0.3, value: new Vector3(1, 1, 1) },
+      { frame: frameRate * 0.7, value: new Vector3(1, 1, 1) },
+      { frame: frameRate, value: new Vector3(0.7, 0.7, 0.7) },
+    ];
+
+    scaleAnim.setKeys(scaleKeys);
+
+    const easeInOut = new CubicEase();
+    easeInOut.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
+
+    posAnim.setEasingFunction(easeInOut);
+    rotAnim.setEasingFunction(easeInOut);
+    scaleAnim.setEasingFunction(easeInOut);
+
+    animations.push(posAnim);
+    animations.push(rotAnim);
+    animations.push(scaleAnim);
+
+    return animations;
   }
 
   private createFadeOutAnimation(): Animation {
@@ -157,12 +307,17 @@ class GameTextManager {
       this.scene.stopAnimation(this.textMesh, this.currentAnimationKey);
     }
 
+    this.textMesh.visibility = 0;
     this.drawText(text, fontSize);
 
-    const fadeIn = this.createFadeInAnimation();
+    const cameraZ = this.camera.position.z;
 
-    this.currentAnimation = fadeIn;
-    this.currentAnimationKey = 'visibility';
+    this.textMesh.position = new Vector3(0, 8, cameraZ + 2);
+    this.textMesh.rotation = new Vector3(Math.PI * 0.1, 0, 0);
+    this.textMesh.scaling = new Vector3(0.6, 0.6, 0.6);
+    this.textMesh.visibility = 1;
+
+    const dropAnimations = this.createDropAnimation();
 
     if (playSound) {
       switch (text) {
@@ -186,18 +341,19 @@ class GameTextManager {
 
     this.scene.beginDirectAnimation(
       this.textMesh,
-      [fadeIn],
+      dropAnimations,
       0,
-      20,
+      30,
       false,
       1,
-      // When fade in completes, wait then fade out
+      // When animation completes, wait then fade out
       () => {
         setTimeout(() => {
           if (!this.textMesh) return;
 
           const fadeOut = this.createFadeOutAnimation();
           this.currentAnimation = fadeOut;
+          this.currentAnimationKey = 'visibility';
 
           this.scene.beginDirectAnimation(this.textMesh, [fadeOut], 0, 20, false);
         }, duration);
@@ -234,9 +390,18 @@ class GameTextManager {
       this.textTexture.dispose();
       this.textTexture = null;
     }
+
+    if (this.glowLayer) {
+      this.glowLayer.dispose();
+      this.glowLayer = null;
+    }
   }
 }
 
-export function createGameTextManager(scene: Scene, textColor: Color3): GameTextManager {
-  return new GameTextManager(scene, textColor);
+export function createGameTextManager(
+  scene: Scene,
+  textColor: Color3,
+  camera: ArcRotateCamera
+): GameTextManager {
+  return new GameTextManager(scene, textColor, camera);
 }

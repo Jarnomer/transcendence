@@ -133,7 +133,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     enableRequiredExtensions(engine);
 
     soundManagerRef.current = getGameSoundManager();
-    textManagerRef.current = createGameTextManager(scene, thirdColor);
+    textManagerRef.current = createGameTextManager(scene, thirdColor, camera);
 
     retroLevelsRef.current = retroEffectsPresets.default;
     retroEffectsRef.current = createPongRetroEffects(
