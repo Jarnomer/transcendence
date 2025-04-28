@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -52,12 +52,21 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
     setMinimized(!minimized);
   };
 
+  const messageListRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (messageListRef.current) {
+      messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
   console.log(roomId);
   return (
     <div
-      className={`p-0 w-[300px] glass-box  text-primary backdrop-blur-sm shadow-black shadow-lg ${
-        minimized ? 'h-12' : ' h-[400px]'
-      } glass-box overflow-y-scroll`}
+      className={`p-0 w-[300px]  ${
+        minimized ? 'h-12' : 'h-[400px]'
+      } flex flex-col glass-box  text-primary backdrop-blur-sm shadow-black shadow-lg
+        glass-box`}
     >
       <div className="p-0 h-full w-full flex flex-col flex-1">
         <div className="p-0 flex justify-between items-center ">
@@ -93,17 +102,20 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
         </div>
 
         {!minimized && (
-          <>
-            <MessageList
-              messages={chatMessages}
-              user={user}
-              selectedFriendId={selectedFriendId}
-              roomId={roomId}
-            />
-            <div className="p-2 border-t flex gap-2">
-              <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <div ref={messageListRef} className="flex-1 overflow-y-auto">
+              <MessageList
+                messages={chatMessages}
+                user={user}
+                selectedFriendId={selectedFriendId}
+                roomId={roomId}
+              />
             </div>
-          </>
+
+            <div className="p-2 border-t flex gap-2">
+              <MessageInput selectedFriendId={selectedFriendId} roomId={roomId} />
+            </div>
+          </div>
         )}
       </div>
     </div>

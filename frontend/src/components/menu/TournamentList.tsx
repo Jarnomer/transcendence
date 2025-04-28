@@ -61,12 +61,13 @@ export const TournamentList: React.FC = () => {
             <th className="px-4 py-2">Tournament Name</th>
             <th className="px-4 py-2">Visibility</th>
             <th className="px-4 py-2">Players</th>
+            <th className="px-4 py-2">Join</th>
           </tr>
         </thead>
         <tbody className="border-1">
           {dataInQueue.length > 0 &&
             dataInQueue.map((options, index) => (
-              <tr key={index} className="border-b hover:bg-gray-50">
+              <tr key={index} className="border-b hover:text-secondary">
                 <td className="px-4 py-2">{options.name || 'N/A'}</td>
                 <td className="px-4 py-2">
                   {options.isPrivate ? (
@@ -81,6 +82,7 @@ export const TournamentList: React.FC = () => {
                     'Public'
                   )}
                 </td>
+                <td>??/??</td>
                 <td className="px-4 py-2">
                   <NavIconButton
                     id="join-game-button"

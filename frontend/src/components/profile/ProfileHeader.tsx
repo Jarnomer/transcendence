@@ -8,6 +8,7 @@ import { useUser } from '../../contexts/user/UserContext';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { acceptFriendRequest, sendFriendRequest } from '../../services/friendService';
 import { AddFriend } from '../UI/buttons/AddFriend';
+import { ChallengeButton } from '../UI/buttons/ChallengeUser';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import { ProfilePicture } from './ProfilePicture';
 import { getLastSeenTime } from './utils/lastSeen';
@@ -86,7 +87,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   return (
-    <div className="w-full border-1 text-left flex max-w-md md:max-w-full p-2 mb-5">
+    <div className="w-full border-1 text-left flex  max-w-md md:max-w-full p-2">
       <div className="flex w-full gap-4">
         {/* USER INFO */}
         <div className="w-full flex flex-col gap-2">
@@ -128,6 +129,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                 sent={sent}
                 onClick={() => handleAddFriendClick(user.user_id)}
               />
+              <ChallengeButton receiverUserId={user.user_id}></ChallengeButton>
               <NavIconButton
                 id="send-message"
                 ariaLabel="send message"

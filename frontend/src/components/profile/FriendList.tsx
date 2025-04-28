@@ -235,9 +235,7 @@ export const FriendList: React.FC<FriendListProps> = ({
 
   return (
     <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
-      <div className="clipped-corner w-full lg:w-1/2 h-[20px] bg-primary text-black text-sm">
-        Friends
-      </div>
+      <div className=" w-full lg:w-1/2 h-[20px] bg-primary text-black text-sm">Friends</div>
       <motion.div className="">
         <div className="flex gap-4 p-2">
           <button
