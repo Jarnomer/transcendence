@@ -18,7 +18,7 @@ class GameTextManager {
   private textMesh: Mesh | null = null;
   private textTexture: DynamicTexture | null = null;
   private fontName: string = "'joystix monospace', monospace";
-  private fontSize: number = 180;
+  private fontSize: number = 200;
   private textColor: Color3;
   private fontLoaded: boolean = false;
   private currentAnimation: Animation | null = null;
@@ -32,7 +32,6 @@ class GameTextManager {
     this.createTextMesh();
   }
 
-  // Load custom font
   private loadFont(): void {
     const fontFace = new FontFace('joystix monospace', 'url(/fonts/joystix_monospace.otf)');
 
@@ -41,42 +40,39 @@ class GameTextManager {
       .then((loadedFace) => {
         document.fonts.add(loadedFace);
         this.fontLoaded = true;
-        console.log('Joystix font loaded successfully');
       })
       .catch((error) => {
-        console.error('Error loading Joystix font:', error);
-        this.fontName = 'Arial'; // Fallback to Arial
+        console.error('Error loading font:', error);
+        console.error('Falling back to Arial...');
+        this.fontName = 'Arial';
         this.fontLoaded = true;
       });
   }
 
-  // Create the mesh that will display the text
   private createTextMesh(): void {
-    // Create a plane mesh for our text
-    this.textMesh = MeshBuilder.CreatePlane('textPlane', { width: 10, height: 5 }, this.scene);
-    this.textMesh.position = new Vector3(0, 0, -2); // Position in front of the game
+    this.textMesh = MeshBuilder.CreatePlane('textPlane', { width: 20, height: 10 }, this.scene);
+
+    this.textMesh.position = new Vector3(0, 0, -5);
     this.textMesh.isPickable = false;
 
-    // Create a dynamic texture for the text
     this.textTexture = new DynamicTexture(
       'textTexture',
-      { width: 1024, height: 512 },
+      { width: 2048, height: 1024 },
       this.scene,
       true
     );
 
-    // Create material with transparency
     const textMaterial = new StandardMaterial('textMaterial', this.scene);
+
     textMaterial.diffuseTexture = this.textTexture;
     textMaterial.specularColor = new Color3(0, 0, 0);
     textMaterial.emissiveColor = this.textColor;
     textMaterial.disableLighting = true;
+    textMaterial.diffuseTexture.hasAlpha = true;
     textMaterial.useAlphaFromDiffuseTexture = true;
 
-    // Apply material to mesh
     this.textMesh.material = textMaterial;
 
-    // Initially hide the text
     this.textMesh.visibility = 0;
   }
 
@@ -90,37 +86,34 @@ class GameTextManager {
     }
   }
 
-  // Draw text on the dynamic texture
   private drawText(text: string, fontSize: number = this.fontSize): void {
     if (!this.textTexture || !this.fontLoaded) return;
 
-    const ctx = this.textTexture.getContext();
+    this.textTexture.clear();
 
-    // Clear the canvas
-    ctx.clearRect(0, 0, 1024, 512);
+    const ctx = this.textTexture.getContext() as unknown as CanvasRenderingContext2D;
 
-    // Explicitly type ctx as CanvasRenderingContext2D to access text properties
-    const canvas2dCtx = ctx as unknown as CanvasRenderingContext2D;
+    const fontString = `${fontSize}px ${this.fontName}`;
+    ctx.font = fontString;
 
-    // Set font properties
-    canvas2dCtx.font = `${fontSize}px ${this.fontName}`;
-    canvas2dCtx.fillStyle = `rgb(${Math.floor(this.textColor.r * 255)}, ${Math.floor(this.textColor.g * 255)}, ${Math.floor(this.textColor.b * 255)})`;
-    canvas2dCtx.textAlign = 'center';
-    canvas2dCtx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
 
-    // Draw the text in the center
-    canvas2dCtx.fillText(text, 512, 256);
+    const colorString = `rgb(${Math.floor(this.textColor.r * 255)}, ${Math.floor(this.textColor.g * 255)}, ${Math.floor(this.textColor.b * 255)})`;
+    ctx.fillStyle = colorString;
 
-    // Update the texture
+    ctx.fillText(text, 1024, 512);
+
     this.textTexture.update();
   }
 
-  // Create fade in animation
   private createFadeInAnimation(): Animation {
+    const frameRate = 30;
+
     const fadeIn = new Animation(
       'fadeIn',
       'visibility',
-      30, // frames per second
+      frameRate,
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
@@ -133,12 +126,13 @@ class GameTextManager {
     return fadeIn;
   }
 
-  // Create fade out animation
   private createFadeOutAnimation(): Animation {
+    const frameRate = 30;
+
     const fadeOut = new Animation(
       'fadeOut',
       'visibility',
-      30, // frames per second
+      frameRate,
       Animation.ANIMATIONTYPE_FLOAT,
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
@@ -151,29 +145,25 @@ class GameTextManager {
     return fadeOut;
   }
 
-  // Show text with fade in effect
   public showText(
     text: string,
-    duration: number = 2000,
+    duration: number = 800,
     fontSize: number = this.fontSize,
     playSound: boolean = false
   ): void {
     if (!this.textMesh || !this.textTexture) return;
 
-    // Stop any current animation
     if (this.currentAnimation && this.currentAnimationKey) {
       this.scene.stopAnimation(this.textMesh, this.currentAnimationKey);
     }
 
-    // Draw the text
     this.drawText(text, fontSize);
 
-    // Create and start fade in animation
     const fadeIn = this.createFadeInAnimation();
+
     this.currentAnimation = fadeIn;
     this.currentAnimationKey = 'visibility';
 
-    // Play sound effect if requested
     if (playSound) {
       switch (text) {
         case '3':
@@ -194,7 +184,6 @@ class GameTextManager {
       }
     }
 
-    // Start the animation
     this.scene.beginDirectAnimation(
       this.textMesh,
       [fadeIn],
@@ -216,7 +205,6 @@ class GameTextManager {
     );
   }
 
-  // Handle game status changes
   public handleGameStatus(
     gameStatus: GameStatus,
     prevStatus: GameStatus | null,
@@ -232,11 +220,10 @@ class GameTextManager {
       countdown <= 3 &&
       countdown >= 1
     ) {
-      this.showText(countdown.toString(), 500, this.fontSize, true);
+      this.showText(countdown.toString(), 800, this.fontSize, true);
     }
   }
 
-  // Dispose resources
   public dispose(): void {
     if (this.textMesh) {
       this.textMesh.dispose();
@@ -250,7 +237,6 @@ class GameTextManager {
   }
 }
 
-// Export function to create a text manager
 export function createGameTextManager(scene: Scene, textColor: Color3): GameTextManager {
   return new GameTextManager(scene, textColor);
 }
