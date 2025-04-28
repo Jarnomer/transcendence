@@ -92,6 +92,7 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   const isAnimatingBallRef = useRef<boolean>(false);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
+  const prevCountdownRef = useRef<number | undefined>(undefined);
   const prevGameStatusRef = useRef<GameStatus | null>(null);
 
   const playerEffectsMapRef = useRef<Map<number, PlayerEffects>>(new Map());
@@ -249,13 +250,15 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     } else if (
       gameStatus === 'countdown' &&
       gameState.countdown !== undefined &&
-      gameState.countdown <= 3
+      gameState.countdown <= 3 &&
+      gameState.countdown !== prevCountdownRef.current
     ) {
       textManagerRef.current.handleGameStatus(
         gameStatus,
         prevGameStatusRef.current,
         gameState.countdown
       );
+      prevCountdownRef.current = gameState.countdown;
     }
   }, [gameStatus, gameState]);
 
