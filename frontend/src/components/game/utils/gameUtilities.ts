@@ -1,8 +1,11 @@
 import {
   Color3,
+  Color4,
   DefaultRenderingPipeline,
   DynamicTexture,
   Engine,
+  ParticleSystem,
+  Vector3,
   GlowLayer,
   Mesh,
   Scene,
@@ -43,13 +46,70 @@ export function createParticleTexture(scene: Scene, color: Color3): Texture {
   return texture;
 }
 
+export function createStandardParticleSystem(
+  name: string,
+  scene: Scene,
+  emitter: Vector3 | Mesh,
+  options: {
+    color: Color3;
+    capacity?: number;
+    emitRate?: number;
+    minSize?: number;
+    maxSize?: number;
+    minLifeTime?: number;
+    maxLifeTime?: number;
+    minEmitPower?: number;
+    maxEmitPower?: number;
+    blendMode?: number;
+  },
+  texturePath?: string
+): ParticleSystem {
+  const {
+    color,
+    capacity = 100,
+    emitRate = 50,
+    minSize = 0.1,
+    maxSize = 0.5,
+    minLifeTime = 0.3,
+    maxLifeTime = 1.5,
+    minEmitPower = 1.0,
+    maxEmitPower = 2.0,
+    blendMode = ParticleSystem.BLENDMODE_ADD,
+  } = options;
+
+  const particleSystem = new ParticleSystem(name, capacity, scene);
+
+  if (texturePath) {
+    particleSystem.particleTexture = new Texture(texturePath, scene);
+  } else {
+    particleSystem.particleTexture = createParticleTexture(scene, color);
+  }
+
+  particleSystem.emitter = emitter;
+  particleSystem.emitRate = emitRate;
+  particleSystem.minSize = minSize;
+  particleSystem.maxSize = maxSize;
+  particleSystem.minLifeTime = minLifeTime;
+  particleSystem.maxLifeTime = maxLifeTime;
+  particleSystem.minEmitPower = minEmitPower;
+  particleSystem.maxEmitPower = maxEmitPower;
+  particleSystem.blendMode = blendMode;
+
+  particleSystem.color1 = new Color4(color.r, color.g, color.b, 1.0);
+  particleSystem.color2 = new Color4(color.r * 1.5, color.g * 1.5, color.b * 1.5, 0.8);
+  particleSystem.colorDead = new Color4(color.r * 0.5, color.g * 0.5, color.b * 0.5, 0);
+
+  return particleSystem;
+}
+
 export function addGlowEffect(
+  name: string,
   mesh: Mesh,
   scene: Scene,
   intensity: number = 0.5,
   blurKernelSize: number = 32
-) {
-  const glowLayer = new GlowLayer(`${mesh.name}GlowLayer`, scene);
+): GlowLayer {
+  const glowLayer = new GlowLayer(name, scene);
   glowLayer.intensity = intensity;
   glowLayer.blurKernelSize = blurKernelSize;
   glowLayer.addIncludedOnlyMesh(mesh);
@@ -57,6 +117,8 @@ export function addGlowEffect(
   if (!mesh.metadata) mesh.metadata = {};
   if (!mesh.metadata.glowLayers) mesh.metadata.glowLayers = [];
   mesh.metadata.glowLayers.push(glowLayer);
+
+  return glowLayer;
 }
 
 export function gameToSceneX(gameX: number, mesh: Mesh): number {

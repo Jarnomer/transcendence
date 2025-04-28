@@ -61,7 +61,13 @@ export function createEdge(
 
   tube.material = pbr;
 
-  addGlowEffect(tube, scene, params.edge.glowLayerIntensity, params.edge.glowLayerBlurKernelSize);
+  addGlowEffect(
+    `${tube.name}GlowLayer`,
+    tube,
+    scene,
+    params.edge.glowLayerIntensity,
+    params.edge.glowLayerBlurKernelSize
+  );
 
   createEdgeHoverAnimation(tube, scene, params);
 
@@ -197,6 +203,7 @@ export function createPaddle(
   paddle.material = pbr;
 
   addGlowEffect(
+    `${paddle.name}GlowLayer`,
     paddle,
     scene,
     params.paddle.glowLayerIntensity,
@@ -248,7 +255,13 @@ export function createBall(
 
   ball.material = pbr;
 
-  addGlowEffect(ball, scene, params.ball.glowLayerIntensity, params.ball.glowLayerBlurKernelSize);
+  addGlowEffect(
+    `${ball.name}GlowLayer`,
+    ball,
+    scene,
+    params.ball.glowLayerIntensity,
+    params.ball.glowLayerBlurKernelSize
+  );
 
   createBallHoverAnimation(ball, scene, params);
 
