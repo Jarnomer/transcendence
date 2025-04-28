@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useUser } from '@/contexts/user/UserContext';
 
-import { NavIconButton } from './NavIconButton';
+import { ChallengeIcon } from '../../visual/svg/icons/ChallengeIcon';
 
 interface ChallengeButtonProps {
   receiverUserId: string;
@@ -18,11 +18,12 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({ receiverUserId
   };
 
   return (
-    <NavIconButton
+    <button
       id="challenge-user"
-      ariaLabel="challenge user"
-      icon="play"
+      aria-label="challenge user"
       onClick={() => handleChallengeClick(receiverUserId)}
-    />
+    >
+      <ChallengeIcon></ChallengeIcon>
+    </button>
   );
 };
