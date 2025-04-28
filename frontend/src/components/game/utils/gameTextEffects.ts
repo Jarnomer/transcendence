@@ -334,7 +334,7 @@ class GameTextManager {
           this.soundManager.playGameStartSound();
           break;
         case 'SCORE':
-          this.soundManager.playScoreSound();
+          this.soundManager.playGameOverSound();
           break;
       }
     }
