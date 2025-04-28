@@ -3,6 +3,7 @@ import React from 'react';
 import { useUser } from '@/contexts/user/UserContext';
 
 import { ChallengeIcon } from '../../visual/svg/icons/ChallengeIcon';
+import { iconSizeResponsive } from './NavIconButton';
 
 interface ChallengeButtonProps {
   receiverUserId: string;
@@ -19,6 +20,7 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({ receiverUserId
 
   return (
     <button
+      className={` ${iconSizeResponsive} p-0.5 hover:text-secondary`}
       id="challenge-user"
       aria-label="challenge user"
       onClick={() => handleChallengeClick(receiverUserId)}

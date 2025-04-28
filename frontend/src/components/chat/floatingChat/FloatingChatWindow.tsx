@@ -63,7 +63,9 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
   console.log(roomId);
   return (
     <div
-      className={`p-0 w-[300px]  h-[400px] flex flex-col glass-box  text-primary backdrop-blur-sm shadow-black shadow-lg
+      className={`p-0 w-[300px]  ${
+        minimized ? 'h-12' : 'h-[400px]'
+      } flex flex-col glass-box  text-primary backdrop-blur-sm shadow-black shadow-lg
         glass-box`}
     >
       <div className="p-0 h-full w-full flex flex-col flex-1">
