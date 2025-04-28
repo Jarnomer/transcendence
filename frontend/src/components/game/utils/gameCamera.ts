@@ -13,18 +13,18 @@ export interface ArcCameraAngle {
 }
 
 export const cinematicCameraAngles: ArcCameraAngle[] = [
-  // {
-  //   alpha: -0.5,
-  //   beta: Math.PI / 3,
-  //   radius: 30,
-  //   target: new Vector3(10, 3, 10),
-  // },
   {
-    alpha: 1.8,
-    beta: 2.2,
-    radius: 40,
-    target: new Vector3(0, 0, 0),
+    alpha: -0.5,
+    beta: Math.PI / 3,
+    radius: 30,
+    target: new Vector3(10, 3, 10),
   },
+  // {
+  //   alpha: 1.8,
+  //   beta: 2.2,
+  //   radius: 40,
+  //   target: new Vector3(0, 0, 0),
+  // },
   // {
   //   alpha: 0,
   //   beta: 0,

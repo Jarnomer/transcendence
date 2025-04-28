@@ -141,12 +141,13 @@ export const GamePage: React.FC = () => {
         )}
       </div>
 
-      {/* Render GameResults or MatchMakingCarousel */}
-      {gameResult ? (
-        <GameResults result={gameResult} playersData={playersData} />
-      ) : (
-        connections.game !== 'connected' && <MatchMakingCarousel playersData={playersData} />
-      )}
+      {/* Render GameResults */}
+      {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null}
+
+      {/* Render MatchMakingCarousel */}
+      {!isGameCanvasActive && !gameResult ? (
+        <MatchMakingCarousel playersData={playersData} />
+      ) : null}
     </div>
   );
 };
