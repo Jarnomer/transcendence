@@ -134,7 +134,7 @@ export const ProfilePage: React.FC = () => {
   return (
     <>
       <RadialBackground avatar_url={user?.avatar_url}></RadialBackground>
-      <motion.div className="w-full relative">
+      <motion.div className="w-full h-full flex flex-col justify-start relative">
         {loggedInUser?.friend_requests &&
         loggedInUser.friend_requests.some((req) => req.user_id === user?.user_id) ? (
           <div className="flex gap-2">
@@ -167,7 +167,7 @@ export const ProfilePage: React.FC = () => {
           ) : (
             <>
               <div>
-                <div className="p-2 gap-2 grid   w-full flex-none">
+                <div className="p-2 gap-2 grid   w-full ">
                   <div className="row-start-1 h-[200px] max-h-200px col-start-1 self-start flex-none">
                     <ProfileHeader
                       user={user}
