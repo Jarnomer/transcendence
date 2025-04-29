@@ -12,8 +12,8 @@ import {
 } from 'babylonjs';
 
 import {
-  RetroEffectsManager,
   GameAnimationManager,
+  RetroEffectsManager,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
@@ -441,7 +441,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
           ballSpeed,
           ball.spin,
           primaryColor,
-          true,
+          false,
           null
         );
       }
