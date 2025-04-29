@@ -36,7 +36,11 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
   const [queueId, setQueueId] = useState<string | null>(null);
   const [gameSettings, setGameSettings] = useState<GameSettings>(defaultGameSettings);
   const [confirmGame, setConfirmGame] = useState(false);
-  const { setGameOptions, cleanup } = useWebSocketContext();
+  const {
+    setGameOptions,
+    cleanup,
+    matchmakingState: { gameId },
+  } = useWebSocketContext();
   const { userId } = useUser();
   // const [gameId, setGameId] = useState<string | null>(null);
   // const [matchmakingOptions, setMatchmakingOptions] = useState<MatchmakingOptionsType | null>(null);
@@ -47,6 +51,7 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
     console.log('difficulty: ', difficulty);
     console.log('lobby: ', lobby);
     console.log('queueId: ', queueId);
+    console.log('gameId: ', gameId);
   }, [mode, difficulty, lobby, queueId]);
 
   useEffect(() => {
@@ -55,7 +60,9 @@ export const GameOptionsProvider = ({ children }: { children: ReactNode }) => {
     const sessionManager = SessionManager.getInstance();
     sessionManager.set('mode', mode);
     sessionManager.set('difficulty', difficulty);
-  }, [mode, difficulty]);
+    if (queueId) sessionManager.set('queueId', queueId);
+    if (gameId) sessionManager.set('gameId', gameId);
+  }, [mode, difficulty, queueId, gameId]);
 
   useEffect(() => {
     if (!userId) return;

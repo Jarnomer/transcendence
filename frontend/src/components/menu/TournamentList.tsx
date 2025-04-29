@@ -51,7 +51,7 @@ export const TournamentList: React.FC = () => {
     navigate('/tournamentLobby');
   };
 
-  console.log(dataInQueue);
+  // console.log(dataInQueue);
 
   return (
     <div className="w-full overflow-auto border-1 bg-black/10">

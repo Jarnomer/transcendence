@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 
-import { GameEvent, GameOptionsType, GameState, GameStatus } from '@shared/types';
+import { GameEvent, GameOptionsType, GameState, GameStatus, MatchmakingSnapshot } from '@shared/types';
 
 import { useChatSocket } from '../hooks/useChatSocket';
 import { useGameSocket } from '../hooks/useGameSocket';
@@ -37,7 +37,7 @@ interface WebSocketContextType {
   dispatch: React.Dispatch<any>;
   setGameId: (gameId: string) => void;
   cleanup: () => void;
-  phase: any;
+  matchmakingState: MatchmakingSnapshot;
   startMatchMaking: () => void;
   startGame: () => void;
   startSpectating: (gameId: string) => void;
@@ -55,7 +55,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const [matchmakingSocket] = useState(() => WebSocketManager.getInstance('matchmaking'));
   const [state, dispatch] = useReducer(webSocketReducer, initialState);
   const {
-    phase,
+    matchmakingState,
     setGameId,
     cleanup,
     startMatchMaking,
@@ -112,7 +112,7 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
         closeConnection,
         setGameId,
         cleanup,
-        phase,
+        matchmakingState,
         startMatchMaking,
         startGame,
         startSpectating,

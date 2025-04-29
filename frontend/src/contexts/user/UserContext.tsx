@@ -30,6 +30,7 @@ const cleanLocalStorage = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('userID');
   localStorage.removeItem('username');
+  localStorage.removeItem('game-session');
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);

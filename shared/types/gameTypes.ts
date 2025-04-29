@@ -116,7 +116,7 @@ export interface PlayerEffects {
 }
 
 export interface GameSettings {
-  mode?: '1v1' | 'singleplayer' | 'AIvsAI';
+  mode?: '1v1' | 'singleplayer' | 'AIvsAI' | 'tournament';
   difficulty?: 'easy' | 'normal' | 'brutal' | 'local' | 'online';
   maxScore: number;
   ballSpeed: number;
@@ -229,4 +229,19 @@ export type GameOptionsType = {
   difficulty: string;
   queueId: string | null;
   tournamentOptions: TournamentOptionsType | null;
+};
+
+export type Phase =
+  | 'idle'
+  | 'matchmaking'
+  | 'in_game'
+  | 'waiting_next_round'
+  | 'spectating'
+  | 'completed';
+
+export type MatchmakingSnapshot = {
+  phase: Phase;
+  role: UserRole;
+  gameId: string;
+  participants: any[]; // or whatever type
 };

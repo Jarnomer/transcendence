@@ -115,8 +115,19 @@ export class GameController {
     const { game_id, queue_id } = request.query as { game_id: string; queue_id: string };
     const userGame = await this.gameService.getGameID(user_id);
     const isGameValid = (userGame && userGame.game_id === game_id) as boolean;
+    if (!isGameValid && userGame) {
+      request.log.trace(`Game ${game_id} not found for user ${user_id}`);
+      this.gameService.deleteGame(game_id);
+      request.log.trace(`Deleting game ${game_id}`);
+    }
+    // Check if the user is in the queue
     const userQueue = await this.queueService.isInQueue(user_id);
     const isQueueValid = (userQueue && userQueue.queue_id === queue_id) as boolean;
+    if (!isQueueValid && userQueue) {
+      request.log.trace(`Queue ${queue_id} not found for user ${user_id}`);
+      this.queueService.cancelQueueByID(queue_id);
+      request.log.trace(`Deleting queue ${queue_id}`);
+    }
     request.log.trace(`Getting game session status for user ${user_id}`);
     reply.code(200).send({ game_session: isGameValid, queue_session: isQueueValid });
   }

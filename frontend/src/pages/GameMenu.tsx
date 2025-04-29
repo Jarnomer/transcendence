@@ -161,7 +161,7 @@ export const GameMenu: React.FC = () => {
         navigate('/game');
       } else {
         console.log('Game options:', mode, difficulty);
-        navigate('/gameOptions');
+        navigate('/tournamentLobby');
       }
     }
   }, [isNewGame, mode, difficulty]);

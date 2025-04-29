@@ -5,7 +5,9 @@ import { GameService, QueueService } from '@my-backend/matchmaking_service';
 
 type Player = {
   user_id: string;
-  socket: WebSocket;
+  // socket: WebSocket;
+  avatar_url?: string;
+  display_name?: string;
   elo: number;
   joinedAt: Date;
 };
@@ -66,8 +68,11 @@ abstract class MatchmakingMode {
     }
     console.log(`Adding player ${player.user_id} to queue ${queueKey}`);
     const users = this.queueMatches.get(queueKey)!; // Use the "!" to assert non-null
+    if (users.some((p) => p.user_id === player.user_id)) {
+      console.log(`Player ${player.user_id} already in queue ${queueKey}`);
+      return users.length;
+    }
     users.push(player);
-
     return users.length;
   }
 
@@ -153,9 +158,13 @@ class OneVOneMatchmaking extends MatchmakingMode {
         this.playerIntervals.delete(player.user_id);
         console.log(`Matchmaking timed out for player ${player.user_id}`);
         this.cleanupPlayer(player.user_id);
+        this.matchmaking.broadcast([player.user_id], {
+          type: 'matchmaking_timeout',
+          state: { message: 'Matchmaking timed out. Please try again later.' },
+        });
         //send a message to the player that the matchmaking timed out
       }
-    }, 30000); // Timeout after 30 seconds (adjust as needed)
+    }, 60000); // Timeout after 30 seconds (adjust as needed)
 
     const interval = setInterval(async () => {
       console.log(`Searching for opponent for: ${player.user_id}`);
@@ -259,7 +268,11 @@ class TournamentMatchmaking extends MatchmakingMode {
       };
       matches.push(match);
     }
-
+    const playerIds = session.activePlayers.map((p) => p.user_id);
+    this.matchmaking.broadcast(playerIds, {
+      type: 'tournament_matches',
+      state: { matches },
+    });
     session.matches = matches;
     session.activePlayers = [];
   }
@@ -410,7 +423,7 @@ export class MatchmakingService {
     console.log(`Player Elo: ${playerElo.elo}`);
     const player: Player = {
       user_id,
-      socket: this.clients.get(user_id)!,
+      // socket: this.clients.get(user_id)!,
       elo: playerElo.elo,
       joinedAt: new Date(),
     };
@@ -428,23 +441,21 @@ export class MatchmakingService {
     const playerElo = await this.gameService.getPlayerElo(user_id);
     const player: Player = {
       user_id,
-      socket: this.clients.get(user_id)!,
+      // socket: this.clients.get(user_id)!,
+      avatar_url,
+      display_name,
       elo: playerElo.elo,
       joinedAt: new Date(),
     };
     this.matchmakers[mode].joinQueue(queue_id, player);
-    const matches = this.matchmakers[mode].getQueueMatches(queue_id);
+    const players = this.matchmakers[mode].getQueueMatches(queue_id);
     const message = {
       type: 'participants',
-      state: {
-        user_id,
-        avatar_url,
-        display_name,
-      },
+      state: { players: players },
     };
-    if (matches) {
-      const players = matches.map((p) => p.user_id);
-      this.broadcast(players, message);
+    if (players) {
+      const playerIds = players.map((p) => p.user_id);
+      this.broadcast(playerIds, message);
     }
   }
 

@@ -12,6 +12,7 @@ const useMatchmaking = () => {
   const navigate = useNavigate();
   const { userId, user } = useUser();
   const {
+    matchmakingState,
     matchmakingSocket,
     sendMessage,
     closeConnection,
@@ -21,16 +22,26 @@ const useMatchmaking = () => {
     startMatchMaking,
     startSpectating,
   } = useWebSocketContext();
-  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId } =
+  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId, resetGameOptions } =
     useGameOptionsContext();
   const matchmaker = useRef<MatchMaker>(null);
   const sessionManager = SessionManager.getInstance();
+  const hasRegistered = SessionManager.getInstance().get('matchmakingRegistered');
   // const params = useRef<URLSearchParams>(new URLSearchParams());
 
   // useEffect(() => {
   //   if (!mode || !difficulty) return;
   //   params.current = new URLSearchParams({ mode: mode, difficulty: difficulty });
   // }, [mode, difficulty]);
+
+  // useEffect(() => {
+  //   if (matchmakingState.phase === 'in_game') {
+  //     navigate('/game');
+  //   }
+  //   if (matchmakingState.phase === 'spectating') {
+  //     navigate('/game');
+  //   }
+  // }, [matchmakingState.phase]);
 
   useEffect(() => {
     if (!mode || !difficulty || !lobby) return;
@@ -58,7 +69,7 @@ const useMatchmaking = () => {
     sendMessage('matchmaking', {
       type: 'join_match',
       payload: {
-        queue_id: matchmaker.current.getQueueId(),
+        queue_id: sessionManager.get('queueId'),
         user_id: userId,
         mode: mode,
         difficulty: difficulty,
@@ -107,13 +118,14 @@ const useMatchmaking = () => {
   // }, [matchmakingSocket]);
 
   useEffect(() => {
-    if (!userId || !matchmaker.current) return;
+    if (!userId || !matchmaker.current || hasRegistered) return;
     console.log('Starting matchmaking');
     console.log('mode:', mode, 'difficulty:', difficulty, 'lobby:', lobby, 'queueId:', queueId);
     matchmaker.current
       .startMatchMake()
       .then(() => {
         if (!matchmaker.current) return;
+        sessionManager.set('matchmakerState', matchmaker.current.getMatchMakerState());
         switch (matchmaker.current.getMatchMakerState()) {
           case MatchMakerState.MATCHED:
             console.log('Matched with a game');
@@ -123,6 +135,7 @@ const useMatchmaking = () => {
           case MatchMakerState.WAITING_FOR_PLAYERS:
           case MatchMakerState.JOINING_RANDOM:
             console.log('Waiting for players');
+            setQueueId(matchmaker.current.getQueueId()!);
             sessionManager.set('queueId', matchmaker.current.getQueueId()!);
             startMatchMaking();
             // params.current.set('queue_id', matchmaker.current.getQueueId() || '');
@@ -136,24 +149,26 @@ const useMatchmaking = () => {
       .catch((err) => {
         console.error('Matchmaking failed:', err);
         navigate('/home');
+      })
+      .finally(() => {
+        sessionManager.set('matchmakingRegistered', true);
       });
   }, [userId]);
 
-  // useEffect(() => {
-  //   console.log('Cleaning up matchmaking api');
-  //   return () => {
-  //     if (!matchmaker.current) return;
-  //     if (confirmGame) return;
-  //     matchmaker.current.stopMatchMake();
-  //   };
-  // }, [confirmGame]);
+  useEffect(() => {
+    console.log('connections.matchmaking:', connections.matchmaking);
+    if (connections.matchmaking !== 'connected' && sessionManager.get('matchmakingRegistered')) {
+      console.log('In queue, recovering session');
+      matchmaker.current?.setMatchMakerState(MatchMakerState.WAITING_FOR_PLAYERS);
+      startMatchMaking();
+    }
+  }, [connections.matchmaking]);
 
   // sending a message when the matchmaking connection is established
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
     console.log('Matchmaking connected');
-    if (!matchmaker.current) return;
-    switch (matchmaker.current.getMatchMakerState()) {
+    switch (sessionManager.get('matchmakerState')) {
       case MatchMakerState.WAITING_FOR_PLAYERS:
         handleJoinMatch();
         break;
@@ -167,7 +182,7 @@ const useMatchmaking = () => {
         console.error('Invalid matchmaker state');
         break;
     }
-  }, [connections.matchmaking, matchmaker.current?.getMatchMakerState()]);
+  }, [connections.matchmaking]);
 
   // useEffect(() => {
   //   console.log('Attaching matchmaking event listeners');

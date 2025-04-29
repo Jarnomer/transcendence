@@ -13,8 +13,15 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 export const useGameResult = () => {
   const navigate = useNavigate();
   const { resetGameOptions, mode } = useGameOptionsContext();
-  const { closeConnection, gameStatus, gameState, dispatch, phase, setGameId, cleanup } =
-    useWebSocketContext();
+  const {
+    closeConnection,
+    gameStatus,
+    gameState,
+    dispatch,
+    matchmakingState: { gameId },
+    setGameId,
+    cleanup,
+  } = useWebSocketContext();
   const { userId } = useUser();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
@@ -30,9 +37,9 @@ export const useGameResult = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (!phase.gameId) return;
-    gameIdRef.current = phase.gameId;
-  }, [phase.gameId]);
+    if (!gameId) return;
+    gameIdRef.current = gameId;
+  }, [gameId]);
 
   useEffect(() => {
     if (!gameStatus) return;
@@ -53,22 +60,21 @@ export const useGameResult = () => {
     ) {
       console.log('Game finished, submitting result');
       const { players } = gameStateRef.current;
-      const playerArray = [players.player1, players.player2];
-      const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
-      const loserIndex = winnerIndex === 0 ? 1 : 0;
+      const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
+      console.log('Submitting game result:', gameId, sortedPlayers);
       const result = {
-        game_id: gameIdRef.current,
-        winner_id: playerArray[winnerIndex].id,
-        loser_id: playerArray[loserIndex].id,
-        winner_score: playerArray[winnerIndex].score,
-        loser_score: playerArray[loserIndex].score,
+        game_id: gameId,
+        winner_id: sortedPlayers[0].id,
+        loser_id: sortedPlayers[1].id,
+        winner_score: sortedPlayers[0].score,
+        loser_score: sortedPlayers[1].score,
         game_mode: mode,
       };
-
       setGameResult(result);
       dispatch({ type: 'GAME_RESET' });
-      cleanup();
-      resetGameOptions();
+      // cleanup();
+      // resetGameOptions();
+      // closeConnection('game');
       if (mode !== 'tournamnet') {
         // navigate('/gameMenu');
       }
@@ -115,15 +121,15 @@ export const useGameResult = () => {
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
       if (gameIdRef.current === 'local_game_id') {
         dispatch({ type: 'GAME_RESET' });
-        cleanup();
-        resetGameOptions();
+        // cleanup();
+        // resetGameOptions();
         if (mode !== 'tournamnet') {
           // navigate('/gameMenu');
         }
         return;
       }
       console.log('Submitting game result:', gameIdRef.current);
-      closeConnection('game');
+      // closeConnection('game');
       const { players } = gameStateRef.current;
       const playerArray = [players.player1, players.player2];
       const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
@@ -144,9 +150,10 @@ export const useGameResult = () => {
           console.error('Error submitting game result:', err);
         })
         .finally(() => {
-          resetGameOptions();
+          // resetGameOptions();
+          // closeConnection('game');
           setGameId('');
-          cleanup();
+          // cleanup();
           if (mode !== 'tournamnet') {
             // navigate('/gameMenu');
           }

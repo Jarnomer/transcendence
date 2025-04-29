@@ -12,6 +12,7 @@ import GameplayCanvas from '../components/game/GameplayCanvas';
 import { GameResults } from '../components/game/GameResults';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useFetchPlayerData } from '../hooks/useFetchPlayers';
 import { useGameVisibility } from '../hooks/useGameVisibility';
@@ -23,12 +24,13 @@ export const GamePage: React.FC = () => {
     connections,
     sendMessage,
     closeConnection,
-    phase,
+    matchmakingState: { gameId },
     startGame,
     startMatchMaking,
   } = useWebSocketContext();
   const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
+  const { user } = useUser();
 
   const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
 
@@ -45,7 +47,7 @@ export const GamePage: React.FC = () => {
     console.log('GamePage mounted');
     console.log('mode: ', mode);
     console.log('difficulty: ', difficulty);
-    console.log('gameId: ', phase.gameId);
+    console.log('gameId: ', gameId);
     console.log('tournamentOptions', tournamentOptions);
     console.log('lobby ', lobby);
 
@@ -66,21 +68,44 @@ export const GamePage: React.FC = () => {
     }
   }, [loading, gameStatus, gameState, connections.game, isGameCanvasVisible, showGameCanvas]);
 
-  useEffect(() => {
-    if (!phase.gameId) return;
-    console.log('connecting to game socket');
-    startGame();
-    return () => {
-      closeConnection('game');
-    };
-  }, [phase.gameId]);
-
+  /**
+   * for 1v1 online mode, subscribe to matchmaking connection
+   */
   useEffect(() => {
     if (!lobby || !mode || !difficulty) return;
     if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
       startMatchMaking();
     }
   }, [lobby, mode, difficulty]);
+
+  /**
+   * for 1v1 online mode, send find_match message
+   */
+  useEffect(() => {
+    if (connections.matchmaking !== 'connected') return;
+    sendMessage('matchmaking', {
+      type: 'find_match',
+      payload: {
+        mode: mode,
+        difficulty: difficulty,
+        user_id: user?.user_id,
+        avatar_url: user?.avatar_url,
+        display_name: user?.display_name,
+      },
+    });
+  }, [connections.matchmaking, gameId, user, mode, difficulty]);
+
+  /**
+   * if gameId is set, connect to game socket
+   */
+  useEffect(() => {
+    if (!gameId) return;
+    console.log('connecting to game socket');
+    startGame();
+    return () => {
+      closeConnection('game');
+    };
+  }, [gameId]);
 
   useEffect(() => {
     if (connections.game !== 'connected') return;
@@ -98,19 +123,20 @@ export const GamePage: React.FC = () => {
 
   // Set loading to false to render the game
   useEffect(() => {
-    if (!phase.gameId) return;
+    if (!gameId) return;
     if (!loadingStates.matchMakingAnimationLoading && !loadingStates.scoreBoardLoading) {
       setLoading(false);
     }
-  }, [loadingStates, phase.gameId]);
+  }, [loadingStates, gameId]);
 
   useEffect(() => {
-    if (!phase.gameId || !localPlayerId) return;
+    if (!gameId || !localPlayerId) return;
 
     let isMounted = true; // Track if component is mounted
 
     if (!loading && gameStatus === 'waiting' && connections.game === 'connected') {
       if (isMounted) {
+        console.log('GamePage: sending ready message');
         sendMessage('game', createReadyInputMessage(localPlayerId, true));
       }
 
@@ -119,7 +145,7 @@ export const GamePage: React.FC = () => {
         isMounted = false;
       };
     }
-  }, [loading, gameStatus, phase.gameId, localPlayerId, sendMessage, connections.game]);
+  }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 
   return (
     <div
@@ -138,6 +164,9 @@ export const GamePage: React.FC = () => {
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
           <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          // <h1 className="w-full h-full">
+          //   gameplay canvas: ${gameStatus} : ${connections.game}
+          // </h1>
         )}
       </div>
 

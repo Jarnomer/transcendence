@@ -2,10 +2,13 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
+import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
+
 export const TournamentLobbyNav: React.FC<{
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ activeTab, setActiveTab }) => {
+  const { mode, lobby } = useGameOptionsContext();
   return (
     <motion.div
       id="home-page-nav"
@@ -14,20 +17,25 @@ export const TournamentLobbyNav: React.FC<{
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
       <span className="relative p-0 flex gap-4">
-        <button onClick={() => setActiveTab('players')}>
-          <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
-        </button>
+        {mode === 'tournament' && (
+          <>
+            <button onClick={() => setActiveTab('players')}>
+              <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
+            </button>
 
-        <button onClick={() => setActiveTab('matches')}>
-          <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
-        </button>
-
-        <button
-          className={`btn btn-primary ${activeTab === 'settings' ? ' text-secondary' : ''}`}
-          onClick={() => setActiveTab('settings')}
-        >
-          Settings
-        </button>
+            <button onClick={() => setActiveTab('matches')}>
+              <span className={`${activeTab === 'matches' ? ' text-secondary' : ''}`}>Matches</span>
+            </button>
+          </>
+        )}
+        {lobby === 'create' && (
+          <button
+            className={`btn btn-primary ${activeTab === 'settings' ? ' text-secondary' : ''}`}
+            onClick={() => setActiveTab('settings')}
+          >
+            Settings
+          </button>
+        )}
       </span>
     </motion.div>
   );

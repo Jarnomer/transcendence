@@ -92,6 +92,16 @@ const start = async () => {
     app.register(matchMakingService, { prefix: '/api' }); // Register matchmaking routes inside the plugin
     app.register(remoteService, { prefix: '/ws' }); // Register remote routes inside the plugin
 
+    // Handle uncaught exceptions (prevents crashes)
+    process.on('uncaughtException', (error) => {
+      console.error('🔥 Uncaught Exception:', error);
+    });
+
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (reason, promise) => {
+      console.warn('⚠️ Unhandled Promise Rejection at:', promise, 'Reason:', reason);
+    });
+
     await app.listen({ port: Number(process.env.BACKEND_PORT) || 8000, host: '0.0.0.0' });
     app.log.info(`Server running on port ${process.env.BACKEND_PORT || 8000}`);
     console.log(`Server running on port ${process.env.BACKEND_PORT || 8000}`);
