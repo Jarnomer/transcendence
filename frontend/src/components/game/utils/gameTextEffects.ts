@@ -169,14 +169,13 @@ export class GameTextManager {
 
     const cameraZ = this.camera.position.z;
 
-    const startY = 8;
-    const startZ = cameraZ + 2;
+    const startY = 5;
+    const startZ = cameraZ + 5;
     const middleY = 0;
     const middleZ = -15;
     const endY = -5;
-    const endZ = 2;
+    const endZ = 5;
 
-    // Position animation
     const posAnim = new Animation(
       'textPositionAnim',
       'position',
@@ -194,25 +193,6 @@ export class GameTextManager {
 
     posAnim.setKeys(posKeys);
 
-    // Rotation animation for tilt effect
-    const rotAnim = new Animation(
-      'textRotationAnim',
-      'rotation',
-      frameRate,
-      Animation.ANIMATIONTYPE_VECTOR3,
-      Animation.ANIMATIONLOOPMODE_CONSTANT
-    );
-
-    const rotKeys = [
-      { frame: 0, value: new Vector3(Math.PI * 0.1, 0, 0) },
-      { frame: frameRate * 0.3, value: new Vector3(0, 0, 0) },
-      { frame: frameRate * 0.7, value: new Vector3(0, 0, 0) },
-      { frame: frameRate, value: new Vector3(-Math.PI * 0.2, 0, 0) },
-    ];
-
-    rotAnim.setKeys(rotKeys);
-
-    // Scale animation for "bounce" effect
     const scaleAnim = new Animation(
       'textScaleAnim',
       'scaling',
@@ -224,9 +204,10 @@ export class GameTextManager {
     const scaleKeys = [
       { frame: 0, value: new Vector3(0.6, 0.6, 0.6) },
       { frame: frameRate * 0.15, value: new Vector3(1.1, 1.1, 1.1) },
-      { frame: frameRate * 0.3, value: new Vector3(1, 1, 1) },
+      { frame: frameRate * 0.3, value: new Vector3(1.4, 1.4, 1.4) },
       { frame: frameRate * 0.7, value: new Vector3(1, 1, 1) },
-      { frame: frameRate, value: new Vector3(0.7, 0.7, 0.7) },
+      { frame: frameRate * 0.9, value: new Vector3(0.2, 0.2, 0.2) },
+      { frame: frameRate, value: new Vector3(0, 0, 0) },
     ];
 
     scaleAnim.setKeys(scaleKeys);
@@ -235,11 +216,9 @@ export class GameTextManager {
     easeInOut.setEasingMode(EasingFunction.EASINGMODE_EASEINOUT);
 
     posAnim.setEasingFunction(easeInOut);
-    rotAnim.setEasingFunction(easeInOut);
     scaleAnim.setEasingFunction(easeInOut);
 
     animations.push(posAnim);
-    animations.push(rotAnim);
     animations.push(scaleAnim);
 
     return animations;
