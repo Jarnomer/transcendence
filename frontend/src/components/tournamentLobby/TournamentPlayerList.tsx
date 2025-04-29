@@ -5,12 +5,12 @@ import { motion } from 'framer-motion';
 import { slideFromRightVariants } from './animationVariants';
 import TournamentBracket from './TournamentBracket';
 
-export const TournamentPlayerList: React.FC = ({ players }) => {
+export const TournamentPlayerList: React.FC = ({ players, tournamentSize }) => {
   const [activeTab, setActiveTab] = useState('bracket');
 
   return (
     <motion.div>
-      <div className="flex gap-3">
+      <div className="flex gap-3 w-full">
         <button className="text-xs hover:text-secondary" onClick={() => setActiveTab('bracket')}>
           bracket
         </button>
@@ -20,7 +20,7 @@ export const TournamentPlayerList: React.FC = ({ players }) => {
       </div>
       <motion.div
         key="tournamentBracket"
-        className="w-full h-full "
+        className="w-full h-full"
         variants={slideFromRightVariants}
         initial="initial"
         animate="animate"

@@ -37,7 +37,7 @@ export const ChatPage: React.FC = () => {
   if (!user) return null;
 
   return (
-    <div className="flex border-1 w-2xl relative h-full max-h-2xl glass-box">
+    <div className="flex border-1 w-2xl relative h-full  sm:max-h-[500px] glass-box">
       <div className="absolute w-full h-full overflow-hidden pointer-events-none">
         <BackgroundGlow />
       </div>

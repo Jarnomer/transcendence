@@ -1,66 +1,124 @@
+import React from 'react';
+
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 import { motion } from 'framer-motion';
 
-import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
-import { SpectateSmallCanvas } from './Spectate';
+import { UserListCard } from '../UI/cards/UserListCard';
 
-const Competitor: React.FC<CompetitorProps> = ({ name }) => {
+interface PlayerData {
+  user_id: string;
+  avatar_url: string;
+  display_name: string;
+}
+
+interface CompetitorProps {
+  player: PlayerData;
+}
+
+const Competitor: React.FC<CompetitorProps> = ({ player }) => {
   return (
     <motion.li
       className={`flex items-center m-4 p-1 hover:text-secondary`}
       // onClick={() => navigate(`/profile/${user.user_id}`)}
     >
-      <SpectateSmallCanvas></SpectateSmallCanvas>
-      <ListSvgContainer>
+      <UserListCard user={player}>
         <div className="flex items-center gap-2">
           <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
             <img
               className="object-cover w-full h-full"
               src={'./src/assets/images/default_avatar.png'}
-              alt={`users's profile picture`}
             />
           </div>
           <p className="text-xs">
-            {name} <br />
+            {player ? player.display_name : '??'} <br />
           </p>
         </div>
-      </ListSvgContainer>
+      </UserListCard>
     </motion.li>
   );
 };
 
 const Round: React.FC<{
   id?: string;
-  competitors: string[];
+  matches: TournamentMatch[];
   roundIndex: number;
   maxRounds: number;
-}> = ({ id, competitors, roundIndex, maxRounds }) => {
-  const leftCompetitors = competitors.filter((_, idx) => idx % 2 === 0);
-  const rightCompetitors = competitors.filter((_, idx) => idx % 2 !== 0);
-  const isFinal = competitors.length === 1;
+}> = ({ id, competitors, maxRounds }) => {
+  const mid = Math.ceil(competitors.length / 2);
+  const leftHalf = competitors.slice(0, mid);
+  const rightHalf = competitors.slice(mid);
+  const round = parseInt(competitors[0].round);
 
-  if (isFinal) {
-    return <></>;
+  // console.log('matches from round: ', competitors);
+  // console.log('leftHalf: ', leftHalf);
+  // console.log('rightHalf: ', rightHalf);
+  // console.log('maxRounds: ', maxRounds);
+  // console.log('competitors', competitors);
+
+  if (competitors.length === 1) {
+    // console.log('Single match round:', round);
+
+    return (
+      <>
+        {/* Left side */}
+        <div
+          style={{
+            gridColumnStart: round + 1,
+            gridRowStart: 1,
+          }}
+        >
+          <ol className="flex h-full flex-col justify-around">
+            <div className={` `}>
+              <Competitor player={competitors[0].players[0]} />
+            </div>
+          </ol>
+        </div>
+
+        {/* Right side */}
+        <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
+          <ol className="flex h-full flex-col justify-around">
+            <div className="">
+              <Competitor player={competitors[0].players[1]} />
+            </div>
+          </ol>
+        </div>
+      </>
+    );
   }
 
   return (
     <>
-      <div style={{ gridColumnStart: roundIndex + 1, gridRowStart: 1 }}>
+      {/* Left side */}
+      <div
+        style={{
+          gridColumnStart: round + 1,
+          gridRowStart: 1,
+        }}
+      >
         <ol className="flex h-full flex-col justify-around">
-          {leftCompetitors.map((name, idx) => (
-            <div key={`left-${idx}`}>
-              <Competitor name={name} />
+          {leftHalf.map((match, idx) => (
+            <div className={` `} key={`left-${idx}`}>
+              {/* <p>
+                round: {round} index: {idx}
+              </p> */}
+              <Competitor player={match.players[0]} />
+              <Competitor player={match.players[1]} />
             </div>
           ))}
         </ol>
       </div>
 
-      <div style={{ gridColumnStart: maxRounds - roundIndex, gridRowStart: 1 }}>
+      {/* Right side */}
+      <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
-          {rightCompetitors.map((name, idx) => (
-            <div key={`right-${idx}`}>
-              <Competitor name={name} />
+          {rightHalf.map((match, idx) => (
+            <div className="" key={`right-${idx}`}>
+              {/* <p>
+                round: {round} index: {idx}
+              </p> */}
+              <Competitor player={match.players[0]} />
+              <Competitor player={match.players[1]} />
             </div>
           ))}
         </ol>
@@ -69,32 +127,16 @@ const Round: React.FC<{
   );
 };
 
-export const TournamentBracket: React.FC = ({ players }) => {
+export const TournamentBracket: React.FC = ({ players, tournamentSize }) => {
   // Create rounds based on number of players
 
   if (!players) return;
-  const generateRounds = (initialPlayers: string[]) => {
-    const rounds = [];
-    let currentRound = initialPlayers;
-
-    while (currentRound.length >= 1) {
-      rounds.push(currentRound);
-      currentRound = new Array(Math.floor(currentRound.length / 2)).fill('Competitor');
-    }
-
-    return rounds.map((competitors, idx) => ({
-      id: `round-${idx + 1}`,
-      competitors,
-    }));
-  };
+  const gridCols = players.length * 2 + 2;
+  // console.log('players from bracket component:', players);
+  // console.log('players.length: ', players.length, 'grid cols:', gridCols);
 
   const container = document.getElementById('app-main-container');
   if (!container) return null;
-  const rounds = generateRounds(players);
-  const maxRounds = players.length / 2;
-  const gridCols = maxRounds + 2;
-  console.log('Max rounds: ', maxRounds);
-  console.log('Grid cols: ', gridCols);
 
   return (
     <div className=" w-full flex items-center justify-center">
@@ -117,11 +159,11 @@ export const TournamentBracket: React.FC = ({ players }) => {
               minWidth: `${gridCols * 150}px`,
             }}
           >
-            {rounds.map((round, index) => (
+            {players.map((round, index) => (
               <Round
-                key={round.id}
+                key={'round_' + index}
                 roundIndex={index}
-                competitors={round.competitors}
+                competitors={round}
                 maxRounds={gridCols}
               />
             ))}
