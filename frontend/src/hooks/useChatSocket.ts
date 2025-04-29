@@ -26,7 +26,7 @@ export const useChatSocket = (
       dispatch({ type: 'DISCONNECTED', socket: 'chat' });
     };
     const handlePong = () => {
-      console.log('ping');
+      console.log('chat ping');
     };
 
     chatSocket.addEventListener('open', handleOpen);

@@ -6,6 +6,7 @@ import { UserDataResponseType } from '@shared/types/userTypes';
 
 import { api } from '../../services/api';
 import { getRequestsSent } from '../../services/friendService';
+import SessionManager from '../../services/SessionManager';
 
 interface FriendRequest {
   user_id: string;
@@ -43,10 +44,24 @@ export const useUser = () => {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
+  const [myFriends, setMyFriends] = useState<UserDataResponseType[]>([]);
+  const [myFriendRequests, setMyFriendRequests] = useState<UserDataResponseType[]>([]);
+  const [mySentRequests, setMySentRequests] = useState<UserDataResponseType[]>([]);
+  const [myBlockedUsers, setMyBlockedUsers] = useState<UserDataResponseType[]>([]);
+  const [myGames, setMyGames] = useState<UserDataResponseType[]>([]);
+  const [myStats, setMyStats] = useState<UserDataResponseType[]>([]);
 
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
+
+  useEffect(() => {
+    if (!user) return;
+    const sessionManager = SessionManager.getInstance();
+    sessionManager.set('avatarUrl', user.avatar_url);
+    sessionManager.set('displayName', user.username);
+    sessionManager.set('userId', user.user_id);
+  }, [user]);
 
   const fetchUser = useCallback(() => {
     if (!userId) {

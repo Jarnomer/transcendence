@@ -109,6 +109,7 @@ class WebSocketManager {
     this.ws = null;
     this.manualClose = false;
     this.params = new URLSearchParams();
+    this.queue = [];
   }
 
   deleteInstance() {
@@ -120,6 +121,9 @@ class WebSocketManager {
 
   private scheduleReconnect() {
     this.reconnectAttempts++;
+    if (this.reconnectAttempts === 1) {
+      this.notifyHandlers('reconnecting', { reconnectAttempts: this.reconnectAttempts });
+    }
     console.log(
       `Reconnecting attempt ${this.reconnectAttempts}/${WebSocketManager.MAX_RECONNECT_ATTEMPTS}`
     );

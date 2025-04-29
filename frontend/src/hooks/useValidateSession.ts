@@ -34,6 +34,8 @@ const useValidateSession = () => {
         setGameId(gameId || '');
       } else if (res.queue_session) {
         setStep('validating'); // Restoring session
+        setMode(sessionManager.get('mode') || null);
+        setDifficulty(sessionManager.get('difficulty') || null);
         setQueueId(queueId || '');
       } else {
         sessionManager.clear();

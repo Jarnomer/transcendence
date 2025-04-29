@@ -65,7 +65,6 @@ const useMatchmaking = () => {
 
   const handleJoinMatch = () => {
     if (!matchmaker.current) return;
-    console.log('Joining match with queue ID:', matchmaker.current.getQueueId());
     sendMessage('matchmaking', {
       type: 'join_match',
       payload: {

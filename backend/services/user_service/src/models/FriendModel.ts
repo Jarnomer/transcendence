@@ -96,4 +96,38 @@ export class FriendModel {
       [user_id, receiver_id]
     );
   }
+
+  async getFriends(user_id: string) {
+    return await this.db.all(
+      `SELECT
+      f.*,
+      up.*,
+      us.*,
+      u.username
+      FROM friends f
+      JOIN user_profiles up ON f.friend_id = up.user_id
+      JOIN user_stats us ON f.friend_id = us.user_id
+      JOIN users u ON f.friend_id = u.user_id
+      WHERE f.user_id = ?`,
+      [user_id]
+    );
+  }
+
+  async getBlockedUsers(user_id: string) {
+    return await this.db.all(`SELECT * FROM blocked_users WHERE user_id = ?`, [user_id]);
+  }
+
+  async blockUser(user_id: string, blocked_user_id: string) {
+    return await this.db.get(
+      `INSERT INTO blocked_users (user_id, blocked_user_id) VALUES (?, ?) RETURNING *`,
+      [user_id, blocked_user_id]
+    );
+  }
+
+  async unblockUser(user_id: string, blocked_user_id: string) {
+    return await this.db.run(
+      `DELETE FROM blocked_users WHERE user_id = ? AND blocked_user_id = ?`,
+      [user_id, blocked_user_id]
+    );
+  }
 }

@@ -63,4 +63,36 @@ export class FriendService {
     }
     return res;
   }
+
+  async getFriends(user_id: string) {
+    const friends = await this.friendModel.getFriends(user_id);
+    if (!friends) {
+      throw new BadRequestError('Could not get friends');
+    }
+    return friends;
+  }
+
+  async getBlockedUsers(user_id: string) {
+    const blockedUsers = await this.friendModel.getBlockedUsers(user_id);
+    if (!blockedUsers) {
+      throw new BadRequestError('Could not get blocked users');
+    }
+    return blockedUsers;
+  }
+
+  async blockUser(user_id: string, blocked_user_id: string) {
+    const res = await this.friendModel.blockUser(user_id, blocked_user_id);
+    if (!res) {
+      throw new BadRequestError('Could not block user');
+    }
+    return res;
+  }
+
+  async unblockUser(user_id: string, blocked_user_id: string) {
+    const res = await this.friendModel.unblockUser(user_id, blocked_user_id);
+    if (!res) {
+      throw new BadRequestError('Could not unblock user');
+    }
+    return res;
+  }
 }

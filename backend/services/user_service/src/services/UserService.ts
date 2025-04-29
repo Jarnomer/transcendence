@@ -36,8 +36,8 @@ export class UserService {
     return res;
   }
 
-  async getAllUsers() {
-    const res = await this.userModel.getAllUsers();
+  async getAllUsers(user_id: string) {
+    const res = await this.userModel.getAllUsers(user_id);
     if (res.length === 0) {
       throw new NotFoundError('No users found');
     }
@@ -115,4 +115,11 @@ export class UserService {
     return res;
   }
 
+  async getUserStats(user_id: string) {
+    const res = await this.userModel.getUserStats(user_id);
+    if (!res) {
+      throw new NotFoundError('User stats not found');
+    }
+    return res;
+  }
 }
