@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useMatchmaking } from '@/hooks';
 
 import { slideFromRightVariants } from '../components/tournamentLobby/animationVariants';
-import { Spectate } from '../components/tournamentLobby/Spectate';
 import { TournamentLobbyNav } from '../components/tournamentLobby/TournamentLobbyNav';
 import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
 import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
@@ -128,8 +127,6 @@ export const TournamentLobby: React.FC = () => {
   };
   bracket[0][0].players = [fakePlayer, fakePlayer2];
 
-  console.log('bracket: ', bracket);
-
   const onAccept = () => {
     console.log('joining game..');
     navigate('/game');
@@ -156,9 +153,6 @@ export const TournamentLobby: React.FC = () => {
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
-
-  console.log('matchmaking state: ', matchmakingState);
-  console.log(difficulty);
 
   useEffect(() => {}, [tournamentChatId]);
 

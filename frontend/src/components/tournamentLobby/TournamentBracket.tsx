@@ -17,7 +17,6 @@ interface CompetitorProps {
 }
 
 const Competitor: React.FC<CompetitorProps> = ({ player }) => {
-  console.log('player from competitor component: ', player);
   return (
     <motion.li
       className={`flex items-center m-4 p-1 hover:text-secondary`}
@@ -46,20 +45,19 @@ const Round: React.FC<{
   roundIndex: number;
   maxRounds: number;
 }> = ({ id, competitors, maxRounds }) => {
-  console.log('matches from round: ', competitors);
-
   const mid = Math.ceil(competitors.length / 2);
   const leftHalf = competitors.slice(0, mid);
   const rightHalf = competitors.slice(mid);
   const round = parseInt(competitors[0].round);
 
-  console.log('leftHalf: ', leftHalf);
-  console.log('rightHalf: ', rightHalf);
-  console.log('maxRounds: ', maxRounds);
-  console.log('competitors', competitors);
+  // console.log('matches from round: ', competitors);
+  // console.log('leftHalf: ', leftHalf);
+  // console.log('rightHalf: ', rightHalf);
+  // console.log('maxRounds: ', maxRounds);
+  // console.log('competitors', competitors);
 
   if (competitors.length === 1) {
-    console.log('Single match round:', round);
+    // console.log('Single match round:', round);
 
     return (
       <>
@@ -132,10 +130,10 @@ const Round: React.FC<{
 export const TournamentBracket: React.FC = ({ players, tournamentSize }) => {
   // Create rounds based on number of players
 
-  console.log('players from bracket component:', players);
   if (!players) return;
   const gridCols = players.length * 2 + 2;
-  console.log('players.length: ', players.length, 'grid cols:', gridCols);
+  // console.log('players from bracket component:', players);
+  // console.log('players.length: ', players.length, 'grid cols:', gridCols);
 
   const container = document.getElementById('app-main-container');
   if (!container) return null;
