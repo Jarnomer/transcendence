@@ -17,6 +17,19 @@ import { useModal } from '../contexts/modalContext/ModalContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
+interface TournamentMatch {
+  gameId: string;
+  players: [p1, p2];
+  round: number;
+  isComplete: boolean;
+}
+
+interface PlayerData {
+  user_id: string;
+  avatar_url: string;
+  display_name: string;
+}
+
 export const TournamentLobby: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('settings');
@@ -73,6 +86,50 @@ export const TournamentLobby: React.FC = () => {
     }
   }, [matchmakingState.phase, location.pathname]);
 
+  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET
+
+  function generateBracket(playerCount: number): TournamentMatch[][] {
+    const totalRounds = Math.log2(playerCount);
+    const matchesPerRound: number[] = [];
+
+    for (let r = 0; r < totalRounds; r++) {
+      matchesPerRound.push(playerCount / Math.pow(2, r + 1));
+    }
+    let gameIdCounter = 1;
+    const bracket: TournamentMatch[][] = [];
+
+    for (let round = 0; round < totalRounds; round++) {
+      const roundMatches: TournamentMatch[] = [];
+
+      for (let m = 0; m < matchesPerRound[round]; m++) {
+        roundMatches.push({
+          gameId: `game-${gameIdCounter++}`,
+          players: [null, null],
+          round: round + 1,
+          isComplete: false,
+        });
+      }
+      bracket.push(roundMatches);
+    }
+    return bracket;
+  }
+
+  const bracket = generateBracket(8);
+
+  const fakePlayer = {
+    user_id: user?.user_id,
+    avatar_url: user?.avatar_url,
+    display_name: user?.display_name,
+  };
+  const fakePlayer2 = {
+    user_id: 'asdasd',
+    avatar_url: 'uploads/default_avatar.png',
+    display_name: 'martti',
+  };
+  bracket[0][0].players = [fakePlayer, fakePlayer2];
+
+  console.log('bracket: ', bracket);
+
   const onAccept = () => {
     console.log('joining game..');
     navigate('/game');
@@ -100,12 +157,10 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
+  console.log('matchmaking state: ', matchmakingState);
+  console.log(difficulty);
+
   useEffect(() => {}, [tournamentChatId]);
-
-  useEffect(() => {
-    setPlayers(Array.from({ length: parseInt(difficulty!) }, (_, i) => `Competitor ${i + 1}`));
-  }, []);
-
 
   return (
     <>
@@ -136,7 +191,7 @@ export const TournamentLobby: React.FC = () => {
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
               ) : activeTab == 'players' ? (
-                <TournamentPlayerList players={players}></TournamentPlayerList>
+                <TournamentPlayerList players={bracket}></TournamentPlayerList>
               ) : (
                 <motion.div
                   key="tournamentPlayerList"
@@ -146,7 +201,7 @@ export const TournamentLobby: React.FC = () => {
                   animate="animate"
                   exit="exit"
                 >
-                  <Spectate players={players}></Spectate>
+                  {/* <Spectate players={bracket}></Spectate> */}
                 </motion.div>
               )}
             </AnimatePresence>

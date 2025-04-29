@@ -25,10 +25,10 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
     if (sentRequests) {
       setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
     }
-  }, [sentRequests, receiverUserId]);
+  }, [sentRequests, receiverUserId, user]);
 
   const handleAddFriendClick = async () => {
-    if (!receiverUserId || loading) return;
+    if (!receiverUserId) return;
     setLoading(true);
     if (isPending) {
       // HANDLE CANCELING FRIEND REQUEST HERE
@@ -56,7 +56,10 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
   return (
     <button
       className="hover:text-secondary"
-      onClick={handleAddFriendClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleAddFriendClick();
+      }}
       disabled={loading}
       aria-label={`${isPending ? 'delete friend' : 'add friend'}`}
     >

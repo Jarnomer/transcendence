@@ -7,6 +7,7 @@ import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is im
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { useSound } from '../../hooks/useSound.tsx';
+import { BracketTest } from '../../pages/BracketTest.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
@@ -76,6 +77,19 @@ export const AnimatedRoutes: React.FC = () => {
             user ? (
               <PageWrapper>
                 <HomePage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/bracketTest"
+          element={
+            user ? (
+              <PageWrapper>
+                <BracketTest></BracketTest>
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />

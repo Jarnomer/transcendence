@@ -7,9 +7,7 @@ import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { acceptFriendRequest, sendFriendRequest } from '../../services/friendService';
-import { AddFriend } from '../UI/buttons/AddFriend';
-import { ChallengeButton } from '../UI/buttons/ChallengeUser';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
+import { UserActions } from '../UI/buttons/UserActions';
 import { ProfilePicture } from './ProfilePicture';
 import { getLastSeenTime } from './utils/lastSeen';
 
@@ -123,26 +121,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               </button>
             ) : null
           ) : (
-            <div className="flex gap-2">
-              <AddFriend
-                receiverUserId={user.user_id}
-                sent={sent}
-                onClick={() => handleAddFriendClick(user.user_id)}
-              />
-              <ChallengeButton receiverUserId={user.user_id}></ChallengeButton>
-              <NavIconButton
-                id="send-message"
-                ariaLabel="send message"
-                icon="chat"
-                onClick={() => handleChatClick(user.user_id)}
-              />
-              <NavIconButton
-                id="block-user"
-                ariaLabel="block user"
-                icon="block"
-                onClick={() => handleBlockUserClick(user.user_id)}
-              />
-            </div>
+            <UserActions user={user}></UserActions>
           )}
         </div>
         <ProfilePicture
