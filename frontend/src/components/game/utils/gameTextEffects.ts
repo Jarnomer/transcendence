@@ -26,11 +26,10 @@ export class GameTextManager {
   private fontSize: number = 200;
   private textColor: Color3;
   private fontLoaded: boolean = false;
-  private currentAnimation: Animation | null = null;
-  private currentAnimationKey: string | null = null;
   private soundManager = getGameSoundManager();
   private glowLayer: GlowLayer | null = null;
   private camera: ArcRotateCamera;
+  private fadeOutTimeoutId: number | null = null;
 
   constructor(scene: Scene, textColor: Color3, camera: ArcRotateCamera) {
     this.scene = scene;
@@ -273,11 +272,13 @@ export class GameTextManager {
   ): void {
     if (!this.textMesh || !this.textTexture) return;
 
-    if (this.currentAnimation && this.currentAnimationKey) {
-      this.scene.stopAnimation(this.textMesh, this.currentAnimationKey);
+    // Stop and clear any current animation
+    this.scene.stopAnimation(this.textMesh);
+    if (this.fadeOutTimeoutId) {
+      clearTimeout(this.fadeOutTimeoutId);
+      this.fadeOutTimeoutId = null;
     }
 
-    this.textMesh.visibility = 0;
     this.drawText(text, fontSize);
 
     const cameraZ = this.camera.position.z;
@@ -310,14 +311,13 @@ export class GameTextManager {
     }
 
     this.scene.beginDirectAnimation(this.textMesh, dropAnimations, 0, 30, false, 1, () => {
-      setTimeout(() => {
+      this.fadeOutTimeoutId = window.setTimeout(() => {
         if (!this.textMesh) return;
+
+        this.fadeOutTimeoutId = null;
 
         // When animation completes, wait, then fade out
         const fadeOut = this.createFadeOutAnimation();
-        this.currentAnimation = fadeOut;
-        this.currentAnimationKey = 'visibility';
-
         this.scene.beginDirectAnimation(this.textMesh, [fadeOut], 0, 20, false);
       }, duration);
     });
@@ -343,6 +343,11 @@ export class GameTextManager {
   }
 
   public dispose(): void {
+    if (this.fadeOutTimeoutId) {
+      clearTimeout(this.fadeOutTimeoutId);
+      this.fadeOutTimeoutId = null;
+    }
+
     if (this.textMesh) {
       this.textMesh.dispose();
       this.textMesh = null;
