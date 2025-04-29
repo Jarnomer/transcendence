@@ -1,24 +1,24 @@
 import {
+  Animation,
+  ArcRotateCamera,
   Color3,
+  CubicEase,
   DynamicTexture,
+  EasingFunction,
+  GlowLayer,
   Mesh,
   MeshBuilder,
+  PBRMaterial,
   Scene,
   StandardMaterial,
   Vector3,
-  Animation,
-  GlowLayer,
-  PBRMaterial,
-  ArcRotateCamera,
-  EasingFunction,
-  CubicEase,
 } from 'babylonjs';
 
 import { GameStatus } from '@shared/types';
 
 import { getGameSoundManager } from './gameSoundEffects';
 
-class GameTextManager {
+export class GameTextManager {
   private scene: Scene;
   private textMesh: Mesh | null = null;
   private textTexture: DynamicTexture | null = null;
@@ -90,26 +90,6 @@ class GameTextManager {
     textMaterial.diffuseTexture.hasAlpha = true;
     textMaterial.backFaceCulling = false;
 
-    // Create a slightly smaller backing mesh for the 3D effect
-    const backingMesh = MeshBuilder.CreatePlane(
-      'textPlaneBack',
-      { width: 27.9, height: 13.9, sideOrientation: Mesh.DOUBLESIDE },
-      this.scene
-    );
-    backingMesh.position.z = -15.1;
-
-    const backingMaterial = new StandardMaterial('textBackingMaterial', this.scene);
-
-    backingMaterial.diffuseColor = this.textColor.scale(0.5);
-    backingMaterial.emissiveColor = this.textColor.scale(0.3);
-    backingMaterial.diffuseTexture = this.textTexture.clone();
-    backingMaterial.diffuseTexture.hasAlpha = true;
-    backingMaterial.useAlphaFromDiffuseTexture = true;
-    backingMaterial.backFaceCulling = false;
-
-    backingMesh.material = backingMaterial;
-    backingMesh.parent = this.textMesh;
-
     this.textMesh.material = textMaterial;
     this.textMesh.visibility = 0;
 
@@ -127,16 +107,6 @@ class GameTextManager {
       const material = this.textMesh.material as PBRMaterial;
       material.emissiveColor = this.textColor;
       material.albedoColor = this.textColor;
-
-      // Update backing color too
-      if (this.textMesh.getChildMeshes().length > 0) {
-        const backingMesh = this.textMesh.getChildMeshes()[0];
-        if (backingMesh && backingMesh.material) {
-          const backMaterial = backingMesh.material as PBRMaterial;
-          backMaterial.albedoColor = this.textColor.scale(0.7);
-          backMaterial.emissiveColor = this.textColor.scale(0.4);
-        }
-      }
     }
   }
 
@@ -147,7 +117,7 @@ class GameTextManager {
 
     const ctx = this.textTexture.getContext() as unknown as CanvasRenderingContext2D;
 
-    ctx.clearRect(0, 0, 2048, 1024); // Clear with transparent
+    ctx.clearRect(0, 0, 2048, 1024); // Clear with transparency
 
     const fontString = `${fontSize}px ${this.fontName}`;
     ctx.font = fontString;
@@ -163,13 +133,13 @@ class GameTextManager {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    // Layer 1: Base glow
+    // Base glow
     ctx.shadowColor = colorString;
     ctx.shadowBlur = 20;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.fillText(text, 1024, 512);
 
-    // Layer 2: Text outline
+    // Text outline
     ctx.shadowColor = colorString;
     ctx.shadowBlur = 8;
     ctx.shadowOffsetX = 0;
@@ -177,7 +147,7 @@ class GameTextManager {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.fillText(text, 1024, 512);
 
-    // Layer 3: Main text
+    // Main text
     ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
     ctx.shadowBlur = 3;
     ctx.shadowOffsetX = 0;
@@ -185,7 +155,7 @@ class GameTextManager {
     ctx.fillStyle = colorString;
     ctx.fillText(text, 1024, 512);
 
-    // Layer 4: Highlight
+    // Highlight
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
@@ -339,26 +309,18 @@ class GameTextManager {
       }
     }
 
-    this.scene.beginDirectAnimation(
-      this.textMesh,
-      dropAnimations,
-      0,
-      30,
-      false,
-      1,
-      // When animation completes, wait then fade out
-      () => {
-        setTimeout(() => {
-          if (!this.textMesh) return;
+    this.scene.beginDirectAnimation(this.textMesh, dropAnimations, 0, 30, false, 1, () => {
+      setTimeout(() => {
+        if (!this.textMesh) return;
 
-          const fadeOut = this.createFadeOutAnimation();
-          this.currentAnimation = fadeOut;
-          this.currentAnimationKey = 'visibility';
+        // When animation completes, wait, then fade out
+        const fadeOut = this.createFadeOutAnimation();
+        this.currentAnimation = fadeOut;
+        this.currentAnimationKey = 'visibility';
 
-          this.scene.beginDirectAnimation(this.textMesh, [fadeOut], 0, 20, false);
-        }, duration);
-      }
-    );
+        this.scene.beginDirectAnimation(this.textMesh, [fadeOut], 0, 20, false);
+      }, duration);
+    });
   }
 
   public handleGameStatus(
