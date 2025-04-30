@@ -167,7 +167,7 @@ export const ProfilePage: React.FC = () => {
           ) : (
             <>
               <div>
-                <div className="p-2 gap-2 grid   w-full ">
+                <div className="p-2 gap-4 grid w-full ">
                   <div className="row-start-1 h-[200px] max-h-200px col-start-1 self-start flex-none">
                     <ProfileHeader
                       user={user}
@@ -191,7 +191,7 @@ export const ProfilePage: React.FC = () => {
                   </motion.div>
                   <motion.div
                     key="defaultSection"
-                    className="col-start-1 row-start-3 sm:row-start-2 sm:col-start-1 gap-3 sm:flex justify-start w-full flex-none"
+                    className="col-start-1 row-start-3 sm:row-start-2 sm:col-start-1 gap-3 sm:flex justify-start w-full h-full"
                   >
                     <motion.div className="w-full">
                       <MatchHistory user={user} />

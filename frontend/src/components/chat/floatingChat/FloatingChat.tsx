@@ -57,9 +57,7 @@ export const FloatingChat = () => {
 
   return (
     <div
-      className={`flex gap-2 items-end fixed bottom-4 right-4 z-40 ${
-        minimized ? 'h-12' : 'h-[400px]'
-      } transition-all duration-300 overflow-hidden`}
+      className={`flex gap-2 items-end fixed bottom-4 right-4 z-40 transition-all duration-300 overflow-hidden`}
     >
       {openChatWindows &&
         Object.entries(openChatWindows)

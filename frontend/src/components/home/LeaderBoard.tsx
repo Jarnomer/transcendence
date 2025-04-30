@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 
 import { useSound } from '../../hooks/useSound';
 import { getUsersWithRank } from '../../services/userService';
+import { UserListCard } from '../UI/cards/UserListCard';
 import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
 import SearchBar from '../UI/SearchBar';
-import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
 
 export const animationVariants = {
   initial: {
@@ -114,7 +114,9 @@ export const LeaderBoard: React.FC = () => {
                       <div className="flex items-center justify-center text-center ml-2">
                         {index + 1}
                       </div>
-                      <ListSvgContainer>
+
+                      {/* <ListSvgContainer></ListSvgContainer> */}
+                      <UserListCard user={user}>
                         <div className="flex items-center gap-2">
                           <ProfilePictureMedium user={user}></ProfilePictureMedium>
                           <p className="text-xs">
@@ -122,7 +124,7 @@ export const LeaderBoard: React.FC = () => {
                           </p>
                           <p>Rank: {user.rank}</p>
                         </div>
-                      </ListSvgContainer>
+                      </UserListCard>
                     </motion.li>
                   ))}
                 </motion.ul>
