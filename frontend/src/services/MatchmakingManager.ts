@@ -28,6 +28,7 @@ class MatchmakingManager {
   private queueId: string = '';
   private mode: string | null = null;
   private difficulty: string | null = null;
+  private numberOfRounds: number | null = null;
   // private participants: string[] = [];
   private matchmakingSocket: WebSocketManager;
   private gameSocket: WebSocketManager;
@@ -37,6 +38,7 @@ class MatchmakingManager {
     role: 'player',
     gameId: '',
     participants: [],
+    matches: [],
   };
   private sessionManager = SessionManager.getInstance();
 
@@ -92,10 +94,11 @@ class MatchmakingManager {
   }
 
   setGameOptions(options: GameOptionsType) {
-    const { queueId, mode, difficulty } = options;
+    const { queueId, mode, difficulty, tournamentOptions } = options;
     this.mode = mode;
     this.difficulty = difficulty;
     this.queueId = queueId ? queueId : '';
+    this.numberOfRounds = tournamentOptions?.numberOfRounds || null;
   }
 
   startMatchmaking() {
@@ -173,16 +176,31 @@ class MatchmakingManager {
     this.setState({ gameId: game.game_id, phase: 'in_game', role: 'player' });
   };
 
-  handleGameWinner = () => {
+  handleGameWinner = (game_id: string) => {
     if (this.mode === 'tournament') {
-      console.info('You won the game! Waiting for next round...');
-      this.setState({ phase: 'waiting_next_round' });
+      const currentRound = this.snapshot.matches.length;
+      console.info('Current round:', currentRound);
+      if (currentRound < this.numberOfRounds!) {
+        console.info('You won the game! Waiting for next round...');
+        this.setState({ phase: 'waiting_next_round' });
+      } else {
+        console.info('------You won the tournament!!!!!!-----');
+        this.setState({ phase: 'completed', role: 'player', gameId: '' });
+      }
     } else {
       console.info('Congratulations! You won the game!');
       this.setState({ phase: 'completed', role: 'spectator' });
       this.cleanup();
     }
-    // this.notifyListeners();
+    // const newSnap = this.snapshot.matches.map((match) => {
+    //   console.info('Match:', match);
+    //   if (match.game_id === game_id) {
+    //     console.info('Match found:', match);
+    //     match.isCompleted = true;
+    //   }
+    // });
+
+    // this.setState({ matches: newSnap });
   };
 
   handleGameLoser = () => {
@@ -205,12 +223,13 @@ class MatchmakingManager {
 
   handleParticipants = (participants: any) => {
     console.info('Participants:', this.snapshot.participants);
-    if (this.snapshot.participants.some((p) => p.user_id === participants.user_id)) return;
-    this.setState({ participants: [...this.snapshot.participants, participants] });
+    // if (this.snapshot.participants.some((p) => p.user_id === participants.user_id)) return;
+    this.setState({ participants: participants.players });
   };
 
   handleTournamentMatches = (matches: any) => {
-    console.info('Tournament matches:', matches);
+    console.info('Tournament matches:', this.snapshot.matches);
+    this.setState({ matches: [this.snapshot.matches.push(matches.matches)] });
   };
 
   handleMatchmakingTimeout = () => {
@@ -281,7 +300,9 @@ class MatchmakingManager {
     this.gameSocket.close();
     this.mode = null;
     this.difficulty = null;
-    this.setState({ phase: 'idle', role: 'player', gameId: '', participants: [] });
+    this.queueId = '';
+    this.numberOfRounds = null;
+    this.setState({ phase: 'idle', role: 'player', gameId: '', participants: [], matches: [] });
     // this.notifyListeners();
   }
 

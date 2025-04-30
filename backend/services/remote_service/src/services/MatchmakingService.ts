@@ -268,7 +268,7 @@ class TournamentMatchmaking extends MatchmakingMode {
       };
       matches.push(match);
     }
-    const playerIds = session.activePlayers.map((p) => p.user_id);
+    const playerIds = this.queueMatches.get(tournamentId)!.map((p) => p.user_id);
     this.matchmaking.broadcast(playerIds, {
       type: 'tournament_matches',
       state: { matches },
@@ -452,7 +452,7 @@ export class MatchmakingService {
     const players = this.matchmakers[mode].getQueueMatches(queue_id);
     const message = {
       type: 'participants',
-      state: { players: players },
+      state: { players },
     };
     if (players) {
       const playerIds = players.map((p) => p.user_id);

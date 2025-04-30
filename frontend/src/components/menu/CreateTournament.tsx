@@ -21,6 +21,7 @@ export const CreateTournament: React.FC = () => {
     e.preventDefault();
     const formData = {
       playerCount,
+      numberOfRounds: Math.log2(playerCount),
       tournamentName,
       isPrivate,
       password: isPrivate ? password : null,

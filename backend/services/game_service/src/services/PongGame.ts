@@ -81,6 +81,12 @@ export default class PongGame {
       console.log('Adding player2:', playerId);
       this.gameState.players.player2.id = playerId;
       this.readyState.set(2, false);
+    } else if (this.gameState.players.player1.id === playerId) {
+      console.log('Player1 already exists:', playerId);
+      this.gameState.players.player1.id = playerId;
+    } else if (this.gameState.players.player2.id === playerId) {
+      console.log('Player2 already exists:', playerId);
+      this.gameState.players.player2.id = playerId;
     } else {
       throw new Error('Cannot add more than 2 players');
     }

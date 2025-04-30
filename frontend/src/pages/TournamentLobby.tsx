@@ -71,7 +71,7 @@ export const TournamentLobby: React.FC = () => {
   // }, [user]);
 
   useEffect(() => {
-    if (lobby === 'join' && mode === 'tournament') {
+    if (mode === 'tournament') {
       setActiveTab('players');
     }
   }, [lobby]);
@@ -84,16 +84,13 @@ export const TournamentLobby: React.FC = () => {
       mode === 'tournament'
     ) {
       console.log('in game... opening accet pamge modal');
-      // console.log('participants: ', matchmakingState.participants);
       handleClickOpenModal();
     }
   }, [matchmakingState.phase, location.pathname]);
 
   useEffect(() => {
-    if (matchmakingState.phase === 'in_game' && location.pathname === 'game') {
+    if (matchmakingState.phase === 'in_game') {
       console.log('in game....accept game');
-      // console.log('participants: ', matchmakingState.participants);
-      // handleClickOpenModal();
     }
   }, [matchmakingState.phase, location.pathname]);
 
