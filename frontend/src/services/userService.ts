@@ -1,6 +1,7 @@
 import {
   AllResponseRankType,
   AllResponseType,
+  GameAudioOptions,
   GameSettings,
   QueueResType,
   UserDataResponseType,
@@ -178,6 +179,33 @@ export async function getGameSettings() {
     return res.data;
   } catch (err) {
     console.error('Failed to get game settings:', err);
+    throw err;
+  }
+}
+
+export async function saveAudioSettings(settings: GameAudioOptions) {
+  try {
+    console.log('Saving audio settings for user:', settings);
+    const res = await api.post<GameAudioOptions>(`/user/audio-settings`, settings);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to save audio settings`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to save audio settings:', err);
+    throw err;
+  }
+}
+
+export async function getAudioSettings() {
+  try {
+    const res = await api.get<GameAudioOptions>(`/user/audio-settings`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch audio settings`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get audio settings:', err);
     throw err;
   }
 }

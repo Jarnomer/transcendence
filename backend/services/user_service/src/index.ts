@@ -14,7 +14,7 @@ export default async function userService(fastify: FastifyInstance) {
     prefix: '/uploads/',
   });
 
-  await fastify.register(authRoutes, { prefix: '/auth' }); // Register user routes inside the plugin
-  await fastify.register(userRoutes, { prefix: '/user' }); // Register user routes inside the plugin
-  await fastify.register(friendRoutes, { prefix: '/friend' }); // Register friend routes inside the plugin
+  await fastify.register(authRoutes, { prefix: '/auth' }); // Register auth routes
+  await fastify.register(userRoutes, { prefix: '/user' }); // Register user routes
+  await fastify.register(friendRoutes, { prefix: '/friend' }); // Register friend routes
 }

@@ -14,6 +14,7 @@ import { JoinGameNotificationModal } from './components/modals/JoinGameNotificat
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
+import { AudioSettingsProvider } from './contexts/audioContext/AudioSettingsContext.tsx';
 import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
 
 const App: React.FC = () => {
@@ -21,28 +22,31 @@ const App: React.FC = () => {
 
   return (
     <>
-      <GameOptionsProvider>
-        <Router>
-          {/* <div className="fixed"> */}
-          <BackgroundProvider />
-          {/* </div> */}
-          <div
-            id="app-main-container"
-            className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full  text-primary md:p-2 `}
-          >
-            <div id="app-content" className="relative flex grow flex-col w-full  max-w-screen-lg">
-              <Header />
-              <AnimatePresence>
-                <motion.div
-                  id="backgroundGlitch"
-                  aria-hidden="true"
-                  className="absolute  top-12 w-full h-full point pointer-events-none"
-                >
-                  <BackgroundGlitch duration={1100} />
-                </motion.div>
-              </AnimatePresence>
+      <AudioSettingsProvider>
+        <GameOptionsProvider>
+          <Router>
+            {/* <div className="fixed"> */}
+            <BackgroundProvider />
+            {/* </div> */}
+            <div
+              id="app-main-container"
+              className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full text-primary md:p-2`}
+            >
+              <div id="app-content" className="relative flex grow flex-col w-full max-w-screen-lg">
+                <Header />
+                <AnimatePresence>
+                  <motion.div
+                    id="backgroundGlitch"
+                    aria-hidden="true"
+                    className="absolute top-12 w-full h-full point pointer-events-none"
+                  >
+                    <BackgroundGlitch duration={1100} />
+                  </motion.div>
+                </AnimatePresence>
 
-              <AnimatedRoutes />
+                <AnimatedRoutes />
+              </div>
+              <Footer />
             </div>
             <Footer />
           </div>
