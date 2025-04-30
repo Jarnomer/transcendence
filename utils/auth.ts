@@ -11,7 +11,8 @@ export async function loginOrRegister(
   }
 ) {
   // const username = options?.username ?? `testuser_${Date.now()}`;
-  const username = options?.username ?? `testuser_${crypto.randomUUID().slice(0, 8)}`;
+  const username = options?.username ?? `testuser_${Math.random().toString(36).slice(2, 6)}`;
+
   const password = options?.password ?? 'TestPassword123';
   const page = await context.newPage();
 
@@ -25,11 +26,11 @@ export async function loginOrRegister(
     console.log('Clicked register button');
     await page.waitForSelector('text=Register');
     await expect(page.getByRole('heading', { name: 'Register' })).toBeVisible();
-    console.log('Register page is visible');
+    // console.log('Register page is visible');
     await expect(page.getByRole('button', { name: 'Register' })).toBeVisible();
     await expect(page.getByPlaceholder('Username')).toBeVisible();
     await expect(page.getByPlaceholder('Password')).toBeVisible();
-    console.log('Register form is visible');
+    // console.log('Register form is visible');
     await page.getByPlaceholder('Username').fill(username);
     console.log(`Filled username: ${username}`);
     await page.getByPlaceholder('Password').fill(password);
@@ -37,9 +38,11 @@ export async function loginOrRegister(
     await page.getByRole('button', { name: 'Register' }).click();
     console.log('Clicked register button');
     await page.waitForURL('**/signUp');
-    await page.waitForTimeout(7000);
-    await expect(page.getByRole('heading', { name: 'Edit Profile' })).toBeVisible();
-    console.log('Edit Profile page is visible');
+    // await page.waitForTimeout(7000);
+    await expect(page.getByRole('heading', { name: 'Edit Profile' })).toBeVisible({
+      timeout: 15000,
+    });
+    // console.log('Edit Profile page is visible');
     await page.getByLabel('Display name').fill(username);
     console.log(`Filled display name: ${username}`);
     await page.getByRole('button', { name: 'Save' }).click();
