@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { ProcessingBar } from '@components/visual/animations/ProcessingBar';
+import { ProcessingBar } from '@/components/visual/svg/shapes/ProcessingBar';
 
 import { BackgroundGlitchTextBlock } from '../visual/BackgroundGlitch';
 import { WarningSign } from '../visual/svg/shapes/WarningSign';

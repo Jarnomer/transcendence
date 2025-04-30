@@ -9,6 +9,8 @@ export const TournamentLobbyNav: React.FC<{
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ activeTab, setActiveTab }) => {
   const { mode, lobby } = useGameOptionsContext();
+
+  console.log('rendering tournament lobby nav');
   return (
     <motion.div
       id="home-page-nav"

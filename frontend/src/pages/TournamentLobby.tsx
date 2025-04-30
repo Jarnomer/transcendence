@@ -171,12 +171,12 @@ export const TournamentLobby: React.FC = () => {
           open modal
         </button>
         <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
-          <motion.div className="flex flex-col md:w-full h-full w-full gap-2 md:gap-10">
+          <motion.div className="flex flex-col md:w-full  w-full">
             <AnimatePresence mode="wait">
               {activeTab === 'settings' ? (
                 <motion.div
                   key="tournamentSettings"
-                  className="w-full h-full"
+                  className="w-full "
                   variants={slideFromRightVariants}
                   initial="initial"
                   animate="animate"

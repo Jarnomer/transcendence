@@ -10,13 +10,13 @@ export const SettingsModal: React.FC = () => {
 
   const { user } = useUser();
 
-  if (!isModalOpen('settings')) return null;
-
   return (
     <ModalWrapper modalName="settings">
-      <div className="relative w-full h-full max-h-screen sm:w-3xl flex items-center">
-        <Settings></Settings>
-      </div>
+      {isModalOpen('settings') && (
+        <div className="relative w-full h-full max-h-screen sm:w-3xl flex items-center">
+          <Settings></Settings>
+        </div>
+      )}
     </ModalWrapper>
   );
 };
