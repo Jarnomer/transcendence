@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
@@ -31,6 +32,7 @@ export const GamePage: React.FC = () => {
   const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
 
@@ -149,6 +151,13 @@ export const GamePage: React.FC = () => {
     }
   }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 
+  useEffect(() => {
+    if (!gameResult) return;
+    navigate('/game-results', {
+      state: { gameResult, playersData },
+    });
+  }, [gameResult, playersData]);
+
   return (
     <div
       id="game-page"
@@ -173,7 +182,7 @@ export const GamePage: React.FC = () => {
       </div>
 
       {/* Render GameResults */}
-      {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null}
+      {/* {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null} */}
 
       {/* Render MatchMakingCarousel */}
       {!isGameCanvasActive && !gameResult ? (

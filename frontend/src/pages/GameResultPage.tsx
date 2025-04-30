@@ -1,32 +1,13 @@
-import React from 'react';
-
+import { Navigate, useLocation } from 'react-router-dom';
 import { GameResults } from '../components/game/GameResults';
 
-interface PlayerData {
-  user_id: string;
-  avatar_url: string;
-  display_name: string;
-}
+export default function GameResultPage() {
+  const location = useLocation();
+  const { gameResult, playersData } = location.state || {};
 
-interface GameResultsProps {
-  result: {
-    game_id: string;
-    winner_id: string;
-    loser_id: string;
-    winner_score: number;
-    loser_score: number;
-  };
-  playersData: {
-    player1: PlayerData | null;
-    player2: PlayerData | null;
-  };
+  if (!gameResult || !playersData) {
+    return <Navigate to="/" />; // Redirect or show an error
+  }
+
+  return <GameResults result={gameResult} playersData={playersData} />;
 }
-export const GameResultPage: React.FC<GameResultsProps> = ({ result, playersData }) => {
-  return (
-    <div>
-      <GameResults result={gameResult} playersData={playersData}>
-        {' '}
-      </GameResults>
-    </div>
-  );
-};
