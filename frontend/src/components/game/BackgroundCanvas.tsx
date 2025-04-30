@@ -14,6 +14,7 @@ import {
 import {
   GameAnimationManager,
   RetroEffectsManager,
+  addCameraDebugControls,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
@@ -48,7 +49,7 @@ import {
   GameStatus,
   RetroEffectsLevels,
   cinematicRetroEffectsLevels,
-  defaultCameraTimings,
+  // defaultCameraTimings,
   defaultCinematicGlitchTimings,
   defaultGameObjectParams,
   defaultGameParams,
@@ -101,40 +102,6 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const gameWidth = defaultGameParams.dimensions.gameWidth;
   const gameHeight = defaultGameParams.dimensions.gameHeight;
 
-  const setupCamera = () => {
-    if (!engineRef.current || !sceneRef.current || !cameraRef.current) return;
-
-    if (cameraMoveTimerRef.current) {
-      window.clearInterval(cameraMoveTimerRef.current);
-      cameraMoveTimerRef.current = null;
-    }
-
-    if (gameMode === 'background') {
-      const cinematicAngle = getNextCinematicCameraAngle();
-
-      applyCinematicCameraAngle(cameraRef.current, cinematicAngle);
-      animateCinematicCamera(cameraRef.current, cinematicAngle);
-
-      cameraMoveTimerRef.current = window.setInterval(() => {
-        if (cameraRef.current) {
-          const nextCinematicAngle = getNextCinematicCameraAngle();
-
-          applyCinematicCameraAngle(cameraRef.current, nextCinematicAngle);
-          animateCinematicCamera(cameraRef.current, nextCinematicAngle);
-
-          if (retroEffectsRef.current) {
-            retroEffectsRef.current.simulateTrackingDistortion(
-              defaultRetroEffectTimings.trackingDistortionIntensity,
-              defaultRetroEffectTimings.trackingDistortionDuration
-            );
-          }
-        }
-      }, defaultCameraTimings.cameraSwitchAngleInterval);
-    } else {
-      performCameraSequence();
-    }
-  };
-
   const setupRenderLoop = (engine: Engine, scene: Scene) => {
     engine.stopRenderLoop();
 
@@ -180,6 +147,40 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     };
 
     scheduleNextGlitch();
+  };
+
+  const setupCamera = () => {
+    if (!engineRef.current || !sceneRef.current || !cameraRef.current) return;
+
+    if (cameraMoveTimerRef.current) {
+      window.clearInterval(cameraMoveTimerRef.current);
+      cameraMoveTimerRef.current = null;
+    }
+
+    if (gameMode === 'background') {
+      const cinematicAngle = getNextCinematicCameraAngle();
+
+      applyCinematicCameraAngle(cameraRef.current, cinematicAngle);
+      animateCinematicCamera(cameraRef.current, cinematicAngle);
+
+      cameraMoveTimerRef.current = window.setInterval(() => {
+        if (cameraRef.current) {
+          const nextCinematicAngle = getNextCinematicCameraAngle();
+
+          applyCinematicCameraAngle(cameraRef.current, nextCinematicAngle);
+          animateCinematicCamera(cameraRef.current, nextCinematicAngle);
+
+          if (retroEffectsRef.current) {
+            retroEffectsRef.current.simulateTrackingDistortion(
+              defaultRetroEffectTimings.trackingDistortionIntensity,
+              defaultRetroEffectTimings.trackingDistortionDuration
+            );
+          }
+        }
+      }, 10000000); // }, defaultCameraTimings.cameraSwitchAngleInterval);
+    } else {
+      performCameraSequence();
+    }
   };
 
   const performCameraSequence = () => {
@@ -260,6 +261,16 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     );
 
     const camera = setupSceneCamera(scene);
+    camera.attachControl();
+
+    const cameraDebugControls = addCameraDebugControls(camera, scene, true);
+
+    setTimeout(() => {
+      if (canvas) {
+        canvas.focus();
+        console.log('Canvas focused for keyboard input');
+      }
+    }, 500);
 
     retroLevelsRef.current = retroEffectsPresets.cinematic;
     retroEffectsRef.current = createPongRetroEffects(
@@ -355,6 +366,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         randomGlitchTimerRef.current = null;
       }
 
+      cameraDebugControls();
       engine.dispose();
       scene.dispose();
     };
@@ -521,7 +533,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     };
   }, [gameState]);
 
-  return <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />;
+  return <canvas ref={canvasRef} className="w-full h-full" />;
 };
 
 export default BackgroundCanvas;

@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { GameMode, GameState, GameStatus, defaultGameParams } from '@shared/types';
 
-import BackgroundCanvas from './BackgroundCanvas';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useGameMusic } from '../../hooks/useGameMusic';
+import BackgroundCanvas from './BackgroundCanvas';
 
 interface BackgroundProviderProps {}
 
@@ -246,7 +246,7 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
 
   return (
     <>
-      <div className="absolute w-screen h-screen pointer-events-none">
+      <div className="absolute w-screen h-screen">
         <BackgroundCanvas
           gameState={currentGameState}
           gameMode={currentMode}
