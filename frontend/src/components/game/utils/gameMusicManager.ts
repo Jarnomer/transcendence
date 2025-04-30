@@ -62,7 +62,13 @@ export class GameMusicManager {
     const enabled = isGameTrack ? this.gameMusicEnabled : this.backgroundMusicEnabled;
     const volume = isGameTrack ? this.gameMusicVolume : this.backgroundMusicVolume;
 
-    if (!enabled) return;
+    if (!enabled) {
+      // If we're switching to this track but it's disabled
+      if (this.backgroundMusic.currentTrack !== track) {
+        this.stopBackgroundMusic();
+      }
+      return;
+    }
 
     const newTrack = this.backgroundMusic[track];
     const currentTrackName = this.backgroundMusic.currentTrack;
@@ -274,7 +280,10 @@ export class GameMusicManager {
           // Fade out and pause
           this.fadeOut(audio, () => {
             audio.pause();
+            audio.currentTime = 0;
           });
+          // Reset current track so we know nothing is playing
+          this.backgroundMusic.currentTrack = null;
         }
       }
     }
@@ -302,7 +311,10 @@ export class GameMusicManager {
           // Fade out and pause
           this.fadeOut(audio, () => {
             audio.pause();
+            audio.currentTime = 0;
           });
+          // Reset current track so we know nothing is playing
+          this.backgroundMusic.currentTrack = null;
         }
       }
     }

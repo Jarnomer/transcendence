@@ -85,10 +85,13 @@ export const Soundsettings: React.FC = () => {
   // Local state for UI
   const [gameSoundVolume, setGameSoundVolume] = useState<number>(2);
   const [gameSoundEnabled, setGameSoundEnabled] = useState<boolean>(true);
+
   const [gameMusicVolume, setGameMusicVolume] = useState<number>(2);
   const [gameMusicEnabled, setGameMusicEnabled] = useState<boolean>(true);
+
   const [uiSoundVolume, setUiSoundVolume] = useState<number>(2);
   const [uiSoundEnabled, setUiSoundEnabled] = useState<boolean>(true);
+
   const [backgroundMusicVolume, setBackgroundMusicVolume] = useState<number>(2);
   const [backgroundMusicEnabled, setBackgroundMusicEnabled] = useState<boolean>(true);
 
@@ -102,8 +105,12 @@ export const Soundsettings: React.FC = () => {
       setGameSoundEnabled(audioSettings.soundEffects?.enabled !== false);
       setGameMusicVolume(volumeValueToLevel(audioSettings.gameMusic?.volume || 0.4));
       setGameMusicEnabled(audioSettings.gameMusic?.enabled !== false);
-      setUiSoundVolume(volumeValueToLevel(audioSettings.uiSounds?.volume || 0.4));
-      setUiSoundEnabled(audioSettings.uiSounds?.enabled !== false);
+
+      // UI sounds - use uiSounds if available, otherwise fallback to gameMusic
+      const uiSettings = audioSettings.uiSounds || audioSettings.gameMusic;
+      setUiSoundVolume(volumeValueToLevel(uiSettings?.volume || 0.4));
+      setUiSoundEnabled(uiSettings?.enabled !== false);
+
       setBackgroundMusicVolume(volumeValueToLevel(audioSettings.backgroundMusic?.volume || 0.4));
       setBackgroundMusicEnabled(audioSettings.backgroundMusic?.enabled !== false);
 
