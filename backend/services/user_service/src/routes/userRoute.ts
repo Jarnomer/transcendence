@@ -6,6 +6,7 @@ import {
   AllResponseRankType,
   AllResponseSchema,
   AllResponseType,
+  GameAudioOptions,
   UserDataResponseSchema,
   UserDataResponseType,
   UserIdSchema,
@@ -64,11 +65,15 @@ export async function userRoutes(fastify: FastifyInstance) {
     { schema: { response: { 200: UserNotificationSchema } } },
     userController.getNotifications.bind(userController)
   );
-
   fastify.post(
     '/notification/seen/:notification_id',
     userController.markNotificationAsSeen.bind(userController)
   );
   fastify.post('/saveGameSettings', userController.saveGameSettings.bind(userController));
   fastify.get('/getGameSettings', userController.getGameSettings.bind(userController));
+  fastify.get('/audio-settings', userController.getAudioSettings.bind(userController));
+  fastify.post<{ Body: GameAudioOptions }>(
+    '/audio-settings',
+    userController.saveAudioSettings.bind(userController)
+  );
 }

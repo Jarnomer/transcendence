@@ -1,6 +1,6 @@
 import { Database } from 'sqlite';
 
-import { GameSettings } from '@shared/types';
+import { GameAudioOptions, GameSettings } from '@shared/types';
 
 import { queryWithJsonParsingObject } from '../../../utils/utils';
 
@@ -211,22 +211,36 @@ export class UserModel {
     );
   }
 
-  // maxScore: 5,
-  // ballSpeed: 7,
-  // enableSpin: true,
-  // enablePowerUps: true,
-  // powerUpTypes: {
-  //   [PowerUpType.BiggerPaddle]: true,
-  //   [PowerUpType.SmallerPaddle]: true,
-  //   [PowerUpType.FasterPaddle]: true,
-  //   [PowerUpType.SlowerPaddle]: true,
-  //   [PowerUpType.MoreSpin]: true,
-  // },
   async saveGameSettings(user_id: string, settings: GameSettings) {
     const settingsString = JSON.stringify(settings);
     return await this.db.get(
       `UPDATE user_profiles SET game_settings = ? WHERE user_id = ? RETURNING *`,
       [settingsString, user_id]
     );
+  }
+
+  async saveAudioSettings(user_id: string, settings: GameAudioOptions) {
+    const settingsString = JSON.stringify(settings);
+    return await this.db.get(
+      `UPDATE user_profiles SET audio_settings = ? WHERE user_id = ? RETURNING *`,
+      [settingsString, user_id]
+    );
+  }
+
+  async getAudioSettings(user_id: string) {
+    const result = await this.db.get(`SELECT audio_settings FROM user_profiles WHERE user_id = ?`, [
+      user_id,
+    ]);
+
+    if (result && result.audio_settings) {
+      try {
+        return JSON.parse(result.audio_settings);
+      } catch (error) {
+        console.error('Error parsing audio settings:', error);
+        return null;
+      }
+    }
+
+    return null;
   }
 }

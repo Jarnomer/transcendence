@@ -25,7 +25,7 @@ export const defaultGameAudioOptions: GameAudioOptions = {
     enabled: true,
   },
   soundEffects: {
-    volume: 0.5,
+    volume: 0.4,
     enabled: true,
   },
 };

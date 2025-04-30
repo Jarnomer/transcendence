@@ -1,9 +1,10 @@
 import { Database } from 'sqlite';
 
+import { GameAudioOptions, GameSettings } from '@shared/types';
+
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
 import { UserModel } from '../models/UserModel';
-import { GameSettings } from '@shared/types';
 
 export class UserService {
   private userModel: UserModel;
@@ -115,4 +116,11 @@ export class UserService {
     return res;
   }
 
+  async saveAudioSettings(user_id: string, audioSettings: GameAudioOptions) {
+    const res = await this.userModel.saveAudioSettings(user_id, audioSettings);
+    if (!res) {
+      throw new BadRequestError('Could not save audio settings');
+    }
+    return res;
+  }
 }

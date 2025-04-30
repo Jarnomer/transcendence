@@ -28,6 +28,7 @@ export class GameMusicManager {
     defaultGameAudioOptions.backgroundMusic?.enabled || true;
 
   private readonly FADE_DURATION = 400; // ms
+  private fadeVolumeIntervals: Map<HTMLAudioElement, number> = new Map();
 
   constructor() {
     this.initBackgroundMusic();
@@ -142,76 +143,139 @@ export class GameMusicManager {
   private fadeIn(audio: HTMLAudioElement, targetVolume: number): void {
     if (!audio) return;
 
+    this.clearFadeInterval(audio); // Clear any existing fade intervals
+
     const steps = 20;
     const interval = this.FADE_DURATION / steps;
     let vol = 0;
     audio.volume = 0;
 
-    const step = () => {
+    const fadeIntervalId = window.setInterval(() => {
       vol += targetVolume / steps;
       if (vol >= targetVolume) {
         audio.volume = targetVolume;
+        this.clearFadeInterval(audio);
       } else {
         audio.volume = vol;
-        setTimeout(step, interval);
       }
-    };
+    }, interval);
 
-    step();
+    this.fadeVolumeIntervals.set(audio, fadeIntervalId);
   }
 
   private fadeOut(audio: HTMLAudioElement, callback: () => void): void {
     if (!audio) return callback();
 
+    this.clearFadeInterval(audio);
+
     const steps = 20;
     const interval = this.FADE_DURATION / steps;
     let vol = audio.volume;
 
-    const step = () => {
+    const fadeIntervalId = window.setInterval(() => {
       vol -= vol / steps;
       if (vol <= 0.02) {
         audio.volume = 0;
+        this.clearFadeInterval(audio);
         callback();
       } else {
         audio.volume = vol;
-        setTimeout(step, interval);
       }
-    };
+    }, interval);
 
-    step();
+    this.fadeVolumeIntervals.set(audio, fadeIntervalId);
+  }
+
+  private fadeToVolume(audio: HTMLAudioElement, targetVolume: number): void {
+    if (!audio) return;
+
+    this.clearFadeInterval(audio);
+
+    const currentVolume = audio.volume;
+    if (Math.abs(currentVolume - targetVolume) < 0.01) {
+      audio.volume = targetVolume;
+      return;
+    }
+
+    const steps = 10;
+    const interval = 50; // ms
+    const volumeStep = (targetVolume - currentVolume) / steps;
+
+    let step = 0;
+
+    const fadeIntervalId = window.setInterval(() => {
+      step++;
+      if (step >= steps) {
+        audio.volume = targetVolume;
+        this.clearFadeInterval(audio);
+      } else {
+        audio.volume = currentVolume + volumeStep * step;
+      }
+    }, interval);
+
+    this.fadeVolumeIntervals.set(audio, fadeIntervalId);
+  }
+
+  private clearFadeInterval(audio: HTMLAudioElement): void {
+    const intervalId = this.fadeVolumeIntervals.get(audio);
+    if (intervalId) {
+      window.clearInterval(intervalId);
+      this.fadeVolumeIntervals.delete(audio);
+    }
   }
 
   setGameMusicVolume(volume: number): void {
-    this.gameMusicVolume = Math.max(0, Math.min(volume, 1.0));
+    const newVolume = Math.max(0, Math.min(volume, 1.0));
 
     if (this.backgroundMusic.currentTrack === 'game' && this.gameMusicEnabled) {
       const audio = this.backgroundMusic.game;
       if (audio) {
-        audio.volume = this.gameMusicVolume;
+        // Smoothly transition to new volume
+        this.fadeToVolume(audio, newVolume);
       }
     }
+
+    this.gameMusicVolume = newVolume;
   }
 
   setBackgroundMusicVolume(volume: number): void {
-    this.backgroundMusicVolume = Math.max(0, Math.min(volume, 1.0));
+    const newVolume = Math.max(0, Math.min(volume, 1.0));
 
     if (this.backgroundMusic.currentTrack === 'menu' && this.backgroundMusicEnabled) {
       const audio = this.backgroundMusic.menu;
       if (audio) {
-        audio.volume = this.backgroundMusicVolume;
+        // Smoothly transition to new volume
+        this.fadeToVolume(audio, newVolume);
       }
     }
+
+    this.backgroundMusicVolume = newVolume;
   }
 
   setGameMusicEnabled(enabled: boolean): void {
     this.gameMusicEnabled = enabled;
 
-    if (!enabled && this.backgroundMusic.currentTrack === 'game') {
-      this.stopBackgroundMusic();
-    } else if (enabled && this.backgroundMusic.currentTrack === 'game') {
+    if (this.backgroundMusic.currentTrack === 'game') {
       const audio = this.backgroundMusic.game;
       if (audio) {
-        audio.volume = this.gameMusicVolume;
+        if (enabled) {
+          // Fade in
+          if (audio.paused) {
+            audio
+              .play()
+              .then(() => {
+                this.fadeIn(audio, this.gameMusicVolume);
+              })
+              .catch((err) => console.warn("Couldn't play game music:", err));
+          } else {
+            this.fadeIn(audio, this.gameMusicVolume);
+          }
+        } else {
+          // Fade out and pause
+          this.fadeOut(audio, () => {
+            audio.pause();
+          });
+        }
       }
     }
   }
@@ -219,12 +283,27 @@ export class GameMusicManager {
   setBackgroundMusicEnabled(enabled: boolean): void {
     this.backgroundMusicEnabled = enabled;
 
-    if (!enabled && this.backgroundMusic.currentTrack === 'menu') {
-      this.stopBackgroundMusic();
-    } else if (enabled && this.backgroundMusic.currentTrack === 'menu') {
+    if (this.backgroundMusic.currentTrack === 'menu') {
       const audio = this.backgroundMusic.menu;
       if (audio) {
-        audio.volume = this.backgroundMusicVolume;
+        if (enabled) {
+          // Fade in
+          if (audio.paused) {
+            audio
+              .play()
+              .then(() => {
+                this.fadeIn(audio, this.backgroundMusicVolume);
+              })
+              .catch((err) => console.warn("Couldn't play background music:", err));
+          } else {
+            this.fadeIn(audio, this.backgroundMusicVolume);
+          }
+        } else {
+          // Fade out and pause
+          this.fadeOut(audio, () => {
+            audio.pause();
+          });
+        }
       }
     }
   }
@@ -235,6 +314,11 @@ export class GameMusicManager {
 
   dispose(): void {
     this.stopBackgroundMusic();
+
+    this.fadeVolumeIntervals.forEach((intervalId) => {
+      window.clearInterval(intervalId);
+    });
+    this.fadeVolumeIntervals.clear();
 
     // Clean up background music
     Object.values(this.backgroundMusic).forEach((track) => {

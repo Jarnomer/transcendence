@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
+import { useAudioSettings } from '../../contexts/audioContext/AudioSettingsContext';
+import { useSound } from '../../hooks/useSound';
+import { volumeValueToLevel } from '../../services/audioService';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
 import { Slider } from '../UI/forms/Slider';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
+
 export const animationVariants = {
   initial: {
     clipPath: 'inset(0 0 100% 0)',
@@ -23,14 +27,14 @@ export const animationVariants = {
   },
 };
 
-interface soundSettingsProps {
+interface SoundSettingsProps {
   level: number;
   isEnabled: boolean;
   setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setLevel: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const GameSoundSettings: React.FC<soundSettingsProps> = ({
+const GameSoundSettings: React.FC<SoundSettingsProps> = ({
   level,
   setLevel,
   isEnabled,
@@ -55,7 +59,7 @@ const GameSoundSettings: React.FC<soundSettingsProps> = ({
   );
 };
 
-const MusicSettings: React.FC<soundSettingsProps> = ({
+const MusicSettings: React.FC<SoundSettingsProps> = ({
   level,
   setLevel,
   isEnabled,
@@ -80,7 +84,7 @@ const MusicSettings: React.FC<soundSettingsProps> = ({
   );
 };
 
-const UISoundSetting: React.FC<soundSettingsProps> = ({
+const UISoundSetting: React.FC<SoundSettingsProps> = ({
   isEnabled,
   setIsEnabled,
   level,
@@ -105,23 +109,80 @@ const UISoundSetting: React.FC<soundSettingsProps> = ({
 };
 
 export const Soundsettings: React.FC = () => {
+  const playButtonSound = useSound('/sounds/effects/button_submit.wav');
+  const {
+    audioSettings,
+    isLoading,
+    updateGameSoundVolume,
+    updateGameSoundEnabled,
+    updateBackgroundMusicVolume,
+    updateBackgroundMusicEnabled,
+    updateUISoundVolume,
+    updateUISoundEnabled,
+    saveSettings,
+  } = useAudioSettings();
+
+  // Local state for UI
   const [UISoundVolume, setUISoundVolume] = useState<number>(2);
   const [UISoundEnabled, setUISoundEnabled] = useState<boolean>(true);
-
   const [gameSoundVolume, setGameSoundVolume] = useState<number>(2);
   const [gameSoundEnabled, setGameSoundEnabled] = useState<boolean>(true);
-
   const [musicVolume, setMusicVolume] = useState<number>(2);
   const [musicEnabled, setMusicEnabled] = useState<boolean>(true);
 
-  const handleSaveSettings = () => {
+  const isUpdatingFromContext = useRef(false);
+
+  useEffect(() => {
+    if (!isLoading && audioSettings) {
+      isUpdatingFromContext.current = true;
+
+      setGameSoundVolume(volumeValueToLevel(audioSettings.soundEffects?.volume || 0.4));
+      setGameSoundEnabled(audioSettings.soundEffects?.enabled !== false);
+
+      setMusicVolume(volumeValueToLevel(audioSettings.backgroundMusic?.volume || 0.4));
+      setMusicEnabled(audioSettings.backgroundMusic?.enabled !== false);
+
+      setUISoundVolume(volumeValueToLevel(audioSettings.gameMusic?.volume || 0.4));
+      setUISoundEnabled(audioSettings.gameMusic?.enabled !== false);
+
+      setTimeout(() => {
+        isUpdatingFromContext.current = false;
+      }, 0);
+    }
+  }, [isLoading, audioSettings]);
+
+  useEffect(() => {
+    if (!isUpdatingFromContext.current) {
+      updateGameSoundVolume(gameSoundVolume);
+      updateGameSoundEnabled(gameSoundEnabled);
+    }
+  }, [gameSoundVolume, gameSoundEnabled]);
+
+  useEffect(() => {
+    if (!isUpdatingFromContext.current) {
+      updateBackgroundMusicVolume(musicVolume);
+      updateBackgroundMusicEnabled(musicEnabled);
+    }
+  }, [musicVolume, musicEnabled]);
+
+  useEffect(() => {
+    if (!isUpdatingFromContext.current) {
+      updateUISoundVolume(UISoundVolume);
+      updateUISoundEnabled(UISoundEnabled);
+    }
+  }, [UISoundVolume, UISoundEnabled]);
+
+  const handleSaveSettings = async () => {
+    playButtonSound();
     console.log('---- Saving Sound settings -------');
     console.log('Game Sound Enabled: ', gameSoundEnabled);
     console.log('Game Sound Volume: ', gameSoundVolume);
     console.log('UI Sound Enabled: ', UISoundEnabled);
     console.log('UI Sound Volume: ', UISoundVolume);
     console.log('Music Enabled: ', musicEnabled);
-    console.log('Game Volume: ', musicVolume);
+    console.log('Music Volume: ', musicVolume);
+
+    await saveSettings();
   };
 
   return (
@@ -150,14 +211,18 @@ export const Soundsettings: React.FC = () => {
               level={gameSoundVolume}
               setLevel={setGameSoundVolume}
             ></GameSoundSettings>
+
             <h2 className="font-heading text-2xl">UI Sounds</h2>
+
             <UISoundSetting
               isEnabled={UISoundEnabled}
               setIsEnabled={setUISoundEnabled}
               level={UISoundVolume}
               setLevel={setUISoundVolume}
             ></UISoundSetting>
+
             <h2 className="font-heading text-2xl">Music</h2>
+
             <MusicSettings
               isEnabled={musicEnabled}
               setIsEnabled={setMusicEnabled}
@@ -167,7 +232,7 @@ export const Soundsettings: React.FC = () => {
           </div>
         </div>
         <div className="absolute bottom-0 right-0 p-4">
-          <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
+          <ClippedButton label={'Save'} onClick={handleSaveSettings} />
         </div>
       </motion.div>
     </>

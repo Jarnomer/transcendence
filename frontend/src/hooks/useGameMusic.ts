@@ -2,19 +2,34 @@ import { useEffect, useRef } from 'react';
 
 import { getGameMusicManager } from '@game/utils';
 
-import { MusicTrack, GameMode, GameStatus } from '@shared/types';
+import { GameMode, GameStatus, MusicTrack } from '@shared/types';
+
+import { useAudioSettings } from '../contexts/audioContext/AudioSettingsContext';
 
 export const useGameMusic = (gameMode: GameMode, gameStatus?: GameStatus) => {
   const musicManagerRef = useRef(getGameMusicManager());
   const lastModeRef = useRef<string | null>(null);
+  const { audioSettings } = useAudioSettings();
 
   useEffect(() => {
     const musicManager = musicManagerRef.current;
 
+    if (audioSettings) {
+      if (audioSettings.gameMusic) {
+        musicManager.setGameMusicEnabled(audioSettings.gameMusic.enabled !== false);
+        musicManager.setGameMusicVolume(audioSettings.gameMusic.volume || 0.4);
+      }
+
+      if (audioSettings.backgroundMusic) {
+        musicManager.setBackgroundMusicEnabled(audioSettings.backgroundMusic.enabled !== false);
+        musicManager.setBackgroundMusicVolume(audioSettings.backgroundMusic.volume || 0.4);
+      }
+    }
+
     return () => {
       musicManager.pauseBackgroundMusic();
     };
-  }, []);
+  }, [audioSettings]);
 
   useEffect(() => {
     if (lastModeRef.current === gameMode) return;
