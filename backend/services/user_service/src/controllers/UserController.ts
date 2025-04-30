@@ -233,6 +233,14 @@ export class UserController {
       let audioSettings = user.audio_settings;
       if (!audioSettings) {
         audioSettings = defaultGameAudioOptions;
+      } else {
+        // Ensure all necessary fields exist
+        audioSettings = {
+          gameMusic: audioSettings.gameMusic || defaultGameAudioOptions.gameMusic,
+          backgroundMusic: audioSettings.backgroundMusic || defaultGameAudioOptions.backgroundMusic,
+          soundEffects: audioSettings.soundEffects || defaultGameAudioOptions.soundEffects,
+          uiSounds: audioSettings.uiSounds || defaultGameAudioOptions.uiSounds,
+        };
       }
 
       reply.code(200).send(audioSettings);
@@ -255,7 +263,6 @@ export class UserController {
       request.log.trace(`Saving audio settings for user ${user_id}`);
       request.log.trace(`Settings: ${JSON.stringify(settings)}`);
 
-      // Validate volumes are within range
       if (settings.gameMusic && typeof settings.gameMusic.volume === 'number') {
         settings.gameMusic.volume = Math.max(0, Math.min(1, settings.gameMusic.volume));
       }
@@ -266,6 +273,10 @@ export class UserController {
 
       if (settings.soundEffects && typeof settings.soundEffects.volume === 'number') {
         settings.soundEffects.volume = Math.max(0, Math.min(1, settings.soundEffects.volume));
+      }
+
+      if (settings.uiSounds && typeof settings.uiSounds.volume === 'number') {
+        settings.uiSounds.volume = Math.max(0, Math.min(1, settings.uiSounds.volume));
       }
 
       await this.userService.saveAudioSettings(user_id, settings);

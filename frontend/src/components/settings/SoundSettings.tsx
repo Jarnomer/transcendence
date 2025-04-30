@@ -32,71 +32,29 @@ interface SoundSettingsProps {
   isEnabled: boolean;
   setIsEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setLevel: React.Dispatch<React.SetStateAction<number>>;
+  label?: string;
 }
 
-const GameSoundSettings: React.FC<SoundSettingsProps> = ({
+const SoundSettingSection: React.FC<SoundSettingsProps> = ({
   level,
   setLevel,
   isEnabled,
   setIsEnabled,
+  label = 'Enable',
 }) => {
   return (
     <div className="p-2 max-w-md">
       <div className="flex items-center mb-4">
-        <CheckBox isEnabled={isEnabled} setIsEnabled={setIsEnabled} id={'enableSound'}></CheckBox>
+        <CheckBox
+          isEnabled={isEnabled}
+          setIsEnabled={setIsEnabled}
+          id={`enable${label.replace(/\s+/g, '')}`}
+          label={label}
+        ></CheckBox>
       </div>
 
       <Slider
-        id="gameVolume"
-        level={level}
-        min={0}
-        max={5}
-        step={1}
-        setLevel={setLevel}
-        isEnabled={isEnabled}
-      ></Slider>
-    </div>
-  );
-};
-
-const MusicSettings: React.FC<SoundSettingsProps> = ({
-  level,
-  setLevel,
-  isEnabled,
-  setIsEnabled,
-}) => {
-  return (
-    <div className="p-2 max-w-md">
-      <div className="flex items-center mb-4">
-        <CheckBox isEnabled={isEnabled} setIsEnabled={setIsEnabled} id={'enableMusic'}></CheckBox>
-      </div>
-
-      <Slider
-        id="musicVolume"
-        level={level}
-        min={0}
-        max={5}
-        step={1}
-        setLevel={setLevel}
-        isEnabled={isEnabled}
-      ></Slider>
-    </div>
-  );
-};
-
-const UISoundSetting: React.FC<SoundSettingsProps> = ({
-  isEnabled,
-  setIsEnabled,
-  level,
-  setLevel,
-}) => {
-  return (
-    <div className="p-2 max-w-md">
-      <div className="flex items-center mb-4">
-        <CheckBox isEnabled={isEnabled} setIsEnabled={setIsEnabled} id={'enableUiSound'}></CheckBox>
-      </div>
-      <Slider
-        id="UISoundVolume"
+        id={`${label.toLowerCase().replace(/\s+/g, '')}Volume`}
         level={level}
         min={0}
         max={5}
@@ -115,6 +73,8 @@ export const Soundsettings: React.FC = () => {
     isLoading,
     updateGameSoundVolume,
     updateGameSoundEnabled,
+    updateGameMusicVolume,
+    updateGameMusicEnabled,
     updateBackgroundMusicVolume,
     updateBackgroundMusicEnabled,
     updateUISoundVolume,
@@ -123,12 +83,14 @@ export const Soundsettings: React.FC = () => {
   } = useAudioSettings();
 
   // Local state for UI
-  const [UISoundVolume, setUISoundVolume] = useState<number>(2);
-  const [UISoundEnabled, setUISoundEnabled] = useState<boolean>(true);
   const [gameSoundVolume, setGameSoundVolume] = useState<number>(2);
   const [gameSoundEnabled, setGameSoundEnabled] = useState<boolean>(true);
-  const [musicVolume, setMusicVolume] = useState<number>(2);
-  const [musicEnabled, setMusicEnabled] = useState<boolean>(true);
+  const [gameMusicVolume, setGameMusicVolume] = useState<number>(2);
+  const [gameMusicEnabled, setGameMusicEnabled] = useState<boolean>(true);
+  const [uiSoundVolume, setUiSoundVolume] = useState<number>(2);
+  const [uiSoundEnabled, setUiSoundEnabled] = useState<boolean>(true);
+  const [backgroundMusicVolume, setBackgroundMusicVolume] = useState<number>(2);
+  const [backgroundMusicEnabled, setBackgroundMusicEnabled] = useState<boolean>(true);
 
   const isUpdatingFromContext = useRef(false);
 
@@ -138,12 +100,12 @@ export const Soundsettings: React.FC = () => {
 
       setGameSoundVolume(volumeValueToLevel(audioSettings.soundEffects?.volume || 0.4));
       setGameSoundEnabled(audioSettings.soundEffects?.enabled !== false);
-
-      setMusicVolume(volumeValueToLevel(audioSettings.backgroundMusic?.volume || 0.4));
-      setMusicEnabled(audioSettings.backgroundMusic?.enabled !== false);
-
-      setUISoundVolume(volumeValueToLevel(audioSettings.gameMusic?.volume || 0.4));
-      setUISoundEnabled(audioSettings.gameMusic?.enabled !== false);
+      setGameMusicVolume(volumeValueToLevel(audioSettings.gameMusic?.volume || 0.4));
+      setGameMusicEnabled(audioSettings.gameMusic?.enabled !== false);
+      setUiSoundVolume(volumeValueToLevel(audioSettings.uiSounds?.volume || 0.4));
+      setUiSoundEnabled(audioSettings.uiSounds?.enabled !== false);
+      setBackgroundMusicVolume(volumeValueToLevel(audioSettings.backgroundMusic?.volume || 0.4));
+      setBackgroundMusicEnabled(audioSettings.backgroundMusic?.enabled !== false);
 
       setTimeout(() => {
         isUpdatingFromContext.current = false;
@@ -156,32 +118,36 @@ export const Soundsettings: React.FC = () => {
       updateGameSoundVolume(gameSoundVolume);
       updateGameSoundEnabled(gameSoundEnabled);
     }
-  }, [gameSoundVolume, gameSoundEnabled]);
+  }, [gameSoundVolume, gameSoundEnabled, updateGameSoundVolume, updateGameSoundEnabled]);
 
   useEffect(() => {
     if (!isUpdatingFromContext.current) {
-      updateBackgroundMusicVolume(musicVolume);
-      updateBackgroundMusicEnabled(musicEnabled);
+      updateGameMusicVolume(gameMusicVolume);
+      updateGameMusicEnabled(gameMusicEnabled);
     }
-  }, [musicVolume, musicEnabled]);
+  }, [gameMusicVolume, gameMusicEnabled, updateGameMusicVolume, updateGameMusicEnabled]);
 
   useEffect(() => {
     if (!isUpdatingFromContext.current) {
-      updateUISoundVolume(UISoundVolume);
-      updateUISoundEnabled(UISoundEnabled);
+      updateUISoundVolume(uiSoundVolume);
+      updateUISoundEnabled(uiSoundEnabled);
     }
-  }, [UISoundVolume, UISoundEnabled]);
+  }, [uiSoundVolume, uiSoundEnabled, updateUISoundVolume, updateUISoundEnabled]);
+
+  useEffect(() => {
+    if (!isUpdatingFromContext.current) {
+      updateBackgroundMusicVolume(backgroundMusicVolume);
+      updateBackgroundMusicEnabled(backgroundMusicEnabled);
+    }
+  }, [
+    backgroundMusicVolume,
+    backgroundMusicEnabled,
+    updateBackgroundMusicVolume,
+    updateBackgroundMusicEnabled,
+  ]);
 
   const handleSaveSettings = async () => {
     playButtonSound();
-    console.log('---- Saving Sound settings -------');
-    console.log('Game Sound Enabled: ', gameSoundEnabled);
-    console.log('Game Sound Volume: ', gameSoundVolume);
-    console.log('UI Sound Enabled: ', UISoundEnabled);
-    console.log('UI Sound Volume: ', UISoundVolume);
-    console.log('Music Enabled: ', musicEnabled);
-    console.log('Music Volume: ', musicVolume);
-
     await saveSettings();
   };
 
@@ -204,31 +170,40 @@ export const Soundsettings: React.FC = () => {
           <BackgroundGlow></BackgroundGlow>
           <div className="w-full h-full p-10">
             <h2 className="font-heading text-2xl">Game Sounds</h2>
-
-            <GameSoundSettings
+            <SoundSettingSection
               isEnabled={gameSoundEnabled}
               setIsEnabled={setGameSoundEnabled}
               level={gameSoundVolume}
               setLevel={setGameSoundVolume}
-            ></GameSoundSettings>
+              label="Game Sounds"
+            />
+
+            <h2 className="font-heading text-2xl">Game Music</h2>
+            <SoundSettingSection
+              isEnabled={gameMusicEnabled}
+              setIsEnabled={setGameMusicEnabled}
+              level={gameMusicVolume}
+              setLevel={setGameMusicVolume}
+              label="Game Music"
+            />
 
             <h2 className="font-heading text-2xl">UI Sounds</h2>
+            <SoundSettingSection
+              isEnabled={uiSoundEnabled}
+              setIsEnabled={setUiSoundEnabled}
+              level={uiSoundVolume}
+              setLevel={setUiSoundVolume}
+              label="UI Sounds"
+            />
 
-            <UISoundSetting
-              isEnabled={UISoundEnabled}
-              setIsEnabled={setUISoundEnabled}
-              level={UISoundVolume}
-              setLevel={setUISoundVolume}
-            ></UISoundSetting>
-
-            <h2 className="font-heading text-2xl">Music</h2>
-
-            <MusicSettings
-              isEnabled={musicEnabled}
-              setIsEnabled={setMusicEnabled}
-              level={musicVolume}
-              setLevel={setMusicVolume}
-            ></MusicSettings>
+            <h2 className="font-heading text-2xl">Background Music</h2>
+            <SoundSettingSection
+              isEnabled={backgroundMusicEnabled}
+              setIsEnabled={setBackgroundMusicEnabled}
+              level={backgroundMusicVolume}
+              setLevel={setBackgroundMusicVolume}
+              label="Background Music"
+            />
           </div>
         </div>
         <div className="absolute bottom-0 right-0 p-4">

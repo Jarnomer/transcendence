@@ -15,6 +15,8 @@ type AudioSettingsContextType = {
   isLoading: boolean;
   updateGameSoundVolume: (level: number) => void;
   updateGameSoundEnabled: (enabled: boolean) => void;
+  updateGameMusicVolume: (level: number) => void;
+  updateGameMusicEnabled: (enabled: boolean) => void;
   updateBackgroundMusicVolume: (level: number) => void;
   updateBackgroundMusicEnabled: (enabled: boolean) => void;
   updateUISoundVolume: (level: number) => void;
@@ -49,7 +51,6 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
       });
   }, [userId]);
 
-  // Update game sound volume
   const updateGameSoundVolume = (level: number) => {
     setAudioSettings((prev) => {
       const volume = volumeLevelToValue(level);
@@ -65,7 +66,6 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // Update game sound enabled
   const updateGameSoundEnabled = (enabled: boolean) => {
     setAudioSettings((prev) => {
       const newSettings = {
@@ -80,7 +80,35 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // Update background music volume
+  const updateGameMusicVolume = (level: number) => {
+    setAudioSettings((prev) => {
+      const volume = volumeLevelToValue(level);
+      const newSettings = {
+        ...prev,
+        gameMusic: {
+          ...prev.gameMusic,
+          volume,
+        },
+      };
+      applyAudioSettings(newSettings);
+      return newSettings;
+    });
+  };
+
+  const updateGameMusicEnabled = (enabled: boolean) => {
+    setAudioSettings((prev) => {
+      const newSettings = {
+        ...prev,
+        gameMusic: {
+          ...prev.gameMusic,
+          enabled,
+        },
+      };
+      applyAudioSettings(newSettings);
+      return newSettings;
+    });
+  };
+
   const updateBackgroundMusicVolume = (level: number) => {
     setAudioSettings((prev) => {
       const volume = volumeLevelToValue(level);
@@ -96,7 +124,6 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // Update background music enabled
   const updateBackgroundMusicEnabled = (enabled: boolean) => {
     setAudioSettings((prev) => {
       const newSettings = {
@@ -111,14 +138,13 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // Update UI sound volume
   const updateUISoundVolume = (level: number) => {
     setAudioSettings((prev) => {
       const volume = volumeLevelToValue(level);
       const newSettings = {
         ...prev,
-        gameMusic: {
-          ...prev.gameMusic,
+        uiSounds: {
+          ...prev.uiSounds,
           volume,
         },
       };
@@ -127,13 +153,12 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  // Update UI sound enabled
   const updateUISoundEnabled = (enabled: boolean) => {
     setAudioSettings((prev) => {
       const newSettings = {
         ...prev,
-        gameMusic: {
-          ...prev.gameMusic,
+        uiSounds: {
+          ...prev.uiSounds,
           enabled,
         },
       };
@@ -158,6 +183,8 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         isLoading,
         updateGameSoundVolume,
         updateGameSoundEnabled,
+        updateGameMusicVolume,
+        updateGameMusicEnabled,
         updateBackgroundMusicVolume,
         updateBackgroundMusicEnabled,
         updateUISoundVolume,

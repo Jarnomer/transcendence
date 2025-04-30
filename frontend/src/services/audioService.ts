@@ -41,17 +41,18 @@ export const applyAudioSettings = (settings: GameAudioOptions): void => {
   if (gameSoundManager) {
     if (settings.soundEffects) {
       gameSoundManager.setSoundEffectsEnabled(settings.soundEffects.enabled ?? true);
-      gameSoundManager.setSoundEffectsVolume(settings.soundEffects.volume ?? 0.5);
+      gameSoundManager.setSoundEffectsVolume(settings.soundEffects.volume ?? 0.4);
     }
   }
 
   const gameMusicManager = getGameMusicManager();
   if (gameMusicManager) {
-    if (settings.backgroundMusic) {
-      // Use the same settings for both game and background music
-      gameMusicManager.setGameMusicEnabled(settings.backgroundMusic.enabled ?? true);
-      gameMusicManager.setGameMusicVolume(settings.backgroundMusic.volume ?? 0.4);
+    if (settings.gameMusic) {
+      gameMusicManager.setGameMusicEnabled(settings.gameMusic.enabled ?? true);
+      gameMusicManager.setGameMusicVolume(settings.gameMusic.volume ?? 0.4);
+    }
 
+    if (settings.backgroundMusic) {
       gameMusicManager.setBackgroundMusicEnabled(settings.backgroundMusic.enabled ?? true);
       gameMusicManager.setBackgroundMusicVolume(settings.backgroundMusic.volume ?? 0.4);
     }
@@ -59,11 +60,11 @@ export const applyAudioSettings = (settings: GameAudioOptions): void => {
 
   const uiSoundManager = SoundManager;
   if (uiSoundManager) {
-    const isUISoundEnabled = settings.gameMusic?.enabled ?? true;
+    const isUISoundEnabled = settings.uiSounds?.enabled ?? true;
     uiSoundManager.setMute(!isUISoundEnabled);
 
-    if (settings.gameMusic?.volume !== undefined && uiSoundManager.setVolume) {
-      uiSoundManager.setVolume(settings.gameMusic.volume);
+    if (settings.uiSounds?.volume !== undefined && uiSoundManager.setVolume) {
+      uiSoundManager.setVolume(settings.uiSounds.volume);
     }
   }
 };

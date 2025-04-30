@@ -14,7 +14,15 @@ export class AudioSettingsController {
       const settings = await this.userModel.getAudioSettings(userId);
 
       // Return the settings or default if not found
-      return reply.send(settings || defaultGameAudioOptions);
+      const audioSettings = settings || defaultGameAudioOptions;
+
+      // Ensure all audio categories are present
+      return reply.send({
+        gameMusic: audioSettings.gameMusic || defaultGameAudioOptions.gameMusic,
+        backgroundMusic: audioSettings.backgroundMusic || defaultGameAudioOptions.backgroundMusic,
+        soundEffects: audioSettings.soundEffects || defaultGameAudioOptions.soundEffects,
+        uiSounds: audioSettings.uiSounds || defaultGameAudioOptions.uiSounds,
+      });
     } catch (error) {
       console.error('Error getting audio settings:', error);
       return reply.code(500).send({ error: 'Internal server error' });
@@ -29,7 +37,6 @@ export class AudioSettingsController {
       const userId = request.user.user_id;
       const audioSettings = request.body;
 
-      // Validate that all audio settings values are within bounds
       if (audioSettings.gameMusic && typeof audioSettings.gameMusic.volume === 'number') {
         audioSettings.gameMusic.volume = Math.max(0, Math.min(1, audioSettings.gameMusic.volume));
       }
@@ -49,6 +56,10 @@ export class AudioSettingsController {
           0,
           Math.min(1, audioSettings.soundEffects.volume)
         );
+      }
+
+      if (audioSettings.uiSounds && typeof audioSettings.uiSounds.volume === 'number') {
+        audioSettings.uiSounds.volume = Math.max(0, Math.min(1, audioSettings.uiSounds.volume));
       }
 
       await this.userModel.saveAudioSettings(userId, audioSettings);

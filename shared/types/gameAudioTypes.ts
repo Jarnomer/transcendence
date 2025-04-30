@@ -13,6 +13,10 @@ export interface GameAudioOptions {
     volume?: number;
     enabled?: boolean;
   };
+  uiSounds?: {
+    volume?: number;
+    enabled?: boolean;
+  };
 }
 
 export const defaultGameAudioOptions: GameAudioOptions = {
@@ -25,6 +29,10 @@ export const defaultGameAudioOptions: GameAudioOptions = {
     enabled: true,
   },
   soundEffects: {
+    volume: 0.4,
+    enabled: true,
+  },
+  uiSounds: {
     volume: 0.4,
     enabled: true,
   },
