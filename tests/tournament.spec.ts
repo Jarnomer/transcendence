@@ -1,5 +1,6 @@
 // tests/tournament.spec.ts
-import { test, chromium } from '@playwright/test';
+import { chromium, test } from '@playwright/test';
+
 import { loginOrRegister } from '../utils/auth';
 
 test('simulate three users joining tournament', async () => {
@@ -28,10 +29,6 @@ test('simulate three users joining tournament', async () => {
   // await page.locator('.game-menu-card', { hasText: 'Tournament' }).click();
   await player1.getByText('Tournament').nth(0).click(); // h2
   // await page.getByText('Tournament').nth(1).click(); // hover-info
-
-
-
-
 
   console.log(`${u1} clicked tournament button`);
   // await player1.goto(`${baseUrl}/tournament`);
@@ -65,18 +62,40 @@ test('simulate three users joining tournament', async () => {
   // await player3.getByRole('button', { name: 'Join' }).click();
 
   // Wait for the tournament lobby to load for all players
-  await player1.waitForURL('**/tournamentLobby');
+  // await player1.waitForURL('**/tournamentLobby');
   // await player2.waitForURL('**/tournamentLobby');
   // await player3.waitForURL('**/tournamentLobby');
 
   // Check if all players are in the tournament lobby
-  const player1LobbyText = await player1.getByText('Tournament Lobby').innerText();
+  // const player1LobbyText = await player1.getByText('Tournament Lobby').innerText();
   // const player2LobbyText = await player2.getByText('Tournament Lobby').innerText();
   // const player3LobbyText = await player3.getByText('Tournament Lobby').innerText();
 
-  console.log(`Player 1 Lobby Text: ${player1LobbyText}`);
+  // console.log(`Player 1 Lobby Text: ${player1LobbyText}`);
   // console.log(`Player 2 Lobby Text: ${player2LobbyText}`);
   // console.log(`Player 3 Lobby Text: ${player3LobbyText}`);
+
+  // Wait for the accept game popup to appear
+  await player1
+    .getByText('You have a game starting against:')
+    .waitFor({ state: 'visible', timeout: 50000 });
+  console.log(`Accept game popup is visible`);
+  // click to accept
+  await player1.getByRole('button', { name: 'Accept' }).click();
+  console.log(`${u1} accepted the game`);
+
+  console.log(`Waiting for 40 seconds for game to end...`);
+  await player1.waitForTimeout(140000);
+
+  // await player1
+  //   .getByText('You have a game starting against:')
+  //   .waitFor({ state: 'visible', timeout: 30000 });
+  // console.log(`Accept game popup is visible`);
+  // // click to accept
+  // await player1.getByRole('button', { name: 'Accept' }).click();
+  // console.log(`${u1} accepted the 2nd round game`);
+
+  await player1.waitForTimeout(20000);
 
   await browser.close();
 });
