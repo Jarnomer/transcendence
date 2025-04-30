@@ -131,19 +131,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         }
       }, defaultCameraTimings.cameraSwitchAngleInterval);
     } else {
-      if (cameraRef.current) {
-        const gameplayAngle = gameplayCameraAngles[0];
-
-        applyGameplayCameraAngle(cameraRef.current, gameplayAngle);
-        animateGameplayCamera(cameraRef.current, gameplayAngle);
-
-        if (retroEffectsRef.current) {
-          retroEffectsRef.current.simulateTrackingDistortion(
-            defaultRetroEffectTimings.trackingDistortionIntensity,
-            defaultRetroEffectTimings.trackingDistortionDuration
-          );
-        }
-      }
+      performCameraSequence();
     }
   };
 
@@ -192,6 +180,63 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     };
 
     scheduleNextGlitch();
+  };
+
+  const performCameraSequence = () => {
+    if (
+      !cameraRef.current ||
+      !retroEffectsRef.current ||
+      !player1Ref.current ||
+      !player2Ref.current ||
+      !ballRef.current
+    )
+      return;
+
+    const { players, ball } = gameState;
+
+    player1Ref.current.position.x = gameToSceneX(0, player1Ref.current);
+    player1Ref.current.position.y = gameToSceneY(players.player1.y, player1Ref.current);
+    player2Ref.current.position.x = gameToSceneX(gameWidth, player2Ref.current);
+    player2Ref.current.position.y = gameToSceneY(players.player2.y, player2Ref.current);
+    ballRef.current.position.x = gameToSceneX(ball.x, ballRef.current);
+    ballRef.current.position.y = gameToSceneY(ball.y, ballRef.current);
+
+    if (cameraMoveTimerRef.current) {
+      window.clearInterval(cameraMoveTimerRef.current);
+      cameraMoveTimerRef.current = null;
+    }
+
+    const angle1 = gameplayCameraAngles[1]; // player 1
+    applyGameplayCameraAngle(cameraRef.current, angle1);
+    animateGameplayCamera(cameraRef.current, angle1);
+    retroEffectsRef.current.simulateTrackingDistortion(
+      defaultRetroEffectTimings.trackingDistortionIntensity * 1.5,
+      defaultRetroEffectTimings.trackingDistortionDuration / 2
+    );
+
+    setTimeout(() => {
+      if (!cameraRef.current || !retroEffectsRef.current) return;
+
+      const angle2 = gameplayCameraAngles[2]; // player 2
+      applyGameplayCameraAngle(cameraRef.current, angle2);
+      animateGameplayCamera(cameraRef.current, angle2);
+      retroEffectsRef.current.simulateTrackingDistortion(
+        defaultRetroEffectTimings.trackingDistortionIntensity * 1.5,
+        defaultRetroEffectTimings.trackingDistortionDuration / 2
+      );
+
+      setTimeout(() => {
+        if (!cameraRef.current || !retroEffectsRef.current) return;
+
+        const angle0 = gameplayCameraAngles[0]; // gameplay
+        applyGameplayCameraAngle(cameraRef.current, angle0);
+        animateGameplayCamera(cameraRef.current, angle0);
+        retroEffectsRef.current.simulateTrackingDistortion(
+          defaultRetroEffectTimings.trackingDistortionIntensity * 1.5,
+          defaultRetroEffectTimings.trackingDistortionDuration / 2
+        );
+      }, 1500);
+    }, 1500);
   };
 
   // Initial render setup

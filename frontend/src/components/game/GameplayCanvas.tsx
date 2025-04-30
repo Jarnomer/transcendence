@@ -12,11 +12,11 @@ import {
 
 import {
   ActivePowerUpIconManager,
+  GameAnimationManager,
   GameSoundManager,
+  GameTextManager,
   PowerUpEffectsManager,
   RetroEffectsManager,
-  GameAnimationManager,
-  GameTextManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -25,6 +25,7 @@ import {
   createBall,
   createEdge,
   createFloor,
+  createGameTextManager,
   createPaddle,
   createPongRetroEffects,
   detectCollision,
@@ -39,7 +40,6 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  createGameTextManager,
 } from '@game/utils';
 
 import {

@@ -42,18 +42,18 @@ export const gameplayCameraAngles: ArcCameraAngle[] = [
     target: new Vector3(0, 0, -100),
   },
   {
-    // Player 2 perspective
-    alpha: -Math.PI / 8,
-    beta: Math.PI / 3,
-    radius: 35,
-    target: new Vector3(-2, -7, 10),
-  },
-  {
     // Player 1 perspective
     alpha: Math.PI / 8,
     beta: Math.PI / 3,
     radius: 35,
-    target: new Vector3(-2, -7, -6),
+    target: new Vector3(-2, -9, -6),
+  },
+  {
+    // Player 2 perspective
+    alpha: -Math.PI / 8,
+    beta: Math.PI / 3,
+    radius: 35,
+    target: new Vector3(-2, -9, 10),
   },
 ];
 
