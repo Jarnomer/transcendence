@@ -4,7 +4,7 @@ import { useChatContext } from '../../../contexts/chatContext/ChatContext';
 import { useModal } from '../../../contexts/modalContext/ModalContext';
 import { useUser } from '../../../contexts/user/UserContext';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
-import { acceptFriendRequest, sendFriendRequest } from '../../../services/friendService';
+import { acceptFriendRequest, blockUser, sendFriendRequest } from '../../../services/friendService';
 import { AddFriend } from './AddFriend';
 import { ChallengeButton } from './ChallengeUser';
 import { NavIconButton } from './NavIconButton';
@@ -55,8 +55,9 @@ export const UserActions: React.FC<UserActionsProps> = ({ user }) => {
     }
   };
 
-  const handleBlockUserClick = (user_id: string) => {
+  const handleBlockUserClick = async (user_id: string) => {
     console.log('Blocking user: ', user_id);
+    await blockUser(user_id);
   };
   if (!user) return;
   return (

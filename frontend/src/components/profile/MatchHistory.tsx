@@ -61,34 +61,34 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
             <div className="text-center flex items-center justify-center gap-6">
               <span className="">Wins: {user.stats?.wins}</span>
               <span className="">Losses: {user.stats?.losses}</span>
+              <span className="">Rank: {user.stats?.rank}</span>
+              <span className="">Rating: {user.stats?.rating}</span>
             </div>
           )}
           {user.games && user.games.length > 0 ? (
-            user.games
-              .filter((game: any) => game.display_name)
-              .map((game: any, index: number) => (
-                <motion.div
-                  key={game.game_id}
-                  className="flex items-center gap-3"
-                  custom={index}
-                  initial="hidden"
-                  animate="visible"
-                  variants={itemVariants}
-                >
-                  <span className={game.vsplayer.is_winner ? 'text-red-500' : 'text-green-500'}>
-                    {game.vsplayer.is_winner ? 'Defeat' : 'Victory'}
-                  </span>
-                  <span className={game.vsplayer.is_winner ? 'text-red-500' : 'text-green-500'}>
-                    {game.vsplayer.display_name}
-                  </span>
-                  <span className={game.vsplayer.is_winner ? 'text-red-500' : 'text-green-500'}>
-                    {`${game.my_score} - ${game.vsplayer.score}`}
-                  </span>
-                  <span className="text-gray-500 text-xs">
-                    {new Date(game.started_at.replace(' ', 'T')).toLocaleDateString()}
-                  </span>
-                </motion.div>
-              ))
+            user.games.map((game: any, index: number) => (
+              <motion.div
+                key={game.game_id}
+                className="flex items-center gap-3"
+                custom={index}
+                initial="hidden"
+                animate="visible"
+                variants={itemVariants}
+              >
+                <span className={game.vsplayer.is_winner ? 'text-red-500' : 'text-green-500'}>
+                  {game.vsplayer.is_winner ? 'Defeat' : 'Victory'}
+                </span>
+                <span className={game.vsplayer.is_winner ? 'text-red-500' : 'text-green-500'}>
+                  {game.vsplayer.display_name}
+                </span>
+                <span className={game.vsplayer.is_winner ? 'text-red-500' : 'text-green-500'}>
+                  {`${game.my_score} - ${game.vsplayer.score}`}
+                </span>
+                <span className="text-gray-500 text-xs">
+                  {new Date(game.started_at.replace(' ', 'T')).toLocaleDateString()}
+                </span>
+              </motion.div>
+            ))
           ) : (
             <p>No games found.</p>
           )}
