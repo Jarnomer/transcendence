@@ -58,7 +58,8 @@ export class UserModel {
                 WHERE is_winner = 1
                 GROUP BY player_id
             ) gp ON u.user_id = gp.player_id
-      ORDER BY rank;`
+      ORDER BY rank
+      ;`
     );
   }
 

@@ -180,4 +180,32 @@ export async function getGameSettings() {
     console.error('Failed to get game settings:', err);
     throw err;
   }
+
+}
+
+
+export async function getMyStats() {
+  try {
+    const res = await api.get(`/user/myStats`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch my stats`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get my stats:', err);
+    throw err;
+  }
+}
+
+export async function getMyGames() {
+  try {
+    const res = await api.get(`/game/myGames`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch my games`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get my games:', err);
+    throw err;
+  }
 }

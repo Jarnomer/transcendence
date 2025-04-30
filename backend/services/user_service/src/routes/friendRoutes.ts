@@ -63,4 +63,5 @@ export async function friendRoutes(fastify: FastifyInstance) {
   fastify.get('/blocked', friendController.getBlockedUsers.bind(friendController));
   fastify.post('/block/:blocked_user_id', friendController.blockUser.bind(friendController));
   fastify.delete('/block/:blocked_user_id', friendController.unblockUser.bind(friendController));
+  fastify.get('/block/:blocked_user_id', friendController.getBlockedUser.bind(friendController));
 }
