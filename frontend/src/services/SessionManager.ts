@@ -5,6 +5,9 @@ export type SessionData = {
   queueId?: string;
   mode?: string;
   difficulty?: string;
+  avatarUrl?: string;
+  displayName?: string;
+  userId?: string;
   matchmakingRegistered?: boolean;
   matchmakerState?: MatchMakerState;
 };
@@ -15,9 +18,7 @@ export default class SessionManager {
   private static instance: SessionManager;
   private cache: SessionData = {};
 
-  private constructor(private storage: Storage = localStorage) {
-    this.set('matchmakingRegistered', false);
-  }
+  private constructor(private storage: Storage = localStorage) {}
 
   public static getInstance(storage?: Storage): SessionManager {
     if (!SessionManager.instance) {

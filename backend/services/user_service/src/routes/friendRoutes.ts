@@ -58,4 +58,9 @@ export async function friendRoutes(fastify: FastifyInstance) {
     { schema: { params: CancelSchema, response: { 204: MessageResponseSchema } } },
     friendController.cancelFriendRequest.bind(friendController)
   );
+
+  fastify.get('/friends', friendController.getFriends.bind(friendController));
+  fastify.get('/blocked', friendController.getBlockedUsers.bind(friendController));
+  fastify.post('/block/:blocked_user_id', friendController.blockUser.bind(friendController));
+  fastify.delete('/block/:blocked_user_id', friendController.unblockUser.bind(friendController));
 }

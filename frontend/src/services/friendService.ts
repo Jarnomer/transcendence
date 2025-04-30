@@ -58,3 +58,57 @@ export async function getRequestsSent() {
     throw err;
   }
 }
+
+export async function getBlockedUsers() {
+  try {
+    const res = await api.get(`/friend/blocked`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to get blocked users`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get blocked users:', err);
+    throw err;
+  }
+}
+
+export async function getMyfriends() {
+  try {
+    const res = await api.get(`/friend/friends`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to get friends`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get friends:', err);
+    throw err;
+  }
+}
+
+export async function blockUser(blocked_user_id: string) {
+  try {
+    const res = await api.post(`/friend/block/${blocked_user_id}`, {
+      message: 'User blocked',
+    });
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to block user`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to block user:', err);
+    throw err;
+  }
+}
+
+export async function unblockUser(blocked_user_id: string) {
+  try {
+    const res = await api.delete(`/friend/block/${blocked_user_id}`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to unblock user`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to unblock user:', err);
+    throw err;
+  }
+}

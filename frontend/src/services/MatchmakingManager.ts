@@ -1,6 +1,8 @@
 import { GameOptionsType, MatchmakingSnapshot } from '@shared/types';
 
+import { MatchMakerState } from '../services/MatchMaker';
 import { cancelQueue, deleteGame } from './gameService';
+import SessionManager from './SessionManager';
 import WebSocketManager from './webSocket/WebSocketManager';
 
 // export type Phase =
@@ -23,7 +25,7 @@ class MatchmakingManager {
   // private phase: Phase = 'idle';
   // private role: UserRole = 'player';
   // private gameId: string | null = null;
-  // private queueId: string = '';
+  private queueId: string = '';
   private mode: string | null = null;
   private difficulty: string | null = null;
   // private participants: string[] = [];
@@ -36,6 +38,7 @@ class MatchmakingManager {
     gameId: '',
     participants: [],
   };
+  private sessionManager = SessionManager.getInstance();
 
   constructor() {
     this.matchmakingSocket = WebSocketManager.getInstance('matchmaking');
@@ -92,7 +95,7 @@ class MatchmakingManager {
     const { queueId, mode, difficulty } = options;
     this.mode = mode;
     this.difficulty = difficulty;
-    // this.queueId = queueId ? queueId : '';
+    this.queueId = queueId ? queueId : '';
   }
 
   startMatchmaking() {
@@ -136,6 +139,34 @@ class MatchmakingManager {
     this.setState({ phase: 'in_game', role: 'player', gameId: this.snapshot.gameId });
     // this.notifyListeners();
   }
+
+  handleFindMatch = () => {
+    console.log('Finding match');
+    this.matchmakingSocket.sendMessage({
+      type: 'find_match',
+      payload: {
+        mode: this.sessionManager.get('mode'),
+        difficulty: this.sessionManager.get('difficulty'),
+        user_id: this.sessionManager.get('userId'),
+        avatar_url: this.sessionManager.get('avatarUrl'),
+        display_name: this.sessionManager.get('displayName'),
+      },
+    });
+  };
+
+  handleJoinMatch = () => {
+    this.matchmakingSocket.sendMessage({
+      type: 'join_match',
+      payload: {
+        queue_id: this.sessionManager.get('queueId'),
+        user_id: this.sessionManager.get('userId'),
+        mode: this.sessionManager.get('mode'),
+        difficulty: this.sessionManager.get('difficulty'),
+        avatar_url: this.sessionManager.get('avatarUrl'),
+        display_name: this.sessionManager.get('displayName'),
+      },
+    });
+  };
 
   handleMatchFound = (game: any) => {
     console.info('Match found:', game);
@@ -188,6 +219,16 @@ class MatchmakingManager {
     this.setState({ phase: 'idle', role: 'player', gameId: '' });
   };
 
+  handleReconnecting = (data: any) => {
+    console.info('Reconnecting to matchmaking server... attempt:', data.reconnectAttempts);
+    if (sessionStorage.getItem('matchmakingRegistered') !== 'true') return;
+    if (sessionStorage.getItem('matchmakerState') === MatchMakerState.WAITING_FOR_PLAYERS) {
+      this.handleJoinMatch();
+    } else if (sessionStorage.getItem('matchmakerState') === MatchMakerState.JOINING_RANDOM) {
+      this.handleFindMatch();
+    }
+  };
+
   attachListeners() {
     this.matchmakingSocket.addEventListener('match_found', this.handleMatchFound);
     this.matchmakingSocket.addEventListener('game_winner', this.handleGameWinner);
@@ -196,6 +237,7 @@ class MatchmakingManager {
     this.matchmakingSocket.addEventListener('participants', this.handleParticipants);
     this.matchmakingSocket.addEventListener('tournament_matches', this.handleTournamentMatches);
     this.matchmakingSocket.addEventListener('matchmaking_timeout', this.handleMatchmakingTimeout);
+    this.matchmakingSocket.addEventListener('reconnecting', this.handleReconnecting);
   }
 
   detachListeners() {
@@ -209,6 +251,7 @@ class MatchmakingManager {
       'matchmaking_timeout',
       this.handleMatchmakingTimeout
     );
+    this.matchmakingSocket.removeEventListener('reconnecting', this.handleReconnecting);
   }
 
   async cancelQueue() {

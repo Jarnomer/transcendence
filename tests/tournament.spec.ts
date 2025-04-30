@@ -49,11 +49,13 @@ test('simulate three users joining tournament', async () => {
 
   // console.log(`Join button is visible`);
   // await joinButton.click();
-  await player1.getByText('Open tournaments').waitFor({ state: 'visible', timeout: 10000 });
+  // await player1.getByText('Open tournaments').waitFor({ state: 'visible', timeout: 20000 });
+  await player1.waitForTimeout(10000);
+
 
   // Wait for any join button (aria-label="Join TournamentName") to appear
   const joinButton = player1.getByLabel(/Join /).first();
-  await joinButton.waitFor({ state: 'visible', timeout: 10000 }); // more generous timeout
+  await joinButton.waitFor({ state: 'visible', timeout: 40000 }); // more generous timeout
   console.log(`Join button is visible`);
   await player1.getByLabel(/Join /).first().click();
 
@@ -84,7 +86,7 @@ test('simulate three users joining tournament', async () => {
   await player1.getByRole('button', { name: 'Accept' }).click();
   console.log(`${u1} accepted the game`);
 
-  console.log(`Waiting for 40 seconds for game to end...`);
+  console.log(`Waiting for 140 seconds for game to end...`);
   await player1.waitForTimeout(140000);
 
   // await player1

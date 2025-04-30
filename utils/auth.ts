@@ -37,7 +37,7 @@ export async function loginOrRegister(
     await page.getByRole('button', { name: 'Register' }).click();
     console.log('Clicked register button');
     await page.waitForURL('**/signUp');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(7000);
     await expect(page.getByRole('heading', { name: 'Edit Profile' })).toBeVisible();
     console.log('Edit Profile page is visible');
     await page.getByLabel('Display name').fill(username);

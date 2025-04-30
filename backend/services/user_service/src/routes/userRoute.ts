@@ -71,4 +71,6 @@ export async function userRoutes(fastify: FastifyInstance) {
   );
   fastify.post('/saveGameSettings', userController.saveGameSettings.bind(userController));
   fastify.get('/getGameSettings', userController.getGameSettings.bind(userController));
+  fastify.get('/myStats', userController.getMyStats.bind(userController));
+  fastify.get('/stats/:user_id', userController.getUserStats.bind(userController));
 }

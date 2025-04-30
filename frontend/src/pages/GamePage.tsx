@@ -8,7 +8,7 @@ import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
-import GameplayCanvas from '../components/game/GameplayCanvas';
+// import GameplayCanvas from '../components/game/GameplayCanvas';lo
 import { GameResults } from '../components/game/GameResults';
 import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
@@ -83,17 +83,19 @@ export const GamePage: React.FC = () => {
    */
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
-    sendMessage('matchmaking', {
-      type: 'find_match',
-      payload: {
-        mode: mode,
-        difficulty: difficulty,
-        user_id: user?.user_id,
-        avatar_url: user?.avatar_url,
-        display_name: user?.display_name,
-      },
-    });
-  }, [connections.matchmaking, gameId, user, mode, difficulty]);
+    if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
+      sendMessage('matchmaking', {
+        type: 'find_match',
+        payload: {
+          mode: mode,
+          difficulty: difficulty,
+          user_id: user?.user_id,
+          avatar_url: user?.avatar_url,
+          display_name: user?.display_name,
+        },
+      });
+    }
+  }, [connections.matchmaking, gameId, user, mode, difficulty, lobby]);
 
   /**
    * if gameId is set, connect to game socket
@@ -163,10 +165,10 @@ export const GamePage: React.FC = () => {
         }`}
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
-          // <h1 className="w-full h-full">
-          //   gameplay canvas: ${gameStatus} : ${connections.game}
-          // </h1>
+          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          <h1 className="w-full h-full">
+            gameplay canvas: ${gameStatus} : ${connections.game}
+          </h1>
         )}
       </div>
 
