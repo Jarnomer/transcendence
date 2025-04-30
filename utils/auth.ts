@@ -5,13 +5,16 @@ export async function loginOrRegister(
   context: BrowserContext,
   baseUrl: string,
   options?: {
+    index?: number;
     username?: string;
     password?: string;
     saveStoragePath?: string;
   }
 ) {
   // const username = options?.username ?? `testuser_${Date.now()}`;
-  const username = options?.username ?? `testuser_${Math.random().toString(36).slice(2, 6)}`;
+  // const username = options?.username ?? `testuser_${Math.random().toString(36).slice(2, 6)}`;
+  const username =
+    options?.username ?? `testuser_${options?.index ?? Math.random().toString(36).slice(2, 6)}`;
 
   const password = options?.password ?? 'TestPassword123';
   const page = await context.newPage();
