@@ -40,7 +40,7 @@ export class MatchmakingController {
     ws.on('message', this.matchmakingService.handleMessage.bind(this.matchmakingService));
     ws.on('message', (message: string) => {
       const parsedMessage = JSON.parse(message);
-      console.log('Received message:', parsedMessage);
+      // console.log('Received message:', parsedMessage);
       if (parsedMessage.type === 'ping') {
         ws.send(JSON.stringify({ type: 'pong', state: {} }));
       }

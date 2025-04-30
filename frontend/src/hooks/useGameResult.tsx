@@ -74,7 +74,7 @@ export const useGameResult = () => {
       dispatch({ type: 'GAME_RESET' });
       // cleanup();
       // resetGameOptions();
-      // closeConnection('game');
+      closeConnection('game');
       if (mode !== 'tournamnet') {
         // navigate('/gameMenu');
       }
@@ -151,7 +151,7 @@ export const useGameResult = () => {
         })
         .finally(() => {
           // resetGameOptions();
-          // closeConnection('game');
+          closeConnection('game');
           setGameId('');
           // cleanup();
           if (mode !== 'tournamnet') {

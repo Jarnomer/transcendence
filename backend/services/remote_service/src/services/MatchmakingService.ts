@@ -54,7 +54,7 @@ abstract class MatchmakingMode {
   abstract addPlayer(player: Player): void;
   abstract removePlayer(playerId: string): void;
   abstract findRandomMatch(player: Player): void;
-  abstract joinQueue(queueId: string, player: Player): void;
+  abstract joinQueue(queueId: string, player: Player, difficulty: string): void;
   abstract createMatch(playerIds: string[]): Promise<string>;
   abstract handleGameResult(gameId: string, winnerId: string): void;
 
@@ -210,7 +210,7 @@ class OneVOneMatchmaking extends MatchmakingMode {
     this.playerIntervals.set(player.user_id, interval);
   }
 
-  async joinQueue(queueId: string, player: Player) {
+  async joinQueue(queueId: string, player: Player, difficulty: string) {
     const count = this.addUserToQueue(queueId, player);
     if (count >= 2) {
       const players = this.queueMatches.get(queueId)!;
@@ -344,12 +344,13 @@ class TournamentMatchmaking extends MatchmakingMode {
 
   async findRandomMatch(player: Player) {}
 
-  async joinQueue(queueId: string, player: Player) {
+  async joinQueue(queueId: string, player: Player, difficulty: string) {
     console.log(`Joining tournament queue: ${queueId}`);
     const count = this.addUserToQueue(queueId, player);
     this.playerTournament.set(player.user_id, queueId);
-    const minPlayers = await this.queueService.getQueueVariant(queueId);
-    const size = parseInt(minPlayers.variant);
+    // const minPlayers = await this.queueService.getQueueVariant(queueId);
+    const minPlayers = difficulty;
+    const size = parseInt(minPlayers);
     console.log(`Queue size: ${size}`);
     console.log(`Players in queue: ${count}`);
     if (count >= size) {
@@ -436,7 +437,7 @@ export class MatchmakingService {
    * no match making is done
    */
   async joinQueue(payload: any) {
-    const { queue_id, user_id, mode, avatar_url, display_name } = payload;
+    const { queue_id, user_id, mode, avatar_url, display_name, difficulty } = payload;
     console.log(`Joining match for ${user_id} in queue: ${queue_id}`);
     const playerElo = await this.gameService.getPlayerElo(user_id);
     const player: Player = {
@@ -447,7 +448,7 @@ export class MatchmakingService {
       elo: playerElo.elo,
       joinedAt: new Date(),
     };
-    this.matchmakers[mode].joinQueue(queue_id, player);
+    this.matchmakers[mode].joinQueue(queue_id, player, difficulty);
     const players = this.matchmakers[mode].getQueueMatches(queue_id);
     const message = {
       type: 'participants',
