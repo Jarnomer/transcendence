@@ -6,10 +6,10 @@ import { motion } from 'framer-motion';
 
 import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
 
+import { UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
 import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
 import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
-import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
 
 export const listAnimationVariants = {
   initial: {
@@ -50,6 +50,7 @@ type Friend = {
 };
 
 type FriendListProps = {
+  user: UserDataResponseType;
   friends: Friend[];
   requests: Friend[];
   sents: Friend[];
@@ -120,6 +121,7 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests, loading, s
     <>
       {requests && requests.length > 0 ? (
         <motion.ul
+          aria-label="friend requests"
           className="pl-5 w-full h-full overflow-y-scroll"
           variants={containerVariants}
           initial="hidden"
@@ -142,11 +144,13 @@ export const FriendRequests: React.FC<FriendListProps> = ({ requests, loading, s
                 <div className="ml-5 flex gap-1">
                   <NavIconButton
                     id={`accept-friend-${friend.user_id}`}
+                    ariaLabel={`Accept friend request from ${friend.display_name}`}
                     icon="checkCircle"
                     onClick={(event) => handleAcceptFriendClick(event, friend.user_id)}
                   />
                   <NavIconButton
                     id={`reject-friend-${friend.user_id}`}
+                    ariaLabel={`Decline friend request from ${friend.display_name}`}
                     icon="xCircle"
                     onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
                   />
@@ -167,7 +171,7 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
   console.log('FRIENDS FROM FRIENDLIST: ', friends);
   return friends && friends.length > 0 ? (
     <motion.ul
-      className="pl-5 w-full h-full gap-3 overflow-y-scroll"
+      className="flex flex-wrap gap-4 justify-start "
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -176,66 +180,77 @@ export const Friends: React.FC<FriendListProps> = ({ friends }) => {
     >
       {friends.map((friend) => (
         <motion.li
-          className="my-1 hover:text-secondary h-[57px] w-[282px]"
+          className="hover:text-secondary backdrop-blur-md aspect-square w-[100px] flex-shrink-0"
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
           variants={listItemVariants}
         >
-          <ListSvgContainer>
-            <div className="flex w-full h-full items-center gap-2">
-              <ProfilePictureMedium user={friend}></ProfilePictureMedium>
-              <span className="text-xs font-medium">{friend.display_name}</span>
+          <div className="text-center ">
+            <div className="relative border h-[100px] w-[100px] overflow-hidden">
+              <img
+                className="object-cover w-full h-full"
+                src={friend.avatar_url}
+                alt={`${friend.display_name}'s profile picture`}
+              />
             </div>
-          </ListSvgContainer>
+            <span className="text-xs font-medium text-secondary">{friend.display_name}</span>
+          </div>
         </motion.li>
       ))}
     </motion.ul>
   ) : (
-    <>
-      <p className="text-gray-400 "></p>
-      <motion.ul
-        className="pl-5 w-full h-full gap-3 overflow-y-scroll text-grey-400"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        transition={{ duration: 0.4 }}
+    <motion.ul
+      className="flex text-gray-400 flex-wrap gap-4 justify-start"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      transition={{ duration: 0.4 }}
+    >
+      <motion.li
+        className=" aspect-square opacity-20 w-[100px] flex-shrink-0"
+        variants={listItemVariants}
       >
-        <motion.li className="my-1 text-gray-500 h-[57px] w-[282px]" variants={listItemVariants}>
-          <ListSvgContainer>
-            <div className="flex w-full h-full items-center gap-2">
-              <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-                <img className="object-cover w-full h-full grayscale" src={``} />
-              </div>
-              <span className="text-xs font-medium">mystery man</span>
-            </div>
-          </ListSvgContainer>
-        </motion.li>
-      </motion.ul>
-    </>
+        <div className="text-center ">
+          <div className="relative border h-[100px] w-[100px] overflow-hidden">
+            <img
+              className="object-cover grayscale w-full h-full opacity-50"
+              src={'/uploads/default_avatar.png'}
+            />
+          </div>
+          <span className="text-xs font-medium">{}</span>
+        </div>
+      </motion.li>
+    </motion.ul>
   );
 };
 
-export const FriendList: React.FC<FriendListProps> = ({
-  isOwnProfile,
-  friends,
-  requests,
-  sents,
-  loading,
-  setLoading,
-}) => {
+export const FriendList: React.FC<FriendListProps> = ({ user, requests, loading, setLoading }) => {
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
   const navigate = useNavigate();
-  const { refetchUser } = useUser();
   console.log('LOADING FROM FRIENDLIST: ', loading);
+  const {
+    user: loggedInUser,
+    refetchUser,
+    refetchRequests,
+    friends: loggedInUserFriends,
+  } = useUser();
+  const isOwnProfile = user?.user_id === loggedInUser?.user_id;
+  const friends = isOwnProfile ? loggedInUserFriends || [] : user?.friends || [];
 
   if (loading) {
     return <h1>loading asd</h1>;
   }
 
   return (
-    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
-      <div className=" w-full lg:w-1/2 h-[20px] bg-primary text-black text-sm">Friends</div>
+    <motion.div
+      className=""
+      variants={animationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="h-[20px] bg-primary text-black text-sm">Friends</div>
       <motion.div className="">
         <div className="flex gap-4 p-2">
           <button
@@ -245,14 +260,12 @@ export const FriendList: React.FC<FriendListProps> = ({
             {(friends && friends.length) || '0'} Friends
           </button>
           {isOwnProfile ? (
-            <>
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={` text-xs ${activeTab === 'requests' ? ' text-secondary' : ''}`}
-              >
-                Requests
-              </button>
-            </>
+            <button
+              onClick={() => setActiveTab('requests')}
+              className={` text-xs ${activeTab === 'requests' ? ' text-secondary' : ''}`}
+            >
+              Requests
+            </button>
           ) : null}
         </div>
 

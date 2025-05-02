@@ -23,6 +23,7 @@ interface UserContextType {
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  friends: any[];
   // setToken: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
@@ -43,8 +44,8 @@ export const useUser = () => {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
-
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
 
@@ -58,6 +59,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getUserData(userId)
       .then((data) => {
         setUser(data);
+        setFriends(data.friends);
         // console.log('Fetched user data:', data);
       })
       .catch((err) => {
@@ -133,6 +135,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         refetchRequests: fetchRequestsSent,
         loading,
+        friends,
       }}
     >
       {children}

@@ -70,7 +70,9 @@ export const HomePage: React.FC = () => {
             animate="animate"
             exit="exit"
           >
-            <LeaderBoard />
+            <section aria-label="leaderboard">
+              <LeaderBoard />
+            </section>
           </motion.div>
           <motion.div
             key="playerQueue"
@@ -81,7 +83,9 @@ export const HomePage: React.FC = () => {
             exit="exit"
             layout
           >
-            <Updates></Updates>
+            <section aria-label="news and updates">
+              <Updates></Updates>
+            </section>
           </motion.div>
         </AnimatePresence>
       </motion.div>

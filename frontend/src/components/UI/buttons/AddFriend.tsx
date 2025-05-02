@@ -8,7 +8,6 @@ import { sendFriendRequest } from '../../../services/friendService';
 
 interface AddFriendButtonProps {
   receiverUserId: string;
-  onClick?: () => void;
 }
 
 const icons = {
@@ -38,7 +37,6 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
         sendFriendRequest(receiverUserId);
         refetchRequests();
         refetchUser();
-        setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
       } catch (error) {
         console.error('Failed to send friend request:', error);
       } finally {
@@ -46,6 +44,12 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
       }
     }
   };
+
+  useEffect(() => {
+    if (sentRequests) {
+      setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
+    }
+  }, [sentRequests, receiverUserId]);
 
   console.log(user?.friends);
   console.log('isPending:', isPending);

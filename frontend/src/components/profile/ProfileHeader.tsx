@@ -1,15 +1,30 @@
 import React from 'react';
 
+import { motion } from 'framer-motion';
+
 import { UserDataResponseType } from '@shared/types/userTypes';
 
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { acceptFriendRequest, sendFriendRequest } from '../../services/friendService';
 import { UserActions } from '../UI/buttons/UserActions';
 import { ProfilePicture } from './ProfilePicture';
 import { getLastSeenTime } from './utils/lastSeen';
+
+export const animationVariants = {
+  initial: {
+    clipPath: 'inset(100% 0 0  0 )',
+    opacity: 0,
+  },
+  animate: {
+    clipPath: 'inset(0 0% 0 0)',
+    opacity: 1,
+    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
+  },
+  exit: {
+    clipPath: 'inset(0 100% 0 0)',
+    opacity: 0,
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+};
 
 type Friend = {
   user_id: string;
@@ -19,7 +34,6 @@ type Friend = {
 
 interface ProfileHeaderProps {
   user: UserDataResponseType | null;
-  isOwnProfile: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setEditProfile: React.Dispatch<React.SetStateAction<boolean>>;
   editProfile: boolean;
@@ -28,65 +42,31 @@ interface ProfileHeaderProps {
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
-  isOwnProfile,
   setLoading,
   setEditProfile,
   editProfile,
   sent,
 }) => {
-  const { user: loggedInUser, setUser, refetchUser } = useUser();
-  const { setOpenChatWindows, messages, fetchDmHistory, friends } = useChatContext();
-  const isDesktop = useMediaQuery('(min-width: 600px)');
-  const { openModal, closeModal } = useModal();
+  const { user: loggedInUser } = useUser();
 
-  const handleAddFriendClick = (user_id: string) => {
-    if (
-      loggedInUser?.friend_requests &&
-      loggedInUser.friend_requests.some((req) => req.user_id === user?.user_id)
-    ) {
-      console.log('ACCEPTING FRIEND REQUEST');
-      acceptFriendRequest(user_id)
-        .then(() => {
-          console.log('Friend request accepted');
-          refetchUser();
-        })
-        .catch((error) => {
-          console.error('Failed to accept friend request: ', error);
-        });
-    } else {
-      console.log('Sending friend request to user: ', user_id);
-      sendFriendRequest(user_id);
-    }
-  };
+  const isOwnProfile = user?.user_id === loggedInUser?.user_id;
 
-  const handleChatClick = async (friendId: string) => {
-    console.log('opening chat', friendId);
-    if (!isDesktop) {
-      openModal('chatModal', {
-        loggedInUser,
-        friends,
-        selectedFriendId: user?.user_id,
-        onClose: closeModal,
-      });
-    } else {
-      setOpenChatWindows((prev) => ({
-        ...prev,
-        [friendId]: true,
-      }));
-
-      if (!messages[friendId]) {
-        await fetchDmHistory(friendId);
-      }
-    }
-  };
-
-  const handleBlockUserClick = (user_id: string) => {
-    console.log('Blocking user: ', user_id);
-  };
+  if (!user) return;
 
   return (
-    <div className="w-full border-1 text-left flex  max-w-md md:max-w-full p-2">
+    <motion.div
+      className="w-full border-1 text-left flex p-2 backdrop-blur-sm"
+      variants={animationVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="flex w-full gap-4">
+        <ProfilePicture
+          user={user}
+          isOwnProfile={isOwnProfile}
+          setLoading={setLoading}
+        ></ProfilePicture>
         {/* USER INFO */}
         <div className="w-full flex flex-col gap-2">
           <div className="bg-primary text-black min-w-full text-xs">
@@ -124,12 +104,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <UserActions user={user}></UserActions>
           )}
         </div>
-        <ProfilePicture
-          user={user}
-          isOwnProfile={isOwnProfile}
-          setLoading={setLoading}
-        ></ProfilePicture>
       </div>
-    </div>
+    </motion.div>
   );
 };
