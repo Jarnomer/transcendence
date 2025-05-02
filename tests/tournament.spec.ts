@@ -21,7 +21,7 @@ test('simulate ${totalUsers} users joining tournament', async () => {
         .waitFor({ state: 'visible', timeout: 180_000 });
       console.log(`${username} sees next game invite`);
       await page.getByRole('button', { name: 'Accept' }).click();
-      console.log(`${username} accepted next round`);
+      console.log(`${username} accepted next game`);
     } catch {
       console.log(`${username} eliminated`);
       return false;
