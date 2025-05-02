@@ -105,6 +105,59 @@ function applyLightEffect(
   }, effectDelay);
 }
 
+function disposeParticlesWithAnimation(
+  scene: Scene,
+  particleSystem: ParticleSystem,
+  effectDelay: number,
+  duration: number,
+  fadeStartMultiplier: number,
+  velocityMultiplier: number,
+  sizeMultiplier: number
+): void {
+  // Set up update function to directly modify existing particles
+  const originalUpdateFunction = particleSystem.updateFunction;
+
+  setTimeout(() => {
+    particleSystem.start();
+
+    const startTime = Date.now();
+    const endTime = startTime + duration;
+    const fadeStartTime = startTime + duration * fadeStartMultiplier;
+
+    particleSystem.updateFunction = (particles) => {
+      // First call original update function if it exists
+      if (originalUpdateFunction) originalUpdateFunction(particles);
+
+      const currentTime = Date.now();
+
+      if (currentTime >= fadeStartTime && currentTime < endTime) {
+        const fadeProgress = (currentTime - fadeStartTime) / (endTime - fadeStartTime);
+        const velocityFactor = 1 + (velocityMultiplier - 1) * fadeProgress * 2;
+        const sizeFactor = 1 + (sizeMultiplier - 1) * fadeProgress;
+        const alphaFactor = Math.max(0, 1 - fadeProgress);
+
+        for (let p = 0; p < particles.length; p++) {
+          const particle = particles[p];
+          particle.direction.scaleInPlace(1 + (velocityFactor - 1) * 0.3);
+          particle.size *= 1 + (sizeFactor - 1) * 0.2;
+          particle.color.a *= alphaFactor * 0.97;
+        }
+      }
+
+      if (currentTime >= endTime) particleSystem.dispose();
+    };
+
+    const observer = scene.onBeforeRenderObservable.add(() => {
+      const currentTime = Date.now();
+
+      if (currentTime >= endTime) {
+        scene.onBeforeRenderObservable.remove(observer);
+        particleSystem.dispose();
+      }
+    });
+  }, effectDelay);
+}
+
 export function applyScoreBallParticles(
   scene: Scene,
   paddle: Mesh,
@@ -120,7 +173,7 @@ export function applyScoreBallParticles(
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
 
-  const particleSystem = new ParticleSystem('ballExplosionParticles', 150, scene);
+  const particleSystem = new ParticleSystem('ballExplosionParticles', 300, scene);
 
   particleSystem.particleTexture = createParticleTexture(scene, primaryColor);
   particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
@@ -138,7 +191,7 @@ export function applyScoreBallParticles(
   particleSystem.maxSize = 0.8 + intensity * 1.5;
   particleSystem.minLifeTime = 1.5 + intensity * 1.5;
   particleSystem.maxLifeTime = 3.0 + intensity * 2.0;
-  particleSystem.minEmitPower = 2 + intensity * 2.0;
+  particleSystem.minEmitPower = 4 + intensity * 2.0;
   particleSystem.maxEmitPower = 6 + intensity * 4.0;
 
   particleSystem.manualEmitCount = 100 + Math.floor(intensity * 100);
@@ -154,12 +207,15 @@ export function applyScoreBallParticles(
 
   particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
-  setTimeout(() => {
-    particleSystem.start();
-    setTimeout(() => {
-      particleSystem.dispose();
-    }, duration);
-  }, effectDelay);
+  disposeParticlesWithAnimation(
+    scene,
+    particleSystem,
+    effectDelay,
+    duration,
+    scoreEffectTimings.fadeStartBallMultiplier,
+    4.0,
+    0.5
+  );
 }
 
 export function applyScoreBallFlares(
@@ -176,7 +232,7 @@ export function applyScoreBallFlares(
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
 
-  const particleSystem = new ParticleSystem('whiteFlareParticles', 100, scene);
+  const particleSystem = new ParticleSystem('whiteFlareParticles', 200, scene);
 
   particleSystem.particleTexture = new Texture('/textures/flare.png', scene);
   particleSystem.emitter = new Vector3(ballSceneX + xOffset, ballSceneY, paddle.position.z);
@@ -185,12 +241,12 @@ export function applyScoreBallFlares(
   particleSystem.color2 = new Color4(1, 1, 1, 1.0);
   particleSystem.colorDead = new Color4(0.8, 0.8, 0.8, 0);
 
-  particleSystem.minSize = (0.2 + intensity * 0.5) * (2 / 3);
-  particleSystem.maxSize = (0.8 + intensity * 1.5) * (2 / 3);
-  particleSystem.minLifeTime = (1.5 + intensity * 1.5) * (2 / 3);
-  particleSystem.maxLifeTime = (3.0 + intensity * 2.0) * (2 / 3);
-  particleSystem.minEmitPower = (2 + intensity * 2.0) * (2 / 3);
-  particleSystem.maxEmitPower = (6 + intensity * 4.0) * (2 / 3);
+  particleSystem.minSize = 0.2 + intensity * 0.5;
+  particleSystem.maxSize = 0.8 + intensity * 1.5;
+  particleSystem.minLifeTime = 1.5 + intensity * 1.5;
+  particleSystem.maxLifeTime = 3.0 + intensity * 2.0;
+  particleSystem.minEmitPower = 4 + intensity * 2.0;
+  particleSystem.maxEmitPower = 6 + intensity * 4.0;
 
   particleSystem.manualEmitCount = Math.floor((100 + Math.floor(intensity * 100)) * (2 / 3));
   particleSystem.emitRate = 0; // Emit all at once
@@ -200,17 +256,20 @@ export function applyScoreBallFlares(
   particleSystem.direction1 = new Vector3(5, 5, 5);
   particleSystem.direction2 = new Vector3(-5, -5, -5);
 
-  particleSystem.minAngularSpeed = -3.0 * (2 / 3);
-  particleSystem.maxAngularSpeed = 3.0 * (2 / 3);
+  particleSystem.minAngularSpeed = -3.0;
+  particleSystem.maxAngularSpeed = 3.0;
 
   particleSystem.blendMode = ParticleSystem.BLENDMODE_ADD;
 
-  setTimeout(() => {
-    particleSystem.start();
-    setTimeout(() => {
-      particleSystem.dispose();
-    }, duration);
-  }, effectDelay);
+  disposeParticlesWithAnimation(
+    scene,
+    particleSystem,
+    effectDelay,
+    duration,
+    scoreEffectTimings.fadeStartBallMultiplier,
+    3.5,
+    2.0
+  );
 }
 
 export function applyScorePaddleExplosion(
