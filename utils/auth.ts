@@ -29,11 +29,9 @@ export async function loginOrRegister(
     console.log('Clicked register button');
     await page.waitForSelector('text=Register');
     await expect(page.getByRole('heading', { name: 'Register' })).toBeVisible();
-    // console.log('Register page is visible');
     await expect(page.getByRole('button', { name: 'Register' })).toBeVisible();
     await expect(page.getByPlaceholder('Username')).toBeVisible();
     await expect(page.getByPlaceholder('Password')).toBeVisible();
-    // console.log('Register form is visible');
     await page.getByPlaceholder('Username').fill(username);
     console.log(`Filled username: ${username}`);
     await page.getByPlaceholder('Password').fill(password);
@@ -41,11 +39,9 @@ export async function loginOrRegister(
     await page.getByRole('button', { name: 'Register' }).click();
     console.log('Clicked register button');
     await page.waitForURL('**/signUp');
-    // await page.waitForTimeout(7000);
     await expect(page.getByRole('heading', { name: 'Edit Profile' })).toBeVisible({
       timeout: 15000,
     });
-    // console.log('Edit Profile page is visible');
     await page.getByLabel('Display name').fill(username);
     console.log(`Filled display name: ${username}`);
     await page.getByRole('button', { name: 'Save' }).click();

@@ -21,7 +21,9 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
 
   const handleOnClik = () => {
     playSubmitSound();
-    onClick();
+    if (typeof onClick === 'function') {
+      onClick();
+    }
   };
   return (
     <button
