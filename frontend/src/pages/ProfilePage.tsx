@@ -13,6 +13,7 @@ import { UserDataResponseType } from '@shared/types/userTypes';
 import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { UserInformationForm } from '../components/signUp/UserInformationForm';
+import { Error } from '../components/UI/Error';
 
 export const animationVariants = {
   initial: {
@@ -59,7 +60,11 @@ export const ProfilePage: React.FC = () => {
   }
 
   if (!user && !loading) {
-    return <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>;
+    return (
+      <Error>
+        <div className="text-center mt-10 text-lg text-red-500">Failed to load user data.</div>
+      </Error>
+    );
   }
 
   return (

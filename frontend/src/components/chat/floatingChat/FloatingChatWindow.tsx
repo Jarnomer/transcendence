@@ -12,7 +12,7 @@ import { MessageList } from '../MessageList';
 
 interface ChatWindowProps {
   friends: UserDataResponseType[];
-  selectedFriendId: string | null;
+  chatId: string | null;
   roomId: string | null;
   onBack: () => void;
   onSend: (text: string) => void;
@@ -20,26 +20,24 @@ interface ChatWindowProps {
 
 export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
   friends,
-  selectedFriendId,
-  roomId,
+  chatId,
   onBack,
   onSend,
 }) => {
   const [input, setInput] = useState('');
   const [minimized, setMinimized] = useState(false);
-  const { messages } = useChatContext();
-  // const chatMessages = messages[selectedFriendId] || [];
+  const { messages, rooms } = useChatContext();
+  // const chatMessages = messages[chatId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
+  const isGroupChat = rooms.some((room) => room.chat_room_id === chatId);
+  let roomId;
 
   const chatMessages = useMemo(() => {
-    if (roomId) {
-      return messages[roomId] || [];
+    if (chatId) {
+      return messages[chatId] || [];
     }
-    if (selectedFriendId) {
-      return messages[selectedFriendId] || [];
-    }
-  }, [messages, selectedFriendId, roomId]);
+  }, [messages, chatId, roomId]);
 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
   const playSelectSound = useSound('/sounds/effects/select.wav');
@@ -60,7 +58,8 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
     }
   }, [chatMessages]);
 
-  console.log(roomId);
+  console.log('isChatroom:', isGroupChat, 'roomId: ', chatId);
+
   return (
     <div
       className={`p-0 w-[300px]  ${
@@ -74,13 +73,13 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
             className="w-full text-sm bg-primary text-black p-2 flex justify-between items-center cursor-pointer"
             onClick={minimized ? handleChatMinimize : undefined}
           >
-            {selectedFriendId ? (
-              <span onClick={() => navigate(`/profile/${selectedFriendId}`)}>
-                {friends.find((f) => f.user_id === selectedFriendId)?.display_name}
+            {chatId && !isGroupChat ? (
+              <span onClick={() => navigate(`/profile/${chatId}`)}>
+                {friends.find((f) => f.user_id === chatId)?.display_name}
               </span>
-            ) : (
-              roomId
-            )}
+            ) : chatId && isGroupChat ? (
+              <span>{rooms.find((room) => room.chat_room_id === chatId).name}</span>
+            ) : null}
             <div className="flex items-center gap-2">
               {!minimized && (
                 <button onClick={handleChatMinimize} className="text-xs">
@@ -107,13 +106,13 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
               <MessageList
                 messages={chatMessages}
                 user={user}
-                selectedFriendId={selectedFriendId}
-                roomId={roomId}
+                chatId={chatId}
+                isGroupChat={isGroupChat}
               />
             </div>
 
             <div className="p-2 border-t flex gap-2">
-              <MessageInput selectedFriendId={selectedFriendId} roomId={roomId} />
+              <MessageInput chatId={chatId} isGroupChat={isGroupChat} />
             </div>
           </div>
         )}

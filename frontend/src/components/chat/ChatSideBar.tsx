@@ -8,9 +8,14 @@ import SearchBar from '../UI/SearchBar';
 interface ChatSidebarProps {
   handleClickNewChat: () => void;
   onOpenChat: (friendId: string) => void;
+  onOpenRoom: (friendId: string) => void;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, onOpenChat }) => {
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({
+  handleClickNewChat,
+  onOpenChat,
+  onOpenRoom,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { friends, rooms, myRooms, roomId, joinRoom } = useChatContext();
   const playSelectSound = useSound('/sounds/effects/select.wav');
@@ -69,6 +74,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, on
               onClick={() => {
                 playSelectSound();
                 joinRoom(room.chat_room_id);
+                onOpenRoom(room.chat_room_id);
                 // setSelectedFriend(null);
                 // setRoomId(room.chat_room_id);
               }}

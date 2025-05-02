@@ -12,11 +12,11 @@ import { useSound } from '../hooks/useSound';
 
 export const ChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
-  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
+  const [chatId, setchatId] = useState<string | null>(null);
   const location = useLocation();
   const { user } = useUser();
 
-  const { friends, sendChatMessage, messages, fetchDmHistory } = useChatContext();
+  const { friends, sendChatMessage, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
   const playZoomSound = useSound('/sounds/effects/zoom.wav');
 
   const handleClickNewChat = () => {
@@ -24,14 +24,22 @@ export const ChatPage: React.FC = () => {
   };
 
   const handleOpenChat = async (friendId: string) => {
-    setSelectedFriendId(friendId);
+    setchatId(friendId);
     if (!messages[friendId]) {
       await fetchDmHistory(friendId);
     }
   };
 
   const handleCloseChat = () => {
-    setSelectedFriendId(null);
+    setchatId(null);
+  };
+
+  const handleOpenRoom = async (roomId: string) => {
+    console.log('opening chat', roomId);
+    setchatId(roomId);
+    if (!messages[roomId]) {
+      await fetchChatHistory(roomId); // Optional: make sure messages are loaded
+    }
   };
 
   if (!user) return null;
@@ -42,28 +50,32 @@ export const ChatPage: React.FC = () => {
         <BackgroundGlow />
       </div>
 
-      {createNewGroupChat && !selectedFriendId ? (
+      {createNewGroupChat && !chatId ? (
         <div className="w-full h-full relative flex items-center">
           <div className="h-full overflow-y-auto">
             <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
           </div>
         </div>
       ) : (
-        !selectedFriendId && (
+        !chatId && (
           <div className="w-full h-full relative flex items-center">
             <div className="h-full overflow-y-auto">
-              <ChatSidebar onOpenChat={handleOpenChat} handleClickNewChat={handleClickNewChat} />
+              <ChatSidebar
+                onOpenChat={handleOpenChat}
+                onOpenRoom={handleOpenRoom}
+                handleClickNewChat={handleClickNewChat}
+              />
             </div>
           </div>
         )
       )}
 
-      {selectedFriendId && (
+      {chatId && (
         <ChatWindow
-          key={selectedFriendId}
+          key={chatId}
           user={user}
           friends={friends}
-          selectedFriendId={selectedFriendId}
+          chatId={chatId}
           onBack={handleCloseChat}
           onSend={sendChatMessage}
         />
