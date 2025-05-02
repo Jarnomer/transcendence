@@ -16,7 +16,7 @@ const icons = {
 };
 
 export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) => {
-  const { user, sentRequests, refetchRequests, refetchUser } = useUser();
+  const { user, sentRequests, refetchRequests, refetchUser, loading: loadingUser } = useUser();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +24,7 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
     if (sentRequests) {
       setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
     }
-  }, [sentRequests, receiverUserId, user]);
+  }, [sentRequests, receiverUserId, user, loading2q]);
 
   const handleAddFriendClick = async () => {
     if (!receiverUserId) return;

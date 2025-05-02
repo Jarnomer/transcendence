@@ -296,13 +296,12 @@ export const InformationRequestSvg: React.FC = () => {
 // }
 
 export const UserInformationForm: React.FC<EditProfileProps> = ({
-  user,
   setEditProfile,
   setLoading,
   loading,
 }) => {
   const navigate = useNavigate();
-
+  const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setUser } = useUser();
   // const [loading, setLoading] = useState<boolean>();

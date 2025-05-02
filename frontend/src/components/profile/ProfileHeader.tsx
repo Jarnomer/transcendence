@@ -50,6 +50,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const { user: loggedInUser } = useUser();
 
   const isOwnProfile = user?.user_id === loggedInUser?.user_id;
+  user = isOwnProfile ? loggedInUser : user;
 
   if (!user) return;
 
@@ -91,7 +92,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
             {/* USER BIOGRAPHY */}
             <div>
-              <span>{user?.bio}</span>
+              <span className="text-xs text-gray-500">{user?.bio}</span>
             </div>
           </div>
           {isOwnProfile ? (
