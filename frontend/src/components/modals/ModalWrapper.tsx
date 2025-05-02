@@ -3,7 +3,6 @@ import React, { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useModal } from '../../contexts/modalContext/ModalContext';
-import { CircleSvg } from '../visual/svg/shapes/CircleSvg';
 import { ModalBackgroundGlitch } from './ModalBackgroundGlitch';
 
 interface ModalWrapperProps {
@@ -52,9 +51,6 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
             exit="exit"
             onClick={handleOverlayClick}
           >
-            <div className="absolute top-4 right-4 z-40 text-primary">
-              <CircleSvg />
-            </div>
             <ModalBackgroundGlitch duration={1000}></ModalBackgroundGlitch>
 
             <motion.div
