@@ -8,6 +8,7 @@ import { UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
 import { api } from '../../services/api';
 import { ProfilePicture } from '../profile/ProfilePicture';
+import { NavIconButton } from '../UI/buttons/NavIconButton';
 
 interface EditProfileProps {
   user: UserDataResponseType;
@@ -379,139 +380,152 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({
   return (
     <>
       {!loading ? (
-        <div className="justify-center w-full max-w-lg  flex flex-col ">
-          <div className="flex w-full  justify-between">
-            <div className="flex w-2/3  items-center relative">
-              <InformationRequestSvg></InformationRequestSvg>
-            </div>
-            <div className="relative">
-              <ProfilePicture user={user} isOwnProfile={true}></ProfilePicture>
-            </div>
-          </div>
-          <motion.div
-            className="relative w-full overflow-hidden"
-            variants={animationVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <div
-              id="edit-profile-content"
-              className="relative w-full overflow-hidden border-primary"
-            >
+        <motion.div className=" backdrop-blur-md z-30">
+          <motion.div className="text-primary w-full h-full md:w-2xl md:h-2xl relative shadow-lg flex flex-col justify-center items-center overflow-hidden">
+            <div className="justify-center w-full max-w-lg  flex flex-col ">
               {user.display_name ? (
-                <button
-                  className="absolute top-0 right-0 px-2 text-xl"
-                  onClick={() => setEditProfile(false)}
-                >
-                  x
-                </button>
-              ) : null}
-              <div className="w-full">
-                <div className="flex mb-2 gap-2 text-left text-xs" aria-hidden="true">
-                  <div className="border-1 w-2/3">
-                    <p className="px-1 text-xs text-neutral-200 opacity-45">user id</p>
-                    <br></br>
-                    <p className="px-2 text-neutral-200 opacity-45">{user.user_id?.slice(0, 20)}</p>
-                  </div>
-                  <div className="border-1 w-1/3">
-                    <p className="px-1 text-xs text-neutral-200 opacity-45">Username</p>
-                    <br></br>
-                    <p className="px-2 text-neutral-200 opacity-45">{user.username}</p>
-                  </div>
+                <div className="w-full flex justify-end p-2 items-center">
+                  <NavIconButton
+                    id="exit edit profile"
+                    ariaLabel="exit edit profile"
+                    icon="close"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditProfile(false);
+                    }}
+                  />
                 </div>
-                <form className="flex w-full flex-col justify-center" onSubmit={handleSubmit}>
-                  <span className="flex flex-row relative">
-                    <div className="border relative">
-                      <label htmlFor="displayName">
-                        <span className="text-xs absolute top-1 left-1 text-secondary">
-                          Display Name *
-                        </span>
-                      </label>
-
-                      <input
-                        type="text"
-                        name="display_name"
-                        id="displayName"
-                        required
-                        placeholder={user.display_name ? user.display_name : 'Missing data'}
-                        value={formData.display_name}
-                        onChange={handleInputChange}
-                        className="pt-5 px-2"
-                      />
+              ) : null}
+              <div className="flex w-full  justify-between">
+                <div className="flex w-2/3  items-center relative">
+                  <InformationRequestSvg></InformationRequestSvg>
+                </div>
+                <div className="relative">
+                  <ProfilePicture user={user} isOwnProfile={true}></ProfilePicture>
+                </div>
+              </div>
+              <motion.div
+                className="relative w-full overflow-hidden"
+                variants={animationVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <div
+                  id="edit-profile-content"
+                  className="relative w-full overflow-hidden border-primary"
+                >
+                  <div className="w-full">
+                    <div className="flex mb-2 gap-2 text-left text-xs" aria-hidden="true">
+                      <div className="border-1 w-2/3">
+                        <p className="px-1 text-xs text-neutral-200 opacity-45">user id</p>
+                        <br></br>
+                        <p className="px-2 text-neutral-200 opacity-45">
+                          {user.user_id?.slice(0, 20)}
+                        </p>
+                      </div>
+                      <div className="border-1 w-1/3">
+                        <p className="px-1 text-xs text-neutral-200 opacity-45">Username</p>
+                        <br></br>
+                        <p className="px-2 text-neutral-200 opacity-45">{user.username}</p>
+                      </div>
                     </div>
-                    <div className="border-1 w-full relative border-r-primary">
-                      <span className="text-xs absolute top-1 left-1 text-secondary">Email</span>
-                      {/* <input
+                    <form className="flex w-full flex-col justify-center" onSubmit={handleSubmit}>
+                      <span className="flex flex-row relative">
+                        <div className="border relative">
+                          <label htmlFor="displayName">
+                            <span className="text-xs absolute top-1 left-1 text-secondary">
+                              Display Name *
+                            </span>
+                          </label>
+
+                          <input
+                            type="text"
+                            name="display_name"
+                            id="displayName"
+                            required
+                            placeholder={user.display_name ? user.display_name : 'Missing data'}
+                            value={formData.display_name}
+                            onChange={handleInputChange}
+                            className="pt-5 px-2"
+                          />
+                        </div>
+                        <div className="border-1 w-full relative border-r-primary">
+                          <span className="text-xs absolute top-1 left-1 text-secondary">
+                            Email
+                          </span>
+                          {/* <input
                     type="text"
                     name="email"
                     placeholder="Missing Data"
                     value={formData.email}
                     onChange={handleInputChange}
                     className="pt-5 px-2"
-                  /> */}
-                    </div>
-                  </span>
-                  <span className="flex flex-row relative">
-                    <div className="border relative">
-                      <label htmlFor="firstName">
-                        <span className="text-xs absolute top-1 left-1 text-secondary">
-                          First Name
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        id="firstName"
-                        name="first_name"
-                        placeholder={user.first_name ? user.first_name : 'Missing data'}
-                        value={formData.first_name}
-                        onChange={handleInputChange}
-                        className="pt-5 px-2"
-                      />
-                    </div>
-                    <div className="border relative">
-                      <label htmlFor="lastName">
-                        <span className="text-xs absolute top-1 left-1 text-secondary">
-                          Last Name
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        name="last_name"
-                        id="lastName"
-                        placeholder={user.last_name ? user.last_name : 'Missing data'}
-                        value={formData.last_name}
-                        onChange={handleInputChange}
-                        className="pt-5 px-2"
-                      />
-                    </div>
-                  </span>
-                  <div className="border flex flex-row w-full relative">
-                    <label htmlFor="bio">
-                      <span className="text-xs absolute top-1 left-1 text-secondary">
-                        Biography
+                    /> */}
+                        </div>
                       </span>
-                    </label>
-                    <textarea
-                      name="bio"
-                      id="bio"
-                      placeholder="Write something about yourself..."
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                      className="pt-5 px-2 border w-full h-32 resize-none"
-                    />
+                      <span className="flex flex-row relative">
+                        <div className="border relative">
+                          <label htmlFor="firstName">
+                            <span className="text-xs absolute top-1 left-1 text-secondary">
+                              First Name
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            id="firstName"
+                            name="first_name"
+                            placeholder={user.first_name ? user.first_name : 'Missing data'}
+                            value={formData.first_name}
+                            onChange={handleInputChange}
+                            className="pt-5 px-2"
+                          />
+                        </div>
+                        <div className="border relative">
+                          <label htmlFor="lastName">
+                            <span className="text-xs absolute top-1 left-1 text-secondary">
+                              Last Name
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            name="last_name"
+                            id="lastName"
+                            placeholder={user.last_name ? user.last_name : 'Missing data'}
+                            value={formData.last_name}
+                            onChange={handleInputChange}
+                            className="pt-5 px-2"
+                          />
+                        </div>
+                      </span>
+                      <div className="border flex flex-row w-full relative">
+                        <label htmlFor="bio">
+                          <span className="text-xs absolute top-1 left-1 text-secondary">
+                            Biography
+                          </span>
+                        </label>
+                        <textarea
+                          name="bio"
+                          id="bio"
+                          placeholder="Write something about yourself..."
+                          value={formData.bio}
+                          onChange={handleInputChange}
+                          className="pt-5 px-2 border w-full h-32 resize-none"
+                        />
+                      </div>
+                      <button
+                        type={'submit'}
+                        className="mt-2 w-1/2 text-primary border-2 border-primary px-4 py-2"
+                      >
+                        Save
+                      </button>
+                    </form>
                   </div>
-                  <button
-                    type={'submit'}
-                    className="mt-2 w-1/2 text-primary border-2 border-primary px-4 py-2"
-                  >
-                    Save
-                  </button>
-                </form>
-              </div>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       ) : null}
     </>
   );

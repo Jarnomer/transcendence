@@ -13,7 +13,6 @@ import {
 } from '@/services/chatService';
 
 import { MessageNotification } from '../../components/chat/MessageNotification';
-import { useSound } from '../../hooks/useSound';
 import { useUser } from '../user/UserContext';
 
 const ChatContext = createContext<any>(null);
@@ -90,16 +89,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const notifyMessage = (event: MessageEvent) => {
+    console.log(event);
     const isCurrentRoom = roomIdRef.current && event.room_id === roomIdRef.current;
+    if (isCurrentRoom || openChatWindows[event.sender_id] || openChatWindows[event.room_id]) return;
+    const chatId = event.room_id ? event.room_id : event.sender_id;
+    const isGroupChat = event.room_id ? true : false;
+    const foundRoom = rooms.find((room) => room.chat_room_id === event.room_id);
+    const groupChatName = isGroupChat && foundRoom ? foundRoom.name : null;
 
-    if (isCurrentRoom || openChatWindows[event.sender_id]) return;
-
+    console.log('rooms: ', rooms, 'myRooms: ', myRooms);
+    console.log('event room id: ', event.room_id);
+    console.log(isGroupChat, groupChatName);
     // playMessageSound();
     toast.custom((t) => (
       <MessageNotification>
         <div
           className="h-full w-full flex items-center glass-box"
-          onClick={() => handleNotificationClick(event.sender_id)}
+          onClick={() => handleNotificationClick(chatId)}
         >
           <div className="h-full aspect-square p-2">
             <img
@@ -108,6 +114,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             />
           </div>
           <div className="text-xs">
+            {event.room_id &&
+              rooms &&
+              rooms.find((room) => room.chat_room_id === event.room_id) && (
+                <span>{rooms.find((room) => room.chat_room_id === event.room_id).name}</span>
+              )}
             <p className="text-xs">{event.display_name}</p>
             <p className="text-xs">{event.message}</p>
           </div>
@@ -123,6 +134,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...prev,
         [event.room_id]: [...(prev[event.room_id] || []), event],
       }));
+      if (!messages[event.room_id]) {
+        fetchChatHistory(event.room_id);
+      }
     }
 
     if (event.sender_id) {

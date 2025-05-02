@@ -14,33 +14,29 @@ interface ChatWindowProps {
   messages: any[];
   user: any;
   friends: UserDataResponseType[];
-  selectedFriendId: string | null;
+  chatId: string | null;
   roomId: string | null;
   onBack: () => void;
   onSend: (text: string) => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({
-  friends,
-  selectedFriendId,
-  roomId,
-  onBack,
-}) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, roomId, onBack }) => {
   const [input, setInput] = useState('');
   const [minimized, setMinimized] = useState(false);
-  const { messages } = useChatContext();
-  // const chatMessages = messages[selectedFriendId] || [];
+  const { messages, rooms } = useChatContext();
+  // const chatMessages = messages[chatId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
+  const isGroupChat = rooms.some((room) => room.chat_room_id === chatId);
 
   const chatMessages = useMemo(() => {
     if (roomId) {
       return messages[roomId] || [];
     }
-    if (selectedFriendId) {
-      return messages[selectedFriendId] || [];
+    if (chatId) {
+      return messages[chatId] || [];
     }
-  }, [messages, selectedFriendId, roomId]);
+  }, [messages, chatId, roomId]);
 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
   const playSelectSound = useSound('/sounds/effects/select.wav');
@@ -59,9 +55,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="p-0 h-full w-full flex flex-col flex-1">
         <div className="p-0 flex justify-between items-center ">
           <div className="w-full text-sm bg-primary text-black p-2 flex justify-between items-center cursor-pointer">
-            {selectedFriendId ? (
-              <span onClick={() => navigate(`/profile/${selectedFriendId}`)}>
-                {friends.find((f) => f.user_id === selectedFriendId)?.display_name}
+            {chatId ? (
+              <span onClick={() => navigate(`/profile/${chatId}`)}>
+                {friends.find((f) => f.user_id === chatId)?.display_name}
               </span>
             ) : (
               roomId
@@ -84,11 +80,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <MessageList
           messages={chatMessages}
           user={user}
-          selectedFriendId={selectedFriendId}
-          roomId={roomId}
+          chatId={chatId}
+          isGroupChat={isGroupChat}
         />
         <div className="p-2 border-t flex gap-2">
-          <MessageInput selectedFriendId={selectedFriendId} roomId={roomId}></MessageInput>
+          <MessageInput chatId={chatId} isGroupChat={isGroupChat}></MessageInput>
         </div>
       </div>
     </div>

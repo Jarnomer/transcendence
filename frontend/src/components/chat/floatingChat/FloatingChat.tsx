@@ -22,6 +22,10 @@ export const FloatingChat = () => {
     setOpenChatWindows,
     messages,
     fetchDmHistory,
+    rooms,
+    myRooms,
+    fetchChatHistory,
+    roomId,
   } = useChatContext();
   const playZoomSound = useSound('/sounds/effects/zoom.wav');
 
@@ -46,6 +50,18 @@ export const FloatingChat = () => {
     }
   };
 
+  const handleOpenRoom = async (roomId: string) => {
+    console.log('opening chat', roomId);
+    setOpenChatWindows((prev) => ({
+      ...prev,
+      [roomId]: true,
+    }));
+
+    if (!messages[roomId]) {
+      await fetchChatHistory(roomId); // Optional: make sure messages are loaded
+    }
+  };
+
   const handleCloseChat = (friendId: string) => {
     setOpenChatWindows((prev) => ({
       ...prev,
@@ -53,6 +69,7 @@ export const FloatingChat = () => {
     }));
   };
 
+  console.log('rooms: ', rooms, 'myrooms: ', myRooms);
   if (!user) return null;
 
   return (
@@ -67,7 +84,7 @@ export const FloatingChat = () => {
               key={friendId}
               user={user}
               friends={friends}
-              selectedFriendId={friendId}
+              chatId={friendId}
               onBack={() => handleCloseChat(friendId)}
               onSend={sendChatMessage}
             />
@@ -100,6 +117,7 @@ export const FloatingChat = () => {
                 ) : (
                   <ChatSidebar
                     onOpenChat={handleOpenChat}
+                    onOpenRoom={handleOpenRoom}
                     handleClickNewChat={handleClickNewChat}
                   />
                 )}
