@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -55,40 +55,36 @@ export const slideFromRightVariants = {
 };
 
 export const HomePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('leaderboard');
-
   return (
-    <>
-      <motion.div className="w-full max-h-full relative flex flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
-        {/* <HomePageNav activeTab={activeTab} setActiveTab={setActiveTab}></HomePageNav> */}
-        <motion.div id="home-page-content" className="flex flex-col md:flex-row h-full gap-2">
-          {activeTab === 'leaderboard' && (
-            <AnimatePresence>
-              <motion.div
-                key="leaderboard"
-                className="md:min-w-1/2 flex overflow-y-scroll justify-center md:justify-end  p-0"
-                variants={slideFromLeftVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <LeaderBoard />
-              </motion.div>
-              <motion.div
-                key="playerQueue"
-                className="md:min-w-1/2 flex justify-center md:justify-start flex-col gap-10"
-                variants={slideFromRightVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                layout
-              >
-                <Updates></Updates>
-              </motion.div>
-            </AnimatePresence>
-          )}
-        </motion.div>
+    <motion.div className="w-full max-h-full relative flex justify-center flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
+      <motion.div
+        id="home-page-content"
+        className=" flex justify-center flex-col md:flex-row h-full gap-2"
+      >
+        <AnimatePresence>
+          <motion.div
+            key="leaderboard"
+            className="md:min-w-1/2  flex overflow-y-scroll justify-center p-0"
+            variants={slideFromLeftVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <LeaderBoard />
+          </motion.div>
+          <motion.div
+            key="playerQueue"
+            className="md:min-w-1/2 flex justify-center md:justify-start flex-col gap-10"
+            variants={slideFromRightVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            layout
+          >
+            <Updates></Updates>
+          </motion.div>
+        </AnimatePresence>
       </motion.div>
-    </>
+    </motion.div>
   );
 };

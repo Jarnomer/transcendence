@@ -137,6 +137,7 @@ export const GameMenu: React.FC = () => {
   const handleDifficultyClick = (difficulty: string | null) => {
     playSubmitSound();
     setDifficulty(difficulty);
+    console.log('set Difficulty');
   };
 
   useEffect(() => {
@@ -148,7 +149,7 @@ export const GameMenu: React.FC = () => {
   // Effect that only runs after state is reset
   useEffect(() => {
     if (!isNewGame) return;
-
+    console.log('game menu useEffect: ', mode, difficulty);
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
