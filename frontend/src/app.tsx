@@ -49,14 +49,15 @@ const App: React.FC = () => {
               <Footer />
             </div>
             <Footer />
-          </div>
-          <FloatingChatWrapper />
-        </Router>
-      </GameOptionsProvider>
-      <SettingsModal></SettingsModal>
-      <JoinGameNotificationModal></JoinGameNotificationModal>
-      <ConfirmModal></ConfirmModal>
-      <Toaster position="bottom-right" />
+            <FloatingChatWrapper />
+          </Router>
+          <SettingsModal></SettingsModal>
+          <JoinGameNotificationModal></JoinGameNotificationModal>
+          <ConfirmModal></ConfirmModal>
+
+          <Toaster position="bottom-right" />
+        </GameOptionsProvider>
+      </AudioSettingsProvider>
     </>
   );
 };
