@@ -105,7 +105,7 @@ function applyLightEffect(
   }, effectDelay);
 }
 
-function applyBallParticles(
+export function applyScoreBallParticles(
   scene: Scene,
   paddle: Mesh,
   intensity: number,
@@ -113,9 +113,9 @@ function applyBallParticles(
   ball: Ball,
   effectDelay: number,
   primaryColor: Color3,
-  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings,
+  duration: number = scoreEffectTimings.scoreBallExplosionDuration
 ): void {
-  const duration = scoreEffectTimings.scoreBallExplosionDuration;
   const ballSceneX = gameToSceneX(ball.x, paddle);
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
@@ -162,16 +162,16 @@ function applyBallParticles(
   }, effectDelay);
 }
 
-function createParticleFlares(
+export function applyScoreBallFlares(
   scene: Scene,
   paddle: Mesh,
   intensity: number,
   scoringDirection: 'left' | 'right',
   ball: Ball,
   effectDelay: number,
-  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings,
+  duration: number = scoreEffectTimings.scoreBallExplosionDuration
 ): void {
-  const duration = scoreEffectTimings.scoreBallExplosionDuration;
   const ballSceneX = gameToSceneX(ball.x, paddle);
   const ballSceneY = gameToSceneY(ball.y, paddle);
   const xOffset = scoringDirection === 'right' ? 3.5 : -3.5;
@@ -213,7 +213,7 @@ function createParticleFlares(
   }, effectDelay);
 }
 
-export function applyPaddleExplosion(
+export function applyScorePaddleExplosion(
   scene: Scene,
   paddle: Mesh,
   intensity: number,
@@ -221,9 +221,9 @@ export function applyPaddleExplosion(
   ballY: number,
   effectDelay: number,
   camera: ArcRotateCamera | null | undefined,
-  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings,
+  duration: number = scoreEffectTimings.scorePaddleExplosionDuration
 ): void {
-  const duration = scoreEffectTimings.scorePaddleExplosionDuration;
   setTimeout(() => {
     paddle.visibility = 0;
     const fragments = createPaddleFragments(scene, paddle, intensity);
@@ -237,7 +237,7 @@ export function applyPaddleExplosion(
   }, duration);
 }
 
-function createPaddleFragments(scene: Scene, paddle: Mesh, intensity: number): Mesh[] {
+export function createPaddleFragments(scene: Scene, paddle: Mesh, intensity: number): Mesh[] {
   const numFragments = Math.min(25 + Math.floor(intensity * 15), 40);
 
   const paddleWidth = paddle.getBoundingInfo().boundingBox.extendSize.x * 2 * paddle.scaling.x;
@@ -316,16 +316,16 @@ function createPaddleFragments(scene: Scene, paddle: Mesh, intensity: number): M
   return fragments;
 }
 
-function animatePaddleFragments(
+export function animatePaddleFragments(
   scene: Scene,
   fragments: Mesh[],
   paddle: Mesh,
   effectIntensity: number,
   scoringDirection: 'left' | 'right',
   ballY: number,
-  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings,
+  duration: number = scoreEffectTimings.scorePaddleExplosionDuration
 ): void {
-  const duration = scoreEffectTimings.scorePaddleExplosionDuration;
   const ballAbovePaddle = ballY < defaultGameParams.dimensions.gameHeight / 2;
   const baseDirection = scoringDirection === 'right' ? Math.PI : 0;
 
@@ -443,11 +443,11 @@ export function applyNeonEdgeFlicker(
   bottomEdgeMesh: Mesh,
   playerColor: Color3,
   effectIntensity: number,
-  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings
+  scoreEffectTimings: ScoreEffectTimings = defaultScoreEffectTimings,
+  duration: number = scoreEffectTimings.edgeFlickerDuration
 ): void {
   effectIntensity /= 3; // Adjusting intensity
 
-  const duration = scoreEffectTimings.edgeFlickerDuration;
   const edgeMaterial = topEdgeMesh.material as PBRMaterial;
   const originalEmissiveColor = edgeMaterial.emissiveColor.clone();
   const originalEmissiveIntensity = edgeMaterial.emissiveIntensity;
@@ -791,7 +791,7 @@ export function applyScoreEffects(
     scoreEffectTimings
   );
 
-  applyPaddleExplosion(
+  applyScorePaddleExplosion(
     scene,
     scoredAgainstPaddle,
     intensityFactor,
@@ -810,7 +810,7 @@ export function applyScoreEffects(
     scoreEffectTimings
   );
 
-  applyBallParticles(
+  applyScoreBallParticles(
     scene,
     scoredAgainstPaddle,
     intensityFactor,
@@ -821,7 +821,7 @@ export function applyScoreEffects(
     scoreEffectTimings
   );
 
-  createParticleFlares(
+  applyScoreBallFlares(
     scene,
     scoredAgainstPaddle,
     intensityFactor,

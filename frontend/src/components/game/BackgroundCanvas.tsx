@@ -14,16 +14,19 @@ import {
 import {
   GameAnimationManager,
   RetroEffectsManager,
+  GameSoundManager,
   addCameraDebugControls,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
   applyBackgroundScoreEffects,
   applyBallEffects,
+  applyGameOverEffects,
   applyCinematicCameraAngle,
   applyCollisionEffects,
   applyGameplayCameraAngle,
   applyLowQualitySettings,
+  getGameSoundManager,
   createBall,
   createEdge,
   createFloor,
@@ -83,6 +86,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const sceneRef = useRef<Scene | null>(null);
   const cameraRef = useRef<ArcRotateCamera | null>(null);
 
+  const soundManagerRef = useRef<GameSoundManager>(null);
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(cinematicRetroEffectsLevels);
@@ -91,6 +95,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const randomGlitchTimerRef = useRef<number | null>(null);
   const lastScoreRef = useRef<{ value: number }>({ value: 0 });
   const lastGameModeRef = useRef<GameMode>('background');
+  const prevGameStatusRef = useRef<GameStatus | null>(null);
 
   const floorRef = useRef<Mesh | null>(null);
   const topEdgeRef = useRef<Mesh | null>(null);
@@ -248,6 +253,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const engine = new Engine(canvas, true);
     const scene = new Scene(engine);
 
+    soundManagerRef.current = getGameSoundManager();
     GameAnimationManager.getInstance(scene);
 
     const colors = getThemeColorsFromDOM(theme);
@@ -371,6 +377,28 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       scene.dispose();
     };
   }, []);
+
+  // Handle game over
+  useEffect(() => {
+    if (prevGameStatusRef.current === 'playing' && gameStatus === 'finished') {
+      const isPlayer1Loser = gameState.players.player1.score < gameState.players.player2.score;
+      const losingPaddle = isPlayer1Loser ? player1Ref.current : player2Ref.current;
+
+      if (sceneRef.current && losingPaddle && ballRef.current && themeColors.current) {
+        applyGameOverEffects(
+          sceneRef.current,
+          losingPaddle,
+          ballRef.current,
+          gameState.ball,
+          themeColors.current.primaryColor,
+          5000, // duration in ms
+          soundManagerRef.current
+        );
+      }
+    }
+
+    prevGameStatusRef.current = gameStatus;
+  }, [gameStatus, gameState]);
 
   // Handle game modes
   useEffect(() => {
