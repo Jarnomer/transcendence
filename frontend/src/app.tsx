@@ -10,8 +10,10 @@ import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider';
 import { Header } from './components/header/Header.tsx';
 import { ConfirmModal } from './components/modals/CornfirmModal.tsx';
+import { ErrorModal } from './components/modals/ErrorModal.tsx';
 import { JoinGameNotificationModal } from './components/modals/JoinGameNotification.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
+import { MobileNavBar } from './components/navBar/MobileNavBar.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 import { AudioSettingsProvider } from './contexts/audioContext/AudioSettingsContext.tsx';
@@ -32,8 +34,8 @@ const App: React.FC = () => {
               id="app-main-container"
               className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full text-primary md:p-2`}
             >
+              <Header />
               <div id="app-content" className="relative flex grow flex-col w-full max-w-screen-lg">
-                <Header />
                 <AnimatePresence>
                   <motion.div
                     id="backgroundGlitch"
@@ -50,10 +52,12 @@ const App: React.FC = () => {
             </div>
             <Footer />
             <FloatingChatWrapper />
+            <MobileNavBar></MobileNavBar>
           </Router>
           <SettingsModal></SettingsModal>
           <JoinGameNotificationModal></JoinGameNotificationModal>
           <ConfirmModal></ConfirmModal>
+          <ErrorModal></ErrorModal>
 
           <Toaster position="bottom-right" />
         </GameOptionsProvider>

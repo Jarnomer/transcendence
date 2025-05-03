@@ -9,6 +9,7 @@ import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsCon
 import { useModal } from '../../contexts/modalContext/ModalContext'; // Importing modal context
 import { useUser } from '../../contexts/user/UserContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { Notifications } from '../notifications/Notifications';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
@@ -36,6 +37,7 @@ export const HeaderNav: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { setLobby, setDifficulty, setMode, resetGameOptions, queueId } = useGameOptionsContext();
   const { matchmakingState } = useWebSocketContext();
+  const isDesktop = useMediaQuery('(min-width: 600px)');
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {
@@ -67,7 +69,10 @@ export const HeaderNav: React.FC = () => {
   return (
     <>
       {user && user.display_name ? (
-        <div className="flex gap-3 items-center justify-center w-full" aria-label="Navigation menu">
+        <div
+          className="flex  gap-3 items-center justify-center w-full"
+          aria-label="Navigation menu"
+        >
           <NavIconButton
             id="nav-play-button"
             ariaLabel="play"

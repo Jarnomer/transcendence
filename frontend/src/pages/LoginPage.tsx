@@ -24,8 +24,6 @@ export const InputWrapper: React.FC<inputWrapperProps> = ({ children }) => {
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, setUser, refetchUser, checkAuth, logout, setToken } = useUser();
   const { chatSocket, gameSocket, matchmakingSocket } = useWebSocketContext();
 
   const [isRegistering, setIsRegistering] = useState(false);

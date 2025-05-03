@@ -54,10 +54,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
   };
 
   return (
-    <div
-      id="chatSideBar"
-      className={`w-full h-full ${selectedFriend ? 'hidden lg:block' : 'md:block'} border-r p-2 overflow-y-auto`}
-    >
+    <div id="chatSideBar" className={`w-full h-full  border-r p-2 overflow-y-auto`}>
       <div className="w-full flex gap-3 relative">
         <div className="overflow-hidden absolute left-0">
           <NavIconButton
@@ -90,13 +87,10 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
                 placeholder="Search users"
               />
 
-              <div className="mt-4">
+              <div className="mt-4 w-full">
                 {friends && friends.length > 0 ? <h3>Suggested:</h3> : null}
                 {filteredUsers.map((friend) => (
-                  <div
-                    key={`create_room_${friend.user_id}`}
-                    className="flex items-center gap-3 mt-2"
-                  >
+                  <div key={`create_room_${friend.user_id}`} className="flex gap-3 mt-2 ml-2">
                     <div className="w-[30px] h-[30px] rounded-full overflow-hidden">
                       <img
                         src={friend.avatar_url}
@@ -104,7 +98,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
                         className="object-contain"
                       />
                     </div>
-                    <span>{friend.display_name}</span>
+                    <span className="text-sm">{friend.display_name}</span>
                     <input
                       type="checkbox"
                       checked={selectedMembers.includes(friend.user_id)}

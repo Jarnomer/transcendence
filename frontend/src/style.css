@@ -648,3 +648,11 @@ input[type='range']::-moz-range-thumb {
 input[type='range']:hover::-webkit-slider-thumb {
   background: #444;
 }
+
+@media (max-width: 600px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

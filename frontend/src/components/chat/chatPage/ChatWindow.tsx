@@ -54,7 +54,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, roomId,
     <div className={`p-0 w-full h-full max-h-fit text-primary backdrop-blur-sm overflow-hidden`}>
       <div className="p-0 h-full w-full flex flex-col flex-1">
         <div className="p-0 flex justify-between items-center ">
-          <div className="w-full text-sm bg-primary text-black p-2 flex justify-between items-center cursor-pointer">
+          <div className="w-full text-sm bg-primary text-black p-2 gap-2 flex items-center cursor-pointer">
+            <NavIconButton
+              icon="arrowLeft"
+              onClick={() => {
+                playUnSelectSound();
+                onBack();
+              }}
+              id="chat-back-button"
+              ariaLabel="back to conversations"
+            ></NavIconButton>
+
             {chatId ? (
               <span onClick={() => navigate(`/profile/${chatId}`)}>
                 {friends.find((f) => f.user_id === chatId)?.display_name}
@@ -62,17 +72,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, roomId,
             ) : (
               roomId
             )}
-            <div className="flex items-center gap-2">
-              <NavIconButton
-                icon="close"
-                onClick={() => {
-                  playUnSelectSound();
-                  onBack();
-                }}
-                id="chat-back-button"
-                ariaLabel="back to conversations"
-              ></NavIconButton>
-            </div>
           </div>
           <div />
         </div>

@@ -4,12 +4,11 @@ import { useParams } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { FriendList } from '@components/profile/FriendList.tsx';
-
 import { getUserData } from '@services/userService';
 
 import { UserDataResponseType } from '@shared/types/userTypes';
 
+import { Friends } from '../components/profile/FriendList';
 import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { UserInformationForm } from '../components/signUp/UserInformationForm';
@@ -82,19 +81,13 @@ export const ProfilePage: React.FC = () => {
               <div className="row-start-1 h-[200px] max-h-200px col-start-1 self-start flex-none">
                 <ProfileHeader
                   user={user}
-                  setLoading={setLoading}
                   setEditProfile={setEditProfile}
                   editProfile={editProfile}
                 ></ProfileHeader>
               </div>
 
               <motion.div className="col-start-1 row-start-2 sm:row-start-1 sm:col-start-2 sm:row-span-2 flex-none">
-                <FriendList
-                  user={user}
-                  requests={user.friend_requests}
-                  loading={loading}
-                  setLoading={setLoading}
-                />
+                <Friends user={user} />
               </motion.div>
               <motion.div
                 key="match history"
