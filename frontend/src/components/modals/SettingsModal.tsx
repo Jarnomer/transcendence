@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { ModalWrapper } from './ModalWrapper';
 import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { Settings } from '../../pages/Settings';
-import { ModalWrapper } from './ModalWrapper';
 
 export const SettingsModal: React.FC = () => {
   const { isModalOpen, closeModal } = useModal();

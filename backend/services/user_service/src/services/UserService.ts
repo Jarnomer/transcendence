@@ -1,6 +1,6 @@
 import { Database } from 'sqlite';
 
-import { GameAudioOptions, GameSettings } from '@shared/types';
+import { GameAudioOptions, GameSettings, GraphicsSettings } from '@shared/types';
 
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
@@ -121,6 +121,19 @@ export class UserService {
     if (!res) {
       throw new BadRequestError('Could not save audio settings');
     }
+    return res;
+  }
+
+  async saveGraphicsSettings(user_id: string, graphicsSettings: GraphicsSettings) {
+    const res = await this.userModel.saveGraphicsSettings(user_id, graphicsSettings);
+    if (!res) {
+      throw new BadRequestError('Could not save graphics settings');
+    }
+    return res;
+  }
+
+  async getGraphicsSettings(user_id: string) {
+    const res = await this.userModel.getGraphicsSettings(user_id);
     return res;
   }
 }

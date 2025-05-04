@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { GameSettings } from '../components/settings/GameSettings';
-import { GraphicSettings } from '../components/settings/GraphicSettings';
+import { GraphicsSettings } from '../components/settings/GraphicsSettings';
 import { Soundsettings } from '../components/settings/SoundSettings';
 import { UserSettings } from '../components/settings/UserSettings';
 import { useSound } from '../hooks/useSound';
@@ -63,7 +62,7 @@ export const SettingsNav: React.FC<{
   return (
     <motion.div
       id="settings-nav"
-      className="flex p:m-2 relative w-full h-full overflow-hidden items-center justify-center   gap-3  md:gap-6"
+      className="flex p:m-2 relative w-full h-full overflow-hidden items-center justify-center gap-3 md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
@@ -71,11 +70,8 @@ export const SettingsNav: React.FC<{
         <button onClick={() => setActiveTab('userSettings')}>
           <span className={`${activeTab === 'userSettings' ? 'text-secondary' : ''}`}>User</span>
         </button>
-        <button onClick={() => setActiveTab('gameSettings')}>
-          <span className={`${activeTab === 'gameSettings' ? 'text-secondary' : ''}`}>Game</span>
-        </button>
-        <button onClick={() => setActiveTab('graphicSettings')}>
-          <span className={`${activeTab === 'graphicSettings' ? 'text-secondary' : ''}`}>
+        <button onClick={() => setActiveTab('graphicsSettings')}>
+          <span className={`${activeTab === 'graphicsSettings' ? 'text-secondary' : ''}`}>
             Graphics
           </span>
         </button>
@@ -98,10 +94,10 @@ export const Settings: React.FC = () => {
 
   return (
     <>
-      <motion.div className="relative w-full  max-w-screen z-10 gap-5 md:gap-10 p-0 md:p-4">
+      <motion.div className="relative w-full max-w-screen z-10 gap-5 md:gap-10 p-0 md:p-4">
         <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
 
-        <motion.div id="home-page-content" className="w-full h-full lg:px-20  gap-20">
+        <motion.div id="home-page-content" className="w-full h-full lg:px-20 gap-20">
           <AnimatePresence mode="wait">
             {activeTab === 'userSettings' && (
               <motion.div
@@ -116,29 +112,16 @@ export const Settings: React.FC = () => {
               </motion.div>
             )}
 
-            {activeTab === 'gameSettings' && (
+            {activeTab === 'graphicsSettings' && (
               <motion.div
-                key="gameSettings"
-                className="w-full h-full max-h-screen"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <GameSettings></GameSettings>
-              </motion.div>
-            )}
-
-            {activeTab === 'graphicSettings' && (
-              <motion.div
-                key="graphicSettings"
+                key="graphicsSettings"
                 className="w-full"
                 // variants={slideFromLeftVariants}
                 // initial="initial"
                 // animate="animate"
                 // exit="exit"
               >
-                <GraphicSettings></GraphicSettings>
+                <GraphicsSettings></GraphicsSettings>
               </motion.div>
             )}
 

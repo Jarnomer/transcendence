@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     status TEXT CHECK(status IN ('online', 'offline', 'away', 'busy')) DEFAULT 'offline',
     game_settings TEXT DEFAULT '{}', -- JSON or TEXT for game settings
     audio_settings TEXT DEFAULT '{}', -- JSON or TEXT for audio settings
+    graphics_settings TEXT DEFAULT '{}', -- JSON or TEXT for graphics settings
     last_active DATETIME DEFAULT (CURRENT_TIMESTAMP),
     updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );

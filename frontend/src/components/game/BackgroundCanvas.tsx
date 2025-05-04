@@ -52,7 +52,7 @@ import {
   GameStatus,
   RetroEffectsLevels,
   cinematicRetroEffectsLevels,
-  // defaultCameraTimings,
+  defaultCameraTimings,
   defaultCinematicGlitchTimings,
   defaultGameObjectParams,
   defaultGameParams,
@@ -68,12 +68,15 @@ interface BackgroundCanvasProps {
   theme?: 'light' | 'dark';
 }
 
+import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
+
 const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   gameState,
   gameMode,
   gameStatus,
   theme = 'dark',
 }) => {
+  const { state: graphicsSettings } = useGraphicsContext();
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
@@ -90,6 +93,9 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const postProcessingRef = useRef<DefaultRenderingPipeline | null>(null);
   const retroEffectsRef = useRef<RetroEffectsManager | null>(null);
   const retroLevelsRef = useRef<RetroEffectsLevels>(cinematicRetroEffectsLevels);
+
+  const retroEnabled = graphicsSettings?.retroEffect?.enabled !== false;
+  const retroLevel = retroEnabled ? graphicsSettings?.retroEffect?.level || 3 : 0;
 
   const cameraMoveTimerRef = useRef<number | null>(null);
   const randomGlitchTimerRef = useRef<number | null>(null);
@@ -182,7 +188,7 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
             );
           }
         }
-      }, 10000000); // }, defaultCameraTimings.cameraSwitchAngleInterval);
+      }, defaultCameraTimings.cameraSwitchAngleInterval);
     } else {
       performCameraSequence();
     }
@@ -278,14 +284,44 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
       }
     }, 500);
 
-    retroLevelsRef.current = retroEffectsPresets.cinematic;
-    retroEffectsRef.current = createPongRetroEffects(
-      scene,
-      camera,
-      'cinematic',
-      retroLevelsRef.current,
-      defaultRetroCinematicBaseParams
-    );
+    if (retroEnabled) {
+      retroLevelsRef.current = {
+        ...retroEffectsPresets.cinematic,
+        scanlines: retroLevel,
+        curvature: retroLevel,
+        glitch: retroLevel,
+        colorBleed: retroLevel,
+        flicker: retroLevel,
+        vignette: retroLevel,
+        noise: retroLevel,
+      };
+
+      retroEffectsRef.current = createPongRetroEffects(
+        scene,
+        camera,
+        'cinematic',
+        retroLevelsRef.current,
+        defaultRetroCinematicBaseParams
+      );
+    } else {
+      retroLevelsRef.current = {
+        scanlines: 0,
+        curvature: 0,
+        glitch: 0,
+        colorBleed: 0,
+        flicker: 0,
+        vignette: 0,
+        noise: 0,
+      };
+
+      retroEffectsRef.current = createPongRetroEffects(
+        scene,
+        camera,
+        'cinematic',
+        retroLevelsRef.current,
+        defaultRetroCinematicBaseParams
+      );
+    }
 
     const pipeline = setupPostProcessing(scene, camera, false);
 
