@@ -58,7 +58,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
     if (transitionToScoreboard) {
       setTimeout(() => {
         setLoadingState('matchMakingAnimationLoading', false);
-      }, 400);
+      }, 1000);
     }
   }, [transitionToScoreboard, setLoadingState]);
 
@@ -108,10 +108,6 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
 
   if (!user) return;
 
-  if (!loadingStates.scoreBoardLoading) {
-    return null;
-  }
-
   return (
     <>
       {!transitionToScoreboard && <MatchMakingBackgroundGlitch></MatchMakingBackgroundGlitch>}
@@ -120,7 +116,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
         key="matchmaking-screen"
         initial={{ opacity: 1, scale: 1 }}
         animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, transition: { duration: 0.7 } }}
+        exit={{ opacity: 0, transition: { duration: 0.00001 } }}
       >
         {!opponentFound && (
           <h2 className="w-full text-center font-heading text-3xl m-2">Looking for an opponent</h2>
