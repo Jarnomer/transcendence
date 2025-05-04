@@ -12,21 +12,22 @@ import {
   getPublicChat,
 } from '@/services/chatService';
 
+import { FriendListType } from '../../../../shared/types';
+import { ChatMessageType, ChatRoomType } from '../../../../shared/types/chatTypes';
 import { MessageNotification } from '../../components/chat/MessageNotification';
 import { useUser } from '../user/UserContext';
 
 const ChatContext = createContext<any>(null);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { chatSocket, sendMessage, closeConnection } = useWebSocketContext();
+  const { chatSocket, sendMessage } = useWebSocketContext();
   const { user } = useUser();
 
-  const [friends, setFriends] = useState<any[]>([]);
+  const [friends, setFriends] = useState<FriendListType>([]);
   const [roomId, setRoomId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Record<string, any[]>>({});
-  const [rooms, setRooms] = useState<any[]>([]);
-  const [myRooms, setMyRooms] = useState<any[]>([]);
-  const [members, setMembers] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Record<string, ChatMessageType[]>>({});
+  const [rooms, setRooms] = useState<ChatRoomType[]>([]);
+  const [myRooms, setMyRooms] = useState<ChatRoomType[]>([]);
   const [openChatWindows, setOpenChatWindows] = useState<Record<string, boolean>>({});
   // const playMessageSound = useSound('/sounds/effects/message.wav');
 
@@ -238,9 +239,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         roomId,
         rooms,
         myRooms,
-        members,
         setRoomId,
-        setMembers,
         sendChatMessage,
         joinRoom,
         createRoom,

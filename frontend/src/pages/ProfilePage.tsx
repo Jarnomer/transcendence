@@ -4,15 +4,13 @@ import { useParams } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { FriendList } from '@components/profile/FriendList.tsx';
-
 import { getUserData } from '@services/userService';
 
 import { UserDataResponseType } from '@shared/types/userTypes';
 
+import { Friends } from '../components/profile/FriendList';
 import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
-import { UserInformationForm } from '../components/signUp/UserInformationForm';
 import { Error } from '../components/UI/Error';
 
 export const animationVariants = {
@@ -35,7 +33,6 @@ export const animationVariants = {
 export const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [loading, setLoading] = useState(false);
-  const [editProfile, setEditProfile] = useState<boolean>(false);
 
   const { userId } = useParams<{ userId: string }>();
 
@@ -56,7 +53,13 @@ export const ProfilePage: React.FC = () => {
   }, [userId]);
 
   if (loading) {
-    return <div className="text-center mt-10 text-lg">Loading...</div>;
+    return (
+      <div className="w-full h-full flex items-center justify-center  text-lg">
+        <div>
+          <p>loading..</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user && !loading) {
@@ -70,43 +73,25 @@ export const ProfilePage: React.FC = () => {
   return (
     <motion.div className="w-full h-full flex flex-col items-center justify-start relative">
       <AnimatePresence>
-        {editProfile ? (
-          <UserInformationForm
-            user={user}
-            setLoading={setLoading}
-            setEditProfile={setEditProfile}
-          ></UserInformationForm>
-        ) : (
-          <>
-            <div className="p-2 gap-4 grid w-full  grid-cols-1 md:grid-cols-2">
-              <div className="row-start-1 h-[200px] max-h-200px col-start-1 self-start flex-none">
-                <ProfileHeader
-                  user={user}
-                  setLoading={setLoading}
-                  setEditProfile={setEditProfile}
-                  editProfile={editProfile}
-                ></ProfileHeader>
-              </div>
-
-              <motion.div className="col-start-1 row-start-2 sm:row-start-1 sm:col-start-2 sm:row-span-2 flex-none">
-                <FriendList
-                  user={user}
-                  requests={user.friend_requests}
-                  loading={loading}
-                  setLoading={setLoading}
-                />
-              </motion.div>
-              <motion.div
-                key="match history"
-                className="col-start-1 row-start-3 sm:row-start-2 sm:col-start-1 gap-3 sm:flex justify-start w-full h-full"
-              >
-                <motion.div className="w-full">
-                  <MatchHistory user={user} />
-                </motion.div>
-              </motion.div>
+        <>
+          <div className="p-2 gap-4 grid w-full  grid-cols-1 md:grid-cols-2">
+            <div className="row-start-1 h-[200px] max-h-200px col-start-1 self-start flex-none">
+              <ProfileHeader user={user}></ProfileHeader>
             </div>
-          </>
-        )}
+
+            <motion.div className="col-start-1 row-start-2 md:row-start-1 md:col-start-2 md:row-span-2 flex-none">
+              <Friends user={user} />
+            </motion.div>
+            <motion.div
+              key="match history"
+              className="justify-start col-start-1 row-start-3 md:row-start-2 md:col-start-1 gap-3  w-full h-full"
+            >
+              <motion.div className="w-full">
+                <MatchHistory user={user} />
+              </motion.div>
+            </motion.div>
+          </div>
+        </>
       </AnimatePresence>
     </motion.div>
   );

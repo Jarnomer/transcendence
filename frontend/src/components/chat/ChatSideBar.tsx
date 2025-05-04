@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { FriendType } from '../../../../shared/types';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useSound } from '../../hooks/useSound';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
@@ -24,7 +25,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  const filteredUsers = friends.filter((friend) =>
+  console.log('FRIENDS: ', friends);
+
+  const filteredUsers = friends.filter((friend: FriendType) =>
     friend.display_name?.toLowerCase().startsWith(searchQuery)
   );
   return (
@@ -44,7 +47,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
         <div>
           <h3 className="text-md font-bold mb-1">Friends</h3>
-          {filteredUsers.map((user) => (
+          {filteredUsers.map((user: FriendType) => (
             <div className="flex gap-3 justify-center items-center" key={`chat_${user.user_id}`}>
               <div className="w-[25px] h-[25px]">
                 <img

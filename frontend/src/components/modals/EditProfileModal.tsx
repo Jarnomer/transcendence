@@ -2,29 +2,14 @@ import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { UserInformationForm } from '../components/UI/forms/UserInformationForm';
-import { useUser } from '../contexts/user/UserContext';
+import { useModal } from '../../contexts/modalContext/ModalContext';
+import { useUser } from '../../contexts/user/UserContext';
+import { UserInformationForm } from '../UI/forms/UserInformationForm';
+import { ModalWrapper } from './ModalWrapper';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
-
-export const SignUpPage: React.FC = () => {
+export const EditProfileModal: React.FC = () => {
+  const { isModalOpen } = useModal();
   const [loading, setLoading] = useState(false);
-  const [editProfile, setEditProfile] = useState<boolean>(false);
 
   const { user, loading: userContextLoading } = useUser();
 
@@ -37,8 +22,8 @@ export const SignUpPage: React.FC = () => {
   }
 
   return (
-    <>
-      {!loading && user && !userContextLoading ? (
+    <ModalWrapper modalName="editProfile">
+      {isModalOpen('editProfile') && !loading && user && !userContextLoading ? (
         <AnimatePresence>
           <motion.div
             key="editSection"
@@ -48,15 +33,10 @@ export const SignUpPage: React.FC = () => {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.4 }}
           >
-            <UserInformationForm
-              loading={loading}
-              setLoading={setLoading}
-              user={user}
-              setEditProfile={setEditProfile}
-            />
+            <UserInformationForm loading={loading} setLoading={setLoading} user={user} />
           </motion.div>
         </AnimatePresence>
       ) : null}
-    </>
+    </ModalWrapper>
   );
 };

@@ -47,7 +47,7 @@ interface NavIconButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const iconSizeResponsive = 'size-4 sm:size-6 ';
+export const iconSizeResponsive = 'size-6 sm:size-6 ';
 
 export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick, ariaLabel }) => {
   const icons = {

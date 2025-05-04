@@ -161,7 +161,7 @@ export const Soundsettings: React.FC = () => {
   return (
     <>
       <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
+        className="h-full min-h-[450px] relative overflow-y-scroll glass-box  text-xs"
         variants={animationVariants}
         initial="hidden"
         animate="visible"

@@ -58,9 +58,9 @@ export const Notifications: React.FC = () => {
             }
           })
         );
-        setNotifications(friends);
         refetchUser();
         refetchRequests();
+        setNotifications(friends);
       } catch (err) {
         console.error('Failed to get notifications:', err);
       } finally {

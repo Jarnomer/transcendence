@@ -22,26 +22,27 @@ export const animationVariants = {
 };
 
 interface MatchHistoryProps {
-  user: UserDataResponseType;
+  user: UserDataResponseType | null;
 }
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.1,
+      type: 'tween',
+      ease: 'easeOut',
+    },
+  }),
+};
 
 export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
   // console.log(user);
   console.info('Match history mounted');
 
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.1,
-        type: 'tween',
-        ease: 'easeOut',
-      },
-    }),
-  };
-
+  if (!user) return;
   return (
     <motion.div
       className="min-h-xl h-full w-full"
