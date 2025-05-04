@@ -27,30 +27,3 @@ export const defaultGraphicsSettings: GraphicsSettings = {
     third: '#ff9100',
   },
 };
-
-export const GraphicsSettingsSchema = {
-  type: 'object',
-  properties: {
-    retroEffect: {
-      type: 'object',
-      properties: {
-        enabled: { type: 'boolean' },
-        level: { type: 'number' },
-      },
-    },
-    backgroundGame: {
-      type: 'object',
-      properties: {
-        enabled: { type: 'boolean' },
-      },
-    },
-    colorTheme: {
-      type: 'object',
-      properties: {
-        primary: { type: 'string' },
-        secondary: { type: 'string' },
-        third: { type: 'string' },
-      },
-    },
-  },
-};
