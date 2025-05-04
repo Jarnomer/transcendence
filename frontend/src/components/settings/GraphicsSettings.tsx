@@ -6,7 +6,6 @@ import { GraphicsSettings as GraphicsSettingsType } from '@shared/types';
 
 import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
 import { useSound } from '../../hooks/useSound';
-import { setRetroEffectLevel } from '../game';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
 import { BackgroundGlow } from '../visual/BackgroundGlow';
@@ -41,9 +40,6 @@ const RetroEffectSettings: React.FC<RetroEffectSettingsProps> = ({
   isEnabled,
   setIsEnabled,
 }) => {
-  const baseValue = 5;
-  const effectValue = isEnabled ? setRetroEffectLevel(level, baseValue) : 0;
-
   return (
     <div className="p-2 max-w-md ">
       <div className="flex items-center mb-4">
@@ -145,7 +141,7 @@ export const BackgroundGameSettings: React.FC<BackgroundGameSettingsProps> = ({
 };
 
 export const GraphicsSettings: React.FC = () => {
-  const { state, updateGraphicsSettings, saveGraphicsSettings } = useGraphicsContext();
+  const { state, saveGraphicsSettings } = useGraphicsContext();
 
   const [retroEffectLevel, setRetroEffectLevel] = useState(state.retroEffect?.level || 2);
   const [isRetroEffectEnabled, setIsRetroEffectEnabled] = useState(
