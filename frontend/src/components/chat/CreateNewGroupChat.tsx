@@ -1,31 +1,20 @@
 import React, { useState } from 'react';
 
+import { FriendType } from '../../../../shared/types';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';
 
 type CreateRoomPopupProps = {
-  onClose: () => void;
   handleClickNewChat: () => void;
 };
 
-{
-  /* <CreateRoomPopup
-  isVisible={isRoomPopupVisible}
-  onClose={() => setRoomPopupVisible(false)}
-  friends={friends}
-/>; */
-}
-
-export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
-  onClose,
-  handleClickNewChat,
-}) => {
+export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({ handleClickNewChat }) => {
   const [roomName, setRoomName] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const { friends, selectedFriend, createRoom } = useChatContext();
+  const { friends, createRoom } = useChatContext();
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -33,7 +22,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  const filteredUsers = friends.filter((friend) =>
+  const filteredUsers = friends.filter((friend: FriendType) =>
     friend.display_name?.toLowerCase().startsWith(searchQuery)
   );
 
@@ -89,7 +78,7 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({
 
               <div className="mt-4 w-full">
                 {friends && friends.length > 0 ? <h3>Suggested:</h3> : null}
-                {filteredUsers.map((friend) => (
+                {filteredUsers.map((friend: FriendType) => (
                   <div key={`create_room_${friend.user_id}`} className="flex gap-3 mt-2 ml-2">
                     <div className="w-[30px] h-[30px] rounded-full overflow-hidden">
                       <img

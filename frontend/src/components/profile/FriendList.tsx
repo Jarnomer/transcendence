@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '../../../../shared/types';
+import { FriendListType, FriendType, UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
 
 const friendListVariants = {
@@ -40,15 +40,15 @@ export const parentContainerVariants = {
 };
 
 type FriendListProps = {
-  friends: UserDataResponseType[];
+  friends: FriendListType;
 };
 
 type FriendProps = {
-  friend: UserDataResponseType;
+  friend: FriendType;
 };
 
 type FriendsProps = {
-  user: UserDataResponseType;
+  user: UserDataResponseType | null;
 };
 
 export const Friend: React.FC<FriendProps> = ({ friend }) => {
@@ -112,6 +112,9 @@ export const FriendList: React.FC<FriendListProps> = ({ friends }) => {
 
 export const Friends: React.FC<FriendsProps> = ({ user }) => {
   const { user: loggedInUser, friends: loggedInUserFriends } = useUser();
+
+  if (!user) return;
+
   const isOwnProfile = user?.user_id === loggedInUser?.user_id;
   const friends = isOwnProfile ? loggedInUserFriends || [] : user?.friends || [];
 

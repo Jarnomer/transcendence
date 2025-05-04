@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 import { getUserData } from '@/services/userService';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { FriendListType, UserDataResponseType } from '@shared/types/userTypes';
 
 import { api } from '../../services/api';
 import { getRequestsSent } from '../../services/friendService';
@@ -23,7 +23,7 @@ interface UserContextType {
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
-  friends: any[];
+  friends: FriendListType;
   // setToken: React.Dispatch<React.SetStateAction<string | null>>;
 }
 

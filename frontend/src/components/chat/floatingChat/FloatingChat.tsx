@@ -1,7 +1,5 @@
 import { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import { useChatContext } from '../../../contexts/chatContext/ChatContext';
 import { useSound } from '../../../hooks/useSound';
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
@@ -12,12 +10,10 @@ import { FloatingChatWindow } from './FloatingChatWindow';
 export const FloatingChat = () => {
   const [minimized, setMinimized] = useState(true);
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
-  const location = useLocation();
 
   const {
     friends,
     user,
-    sendChatMessage,
     openChatWindows,
     setOpenChatWindows,
     messages,
@@ -25,7 +21,6 @@ export const FloatingChat = () => {
     rooms,
     myRooms,
     fetchChatHistory,
-    roomId,
   } = useChatContext();
   const playZoomSound = useSound('/sounds/effects/zoom.wav');
 
@@ -40,7 +35,7 @@ export const FloatingChat = () => {
 
   const handleOpenChat = async (friendId: string) => {
     console.log('opening chat', friendId);
-    setOpenChatWindows((prev) => ({
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [friendId]: true,
     }));
@@ -52,7 +47,7 @@ export const FloatingChat = () => {
 
   const handleOpenRoom = async (roomId: string) => {
     console.log('opening chat', roomId);
-    setOpenChatWindows((prev) => ({
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [roomId]: true,
     }));
@@ -63,7 +58,7 @@ export const FloatingChat = () => {
   };
 
   const handleCloseChat = (friendId: string) => {
-    setOpenChatWindows((prev) => ({
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [friendId]: false,
     }));
@@ -82,11 +77,9 @@ export const FloatingChat = () => {
           .map(([friendId]) => (
             <FloatingChatWindow
               key={friendId}
-              user={user}
               friends={friends}
               chatId={friendId}
               onBack={() => handleCloseChat(friendId)}
-              onSend={sendChatMessage}
             />
           ))}
 

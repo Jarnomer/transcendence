@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { UserDataResponseType } from '../../../../../shared/types';
+import { FriendType } from '../../../../../shared/types';
+import { ChatRoomType } from '../../../../../shared/types/chatTypes';
 import { useChatContext } from '../../../contexts/chatContext/ChatContext';
 import { useUser } from '../../../contexts/user/UserContext';
 import { useSound } from '../../../hooks/useSound';
@@ -11,38 +12,27 @@ import { MessageInput } from '../MessageInput';
 import { MessageList } from '../MessageList';
 
 interface ChatWindowProps {
-  friends: UserDataResponseType[];
+  friends: FriendType[];
   chatId: string | null;
-  roomId: string | null;
   onBack: () => void;
-  onSend: (text: string) => void;
 }
 
-export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
-  friends,
-  chatId,
-  onBack,
-  onSend,
-}) => {
-  const [input, setInput] = useState('');
+export const FloatingChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, onBack }) => {
   const [minimized, setMinimized] = useState(false);
   const { messages, rooms } = useChatContext();
   // const chatMessages = messages[chatId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
-  const isGroupChat = rooms.some((room) => room.chat_room_id === chatId);
-  let roomId;
+  const isGroupChat = rooms.some((room: ChatRoomType) => room.chat_room_id === chatId);
 
   const chatMessages = useMemo(() => {
     if (chatId) {
       return messages[chatId] || [];
     }
-  }, [messages, chatId, roomId]);
+  }, [messages, chatId]);
 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
   const playSelectSound = useSound('/sounds/effects/select.wav');
-
-  const playZoomSound = useSound('/sounds/effects/zoom.wav');
 
   const handleChatMinimize = () => {
     if (!minimized) playUnSelectSound();
@@ -58,7 +48,7 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
     }
   }, [chatMessages]);
 
-  console.log('isChatroom:', isGroupChat, 'roomId: ', chatId);
+  console.log('isChatroom:', isGroupChat, 'chatId: ', chatId);
 
   return (
     <div
@@ -78,7 +68,7 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
                 {friends.find((f) => f.user_id === chatId)?.display_name}
               </span>
             ) : chatId && isGroupChat ? (
-              <span>{rooms.find((room) => room.chat_room_id === chatId).name}</span>
+              <span>{rooms.find((room: ChatRoomType) => room.chat_room_id === chatId).name}</span>
             ) : null}
             <div className="flex items-center gap-2">
               {!minimized && (
@@ -103,12 +93,7 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({
         {!minimized && (
           <div className="flex flex-col flex-1 overflow-hidden">
             <div ref={messageListRef} className="flex-1 overflow-y-auto">
-              <MessageList
-                messages={chatMessages}
-                user={user}
-                chatId={chatId}
-                isGroupChat={isGroupChat}
-              />
+              <MessageList messages={chatMessages} user={user} isGroupChat={isGroupChat} />
             </div>
 
             <div className="p-2 border-t flex gap-2">

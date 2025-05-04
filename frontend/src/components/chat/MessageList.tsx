@@ -1,30 +1,19 @@
 import React from 'react';
 
+import { UserResponseType } from '../../../../shared/types';
+import { ChatMessageType } from '../../../../shared/types/chatTypes';
 import { MessageBubble } from './MessageBubble';
 
 interface MessageListProps {
-  user: User;
+  user: UserResponseType | null;
+  messages: ChatMessageType[];
+  isGroupChat: boolean;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
-  messages,
-  user,
-  chatId,
-  isGroupChat,
-}) => {
-  console.log('user: ', user);
-  console.log(user.user_id);
-  console.log(messages);
-  // useEffect(() => {
-  //   if (selectedFriendId) {
-  //     setMessageList(messages[selectedFriendId] || []);
-  //   }
-  //   if (roomId) {
-  //     setMessageList(messages[roomId] || []);
-  //   }
-  // }, [messages, selectedFriendId, roomId]);
+export const MessageList: React.FC<MessageListProps> = ({ messages, user, isGroupChat }) => {
+  if (!messages || !user) return;
 
-  if (!messages) return;
+  console.log(messages);
 
   return (
     <div className="flex flex-col  w-full  gap-2  grow p-2 ">
@@ -38,8 +27,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             <MessageBubble
               message={msg}
               isOwn={currentSender === user.user_id}
-              sender={currentSender}
-              isLastOfGroup={isLastOfGroup} // <-- New prop
+              isLastOfGroup={isLastOfGroup}
               isGroupChat={isGroupChat}
             />
           </div>

@@ -13,7 +13,7 @@ export const SettingsModal: React.FC = () => {
   return (
     <ModalWrapper modalName="settings">
       {isModalOpen('settings') && (
-        <div className="relative w-full h-[70%] overflow-y-scroll  sm:w-3xl flex items-center">
+        <div className="relative w-full h-[70%] overflow-y-scroll border-1  sm:w-3xl flex items-center">
           <Settings></Settings>
         </div>
       )}

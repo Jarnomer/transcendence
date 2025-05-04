@@ -1,13 +1,10 @@
 import React from 'react';
 
-import { Message, User } from '@/lib/types';
-
-import { useUser } from '../../contexts/user/UserContext';
+import { ChatMessageType } from '../../../../shared/types/chatTypes';
 
 interface MessageBubbleProps {
-  message: Message;
+  message: ChatMessageType;
   isOwn: boolean;
-  sender?: User;
   isLastOfGroup: boolean;
   isGroupChat: boolean;
 }
@@ -18,8 +15,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   isLastOfGroup,
   isGroupChat,
 }) => {
-  const { user } = useUser();
-
   return (
     <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} gap-1`}>
       {/* Avatar and bubble */}

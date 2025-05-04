@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { ClippedCornerCard } from '@/components/UI/cards/ClippedCornerCard';
 
@@ -9,7 +9,7 @@ import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
 import { login, register } from '@services/authService.ts';
 import { updateUser } from '@services/userService.ts';
 
-import { useUser } from '../contexts/user/UserContext';
+import { useModal } from '../contexts/modalContext/ModalContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useSound } from '../hooks/useSound';
 
@@ -32,6 +32,7 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const playErrorSound = useSound('/sounds/effects/error.wav');
+  const { openModal } = useModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +68,8 @@ export const LoginPage: React.FC = () => {
         chatSocket.connect();
         // setToken(token.token); // Update the token in the context
         if (isRegistering) {
-          navigate(`/signUp`);
+          openModal('editProfile');
+          navigate(`/gameMenu`);
         } else {
           await updateUser({ status: 'online' });
           navigate(`/gameMenu`);

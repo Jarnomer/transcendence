@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 
 import { UserDataResponseType } from '@shared/types/userTypes';
 
+import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { UserActions } from '../UI/buttons/UserActions';
 import { ProfilePicture } from './ProfilePicture';
@@ -34,36 +35,30 @@ type Friend = {
 
 interface ProfileHeaderProps {
   user: UserDataResponseType | null;
-  setEditProfile: React.Dispatch<React.SetStateAction<boolean>>;
-  editProfile: boolean;
-  sent: Friend;
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
-  user,
-  setEditProfile,
-  editProfile,
-}) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
   const { user: loggedInUser } = useUser();
+  const { openModal } = useModal();
+
+  if (!user) return;
 
   const isOwnProfile = user?.user_id === loggedInUser?.user_id;
   user = isOwnProfile ? loggedInUser : user;
 
-  if (!user) return;
-
   return (
     <motion.div
-      className="w-full border-1 text-left flex gap-2 p-2 backdrop-blur-sm"
+      className="w-full border-1 text-left flex gap-2 p-2 backdrop-blur-sm glass-box"
       variants={animationVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <div>
+      <div className="w-1/3 sm:w-2/5 h-full">
         <ProfilePicture user={user} isOwnProfile={isOwnProfile}></ProfilePicture>
       </div>
       {/* USER INFO */}
-      <div className="w-full flex flex-col gap-2">
+      <div className="w-2/3 sm:w-3/5 flex flex-col gap-2">
         {/* USER DISPLAY NAME */}
         <div className="bg-primary text-black min-w-full text-xs">
           <h2 className="w-full text-lg p-2 font-semibold">{user.display_name}</h2>
@@ -87,11 +82,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         </div>
 
         {isOwnProfile ? (
-          !editProfile ? (
-            <button className="text-xs hover:text-secondary" onClick={() => setEditProfile(true)}>
-              Edit Profile
-            </button>
-          ) : null
+          <button
+            className="text-xs hover:text-secondary"
+            onClick={() => {
+              openModal('editProfile');
+            }}
+          >
+            Edit Profile
+          </button>
         ) : (
           <UserActions user={user}></UserActions>
         )}

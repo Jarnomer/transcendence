@@ -10,6 +10,7 @@ import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider';
 import { Header } from './components/header/Header.tsx';
 import { ConfirmModal } from './components/modals/CornfirmModal.tsx';
+import { EditProfileModal } from './components/modals/EditProfileModal.tsx';
 import { ErrorModal } from './components/modals/ErrorModal.tsx';
 import { JoinGameNotificationModal } from './components/modals/JoinGameNotification.tsx';
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
@@ -53,11 +54,12 @@ const App: React.FC = () => {
             <Footer />
             <FloatingChatWrapper />
             <MobileNavBar></MobileNavBar>
+            <EditProfileModal></EditProfileModal>
+            <SettingsModal></SettingsModal>
+            <JoinGameNotificationModal></JoinGameNotificationModal>
+            <ConfirmModal></ConfirmModal>
+            <ErrorModal></ErrorModal>
           </Router>
-          <SettingsModal></SettingsModal>
-          <JoinGameNotificationModal></JoinGameNotificationModal>
-          <ConfirmModal></ConfirmModal>
-          <ErrorModal></ErrorModal>
 
           <Toaster position="bottom-right" />
         </GameOptionsProvider>

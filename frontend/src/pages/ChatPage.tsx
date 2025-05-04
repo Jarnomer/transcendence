@@ -1,7 +1,5 @@
 import { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import { BackgroundGlow } from '../components';
 import { ChatWindow } from '../components/chat/chatPage/ChatWindow';
 import { MobileChatPage } from '../components/chat/chatPage/MobileChatPage';
@@ -10,17 +8,14 @@ import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useMediaQuery } from '../hooks/useMediaQuery';
-import { useSound } from '../hooks/useSound';
 
 export const ChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
   const [chatId, setchatId] = useState<string | null>(null);
-  const location = useLocation();
   const { user } = useUser();
   const isDesktop = useMediaQuery('(min-width: 600px)');
 
-  const { friends, sendChatMessage, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
-  const playZoomSound = useSound('/sounds/effects/zoom.wav');
+  const { friends, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
 
   const handleClickNewChat = () => {
     setCreateNewGroupChat(!createNewGroupChat);
@@ -79,11 +74,9 @@ export const ChatPage: React.FC = () => {
               <div className="w-full md:w-3/5 h-full">
                 <ChatWindow
                   key={chatId}
-                  user={user}
                   friends={friends}
                   chatId={chatId}
                   onBack={handleCloseChat}
-                  onSend={sendChatMessage}
                 />
               </div>
             )}

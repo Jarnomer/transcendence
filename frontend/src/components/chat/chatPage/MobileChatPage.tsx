@@ -1,10 +1,9 @@
 import { useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useChatContext } from '../../../contexts/chatContext/ChatContext';
 import { useUser } from '../../../contexts/user/UserContext';
-import { useSound } from '../../../hooks/useSound';
 import { NavIconButton } from '../../UI/buttons/NavIconButton';
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
 import { ChatSidebar } from '../ChatSideBar';
@@ -13,12 +12,10 @@ import { ChatWindow } from './ChatWindow';
 export const MobileChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
   const [chatId, setchatId] = useState<string | null>(null);
-  const location = useLocation();
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const { friends, sendChatMessage, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
-  const playZoomSound = useSound('/sounds/effects/zoom.wav');
+  const { friends, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
 
   const handleClickNewChat = () => {
     setCreateNewGroupChat(!createNewGroupChat);
@@ -72,14 +69,7 @@ export const MobileChatPage: React.FC = () => {
         <>
           {chatId ? (
             <div className="w-full h-full">
-              <ChatWindow
-                key={chatId}
-                user={user}
-                friends={friends}
-                chatId={chatId}
-                onBack={handleGoBack}
-                onSend={sendChatMessage}
-              />
+              <ChatWindow key={chatId} friends={friends} chatId={chatId} onBack={handleGoBack} />
             </div>
           ) : (
             <div className={`h-full overflow-y-auto  w-full`}>

@@ -29,7 +29,7 @@ export const UserSettings: React.FC = () => {
 
   return (
     <motion.div
-      className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
+      className="h-full min-h-[450px] relative glass-box text-xs"
       variants={animationVariants}
       initial="hidden"
       animate="visible"

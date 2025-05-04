@@ -22,7 +22,7 @@ export const Header: React.FC = () => {
           Super Pong 3D
         </h1>
 
-        <div className="ml-0 md:ml-auto">
+        <div className="ml-0 md:ml-auto relative">
           <HeaderNav />
         </div>
       </header>
