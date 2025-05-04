@@ -10,3 +10,4 @@ export * from './gameAudioTypes';
 export * from './gameTypes';
 export * from './queueTypes';
 export * from './userTypes';
+export * from './graphicsTypes';

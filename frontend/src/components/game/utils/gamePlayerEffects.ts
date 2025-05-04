@@ -1,7 +1,6 @@
 import {
   Animation,
   Color3,
-  Color4,
   CubicEase,
   EasingFunction,
   GlowLayer,
@@ -16,11 +15,11 @@ import {
 } from 'babylonjs';
 
 import {
-  gameToSceneSize,
-  getPowerUpSignPath,
-  getPowerUpIconPath,
   addGlowEffect,
   createStandardParticleSystem,
+  gameToSceneSize,
+  getPowerUpIconPath,
+  getPowerUpSignPath,
 } from '@game/utils';
 
 import {
@@ -429,21 +428,9 @@ function applyPaddleMaterial(
     return;
   }
 
-  const positiveEffects = activePowerUps.filter((p) => !p.isNegative).length;
-  const negativeEffects = activePowerUps.filter((p) => p.isNegative).length;
-
-  let effectColor: Color3 = primaryColor;
-
-  if (positiveEffects > 0 && negativeEffects > 0) {
-    const ratio = positiveEffects / (positiveEffects + negativeEffects);
-    effectColor = Color3.Lerp(secondaryColor, primaryColor, ratio);
-  } else if (negativeEffects > 0) {
-    effectColor = secondaryColor;
-  }
-
-  const totalEffects = positiveEffects + negativeEffects;
-  const intensityMultiplier = 1.2 + Math.min(totalEffects * 0.2, 0.8);
-  const targetIntensity = baseEmissive * intensityMultiplier;
+  const firstPowerUp = activePowerUps[0];
+  const effectColor = firstPowerUp.isNegative ? secondaryColor : primaryColor;
+  const targetIntensity = baseEmissive * 1.5;
 
   animateMaterialTransition(paddleMesh, effectColor, targetIntensity);
 }

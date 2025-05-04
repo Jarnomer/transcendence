@@ -14,7 +14,7 @@ export class GameSoundManager {
 
   private readonly SOUND_CONFIGS = {
     edge: { base: 'hit_edge', count: 3 },
-    paddle: { base: 'hit_paddle', count: 2 },
+    paddle: { base: 'hit_paddle', count: 1 },
     ballFizzle: { base: 'ball_fizzle', count: 1 },
     paddleFizzle: { base: 'paddle_fizzle', count: 1 },
     score: { base: 'ball_explode', count: 3 },
@@ -30,6 +30,7 @@ export class GameSoundManager {
     positivePowerUp: 'power_up_pos.wav',
     negativePowerUpExpire: 'power_up_expire_neg.wav',
     positivePowerUpExpire: 'power_up_expire_pos.wav',
+    canvasModeExplosion: 'background_explosion.wav',
   };
 
   private gameStartSound: HTMLAudioElement | null = null;
@@ -41,6 +42,7 @@ export class GameSoundManager {
   private positivePowerUpSound: HTMLAudioElement | null = null;
   private negativePowerUpExpireSound: HTMLAudioElement | null = null;
   private positivePowerUpExpireSound: HTMLAudioElement | null = null;
+  private canvasModeExplosion: HTMLAudioElement | null = null;
 
   private edgeSounds: HTMLAudioElement[] = [];
   private paddleSounds: HTMLAudioElement[] = [];
@@ -74,6 +76,7 @@ export class GameSoundManager {
       this.positivePowerUpSound = new Audio(baseUrl + this.SOUND_NAMES.positivePowerUp);
       this.negativePowerUpExpireSound = new Audio(baseUrl + this.SOUND_NAMES.negativePowerUpExpire);
       this.positivePowerUpExpireSound = new Audio(baseUrl + this.SOUND_NAMES.positivePowerUpExpire);
+      this.canvasModeExplosion = new Audio(baseUrl + this.SOUND_NAMES.canvasModeExplosion);
 
       this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.edge, this.edgeSounds);
       this.loadSoundVariations(baseUrl, this.SOUND_CONFIGS.paddle, this.paddleSounds);
@@ -175,7 +178,7 @@ export class GameSoundManager {
     this.updateLastSoundTime('paddleFizzle');
   }
 
-  playNegativePowerUpSound(volumeMultiplier: number = 1.0, playbackRate: number = 0.8): void {
+  playNegativePowerUpSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('negativePowerUp')) return;
 
     if (this.negativePowerUpSound) {
@@ -186,7 +189,7 @@ export class GameSoundManager {
     this.updateLastSoundTime('negativePowerUp');
   }
 
-  playPositivePowerUpSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.2): void {
+  playPositivePowerUpSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('positivePowerUp')) return;
 
     if (this.positivePowerUpSound) {
@@ -197,7 +200,7 @@ export class GameSoundManager {
     this.updateLastSoundTime('positivePowerUp');
   }
 
-  playNegativePowerUpExpireSound(volumeMultiplier: number = 1.0, playbackRate: number = 0.8): void {
+  playNegativePowerUpExpireSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('negativePowerUpExpire')) return;
 
     if (this.negativePowerUpExpireSound) {
@@ -208,7 +211,7 @@ export class GameSoundManager {
     this.updateLastSoundTime('negativePowerUpExpire');
   }
 
-  playPositivePowerUpExpireSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.2): void {
+  playPositivePowerUpExpireSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
     if (!this.shouldPlaySound('positivePowerUpExpire')) return;
 
     if (this.positivePowerUpExpireSound) {
@@ -284,6 +287,17 @@ export class GameSoundManager {
     }
 
     this.updateLastSoundTime('countDown3');
+  }
+
+  playCanvasModeExplosionSound(volumeMultiplier: number = 1.0, playbackRate: number = 1.0): void {
+    if (!this.shouldPlaySound('canvasModeExplosion')) return;
+
+    if (this.canvasModeExplosion) {
+      this.canvasModeExplosion.playbackRate = playbackRate;
+      this.playSound(this.canvasModeExplosion, volumeMultiplier);
+    }
+
+    this.updateLastSoundTime('canvasModeExplosion');
   }
 
   private shouldPlaySound(soundType: string): boolean {

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { GameSettings } from '../components/settings/GameSettings';
-import { GraphicSettings } from '../components/settings/GraphicSettings';
+import { GraphicsSettings } from '../components/settings/GraphicsSettings';
 import { Soundsettings } from '../components/settings/SoundSettings';
 import { UserSettings } from '../components/settings/UserSettings';
 import { useSound } from '../hooks/useSound';
@@ -71,11 +70,8 @@ export const SettingsNav: React.FC<{
         <button onClick={() => setActiveTab('userSettings')}>
           <span className={`${activeTab === 'userSettings' ? 'text-secondary' : ''}`}>User</span>
         </button>
-        <button onClick={() => setActiveTab('gameSettings')}>
-          <span className={`${activeTab === 'gameSettings' ? 'text-secondary' : ''}`}>Game</span>
-        </button>
-        <button onClick={() => setActiveTab('graphicSettings')}>
-          <span className={`${activeTab === 'graphicSettings' ? 'text-secondary' : ''}`}>
+        <button onClick={() => setActiveTab('graphicsSettings')}>
+          <span className={`${activeTab === 'graphicsSettings' ? 'text-secondary' : ''}`}>
             Graphics
           </span>
         </button>
@@ -117,29 +113,16 @@ export const Settings: React.FC = () => {
               </motion.div>
             )}
 
-            {activeTab === 'gameSettings' && (
+            {activeTab === 'graphicsSettings' && (
               <motion.div
-                key="gameSettings"
-                className="w-full h-full max-h-screen"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <GameSettings></GameSettings>
-              </motion.div>
-            )}
-
-            {activeTab === 'graphicSettings' && (
-              <motion.div
-                key="graphicSettings"
-                className="w-full h-full"
+                key="graphicsSettings"
+                className="w-full"
                 // variants={slideFromLeftVariants}
                 // initial="initial"
                 // animate="animate"
                 // exit="exit"
               >
-                <GraphicSettings></GraphicSettings>
+                <GraphicsSettings></GraphicsSettings>
               </motion.div>
             )}
 
