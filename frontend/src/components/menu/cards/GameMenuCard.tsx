@@ -122,7 +122,6 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
             />
             <path
               d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z"
-              fill="url(#imagePattern)"
               strokeWidth="2"
               className="creator-img-container stroke-2 "
               fill="currentColor"

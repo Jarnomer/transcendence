@@ -28,10 +28,3 @@ export const Header: React.FC = () => {
       </header>
     );
   }
-  //   return (
-  //     <header className={`header z-10  w-full flex justify-center items-center p-2`}>
-  //       <HeaderNav />
-  //     </header>
-  //   );
-  // }
-};

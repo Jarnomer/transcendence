@@ -93,7 +93,7 @@ export const LeaderBoard: React.FC = () => {
           exit="hidden"
           transition={{ duration: 0.4 }}
         >
-          {filteredUsers.map((user, index) => (
+          {filteredUsers.map((user) => (
             <motion.li
               key={user.user_id}
               className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
