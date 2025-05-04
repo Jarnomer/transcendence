@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { AnimatePresence } from 'framer-motion';
+
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { PlayerScoreBoard } from '@components';
@@ -8,9 +10,9 @@ import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
+import { MatchMakingCarousel } from '../components/game';
 import GameplayCanvas from '../components/game/GameplayCanvas';
 import { GameResults } from '../components/game/GameResults';
-import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -174,9 +176,11 @@ export const GamePage: React.FC = () => {
       {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null}
 
       {/* Render MatchMakingCarousel */}
-      {!isGameCanvasActive && !gameResult ? (
-        <MatchMakingCarousel playersData={playersData} />
-      ) : null}
+      <AnimatePresence mode="wait">
+        {!isGameCanvasActive && !gameResult ? (
+          <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 };

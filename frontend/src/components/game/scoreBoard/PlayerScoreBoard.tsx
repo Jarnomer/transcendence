@@ -4,8 +4,8 @@ import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { GameState } from '@shared/types';
 
-import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
-import { useWebSocketContext } from '../../contexts/WebSocketContext';
+import { useGameOptionsContext } from '../../../contexts/gameContext/GameOptionsContext';
+import { useWebSocketContext } from '../../../contexts/WebSocketContext';
 import PlayerCard from './PlayerScoreCard';
 
 interface Player {
@@ -53,7 +53,6 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   });
 
   useEffect(() => {
-    setLoadingState('scoreBoardLoading', true);
     console.log('playerScoreBoard useEffect playerdata: ', playersData);
     if (!playersData?.player1) {
       console.log('playerdata null, returning');

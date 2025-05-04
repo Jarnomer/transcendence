@@ -7,7 +7,6 @@ import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is im
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { useSound } from '../../hooks/useSound.tsx';
-import { BracketTest } from '../../pages/BracketTest.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
@@ -19,7 +18,9 @@ import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
-import { TestGameResult } from '../../pages/TestGameResult.tsx';
+import { BracketTest } from '../../pages/testing_pages/BracketTest.tsx';
+import { CarouselTest } from '../../pages/testing_pages/CarouselTest.tsx';
+import { TestGameResult } from '../../pages/testing_pages/TestGameResult.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
@@ -132,6 +133,17 @@ export const AnimatedRoutes: React.FC = () => {
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/CarouselTest"
+          element={
+            user && (
+              <PageWrapper>
+                <CarouselTest />
+              </PageWrapper>
             )
           }
         />
