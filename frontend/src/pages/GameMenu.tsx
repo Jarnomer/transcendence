@@ -20,11 +20,6 @@ interface GameMenuOption {
   onClick: () => void;
 }
 
-interface SelectedMode {
-  mode: string;
-  difficulty?: string;
-}
-
 export const pageVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
@@ -49,8 +44,7 @@ export const GameMenu: React.FC = () => {
   // const [readyForNextEffect, setReadyForNextEffect] = useState(false);
 
   const navigate = useNavigate(); // Hook to navigate to different routes
-  const { setMode, setDifficulty, setLobby, resetGameOptions, difficulty, mode, queueId } =
-    useGameOptionsContext();
+  const { setMode, setDifficulty, setLobby, difficulty, mode } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
 
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
@@ -137,6 +131,7 @@ export const GameMenu: React.FC = () => {
   const handleDifficultyClick = (difficulty: string | null) => {
     playSubmitSound();
     setDifficulty(difficulty);
+    console.log('set Difficulty');
   };
 
   useEffect(() => {
@@ -148,7 +143,7 @@ export const GameMenu: React.FC = () => {
   // Effect that only runs after state is reset
   useEffect(() => {
     if (!isNewGame) return;
-
+    console.log('game menu useEffect: ', mode, difficulty);
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
@@ -179,7 +174,12 @@ export const GameMenu: React.FC = () => {
       >
         {mode && !difficulty ? (
           <>
-            <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
+            <NavIconButton
+              ariaLabel="Go back"
+              id="arrow-left"
+              icon="arrowLeft"
+              onClick={() => handleModeClick(null)}
+            />
 
             {subMenus[mode].map((option, index) => (
               <motion.div key={index} style={{ flexBasis: '250px' }}>

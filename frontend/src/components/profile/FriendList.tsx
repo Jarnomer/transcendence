@@ -1,64 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { NavIconButton } from '@components/UI/buttons/NavIconButton'; // Assuming this component is already in place
-
+import { FriendListType, FriendType, UserDataResponseType } from '../../../../shared/types';
 import { useUser } from '../../contexts/user/UserContext';
-import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
-import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
-import { ListSvgContainer } from '../visual/svg/containers/ListSvgContainer';
 
-export const listAnimationVariants = {
-  initial: {
-    clipPath: 'inset(0 0 100% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut', delay: 0.5 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
-
-const containerVariants = {
+const friendListVariants = {
   visible: {
     transition: {
-      staggerChildren: 0.1, // Stagger items
+      staggerChildren: 0.1,
       delay: 0.4,
     },
   },
 };
 
-const listItemVariants = {
+const friendVariants = {
   hidden: { opacity: 0, x: -10 },
   visible: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -10 },
 };
 
-type Friend = {
-  user_id: string;
-  display_name: string;
-  avatar_url: string;
-};
-
-type FriendListProps = {
-  friends: Friend[];
-  requests: Friend[];
-  sents: Friend[];
-  isOwnProfile: boolean;
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-};
-
-export const animationVariants = {
+export const parentContainerVariants = {
   initial: {
     clipPath: 'inset(0 0 0 100% )',
     opacity: 0,
@@ -75,195 +39,100 @@ export const animationVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: {
-      delay: i * 0.1,
-      type: 'tween',
-      ease: 'easeOut',
-    },
-  }),
+type FriendListProps = {
+  friends: FriendListType;
 };
 
-export const FriendRequests: React.FC<FriendListProps> = ({ requests, loading, setLoading }) => {
-  const navigate = useNavigate();
-  const { refetchUser } = useUser();
+type FriendProps = {
+  friend: FriendType;
+};
 
-  const handleAcceptFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    acceptFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request accepted');
-        refetchUser();
-      })
-      .catch((error) => {
-        console.error('Failed to accept friend request: ', error);
-      });
-  };
+type FriendsProps = {
+  user: UserDataResponseType | null;
+};
 
-  const handleRejectFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
-    rejectFriendRequest(sender_id)
-      .then(() => {
-        console.log('Friend request rejected');
-        refetchUser();
-      })
-      .catch((error) => {
-        console.error('Failed to reject friend request: ', error);
-      });
-  };
-
+export const Friend: React.FC<FriendProps> = ({ friend }) => {
   return (
     <>
-      {requests && requests.length > 0 ? (
-        <motion.ul
-          className="pl-5 w-full h-full overflow-y-scroll"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          transition={{ duration: 0.4 }}
-        >
-          {requests.map((friend) => (
-            <motion.li
-              className=""
-              variants={listItemVariants}
-              key={friend.user_id}
-              onClick={() => navigate(`/profile/${friend.user_id}`)}
-            >
-              <div className="flex w-full h-full items-center gap-2 border-1 my-1 bg-primary/20 clipped-corner-bottom-right">
-                <ProfilePictureMedium user={friend}></ProfilePictureMedium>
-
-                <span className="text-xs font-medium">{friend.display_name}</span>
-
-                <div className="ml-5 flex gap-1">
-                  <NavIconButton
-                    id={`accept-friend-${friend.user_id}`}
-                    icon="checkCircle"
-                    onClick={(event) => handleAcceptFriendClick(event, friend.user_id)}
-                  />
-                  <NavIconButton
-                    id={`reject-friend-${friend.user_id}`}
-                    icon="xCircle"
-                    onClick={(event) => handleRejectFriendClick(event, friend.user_id)}
-                  />
-                </div>
-              </div>
-            </motion.li>
-          ))}
-        </motion.ul>
-      ) : (
-        <p className="text-gray-400 text-xs text-left">0 pending friend requests</p>
-      )}
+      <div className="image-container relative border h-[100px] w-[100px] overflow-hidden">
+        <img
+          className="object-cover w-full h-full"
+          src={friend.avatar_url}
+          alt={`${friend.display_name}'s profile picture`}
+        />
+      </div>
+      <span className="text-xs font-medium text-secondary ">{friend.display_name}</span>
     </>
   );
 };
 
-export const Friends: React.FC<FriendListProps> = ({ friends }) => {
-  const navigate = useNavigate();
+export const FriendList: React.FC<FriendListProps> = ({ friends }) => {
   console.log('FRIENDS FROM FRIENDLIST: ', friends);
+  const navigate = useNavigate();
   return friends && friends.length > 0 ? (
     <motion.ul
-      className="pl-5 w-full h-full gap-3 overflow-y-scroll"
-      variants={containerVariants}
+      className="flex flex-wrap gap-4 justify-start "
+      variants={friendListVariants}
       initial="hidden"
       animate="visible"
       exit="hidden"
       transition={{ duration: 0.4 }}
+      aria-label="friends"
     >
       {friends.map((friend) => (
         <motion.li
-          className="my-1 hover:text-secondary h-[57px] w-[282px]"
+          className="hover:text-secondary backdrop-blur-md aspect-square w-[100px] flex-shrink-0 text-center"
           key={friend.user_id}
           onClick={() => navigate(`/profile/${friend.user_id}`)}
-          variants={listItemVariants}
+          variants={friendVariants}
         >
-          <ListSvgContainer>
-            <div className="flex w-full h-full items-center gap-2">
-              <ProfilePictureMedium user={friend}></ProfilePictureMedium>
-              <span className="text-xs font-medium">{friend.display_name}</span>
-            </div>
-          </ListSvgContainer>
+          <Friend friend={friend}></Friend>
         </motion.li>
       ))}
     </motion.ul>
   ) : (
-    <>
-      <p className="text-gray-400 "></p>
-      <motion.ul
-        className="pl-5 w-full h-full gap-3 overflow-y-scroll text-grey-400"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        transition={{ duration: 0.4 }}
-      >
-        <motion.li className="my-1 text-gray-500 h-[57px] w-[282px]" variants={listItemVariants}>
-          <ListSvgContainer>
-            <div className="flex w-full h-full items-center gap-2">
-              <div className="opacity relative h-[50px] w-[50px]  overflow-hidden">
-                <img className="object-cover w-full h-full grayscale" src={``} />
-              </div>
-              <span className="text-xs font-medium">mystery man</span>
-            </div>
-          </ListSvgContainer>
-        </motion.li>
-      </motion.ul>
-    </>
+    // add a placeholder friend if user has no friends
+    <motion.div
+      className=" aspect-square opacity-50 w-[100px] flex-shrink-0"
+      variants={friendListVariants}
+      aria-hidden="true"
+    >
+      <div className="text-center ">
+        <div className="relative border h-[100px] w-[100px] overflow-hidden">
+          <img
+            className="object-cover grayscale w-full h-full opacity-50"
+            src={'/uploads/default_avatar.png'}
+          />
+        </div>
+        <span className="text-xs font-medium">{}</span>
+      </div>
+    </motion.div>
   );
 };
 
-export const FriendList: React.FC<FriendListProps> = ({
-  isOwnProfile,
-  friends,
-  requests,
-  sents,
-  loading,
-  setLoading,
-}) => {
-  const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent'>('friends');
-  const navigate = useNavigate();
-  const { refetchUser } = useUser();
-  console.log('LOADING FROM FRIENDLIST: ', loading);
+export const Friends: React.FC<FriendsProps> = ({ user }) => {
+  const { user: loggedInUser, friends: loggedInUserFriends } = useUser();
 
-  if (loading) {
-    return <h1>loading asd</h1>;
-  }
+  if (!user) return;
+
+  const isOwnProfile = user?.user_id === loggedInUser?.user_id;
+  const friends = isOwnProfile ? loggedInUserFriends || [] : user?.friends || [];
 
   return (
-    <motion.div variants={animationVariants} initial="initial" animate="animate" exit="exit">
-      <div className=" w-full lg:w-1/2 h-[20px] bg-primary text-black text-sm">Friends</div>
-      <motion.div className="">
-        <div className="flex gap-4 p-2">
-          <button
-            onClick={() => setActiveTab('friends')}
-            className={`text-xs ${activeTab === 'friends' ? 'text-secondary' : ''}`}
-          >
-            {(friends && friends.length) || '0'} Friends
-          </button>
-          {isOwnProfile ? (
-            <>
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={` text-xs ${activeTab === 'requests' ? ' text-secondary' : ''}`}
-              >
-                Requests
-              </button>
-            </>
-          ) : null}
-        </div>
+    <motion.div
+      className=""
+      variants={parentContainerVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <div className="h-[20px] bg-primary text-black text-sm">Friends</div>
 
-        <div className="flex flex-col gap-2">
-          {activeTab === 'friends' ? (
-            <Friends friends={friends}></Friends>
-          ) : activeTab === 'requests' ? (
-            <FriendRequests requests={requests}></FriendRequests>
-          ) : null}
-        </div>
-      </motion.div>
+      <span className={`text-xs pl-2 mb-2 text-secondary`}>
+        {(friends && friends.length) || '0'} Friends
+      </span>
+
+      <FriendList friends={friends}></FriendList>
     </motion.div>
   );
 };

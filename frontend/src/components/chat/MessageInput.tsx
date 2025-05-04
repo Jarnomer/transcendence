@@ -5,17 +5,21 @@ import { useChatContext } from '@/contexts/chatContext/ChatContext';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
 interface MessageInputProps {
-  selectedFriendId: string | null;
-  roomId: string;
+  chatId: string | null;
+  isGroupChat: boolean;
 }
 
-export const MessageInput: React.FC<MessageInputProps> = ({ selectedFriendId, roomId }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({ chatId, isGroupChat }) => {
   const [newMessage, setNewMessage] = useState('');
   const { sendChatMessage } = useChatContext();
 
   const handleSendMessage = () => {
     console.log('new message: ', newMessage);
-    sendChatMessage(selectedFriendId, roomId, newMessage);
+    if (!isGroupChat) {
+      sendChatMessage(chatId, null, newMessage);
+    } else {
+      sendChatMessage(null, chatId, newMessage);
+    }
     setNewMessage('');
   };
 

@@ -10,7 +10,7 @@ export const TournamentPlayerList: React.FC = ({ players, tournamentSize }) => {
 
   return (
     <motion.div>
-      <div className="flex gap-3 w-full">
+      <div className="flex  gap-3 w-full">
         <button className="text-xs hover:text-secondary" onClick={() => setActiveTab('bracket')}>
           bracket
         </button>

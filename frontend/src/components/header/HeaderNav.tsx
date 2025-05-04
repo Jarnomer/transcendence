@@ -5,10 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // import { logout } from "../auth";  // Ensure your logout function is correctly imported
-import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
 import { useModal } from '../../contexts/modalContext/ModalContext'; // Importing modal context
 import { useUser } from '../../contexts/user/UserContext';
-import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { Notifications } from '../notifications/Notifications';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
@@ -34,8 +32,6 @@ export const HeaderNav: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { setLobby, setDifficulty, setMode, resetGameOptions, queueId } = useGameOptionsContext();
-  const { matchmakingState } = useWebSocketContext();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => {
@@ -60,14 +56,13 @@ export const HeaderNav: React.FC = () => {
     };
   }, [isDropdownOpen]);
 
-  const handleCreateGameClick = () => {
-    navigate('/gameMenu');
-  };
-
   return (
     <>
       {user && user.display_name ? (
-        <div className="flex gap-3 items-center justify-center w-full" aria-label="Navigation menu">
+        <div
+          className="flex  gap-3 items-center justify-center w-full"
+          aria-label="Navigation menu"
+        >
           <NavIconButton
             id="nav-play-button"
             ariaLabel="play"

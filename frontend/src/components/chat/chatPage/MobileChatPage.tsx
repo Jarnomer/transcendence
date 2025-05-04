@@ -1,19 +1,19 @@
 import { useState } from 'react';
 
-import { BackgroundGlow } from '../components';
-import { ChatWindow } from '../components/chat/chatPage/ChatWindow';
-import { MobileChatPage } from '../components/chat/chatPage/MobileChatPage';
-import { ChatSidebar } from '../components/chat/ChatSideBar';
-import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
-import { useChatContext } from '../contexts/chatContext/ChatContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useNavigate } from 'react-router-dom';
 
-export const ChatPage: React.FC = () => {
+import { useChatContext } from '../../../contexts/chatContext/ChatContext';
+import { useUser } from '../../../contexts/user/UserContext';
+import { NavIconButton } from '../../UI/buttons/NavIconButton';
+import { BackgroundGlow } from '../../visual/BackgroundGlow';
+import { ChatSidebar } from '../ChatSideBar';
+import { CreateNewGroupChat } from '../CreateNewGroupChat';
+import { ChatWindow } from './ChatWindow';
+export const MobileChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
   const [chatId, setchatId] = useState<string | null>(null);
   const { user } = useUser();
-  const isDesktop = useMediaQuery('(min-width: 600px)');
+  const navigate = useNavigate();
 
   const { friends, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
 
@@ -28,8 +28,12 @@ export const ChatPage: React.FC = () => {
     }
   };
 
-  const handleCloseChat = () => {
-    setchatId(null);
+  const handleGoBack = () => {
+    if (chatId) {
+      setchatId(null);
+    } else {
+      navigate(-1);
+    }
   };
 
   const handleOpenRoom = async (roomId: string) => {
@@ -41,13 +45,16 @@ export const ChatPage: React.FC = () => {
   };
 
   if (!user) return null;
-
-  if (!isDesktop) return <MobileChatPage></MobileChatPage>;
-
   return (
-    <div
-      className={`flex md:border-1 w-2xl backdrop-blur-md relative h-full sm:max-h-[500px] glass-box`}
-    >
+    <div className={`w-full h-full max-h-screen overflow-hidden backdrop-blur-md relative `}>
+      {!chatId && (
+        <NavIconButton
+          icon="arrowLeft"
+          id="chat-back-button"
+          ariaLabel="back to conversations"
+          onClick={() => navigate(-1)}
+        ></NavIconButton>
+      )}
       <div className="absolute w-full h-full overflow-hidden pointer-events-none">
         <BackgroundGlow />
       </div>
@@ -60,27 +67,19 @@ export const ChatPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="w-full h-full flex">
-            <div
-              className={`h-full overflow-y-auto ${chatId ? 'hidden md:block md:w-2/5' : 'block w-full'}`}
-            >
+          {chatId ? (
+            <div className="w-full h-full">
+              <ChatWindow key={chatId} friends={friends} chatId={chatId} onBack={handleGoBack} />
+            </div>
+          ) : (
+            <div className={`h-full overflow-y-auto  w-full`}>
               <ChatSidebar
                 onOpenChat={handleOpenChat}
                 onOpenRoom={handleOpenRoom}
                 handleClickNewChat={handleClickNewChat}
               />
             </div>
-            {chatId && (
-              <div className="w-full md:w-3/5 h-full">
-                <ChatWindow
-                  key={chatId}
-                  friends={friends}
-                  chatId={chatId}
-                  onBack={handleCloseChat}
-                />
-              </div>
-            )}
-          </div>
+          )}
         </>
       )}
     </div>

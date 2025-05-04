@@ -18,6 +18,12 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({ receiverUserId
     console.log('challenged ', receiverUserId, ' to a duel!');
   };
 
+  console.log(user?.friends);
+  if (user?.friends && !user.friends.some((friend) => friend.user_id === receiverUserId)) {
+    console.log('returning null');
+    return null;
+  }
+
   return (
     <button
       className={` ${iconSizeResponsive} p-0.5 hover:text-secondary`}

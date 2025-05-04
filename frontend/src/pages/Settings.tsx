@@ -62,7 +62,7 @@ export const SettingsNav: React.FC<{
   return (
     <motion.div
       id="settings-nav"
-      className="flex p:m-2 relative w-full h-full overflow-hidden items-center justify-center gap-3 md:gap-6"
+      className="flex relative w-full h-full overflow-hidden items-center justify-center gap-3  md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
@@ -94,15 +94,16 @@ export const Settings: React.FC = () => {
 
   return (
     <>
-      <motion.div className="relative w-full max-w-screen z-10 gap-5 md:gap-10 p-0 md:p-4">
-        <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
-
-        <motion.div id="home-page-content" className="w-full h-full lg:px-20 gap-20">
+      <motion.div className="relative w-full h-full">
+        <div className="w-full h-8">
+          <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
+        </div>
+        <motion.div id="settings" className="w-full h-full p-2 border-1 overflow-y-scroll">
           <AnimatePresence mode="wait">
             {activeTab === 'userSettings' && (
               <motion.div
                 key="userSettings"
-                className="w-full"
+                className="w-full h-full"
                 // variants={slideFromRightVariants}
                 // initial="initial"
                 // animate="animate"
@@ -128,7 +129,7 @@ export const Settings: React.FC = () => {
             {activeTab === 'soundSettings' && (
               <motion.div
                 key="soundSettings"
-                className="w-full"
+                className="w-full h-full"
                 // variants={slideFromRightVariants}
                 // initial="initial"
                 // animate="animate"

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { FriendType } from '../../../../shared/types';
 import { useChatContext } from '../../contexts/chatContext/ChatContext';
 import { useSound } from '../../hooks/useSound';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
@@ -8,9 +9,14 @@ import SearchBar from '../UI/SearchBar';
 interface ChatSidebarProps {
   handleClickNewChat: () => void;
   onOpenChat: (friendId: string) => void;
+  onOpenRoom: (friendId: string) => void;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, onOpenChat }) => {
+export const ChatSidebar: React.FC<ChatSidebarProps> = ({
+  handleClickNewChat,
+  onOpenChat,
+  onOpenRoom,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { friends, rooms, myRooms, roomId, joinRoom } = useChatContext();
   const playSelectSound = useSound('/sounds/effects/select.wav');
@@ -19,7 +25,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, on
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  const filteredUsers = friends.filter((friend) =>
+  console.log('FRIENDS: ', friends);
+
+  const filteredUsers = friends.filter((friend: FriendType) =>
     friend.display_name?.toLowerCase().startsWith(searchQuery)
   );
   return (
@@ -39,7 +47,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, on
 
         <div>
           <h3 className="text-md font-bold mb-1">Friends</h3>
-          {filteredUsers.map((user) => (
+          {filteredUsers.map((user: FriendType) => (
             <div className="flex gap-3 justify-center items-center" key={`chat_${user.user_id}`}>
               <div className="w-[25px] h-[25px]">
                 <img
@@ -69,6 +77,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({ handleClickNewChat, on
               onClick={() => {
                 playSelectSound();
                 joinRoom(room.chat_room_id);
+                onOpenRoom(room.chat_room_id);
                 // setSelectedFriend(null);
                 // setRoomId(room.chat_room_id);
               }}

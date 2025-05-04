@@ -14,6 +14,7 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   console.log('is safari:', isSafari);
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
+  const playHoverSound = useSound('/sounds/effects/button_hover.wav');
 
   const handleOnClick = () => {
     playSubmitSound();
@@ -24,6 +25,7 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
     <div
       className="game-mode-modal @container-normal p-0 m-0 relative inline-block overflow-hidden"
       onClick={onClick}
+      onMouseEnter={playHoverSound}
     >
       <div className="w-full h-full flex flex-col p-0 m-0 items-center text-center gap-5">
         <svg
@@ -120,7 +122,6 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
             />
             <path
               d="M62.3067 17L25 49.381V391H363.559L399 360.238V17H62.3067Z"
-              fill="url(#imagePattern)"
               strokeWidth="2"
               className="creator-img-container stroke-2 "
               fill="currentColor"
