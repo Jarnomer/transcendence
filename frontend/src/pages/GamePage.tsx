@@ -182,6 +182,7 @@ export const GamePage: React.FC = () => {
           // <h1 className="w-full h-full">
           //   gameplay canvas: ${gameStatus} : ${connections.game}
           // </h1>
+          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
         )}
       </div>
 
@@ -190,7 +191,7 @@ export const GamePage: React.FC = () => {
 
       {/* Render MatchMakingCarousel */}
       <AnimatePresence mode="wait">
-        {!isGameCanvasActive && !gameResult ? (
+        {!isGameCanvasActive && !gameResult && loading ? (
           <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
         ) : null}
       </AnimatePresence>

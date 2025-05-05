@@ -9,7 +9,6 @@ import { useSound } from '../../hooks/useSound';
 import { setRetroEffectLevel } from '../game';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
-import { BackgroundGlow } from '../visual/BackgroundGlow';
 
 export const animationVariants = {
   initial: {
@@ -186,22 +185,9 @@ export const GraphicsSettings: React.FC = () => {
   };
 
   return (
-    <motion.div
-      className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
-      variants={animationVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      <span
-        aria-hidden="true"
-        className="absolute top-0 left-0 bg-primary text-black w-full pointer-events-none"
-      >
-        <h1>Graphics settings</h1>
-      </span>
-      <div className="w-full h-full relative overflow-hidden">
-        <BackgroundGlow></BackgroundGlow>
-        <div className="p-10">
+    <motion.div className="h-full w-full relative flex flex-col text-xs pb-5">
+      <div className="w-full h-full overflow-y-scroll">
+        <div className="w-full relative p-10">
           {/* Retro effect controls */}
           <h2 className="font-heading text-2xl">Retro Effect</h2>
           <RetroEffectSettings
@@ -223,7 +209,7 @@ export const GraphicsSettings: React.FC = () => {
           ></BackgroundGameSettings>
         </div>
       </div>
-      <div className="absolute bottom-0 right-0 p-4">
+      <div className="flex w-full grow-1  justify-end items-end pr-2 pb-2">
         <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
       </div>
     </motion.div>

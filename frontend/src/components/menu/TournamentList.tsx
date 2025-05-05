@@ -11,7 +11,6 @@ interface DataInQueue {
   isPrivate: boolean;
   mode: string;
   name: string;
-  j;
   variant: string;
 }
 
@@ -40,8 +39,8 @@ export const TournamentList: React.FC = () => {
     setMode(options.mode);
     setDifficulty(options.variant);
     setTournamentOptions({
-      playerCount: 2,
-      numberOfRounds: Math.log2(Number(options.variant)),
+      playerCount: parseInt(options.variant),
+      numberOfRounds: Math.log2(parseInt(options.variant)),
       tournamentName: options.name,
       isPrivate: options.isPrivate,
       password: options.isPrivate ? password : null,

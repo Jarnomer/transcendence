@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { BackgroundGlow } from '../components';
 import { GraphicsSettings } from '../components/settings/GraphicsSettings';
 import { Soundsettings } from '../components/settings/SoundSettings';
 import { UserSettings } from '../components/settings/UserSettings';
-import { useSound } from '../hooks/useSound';
 
 export const slideFromLeftVariants = {
   initial: {
@@ -83,63 +83,63 @@ export const SettingsNav: React.FC<{
   );
 };
 
-export const Settings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('soundSettings');
-
-  const playSelectSound = useSound('/sounds/effects/select.wav');
-
-  useEffect(() => {
-    playSelectSound();
-  }, [activeTab]);
-
+export const Settings: React.FC = ({ activeTab }) => {
   return (
     <>
-      <motion.div className="relative w-full h-full">
-        <div className="w-full h-8">
-          <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
+      <motion.div
+        id="settings"
+        className="w-full h-full relative border-1 glass-box overflow-hidden justify-start"
+      >
+        <div aria-hidden="true" className="w-full bg-primary text-black  pointer-events-none">
+          <h1>
+            {activeTab === 'userSettings'
+              ? 'User Settings'
+              : activeTab === 'soundSettings'
+                ? 'Sound Settings'
+                : 'Graphic Settings'}
+          </h1>
         </div>
-        <motion.div id="settings" className="w-full h-full p-2 border-1 overflow-y-scroll">
-          <AnimatePresence mode="wait">
-            {activeTab === 'userSettings' && (
-              <motion.div
-                key="userSettings"
-                className="w-full h-full"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <UserSettings></UserSettings>
-              </motion.div>
-            )}
+        <BackgroundGlow></BackgroundGlow>
+        <AnimatePresence mode="wait">
+          {activeTab === 'userSettings' && (
+            <motion.div
+              key="userSettings"
+              className="w-full h-full"
+              // variants={slideFromRightVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+            >
+              <UserSettings></UserSettings>
+            </motion.div>
+          )}
 
-            {activeTab === 'graphicsSettings' && (
-              <motion.div
-                key="graphicsSettings"
-                className="w-full"
-                // variants={slideFromLeftVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <GraphicsSettings></GraphicsSettings>
-              </motion.div>
-            )}
+          {activeTab === 'graphicsSettings' && (
+            <motion.div
+              key="graphicsSettings"
+              className="w-full"
+              // variants={slideFromLeftVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+            >
+              <GraphicsSettings></GraphicsSettings>
+            </motion.div>
+          )}
 
-            {activeTab === 'soundSettings' && (
-              <motion.div
-                key="soundSettings"
-                className="w-full h-full"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <Soundsettings></Soundsettings>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+          {activeTab === 'soundSettings' && (
+            <motion.div
+              key="soundSettings"
+              className="w-full h-full"
+              // variants={slideFromRightVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+            >
+              <Soundsettings></Soundsettings>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </>
   );

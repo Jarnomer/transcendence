@@ -54,27 +54,25 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
       animate="animate"
       exit="exit"
     >
-      <div className="w-1/3 sm:w-2/5 h-full">
+      <div className="aspect-square max-w-sm max-h-sm w-sm h-sm">
         <ProfilePicture user={user} isOwnProfile={isOwnProfile}></ProfilePicture>
       </div>
       {/* USER INFO */}
-      <div className="w-2/3 sm:w-3/5 flex flex-col gap-2">
+      <div className="w-full flex flex-col gap-2">
         {/* USER DISPLAY NAME */}
-        <div className="bg-primary text-black min-w-full text-xs">
+        <div className="bg-primary text-black w-full text-xs">
           <h2 className="w-full text-lg p-2 font-semibold">{user.display_name}</h2>
         </div>
 
         <div className="border-1 flex flex-col text-xs border-gray-400 p-5">
           <p className="text-gray-400">@{user.username}</p>
-          <span
-            className={`text-xs ${user.status == 'online' ? 'text-secondary' : 'text-primary'}`}
-          >
+          <p className={`text-xs ${user.status == 'online' ? 'text-secondary' : 'text-primary'}`}>
             {user.status === 'online' ? 'Online' : 'Offline'}
-          </span>
+          </p>
           {user.status === 'offline' ? (
-            <span className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500">
               Last active: {getLastSeenTime(user.last_active)}
-            </span>
+            </p>
           ) : null}
 
           {/* USER BIOGRAPHY */}

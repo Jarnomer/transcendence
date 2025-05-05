@@ -42,16 +42,18 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const [opponentName, setOpponentName] = useState<string>(null);
   const [opponentFound, setOpponentFound] = useState<boolean>(false);
   const [transitionToScoreboard, setTransitionToScoreboard] = useState(false);
+  const [userPlayerNumber, setUserPlayerNumber] = useState(1);
+  const [opponentPlayerNumber, setOpponentPlayerNumber] = useState(2);
   const { mode, difficulty } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const { user } = useUser();
 
-  console.log(mode, difficulty);
-  console.log(playersData);
+  // console.log(mode, difficulty);
+  // console.log(playersData);
 
   const { hideBackgroundGame, showGameCanvas } = useGameVisibility();
 
-  console.log('playersData from matchmaking carousel: ', playersData);
+  // console.log('playersData from matchmaking carousel: ', playersData);
 
   // waits for the player cards to transfrom in to scoreboard shape
   useEffect(() => {
@@ -66,7 +68,6 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
     if (!user) return;
 
     if (opponentFound) {
-      console.log('Opponent found');
       hideBackgroundGame();
       setTimeout(() => {
         setTransitionToScoreboard(true);
@@ -85,7 +86,8 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
       playersData.player1?.user_id !== user?.user_id ? playersData.player1 : playersData.player2;
     setOpponentAvatar(opponent?.avatar_url || '/avatars/default.png');
     setOpponentName(opponent?.display_name || 'Opponent');
-    console.log('setting opponent found to true');
+    setUserPlayerNumber(playersData.player1?.user_id === user?.user_id ? 1 : 2);
+    setOpponentPlayerNumber(playersData.player1?.user_id !== user?.user_id ? 1 : 2);
     setOpponentFound(true);
   }, [playersData]);
 
@@ -98,7 +100,6 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   }, [user]);
 
   useEffect(() => {
-    console.log(mode, difficulty);
     if (mode === 'singleplayer') {
       setOpponentAvatar(aiOptions[difficulty].avatar);
       setOpponentName(aiOptions[difficulty].name);
@@ -108,6 +109,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
 
   if (!user) return;
 
+  console.log(playersData);
   return (
     <>
       {!transitionToScoreboard && <MatchMakingBackgroundGlitch></MatchMakingBackgroundGlitch>}
@@ -123,21 +125,21 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
         )}
 
         <div
-          className={`flex w-full gap-5 ${!transitionToScoreboard ? 'relative justify-center items-center' : 'items-start justify-between gap-2 text-primary mb-2'}`}
+          className={`flex w-full gap-5 ${!transitionToScoreboard ? 'relative justify-center items-center' : 'items-start justify-between gap-2 text-primary mb-2'} ${transitionToScoreboard && userPlayerNumber !== 1 ? 'flex-row-reverse' : ''}`}
         >
           {/* PLAYER CARD */}
           <PlayerCard
             name={user?.display_name}
             imageSrc={user?.avatar_url}
             opponentFound={transitionToScoreboard}
-            playerNum={1}
+            playerNum={userPlayerNumber}
           ></PlayerCard>
 
           <PlayerCard
             name={opponentName}
             imageSrc={opponentAvatar}
             opponentFound={transitionToScoreboard}
-            playerNum={2}
+            playerNum={opponentPlayerNumber}
           ></PlayerCard>
 
           {!transitionToScoreboard && (

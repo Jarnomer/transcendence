@@ -109,7 +109,8 @@ export const LeaderBoard: React.FC = () => {
               className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
               onClick={() => {
                 playSelectPowerUpSound();
-                navigate(`/profile/${user.user_id}`);
+                handleNavigate(user.user_id);
+                // navigate(`/profile/${user.user_id}`);
               }}
               variants={itemVariants}
             >
