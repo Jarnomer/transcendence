@@ -42,7 +42,7 @@ const App: React.FC = () => {
                   <Header />
                   <div
                     id="app-content"
-                    className="relative flex grow flex-col w-full max-w-screen-lg"
+                    className="relative flex grow flex-col w-full max-w-screen-xl"
                   >
                     <AnimatePresence>
                       <motion.div
@@ -53,7 +53,6 @@ const App: React.FC = () => {
                         <BackgroundGlitch duration={1100} />
                       </motion.div>
                     </AnimatePresence>
-
                     <AnimatedRoutes />
                   </div>
                   <Footer />
