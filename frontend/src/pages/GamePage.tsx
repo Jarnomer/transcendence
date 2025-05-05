@@ -185,7 +185,7 @@ export const GamePage: React.FC = () => {
 
       {/* Render MatchMakingCarousel */}
       <AnimatePresence mode="wait">
-        {!isGameCanvasActive && !gameResult ? (
+        {!isGameCanvasActive && !gameResult && loading ? (
           <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
         ) : null}
       </AnimatePresence>
