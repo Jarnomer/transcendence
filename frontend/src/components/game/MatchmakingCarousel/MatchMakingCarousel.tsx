@@ -42,6 +42,8 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const [opponentName, setOpponentName] = useState<string>(null);
   const [opponentFound, setOpponentFound] = useState<boolean>(false);
   const [transitionToScoreboard, setTransitionToScoreboard] = useState(false);
+  const [userPlayerNumber, setUserPlayerNumber] = useState(1);
+  const [opponentPlayerNumber, setOpponentPlayerNumber] = useState(2);
   const { mode, difficulty } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const { user } = useUser();
@@ -85,6 +87,8 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
       playersData.player1?.user_id !== user?.user_id ? playersData.player1 : playersData.player2;
     setOpponentAvatar(opponent?.avatar_url || '/avatars/default.png');
     setOpponentName(opponent?.display_name || 'Opponent');
+    setUserPlayerNumber(playersData.player1?.user_id === user?.user_id ? 1 : 2);
+    setOpponentPlayerNumber(playersData.player1?.user_id !== user?.user_id ? 1 : 2);
     console.log('setting opponent found to true');
     setOpponentFound(true);
   }, [playersData]);
@@ -108,6 +112,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
 
   if (!user) return;
 
+  console.log(playersData);
   return (
     <>
       {!transitionToScoreboard && <MatchMakingBackgroundGlitch></MatchMakingBackgroundGlitch>}
@@ -123,21 +128,21 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
         )}
 
         <div
-          className={`flex w-full gap-5 ${!transitionToScoreboard ? 'relative justify-center items-center' : 'items-start justify-between gap-2 text-primary mb-2'}`}
+          className={`flex w-full gap-5 ${!transitionToScoreboard ? 'relative justify-center items-center' : 'items-start justify-between gap-2 text-primary mb-2'} ${transitionToScoreboard && userPlayerNumber !== 1 ? 'flex-row-reverse' : ''}`}
         >
           {/* PLAYER CARD */}
           <PlayerCard
             name={user?.display_name}
             imageSrc={user?.avatar_url}
             opponentFound={transitionToScoreboard}
-            playerNum={1}
+            playerNum={userPlayerNumber}
           ></PlayerCard>
 
           <PlayerCard
             name={opponentName}
             imageSrc={opponentAvatar}
             opponentFound={transitionToScoreboard}
-            playerNum={2}
+            playerNum={opponentPlayerNumber}
           ></PlayerCard>
 
           {!transitionToScoreboard && (

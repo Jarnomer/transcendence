@@ -13,6 +13,7 @@ import { useGameControls, useGameResult } from '@hooks';
 import { createReadyInputMessage } from '@shared/messages';
 
 import { MatchMakingCarousel } from '../components/game';
+import GameplayCanvas from '../components/game/GameplayCanvas';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -175,10 +176,7 @@ export const GamePage: React.FC = () => {
         }`}
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
-          <h1 className="w-full h-full">
-            gameplay canvas: ${gameStatus} : ${connections.game}
-          </h1>
+          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
         )}
       </div>
 
