@@ -19,6 +19,7 @@ export default class PongGame {
   private gameState: GameState;
   private gameStatus: GameStatus;
   private updateInterval: NodeJS.Timeout | null = null;
+  private countdownInterval: NodeJS.Timeout | null = null;
 
   private settings: GameSettings;
 
@@ -364,12 +365,17 @@ export default class PongGame {
 
     console.log('Game starting with max score:', this.params.rules.maxScore);
 
-    const countdownInterval = setInterval(() => {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+
+    this.countdownInterval = setInterval(() => {
       console.log('Countdown:', this.gameState.countdown);
       this.gameState.countdown--;
-
       if (this.gameState.countdown <= 0) {
-        clearInterval(countdownInterval);
+        clearInterval(this.countdownInterval!);
+        this.countdownInterval = null;
         this.setGameStatus('playing');
         this.startGameLoop();
       }
