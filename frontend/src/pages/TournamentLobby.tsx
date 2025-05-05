@@ -71,17 +71,26 @@ export const TournamentLobby: React.FC = () => {
   // }, [user]);
 
   useEffect(() => {
-    if (lobby === 'join' && mode === 'tournament') {
+    if (mode === 'tournament') {
       setActiveTab('players');
     }
   }, [lobby]);
 
   useEffect(() => {
     console.log('matchmaking state: ', matchmakingState);
-    if (matchmakingState.phase === 'in_game' && location.pathname !== '/game') {
-      console.log('in game');
-      console.log('participants: ', matchmakingState.participants);
+    if (
+      matchmakingState.phase === 'in_game' &&
+      location.pathname !== '/game' &&
+      mode === 'tournament'
+    ) {
+      console.log('in game... opening accet pamge modal');
       handleClickOpenModal();
+    }
+  }, [matchmakingState.phase, location.pathname]);
+
+  useEffect(() => {
+    if (matchmakingState.phase === 'in_game') {
+      console.log('in game....accept game');
     }
   }, [matchmakingState.phase, location.pathname]);
 

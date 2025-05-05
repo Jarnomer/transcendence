@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
+import { getBlockedUsers, unblockUser } from '@/services/friendService';
+
+import { useUser } from '../../contexts/user/UserContext';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { BackgroundGlow } from '../visual/BackgroundGlow';
+import { ProfilePictureSmall } from '../UI/ProfilePictureSmall';
 
 export const animationVariants = {
   initial: {
@@ -23,36 +26,55 @@ export const animationVariants = {
 };
 
 export const UserSettings: React.FC = () => {
+  const { userId } = useUser();
+  const [myBlockedUsers, setMyBlockedUsers] = useState<any[]>([]);
+  // const navigate = useNavigate();
+
   const handleSaveSettings = () => {
     console.log('---- Saving User settings -------');
   };
 
+  const fetchBlockedUsers = useCallback(() => {
+    if (!userId) return;
+    getBlockedUsers()
+      .then((data) => {
+        setMyBlockedUsers(data);
+      })
+      .catch((err) => console.error('Failed to fetch blocked users:', err));
+  }, [userId]);
+
+  useEffect(() => {
+    fetchBlockedUsers();
+  }, [fetchBlockedUsers]);
+
+  const handleUnblockUser = async (block_user_id: string) => {
+    console.log('unblocking user :', block_user_id);
+    await unblockUser(block_user_id);
+    fetchBlockedUsers();
+  };
+
   return (
-    <motion.div
-      className="h-full min-h-[450px] relative glass-box text-xs"
-      variants={animationVariants}
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-    >
-      <span
-        aria-hidden="true"
-        className="absolute top-0 left-0 bg-primary text-black w-full pointer-events-none"
-      >
-        <h1>User settings</h1>
-      </span>
-      <div className="w-full h-full relative overflow-hidden">
-        <BackgroundGlow></BackgroundGlow>
-        <div className="w-full h-full p-10">
-          <div>
-            <button>Delete user ?</button>
-          </div>
-          <div>
-            <button>Blocked users ?</button>
-          </div>
-        </div>
+    <motion.div className="h-full w-full relative flex flex-col pb-5 text-xs">
+      <div className="w-full h-full overflow-y-scroll p-10">
+        <h2 className="font-heading text-2xl">Blocked Users</h2>
+        <motion.ul className="pl-5 w-full gap-3 overflow-y-scroll">
+          {myBlockedUsers.map((user) => (
+            <motion.li className="flex gap-2 w-full" key={user.user_id}>
+              <ProfilePictureSmall user={user} avataUrl={user.avatar_url}></ProfilePictureSmall>
+              <p className=" text-sm">{user.display_name}</p>
+              <button
+                onClick={() => handleUnblockUser(user.user_id)}
+                className="text-xs text-gray-400 hover:text-secondary"
+              >
+                Remove block
+              </button>
+            </motion.li>
+          ))}
+        </motion.ul>
+        <h2 className="font-heading text-2xl">Delete Account</h2>
       </div>
-      <div className="absolute bottom-0 right-0 p-4">
+
+      <div className="flex w-full grow-1  justify-end items-end pr-2 pb-2">
         <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
       </div>
     </motion.div>

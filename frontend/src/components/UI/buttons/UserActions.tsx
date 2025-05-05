@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { useUser } from '../../../contexts/user/UserContext';
+import { useUser } from '@/contexts/user/UserContext';
+import { blockUser } from '@/services/friendService';
+
 import { AddFriend } from './AddFriend';
 import { ChallengeButton } from './ChallengeUser';
 import { ChatButton } from './ChatButton';
@@ -11,8 +13,9 @@ export const UserActions: React.FC<UserActionsProps> = ({ user }) => {
 
   const isOwnProfile = user?.user_id === loggedInUser?.user_id;
 
-  const handleBlockUserClick = (user_id: string) => {
+  const handleBlockUserClick = async (user_id: string) => {
     console.log('Blocking user: ', user_id);
+    await blockUser(user_id);
   };
   if (!user || isOwnProfile) return;
 

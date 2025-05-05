@@ -1,8 +1,8 @@
 // pages/NotFoundPage.tsx
 import React from 'react';
 
-import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
-import { useUser } from '../contexts/user/UserContext';
+import { TournamentPlayerList } from '../../components/tournamentLobby/TournamentPlayerList';
+import { useUser } from '../../contexts/user/UserContext';
 
 interface TournamentMatch {
   gameId: string;

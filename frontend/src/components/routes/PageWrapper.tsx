@@ -24,15 +24,13 @@ export const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <motion.div
       id="page-wrapper"
-      className=" flex grow w-full h-full pt-5 items-center justify-center"
+      className="flex grow w-full h-full p-5 items-center justify-center"
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <div className="flex grow items-center justify-center w-full h-full  max-w-screen-xl pb-4">
-        {children}
-      </div>
+      {children}
     </motion.div>
   );
 };

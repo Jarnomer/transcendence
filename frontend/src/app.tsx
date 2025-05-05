@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { FloatingChatWrapper } from './components/chat/floatingChat/FloatingChatWrapper.tsx';
 import { Footer } from './components/footer/Footer.tsx';
-import BackgroundProvider from './components/game/BackgroundProvider';
+import BackgroundProvider from './components/game/BackgroundProvider.tsx';
 import { Header } from './components/header/Header.tsx';
 import { ConfirmModal } from './components/modals/CornfirmModal.tsx';
 import { EditProfileModal } from './components/modals/EditProfileModal.tsx';
@@ -40,7 +40,7 @@ const App: React.FC = () => {
                 <Header />
                 <div
                   id="app-content"
-                  className="relative flex grow flex-col w-full max-w-screen-lg"
+                  className="relative flex grow flex-col w-full max-w-screen-xl"
                 >
                   <AnimatePresence>
                     <motion.div
@@ -51,7 +51,6 @@ const App: React.FC = () => {
                       <BackgroundGlitch duration={1100} />
                     </motion.div>
                   </AnimatePresence>
-
                   <AnimatedRoutes />
                 </div>
                 <Footer />

@@ -65,7 +65,6 @@ const useMatchmaking = () => {
 
   const handleJoinMatch = () => {
     if (!matchmaker.current) return;
-    console.log('Joining match with queue ID:', matchmaker.current.getQueueId());
     sendMessage('matchmaking', {
       type: 'join_match',
       payload: {
@@ -135,6 +134,7 @@ const useMatchmaking = () => {
           case MatchMakerState.WAITING_FOR_PLAYERS:
           case MatchMakerState.JOINING_RANDOM:
             console.log('Waiting for players');
+            console.log('state', matchmaker.current.getMatchMakerState());
             setQueueId(matchmaker.current.getQueueId()!);
             sessionManager.set('queueId', matchmaker.current.getQueueId()!);
             startMatchMaking();
@@ -166,8 +166,11 @@ const useMatchmaking = () => {
 
   // sending a message when the matchmaking connection is established
   useEffect(() => {
-    if (connections.matchmaking !== 'connected') return;
+    if (connections.matchmaking !== 'connected' && sessionManager.get('matchmakingRegistered')) {
+      return;
+    }
     console.log('Matchmaking connected');
+    console.log('matchmakerState:', sessionManager.get('matchmakerState'));
     switch (sessionManager.get('matchmakerState')) {
       case MatchMakerState.WAITING_FOR_PLAYERS:
         handleJoinMatch();

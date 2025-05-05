@@ -147,4 +147,12 @@ export class GameService {
     }
     return res;
   }
+
+  async getMyGames(user_id: string) {
+    const games = await this.gameModel.getMyGames(user_id);
+    if (!games) {
+      throw new NotFoundError('Games not found');
+    }
+    return games;
+  }
 }

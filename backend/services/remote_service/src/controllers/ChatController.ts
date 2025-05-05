@@ -39,7 +39,7 @@ export class ChatController {
     ws.on('message', this.chatService.handleMessage.bind(this.chatService));
     ws.on('message', (message: string) => {
       const parsedMessage = JSON.parse(message);
-        // console.log('Received ping:', parsedMessage);
+      // console.log('Received ping:', parsedMessage);
       // console.log('type:', parsedMessage.type);
       if (parsedMessage.type === 'ping') {
         // console.log('Sending pong');

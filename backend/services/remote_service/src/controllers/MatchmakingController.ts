@@ -38,6 +38,13 @@ export class MatchmakingController {
       this.matchmakingService.deleteClient(user_id);
     });
     ws.on('message', this.matchmakingService.handleMessage.bind(this.matchmakingService));
+    ws.on('message', (message: string) => {
+      const parsedMessage = JSON.parse(message);
+      // console.log('Received message:', parsedMessage);
+      if (parsedMessage.type === 'ping') {
+        ws.send(JSON.stringify({ type: 'pong', state: {} }));
+      }
+    });
     // const user = await this.matchmakingService.enterMatchMaking(user_id, mode);
     // if (!user) {
     //   ws.send(JSON.stringify({ error: 'No match found' }));

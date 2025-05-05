@@ -4,22 +4,25 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
+import { LoadingProvider } from '../../contexts/gameContext/LoadingContextProvider.tsx';
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { useSound } from '../../hooks/useSound.tsx';
-import { BracketTest } from '../../pages/BracketTest.tsx';
 import { ChatPage } from '../../pages/ChatPage.tsx';
 import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
 import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
+import GameResultPage from '../../pages/GameResultPage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
 import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
-import { TestGameResult } from '../../pages/TestGameResult.tsx';
+import { BracketTest } from '../../pages/testing_pages/BracketTest.tsx';
+import { CarouselTest } from '../../pages/testing_pages/CarouselTest.tsx';
+import { TestGameResult } from '../../pages/testing_pages/TestGameResult.tsx';
 import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
 import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
@@ -137,11 +140,37 @@ export const AnimatedRoutes: React.FC = () => {
         />
 
         <Route
+          path="/game-results"
+          element={
+            user && fromAppNavigation ? (
+              <PageWrapper>
+                <GameResultPage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/CarouselTest"
+          element={
+            user && (
+              <PageWrapper>
+                <CarouselTest />
+              </PageWrapper>
+            )
+          }
+        />
+
+        <Route
           path="/game"
           element={
             user && fromAppNavigation ? (
               <PageWrapper>
-                <GamePage />
+                <LoadingProvider>
+                  <GamePage />
+                </LoadingProvider>
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />

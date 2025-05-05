@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 import { useSound } from '../../hooks/useSound';
+import { getAmIBlockedBy } from '../../services/friendService';
 import { getUsersWithRank } from '../../services/userService';
 import { UserListCard } from '../UI/cards/UserListCard';
 import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
@@ -71,6 +72,15 @@ export const LeaderBoard: React.FC = () => {
     setLoading(false);
   }
 
+  const handleNavigate = async (user_id: string) => {
+    const res = await getAmIBlockedBy(user_id);
+    if (res) {
+      console.log(res);
+      return;
+    }
+    navigate(`/profile/${user_id}`);
+  };
+
   return (
     <motion.div
       className="flex flex-col items-center relative overflow-hidden text-sm"
@@ -99,7 +109,8 @@ export const LeaderBoard: React.FC = () => {
               className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
               onClick={() => {
                 playSelectPowerUpSound();
-                navigate(`/profile/${user.user_id}`);
+                handleNavigate(user.user_id);
+                // navigate(`/profile/${user.user_id}`);
               }}
               variants={itemVariants}
             >

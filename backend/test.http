@@ -1,5 +1,17 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODQ4ZDhlMTUtMWYxMS00MjBlLTk4MjQtOGFjMDQ5MDllOTY3IiwidXNlcm5hbWUiOiJqYW4iLCJpYXQiOjE3NDU1OTMyMDAsImV4cCI6MTc0NTU5NjgwMH0.CpGrzw1tHNuahiM9_KtAQgJMVBeUwThv5KhVn6YMxHU
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOWRhMjY0YWYtOTdkYi00YjAwLWE3MmYtYThkMjUzNTljNTM2IiwidXNlcm5hbWUiOiJhIiwiaWF0IjoxNzQ1OTQ1OTc1LCJleHAiOjE3NDU5NDk1NzV9.P2CDHz4XTBHjiYhDYooSuPDwSRmVNeAMkdfHBJHWYoU
 @user = 848d8e15-1f11-420e-9824-8ac04909e967
+@user1 = 0bf9914f-b38e-40f3-b6d5-ccbfc58945ae
+@user2 = 9b4354fa-3753-4cd6-ad63-f207c70deb14
+@user3 = 6886d329-edd1-4741-8c0a-5efcfc88fb23
+@user4 = 3f2177f5-3cab-4c8b-a379-5ab13f56819a
+@user5 = 99dd1971-c612-43f3-ab10-3280605c4f83
+@user6 = 4c06b67b-667f-4692-a629-825d22054e5e
+@user7 = 24c05f32-2393-4c6c-ad55-a14a21615610
+
+@user8 = ef89c390-e289-4796-8dbc-6a2942771879
+
+@user9 = 664c932b-9a8e-4fb3-a8f7-6b45f48547d6
+@user10 = 6d0218d8-b594-4094-b413-7ddee0848858
 
 ### user
 ### login
@@ -7,21 +19,25 @@ post https://localhost:8443/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "jan",
+  "username": "a",
   "password": "123"
 }
 ### get user
 get https://localhost:8443/api/user/{{user}}
 Authorization: Bearer {{token}}
+
 ### get all users
 get https://localhost:8443/api/user/all
 Authorization: Bearer {{token}}
+
 ### get all user with rank
 get https://localhost:8443/api/user/all/rank
 Authorization: Bearer {{token}}
+
 ### get data of user
 get https://localhost:8443/api/user/data/{{user}}
 Authorization: Bearer {{token}}
+
 ### get notifications
 get https://localhost:8443/api/user/notifications
 Authorization: Bearer {{token}}
@@ -31,6 +47,24 @@ Authorization: Bearer {{token}}
 ### friends routes
 @receiver_id = e2c8fd96-3d43-4e78-9cfd-bbb88f4d156c
 @sender_id = 826db178-63d0-4c14-a688-289283966dcb
+
+### get friends
+get https://localhost:8443/api/friend/friends
+Authorization: Bearer {{token}}
+
+### get blocked users
+get https://localhost:8443/api/friend/blocked
+Authorization: Bearer {{token}}
+
+### block user
+post https://localhost:8443/api/friend/block/{{user2}}
+Authorization: Bearer {{token}}
+
+### unblock user
+delete https://localhost:8443/api/friend/block/{{user2}}
+Authorization: Bearer {{token}}
+
+
 ### get friend request sent
 get https://localhost:8443/api/friend/requests/sent
 Authorization: Bearer {{token}}
@@ -66,6 +100,14 @@ Authorization: Bearer {{token}}
 
 ### get user data
 get https://localhost:8443/api/user/data/{{user}}
+Authorization: Bearer {{token}}
+
+### get user Stats
+get https://localhost:8443/api/user/stats/brutal
+Authorization: Bearer {{token}}
+
+### get my stats
+get https://localhost:8443/api/user/myStats
 Authorization: Bearer {{token}}
 
 
@@ -107,3 +149,9 @@ Authorization: Bearer {{token}}
 ### get queue status
 get https://localhost:8443/api/matchmaking/status
 Authorization: Bearer {{token}}
+
+### get game history
+get https://localhost:8443/api/game/myGames
+Authorization: Bearer {{token}}
+
+

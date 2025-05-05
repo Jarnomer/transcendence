@@ -1,8 +1,8 @@
 // pages/NotFoundPage.tsx
 import React from 'react';
 
-import { GameResults } from '../components/game/GameResults';
-import { useUser } from '../contexts/user/UserContext';
+import { GameResults } from '../../components/game/GameResults';
+import { useUser } from '../../contexts/user/UserContext';
 
 interface PlayerData {
   user_id: string;
