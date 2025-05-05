@@ -1,3 +1,5 @@
+import { api } from '@services';
+
 import {
   AllResponseRankType,
   AllResponseType,
@@ -8,8 +10,6 @@ import {
   UserNotificationType,
   UserResponseType,
 } from '@shared/types';
-
-import { api } from './api';
 
 export async function getUserData(userId: string) {
   try {
@@ -181,9 +181,7 @@ export async function getGameSettings() {
     console.error('Failed to get game settings:', err);
     throw err;
   }
-
 }
-
 
 export async function getMyStats() {
   try {

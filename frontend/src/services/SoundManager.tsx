@@ -1,16 +1,16 @@
-class SoundManager {
-  private static instance: SoundManager | null = null;
+class SoundManagerClass {
+  private static instance: SoundManagerClass | null = null;
   private sounds: Map<string, HTMLAudioElement> = new Map();
   private isMuted: boolean = false;
   private volume: number = 0.4;
 
   private constructor() {}
 
-  public static getInstance(): SoundManager {
-    if (!SoundManager.instance) {
-      SoundManager.instance = new SoundManager();
+  public static getInstance(): SoundManagerClass {
+    if (!SoundManagerClass.instance) {
+      SoundManagerClass.instance = new SoundManagerClass();
     }
-    return SoundManager.instance;
+    return SoundManagerClass.instance;
   }
 
   public loadSound(id: string, url: string): void {
@@ -48,4 +48,4 @@ class SoundManager {
   }
 }
 
-export default SoundManager.getInstance();
+export const SoundManager = SoundManagerClass.getInstance();

@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-import { RefreshResponseType } from '@types';
+import { RefreshResponseType } from '@shared/types';
 
-import WebsocketManager from './webSocket/WebSocketManager';
+// Import directly instead of through the barrel file
+import { WebSocketManager } from './webSocket/WebSocketManager';
 
 export const api = axios.create({
   baseURL: '/api',
@@ -51,9 +52,9 @@ api.interceptors.response.use(
   }
 );
 
-const chatSocket = WebsocketManager.getInstance('chat');
-const gameSocket = WebsocketManager.getInstance('game');
-const matchmakingSocket = WebsocketManager.getInstance('matchmaking');
+const chatSocket = WebSocketManager.getInstance('chat');
+const gameSocket = WebSocketManager.getInstance('game');
+const matchmakingSocket = WebSocketManager.getInstance('matchmaking');
 // Function to Refresh Token
 export async function refreshToken(): Promise<string | null> {
   try {

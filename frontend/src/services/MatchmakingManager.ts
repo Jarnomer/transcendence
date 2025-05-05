@@ -1,9 +1,12 @@
-import { GameOptionsType, MatchmakingSnapshot } from '@shared/types';
+import {
+  MatchMakerState,
+  SessionManager,
+  WebSocketManager,
+  cancelQueue,
+  deleteGame,
+} from '@services';
 
-import { MatchMakerState } from '../services/MatchMaker';
-import { cancelQueue, deleteGame } from './gameService';
-import SessionManager from './SessionManager';
-import WebSocketManager from './webSocket/WebSocketManager';
+import { GameOptionsType, MatchmakingSnapshot } from '@shared/types';
 
 // export type Phase =
 //   | 'idle'
@@ -20,7 +23,7 @@ import WebSocketManager from './webSocket/WebSocketManager';
 //   participants: string[]; // or whatever type
 // };
 
-class MatchmakingManager {
+export class MatchmakingManager {
   private static instance: MatchmakingManager;
   // private phase: Phase = 'idle';
   // private role: UserRole = 'player';
@@ -310,5 +313,3 @@ class MatchmakingManager {
     return this.snapshot;
   }
 }
-
-export default MatchmakingManager;

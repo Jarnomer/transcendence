@@ -1,6 +1,6 @@
-import { GameOptionsType } from '@shared/types/gameTypes';
+import { cancelQueue, createQueue, deleteGame, joinQueue, singlePlayer } from '@services';
 
-import { cancelQueue, createQueue, deleteGame, joinQueue, singlePlayer } from './gameService';
+import { GameOptionsType } from '@shared/types';
 
 // Step 1: Define Game States
 export enum MatchMakerState {
@@ -176,7 +176,7 @@ class GameFactory {
   }
 }
 
-class MatchMaker {
+export class MatchMaker {
   private state: MatchMakerState = MatchMakerState.SEARCHING;
   private gameMode: GameMode;
   private gameId: string | null = null;
@@ -266,5 +266,3 @@ class MatchMaker {
     }
   }
 }
-
-export default MatchMaker;

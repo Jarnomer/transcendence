@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { getSessionStatus } from '@/services/gameService';
 
+import { SessionManager } from '@services';
+
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import SessionManager from '../services/SessionManager';
 import { useConfirm } from './useConfirm';
+
 type StepType = 'init' | 'validating' | 'restoring' | 'done';
 
 export const useValidateSession = () => {

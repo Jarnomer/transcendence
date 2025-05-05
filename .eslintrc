@@ -93,6 +93,16 @@
             "position": "before",
           },
           {
+            "pattern": "@contexts",
+            "group": "internal",
+            "position": "before",
+          },
+          {
+            "pattern": "@contexts/**",
+            "group": "internal",
+            "position": "before",
+          },
+          {
             "pattern": "@components",
             "group": "internal",
             "position": "before",

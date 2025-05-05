@@ -1,6 +1,6 @@
-import { MessageResponseType, RequestResponseType, SentResponseType } from '@shared/types';
+import { api } from '@services';
 
-import { api } from './api';
+import { MessageResponseType, RequestResponseType, SentResponseType } from '@shared/types';
 
 export async function sendFriendRequest(receiver_id: string) {
   try {

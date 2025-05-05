@@ -1,7 +1,7 @@
 // useTournamentStore.ts
 import { useSyncExternalStore } from 'react';
 
-import MatchmakingManager from '../MatchmakingManager';
+import { MatchmakingManager } from '@services';
 
 export function useWebSocketStore() {
   const matchmakingManager = MatchmakingManager.getInstance();

@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { MatchMaker, MatchMakerState, SessionManager } from '@services';
+
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
-import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
-import SessionManager from '../services/SessionManager';
 
 export const useMatchmaking = () => {
   const navigate = useNavigate();

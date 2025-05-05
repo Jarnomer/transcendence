@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 
-import SoundManager from '../services/SoundManager';
+import { SoundManager } from '@services';
 
 export const useSound = (url: string) => {
   const soundId = url;

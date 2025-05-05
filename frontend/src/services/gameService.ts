@@ -1,3 +1,5 @@
+import { api } from '@services';
+
 import {
   GameIdType,
   GameResType,
@@ -6,8 +8,6 @@ import {
   GameSinglePlayerResType,
   QueueStatusResType,
 } from '@shared/types';
-
-import { api } from './api';
 
 type CreateQueueParams = {
   mode: string;
