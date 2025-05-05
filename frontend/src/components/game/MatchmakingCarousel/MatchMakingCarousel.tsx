@@ -38,20 +38,20 @@ const aiOptions = {
 };
 
 export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ playersData }) => {
-  const [opponentAvatar, setOpponentAvatar] = useState<string>(null);
-  const [opponentName, setOpponentName] = useState<string>(null);
+  const [opponentAvatar, setOpponentAvatar] = useState<string>();
+  const [opponentName, setOpponentName] = useState<string | null>(null);
   const [opponentFound, setOpponentFound] = useState<boolean>(false);
   const [transitionToScoreboard, setTransitionToScoreboard] = useState(false);
   const [userPlayerNumber, setUserPlayerNumber] = useState(1);
   const [opponentPlayerNumber, setOpponentPlayerNumber] = useState(2);
   const { mode, difficulty } = useGameOptionsContext();
-  const { loadingStates, setLoadingState } = useLoading();
+  const { setLoadingState } = useLoading();
   const { user } = useUser();
 
   // console.log(mode, difficulty);
   // console.log(playersData);
 
-  const { hideBackgroundGame, showGameCanvas } = useGameVisibility();
+  const { hideBackgroundGame } = useGameVisibility();
 
   // console.log('playersData from matchmaking carousel: ', playersData);
 
@@ -100,7 +100,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   }, [user]);
 
   useEffect(() => {
-    if (mode === 'singleplayer') {
+    if (mode === 'singleplayer' && difficulty && aiOptions[difficulty]) {
       setOpponentAvatar(aiOptions[difficulty].avatar);
       setOpponentName(aiOptions[difficulty].name);
       return;

@@ -10,7 +10,6 @@ import { slideFromRightVariants } from '../components/tournamentLobby/animationV
 import { TournamentLobbyNav } from '../components/tournamentLobby/TournamentLobbyNav';
 import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
 import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
-import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useModal } from '../contexts/modalContext/ModalContext';
 import { useUser } from '../contexts/user/UserContext';
@@ -18,7 +17,7 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 
 interface TournamentMatch {
   gameId: string;
-  players: [p1, p2];
+  players: [PlayerData | null, PlayerData | null];
   round: number;
   isComplete: boolean;
 }
@@ -33,12 +32,8 @@ export const TournamentLobby: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
-  const { friends, selectedFriendId, roomId } = useChatContext();
-  const [players, setPlayers] = useState<any[]>();
-  const [tournamentChatId, setTournamentChatId] = useState<string | undefined>();
   const { difficulty, lobby, mode } = useGameOptionsContext();
 
-  const { createRoom } = useChatContext();
   const {
     matchmakingSocket,
     connections,
@@ -163,24 +158,21 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
-  useEffect(() => {}, [tournamentChatId]);
-
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
-        <header className="flex w-full justify-between">
-          <TournamentLobbyNav
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          ></TournamentLobbyNav>
-          <span className="text-secondary">X/{difficulty} Players</span>
-        </header>
+        {mode === 'tournament' && (
+          <header className="flex w-full justify-between">
+            <TournamentLobbyNav
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            ></TournamentLobbyNav>
+            <span className="text-secondary">X/{difficulty} Players</span>
+          </header>
+        )}
 
-        <button onClick={handleClickOpenModal} className="text-green-500">
-          open modal
-        </button>
-        <div className="flex flex-col md:flex-col gap-2 w-full h-full flex-grow">
-          <motion.div className="flex flex-col md:w-full  w-full">
+        <div className="flex flex-col md:flex-col gap-2 justify-center items-center w-full h-full flex-grow">
+          <motion.div className="flex flex-col">
             <AnimatePresence mode="wait">
               {activeTab === 'settings' ? (
                 <motion.div

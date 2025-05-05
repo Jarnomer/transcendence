@@ -7,14 +7,14 @@ import { ModalWrapper } from './ModalWrapper';
 
 export const ChatModal: React.FC = () => {
   const { isModalOpen, getModalProps, closeModal } = useModal();
-  const { setSelectedFriend, setRoomId, sendChatMessage, user } = useChatContext();
+  const { user } = useChatContext();
 
   if (!isModalOpen('chatModal')) return null;
 
   const props = getModalProps('chatModal');
   if (!props) return null;
 
-  const { friends, selectedFriendId, onBack } = props;
+  const { friends, selectedFriendId } = props;
   console.log(user, friends, selectedFriendId);
 
   return (
@@ -22,8 +22,8 @@ export const ChatModal: React.FC = () => {
       <div className="glass-box grow text-primary w-full h-full overflow-hidden">
         <ChatWindow
           key={selectedFriendId}
+          chatId={selectedFriendId}
           friends={friends}
-          selectedFriendId={selectedFriendId}
           onBack={() => closeModal('chatModal')}
         />
       </div>

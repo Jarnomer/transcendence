@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -12,15 +12,6 @@ import { updateUser } from '@services/userService.ts';
 import { useModal } from '../contexts/modalContext/ModalContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useSound } from '../hooks/useSound';
-
-interface inputWrapperProps {
-  children: ReactNode;
-  error: string;
-}
-
-export const InputWrapper: React.FC<inputWrapperProps> = ({ children }) => {
-  return <></>;
-};
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();

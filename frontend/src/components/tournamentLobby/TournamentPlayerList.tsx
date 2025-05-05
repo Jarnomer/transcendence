@@ -5,7 +5,17 @@ import { motion } from 'framer-motion';
 import { slideFromRightVariants } from './animationVariants';
 import TournamentBracket from './TournamentBracket';
 
-export const TournamentPlayerList: React.FC = ({ players, tournamentSize }) => {
+interface PlayerData {
+  user_id: string;
+  avatar_url: string;
+  display_name: string;
+}
+
+interface tournamentPlayerListProps {
+  players: PlayerData[];
+}
+
+export const TournamentPlayerList: React.FC<tournamentPlayerListProps> = ({ players }) => {
   const [activeTab, setActiveTab] = useState('bracket');
 
   return (

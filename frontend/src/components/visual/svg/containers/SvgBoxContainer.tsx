@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { motion } from 'framer-motion';
 
@@ -13,8 +13,6 @@ export const BoxDiv: React.FC<{ index: number; children: React.ReactNode }> = ({
   index,
   children,
 }) => {
-  const [showGlitch, setShowGlitch] = useState(true);
-
   return (
     <motion.div
       className="aspect-square overflow-hidden w-full h-full relative "

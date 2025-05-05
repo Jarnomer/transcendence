@@ -24,7 +24,6 @@ export const animationVariants = {
 
 export const SignUpPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [editProfile, setEditProfile] = useState<boolean>(false);
 
   const { user, loading: userContextLoading } = useUser();
 
@@ -48,12 +47,7 @@ export const SignUpPage: React.FC = () => {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.4 }}
           >
-            <UserInformationForm
-              loading={loading}
-              setLoading={setLoading}
-              user={user}
-              setEditProfile={setEditProfile}
-            />
+            <UserInformationForm loading={loading} setLoading={setLoading} user={user} />
           </motion.div>
         </AnimatePresence>
       ) : null}

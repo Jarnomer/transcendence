@@ -1,4 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
+
 import { GameResults } from '../components/game/GameResults';
 
 export default function GameResultPage() {

@@ -9,7 +9,7 @@ interface PlayerData {
 }
 
 interface CompetitorProps {
-  player: PlayerData;
+  player: PlayerData | null;
   side: string;
 }
 
@@ -38,12 +38,25 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
   );
 };
 
+interface TournamentMatch {
+  gameId: string;
+  players: [PlayerData | null, PlayerData | null];
+  round: string;
+  isComplete: boolean;
+}
+
+interface PlayerData {
+  user_id: string;
+  avatar_url: string;
+  display_name: string;
+}
+
 const Round: React.FC<{
-  id?: string;
   matches: TournamentMatch[];
+  competitors: TournamentMatch[];
   roundIndex: number;
   maxRounds: number;
-}> = ({ id, competitors, maxRounds }) => {
+}> = ({ competitors, maxRounds }) => {
   const mid = Math.ceil(competitors.length / 2);
   const leftHalf = competitors.slice(0, mid);
   const rightHalf = competitors.slice(mid);
@@ -112,7 +125,7 @@ const Round: React.FC<{
       {/* Right side */}
       <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
-          {rightHalf.map((match, idx) => (
+          {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
               {/* <p>
                 round: {round} index: {idx}
@@ -127,7 +140,11 @@ const Round: React.FC<{
   );
 };
 
-export const TournamentBracket: React.FC = ({ players, tournamentSize }) => {
+interface tournamentBracketProps {
+  players: PlayerData[];
+}
+
+export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players }) => {
   // Create rounds based on number of players
 
   if (!players) return;

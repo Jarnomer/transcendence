@@ -3,15 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 import { CircleSvg } from '../../visual/svg/shapes/CircleSvg';
-import { ModalBackgroundGlitchTextBlock } from './ModalBackgroundGlitchTextBlock'; // Import your text block component
 
 const generateRandomText = (length: number) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}<>?';
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 };
-
-// Flickering color variants
-const colors = ['#ea355a', '#f13c7a', '#f24c8c', '#f85b99', '#fc6dbb'];
 
 const lineVariants = {
   hidden: { opacity: 0, y: -5 },
@@ -95,7 +91,6 @@ const duration = 3000;
 export const MatchMakingBackgroundGlitch: React.FC = () => {
   const [showLeft, setShowLeft] = useState(false);
   const [shiftRight, setShiftRight] = useState<boolean>(false);
-  const [textFinished, setTextFinished] = useState(false);
   const [key, setKey] = useState(0); // Key for forcing remount
 
   useEffect(() => {

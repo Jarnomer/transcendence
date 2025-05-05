@@ -3,13 +3,18 @@ import React from 'react';
 import { useUser } from '@/contexts/user/UserContext';
 import { blockUser } from '@/services/friendService';
 
+import { UserDataResponseType } from '../../../../../shared/types';
 import { AddFriend } from './AddFriend';
 import { ChallengeButton } from './ChallengeUser';
 import { ChatButton } from './ChatButton';
 import { NavIconButton } from './NavIconButton';
 
+interface UserActionsProps {
+  user: UserDataResponseType;
+}
+
 export const UserActions: React.FC<UserActionsProps> = ({ user }) => {
-  const { user: loggedInUser, setUser, refetchUser } = useUser();
+  const { user: loggedInUser } = useUser();
 
   const isOwnProfile = user?.user_id === loggedInUser?.user_id;
 
