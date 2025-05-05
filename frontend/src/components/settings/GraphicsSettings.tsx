@@ -143,15 +143,15 @@ export const BackgroundGameSettings: React.FC<BackgroundGameSettingsProps> = ({
 export const GraphicsSettings: React.FC = () => {
   const { state, saveGraphicsSettings } = useGraphicsContext();
 
-  const [retroEffectLevel, setRetroEffectLevel] = useState(state.retroEffect?.level || 2);
+  const [retroEffectLevel, setRetroEffectLevel] = useState(state.retroEffect?.level || 3);
   const [isRetroEffectEnabled, setIsRetroEffectEnabled] = useState(
-    state.retroEffect?.enabled || true
+    state.retroEffect?.enabled !== false
   );
   const [selectedTheme, setSelectedTheme] = useState<string | null>(
     state.colorTheme?.primary || null
   );
   const [backgroundGameEnabled, setBackgroundGameEnabled] = useState(
-    state.backgroundGame?.enabled || true
+    state.backgroundGame?.enabled !== false
   );
 
   const playSelectSound = useSound('/sounds/effects/select.wav');

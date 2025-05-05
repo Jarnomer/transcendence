@@ -22,7 +22,7 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const { state: graphicsSettings } = useGraphicsContext();
-  const isBackgroundEnabled = graphicsSettings?.backgroundGame?.enabled !== false;
+  const isBackgroundEnabled = graphicsSettings?.backgroundGame?.enabled === true;
 
   useGameMusic(currentMode, gameStatus);
 
