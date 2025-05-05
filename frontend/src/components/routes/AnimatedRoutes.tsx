@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
+import { LoadingProvider } from '../../contexts/gameContext/LoadingContextProvider.tsx';
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
 import { useSound } from '../../hooks/useSound.tsx';
@@ -167,7 +168,9 @@ export const AnimatedRoutes: React.FC = () => {
           element={
             user && fromAppNavigation ? (
               <PageWrapper>
-                <GamePage />
+                <LoadingProvider>
+                  <GamePage />
+                </LoadingProvider>
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />

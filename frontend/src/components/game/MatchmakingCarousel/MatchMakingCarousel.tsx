@@ -47,6 +47,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const { mode, difficulty } = useGameOptionsContext();
   const { loadingStates, setLoadingState } = useLoading();
   const { user } = useUser();
+  setLoadingState('matchMakingAnimationLoading', true);
 
   // console.log(mode, difficulty);
   // console.log(playersData);
@@ -59,6 +60,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   useEffect(() => {
     if (transitionToScoreboard) {
       setTimeout(() => {
+        console.log('SETTING LOADING TO FALSE');
         setLoadingState('matchMakingAnimationLoading', false);
       }, 1000);
     }
@@ -71,6 +73,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
       console.log('Opponent found');
       hideBackgroundGame();
       setTimeout(() => {
+        console.log('SETTING TRANSITION TO SCOREBOARD TRUE');
         setTransitionToScoreboard(true);
       }, 1000);
     }
