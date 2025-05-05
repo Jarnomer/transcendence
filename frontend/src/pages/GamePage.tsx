@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { AnimatePresence } from 'framer-motion';
-
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { PlayerScoreBoard } from '@components';
@@ -184,11 +182,10 @@ export const GamePage: React.FC = () => {
       {/* {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null} */}
 
       {/* Render MatchMakingCarousel */}
-      <AnimatePresence mode="wait">
-        {!isGameCanvasActive && !gameResult && loading ? (
-          <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
-        ) : null}
-      </AnimatePresence>
+
+      {!isGameCanvasActive && !gameResult && loading ? (
+        <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
+      ) : null}
     </div>
   );
 };
