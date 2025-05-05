@@ -1,10 +1,6 @@
 import React from 'react';
 
-import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-
 import { motion } from 'framer-motion';
-
-import { UserListCard } from '../UI/cards/UserListCard';
 
 interface PlayerData {
   user_id: string;
@@ -14,27 +10,30 @@ interface PlayerData {
 
 interface CompetitorProps {
   player: PlayerData;
+  side: string;
 }
 
-const Competitor: React.FC<CompetitorProps> = ({ player }) => {
+const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
   return (
     <motion.li
-      className={`flex items-center m-4 p-1 hover:text-secondary`}
+      className={`flex items-center m-2 hover:text-secondary`}
       // onClick={() => navigate(`/profile/${user.user_id}`)}
     >
-      <UserListCard user={player}>
-        <div className="flex items-center gap-2">
-          <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
-            <img
-              className="object-cover w-full h-full"
-              src={'./src/assets/images/default_avatar.png'}
-            />
-          </div>
-          <p className="text-xs">
-            {player ? player.display_name : '??'} <br />
-          </p>
+      <div
+        className={`w-full flex gap-2 items-center glass-box overflow-hidden ${
+          side === 'right' ? 'flex-row-reverse' : ''
+        }`}
+      >
+        <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
+          <img
+            className="object-cover w-full h-full"
+            src={'./src/assets/images/default_avatar.png'}
+          />
         </div>
-      </UserListCard>
+        <div className=" h-full flex items-center justify-center">
+          <p className="text-xs">{player ? player.display_name : '??'}</p>
+        </div>
+      </div>
     </motion.li>
   );
 };
@@ -56,6 +55,7 @@ const Round: React.FC<{
   // console.log('maxRounds: ', maxRounds);
   // console.log('competitors', competitors);
 
+  console.log('round: ', round);
   if (competitors.length === 1) {
     // console.log('Single match round:', round);
 
@@ -64,22 +64,22 @@ const Round: React.FC<{
         {/* Left side */}
         <div
           style={{
-            gridColumnStart: round + 1,
+            gridColumnStart: round,
             gridRowStart: 1,
           }}
         >
           <ol className="flex h-full flex-col justify-around">
             <div className={` `}>
-              <Competitor player={competitors[0].players[0]} />
+              <Competitor player={competitors[0].players[0]} side="left" />
             </div>
           </ol>
         </div>
 
         {/* Right side */}
-        <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
+        <div style={{ gridColumnStart: round + 1, gridRowStart: 1 }}>
           <ol className="flex h-full flex-col justify-around">
             <div className="">
-              <Competitor player={competitors[0].players[1]} />
+              <Competitor player={competitors[0].players[1]} side="right" />
             </div>
           </ol>
         </div>
@@ -92,7 +92,7 @@ const Round: React.FC<{
       {/* Left side */}
       <div
         style={{
-          gridColumnStart: round + 1,
+          gridColumnStart: round,
           gridRowStart: 1,
         }}
       >
@@ -102,8 +102,8 @@ const Round: React.FC<{
               {/* <p>
                 round: {round} index: {idx}
               </p> */}
-              <Competitor player={match.players[0]} />
-              <Competitor player={match.players[1]} />
+              <Competitor player={match.players[0]} side="left" />
+              <Competitor player={match.players[1]} side="left" />
             </div>
           ))}
         </ol>
@@ -117,8 +117,8 @@ const Round: React.FC<{
               {/* <p>
                 round: {round} index: {idx}
               </p> */}
-              <Competitor player={match.players[0]} />
-              <Competitor player={match.players[1]} />
+              <Competitor player={match.players[0]} side="right" />
+              <Competitor player={match.players[1]} side="right" />
             </div>
           ))}
         </ol>
@@ -131,7 +131,7 @@ export const TournamentBracket: React.FC = ({ players, tournamentSize }) => {
   // Create rounds based on number of players
 
   if (!players) return;
-  const gridCols = players.length * 2 + 2;
+  const gridCols = players.length * 2;
   // console.log('players from bracket component:', players);
   // console.log('players.length: ', players.length, 'grid cols:', gridCols);
 
@@ -139,8 +139,8 @@ export const TournamentBracket: React.FC = ({ players, tournamentSize }) => {
   if (!container) return null;
 
   return (
-    <div className=" w-full flex items-center justify-center">
-      <TransformWrapper
+    <div className=" w-full h-full flex  ">
+      {/* <TransformWrapper
         initialScale={1}
         minScale={1}
         maxScale={4}
@@ -151,25 +151,25 @@ export const TournamentBracket: React.FC = ({ players, tournamentSize }) => {
         }}
         doubleClick={{ disabled: true }}
       >
-        <TransformComponent>
-          <div
-            className=" grid grid-rows-1"
-            style={{
-              gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-              minWidth: `${gridCols * 150}px`,
-            }}
-          >
-            {players.map((round, index) => (
-              <Round
-                key={'round_' + index}
-                roundIndex={index}
-                competitors={round}
-                maxRounds={gridCols}
-              />
-            ))}
-          </div>
-        </TransformComponent>
-      </TransformWrapper>
+        <TransformComponent> */}
+      <div
+        className="grid grid-rows-1 w-full overflow-x-scroll"
+        style={{
+          gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+          minWidth: `${gridCols * 150}px`,
+        }}
+      >
+        {players.map((round, index) => (
+          <Round
+            key={'round_' + index}
+            roundIndex={index}
+            competitors={round}
+            maxRounds={gridCols + 1}
+          />
+        ))}
+      </div>
+      {/* </TransformComponent>
+      </TransformWrapper> */}
     </div>
   );
 };

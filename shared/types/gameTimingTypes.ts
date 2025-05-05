@@ -65,7 +65,7 @@ export const defaultScoreEffectTimings: ScoreEffectTimings = {
   scorePaddleExplosionDuration: 2000,
   scoreBallExplosionDuration: 3000,
   fadeStartPaddleMultiplier: 0.8,
-  fadeStartBallMultiplier: 0.9,
+  fadeStartBallMultiplier: 0.6,
   edgeFlickerDuration: 2000,
   paddleFizzleSoundDelay: 2100,
   ballFizzleSoundDelay: 1300,

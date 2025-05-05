@@ -106,3 +106,6 @@ export type UserResponseType = Static<typeof UserResponseSchema>;
 export type UserIdType = Static<typeof UserIdSchema>;
 export type AllResponseType = Static<typeof AllResponseSchema>;
 export type UserNotificationType = Static<typeof UserNotificationSchema>;
+
+export type FriendListType = Static<typeof UserDataResponseSchema>['friends'];
+export type FriendType = Static<typeof UserDataResponseSchema>['friends'][number];

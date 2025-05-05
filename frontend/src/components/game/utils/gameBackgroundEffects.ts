@@ -1,6 +1,20 @@
-import { RetroEffectsManager } from '@game/utils';
+import { Color3, Mesh, Scene } from 'babylonjs';
 
-import { defaultGameParams, defaultRetroEffectTimings } from '@shared/types';
+import {
+  GameSoundManager,
+  RetroEffectsManager,
+  createPaddleFragments,
+  animatePaddleFragments,
+  applyScoreBallParticles,
+  applyScoreBallFlares,
+} from '@game/utils';
+
+import {
+  Ball,
+  defaultGameParams,
+  defaultRetroEffectTimings,
+  defaultScoreEffectTimings,
+} from '@shared/types';
 
 function calculateEffectIntensity(
   playerScore: number,
@@ -50,7 +64,7 @@ export function applyBackgroundScoreEffects(
 ): void {
   if (!retroEffectsRef) return;
 
-  const totalDuration = 1800;
+  const totalDuration = 1500;
 
   const intensityFactor = calculateEffectIntensity(playerScore, ballSpeed, ballSpin);
   const numberOfGlitches = Math.floor(10 + (intensityFactor - 2) * 4);
@@ -93,4 +107,60 @@ export function applyBackgroundScoreEffects(
     // Clean up any remaining timers after the effect duration
     glitchTimers.forEach((timerId) => window.clearTimeout(timerId));
   }, totalDuration + 100);
+}
+
+export function applyGameOverEffects(
+  scene: Scene,
+  scoredAgainstPaddle: Mesh,
+  ballMesh: Mesh,
+  ball: Ball,
+  primaryColor: Color3,
+  duration: number,
+  soundManagerRef?: GameSoundManager | null | undefined
+): void {
+  if (!scene || !scoredAgainstPaddle || !ballMesh) return;
+
+  if (soundManagerRef) soundManagerRef.playCanvasModeExplosionSound();
+
+  const intensityFactor = 3;
+  const effectDelay = 400;
+
+  const params = defaultScoreEffectTimings;
+
+  const paddleFragments = createPaddleFragments(scene, scoredAgainstPaddle, intensityFactor);
+  const ballDirection: 'left' | 'right' = ball.dx > 0 ? 'right' : 'left';
+
+  animatePaddleFragments(
+    scene,
+    paddleFragments,
+    scoredAgainstPaddle,
+    intensityFactor / 5,
+    ballDirection,
+    ball.y,
+    params,
+    duration
+  );
+
+  applyScoreBallParticles(
+    scene,
+    scoredAgainstPaddle,
+    intensityFactor,
+    ballDirection,
+    ball,
+    effectDelay,
+    primaryColor,
+    params,
+    duration
+  );
+
+  applyScoreBallFlares(
+    scene,
+    scoredAgainstPaddle,
+    intensityFactor,
+    ballDirection,
+    ball,
+    effectDelay,
+    params,
+    duration
+  );
 }

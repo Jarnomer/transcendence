@@ -12,11 +12,11 @@ import {
 
 import {
   ActivePowerUpIconManager,
+  GameAnimationManager,
   GameSoundManager,
+  GameTextManager,
   PowerUpEffectsManager,
   RetroEffectsManager,
-  GameAnimationManager,
-  GameTextManager,
   applyBallEffects,
   applyCollisionEffects,
   applyPlayerEffects,
@@ -25,6 +25,7 @@ import {
   createBall,
   createEdge,
   createFloor,
+  createGameTextManager,
   createPaddle,
   createPongRetroEffects,
   detectCollision,
@@ -39,7 +40,6 @@ import {
   setupReflections,
   setupSceneCamera,
   setupScenelights,
-  createGameTextManager,
 } from '@game/utils';
 
 import {
@@ -55,6 +55,8 @@ import {
   retroEffectsPresets,
 } from '@shared/types';
 
+import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
+
 interface GameplayCanvasProps {
   gameState: GameState;
   gameStatus: GameStatus;
@@ -66,12 +68,16 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   gameStatus,
   theme = 'dark',
 }) => {
+  const { state: graphicsSettings } = useGraphicsContext();
   const prevBallState = useRef({ x: 0, y: 0, dx: 0, dy: 0, spin: 0 });
   const themeColors = useRef<{
     primaryColor: Color3;
     secondaryColor: Color3;
     backgroundColor: Color3;
   } | null>(null);
+
+  const retroEnabled = graphicsSettings?.retroEffect?.enabled !== false;
+  const retroLevel = retroEnabled ? graphicsSettings?.retroEffect?.level || 3 : 0;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
@@ -135,14 +141,44 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
     soundManagerRef.current = getGameSoundManager();
     textManagerRef.current = createGameTextManager(scene, thirdColor, camera);
 
-    retroLevelsRef.current = retroEffectsPresets.default;
-    retroEffectsRef.current = createPongRetroEffects(
-      scene,
-      camera,
-      'default',
-      retroLevelsRef.current,
-      defaultRetroEffectsBaseParams
-    );
+    if (retroEnabled) {
+      retroLevelsRef.current = {
+        ...retroEffectsPresets.default,
+        scanlines: retroLevel,
+        curvature: retroLevel,
+        glitch: retroLevel,
+        colorBleed: retroLevel,
+        flicker: retroLevel,
+        vignette: retroLevel,
+        noise: retroLevel,
+      };
+
+      retroEffectsRef.current = createPongRetroEffects(
+        scene,
+        camera,
+        'default',
+        retroLevelsRef.current,
+        defaultRetroEffectsBaseParams
+      );
+    } else {
+      retroLevelsRef.current = {
+        scanlines: 0,
+        curvature: 0,
+        glitch: 0,
+        colorBleed: 0,
+        flicker: 0,
+        vignette: 0,
+        noise: 0,
+      };
+
+      retroEffectsRef.current = createPongRetroEffects(
+        scene,
+        camera,
+        'default',
+        retroLevelsRef.current,
+        defaultRetroEffectsBaseParams
+      );
+    }
 
     engineRef.current = engine;
     sceneRef.current = scene;

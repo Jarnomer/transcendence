@@ -6,6 +6,7 @@ import {
   AllResponseRankType,
   AllResponseSchema,
   AllResponseType,
+  GameAudioOptions,
   UserDataResponseSchema,
   UserDataResponseType,
   UserIdSchema,
@@ -16,14 +17,17 @@ import {
   UserResponseType,
   UserUpdateSchema,
   UserUpdateType,
+  GraphicsSettings,
 } from '@shared/types';
 
+import { GraphicsController } from '../controllers/GraphicsController';
 import { UserController } from '../controllers/UserController';
 import { UserService } from '../services/UserService';
 
 export async function userRoutes(fastify: FastifyInstance) {
   const userService = UserService.getInstance(fastify.db);
   const userController = UserController.getInstance(userService);
+  const graphicsController = GraphicsController.getInstance(userService);
 
   fastify.get<{ Params: UserIdType; Reply: UserResponseType }>(
     '/:user_id',
@@ -64,7 +68,6 @@ export async function userRoutes(fastify: FastifyInstance) {
     { schema: { response: { 200: UserNotificationSchema } } },
     userController.getNotifications.bind(userController)
   );
-
   fastify.post(
     '/notification/seen/:notification_id',
     userController.markNotificationAsSeen.bind(userController)
@@ -73,4 +76,17 @@ export async function userRoutes(fastify: FastifyInstance) {
   fastify.get('/getGameSettings', userController.getGameSettings.bind(userController));
   fastify.get('/myStats', userController.getMyStats.bind(userController));
   fastify.get('/stats/:user_id', userController.getUserStats.bind(userController));
+  fastify.get('/audio-settings', userController.getAudioSettings.bind(userController));
+  fastify.post<{ Body: GameAudioOptions }>(
+    '/audio-settings',
+    userController.saveAudioSettings.bind(userController)
+  );
+  fastify.get(
+    '/graphics-settings',
+    graphicsController.getGraphicsSettings.bind(graphicsController)
+  );
+  fastify.post<{ Body: GraphicsSettings }>(
+    '/graphics-settings',
+    graphicsController.saveGraphicsSettings.bind(graphicsController)
+  );
 }

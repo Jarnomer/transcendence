@@ -1,13 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { GameState } from '@shared/types';
 
-import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
-import { useWebSocketContext } from '../../contexts/WebSocketContext';
+import { useGameOptionsContext } from '../../../contexts/gameContext/GameOptionsContext';
+import { useWebSocketContext } from '../../../contexts/WebSocketContext';
 import PlayerCard from './PlayerScoreCard';
 
 interface Player {
@@ -44,11 +42,10 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   const player1Ref = useRef<Player | null>(null);
   const player2Ref = useRef<Player | null>(null);
 
-  const location = useLocation();
   const { mode, difficulty } = useGameOptionsContext();
 
-  const { gameStatus, connections, gameState, gameId } = useWebSocketContext();
-  const { setLoadingState, loadingStates } = useLoading();
+  const { connections, gameState } = useWebSocketContext();
+  const { setLoadingState } = useLoading();
 
   const playerScores = useRef({
     player1Score: gameState?.players.player1?.score || 0,
@@ -56,7 +53,6 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   });
 
   useEffect(() => {
-    setLoadingState('scoreBoardLoading', true);
     console.log('playerScoreBoard useEffect playerdata: ', playersData);
     if (!playersData?.player1) {
       console.log('playerdata null, returning');

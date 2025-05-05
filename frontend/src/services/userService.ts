@@ -1,11 +1,14 @@
 import {
   AllResponseRankType,
   AllResponseType,
+  GameAudioOptions,
+  GraphicsSettings,
   GameSettings,
   QueueResType,
   UserDataResponseType,
   UserNotificationType,
   UserResponseType,
+  defaultGraphicsSettings,
 } from '@shared/types';
 
 import { api } from './api';
@@ -209,3 +212,51 @@ export async function getMyGames() {
     throw err;
   }
 }
+
+export async function saveAudioSettings(settings: GameAudioOptions) {
+  try {
+    console.log('Saving audio settings for user:', settings);
+    const res = await api.post<GameAudioOptions>(`/user/audio-settings`, settings);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to save audio settings`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to save audio settings:', err);
+    throw err;
+  }
+}
+
+export async function getAudioSettings() {
+  try {
+    const res = await api.get<GameAudioOptions>(`/user/audio-settings`);
+    if (res.status !== 200) {
+      throw new Error(`Error ${res.status}: Failed to fetch audio settings`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get audio settings:', err);
+    throw err;
+  }
+}
+
+export const getGraphicsSettings = async (): Promise<GraphicsSettings> => {
+  try {
+    const response = await api.get('/user/graphics-settings');
+    return response.data as GraphicsSettings;
+  } catch (error) {
+    console.error('Error fetching graphics settings:', error);
+    // Return default settings on error
+    return { ...defaultGraphicsSettings };
+  }
+};
+
+export const saveGraphicsSettings = async (settings: GraphicsSettings) => {
+  try {
+    const response = await api.post('/user/graphics-settings', settings);
+    return response.data as GraphicsSettings;
+  } catch (error) {
+    console.error('Error saving graphics settings:', error);
+    throw error;
+  }
+};

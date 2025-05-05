@@ -8,6 +8,7 @@ import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContex
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 import SessionManager from '../services/SessionManager';
+import { useConfirm } from './useConfirm';
 type StepType = 'init' | 'validating' | 'restoring' | 'done';
 
 const useValidateSession = () => {
@@ -19,6 +20,8 @@ const useValidateSession = () => {
   const sessionManager = SessionManager.getInstance();
   const gameId = sessionManager.get('gameId');
   const queueId = sessionManager.get('queueId');
+
+  const { confirm } = useConfirm();
 
   const navigate = useNavigate();
 
@@ -73,27 +76,34 @@ const useValidateSession = () => {
       }
     };
 
-    if (step === 'validating') {
-      const confirm = window.confirm('You are already in a game or queue. continue?');
-      if (confirm) {
-        allowInternalNavigation();
-        if (gameId) {
-          console.log('Game ID found:', gameId);
-          navigate('/game');
+    const run = async () => {
+      if (step === 'validating') {
+        console.log('confirming');
+        const userConfirmed = await confirm('You are already in a game or queue. Continue?');
+
+        console.log(userConfirmed);
+        if (userConfirmed) {
+          allowInternalNavigation();
+          if (gameId) {
+            console.log('Game ID found:', gameId);
+            navigate('/game');
+          } else {
+            console.log('Queue ID found:', queueId);
+            navigate('/tournamentLobby');
+          }
         } else {
-          console.log('Queue ID found:', queueId);
-          navigate('/tournamentLobby');
+          console.log('User declined to continue.');
+          cancelQueueGame().then(() => {
+            console.log('Queue/game canceled.');
+            sessionManager.clear(); // Clear session
+            setStep('done'); // Set step to done after canceling
+            resetGameOptions(); // Reset game options
+          });
         }
-      } else {
-        console.log('User declined to continue.');
-        cancelQueueGame().then(() => {
-          console.log('Queue/game canceled.');
-          sessionManager.clear(); // Clear session
-          setStep('done'); // Set step to done after canceling
-          resetGameOptions(); // Reset game options
-        });
       }
-    }
+    };
+
+    run();
   }, [step]);
 
   const isNewGame = step === 'done';

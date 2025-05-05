@@ -58,6 +58,8 @@ export const Notifications: React.FC = () => {
             }
           })
         );
+        refetchUser();
+        refetchRequests();
         setNotifications(friends);
       } catch (err) {
         console.error('Failed to get notifications:', err);
@@ -120,7 +122,7 @@ export const Notifications: React.FC = () => {
   console.log('notficitations: ', notifications);
   return (
     <motion.div
-      className=" shadow-black shadow-lg "
+      className=" "
       variants={animationVariants}
       initial="initial"
       animate="animate"
@@ -131,10 +133,10 @@ export const Notifications: React.FC = () => {
           notifications.map((request: any, index: number) => (
             <li key={index}>
               <div
-                className="flex items-center justify-start gap-2 hover:text-secondary"
+                className="flex items-center justify-start gap-2 text-secondary"
                 onClick={(event) => handleNotificationClick(event, request)}
               >
-                <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-primary hover:border-secondary border-1">
+                <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-secondary border-1">
                   <img src={request.avatar_url} className="object-contain"></img>
                 </div>
                 <span className="text-xs">{request.display_name} sent you a friend request</span>

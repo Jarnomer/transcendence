@@ -1,72 +1,87 @@
 import { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
-
 import { BackgroundGlow } from '../components';
 import { ChatWindow } from '../components/chat/chatPage/ChatWindow';
+import { MobileChatPage } from '../components/chat/chatPage/MobileChatPage';
 import { ChatSidebar } from '../components/chat/ChatSideBar';
 import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
 import { useChatContext } from '../contexts/chatContext/ChatContext';
 import { useUser } from '../contexts/user/UserContext';
-import { useSound } from '../hooks/useSound';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 
 export const ChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
-  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
-  const location = useLocation();
+  const [chatId, setchatId] = useState<string | null>(null);
   const { user } = useUser();
+  const isDesktop = useMediaQuery('(min-width: 600px)');
 
-  const { friends, sendChatMessage, messages, fetchDmHistory } = useChatContext();
-  const playZoomSound = useSound('/sounds/effects/zoom.wav');
+  const { friends, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
 
   const handleClickNewChat = () => {
     setCreateNewGroupChat(!createNewGroupChat);
   };
 
   const handleOpenChat = async (friendId: string) => {
-    setSelectedFriendId(friendId);
+    setchatId(friendId);
     if (!messages[friendId]) {
       await fetchDmHistory(friendId);
     }
   };
 
   const handleCloseChat = () => {
-    setSelectedFriendId(null);
+    setchatId(null);
+  };
+
+  const handleOpenRoom = async (roomId: string) => {
+    console.log('opening chat', roomId);
+    setchatId(roomId);
+    if (!messages[roomId]) {
+      await fetchChatHistory(roomId); // Optional: make sure messages are loaded
+    }
   };
 
   if (!user) return null;
 
+  if (!isDesktop) return <MobileChatPage></MobileChatPage>;
+
   return (
-    <div className="flex border-1 w-2xl relative h-full  sm:max-h-[500px] glass-box">
+    <div
+      className={`flex md:border-1 w-2xl backdrop-blur-md relative h-full sm:max-h-[500px] glass-box`}
+    >
       <div className="absolute w-full h-full overflow-hidden pointer-events-none">
         <BackgroundGlow />
       </div>
 
-      {createNewGroupChat && !selectedFriendId ? (
+      {createNewGroupChat && !chatId ? (
         <div className="w-full h-full relative flex items-center">
           <div className="h-full overflow-y-auto">
             <CreateNewGroupChat handleClickNewChat={handleClickNewChat} />
           </div>
         </div>
       ) : (
-        !selectedFriendId && (
-          <div className="w-full h-full relative flex items-center">
-            <div className="h-full overflow-y-auto">
-              <ChatSidebar onOpenChat={handleOpenChat} handleClickNewChat={handleClickNewChat} />
+        <>
+          <div className="w-full h-full flex">
+            <div
+              className={`h-full overflow-y-auto ${chatId ? 'hidden md:block md:w-2/5' : 'block w-full'}`}
+            >
+              <ChatSidebar
+                onOpenChat={handleOpenChat}
+                onOpenRoom={handleOpenRoom}
+                handleClickNewChat={handleClickNewChat}
+              />
             </div>
+            {chatId && (
+              <div className="w-full md:w-3/5 h-full">
+                <ChatWindow
+                  key={chatId}
+                  friends={friends}
+                  chatId={chatId}
+                  onBack={handleCloseChat}
+                />
+              </div>
+            )}
           </div>
-        )
-      )}
-
-      {selectedFriendId && (
-        <ChatWindow
-          key={selectedFriendId}
-          user={user}
-          friends={friends}
-          selectedFriendId={selectedFriendId}
-          onBack={handleCloseChat}
-          onSend={sendChatMessage}
-        />
+        </>
       )}
     </div>
   );

@@ -8,7 +8,6 @@ import { sendFriendRequest } from '../../../services/friendService';
 
 interface AddFriendButtonProps {
   receiverUserId: string;
-  onClick?: () => void;
 }
 
 const icons = {
@@ -17,7 +16,7 @@ const icons = {
 };
 
 export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) => {
-  const { user, sentRequests, refetchRequests, refetchUser } = useUser();
+  const { user, sentRequests, refetchRequests, refetchUser, loading: loadingUser } = useUser();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +24,7 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
     if (sentRequests) {
       setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
     }
-  }, [sentRequests, receiverUserId, user]);
+  }, [sentRequests, receiverUserId, user, loading]);
 
   const handleAddFriendClick = async () => {
     if (!receiverUserId) return;
@@ -35,10 +34,9 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
       console.log('cancelling friend request');
     } else {
       try {
-        sendFriendRequest(receiverUserId);
+        await sendFriendRequest(receiverUserId);
         refetchRequests();
         refetchUser();
-        setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
       } catch (error) {
         console.error('Failed to send friend request:', error);
       } finally {
@@ -46,6 +44,12 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
       }
     }
   };
+
+  useEffect(() => {
+    if (sentRequests) {
+      setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
+    }
+  }, [sentRequests, receiverUserId]);
 
   console.log(user?.friends);
   console.log('isPending:', isPending);
