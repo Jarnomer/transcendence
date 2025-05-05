@@ -11,8 +11,6 @@ export async function loginOrRegister(
     saveStoragePath?: string;
   }
 ) {
-  // const username = options?.username ?? `testuser_${Date.now()}`;
-  // const username = options?.username ?? `testuser_${Math.random().toString(36).slice(2, 6)}`;
   const username =
     options?.username ?? `testuser_${options?.index ?? Math.random().toString(36).slice(2, 6)}`;
 
@@ -38,14 +36,16 @@ export async function loginOrRegister(
     console.log(`Filled password: ${password}`);
     await page.getByRole('button', { name: 'Register' }).click();
     console.log('Clicked register button');
+    await page.getByLabel('Display name').waitFor({ state: 'visible', timeout: 60_000 });
+    await page.getByLabel('Display name').fill(username);
+    console.log(`Filled display name: ${username}`);
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('text=Edit Profile')).toHaveCount(0);
+    console.log(`Registered new user: ${username}`);
+
+    console.log(`Logged in as: ${username}`);
   } catch (err) {
     console.log(`Register failed (probably exists), trying login...`);
-    // Retry with login
-    // await page.goto(`${baseUrl}/login`);
-    // await page.getByPlaceholder('Username').fill(username);
-    // await page.getByPlaceholder('Password').fill(password);
-    // await page.getByRole('button', { name: 'Login' }).click();
-    // await page.waitForURL('**/gameMenu');
   }
 
   // Optionally save session state
