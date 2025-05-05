@@ -78,7 +78,13 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
       return {
         ...state,
         ...initialState,
+        connections: {
+          ...initialState.connections,
+          chat: state.connections.chat,
+          matchmaking: state.connections.matchmaking,
+        },
       };
+
     default:
       return state;
   }

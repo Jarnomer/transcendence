@@ -68,7 +68,8 @@ export class UserController {
    */
   async getAllUsers(request: FastifyRequest, reply: FastifyReply) {
     request.log.trace(`Getting all users`);
-    const users = await this.userService.getAllUsers();
+    const { user_id } = request.user as { user_id: string };
+    const users = await this.userService.getAllUsers(user_id);
     if (users.length === 0) {
       throw new NotFoundError('No users found');
     }
@@ -213,6 +214,20 @@ export class UserController {
     }
     const gameSettings = user.game_settings;
     reply.code(200).send(gameSettings);
+  }
+
+  async getMyStats(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting my stats for user ${user_id}`);
+    const stats = await this.userService.getUserStats(user_id);
+    reply.code(200).send(stats);
+  }
+
+  async getUserStats(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.params as { user_id: string };
+    request.log.trace(`Getting stats for user ${user_id}`);
+    const stats = await this.userService.getUserStats(user_id);
+    reply.code(200).send(stats);
   }
 
   /**

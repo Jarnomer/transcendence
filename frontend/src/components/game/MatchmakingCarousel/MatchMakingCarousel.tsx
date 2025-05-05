@@ -46,12 +46,12 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
   const { loadingStates, setLoadingState } = useLoading();
   const { user } = useUser();
 
-  console.log(mode, difficulty);
-  console.log(playersData);
+  // console.log(mode, difficulty);
+  // console.log(playersData);
 
   const { hideBackgroundGame, showGameCanvas } = useGameVisibility();
 
-  console.log('playersData from matchmaking carousel: ', playersData);
+  // console.log('playersData from matchmaking carousel: ', playersData);
 
   // waits for the player cards to transfrom in to scoreboard shape
   useEffect(() => {

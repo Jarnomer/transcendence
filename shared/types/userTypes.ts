@@ -91,6 +91,8 @@ export const UserDataResponseSchema = Type.Object({
   stats: Type.Object({
     wins: Type.Number(),
     losses: Type.Number(),
+    rank: Type.Number(),
+    rating: Type.Number(),
   }),
   status: Type.String(),
   user_id: Type.String(),

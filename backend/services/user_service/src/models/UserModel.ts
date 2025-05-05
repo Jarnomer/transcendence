@@ -45,12 +45,23 @@ export class UserModel {
                 WHERE is_winner = 1
                 GROUP BY player_id
             ) gp ON u.user_id = gp.player_id
-      ORDER BY rank;`
+      ORDER BY rank
+      ;`
     );
   }
 
-  async getAllUsers() {
-    return await this.db.all(`SELECT * FROM user_profiles`);
+  async getAllUsers(user_id: string) {
+    return await this.db.all(
+      `
+      SELECT * FROM user_profiles
+      WHERE user_id != ?
+      AND user_id NOT IN (
+        SELECT blocked_user_id FROM blocked_users WHERE user_id = ?
+        UNION
+        SELECT user_id FROM blocked_users WHERE blocked_user_id = ?
+      )`,
+      [user_id, user_id, user_id]
+    );
   }
 
   async updateUserByID(
@@ -74,7 +85,7 @@ export class UserModel {
   }
 
   async deleteUserByID(user_id: string) {
-    return await this.db.run(`DELETE FROM user_profiles WHERE user_id = ?`, [user_id]);
+    return await this.db.run(`DELETE FROM users WHERE user_id = ?`, [user_id]);
   }
 
   async createUserStats(user_id: string) {
@@ -87,7 +98,7 @@ export class UserModel {
     SELECT
       up.*,
       u.username,
-      json_object('wins', us.wins, 'losses', us.losses) AS stats,
+      json_object('wins', us.wins, 'losses', us.losses, 'rating', us.elo, 'rank', us.rank) AS stats,
       (
         SELECT
         json_group_array
@@ -204,6 +215,10 @@ export class UserModel {
       `UPDATE user_profiles SET game_settings = ? WHERE user_id = ? RETURNING *`,
       [settingsString, user_id]
     );
+  }
+
+  async getUserStats(user_id: string) {
+    return await this.db.get(`SELECT * FROM user_stats WHERE user_id = ?`, [user_id]);
   }
 
   async saveAudioSettings(user_id: string, settings: GameAudioOptions) {

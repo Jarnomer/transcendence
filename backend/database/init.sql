@@ -62,6 +62,14 @@ CREATE TABLE  IF NOT EXISTS friends (
   PRIMARY KEY (user_id, friend_id)
 );
 
+--blocked users
+CREATE TABLE IF NOT EXISTS blocked_users (
+  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  blocked_user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (user_id, blocked_user_id)
+);
+
 -- Chat Rooms Table (public, private, global)
 CREATE TABLE IF NOT EXISTS chat_rooms (
     chat_room_id TEXT PRIMARY KEY,

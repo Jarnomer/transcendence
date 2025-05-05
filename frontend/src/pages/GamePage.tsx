@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { AnimatePresence } from 'framer-motion';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
@@ -11,8 +13,6 @@ import { useGameControls, useGameResult } from '@hooks';
 import { createReadyInputMessage } from '@shared/messages';
 
 import { MatchMakingCarousel } from '../components/game';
-import GameplayCanvas from '../components/game/GameplayCanvas';
-import { GameResults } from '../components/game/GameResults';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -33,6 +33,7 @@ export const GamePage: React.FC = () => {
   const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
 
@@ -85,17 +86,19 @@ export const GamePage: React.FC = () => {
    */
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
-    sendMessage('matchmaking', {
-      type: 'find_match',
-      payload: {
-        mode: mode,
-        difficulty: difficulty,
-        user_id: user?.user_id,
-        avatar_url: user?.avatar_url,
-        display_name: user?.display_name,
-      },
-    });
-  }, [connections.matchmaking, gameId, user, mode, difficulty]);
+    if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
+      sendMessage('matchmaking', {
+        type: 'find_match',
+        payload: {
+          mode: mode,
+          difficulty: difficulty,
+          user_id: user?.user_id,
+          avatar_url: user?.avatar_url,
+          display_name: user?.display_name,
+        },
+      });
+    }
+  }, [connections.matchmaking, gameId, user, mode, difficulty, lobby]);
 
   /**
    * if gameId is set, connect to game socket
@@ -149,6 +152,13 @@ export const GamePage: React.FC = () => {
     }
   }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 
+  useEffect(() => {
+    if (!gameResult) return;
+    navigate('/game-results', {
+      state: { gameResult, playersData },
+    });
+  }, [gameResult, playersData]);
+
   return (
     <div
       id="game-page"
@@ -165,15 +175,15 @@ export const GamePage: React.FC = () => {
         }`}
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
-          // <h1 className="w-full h-full">
-          //   gameplay canvas: ${gameStatus} : ${connections.game}
-          // </h1>
+          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          <h1 className="w-full h-full">
+            gameplay canvas: ${gameStatus} : ${connections.game}
+          </h1>
         )}
       </div>
 
       {/* Render GameResults */}
-      {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null}
+      {/* {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null} */}
 
       {/* Render MatchMakingCarousel */}
       <AnimatePresence mode="wait">

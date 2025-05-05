@@ -12,6 +12,7 @@ import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
 import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
+import GameResultPage from '../../pages/GameResultPage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
 import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
@@ -130,6 +131,19 @@ export const AnimatedRoutes: React.FC = () => {
             user && fromAppNavigation ? (
               <PageWrapper>
                 <GameOptionsPage />
+              </PageWrapper>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/game-results"
+          element={
+            user && fromAppNavigation ? (
+              <PageWrapper>
+                <GameResultPage />
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />

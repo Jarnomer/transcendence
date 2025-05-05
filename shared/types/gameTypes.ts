@@ -218,6 +218,7 @@ export type MatchmakingOptionsType = {
 
 export type TournamentOptionsType = {
   playerCount: number;
+  numberOfRounds: number;
   tournamentName: string;
   isPrivate: boolean;
   password: string | null;
@@ -244,4 +245,5 @@ export type MatchmakingSnapshot = {
   role: UserRole;
   gameId: string;
   participants: any[]; // or whatever type
+  matches: any[]; // or whatever type
 };
