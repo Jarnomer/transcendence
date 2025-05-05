@@ -2,13 +2,11 @@ import {
   AllResponseRankType,
   AllResponseType,
   GameAudioOptions,
-  GraphicsSettings,
   GameSettings,
   QueueResType,
   UserDataResponseType,
   UserNotificationType,
   UserResponseType,
-  defaultGraphicsSettings,
 } from '@shared/types';
 
 import { api } from './api';
@@ -211,24 +209,3 @@ export async function getAudioSettings() {
     throw err;
   }
 }
-
-export const getGraphicsSettings = async (): Promise<GraphicsSettings> => {
-  try {
-    const response = await api.get('/user/graphics-settings');
-    return response.data as GraphicsSettings;
-  } catch (error) {
-    console.error('Error fetching graphics settings:', error);
-    // Return default settings on error
-    return { ...defaultGraphicsSettings };
-  }
-};
-
-export const saveGraphicsSettings = async (settings: GraphicsSettings) => {
-  try {
-    const response = await api.post('/user/graphics-settings', settings);
-    return response.data as GraphicsSettings;
-  } catch (error) {
-    console.error('Error saving graphics settings:', error);
-    throw error;
-  }
-};
