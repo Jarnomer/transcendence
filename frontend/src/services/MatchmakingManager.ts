@@ -229,7 +229,7 @@ class MatchmakingManager {
 
   handleTournamentMatches = (matches: any) => {
     console.info('Tournament matches:', this.snapshot.matches);
-    this.setState({ matches: [this.snapshot.matches.push(matches.matches)] });
+    this.setState({ matches: [...this.snapshot.matches, matches.matches] });
   };
 
   handleMatchmakingTimeout = () => {

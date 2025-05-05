@@ -58,7 +58,7 @@ export const HeaderNav: React.FC = () => {
 
   return (
     <>
-      {user && user.display_name ? (
+      {user ? (
         <div
           className="flex  gap-3 items-center justify-center w-full"
           aria-label="Navigation menu"

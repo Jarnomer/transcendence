@@ -1,16 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-import { getMyGames, getMyStats, getUserData } from '@/services/userService';
+import { getUserData } from '@/services/userService';
 
 import { FriendListType, UserDataResponseType } from '@shared/types/userTypes';
 
 import { api } from '../../services/api';
-import {
-  getBlockedUsers,
-  getMyfriends,
-  getReceivedFriendRequests,
-  getRequestsSent,
-} from '../../services/friendService';
+import { getRequestsSent } from '../../services/friendService';
 import SessionManager from '../../services/SessionManager';
 
 interface FriendRequest {
@@ -64,12 +59,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const fetchUser = useCallback(() => {
+    const userId = localStorage.getItem('userID');
     if (!userId) {
       setUser(null);
       return;
     }
-    // console.log('Fetching user data in UserContext...');
-    // console.log(userId);
     getUserData(userId)
       .then((data) => {
         setUser(data);
@@ -139,6 +133,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('checking auth');
     setLoading(true);
     const token = localStorage.getItem('token');
+    console.log('token', token);
     if (!token) {
       setUser(null);
       setLoading(false);
