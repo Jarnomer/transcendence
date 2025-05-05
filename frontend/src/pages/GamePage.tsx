@@ -178,11 +178,10 @@ export const GamePage: React.FC = () => {
         }`}
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
-          // <h1 className="w-full h-full">
-          //   gameplay canvas: ${gameStatus} : ${connections.game}
-          // </h1>
-          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          <h1 className="w-full h-full">
+            gameplay canvas: ${gameStatus} : ${connections.game}
+          </h1>
         )}
       </div>
 
