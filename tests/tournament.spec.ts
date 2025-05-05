@@ -85,8 +85,9 @@ test('simulate ${totalUsers} users joining tournament', async () => {
     // move player count slider to 16
     const playerCountSlider = page.getByRole('slider', { name: 'Player Count' });
     await playerCountSlider.waitFor({ state: 'visible', timeout: 60_000 });
-    await playerCountSlider.fill('16');
-    console.log(`Filled player count slider: 16`);
+    // fill the slider with the value of totalUsers
+    await playerCountSlider.fill(totalUsers.toString());
+    console.log(`Filled player count slider: ${totalUsers}`);
 
     // input tournament name
     const tournamentNameInput = page.getByLabel('Tournament Name:');
