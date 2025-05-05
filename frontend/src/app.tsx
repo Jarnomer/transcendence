@@ -33,7 +33,7 @@ const App: React.FC = () => {
             <LoadingProvider>
               <Router>
                 {/* <div className="fixed"> */}
-                <BackgroundProvider />
+                {/* <BackgroundProvider /> */}
                 {/* </div> */}
                 <div
                   id="app-main-container"

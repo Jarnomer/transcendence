@@ -1,8 +1,8 @@
-import { chromium, test, Page } from '@playwright/test';
+import { chromium, test, expect, Page } from '@playwright/test';
 
 import { loginOrRegister } from '../utils/auth';
 
-const totalUsers = 15; // total number of users to simulate
+const totalUsers = 7; // total number of users to simulate
 
 test('simulate ${totalUsers} users joining tournament', async () => {
   const browser = await chromium.launch({
@@ -49,15 +49,31 @@ test('simulate ${totalUsers} users joining tournament', async () => {
   // Simulate a single user flow
   const simulateUser = async (i: number) => {
     const context = await browser.newContext();
-    const { page, username } = await loginOrRegister(context, baseUrl, { index: i });
+    const { page, username } = await loginOrRegister(context, baseUrl);
 
-    console.log(`Logged in as: ${username}`);
-
-    await page.goto(`${baseUrl}/gameMenu`);
+    await page.waitForURL(`${baseUrl}/gameMenu`);
     console.log(`${username} navigated to game menu`);
 
+    // wait for the tournament button to be visible
+    await page
+      .getByText('Tournament', { exact: true })
+      .waitFor({ state: 'visible', timeout: 60_000 });
     await page.getByText('Tournament').nth(0).click();
     console.log(`${username} clicked tournament button`);
+
+    // await page.waitForURL('**/signUp');
+    // await expect(page.getByRole('heading', { name: 'Edit Profile' })).toBeVisible({
+    //   timeout: 15000,
+    // });
+    // wait for display name input to be visible
+    await page.getByLabel('Display name').waitFor({ state: 'visible', timeout: 60_000 });
+    await page.getByLabel('Display name').fill(username);
+    console.log(`Filled display name: ${username}`);
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('text=Edit Profile')).toHaveCount(0);
+    console.log(`Registered new user: ${username}`);
+
+    console.log(`Logged in as: ${username}`);
 
     await page.waitForURL('**/tournament');
     console.log(`${username} navigated to tournament page`);

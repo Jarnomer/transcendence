@@ -38,15 +38,6 @@ export async function loginOrRegister(
     console.log(`Filled password: ${password}`);
     await page.getByRole('button', { name: 'Register' }).click();
     console.log('Clicked register button');
-    await page.waitForURL('**/signUp');
-    await expect(page.getByRole('heading', { name: 'Edit Profile' })).toBeVisible({
-      timeout: 15000,
-    });
-    await page.getByLabel('Display name').fill(username);
-    console.log(`Filled display name: ${username}`);
-    await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.locator('text=Edit Profile')).toHaveCount(0);
-    console.log(`Registered new user: ${username}`);
   } catch (err) {
     console.log(`Register failed (probably exists), trying login...`);
     // Retry with login

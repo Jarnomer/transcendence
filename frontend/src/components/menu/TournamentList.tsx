@@ -41,6 +41,7 @@ export const TournamentList: React.FC = () => {
     setDifficulty(options.variant);
     setTournamentOptions({
       playerCount: 2,
+      numberOfRounds: Math.log2(Number(options.variant)),
       tournamentName: options.name,
       isPrivate: options.isPrivate,
       password: options.isPrivate ? password : null,

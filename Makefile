@@ -54,7 +54,7 @@ fclean: down
 	@$(DOCKER_DEV) down -v --rmi all
 	@$(DOCKER_PROD) down -v --rmi all
 
-nuke:
+nuke: re
 	@echo "Deleted database"
 	@$(RM) $(DATABASE)
 
