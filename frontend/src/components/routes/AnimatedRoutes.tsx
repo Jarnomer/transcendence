@@ -13,19 +13,20 @@ import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
 import { GameMenu } from '../../pages/GameMenu.tsx';
 import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
 import { GamePage } from '../../pages/GamePage.tsx';
-import GameResultPage from '../../pages/GameResultPage.tsx';
+import { GameResultPage } from '../../pages/GameResultPage.tsx';
 import { HomePage } from '../../pages/HomePage.tsx';
 import { LoginPage } from '../../pages/LoginPage.tsx';
 import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
 import { ProfilePage } from '../../pages/ProfilePage.tsx';
 import { Settings } from '../../pages/Settings.tsx';
 import { SignUpPage } from '../../pages/SignUpPage.tsx';
+import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
+import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
 import { BracketTest } from '../../pages/testing_pages/BracketTest.tsx';
 import { CarouselTest } from '../../pages/testing_pages/CarouselTest.tsx';
 import { TestGameResult } from '../../pages/testing_pages/TestGameResult.tsx';
-import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
-import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
 import { PageWrapper } from './PageWrapper.tsx';
+
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();

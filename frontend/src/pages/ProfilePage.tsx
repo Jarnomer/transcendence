@@ -13,7 +13,7 @@ import { MatchHistory } from '../components/profile/MatchHistory';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { Error } from '../components/UI/Error';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(0 100% 0 0)',
     opacity: 0,

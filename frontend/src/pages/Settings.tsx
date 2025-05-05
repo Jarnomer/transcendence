@@ -7,7 +7,7 @@ import { GraphicsSettings } from '../components/settings/GraphicsSettings';
 import { Soundsettings } from '../components/settings/SoundSettings';
 import { UserSettings } from '../components/settings/UserSettings';
 
-export const slideFromLeftVariants = {
+const slideFromLeftVariants = {
   initial: {
     x: '-100%',
     scale: 1.05,
@@ -31,7 +31,7 @@ export const slideFromLeftVariants = {
   },
 };
 
-export const slideFromRightVariants = {
+const slideFromRightVariants = {
   initial: {
     x: '100%',
     scale: 1.05,

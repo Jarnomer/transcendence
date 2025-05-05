@@ -6,7 +6,7 @@ import { LeaderBoard } from '@components';
 
 import { Updates } from '../components/home/Updates';
 
-export const slideFromLeftVariants = {
+const slideFromLeftVariants = {
   initial: {
     x: '-100%',
     scale: 1.05,
@@ -30,7 +30,7 @@ export const slideFromLeftVariants = {
   },
 };
 
-export const slideFromRightVariants = {
+const slideFromRightVariants = {
   initial: {
     x: '100%',
     scale: 1.05,

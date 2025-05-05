@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { UserInformationForm } from '../components/UI/forms/UserInformationForm';
 import { useUser } from '../contexts/user/UserContext';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(0 100% 0 0)',
     opacity: 0,
