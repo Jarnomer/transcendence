@@ -16,7 +16,7 @@ const icons = {
 };
 
 export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) => {
-  const { user, sentRequests, refetchRequests, refetchUser, loading: loadingUser } = useUser();
+  const { user, sentRequests, refetchRequests, refetchUser } = useUser();
   const [isPending, setIsPending] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 

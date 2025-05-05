@@ -7,8 +7,8 @@ import { ChangingAvatar } from './ChangingAvatar';
 import RandomLetters from './RandomLetters';
 
 export const PlayerCard: React.FC<{
-  name: string;
-  imageSrc: string;
+  name: string | null;
+  imageSrc: string | null;
   opponentFound: boolean;
   playerNum: number;
 }> = ({ name, imageSrc, opponentFound, playerNum }) => {
@@ -67,7 +67,6 @@ export const PlayerCard: React.FC<{
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
           className={`${!scoreCard ? 'mt-2 font-semibold' : 'font-bold text-sm md:text-xl'}`}
         >
           {name ? name : <RandomLetters></RandomLetters>}

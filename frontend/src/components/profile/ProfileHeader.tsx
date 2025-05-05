@@ -8,7 +8,6 @@ import { useModal } from '../../contexts/modalContext/ModalContext';
 import { useUser } from '../../contexts/user/UserContext';
 import { UserActions } from '../UI/buttons/UserActions';
 import { ProfilePicture } from './ProfilePicture';
-import { getLastSeenTime } from './utils/lastSeen';
 
 export const animationVariants = {
   initial: {
@@ -25,12 +24,6 @@ export const animationVariants = {
     opacity: 0,
     transition: { duration: 0.4, ease: 'easeInOut' },
   },
-};
-
-type Friend = {
-  user_id: string;
-  display_name: string;
-  avatar_url: string;
 };
 
 interface ProfileHeaderProps {
@@ -69,11 +62,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
           <p className={`text-xs ${user.status == 'online' ? 'text-secondary' : 'text-primary'}`}>
             {user.status === 'online' ? 'Online' : 'Offline'}
           </p>
-          {user.status === 'offline' ? (
-            <p className="text-xs text-gray-500">
-              Last active: {getLastSeenTime(user.last_active)}
-            </p>
-          ) : null}
 
           {/* USER BIOGRAPHY */}
           <span className="text-xs text-gray-500">{user?.bio}</span>

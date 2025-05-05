@@ -111,7 +111,7 @@ export const GameOptions: React.FC = () => {
   };
 
   return (
-    <div className="glass-box h-full w-full p-3 flex flex-col gap-2 justify-center">
+    <div className="glass-box h-full w-full md:w-2xl md:max-w-2xl p-3 flex flex-col gap-2 justify-center">
       <div className="flex flex-col md:flex-row gap-3">
         <div className="max-w-full">
           <label className="block font-heading text-2xl">Max Score</label>

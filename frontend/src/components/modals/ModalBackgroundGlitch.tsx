@@ -10,9 +10,6 @@ const generateRandomText = (length: number) => {
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 };
 
-// Flickering color variants
-const colors = ['#ea355a', '#f13c7a', '#f24c8c', '#f85b99', '#fc6dbb'];
-
 const lineVariants = {
   hidden: { opacity: 0, y: -5 },
   visible: (i: number) => ({
@@ -71,29 +68,18 @@ export const ModalBackgroundGlitchTextBlock: React.FC<{}> = () => {
 
 export const ModalBackgroundGlitch: React.FC<{ duration: number }> = ({ duration }) => {
   const [showGlitch, setShowGlitch] = useState(false);
-  const [shiftRight, setShiftRight] = useState(false);
-  const [showLeft, setShowLeft] = useState(false);
 
   useEffect(() => {
     setShowGlitch(true);
-    setShowLeft(true);
-    const shiftTimer = setTimeout(() => {
-      setShiftRight(true);
-      setTimeout(() => {
-        setShowLeft(false);
-      }, 500);
-    }, duration); // ← customize delay as you like
 
     const glitchTimer = setTimeout(() => {
       setShowGlitch(false);
-      setShiftRight(false);
     }, duration);
 
     return () => {
       clearTimeout(glitchTimer);
-      clearTimeout(shiftTimer);
     };
-  }, []);
+  }, [showGlitch, duration]);
 
   return (
     <>

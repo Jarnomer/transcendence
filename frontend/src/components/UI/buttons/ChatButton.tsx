@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { useUser } from '@/contexts/user/UserContext';
 
@@ -12,22 +12,24 @@ interface ChatButtonProps {
 }
 
 export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
-  const { user, sentRequests, refetchRequests, refetchUser } = useUser();
-  const [isPending, setIsPending] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
+  const { user } = useUser();
   const { setOpenChatWindows, messages, fetchDmHistory, friends } = useChatContext();
   const isDesktop = useMediaQuery('(min-width: 600px)');
   const { openModal, closeModal } = useModal();
   const { user: loggedInUser } = useUser();
 
-  useEffect(() => {
-    if (sentRequests) {
-      setIsPending(sentRequests.some((request) => request.receiver_id === receiverUserId));
-    }
-  }, [sentRequests, receiverUserId, user]);
-
   const handleChatClick = async (friendId: string) => {
     console.log('opening chat', friendId);
+
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
+      ...prev,
+      [friendId]: true,
+    }));
+
+    if (!messages[friendId]) {
+      await fetchDmHistory(friendId);
+    }
+
     if (!isDesktop) {
       openModal('chatModal', {
         loggedInUser,
@@ -35,15 +37,6 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
         selectedFriendId: receiverUserId,
         onClose: closeModal,
       });
-    } else {
-      setOpenChatWindows((prev) => ({
-        ...prev,
-        [friendId]: true,
-      }));
-
-      if (!messages[friendId]) {
-        await fetchDmHistory(friendId);
-      }
     }
   };
 

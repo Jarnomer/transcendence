@@ -11,6 +11,8 @@ export const TournamentLobbyNav: React.FC<{
   const { mode, lobby } = useGameOptionsContext();
 
   console.log('rendering tournament lobby nav');
+
+  if (mode !== 'tournament') return;
   return (
     <motion.div
       id="tournament-lobby-nav"

@@ -9,9 +9,9 @@ import { useWebSocketContext } from '../../../contexts/WebSocketContext';
 import PlayerCard from './PlayerScoreCard';
 
 interface Player {
-  user_id?: string;
-  avatar_url: string;
-  display_name: string;
+  user_id?: string | null | undefined;
+  avatar_url: string | null | undefined;
+  display_name: string | null | undefined;
 }
 
 interface PlayerScoreBoardProps {

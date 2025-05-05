@@ -23,6 +23,7 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
     playSubmitSound();
     onClick();
   };
+  
   return (
     <button
       id={id}

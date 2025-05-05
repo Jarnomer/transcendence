@@ -15,8 +15,6 @@ const generateRandomText = (length: number) => {
 // Flickering color variants
 const colors = ['#ea355a', '#f13c7a', '#f24c8c', '#f85b99', '#fc6dbb'];
 
-const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
-
 const lineVariants = {
   hidden: { opacity: 0, y: -5 },
   visible: (i: number) => ({
@@ -24,18 +22,6 @@ const lineVariants = {
     y: 0,
     transition: {
       delay: i * 0.05,
-    },
-  }),
-};
-
-const charVariants = {
-  hidden: { opacity: 0 },
-  visible: (i: number) => ({
-    opacity: 1,
-    color: 'white',
-    transition: {
-      duration: 0.02,
-      delay: i * 0.015,
     },
   }),
 };

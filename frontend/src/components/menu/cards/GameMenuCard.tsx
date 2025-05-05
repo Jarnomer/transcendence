@@ -104,7 +104,7 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
       className="game-mode-modal @container-normal p-0 m-0 relative inline-block overflow-hidden"
       onClick={handleOnClick}
     >
-      <div className="svg-card-wrapper relative w-full h-full min-w-[300px] grid overflow-hidden place-items-center text-center">
+      <div className="svg-card-wrapper relative w-full h-full min-w-[300px] grid overflow-hidden  text-center">
         <svg
           className="w-full h-auto col-start-1 row-start-1"
           height="553"
@@ -150,35 +150,24 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
         </svg>
 
         <div
-          className="col-start-1 row-start-1 h-full w-full overflow-hidden p-0"
+          className="col-start-1 row-start-1 w-full h-full min-w-[300px] overflow-hidden p-0"
           style={{
             clipPath: 'url(#menuCardImg)',
+            WebkitClipPath: 'url(#menuCardImg)',
           }}
         >
-          <div className="relative" style={{ width: '100%', height: '100%' }}>
-            <img
-              src={imageUrl}
-              alt=""
-              role="presentation"
-              style={{
-                width: '100%',
-                objectFit: 'cover',
-                clipPath: 'url(#menuCardImg)',
-                WebkitClipPath: 'url(#menuCardImg)',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                backgroundColor: 'currentColor',
-                mixBlendMode: 'color',
-                clipPath: 'url(#menuCardImg)',
-                WebkitClipPath: 'url(#menuCardImg)',
-              }}
-              className="top-0"
-            ></div>
-          </div>
+          <img
+            className="object-cover overflow-hidden"
+            src={imageUrl}
+            alt=""
+            role="presentation"
+            style={{
+              width: '100%',
+              objectFit: 'cover',
+              clipPath: 'url(#menuCardImg)',
+              WebkitClipPath: 'url(#menuCardImg)',
+            }}
+          />
         </div>
       </div>
       {/* Content positioned at the bottom of the card */}
