@@ -128,7 +128,7 @@ export interface GameSettings {
 export const defaultGameSettings: GameSettings = {
   mode: '1v1',
   difficulty: 'online',
-  maxScore: 5,
+  maxScore: 1,
   ballSpeed: 7,
   enableSpin: true,
   enablePowerUps: true,
