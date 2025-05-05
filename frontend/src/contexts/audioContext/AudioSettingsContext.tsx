@@ -4,8 +4,8 @@ import { GameAudioOptions, defaultGameAudioOptions } from '@shared/types';
 
 import {
   applyAudioSettings,
-  getAudioSettings,
-  saveAudioSettings,
+  getAudioSystemSettings,
+  saveAudioSystemSettings,
   volumeLevelToValue,
 } from '../../services/audioService';
 import { useUser } from '../user/UserContext';
@@ -36,7 +36,7 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!userId) return;
 
     setIsLoading(true);
-    getAudioSettings()
+    getAudioSystemSettings()
       .then((settings) => {
         setAudioSettings(settings);
         applyAudioSettings(settings);
@@ -170,7 +170,7 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   // Save settings to backend
   const saveSettings = async () => {
     try {
-      await saveAudioSettings(audioSettings);
+      await saveAudioSystemSettings(audioSettings);
     } catch (error) {
       console.error('Failed to save audio settings:', error);
     }

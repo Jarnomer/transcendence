@@ -3,10 +3,7 @@ import { GameAudioOptions, defaultGameAudioOptions } from '@shared/types';
 import { getGameMusicManager } from '../components/game/utils/gameMusicManager';
 import { getGameSoundManager } from '../components/game/utils/gameSoundEffects';
 import SoundManager from './SoundManager';
-import {
-  getAudioSettings as fetchAudioSettings,
-  saveAudioSettings as persistAudioSettings,
-} from './userService';
+import { getAudioSettings, saveAudioSettings } from './userService';
 
 export const volumeLevelToValue = (level: number): number => {
   const validLevel = Math.max(0, Math.min(5, level));
@@ -18,18 +15,20 @@ export const volumeValueToLevel = (value: number): number => {
   return Math.round(validValue * 5);
 };
 
-export const saveAudioSettings = async (settings: GameAudioOptions): Promise<GameAudioOptions> => {
+export const saveAudioSystemSettings = async (
+  settings: GameAudioOptions
+): Promise<GameAudioOptions> => {
   try {
-    return await persistAudioSettings(settings);
+    return await saveAudioSettings(settings);
   } catch (error) {
     console.error('Failed to save audio settings:', error);
     return settings;
   }
 };
 
-export const getAudioSettings = async (): Promise<GameAudioOptions> => {
+export const getAudioSystemSettings = async (): Promise<GameAudioOptions> => {
   try {
-    return await fetchAudioSettings();
+    return await getAudioSettings();
   } catch (error) {
     console.error('Failed to get audio settings:', error);
     return defaultGameAudioOptions;

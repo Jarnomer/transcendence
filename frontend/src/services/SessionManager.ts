@@ -14,7 +14,7 @@ export type SessionData = {
 
 const SESSION_KEY = 'game-session';
 
-export default class SessionManager {
+class SessionManager {
   private static instance: SessionManager;
   private cache: SessionData = {};
 
@@ -74,3 +74,5 @@ export default class SessionManager {
     }
   }
 }
+
+export default SessionManager;
