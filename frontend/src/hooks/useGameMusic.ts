@@ -128,5 +128,3 @@ export const useGameMusic = (gameMode: GameMode, gameStatus?: GameStatus) => {
     },
   };
 };
-
-export default useGameMusic;

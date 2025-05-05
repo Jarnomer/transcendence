@@ -11,7 +11,7 @@ import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
 import { useSound } from '../hooks/useSound';
-import useValidateSession from '../hooks/useValidateSession'; // Import the useValidateSession hook
+import { useValidateSession } from '../hooks/useValidateSession'; // Import the useValidateSession hook
 
 interface GameMenuOption {
   content: string;

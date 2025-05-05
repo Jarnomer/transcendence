@@ -166,5 +166,3 @@ export const useGameResult = () => {
   }, []);
   return { gameResult };
 };
-
-export default useGameResult;

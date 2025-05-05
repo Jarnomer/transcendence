@@ -8,7 +8,7 @@ import { useWebSocketContext } from '../contexts/WebSocketContext';
 import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
 import SessionManager from '../services/SessionManager';
 
-const useMatchmaking = () => {
+export const useMatchmaking = () => {
   const navigate = useNavigate();
   const { userId, user } = useUser();
   const {
@@ -201,4 +201,3 @@ const useMatchmaking = () => {
   //   };
   // }, []);
 };
-export default useMatchmaking;

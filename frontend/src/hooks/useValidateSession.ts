@@ -4,14 +4,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { getSessionStatus } from '@/services/gameService';
 
+import { useWebSocketContext } from '../contexts/WebSocketContext';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
 import SessionManager from '../services/SessionManager';
 import { useConfirm } from './useConfirm';
 type StepType = 'init' | 'validating' | 'restoring' | 'done';
 
-const useValidateSession = () => {
+export const useValidateSession = () => {
   const { cancelGame, cancelQueue, setGameId, cleanup } = useWebSocketContext();
   const { resetGameOptions, setMode, setDifficulty, setQueueId } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
@@ -107,7 +107,6 @@ const useValidateSession = () => {
   }, [step]);
 
   const isNewGame = step === 'done';
+
   return isNewGame;
 };
-
-export default useValidateSession;

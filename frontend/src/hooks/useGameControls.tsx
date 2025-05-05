@@ -6,7 +6,7 @@ import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContex
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
 
-const useGameControls = () => {
+export const useGameControls = () => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
@@ -111,7 +111,4 @@ const useGameControls = () => {
   }, [keysPressed, sendMessage, localPlayerId, remotePlayerId]);
 
   return localPlayerId;
-;
 };
-
-export default useGameControls;
