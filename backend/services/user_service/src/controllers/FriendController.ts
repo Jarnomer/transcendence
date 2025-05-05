@@ -148,4 +148,12 @@ export class FriendController {
     const unblockedUser = await this.friendService.unblockUser(user_id, blocked_user_id);
     reply.code(200).send(unblockedUser);
   }
+
+  async getBlockedUser(request: FastifyRequest, reply: FastifyReply) {
+    const { blocked_user_id } = request.params as { blocked_user_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting blocked user ${blocked_user_id}`);
+    const blockedUser = await this.friendService.getBlockedUser(user_id, blocked_user_id);
+    reply.code(200).send(blockedUser);
+  }
 }

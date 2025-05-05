@@ -16,7 +16,6 @@ interface DataInQueue {
 }
 
 export const TournamentList: React.FC = () => {
-  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [dataInQueue, setDataInQueue] = useState<DataInQueue[]>([]);
@@ -86,6 +85,7 @@ export const TournamentList: React.FC = () => {
                 <td className="px-4 py-2">
                   <NavIconButton
                     id="join-game-button"
+                    ariaLabel="join game"
                     icon="arrowRight"
                     ariaLabel={`Join ${options.name}`}
                     onClick={(event) => handleJoinGameClick(event, options)}

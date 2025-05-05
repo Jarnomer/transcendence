@@ -20,6 +20,11 @@ export class FriendService {
   }
 
   async sendFriendRequest(user_id: string, receiver_id: string) {
+    const isBlocked = await this.friendModel.getBlockedUser(receiver_id, user_id);
+    console.log('isBlocked', isBlocked);
+    if (isBlocked) {
+      throw new BadRequestError('You cannot send a friend request to this user');
+    }
     const requestPair = await this.friendModel.getRequestPairAccepted(user_id, receiver_id);
     if (requestPair) {
       throw new BadRequestError('Friend request already exists');
@@ -94,5 +99,16 @@ export class FriendService {
       throw new BadRequestError('Could not unblock user');
     }
     return res;
+  }
+
+  /**
+   *check if a i am blocked by a user
+   * @param user_id
+   * @param blocked_user_id
+   * @returns
+   */
+  async getBlockedUser(user_id: string, blocked_user_id: string) {
+    const blockedUser = await this.friendModel.getBlockedUser(blocked_user_id, user_id);
+    return blockedUser;
   }
 }

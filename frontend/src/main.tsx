@@ -1,7 +1,5 @@
 import ReactDOM from 'react-dom/client';
 
-import { LoadingProvider } from '@/contexts/gameContext/LoadingContextProvider';
-
 import App from './app';
 import { ChatProvider } from './contexts/chatContext/ChatContext';
 import { ModalProvider } from './contexts/modalContext/ModalContext';
@@ -17,11 +15,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <WebSocketProvider>
       <ChatProvider>
         <ModalProvider>
-          <LoadingProvider>
-            <NavigationAccessProvider>
-              <App />
-            </NavigationAccessProvider>
-          </LoadingProvider>
+          <NavigationAccessProvider>
+            <App />
+          </NavigationAccessProvider>
         </ModalProvider>
       </ChatProvider>
     </WebSocketProvider>

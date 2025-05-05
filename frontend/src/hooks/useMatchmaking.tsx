@@ -166,7 +166,9 @@ const useMatchmaking = () => {
 
   // sending a message when the matchmaking connection is established
   useEffect(() => {
-    if (connections.matchmaking !== 'connected') return;
+    if (connections.matchmaking !== 'connected' && sessionManager.get('matchmakingRegistered')) {
+      return;
+    }
     console.log('Matchmaking connected');
     console.log('matchmakerState:', sessionManager.get('matchmakerState'));
     switch (sessionManager.get('matchmakerState')) {

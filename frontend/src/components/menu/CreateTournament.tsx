@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -11,16 +11,16 @@ export const CreateTournament: React.FC = () => {
   const [playerCount, setPlayerCount] = useState(8);
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState('');
-  const [enablePowerUps, setEnablePowerUps] = useState(false);
-  const [selectedPowerUps, setSelectedPowerUps] = useState<string[]>([]);
+
   const [tournamentName, setTournamentName] = useState('');
-  const { setTournamentOptions, setDifficulty, resetGameOptions } = useGameOptionsContext();
+  const { setTournamentOptions, setDifficulty } = useGameOptionsContext();
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = {
       playerCount,
+      numberOfRounds: Math.log2(playerCount),
       tournamentName,
       isPrivate,
       password: isPrivate ? password : null,

@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
+import { AnimatePresence } from 'framer-motion';
+
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
 import { PlayerScoreBoard } from '@components';
@@ -8,9 +12,7 @@ import { useGameControls, useGameResult } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
 
-// import GameplayCanvas from '../components/game/GameplayCanvas';lo
-import { GameResults } from '../components/game/GameResults';
-import { MatchMakingCarousel } from '../components/game/MatchMakingCarousel';
+import { MatchMakingCarousel } from '../components/game';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -31,6 +33,7 @@ export const GamePage: React.FC = () => {
   const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useUser();
+  const navigate = useNavigate();
 
   const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
 
@@ -149,6 +152,13 @@ export const GamePage: React.FC = () => {
     }
   }, [loading, gameStatus, gameId, localPlayerId, sendMessage, connections.game]);
 
+  useEffect(() => {
+    if (!gameResult) return;
+    navigate('/game-results', {
+      state: { gameResult, playersData },
+    });
+  }, [gameResult, playersData]);
+
   return (
     <div
       id="game-page"
@@ -173,12 +183,14 @@ export const GamePage: React.FC = () => {
       </div>
 
       {/* Render GameResults */}
-      {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null}
+      {/* {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null} */}
 
       {/* Render MatchMakingCarousel */}
-      {!isGameCanvasActive && !gameResult ? (
-        <MatchMakingCarousel playersData={playersData} />
-      ) : null}
+      <AnimatePresence mode="wait">
+        {!isGameCanvasActive && !gameResult ? (
+          <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 };

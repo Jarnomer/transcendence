@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { ProcessingBar } from './animations/ProcessingBar';
+import { ProcessingBar } from './svg/shapes/ProcessingBar';
 import { WarningSign } from './svg/shapes/WarningSign';
 
 const generateRandomText = (length: number) => {

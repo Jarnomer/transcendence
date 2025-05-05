@@ -1,7 +1,7 @@
 // Core game components
 export * from './GameHeader';
-export * from './MatchMakingCarousel';
-export * from './PlayerScoreBoard';
-export * from './PlayerScoreCard';
+export * from './MatchmakingCarousel/MatchMakingCarousel';
+export * from './scoreBoard/PlayerScoreBoard';
+export * from './scoreBoard/PlayerScoreCard';
 
 export * from './utils';

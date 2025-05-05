@@ -6,7 +6,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import '@fastify/jwt';
 
-import { GameSettings } from '@shared/types';
+import { GameAudioOptions, GameSettings, defaultGameAudioOptions } from '@shared/types';
 
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
@@ -228,5 +228,78 @@ export class UserController {
     request.log.trace(`Getting stats for user ${user_id}`);
     const stats = await this.userService.getUserStats(user_id);
     reply.code(200).send(stats);
+  }
+
+  /**
+   * Get audio settings for the authenticated user
+   * @param request get
+   * @param reply 200 OK audio_settings : GameAudioOptions object
+   */
+  async getAudioSettings(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { user_id } = request.user as { user_id: string };
+      request.log.trace(`Getting audio settings for user ${user_id}`);
+
+      const user = await this.userService.getUserByID(user_id);
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+
+      let audioSettings = user.audio_settings;
+      if (!audioSettings) {
+        audioSettings = defaultGameAudioOptions;
+      } else {
+        // Ensure all necessary fields exist
+        audioSettings = {
+          gameMusic: audioSettings.gameMusic || defaultGameAudioOptions.gameMusic,
+          backgroundMusic: audioSettings.backgroundMusic || defaultGameAudioOptions.backgroundMusic,
+          soundEffects: audioSettings.soundEffects || defaultGameAudioOptions.soundEffects,
+          uiSounds: audioSettings.uiSounds || defaultGameAudioOptions.uiSounds,
+        };
+      }
+
+      reply.code(200).send(audioSettings);
+    } catch (error) {
+      request.log.error(error);
+      reply.code(500).send({ error: 'Internal server error' });
+    }
+  }
+
+  /**
+   * Save audio settings for the authenticated user
+   * @param request post: audio_settings in request body
+   * @param reply 200 OK status : saved
+   */
+  async saveAudioSettings(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const settings = request.body as GameAudioOptions;
+      const { user_id } = request.user as { user_id: string };
+
+      request.log.trace(`Saving audio settings for user ${user_id}`);
+      request.log.trace(`Settings: ${JSON.stringify(settings)}`);
+
+      if (settings.gameMusic && typeof settings.gameMusic.volume === 'number') {
+        settings.gameMusic.volume = Math.max(0, Math.min(1, settings.gameMusic.volume));
+      }
+
+      if (settings.backgroundMusic && typeof settings.backgroundMusic.volume === 'number') {
+        settings.backgroundMusic.volume = Math.max(0, Math.min(1, settings.backgroundMusic.volume));
+      }
+
+      if (settings.soundEffects && typeof settings.soundEffects.volume === 'number') {
+        settings.soundEffects.volume = Math.max(0, Math.min(1, settings.soundEffects.volume));
+      }
+
+      if (settings.uiSounds && typeof settings.uiSounds.volume === 'number') {
+        settings.uiSounds.volume = Math.max(0, Math.min(1, settings.uiSounds.volume));
+      }
+
+      await this.userService.saveAudioSettings(user_id, settings);
+
+      reply.code(200).send({ status: 'saved' });
+    } catch (error) {
+      request.log.error(error);
+      reply.code(500).send({ error: 'Internal server error' });
+    }
   }
 }

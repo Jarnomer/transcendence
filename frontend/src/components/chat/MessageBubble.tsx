@@ -1,34 +1,36 @@
 import React from 'react';
 
-import { Message, User } from '@/lib/types';
-
-import { useUser } from '../../contexts/user/UserContext';
+import { ChatMessageType } from '../../../../shared/types/chatTypes';
 
 interface MessageBubbleProps {
-  message: Message;
+  message: ChatMessageType;
   isOwn: boolean;
-  sender?: User;
+  isLastOfGroup: boolean;
+  isGroupChat: boolean;
 }
 
-export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }) => {
-  const { user } = useUser();
-
+export const MessageBubble: React.FC<MessageBubbleProps> = ({
+  message,
+  isOwn,
+  isLastOfGroup,
+  isGroupChat,
+}) => {
   return (
     <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} gap-1`}>
-      {/* Display name on top (for group messages) */}
-      {!isOwn && !message.receiver_id && message.room_id && (
-        <p className="text-xs text-gray-500 text-center">{message.display_name}</p>
-      )}
-
       {/* Avatar and bubble */}
       <div className={`flex items-center gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-        {!isOwn && (
+        {!isOwn && isLastOfGroup && (
           <div className="w-[20px] h-[20px] rounded-full overflow-hidden">
             <img src={message.avatar_url} alt="" className="object-contain w-full h-full" />
           </div>
         )}
-        <div className={`p-2 relative  max-w-xs border ${isOwn ? 'bg-primary/25' : ''}`}>
-          <div>{message.message}</div>
+        <div
+          className={`relative ${!isOwn && !isLastOfGroup && 'pl-[22px]'}  ${isOwn ? 'bg-primary/25' : ''}`}
+        >
+          <p className="text-xs border-1 p-2 break-all whitespace-pre-wrap">{message.message}</p>
+          {!isOwn && isGroupChat && isLastOfGroup && (
+            <span className="text-[8px] text-gray-500">{message.display_name}</span>
+          )}
         </div>
       </div>
     </div>

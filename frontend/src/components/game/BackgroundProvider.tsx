@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GameMode, GameState, GameStatus, defaultGameParams } from '@shared/types';
 
 import BackgroundCanvas from './BackgroundCanvas';
+import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useGameMusic } from '../../hooks/useGameMusic';
 
@@ -15,11 +16,13 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
     connections,
     matchmakingState: { gameId },
   } = useWebSocketContext();
-  // const { gameId } = useGameOptionsContext();
 
   const [backgroundGameState, setBackgroundGameState] = useState<GameState | null>(null);
   const [currentMode, setCurrentMode] = useState<GameMode>('background');
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const { state: graphicsSettings } = useGraphicsContext();
+  const isBackgroundEnabled = graphicsSettings?.backgroundGame?.enabled !== false;
 
   useGameMusic(currentMode, gameStatus);
 
@@ -246,13 +249,15 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
 
   return (
     <>
-      <div className="absolute w-screen h-screen pointer-events-none">
-        <BackgroundCanvas
-          gameState={currentGameState}
-          gameMode={currentMode}
-          gameStatus={currentGameStatus}
-        />
-      </div>
+      {isBackgroundEnabled && (
+        <div className="absolute w-screen h-screen">
+          <BackgroundCanvas
+            gameState={currentGameState}
+            gameMode={currentMode}
+            gameStatus={currentGameStatus}
+          />
+        </div>
+      )}
     </>
   );
 };

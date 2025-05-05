@@ -1,11 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-import { getUserData } from '@/services/userService';
+import { getMyGames, getMyStats, getUserData } from '@/services/userService';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { FriendListType, UserDataResponseType } from '@shared/types/userTypes';
 
 import { api } from '../../services/api';
-import { getRequestsSent } from '../../services/friendService';
+import {
+  getBlockedUsers,
+  getMyfriends,
+  getReceivedFriendRequests,
+  getRequestsSent,
+} from '../../services/friendService';
 import SessionManager from '../../services/SessionManager';
 
 interface FriendRequest {
@@ -24,6 +29,7 @@ interface UserContextType {
   checkAuth: () => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  friends: FriendListType;
   // setToken: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
@@ -44,14 +50,8 @@ export const useUser = () => {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
-  const [myFriends, setMyFriends] = useState<UserDataResponseType[]>([]);
-  const [myFriendRequests, setMyFriendRequests] = useState<UserDataResponseType[]>([]);
-  const [mySentRequests, setMySentRequests] = useState<UserDataResponseType[]>([]);
-  const [myBlockedUsers, setMyBlockedUsers] = useState<UserDataResponseType[]>([]);
-  const [myGames, setMyGames] = useState<UserDataResponseType[]>([]);
-  const [myStats, setMyStats] = useState<UserDataResponseType[]>([]);
-
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
 
@@ -73,6 +73,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getUserData(userId)
       .then((data) => {
         setUser(data);
+        setFriends(data.friends);
         // console.log('Fetched user data:', data);
       })
       .catch((err) => {
@@ -89,6 +90,51 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch((err) => console.error('Failed to fetch sent friend requests:', err));
   }, [userId]);
 
+  // const fetchRequestsReceived = useCallback(() => {
+  //   if (!userId) return;
+  //   getReceivedFriendRequests()
+  //     .then((data) => {
+  //       setMyFriendRequests(data);
+  //     })
+  //     .catch((err) => console.error('Failed to fetch received friend requests:', err));
+  // }, [userId]);
+
+  // const fetchBlockedUsers = useCallback(() => {
+  //   if (!userId) return;
+  //   getBlockedUsers()
+  //     .then((data) => {
+  //       setMyBlockedUsers(data);
+  //     })
+  //     .catch((err) => console.error('Failed to fetch blocked users:', err));
+  // }, [userId]);
+
+  // const fetchFriends = useCallback(() => {
+  //   if (!userId) return;
+  //   getMyfriends()
+  //     .then((data) => {
+  //       setMyFriends(data);
+  //     })
+  //     .catch((err) => console.error('Failed to fetch friends:', err));
+  // }, [userId]);
+
+  // const fetchMyGames = useCallback(() => {
+  //   if (!userId) return;
+  //   getMyGames()
+  //     .then((data) => {
+  //       setMyGames(data);
+  //     })
+  //     .catch((err) => console.error('Failed to fetch my games:', err));
+  // }, [userId]);
+
+  // const fetchMyStats = useCallback(() => {
+  //   if (!userId) return;
+  //   getMyStats()
+  //     .then((data) => {
+  //       setMyStats(data);
+  //     })
+  //     .catch((err) => console.error('Failed to fetch my stats:', err));
+  // }, [userId]);
+
   const checkAuth = async () => {
     console.log('checking auth');
     setLoading(true);
@@ -104,6 +150,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('username', res.data.username);
       fetchUser();
       fetchRequestsSent();
+      // fetchRequestsReceived();
+      // fetchBlockedUsers();
+      // fetchFriends();
+      // fetchMyGames();
+      // fetchMyStats();
     } catch (error) {
       setUser(null);
       cleanLocalStorage();
@@ -130,11 +181,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  useEffect(() => {
-    console.log('UserContext mounted');
-    fetchUser();
-    fetchRequestsSent();
-  }, [fetchUser, fetchRequestsSent]);
+  // useEffect(() => {
+  //   console.log('UserContext mounted');
+  //   fetchUser();
+  //   fetchRequestsSent();
+  //   fetchRequestsReceived();
+  //   fetchBlockedUsers();
+  //   fetchFriends();
+  //   fetchMyGames();
+  //   fetchMyStats();
+  // }, [
+  //   fetchUser,
+  //   fetchRequestsSent,
+  //   fetchRequestsReceived,
+  //   fetchBlockedUsers,
+  //   fetchFriends,
+  //   fetchMyGames,
+  //   fetchMyStats,
+  // ]);
 
   return (
     <UserContext.Provider
@@ -148,6 +212,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         refetchRequests: fetchRequestsSent,
         loading,
+        friends,
       }}
     >
       {children}
