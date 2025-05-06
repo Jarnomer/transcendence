@@ -8,53 +8,53 @@ import { GraphicsSettings } from '@components/settings/GraphicsSettings';
 import { Soundsettings } from '@components/settings/SoundSettings';
 import { UserSettings } from '@components/settings/UserSettings';
 
-const slideFromLeftVariants = {
-  initial: {
-    x: '-100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '-100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
+// const slideFromLeftVariants = {
+//   initial: {
+//     x: '-100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '-100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
-const slideFromRightVariants = {
-  initial: {
-    x: '100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
+// const slideFromRightVariants = {
+//   initial: {
+//     x: '100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
 export const SettingsNav: React.FC<{
   activeTab: string;

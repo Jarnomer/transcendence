@@ -9,22 +9,22 @@ import { useSound } from '../../hooks/useSound';
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { CheckBox } from '../UI/forms/CheckBox';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 0 100% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 0 100% 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 interface RetroEffectSettingsProps {
   isEnabled: boolean;

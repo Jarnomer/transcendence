@@ -9,7 +9,7 @@ import { useUser } from '../../contexts/user/UserContext';
 import { UserActions } from '../UI/buttons/UserActions';
 import { ProfilePicture } from './ProfilePicture';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(100% 0 0  0 )',
     opacity: 0,

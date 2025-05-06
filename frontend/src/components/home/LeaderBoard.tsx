@@ -11,7 +11,7 @@ import { UserListCard } from '../UI/cards/UserListCard';
 import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
 import SearchBar from '../UI/SearchBar';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(0 0 100% 0)',
     opacity: 0,

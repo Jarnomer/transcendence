@@ -10,7 +10,7 @@ import { useUser } from '../../contexts/user/UserContext';
 import { Notifications } from '../notifications/Notifications';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,

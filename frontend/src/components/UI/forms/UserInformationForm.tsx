@@ -21,7 +21,7 @@ interface FormHeaderProps {
   user: UserDataResponseType;
 }
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(0 100% 0 100% )',
     opacity: 0,

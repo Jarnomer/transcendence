@@ -9,7 +9,7 @@ import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendS
 import { getNotifications, getUserByID, markNotificationAsSeen } from '../../services/userService';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,
