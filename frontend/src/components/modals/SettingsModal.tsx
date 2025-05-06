@@ -23,7 +23,7 @@ export const SettingsModal: React.FC = () => {
     <ModalWrapper modalName="settings">
       {isModalOpen('settings') && (
         <>
-          <div className="relative w-full h-full overflow-hidden flex flex-col grow-1 items-center">
+          <div className="relative w-full h-full md:h-2xl md:max-h-[70%] overflow-hidden flex flex-col grow-1 items-center">
             <div className="w-full h-8">
               <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
             </div>
