@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { UserResponseType } from '../../../../shared/types';
-import { ChatMessageType } from '../../../../shared/types/chatTypes';
-import { MessageBubble } from './MessageBubble';
+import { MessageBubble } from '@components/chat';
+
+import { ChatMessageType, UserResponseType } from '@shared/types';
 
 interface MessageListProps {
   user: UserResponseType | null;

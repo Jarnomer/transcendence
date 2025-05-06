@@ -1,9 +1,11 @@
 // FloatingChatWrapper.tsx
 import { useLocation } from 'react-router-dom';
 
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import { FloatingChat } from '@components/chat';
+
+import { useMediaQuery } from '@hooks';
+
 import { ChatModal } from '../../modals';
-import { FloatingChat } from './FloatingChat';
 
 export const FloatingChatWrapper: React.FC = () => {
   const location = useLocation();

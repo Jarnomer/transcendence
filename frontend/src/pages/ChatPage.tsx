@@ -4,10 +4,7 @@ import { useChatContext, useUser } from '@contexts';
 
 import { BackgroundGlow } from '@components';
 
-import { ChatWindow } from '@components/chat/chatPage/ChatWindow';
-import { MobileChatPage } from '@components/chat/chatPage/MobileChatPage';
-import { ChatSidebar } from '@components/chat/ChatSideBar';
-import { CreateNewGroupChat } from '@components/chat/CreateNewGroupChat';
+import { ChatSidebar, ChatWindow, CreateNewGroupChat, MobileChatPage } from '@components/chat';
 
 import { useMediaQuery } from '@hooks';
 

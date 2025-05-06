@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
-import { FriendType } from '../../../../shared/types';
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
+import { useChatContext } from '@contexts';
+
+import { FriendType } from '@shared/types';
+
 import { ClippedButton } from '../UI/buttons/ClippedButton';
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';

@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { useUser } from '@/contexts/user/UserContext';
-import { blockUser } from '@/services/friendService';
+import { useUser } from '@/contexts';
+import { blockUser } from '@/services';
 
-import { UserDataResponseType } from '../../../../../shared/types';
+import { UserDataResponseType } from '@shared/types';
+
 import { AddFriend } from './AddFriend';
 import { ChallengeButton } from './ChallengeUser';
 import { ChatButton } from './ChatButton';

@@ -7,7 +7,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
 
-import { FloatingChatWrapper } from './components/chat/floatingChat/FloatingChatWrapper.tsx';
+import { FloatingChatWrapper } from '@components/chat';
+
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider.tsx';
 import { Header } from './components/header/Header.tsx';

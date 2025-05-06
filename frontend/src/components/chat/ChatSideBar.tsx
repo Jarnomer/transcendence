@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 
-import { FriendType } from '../../../../shared/types';
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { useSound } from '../../hooks/useSound';
+import { useChatContext } from '@contexts';
+
+import { useSound } from '@hooks';
+
+import { FriendType } from '@shared/types';
+
 import { NavIconButton } from '../UI/buttons/NavIconButton';
 import SearchBar from '../UI/SearchBar';
 

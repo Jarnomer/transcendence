@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useSound } from '../../../hooks/useSound';
+import { useChatContext } from '@contexts';
+
+import { ChatSidebar, CreateNewGroupChat, FloatingChatWindow } from '@components/chat';
+
+import { useSound } from '@hooks';
+
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
-import { ChatSidebar } from '../ChatSideBar';
-import { CreateNewGroupChat } from '../CreateNewGroupChat';
-import { FloatingChatWindow } from './FloatingChatWindow';
 
 export const FloatingChat = () => {
   const [minimized, setMinimized] = useState(true);

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ChatMessageType } from '../../../../shared/types/chatTypes';
+import { ChatMessageType } from '@shared/types';
 
 interface MessageBubbleProps {
   message: ChatMessageType;

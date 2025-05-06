@@ -2,13 +2,13 @@ import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useUser } from '../../../contexts/user/UserContext';
+import { useChatContext, useUser } from '@contexts';
+
+import { ChatSidebar, ChatWindow, CreateNewGroupChat } from '@components/chat';
+
 import { NavIconButton } from '../../UI/buttons/NavIconButton';
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
-import { ChatSidebar } from '../ChatSideBar';
-import { CreateNewGroupChat } from '../CreateNewGroupChat';
-import { ChatWindow } from './ChatWindow';
+
 export const MobileChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
   const [chatId, setchatId] = useState<string | null>(null);

@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { useUser } from '@/contexts/user/UserContext';
+import { useChatContext, useModal, useUser } from '@contexts';
 
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useModal } from '../../../contexts/modalContext/ModalContext';
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import { useMediaQuery } from '@hooks';
+
 import { NavIconButton } from './NavIconButton';
 
 interface ChatButtonProps {

@@ -2,14 +2,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { FriendType } from '../../../../../shared/types';
-import { ChatRoomType } from '../../../../../shared/types/chatTypes';
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useUser } from '../../../contexts/user/UserContext';
-import { useSound } from '../../../hooks/useSound';
+import { useChatContext, useUser } from '@contexts';
+
+import { MessageInput, MessageList } from '@components/chat';
+
+import { useSound } from '@hooks';
+
+import { ChatRoomType, FriendType } from '@shared/types';
+
 import { NavIconButton } from '../../UI/buttons/NavIconButton';
-import { MessageInput } from '../MessageInput';
-import { MessageList } from '../MessageList';
 
 interface ChatWindowProps {
   friends: FriendType[];

@@ -2,20 +2,13 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 
 import { toast } from 'react-hot-toast';
 
-import { useWebSocketContext } from '@/contexts/WebSocketContext';
-import {
-  addMember,
-  createChatRoom,
-  getChat,
-  getDm,
-  getMyRooms,
-  getPublicChat,
-} from '@/services/chatService';
+import { addMember, createChatRoom, getChat, getDm, getMyRooms, getPublicChat } from '@/services';
 
-import { FriendListType } from '../../../../shared/types';
-import { ChatMessageType, ChatRoomType } from '../../../../shared/types/chatTypes';
-import { MessageNotification } from '../../components/chat/MessageNotification';
-import { useUser } from '../user/UserContext';
+import { useUser, useWebSocketContext } from '@contexts';
+
+import { MessageNotification } from '@components/chat';
+
+import { ChatMessageType, ChatRoomType, FriendListType } from '@shared/types';
 
 const ChatContext = createContext<any>(null);
 
