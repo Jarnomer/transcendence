@@ -24,7 +24,6 @@ const RandomLetters: React.FC = () => {
   useEffect(() => {
     // Set the initial random letters
     setLetters(generateRandomLetters());
-
     const interval = setInterval(() => {
       // Update each letter randomly one by one every 200ms
       setLetters((prevLetters) => prevLetters.map(() => getRandomLetter()));
