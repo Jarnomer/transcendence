@@ -35,7 +35,6 @@ export const FloatingChat = () => {
   };
 
   const handleOpenChat = async (friendId: string) => {
-    console.log('opening chat', friendId);
     setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [friendId]: true,
@@ -47,7 +46,6 @@ export const FloatingChat = () => {
   };
 
   const handleOpenRoom = async (roomId: string) => {
-    console.log('opening chat', roomId);
     setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [roomId]: true,
@@ -65,7 +63,6 @@ export const FloatingChat = () => {
     }));
   };
 
-  console.log('rooms: ', rooms, 'myrooms: ', myRooms);
   if (!user) return null;
 
   return (

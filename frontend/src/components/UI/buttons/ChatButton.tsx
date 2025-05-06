@@ -14,8 +14,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
   const { user } = useUser();
   const { setOpenChatWindows, messages, fetchDmHistory, friends } = useChatContext();
   const isDesktop = useMediaQuery('(min-width: 600px)');
-  const { openModal, closeModal } = useModal();
-  const { user: loggedInUser } = useUser();
+  const { openModal } = useModal();
 
   const handleChatClick = async (friendId: string) => {
     console.log('opening chat', friendId);
@@ -31,10 +30,8 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
 
     if (!isDesktop) {
       openModal('chatModal', {
-        loggedInUser,
         friends,
-        selectedFriendId: receiverUserId,
-        onClose: closeModal,
+        chatId: receiverUserId,
       });
     }
   };

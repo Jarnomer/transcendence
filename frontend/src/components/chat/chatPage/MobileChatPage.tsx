@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useChatContext, useUser } from '@contexts';
+import { useChatContext, useModal, useUser } from '@contexts';
 
 import { ChatSidebar, ChatWindow, CreateNewGroupChat } from '@components/chat';
 
@@ -14,18 +14,12 @@ export const MobileChatPage: React.FC = () => {
   const [chatId, setchatId] = useState<string | null>(null);
   const { user } = useUser();
   const navigate = useNavigate();
-
-  const { friends, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
+  const { openModal } = useModal();
+  const { friends, messages, fetchDmHistory, fetchChatHistory, setOpenChatWindows } =
+    useChatContext();
 
   const handleClickNewChat = () => {
     setCreateNewGroupChat(!createNewGroupChat);
-  };
-
-  const handleOpenChat = async (friendId: string) => {
-    setchatId(friendId);
-    if (!messages[friendId]) {
-      await fetchDmHistory(friendId);
-    }
   };
 
   const handleGoBack = () => {
@@ -37,11 +31,29 @@ export const MobileChatPage: React.FC = () => {
   };
 
   const handleOpenRoom = async (roomId: string) => {
-    console.log('opening chat', roomId);
-    setchatId(roomId);
     if (!messages[roomId]) {
       await fetchChatHistory(roomId); // Optional: make sure messages are loaded
     }
+    openModal('chatModal', {
+      friends,
+      chatId: roomId,
+    });
+  };
+
+  const handleOpenChat = async (friendId: string) => {
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
+      ...prev,
+      [friendId]: true,
+    }));
+
+    if (!messages[friendId]) {
+      await fetchDmHistory(friendId);
+    }
+
+    openModal('chatModal', {
+      friends,
+      chatId: friendId,
+    });
   };
 
   if (!user) return null;

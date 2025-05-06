@@ -28,8 +28,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     setSearchQuery(event.target.value.toLowerCase());
   };
 
-  console.log('FRIENDS: ', friends);
-
   const filteredUsers = friends.filter((friend: FriendType) =>
     friend.display_name?.toLowerCase().startsWith(searchQuery)
   );

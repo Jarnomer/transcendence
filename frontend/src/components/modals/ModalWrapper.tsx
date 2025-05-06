@@ -27,7 +27,6 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
   const { closeModal, isModalOpen } = useModal();
 
   const handleOverlayClick = () => {
-    // console.log('Clicked outside the modal');
     if (modalName !== 'confirmModal' && modalName !== 'editProfile') {
       closeModal(modalName);
     }
@@ -35,10 +34,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
 
   const handleModalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    // console.log('modal clicked');
   };
-
-  // console.log('modal');
 
   return (
     <>
