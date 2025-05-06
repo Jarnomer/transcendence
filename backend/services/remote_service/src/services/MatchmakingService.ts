@@ -169,6 +169,13 @@ class OneVOneMatchmaking extends MatchmakingMode {
     const interval = setInterval(async () => {
       console.log(`Searching for opponent for: ${player.user_id}`);
 
+      if (this.queue.find((p) => p.user_id === player.user_id) === undefined) {
+        console.log(`Player ${player.user_id} has left the queue.`);
+        clearInterval(interval);
+        clearTimeout(timeout);
+        return;
+      }
+
       const opponent = this.findOpponent(player, eloRange);
 
       if (opponent) {

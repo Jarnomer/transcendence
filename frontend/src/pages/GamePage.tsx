@@ -11,7 +11,7 @@ import { useGameControls, useGameResult } from '@hooks';
 import { createReadyInputMessage } from '@shared/messages';
 
 import { MatchMakingCarousel } from '../components/game';
-import GameplayCanvas from '../components/game/GameplayCanvas';
+// import GameplayCanvas from '../components/game/GameplayCanvas';
 import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
 import { useUser } from '../contexts/user/UserContext';
 import { useWebSocketContext } from '../contexts/WebSocketContext';
@@ -80,6 +80,12 @@ export const GamePage: React.FC = () => {
     if (mode === '1v1' && difficulty === 'online') {
       startMatchMaking();
     }
+    return () => {
+      if (mode === '1v1' && difficulty === 'online') {
+        console.log('GamePage: cleaning up matchmaking for 1v1 online');
+        cleanup();
+      }
+    };
   }, [lobby, mode, difficulty]);
 
   /**
@@ -111,10 +117,7 @@ export const GamePage: React.FC = () => {
         },
       });
     }
-    return () => {
-      cleanup();
-    };
-  }, [connections.matchmaking, gameId, user, mode, difficulty, lobby]);
+  }, [connections.matchmaking]);
 
   /**
    * if gameId is set, connect to game socket
@@ -192,7 +195,8 @@ export const GamePage: React.FC = () => {
         }`}
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          <span>{gameStatus}</span>
+          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
         )}
       </div>
 
