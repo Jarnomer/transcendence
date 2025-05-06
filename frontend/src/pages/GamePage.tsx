@@ -177,12 +177,16 @@ export const GamePage: React.FC = () => {
           isGameCanvasVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
-          <h1 className="w-full h-full">
-            gameplay canvas: ${gameStatus} : ${connections.game}
-          </h1>
-        )}
+        {isGameCanvasActive &&
+          gameState &&
+          gameStatus !== 'finished' &&
+          !gameResult &&
+          !user?.display_name?.startsWith('testuser') && (
+            <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+            // <h1 className="w-full h-full">
+            //   gameplay canvas: ${gameStatus} : ${connections.game}
+            // </h1>
+          )}
       </div>
 
       {/* Render GameResults */}
