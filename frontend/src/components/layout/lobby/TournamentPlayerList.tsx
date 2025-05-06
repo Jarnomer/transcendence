@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { slideFromRightVariants } from './animationVariants';
-import TournamentBracket from './TournamentBracket';
+import { TournamentBracket, slideFromRightVariants } from '@components/layout';
 
 interface PlayerData {
   user_id: string;

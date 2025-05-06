@@ -8,10 +8,12 @@ import { useMatchmaking } from '@/hooks';
 
 import { useGameOptionsContext, useModal, useUser, useWebSocketContext } from '@contexts';
 
-import { slideFromRightVariants } from '@components/tournamentLobby/animationVariants';
-import { TournamentLobbyNav } from '@components/tournamentLobby/TournamentLobbyNav';
-import { TournamentPlayerList } from '@components/tournamentLobby/TournamentPlayerList';
-import { TournamentSettings } from '@components/tournamentLobby/TournamentSettings';
+import {
+  TournamentLobbyNav,
+  TournamentPlayerList,
+  TournamentSettings,
+  slideFromRightVariants,
+} from '@components/layout';
 
 interface TournamentMatch {
   gameId: string;
