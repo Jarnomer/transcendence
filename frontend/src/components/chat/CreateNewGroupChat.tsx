@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 
 import { useChatContext } from '@contexts';
 
-import { FriendType } from '@shared/types';
+import { ClippedButton, NavIconButton, SearchBar } from '@components/UI';
 
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
-import SearchBar from '../UI/SearchBar';
+import { FriendType } from '@shared/types';
 
 type CreateRoomPopupProps = {
   handleClickNewChat: () => void;

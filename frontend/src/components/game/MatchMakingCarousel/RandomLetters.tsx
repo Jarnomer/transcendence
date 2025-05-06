@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-const RandomLetters: React.FC = () => {
+export const RandomLetters: React.FC = () => {
   const [letters, setLetters] = useState<string[]>([]);
   const length = 5; // Length of the string of random letters
 
@@ -59,5 +59,3 @@ const RandomLetters: React.FC = () => {
     </div>
   );
 };
-
-export default RandomLetters;

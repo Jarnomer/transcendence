@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { useChatContext } from '@contexts';
 
 import { ChatSidebar, CreateNewGroupChat, FloatingChatWindow } from '@components/chat';
+import { BackgroundGlow } from '@components/visual';
 
 import { useSound } from '@hooks';
-
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
 
 export const FloatingChat = () => {
   const [minimized, setMinimized] = useState(true);

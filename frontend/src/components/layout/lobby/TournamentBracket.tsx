@@ -190,5 +190,3 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
     </div>
   );
 };
-
-export default TournamentBracket;

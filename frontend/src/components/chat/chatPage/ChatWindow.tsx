@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useChatContext, useUser } from '@contexts';
 
 import { MessageInput, MessageList } from '@components/chat';
+import { NavIconButton } from '@components/UI';
 
 import { useSound } from '@hooks';
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { CircleSvg } from '../../visual/svg/shapes/CircleSvg';
+import { CircleSvg } from '@components/visual';
 
 const generateRandomText = (length: number) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}<>?';

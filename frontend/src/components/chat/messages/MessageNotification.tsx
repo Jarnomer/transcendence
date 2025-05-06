@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { MessageNotificationSvg } from '../../visual/svg/containers/MessageNotificationSvg';
+import { MessageNotificationSvg } from '@components/visual';
 
 export const MessageNotification: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (

@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { useGameOptionsContext } from '../../../contexts/gameContext/GameOptionsContext';
-import { useLoading } from '../../../contexts/gameContext/LoadingContextProvider';
-import { useUser } from '../../../contexts/user/UserContext';
-import { useGameVisibility } from '../../../hooks/useGameVisibility';
-import { MatchMakingBackgroundGlitch } from './MatchMakingBackgroundGlitch';
-import { PlayerCard } from './PlayerCard';
+import { useGameOptionsContext, useLoading, useUser } from '@contexts';
+
+import { MatchMakingBackgroundGlitch, PlayerCard } from '@components/game';
+
+import { useGameVisibility } from '@hooks';
 
 interface PlayerData {
   user_id: string;

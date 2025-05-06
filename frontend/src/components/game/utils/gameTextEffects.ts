@@ -14,9 +14,9 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { GameStatus } from '@shared/types';
+import { getGameSoundManager } from '@game/utils';
 
-import { getGameSoundManager } from './gameSoundEffects';
+import { GameStatus } from '@shared/types';
 
 export class GameTextManager {
   private scene: Scene;

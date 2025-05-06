@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useSound } from '@/hooks';
+import { useSound } from '@hooks';
 
 type ButtonOptions = {
   id?: string;

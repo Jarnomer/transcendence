@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { UserMinusIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 
-import { useUser } from '@/contexts';
+import { useUser } from '@contexts';
 
 import { sendFriendRequest } from '@services';
 

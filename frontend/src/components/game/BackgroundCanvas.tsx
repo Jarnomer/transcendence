@@ -11,22 +11,23 @@ import {
   Scene,
 } from 'babylonjs';
 
+import { useGraphicsContext } from '@contexts';
+
 import {
   GameAnimationManager,
-  RetroEffectsManager,
   GameSoundManager,
+  RetroEffectsManager,
   addCameraDebugControls,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
   applyBackgroundScoreEffects,
   applyBallEffects,
-  applyGameOverEffects,
   applyCinematicCameraAngle,
   applyCollisionEffects,
+  applyGameOverEffects,
   applyGameplayCameraAngle,
   applyLowQualitySettings,
-  getGameSoundManager,
   createBall,
   createEdge,
   createFloor,
@@ -38,6 +39,7 @@ import {
   gameToSceneX,
   gameToSceneY,
   gameplayCameraAngles,
+  getGameSoundManager,
   getNextCinematicCameraAngle,
   getThemeColorsFromDOM,
   setupPostProcessing,
@@ -68,9 +70,7 @@ interface BackgroundCanvasProps {
   theme?: 'light' | 'dark';
 }
 
-import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
-
-const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
+export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   gameState,
   gameMode,
   gameStatus,
@@ -599,5 +599,3 @@ const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
 
   return <canvas ref={canvasRef} className="w-full h-full" />;
 };
-
-export default BackgroundCanvas;

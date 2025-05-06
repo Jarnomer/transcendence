@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useChatContext, useModal, useUser } from '@contexts';
 
 import { ChatSidebar, ChatWindow, CreateNewGroupChat } from '@components/chat';
-
-import { NavIconButton } from '../../UI/buttons/NavIconButton';
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
+import { NavIconButton } from '@components/UI';
+import { BackgroundGlow } from '@components/visual';
 
 export const MobileChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);

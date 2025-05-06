@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useChatContext } from '@/contexts';
 
-import { NavIconButton } from '../../UI/buttons/NavIconButton';
+import { NavIconButton } from '@components/UI';
 
 interface MessageInputProps {
   chatId: string | null;

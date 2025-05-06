@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 
 import { useChatContext } from '@contexts';
 
+import { NavIconButton, SearchBar } from '@components/UI';
+
 import { useSound } from '@hooks';
 
 import { FriendType } from '@shared/types';
-
-import { NavIconButton } from '../UI/buttons/NavIconButton';
-import SearchBar from '../UI/SearchBar';
 
 interface ChatSidebarProps {
   handleClickNewChat: () => void;

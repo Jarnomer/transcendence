@@ -1,4 +1,3 @@
-// useTournamentStore.ts
 import { useSyncExternalStore } from 'react';
 
 import { MatchmakingManager } from '@services';

@@ -4,14 +4,13 @@ import { motion } from 'framer-motion';
 
 import { useModal, useUser } from '@contexts';
 
+import { ProfilePicture } from '@components/profile';
 import { ClippedButton, NavIconButton } from '@components/UI';
 import { InformationRequestSvg } from '@components/visual';
 
 import { api } from '@services';
 
 import { UserDataResponseType } from '@shared/types';
-
-import { ProfilePicture } from '../../profile/ProfilePicture';
 
 interface EditProfileProps {
   user: UserDataResponseType;
