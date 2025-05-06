@@ -13,18 +13,17 @@ export const ChangingAvatar: React.FC = () => {
   const [opponentAvatar, setOpponentAvatar] = useState<string>(avatarList[0]);
   useEffect(() => {
     const interval: NodeJS.Timeout = setInterval(() => {
-      let newAvatar;
-      do {
-        newAvatar = avatarList[Math.floor(Math.random() * avatarList.length)];
-      } while (newAvatar === opponentAvatar);
-      if (newAvatar !== opponentAvatar) {
-        setOpponentAvatar(newAvatar);
+      setOpponentAvatar((prev) => {
+        let newAvatar;
+        do {
+          newAvatar = avatarList[Math.floor(Math.random() * avatarList.length)];
+        } while (newAvatar === prev);
         console.log('changing avatar');
-      }
+        return newAvatar;
+      });
     }, 300);
-
     return () => clearInterval(interval);
-  }, [opponentAvatar]);
+  }, []);
 
   return (
     <div className="w-[200px] h-auto max-w-full aspect-square  bg-background overflow-hidden border-2 border-primary relative">

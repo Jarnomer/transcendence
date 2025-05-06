@@ -59,7 +59,7 @@ export const GameMenu: React.FC = () => {
     },
     {
       content: '1v1',
-      imageUrl: './src/assets/images/1v1.png',
+      imageUrl: './src/assets/images/1v1_bw.png',
       hoverInfo: 'Play with another player',
       onClick: () => handleModeClick('1v1'),
     },
@@ -166,7 +166,7 @@ export const GameMenu: React.FC = () => {
       <motion.div
         key={mode && !difficulty ? `${mode}-submenu` : 'main-menu'}
         id="game-menu-container"
-        className="flex grow flex-wrap w-full h-full justify-center gap-4 items-center p-0"
+        className="flex relative grow flex-wrap w-full h-full justify-center gap-4 items-center p-0"
         variants={pageVariants}
         initial="initial"
         animate="animate"
