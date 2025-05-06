@@ -114,7 +114,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
     <>
       {!transitionToScoreboard && <MatchMakingBackgroundGlitch></MatchMakingBackgroundGlitch>}
       <motion.div
-        className={`w-full h-full flex justify-start ${!opponentFound && 'flex-col'}`}
+        className={`w-full h-full flex ${!transitionToScoreboard ? 'justify-center' : 'justify-start'} ${!opponentFound && 'flex-col'}`}
         key="matchmaking-screen"
         initial={{ opacity: 1, scale: 1 }}
         animate={{ opacity: 1, scale: 1 }}
