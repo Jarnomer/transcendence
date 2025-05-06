@@ -66,11 +66,9 @@ export const ModalBackgroundGlitchTextBlock: React.FC<{}> = () => {
 };
 
 export const ModalBackgroundGlitch: React.FC<{ duration: number }> = ({ duration }) => {
-  const [showGlitch, setShowGlitch] = useState(false);
+  const [showGlitch, setShowGlitch] = useState(true);
 
   useEffect(() => {
-    setShowGlitch(true);
-
     const glitchTimer = setTimeout(() => {
       setShowGlitch(false);
     }, duration);

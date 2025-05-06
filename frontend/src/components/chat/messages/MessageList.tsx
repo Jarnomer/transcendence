@@ -13,8 +13,6 @@ interface MessageListProps {
 export const MessageList: React.FC<MessageListProps> = ({ messages, user, isGroupChat }) => {
   if (!messages || !user) return;
 
-  console.log(messages);
-
   return (
     <div className="flex flex-col  w-full  gap-2  grow p-2 ">
       {messages.map((msg, i) => {

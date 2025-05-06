@@ -14,7 +14,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({ chatId, isGroupChat 
   const { sendChatMessage } = useChatContext();
 
   const handleSendMessage = () => {
-    console.log('new message: ', newMessage);
     if (!isGroupChat) {
       sendChatMessage(chatId, null, newMessage);
     } else {

@@ -12,6 +12,14 @@ import { ChatMessageType, ChatRoomType, FriendListType } from '@shared/types';
 
 const ChatContext = createContext<any>(null);
 
+interface ChatMessagePayload {
+  room_id?: string;
+  sender_id: string;
+  avatar_url?: string;
+  display_name: string;
+  message: string;
+}
+
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage } = useWebSocketContext();
   const { user } = useUser();

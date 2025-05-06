@@ -48,8 +48,6 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId,
     }
   }, [chatMessages]);
 
-  console.log('isChatroom:', isGroupChat, 'chatId: ', chatId);
-
   return (
     <div
       className={`p-0 w-[300px]  ${

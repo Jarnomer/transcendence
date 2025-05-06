@@ -27,7 +27,6 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({ handleClick
   );
 
   const handleRoomCreation = () => {
-    console.log(roomName.trim());
     if (roomName.trim() === '') return;
 
     createRoom(roomName, isPrivate, selectedMembers);
