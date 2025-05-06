@@ -107,7 +107,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
     }
   }, [mode, difficulty, opponentAvatar]);
 
-  if (!user) return;
+  if (!user || !playersData || !mode || !difficulty) return;
 
   console.log(playersData);
   return (

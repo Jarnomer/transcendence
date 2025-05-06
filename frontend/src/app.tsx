@@ -33,6 +33,7 @@ const App: React.FC = () => {
               {/* <div className="fixed"> */}
               <BackgroundProvider />
               {/* </div> */}
+
               <div
                 id="app-main-container"
                 className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full text-primary md:p-2`}
@@ -55,6 +56,7 @@ const App: React.FC = () => {
                 </div>
                 <Footer />
               </div>
+
               <Footer />
               <FloatingChatWrapper />
               <MobileNavBar></MobileNavBar>

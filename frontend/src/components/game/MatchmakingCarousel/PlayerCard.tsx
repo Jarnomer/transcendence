@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 
 import { BackgroundGlow } from '../../visual/BackgroundGlow';
 import { ChangingAvatar } from './ChangingAvatar';
-import RandomLetters from './RandomLetters';
 
 export const PlayerCard: React.FC<{
   name: string | null;
@@ -50,9 +49,9 @@ export const PlayerCard: React.FC<{
         >
           <img className="w-full h-full object-cover aspect-square" src={imageSrc} alt="You" />
         </motion.div>
-      ) : (
+      ) : !opponentFound ? (
         <ChangingAvatar></ChangingAvatar>
-      )}
+      ) : null}
       <motion.div
         layout
         transition={{ duration: 0.5, ease: 'easeInOut' }}
@@ -69,7 +68,7 @@ export const PlayerCard: React.FC<{
           exit={{ opacity: 0 }}
           className={`${!scoreCard ? 'mt-2 font-semibold' : 'font-bold text-sm md:text-xl'}`}
         >
-          {name ? name : <RandomLetters></RandomLetters>}
+          {name ? name : '???'}
         </motion.p>
         {scoreCard && <h2 className={` font-bold text-xl md:text-3xl lg:text-6xl `}>{score}</h2>}
       </motion.div>
