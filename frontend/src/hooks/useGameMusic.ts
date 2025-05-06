@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 
+import { useAudioSettings } from '@contexts';
+
 import { getGameMusicManager } from '@game/utils';
 
 import { GameMode, GameStatus, MusicTrack } from '@shared/types';
-
-import { useAudioSettings } from '../contexts/audioContext/AudioSettingsContext';
 
 export const useGameMusic = (gameMode: GameMode, gameStatus?: GameStatus) => {
   const musicManagerRef = useRef(getGameMusicManager());

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useGameOptionsContext } from '@contexts';
 
 export const useGameUser = () => {
   const [userId, setUserId] = useState<string | null>(null);

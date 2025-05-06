@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-import { CreateTournament } from '../components/menu/CreateTournament';
-import { TournamentList } from '../components/menu/TournamentList';
-import { ClippedButton } from '../components/UI/buttons/ClippedButton';
+import { CreateTournament } from '@components/menu/CreateTournament';
+import { TournamentList } from '@components/menu/TournamentList';
+import { ClippedButton } from '@components/UI/buttons/ClippedButton';
 
 export const TournamentMenu: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string | null>(null);

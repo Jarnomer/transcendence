@@ -4,19 +4,16 @@ import { useNavigate } from 'react-router-dom';
 
 import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
 
+import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
+
 import { PlayerScoreBoard } from '@components';
 
-import { useGameControls, useGameResult } from '@hooks';
+import { MatchMakingCarousel } from '@components/game';
+import GameplayCanvas from '@components/game/GameplayCanvas';
+
+import { useFetchPlayerData, useGameControls, useGameResult, useGameVisibility } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
-
-import { MatchMakingCarousel } from '../components/game';
-import GameplayCanvas from '../components/game/GameplayCanvas';
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { useFetchPlayerData } from '../hooks/useFetchPlayers';
-import { useGameVisibility } from '../hooks/useGameVisibility';
 
 export const GamePage: React.FC = () => {
   const {

@@ -4,14 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { ClippedCornerCard } from '@/components/UI/cards/ClippedCornerCard';
 
-import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
+import { useModal, useWebSocketContext } from '@contexts';
 
-import { login, register } from '@services/authService.ts';
-import { updateUser } from '@services/userService.ts';
+import { ClippedButton } from '@components/UI/buttons/ClippedButton';
 
-import { useModal } from '../contexts/modalContext/ModalContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { useSound } from '../hooks/useSound';
+import { login, register, updateUser } from '@services';
+
+import { useSound } from '@hooks';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();

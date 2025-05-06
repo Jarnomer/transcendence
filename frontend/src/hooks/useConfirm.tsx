@@ -1,5 +1,4 @@
-// hooks/useConfirm.ts
-import { useModal } from '../contexts/modalContext/ModalContext';
+import { useModal } from '@contexts';
 
 export const useConfirm = () => {
   const { openModal } = useModal();

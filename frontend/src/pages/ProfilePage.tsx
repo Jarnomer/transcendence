@@ -4,14 +4,14 @@ import { useParams } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { getUserData } from '@services/userService';
+import { Friends } from '@components/profile/FriendList';
+import { MatchHistory } from '@components/profile/MatchHistory';
+import { ProfileHeader } from '@components/profile/ProfileHeader';
+import { Error } from '@components/UI/Error';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { getUserData } from '@services';
 
-import { Friends } from '../components/profile/FriendList';
-import { MatchHistory } from '../components/profile/MatchHistory';
-import { ProfileHeader } from '../components/profile/ProfileHeader';
-import { Error } from '../components/UI/Error';
+import { UserDataResponseType } from '@shared/types';
 
 const animationVariants = {
   initial: {

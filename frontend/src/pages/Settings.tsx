@@ -2,10 +2,11 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../components';
-import { GraphicsSettings } from '../components/settings/GraphicsSettings';
-import { Soundsettings } from '../components/settings/SoundSettings';
-import { UserSettings } from '../components/settings/UserSettings';
+import { BackgroundGlow } from '@components';
+
+import { GraphicsSettings } from '@components/settings/GraphicsSettings';
+import { Soundsettings } from '@components/settings/SoundSettings';
+import { UserSettings } from '@components/settings/UserSettings';
 
 const slideFromLeftVariants = {
   initial: {

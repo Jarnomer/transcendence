@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import WebSocketManager from '../services/webSocket/WebSocketManager';
+import { WebSocketManager } from '@services';
 
 export const useMatchmakingSocket = (
   matchmakingSocket: WebSocketManager | null,

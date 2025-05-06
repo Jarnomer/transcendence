@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import WebSocketManager from '../services/webSocket/WebSocketManager';
+import { WebSocketManager } from '@services';
 
 export const useChatSocket = (
   chatSocket: WebSocketManager | null,

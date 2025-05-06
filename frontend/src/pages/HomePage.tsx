@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { LeaderBoard } from '@components';
 
-import { Updates } from '../components/home/Updates';
+import { Updates } from '@components/home/Updates';
 
 const slideFromLeftVariants = {
   initial: {

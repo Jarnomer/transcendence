@@ -2,14 +2,11 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { getSessionStatus } from '@/services/gameService';
+import { useGameOptionsContext, useNavigationAccess, useWebSocketContext } from '@contexts';
 
-import { SessionManager } from '@services';
+import { SessionManager, getSessionStatus } from '@services';
 
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import { useConfirm } from './useConfirm';
+import { useConfirm } from '@hooks';
 
 type StepType = 'init' | 'validating' | 'restoring' | 'done';
 

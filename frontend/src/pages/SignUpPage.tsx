@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { UserInformationForm } from '../components/UI/forms/UserInformationForm';
-import { useUser } from '../contexts/user/UserContext';
+import { useUser } from '@contexts';
+
+import { UserInformationForm } from '@components/UI/forms/UserInformationForm';
 
 const animationVariants = {
   initial: {

@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { createMoveInputMessage } from '@shared/messages/';
+import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { createMoveInputMessage } from '@shared/messages';
 
 export const useGameControls = () => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});

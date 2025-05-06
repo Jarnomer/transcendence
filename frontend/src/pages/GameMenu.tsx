@@ -4,14 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx'; // Import the GameOptionsContext
+import { useGameOptionsContext, useNavigationAccess } from '@contexts';
 
-import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
+import GameMenuCard from '@components/menu/cards/GameMenuCard';
 import { NavIconButton } from '@components/UI/buttons/NavIconButton';
 
-import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import { useSound } from '../hooks/useSound';
-import { useValidateSession } from '../hooks/useValidateSession'; // Import the useValidateSession hook
+import { useSound, useValidateSession } from '@hooks';
 
 interface GameMenuOption {
   content: string;
