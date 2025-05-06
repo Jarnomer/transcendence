@@ -2,9 +2,8 @@ import { useState } from 'react';
 
 import { useChatContext, useUser } from '@contexts';
 
-import { BackgroundGlow } from '@components';
-
 import { ChatSidebar, ChatWindow, CreateNewGroupChat, MobileChatPage } from '@components/chat';
+import { BackgroundGlow } from '@components/visual';
 
 import { useMediaQuery } from '@hooks';
 

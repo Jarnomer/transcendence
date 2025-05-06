@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { GameAudioOptions, defaultGameAudioOptions } from '@shared/types';
+import { useUser } from '@contexts';
 
 import {
   applyAudioSettings,
   getAudioSystemSettings,
   saveAudioSystemSettings,
   volumeLevelToValue,
-} from '../../services/audioService';
-import { useUser } from '../user/UserContext';
+} from '@services';
+
+import { GameAudioOptions, defaultGameAudioOptions } from '@shared/types';
 
 type AudioSettingsContextType = {
   audioSettings: GameAudioOptions;

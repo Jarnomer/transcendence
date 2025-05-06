@@ -1,12 +1,8 @@
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 
-import { GraphicsSettings, defaultGraphicsSettings } from '@shared/types';
+import { applyGraphicsSettings, getGraphicsSettings, saveGraphicsSettings } from '@services';
 
-import {
-  getGraphicsSettings,
-  saveGraphicsSettings,
-  applyGraphicsSettings,
-} from '../../services/graphicsService';
+import { GraphicsSettings, defaultGraphicsSettings } from '@shared/types';
 
 // Define context state type
 interface GraphicsContextState {

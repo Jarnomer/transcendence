@@ -1,9 +1,8 @@
 import { getAudioSettings, saveAudioSettings, SoundManager } from '@services';
 
-import { defaultGameAudioOptions, GameAudioOptions } from '@shared/types';
+import { getGameMusicManager, getGameSoundManager } from '@game/utils';
 
-import { getGameMusicManager } from '../components/game/utils/gameMusicManager';
-import { getGameSoundManager } from '../components/game/utils/gameSoundEffects';
+import { defaultGameAudioOptions, GameAudioOptions } from '@shared/types';
 
 export const volumeLevelToValue = (level: number): number => {
   const validLevel = Math.max(0, Math.min(5, level));

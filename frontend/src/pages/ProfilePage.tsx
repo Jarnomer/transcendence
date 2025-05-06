@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Friends } from '@components/profile/FriendList';
 import { MatchHistory } from '@components/profile/MatchHistory';
 import { ProfileHeader } from '@components/profile/ProfileHeader';
-import { Error } from '@components/UI/Error';
+import { Error } from '@components/UI';
 
 import { getUserData } from '@services';
 

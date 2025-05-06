@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
 
 import { FloatingChatWrapper } from '@components/chat';
+import { BackgroundGlitch } from '@components/visual';
 
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider.tsx';
@@ -19,7 +20,6 @@ import { JoinGameNotificationModal } from './components/modals/JoinGameNotificat
 import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { MobileNavBar } from './components/navBar/MobileNavBar.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
-import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');

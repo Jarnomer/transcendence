@@ -2,7 +2,8 @@ import React, { ReactNode } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { WarningSign } from '../visual/svg/shapes/WarningSign';
+import { WarningSign } from '@components/visual';
+
 interface ErrorProps {
   children: ReactNode;
 }

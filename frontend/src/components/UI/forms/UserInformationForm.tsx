@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '../../../../../shared/types';
-import { useModal } from '../../../contexts/modalContext/ModalContext';
-import { useUser } from '../../../contexts/user/UserContext';
-import { api } from '../../../services/api';
+import { useModal, useUser } from '@contexts';
+
+import { ClippedButton, NavIconButton } from '@components/UI';
+import { InformationRequestSvg } from '@components/visual';
+
+import { api } from '@services';
+
+import { UserDataResponseType } from '@shared/types';
+
 import { ProfilePicture } from '../../profile/ProfilePicture';
-import { InformationRequestSvg } from '../../visual/svg/shapes/UserInformationRequestSvg';
-import { ClippedButton } from '../buttons/ClippedButton';
-import { NavIconButton } from '../buttons/NavIconButton';
 
 interface EditProfileProps {
   user: UserDataResponseType;

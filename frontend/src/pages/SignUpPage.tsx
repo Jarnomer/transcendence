@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useUser } from '@contexts';
 
-import { UserInformationForm } from '@components/UI/forms/UserInformationForm';
+import { UserInformationForm } from '@components/UI';
 
 // const animationVariants = {
 //   initial: {

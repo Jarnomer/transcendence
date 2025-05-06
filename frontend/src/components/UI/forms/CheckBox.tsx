@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useSound } from '../../../hooks/useSound';
+import { useSound } from '@hooks';
 
 interface checkBoxProps {
   isEnabled: boolean;

@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
-
-import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
+import { useGameOptionsContext, useLoading, useUser, useWebSocketContext } from '@contexts';
 
 import { PlayerScoreBoard } from '@components';
 

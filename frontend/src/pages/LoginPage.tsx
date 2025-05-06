@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { ClippedCornerCard } from '@/components/UI/cards/ClippedCornerCard';
-
 import { useModal, useWebSocketContext } from '@contexts';
 
-import { ClippedButton } from '@components/UI/buttons/ClippedButton';
+import { ClippedButton, ClippedCornerCard } from '@components/UI';
 
 import { login, register, updateUser } from '@services';
 

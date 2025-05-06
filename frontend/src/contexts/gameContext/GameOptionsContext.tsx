@@ -1,12 +1,10 @@
-// FlowContext.tsx
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+
+import { useUser, useWebSocketContext } from '@contexts';
 
 import { getGameSettings, SessionManager } from '@services';
 
 import { defaultGameSettings, GameSettings, TournamentOptionsType } from '@shared/types';
-
-import { useUser } from '../user/UserContext';
-import { useWebSocketContext } from '../WebSocketContext';
 
 type GameOptionsContextType = {
   mode: string | null;

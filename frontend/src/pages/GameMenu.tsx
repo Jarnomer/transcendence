@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useGameOptionsContext, useNavigationAccess } from '@contexts';
 
 import GameMenuCard from '@components/menu/cards/GameMenuCard';
-import { NavIconButton } from '@components/UI/buttons/NavIconButton';
+import { NavIconButton } from '@components/UI';
 
 import { useSound, useValidateSession } from '@hooks';
 

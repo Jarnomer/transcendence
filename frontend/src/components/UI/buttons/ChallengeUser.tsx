@@ -3,8 +3,7 @@ import React from 'react';
 import { useUser } from '@contexts';
 
 import { iconSizeResponsive } from '@components/UI';
-
-import { ChallengeIcon } from '../../visual/svg/icons/ChallengeIcon';
+import { ChallengeIcon } from '@components/visual';
 
 interface ChallengeButtonProps {
   receiverUserId: string;

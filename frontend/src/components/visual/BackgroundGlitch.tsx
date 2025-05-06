@@ -4,8 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { ProcessingBar } from './svg/shapes/ProcessingBar';
-import { WarningSign } from './svg/shapes/WarningSign';
+import { ProcessingBar, WarningSign } from '@components/visual';
 
 const generateRandomText = (length: number) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}<>?';
