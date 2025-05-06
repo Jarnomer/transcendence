@@ -97,6 +97,10 @@ export class FriendModel {
     );
   }
 
+  async deleteNotification(reference_id: string) {
+    return await this.db.run(`DELETE FROM notifications WHERE reference_id = ?`, [reference_id]);
+  }
+
   async getFriends(user_id: string) {
     return await this.db.all(
       `SELECT

@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { toast } from 'react-hot-toast';
 
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
+import { useDuel } from '@/hooks/useDuel';
 import {
   addMember,
   createChatRoom,
@@ -32,6 +33,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // const playMessageSound = useSound('/sounds/effects/message.wav');
 
   const roomIdRef = useRef(roomId);
+
 
   useEffect(() => {
     console.log('ChatProvider mounted');

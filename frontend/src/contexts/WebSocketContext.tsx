@@ -8,9 +8,16 @@ import {
   useState,
 } from 'react';
 
-import { GameEvent, GameOptionsType, GameState, GameStatus, MatchmakingSnapshot } from '@shared/types';
+import {
+  GameEvent,
+  GameOptionsType,
+  GameState,
+  GameStatus,
+  MatchmakingSnapshot,
+} from '@shared/types';
 
 import { useChatSocket } from '../hooks/useChatSocket';
+import { useDuel } from '../hooks/useDuel';
 import { useGameSocket } from '../hooks/useGameSocket';
 import { useMatchmakingSocket } from '../hooks/useMatchmakingSocket';
 import WebSocketManager from '../services/webSocket/WebSocketManager';

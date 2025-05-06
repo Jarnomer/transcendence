@@ -106,6 +106,10 @@ export const Notifications: React.FC = () => {
 
   const handleNotificationClick = async (event, request: any) => {
     console.log('notification clicked');
+    console.log('request:', request);
+    console.log('request type:', request.type);
+
+    
     event.stopPropagation();
     switch (request.type) {
       case 'friend_request':

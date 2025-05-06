@@ -28,13 +28,15 @@ export const GamePage: React.FC = () => {
     matchmakingState: { gameId },
     startGame,
     startMatchMaking,
+    cleanup,
   } = useWebSocketContext();
   const { loadingStates } = useLoading();
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const { lobby, mode, difficulty, tournamentOptions, gameSettings } = useGameOptionsContext();
+  const { lobby, mode, difficulty, tournamentOptions, gameSettings, queueId } =
+    useGameOptionsContext();
 
   const {
     hideBackgroundGame,
@@ -75,7 +77,7 @@ export const GamePage: React.FC = () => {
    */
   useEffect(() => {
     if (!lobby || !mode || !difficulty) return;
-    if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
+    if (mode === '1v1' && difficulty === 'online') {
       startMatchMaking();
     }
   }, [lobby, mode, difficulty]);
@@ -96,7 +98,22 @@ export const GamePage: React.FC = () => {
           display_name: user?.display_name,
         },
       });
+    } else if (lobby !== 'random' && mode === '1v1' && difficulty === 'online') {
+      sendMessage('matchmaking', {
+        type: 'join_match',
+        payload: {
+          queue_id: queueId,
+          user_id: user?.user_id,
+          mode: mode,
+          difficulty: difficulty,
+          avatar_url: user?.avatar_url,
+          display_name: user?.display_name,
+        },
+      });
     }
+    return () => {
+      cleanup();
+    };
   }, [connections.matchmaking, gameId, user, mode, difficulty, lobby]);
 
   /**

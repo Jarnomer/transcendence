@@ -4,6 +4,8 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
 
+import { useDuel } from '@/hooks/useDuel';
+
 import { LoadingProvider } from '../../contexts/gameContext/LoadingContextProvider.tsx';
 import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
 import { useUser } from '../../contexts/user/UserContext.tsx';
@@ -41,6 +43,8 @@ export const AnimatedRoutes: React.FC = () => {
       console.log('Cleanup');
     };
   }, [location]);
+
+  useDuel();
 
   return (
     <AnimatePresence mode="wait">
