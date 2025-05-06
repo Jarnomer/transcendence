@@ -2,10 +2,9 @@
 import { useLocation } from 'react-router-dom';
 
 import { FloatingChat } from '@components/chat';
+import { ChatModal } from '@components/modals';
 
 import { useMediaQuery } from '@hooks';
-
-import { ChatModal } from '../../modals';
 
 export const FloatingChatWrapper: React.FC = () => {
   const location = useLocation();

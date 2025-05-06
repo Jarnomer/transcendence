@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
 
 import { FloatingChatWrapper } from '@components/chat';
+import { BackgroundProvider } from '@components/game';
 import { Footer, Header, MobileNavBar } from '@components/layout';
 import {
   ConfirmModal,
@@ -18,8 +19,6 @@ import {
 } from '@components/modals';
 import { AnimatedRoutes } from '@components/routes';
 import { BackgroundGlitch } from '@components/visual';
-
-import BackgroundProvider from './components/game/BackgroundProvider.tsx'; // replace this
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');

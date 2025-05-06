@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { GameMode, GameState, GameStatus, defaultGameParams } from '@shared/types';
+import { useGraphicsContext, useWebSocketContext } from '@contexts';
 
-import BackgroundCanvas from './BackgroundCanvas';
-import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
-import { useWebSocketContext } from '../../contexts/WebSocketContext';
-import { useGameMusic } from '../../hooks/useGameMusic';
+import { BackgroundCanvas } from '@components/game';
+
+import { useGameMusic } from '@hooks';
+
+import { GameMode, GameState, GameStatus, defaultGameParams } from '@shared/types';
 
 interface BackgroundProviderProps {}
 
-const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
+export const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
   const {
     gameState: activeGameState,
     gameStatus,
@@ -261,5 +262,3 @@ const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
     </>
   );
 };
-
-export default BackgroundProvider;

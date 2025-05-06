@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-export const avatarList = [
+const avatarList = [
   './src/assets/images/ai_easy.png',
   './src/assets/images/ai_hard.png',
   './src/assets/images/ai.png',

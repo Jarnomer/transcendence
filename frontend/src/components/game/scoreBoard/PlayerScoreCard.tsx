@@ -7,7 +7,12 @@ interface PlayerCardProps {
   player_num: number;
 }
 
-export const PlayerCard: React.FC<PlayerCardProps> = ({ name, score, imageSrc, player_num }) => {
+export const PlayerScoreCard: React.FC<PlayerCardProps> = ({
+  name,
+  score,
+  imageSrc,
+  player_num,
+}) => {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
@@ -47,5 +52,3 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ name, score, imageSrc, p
     </div>
   );
 };
-
-export default PlayerCard;

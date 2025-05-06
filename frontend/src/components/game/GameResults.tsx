@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
-import { useUser } from '../../contexts/user/UserContext';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { WinnerSvg } from '../visual/svg/shapes/WinnerSvg';
+import { useGameOptionsContext, useUser } from '@contexts';
+
+import { ClippedButton } from '@components/UI';
+import { WinnerSvg } from '@components/visual';
 
 interface PlayerData {
   user_id: string;

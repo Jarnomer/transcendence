@@ -4,9 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { Friends } from '@components/profile/FriendList';
-import { MatchHistory } from '@components/profile/MatchHistory';
-import { ProfileHeader } from '@components/profile/ProfileHeader';
+import { Friends, MatchHistory, ProfileHeader } from '@components/profile';
 import { Error } from '@components/UI';
 
 import { getUserData } from '@services';

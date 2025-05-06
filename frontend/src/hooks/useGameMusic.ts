@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import { useAudioSettings } from '@contexts';
 
-import { getGameMusicManager } from '@game/utils';
+import { getGameMusicManager } from '@components/game';
 
 import { GameMode, GameStatus, MusicTrack } from '@shared/types';
 

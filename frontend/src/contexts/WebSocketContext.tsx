@@ -10,6 +10,8 @@ import {
 
 import { initialState, useWebSocketStore, WebSocketManager, webSocketReducer } from '@services';
 
+import { useChatSocket, useGameSocket, useMatchmakingSocket } from '@hooks';
+
 import {
   GameEvent,
   GameOptionsType,
@@ -17,10 +19,6 @@ import {
   GameStatus,
   MatchmakingSnapshot,
 } from '@shared/types';
-
-import { useChatSocket } from '../hooks/useChatSocket';
-import { useGameSocket } from '../hooks/useGameSocket';
-import { useMatchmakingSocket } from '../hooks/useMatchmakingSocket';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 

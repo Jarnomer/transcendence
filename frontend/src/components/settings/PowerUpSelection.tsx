@@ -1,14 +1,17 @@
 import React, { useEffect } from 'react';
 
-import { PowerUpType } from '@shared/types';
+import {
+  BoxDiv,
+  PaddleBiggerIcon,
+  PaddleFasterIcon,
+  PaddleSlowerIcon,
+  PaddleSmallerIcon,
+  SpinPowerUp,
+} from '@components/visual';
 
-import { useSound } from '../../hooks/useSound';
-import { BoxDiv } from '../visual/svg/containers/SvgBoxContainer';
-import { PaddleBiggerIcon } from '../visual/svg/icons/PaddleBiggerIcon';
-import { PaddleFasterIcon } from '../visual/svg/icons/PaddleFasterIcont';
-import { PaddleSlowerIcon } from '../visual/svg/icons/PaddleSlowerIcon';
-import { PaddleSmallerIcon } from '../visual/svg/icons/PaddleSmallerIcon';
-import { SpinPowerUp } from '../visual/svg/icons/SpinPowerUp';
+import { useSound } from '@hooks';
+
+import { PowerUpType } from '@shared/types';
 
 const powerUps = [
   PowerUpType.SmallerPaddle,

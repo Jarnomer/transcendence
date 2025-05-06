@@ -2,11 +2,11 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 
 import { toast } from 'react-hot-toast';
 
-import { addMember, createChatRoom, getChat, getDm, getMyRooms, getPublicChat } from '@/services';
-
 import { useUser, useWebSocketContext } from '@contexts';
 
 import { MessageNotification } from '@components/chat';
+
+import { addMember, createChatRoom, getChat, getDm, getMyRooms, getPublicChat } from '@services';
 
 import { ChatMessageType, ChatRoomType, FriendListType } from '@shared/types';
 

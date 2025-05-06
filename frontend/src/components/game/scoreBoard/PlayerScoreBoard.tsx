@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react';
 
 import { useGameOptionsContext, useLoading, useWebSocketContext } from '@contexts';
 
-import { GameState } from '@shared/types';
+import { PlayerScoreCard } from '@components/game';
 
-import PlayerCard from './PlayerScoreCard';
+import { GameState } from '@shared/types';
 
 interface Player {
   user_id?: string | null | undefined;
@@ -88,13 +88,13 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
 
   return (
     <div id="player-scores" className="w-full flex justify-between gap-2 text-primary mb-2">
-      <PlayerCard
+      <PlayerScoreCard
         name={player1Ref.current?.display_name || 'Guest'}
         score={playerScores.current.player1Score}
         imageSrc={player1Ref.current?.avatar_url || './src/assets/images/default_avatar.png'}
         player_num={1}
       />
-      <PlayerCard
+      <PlayerScoreCard
         name={player2Ref.current?.display_name || 'Mystery Man'}
         score={playerScores.current.player2Score}
         imageSrc={player2Ref.current?.avatar_url || './src/assets/images/default_avatar.png'}

@@ -2,15 +2,14 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
+import { useGameOptionsContext } from '@contexts';
 
-import { saveGameSettings } from '@services/userService';
+import { PowerUpSelection } from '@components/settings';
+import { CheckBox, ClippedButton } from '@components/UI';
+
+import { saveGameSettings } from '@services';
 
 import { PowerUpType } from '@shared/types';
-
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { CheckBox } from '../UI/forms/CheckBox';
-import { PowerUpSelection } from './PowerUpSelection';
 
 export const GameOptions: React.FC = () => {
   const [enablePowerUps, setEnablePowerUps] = useState(true);

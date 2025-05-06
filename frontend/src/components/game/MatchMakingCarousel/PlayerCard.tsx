@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
-import { ChangingAvatar } from './ChangingAvatar';
+import { ChangingAvatar } from '@components/game';
+import { BackgroundGlow } from '@components/visual';
 
 export const PlayerCard: React.FC<{
   name: string | null;
