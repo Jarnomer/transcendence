@@ -2,9 +2,9 @@ import React from 'react';
 
 import { useChatContext, useModal, useUser } from '@contexts';
 
-import { useMediaQuery } from '@hooks';
+import { NavIconButton } from '@components/UI';
 
-import { NavIconButton } from './NavIconButton';
+import { useMediaQuery } from '@hooks';
 
 interface ChatButtonProps {
   receiverUserId: string;

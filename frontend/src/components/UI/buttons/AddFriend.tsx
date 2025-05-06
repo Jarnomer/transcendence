@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { UserMinusIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 
-import { useUser } from '@/contexts/user/UserContext';
+import { useUser } from '@/contexts';
 
-import { sendFriendRequest } from '../../../services/friendService';
+import { sendFriendRequest } from '@services';
 
 interface AddFriendButtonProps {
   receiverUserId: string;

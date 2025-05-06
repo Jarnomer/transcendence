@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useSound } from '@/hooks/useSound';
+import { useSound } from '@/hooks';
 
 type ButtonOptions = {
   id?: string;
@@ -23,7 +23,7 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
     playSubmitSound();
     onClick();
   };
-  
+
   return (
     <button
       id={id}

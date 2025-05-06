@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeftIcon } from '@heroicons/react/20/solid'; // For Heroicons v2
+
+import { ChevronLeftIcon } from '@heroicons/react/20/solid';
 
 export const GoBackButton: React.FC = () => {
   const navigate = useNavigate(); // Initialize the navigation hook

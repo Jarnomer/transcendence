@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { useUser } from '@/contexts/user/UserContext';
+import { useUser } from '@contexts';
+
+import { iconSizeResponsive } from '@components/UI';
 
 import { ChallengeIcon } from '../../visual/svg/icons/ChallengeIcon';
-import { iconSizeResponsive } from './NavIconButton';
 
 interface ChallengeButtonProps {
   receiverUserId: string;
