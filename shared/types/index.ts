@@ -1,4 +1,5 @@
 export * from './authTypes';
+export * from './animatioTypes';
 export * from './friendTypes';
 export * from './gameAPITypes';
 export * from './gameAnimationTypes';
