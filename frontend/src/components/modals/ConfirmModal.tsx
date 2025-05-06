@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { WarningSign } from '../visual/svg/shapes/WarningSign';
-import { ModalWrapper } from './ModalWrapper';
+import { useModal } from '@contexts';
+
+import { ModalWrapper } from '@components/modals';
+import { ClippedButton } from '@components/UI';
+import { WarningSign } from '@components/visual';
 
 export const ConfirmModal: React.FC = () => {
   const { isModalOpen, closeModal, getModalProps } = useModal();

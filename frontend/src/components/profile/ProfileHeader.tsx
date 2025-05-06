@@ -2,12 +2,12 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { useModal, useUser } from '@contexts';
 
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { useUser } from '../../contexts/user/UserContext';
-import { UserActions } from '../UI/buttons/UserActions';
-import { ProfilePicture } from './ProfilePicture';
+import { ProfilePicture } from '@components/profile';
+import { UserActions } from '@components/UI';
+
+import { UserDataResponseType } from '@shared/types';
 
 const animationVariants = {
   initial: {

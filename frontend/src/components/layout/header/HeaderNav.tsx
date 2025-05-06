@@ -4,11 +4,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-// import { logout } from "../auth";  // Ensure your logout function is correctly imported
-import { useModal } from '../../contexts/modalContext/ModalContext'; // Importing modal context
-import { useUser } from '../../contexts/user/UserContext';
-import { Notifications } from '../notifications/Notifications';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
+import { useModal, useUser } from '@contexts';
+
+import { NavIconButton, Notifications } from '@components/UI';
 
 const animationVariants = {
   initial: {

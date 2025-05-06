@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { useSound } from '../../hooks/useSound';
-import { Settings, SettingsNav } from '../../pages/Settings';
-import { ModalWrapper } from './ModalWrapper';
+import { Settings, SettingsNav } from '@pages';
+
+import { useModal } from '@contexts';
+
+import { ModalWrapper } from '@components/modals';
+
+import { useSound } from '@hooks';
 
 export const SettingsModal: React.FC = () => {
   const { isModalOpen } = useModal();

@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
 
-import { UserDataResponseType } from '../../../../shared/types';
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { useUser } from '../../contexts/user/UserContext';
-import { api } from '../../services/api';
+import { useModal, useUser } from '@contexts';
+
+import { api } from '@services';
+
+import { UserDataResponseType } from '@shared/types';
 
 interface ProfilePictureProps {
   user: UserDataResponseType;

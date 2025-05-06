@@ -2,8 +2,9 @@ import React, { ReactNode } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { ModalBackgroundGlitch } from './ModalBackgroundGlitch';
+import { useModal } from '@contexts';
+
+import { ModalBackgroundGlitch } from '@components/modals';
 
 interface ModalWrapperProps {
   modalName: string;

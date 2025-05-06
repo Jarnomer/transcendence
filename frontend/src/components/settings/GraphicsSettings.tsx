@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { GraphicsSettings as GraphicsSettingsType } from '@shared/types';
+import { useGraphicsContext } from '@contexts';
 
-import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
-import { useSound } from '../../hooks/useSound';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { CheckBox } from '../UI/forms/CheckBox';
+import { CheckBox, ClippedButton } from '@components/UI';
+
+import { useSound } from '@hooks';
+
+import { GraphicsSettings as GraphicsSettingsType } from '@shared/types';
 
 // const animationVariants = {
 //   initial: {

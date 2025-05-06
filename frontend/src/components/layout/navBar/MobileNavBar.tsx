@@ -1,10 +1,10 @@
-// components/header/MobileNavBar.tsx
 import React from 'react';
 
 import { useLocation } from 'react-router-dom';
 
-import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { HeaderNav } from '../header/HeaderNav';
+import { HeaderNav } from '@components/layout';
+
+import { useMediaQuery } from '@hooks';
 
 export const MobileNavBar: React.FC = () => {
   const isDesktop = useMediaQuery('(min-width: 600px)');

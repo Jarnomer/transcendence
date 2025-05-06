@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 
-import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
+import { useGameOptionsContext, useLoading, useWebSocketContext } from '@contexts';
 
 import { GameState } from '@shared/types';
 
-import { useGameOptionsContext } from '../../../contexts/gameContext/GameOptionsContext';
-import { useWebSocketContext } from '../../../contexts/WebSocketContext';
 import PlayerCard from './PlayerScoreCard';
 
 interface Player {

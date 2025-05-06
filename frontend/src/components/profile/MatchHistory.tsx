@@ -2,7 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { UserDataResponseType } from '@shared/types';
 
 const animationVariants = {
   initial: {

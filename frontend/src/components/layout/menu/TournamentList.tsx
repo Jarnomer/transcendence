@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useGameOptionsContext } from '../../contexts/gameContext/GameOptionsContext';
-import { getTournaments } from '../../services/userService';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
+import { useGameOptionsContext } from '@contexts';
+
+import { NavIconButton } from '@components/UI';
+
+import { getTournaments } from '@services';
 
 interface DataInQueue {
   queue_id: string;

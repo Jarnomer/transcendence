@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useLocation } from 'react-router-dom';
 
-import { HeaderNav } from './HeaderNav';
+import { HeaderNav } from '@components/layout';
 
 export const Header: React.FC = () => {
   const location = useLocation();

@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
-import { ModalWrapper } from './ModalWrapper';
+import { useModal } from '@contexts';
+
+import { ModalWrapper } from '@components/modals';
+import { ClippedButton, NavIconButton } from '@components/UI';
 
 export const JoinGameNotificationModal: React.FC = () => {
   const { isModalOpen, getModalProps, closeModal } = useModal();

@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { FriendListType, FriendType, UserDataResponseType } from '../../../../shared/types';
-import { useUser } from '../../contexts/user/UserContext';
+import { useUser } from '@contexts';
+
+import { FriendListType, FriendType, UserDataResponseType } from '@shared/types';
 
 const friendListVariants = {
   visible: {

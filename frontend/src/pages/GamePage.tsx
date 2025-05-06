@@ -4,9 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useGameOptionsContext, useLoading, useUser, useWebSocketContext } from '@contexts';
 
-import { PlayerScoreBoard } from '@components';
-
-import { MatchMakingCarousel } from '@components/game';
+import { MatchMakingCarousel, PlayerScoreBoard } from '@components/game';
 import GameplayCanvas from '@components/game/GameplayCanvas';
 
 import { useFetchPlayerData, useGameControls, useGameResult, useGameVisibility } from '@hooks';

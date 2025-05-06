@@ -1,4 +1,5 @@
 export * from './Error';
+export * from './Notifications';
 export * from './ProfilePictureMedium';
 export * from './ProfilePictureSmall';
 export * from './SearchBar';

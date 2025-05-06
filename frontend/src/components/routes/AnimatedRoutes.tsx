@@ -23,13 +23,9 @@ import {
 
 import { LoadingProvider, useNavigationAccess, useUser } from '@contexts';
 
-import { useSound } from '@hooks';
+import { PageWrapper } from '@components/routes';
 
-// Delete all of these?
-import { BracketTest } from '../../pages/testing_pages/BracketTest.tsx';
-import { CarouselTest } from '../../pages/testing_pages/CarouselTest.tsx';
-import { TestGameResult } from '../../pages/testing_pages/TestGameResult.tsx';
-import { PageWrapper } from './PageWrapper.tsx';
+import { useSound } from '@hooks';
 
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
@@ -67,37 +63,11 @@ export const AnimatedRoutes: React.FC = () => {
         />
 
         <Route
-          path="/testGameResult"
-          element={
-            user ? (
-              <PageWrapper>
-                <TestGameResult />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        <Route
           path="/home"
           element={
             user ? (
               <PageWrapper>
                 <HomePage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        <Route
-          path="/bracketTest"
-          element={
-            user ? (
-              <PageWrapper>
-                <BracketTest></BracketTest>
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />
@@ -153,17 +123,6 @@ export const AnimatedRoutes: React.FC = () => {
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />
-            )
-          }
-        />
-
-        <Route
-          path="/CarouselTest"
-          element={
-            user && (
-              <PageWrapper>
-                <CarouselTest />
-              </PageWrapper>
             )
           }
         />

@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { getBlockedUsers, unblockUser } from '@/services/friendService';
+import { getBlockedUsers, unblockUser } from '@/services';
 
-import { useUser } from '../../contexts/user/UserContext';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { ProfilePictureSmall } from '../UI/ProfilePictureSmall';
+import { useUser } from '@contexts';
+
+import { ClippedButton, ProfilePictureSmall } from '@components/UI';
 
 // const animationVariants = {
 //   initial: {

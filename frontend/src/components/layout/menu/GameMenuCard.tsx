@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { useSound } from '../../../hooks/useSound';
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
+import { BackgroundGlow } from '@components/visual';
+
+import { useSound } from '@hooks';
 
 interface GameMenuCardProps {
   content: string;
@@ -10,7 +11,12 @@ interface GameMenuCardProps {
   onClick: () => void;
 }
 
-const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInfo, onClick }) => {
+export const GameMenuCard: React.FC<GameMenuCardProps> = ({
+  content,
+  imageUrl,
+  hoverInfo,
+  onClick,
+}) => {
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   console.log('is safari:', isSafari);
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
@@ -165,8 +171,6 @@ const GameMenuCard: React.FC<GameMenuCardProps> = ({ content, imageUrl, hoverInf
     </div>
   );
 };
-
-export default GameMenuCard;
 
 // <div
 //   className="game-mode-modal relative  p-5 m-0 w-full h-full glass-box overflow-hidden"

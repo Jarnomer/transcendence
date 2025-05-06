@@ -4,10 +4,17 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { useUser } from '../../contexts/user/UserContext';
-import { acceptFriendRequest, rejectFriendRequest } from '../../services/friendService';
-import { getNotifications, getUserByID, markNotificationAsSeen } from '../../services/userService';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
+import { useUser } from '@contexts';
+
+import { NavIconButton } from '@components/UI';
+
+import {
+  acceptFriendRequest,
+  getNotifications,
+  getUserByID,
+  markNotificationAsSeen,
+  rejectFriendRequest,
+} from '@services';
 
 const animationVariants = {
   initial: {

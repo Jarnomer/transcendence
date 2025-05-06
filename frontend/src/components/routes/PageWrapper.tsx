@@ -2,7 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-export const pageVariants = {
+const pageVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,
@@ -34,5 +34,3 @@ export const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
     </motion.div>
   );
 };
-
-export default PageWrapper;

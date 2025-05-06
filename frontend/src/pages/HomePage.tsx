@@ -2,9 +2,7 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { LeaderBoard } from '@components';
-
-import { Updates } from '@components/home/Updates';
+import { LeaderBoard, Updates } from '@components/layout';
 
 const slideFromLeftVariants = {
   initial: {

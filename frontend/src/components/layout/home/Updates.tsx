@@ -2,7 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../visual/BackgroundGlow';
+import { BackgroundGlow } from '@components/visual';
 
 export const Updates: React.FC = () => {
   return (

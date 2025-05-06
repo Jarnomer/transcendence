@@ -3,8 +3,7 @@ import React from 'react';
 import { useChatContext, useModal } from '@contexts';
 
 import { ChatWindow } from '@components/chat';
-
-import { ModalWrapper } from './ModalWrapper';
+import { ModalWrapper } from '@components/modals';
 
 export const ChatModal: React.FC = () => {
   const { isModalOpen, getModalProps, closeModal } = useModal();

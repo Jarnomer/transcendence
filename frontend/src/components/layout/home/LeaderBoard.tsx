@@ -4,12 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { useSound } from '../../hooks/useSound';
-import { getAmIBlockedBy } from '../../services/friendService';
-import { getUsersWithRank } from '../../services/userService';
-import { UserListCard } from '../UI/cards/UserListCard';
-import { ProfilePictureMedium } from '../UI/ProfilePictureMedium';
-import SearchBar from '../UI/SearchBar';
+import { ProfilePictureMedium, SearchBar, UserListCard } from '@components/UI';
+
+import { getAmIBlockedBy, getUsersWithRank } from '@services';
+
+import { useSound } from '@hooks';
 
 const animationVariants = {
   initial: {

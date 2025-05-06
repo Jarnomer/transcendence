@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useGameOptionsContext, useNavigationAccess } from '@contexts';
 
-import GameMenuCard from '@components/menu/cards/GameMenuCard';
+import { GameMenuCard } from '@components/layout';
 import { NavIconButton } from '@components/UI';
 
 import { useSound, useValidateSession } from '@hooks';
@@ -18,7 +18,7 @@ interface GameMenuOption {
   onClick: () => void;
 }
 
-export const pageVariants = {
+const pageVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,

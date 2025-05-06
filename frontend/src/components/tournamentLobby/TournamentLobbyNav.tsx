@@ -2,7 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
+import { useGameOptionsContext } from '@contexts';
 
 export const TournamentLobbyNav: React.FC<{
   activeTab: string;

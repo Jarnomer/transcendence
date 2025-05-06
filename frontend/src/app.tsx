@@ -8,18 +8,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
 
 import { FloatingChatWrapper } from '@components/chat';
+import { Footer, Header, MobileNavBar } from '@components/layout';
+import {
+  ConfirmModal,
+  EditProfileModal,
+  ErrorModal,
+  JoinGameNotificationModal,
+  SettingsModal,
+} from '@components/modals';
+import { AnimatedRoutes } from '@components/routes';
 import { BackgroundGlitch } from '@components/visual';
 
-import { Footer } from './components/footer/Footer.tsx';
-import BackgroundProvider from './components/game/BackgroundProvider.tsx';
-import { Header } from './components/header/Header.tsx';
-import { ConfirmModal } from './components/modals/CornfirmModal.tsx';
-import { EditProfileModal } from './components/modals/EditProfileModal.tsx';
-import { ErrorModal } from './components/modals/ErrorModal.tsx';
-import { JoinGameNotificationModal } from './components/modals/JoinGameNotification.tsx';
-import { SettingsModal } from './components/modals/SettingsModal.tsx';
-import { MobileNavBar } from './components/navBar/MobileNavBar.tsx';
-import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
+import BackgroundProvider from './components/game/BackgroundProvider.tsx'; // replace this
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');

@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { useAudioSettings } from '../../contexts/audioContext/AudioSettingsContext';
-import { useSound } from '../../hooks/useSound';
-import { volumeValueToLevel } from '../../services/audioService';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { CheckBox } from '../UI/forms/CheckBox';
-import { Slider } from '../UI/forms/Slider';
+import { useAudioSettings } from '@contexts';
+
+import { CheckBox, ClippedButton, Slider } from '@components/UI';
+
+import { volumeValueToLevel } from '@services';
+
+import { useSound } from '@hooks';
 
 // const animationVariants = {
 //   initial: {
