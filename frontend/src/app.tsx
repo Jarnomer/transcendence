@@ -5,6 +5,8 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
+
 import { FloatingChatWrapper } from './components/chat/floatingChat/FloatingChatWrapper.tsx';
 import { Footer } from './components/footer/Footer.tsx';
 import BackgroundProvider from './components/game/BackgroundProvider.tsx';
@@ -17,9 +19,6 @@ import { SettingsModal } from './components/modals/SettingsModal.tsx';
 import { MobileNavBar } from './components/navBar/MobileNavBar.tsx';
 import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
 import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
-import { AudioSettingsProvider } from './contexts/audioContext/AudioSettingsContext.tsx';
-import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
-import { GraphicsSettingsProvider } from './contexts/user/GraphicsContext.tsx';
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');
