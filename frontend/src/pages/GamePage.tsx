@@ -127,7 +127,7 @@ export const GamePage: React.FC = () => {
   }, [gameId]);
 
   useEffect(() => {
-    if (connections.game !== 'connected') return;
+    if (connections.game !== 'connected' && lobby !== 'create') return;
     console.log('Game connected sending settings');
     sendMessage('game', {
       type: 'settings',
