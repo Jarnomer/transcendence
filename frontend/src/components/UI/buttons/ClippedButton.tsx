@@ -7,6 +7,7 @@ type ButtonOptions = {
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   onClick?: () => void;
+  disabled?: boolean;
 };
 
 export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
@@ -15,22 +16,27 @@ export const ClippedButton: React.FC<{ label: string } & ButtonOptions> = ({
   type = 'button',
   className = '',
   onClick,
+  disabled = false,
 }) => {
   const playHoverSound = useSound('/sounds/effects/button_hover.wav');
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
 
   const handleOnClick = () => {
+    if (disabled) return;
     playSubmitSound();
-    if (onClick) onClick(); // Check if onClick exists before calling it
+    if (onClick) onClick();
   };
 
   return (
     <button
       id={id}
       type={type}
-      className={`relative glitch-svg w-[202px] h-[40px] flex items-center justify-center ${className} hover:scale-105 hover:shadow-lg transition-all duration-300 ease-in-out`}
+      className={`relative glitch-svg w-[202px] h-[40px] flex items-center justify-center ${className} ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 hover:shadow-lg'
+      } transition-all duration-300 ease-in-out`}
       onClick={handleOnClick}
-      onMouseEnter={playHoverSound}
+      onMouseEnter={disabled ? undefined : playHoverSound}
+      disabled={disabled}
     >
       {/* SVG with Glitch Effect */}
       <svg
