@@ -18,8 +18,6 @@ export const FloatingChat = () => {
     setOpenChatWindows,
     messages,
     fetchDmHistory,
-    rooms,
-    myRooms,
     fetchChatHistory,
   } = useChatContext();
   const playZoomSound = useSound('/sounds/effects/zoom.wav');
@@ -65,12 +63,10 @@ export const FloatingChat = () => {
   if (!user) return null;
 
   return (
-    <div
-      className={`flex gap-2 items-end fixed bottom-4 right-4 z-40 transition-all duration-300 overflow-hidden`}
-    >
+    <div className="flex gap-2 items-end fixed bottom-4 right-4 z-40 transition-all duration-300 overflow-hidden">
       {openChatWindows &&
         Object.entries(openChatWindows)
-          .filter(([_, isOpen]) => isOpen)
+          .filter(([, isOpen]) => isOpen)
           .map(([friendId]) => (
             <FloatingChatWindow
               key={friendId}

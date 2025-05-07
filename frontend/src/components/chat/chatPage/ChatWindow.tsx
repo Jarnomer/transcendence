@@ -5,14 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { useChatContext, useUser } from '@contexts';
 
 import { MessageInput, MessageList } from '@components/chat';
-import { NavIconButton } from '@components/UI';
+import { NavIconButton, ProfilePictureSmall } from '@components/UI';
 
 import { useSound } from '@hooks';
 
 import { ChatRoomType, FriendType } from '@shared/types';
-
-import { ProfilePictureSmall } from '../../UI';
-import { NavIconButton } from '../../UI/buttons/NavIconButton';
 
 interface ChatWindowProps {
   friends: FriendType[];

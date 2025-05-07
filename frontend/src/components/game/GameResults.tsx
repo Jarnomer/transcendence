@@ -45,7 +45,7 @@ const aiOptions: Record<string, { avatar: string; name: string }> = {
 export const GameResults: React.FC<GameResultsProps> = ({ result, playersData }) => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { resetGameOptions, mode } = useGameOptionsContext();
+  const { mode } = useGameOptionsContext();
   const [winner, setWinner] = React.useState<PlayerData | null>(null);
   const [loser, setLoser] = React.useState<PlayerData | null>(null);
 
@@ -53,7 +53,6 @@ export const GameResults: React.FC<GameResultsProps> = ({ result, playersData })
     if (mode === 'tournament') {
       navigate('/tournamentLobby');
     } else {
-      // resetGameOptions();
       navigate('/gameMenu');
     }
   };
