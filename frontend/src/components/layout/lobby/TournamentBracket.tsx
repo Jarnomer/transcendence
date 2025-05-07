@@ -8,9 +8,20 @@ interface PlayerData {
   display_name: string;
 }
 
+interface TournamentMatch {
+  gameId: string;
+  players: [PlayerData | null, PlayerData | null];
+  round: string;
+  isComplete: boolean;
+}
+
 interface CompetitorProps {
   player: PlayerData | null;
   side: string;
+}
+
+interface TournamentBracketProps {
+  players: TournamentMatch[][];
 }
 
 const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
@@ -25,7 +36,11 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
         }`}
       >
         <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
-          <img className="object-cover w-full h-full" src={'/images/avatars/default_avatar.png'} />
+          <img
+            className="object-cover w-full h-full"
+            src={player?.avatar_url || '/images/avatars/default_avatar.png'}
+            alt={player?.display_name || 'Unknown player'}
+          />
         </div>
         <div className=" h-full flex items-center justify-center">
           <p className="text-xs">{player ? player.display_name : '??'}</p>
@@ -35,40 +50,21 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
   );
 };
 
-interface TournamentMatch {
-  gameId: string;
-  players: [PlayerData | null, PlayerData | null];
-  round: string;
-  isComplete: boolean;
-}
-
-interface PlayerData {
-  user_id: string;
-  avatar_url: string;
-  display_name: string;
-}
-
-const Round: React.FC<{
-  matches: TournamentMatch[];
+interface RoundProps {
   competitors: TournamentMatch[];
   roundIndex: number;
   maxRounds: number;
-}> = ({ competitors, maxRounds }) => {
+  matches?: TournamentMatch[]; // Optional - not used
+}
+
+const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
   const mid = Math.ceil(competitors.length / 2);
   const leftHalf = competitors.slice(0, mid);
   const rightHalf = competitors.slice(mid);
   const round = parseInt(competitors[0].round);
 
-  // console.log('matches from round: ', competitors);
-  // console.log('leftHalf: ', leftHalf);
-  // console.log('rightHalf: ', rightHalf);
-  // console.log('maxRounds: ', maxRounds);
-  // console.log('competitors', competitors);
-
   console.log('round: ', round);
   if (competitors.length === 1) {
-    // console.log('Single match round:', round);
-
     return (
       <>
         {/* Left side */}
@@ -137,35 +133,16 @@ const Round: React.FC<{
   );
 };
 
-interface tournamentBracketProps {
-  players: PlayerData[];
-}
+export const TournamentBracket: React.FC<TournamentBracketProps> = ({ players }) => {
+  if (!players || players.length === 0) return null;
 
-export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players }) => {
-  // Create rounds based on number of players
-
-  if (!players) return;
   const gridCols = players.length * 2;
-  // console.log('players from bracket component:', players);
-  // console.log('players.length: ', players.length, 'grid cols:', gridCols);
 
   const container = document.getElementById('app-main-container');
   if (!container) return null;
 
   return (
-    <div className=" w-full h-full flex  ">
-      {/* <TransformWrapper
-        initialScale={1}
-        minScale={1}
-        maxScale={4}
-        wheel={{
-          wheelEnabled: true,
-          touchPadEnabled: true, // this is important
-          step: 0.1,
-        }}
-        doubleClick={{ disabled: true }}
-      >
-        <TransformComponent> */}
+    <div className="w-full h-full flex">
       <div
         className="grid grid-rows-1 w-full overflow-x-scroll"
         style={{
@@ -182,8 +159,6 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
           />
         ))}
       </div>
-      {/* </TransformComponent>
-      </TransformWrapper> */}
     </div>
   );
 };
