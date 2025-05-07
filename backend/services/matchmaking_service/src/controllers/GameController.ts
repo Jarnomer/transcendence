@@ -1,9 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { NotFoundError } from '@my-backend/main_server';
 
 import { GameService } from '../services/GameService';
 import { QueueService } from '../services/QueueService';
+
 export class GameController {
   private gameService: GameService;
   private queueService: QueueService;
