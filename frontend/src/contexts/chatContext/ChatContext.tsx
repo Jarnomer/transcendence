@@ -112,22 +112,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const notifyMessage = (event: ChatMessageEvent) => {
-    console.log(event);
+    console.log('Notification event:', event);
+
     const isCurrentRoom = roomIdRef.current && event.room_id === roomIdRef.current;
     if (
       isCurrentRoom ||
       openChatWindows[event.sender_id] ||
       (event.room_id && openChatWindows[event.room_id])
-    )
+    ) {
+      console.log('Skipping notification for open chat');
       return;
-    const chatId = event.room_id ? event.room_id : event.sender_id;
-    const isGroupChat = event.room_id ? true : false;
-    const foundRoom = rooms.find((room) => room.chat_room_id === event.room_id);
-    const groupChatName = isGroupChat && foundRoom ? foundRoom.name : null;
+    }
 
-    console.log('rooms: ', rooms, 'myRooms: ', myRooms);
-    console.log('event room id: ', event.room_id);
-    console.log(isGroupChat, groupChatName);
+    const chatId = event.room_id ? event.room_id : event.sender_id;
+
+    // const isGroupChat = event.room_id ? true : false;
+    // const foundRoom = rooms.find((room) => room.chat_room_id === event.room_id);
+    // const groupChatName = isGroupChat && foundRoom ? foundRoom.name : null;
 
     toast.custom(() => (
       <MessageNotification>
@@ -161,7 +162,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleChatMessage = (event: ChatMessageEvent) => {
-    console.log('handling chat message');
+    console.log('handling chat message', event);
+
     if (event.room_id) {
       setMessages((prev) => {
         const updatedMessages = { ...prev };
@@ -197,14 +199,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // const messageHandler = (event: MessageEvent) => {
-    //   const data = JSON.parse(event.data) as ChatMessageEvent;
-    //   handleChatMessage(data);
-    // };
+    const messageHandler = (messageData: ChatMessageEvent) => {
+      console.log('Message received:', messageData);
+      handleChatMessage(messageData);
+    };
 
-    chatSocket.addEventListener('message', handleChatMessage);
-    return () => chatSocket.removeEventListener('message', handleChatMessage);
-  }, [messages]);
+    chatSocket.addEventListener('message', messageHandler);
+    return () => chatSocket.removeEventListener('message', messageHandler);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -264,12 +266,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const key = selectedFriend || roomId;
     if (key) {
+      const localMessage = {
+        ...messageData.payload,
+        created_at: new Date().toISOString(),
+      };
+
       setMessages((prev) => {
         const updatedMessages = { ...prev };
-        updatedMessages[key] = [
-          ...(prev[key] || []),
-          messageData.payload as unknown as ChatMessageType,
-        ];
+        updatedMessages[key] = [...(prev[key] || []), localMessage as unknown as ChatMessageType];
         return updatedMessages;
       });
     }

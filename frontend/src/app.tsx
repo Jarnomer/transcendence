@@ -32,7 +32,7 @@ const App: React.FC = () => {
           <GameOptionsProvider>
             <Router>
               {/* <div className="fixed"> */}
-              {/* <BackgroundProvider /> */}
+              <BackgroundProvider />
               {/* </div> */}
 
               <div

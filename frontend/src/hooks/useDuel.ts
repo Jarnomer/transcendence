@@ -3,20 +3,13 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
+  ChatMessageEvent,
   useGameOptionsContext,
   useModal,
   useNavigationAccess,
   useUser,
   useWebSocketContext,
 } from '@contexts';
-
-type DuelPayload = {
-  queue_id: string;
-  sender_id: string;
-  receiver_id: string;
-  display_name: string;
-  avatar_url: string;
-};
 
 export const useDuel = () => {
   const { openModal } = useModal();
@@ -33,30 +26,26 @@ export const useDuel = () => {
     navigate('/gameMenu');
   };
 
-  const handleDuel = (event: DuelPayload) => {
-    console.log('opening modal');
+  const handleDuel = (duelEvent: ChatMessageEvent & { queue_id: string }) => {
+    console.log('opening modal for duel', duelEvent);
     openModal('joinGameModal', {
       onAccept: () => {
-        if (!event) return;
-        const { queue_id } = event;
         console.log('joining game..');
         allowInternalNavigation();
-        setQueueId(queue_id);
+        setQueueId(duelEvent.queue_id);
         setLobby('join');
         setMode('1v1');
         setDifficulty('online');
         navigate('/game');
       },
       onDecline: () => {
-        if (!event) return;
-        const { queue_id, sender_id, receiver_id } = event;
         console.log('Declining game..');
         const message = {
           type: 'duel_decline',
           payload: {
-            queue_id: queue_id,
-            sender_id: receiver_id,
-            receiver_id: sender_id,
+            queue_id: duelEvent.queue_id,
+            sender_id: duelEvent.receiver_id,
+            receiver_id: duelEvent.sender_id,
             display_name: user?.display_name,
             avatar_url: user?.avatar_url,
           },
