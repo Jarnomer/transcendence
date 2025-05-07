@@ -1,5 +1,4 @@
 import { Static, Type } from '@sinclair/typebox';
-// } from '../../node_modules/.pnpm/@sinclair+typebox@0.34.30/node_modules/@sinclair/typebox';
 
 export const UserIdSchema = Type.Object({
   user_id: Type.String(),
