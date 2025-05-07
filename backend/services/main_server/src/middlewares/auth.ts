@@ -27,7 +27,7 @@ async function authPlugin(fastify: FastifyInstance) {
   });
 }
 
-async function authHttp(fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+async function authHttp(_fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
   const token = request.headers.authorization?.split(' ')[1];
   if (!token) {
     throw new NotAuthorizedError('No token provided for http');

@@ -32,7 +32,7 @@ class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  public handleError(error: any, request: any, reply: any) {
+  public handleError(error: any, _request: any, reply: any) {
     console.error('Caught Error:', error);
     if (error instanceof ServiceError) {
       return reply.status(error.statusCode).send({ error: error.message });
