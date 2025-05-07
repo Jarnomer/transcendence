@@ -9,8 +9,8 @@ import { useMatchmaking } from '@/hooks';
 import { useGameOptionsContext, useModal, useUser, useWebSocketContext } from '@contexts';
 
 import {
+  TournamentBracket,
   TournamentLobbyNav,
-  TournamentPlayerList,
   TournamentSettings,
   slideFromRightVariants,
 } from '@components/layout';
@@ -136,6 +136,9 @@ export const TournamentLobby: React.FC = () => {
     navigate('/game');
   };
 
+  console.log(bracket);
+  console.log(matchmakingState.participants);
+
   const onDecline = () => {
     console.log('Declining game..');
     cleanup();
@@ -157,6 +160,8 @@ export const TournamentLobby: React.FC = () => {
   useEffect(() => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
+
+  console.log(matchmakingState);
 
   return (
     <>
@@ -185,19 +190,8 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
-              ) : activeTab == 'players' ? (
-                <TournamentPlayerList players={bracket}></TournamentPlayerList>
               ) : (
-                <motion.div
-                  key="tournamentPlayerList"
-                  className="w-full h-full"
-                  variants={slideFromRightVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                >
-                  {/* <Spectate players={bracket}></Spectate> */}
-                </motion.div>
+                <TournamentBracket players={bracket}></TournamentBracket>
               )}
             </AnimatePresence>
           </motion.div>
