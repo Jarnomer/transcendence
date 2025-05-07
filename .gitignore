@@ -34,3 +34,9 @@ logs
 *.txt
 *.pdf
 *.bak
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

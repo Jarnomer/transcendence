@@ -63,7 +63,6 @@ export const NotificationsButton: React.FC = () => {
     };
   }, [isDropdownOpen]);
 
-  console.log(user, appContainer, isDropdownOpen);
   if (!user || !appContainer) return;
 
   return (
