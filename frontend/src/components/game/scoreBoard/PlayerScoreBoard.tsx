@@ -21,7 +21,9 @@ interface PlayerScoreBoardProps {
   };
 }
 
-const aiOptions = {
+type DifficultyKey = 'easy' | 'normal' | 'brutal';
+
+const aiOptions: Record<DifficultyKey, { avatar: string; name: string }> = {
   easy: {
     avatar: './src/assets/images/ai_easy.png',
     name: 'AI_EASY',

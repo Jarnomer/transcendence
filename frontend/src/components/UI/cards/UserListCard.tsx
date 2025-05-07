@@ -5,7 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { UserHoverCard } from '@components/UI';
 import { ListSvgContainer } from '@components/visual';
 
-export const UserListCard: React.FC<{ user: User; children: React.ReactNode }> = ({
+import { UserDataResponseType } from '@shared/types';
+
+export const UserListCard: React.FC<{ user: UserDataResponseType; children: React.ReactNode }> = ({
   user,
   children,
 }) => {

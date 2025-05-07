@@ -18,7 +18,7 @@ const animationVariants = {
   animate: {
     clipPath: 'inset(0 0% 0 0)',
     opacity: 1,
-    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut', delay: 0.5 },
+    transition: { duration: 1.0, ease: 'easeInOut', delay: 0.4 },
   },
   exit: {
     clipPath: 'inset(0 100% 0 0)',
@@ -64,10 +64,7 @@ export const LeaderBoard: React.FC = () => {
   async function fetchData() {
     setLoading(true);
     const res = await getUsersWithRank();
-    if (res) {
-      // console.log(res);
-      setUsers(res);
-    }
+    if (res) setUsers(res);
     setLoading(false);
   }
 
@@ -109,7 +106,6 @@ export const LeaderBoard: React.FC = () => {
               onClick={() => {
                 playSelectPowerUpSound();
                 handleNavigate(user.user_id);
-                // navigate(`/profile/${user.user_id}`);
               }}
               variants={itemVariants}
             >
