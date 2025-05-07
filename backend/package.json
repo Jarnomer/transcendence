@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "module-alias": "^2.2.3"
+    "module-alias": "^2.2.3",
+    "sqlite": "^5.1.1"
   }
 }

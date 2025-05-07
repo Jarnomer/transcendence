@@ -19,16 +19,13 @@ export class MatchmakingController {
   }
 
   async matchmake(ws: WebSocket, req: FastifyRequest) {
-    const { user_id, mode, queue_id } = req.query as {
+    const { user_id, mode } = req.query as {
       user_id: string;
       mode: string;
       queue_id: string;
     };
     console.log(`Matchmaking for ${user_id} in ${mode} mode`);
     this.matchmakingService.addClient(user_id, ws);
-    // queue_id
-    //   ? this.matchmakingService.joinQueue(queue_id, user_id, mode)
-    //   : this.matchmakingService.findMatch(user_id, mode);
     ws.on('close', () => {
       this.matchmakingService.removePlayerFromQueue(user_id, mode);
       this.matchmakingService.deleteClient(user_id);
@@ -40,17 +37,9 @@ export class MatchmakingController {
     ws.on('message', this.matchmakingService.handleMessage.bind(this.matchmakingService));
     ws.on('message', (message: string) => {
       const parsedMessage = JSON.parse(message);
-      // console.log('Received message:', parsedMessage);
       if (parsedMessage.type === 'ping') {
         ws.send(JSON.stringify({ type: 'pong', state: {} }));
       }
     });
-    // const user = await this.matchmakingService.enterMatchMaking(user_id, mode);
-    // if (!user) {
-    //   ws.send(JSON.stringify({ error: 'No match found' }));
-    //   return;
-    // }
-
-    //ws.send(JSON.stringify({ user }));
   }
 }

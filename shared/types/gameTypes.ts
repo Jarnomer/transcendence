@@ -133,6 +133,7 @@ export const defaultGameSettings: GameSettings = {
   enableSpin: true,
   enablePowerUps: true,
   powerUpTypes: {
+    [PowerUpType.NoType]: false,
     [PowerUpType.BiggerPaddle]: true,
     [PowerUpType.SmallerPaddle]: true,
     [PowerUpType.FasterPaddle]: true,
