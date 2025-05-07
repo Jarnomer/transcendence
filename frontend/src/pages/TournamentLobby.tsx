@@ -117,7 +117,7 @@ export const TournamentLobby: React.FC = () => {
     return bracket;
   }
 
-  const bracket = generateBracket(8);
+  const bracket = generateBracket(16);
 
   const fakePlayer = {
     user_id: user?.user_id,
@@ -179,7 +179,9 @@ export const TournamentLobby: React.FC = () => {
         <div className="flex flex-col md:flex-col gap-2 justify-center items-center w-full h-full flex-grow">
           <motion.div className="flex flex-col">
             <AnimatePresence mode="wait">
-              {activeTab === 'settings' ? (
+              {activeTab === 'matches' ? (
+                <TournamentBracket players={bracket}></TournamentBracket>
+              ) : activeTab === 'settings' ? (
                 <motion.div
                   key="tournamentSettings"
                   className="w-full "
