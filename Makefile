@@ -48,7 +48,7 @@ dev-logs:
 prod-logs:
 	@$(DOCKER_PROD) logs
 
-re: down dev
+re: down nuke dev
 
 fclean: down
 	@$(DOCKER_DEV) down -v --rmi all
