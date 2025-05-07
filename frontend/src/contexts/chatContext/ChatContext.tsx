@@ -197,13 +197,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const messageHandler = (event: MessageEvent) => {
-      const data = JSON.parse(event.data) as ChatMessageEvent;
-      handleChatMessage(data);
-    };
+    // const messageHandler = (event: MessageEvent) => {
+    //   const data = JSON.parse(event.data) as ChatMessageEvent;
+    //   handleChatMessage(data);
+    // };
 
-    chatSocket.addEventListener('message', messageHandler);
-    return () => chatSocket.removeEventListener('message', messageHandler);
+    chatSocket.addEventListener('message', handleChatMessage);
+    return () => chatSocket.removeEventListener('message', handleChatMessage);
   }, [messages]);
 
   useEffect(() => {

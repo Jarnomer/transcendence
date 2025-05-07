@@ -8,6 +8,8 @@ import { ClippedButton, ProfilePictureSmall } from '@components/UI';
 
 import { getBlockedUsers, unblockUser } from '@services';
 
+import { BlockedUserArrayType } from '@shared/types';
+
 // const animationVariants = {
 //   initial: {
 //     clipPath: 'inset(0 0 100% 0)',
@@ -27,7 +29,7 @@ import { getBlockedUsers, unblockUser } from '@services';
 
 export const UserSettings: React.FC = () => {
   const { userId } = useUser();
-  const [myBlockedUsers, setMyBlockedUsers] = useState<any[]>([]);
+  const [myBlockedUsers, setMyBlockedUsers] = useState<BlockedUserArrayType>([]);
   // const navigate = useNavigate();
 
   const handleSaveSettings = () => {

@@ -3,13 +3,20 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
-  ChatMessageEvent,
   useGameOptionsContext,
   useModal,
   useNavigationAccess,
   useUser,
   useWebSocketContext,
 } from '@contexts';
+
+type DuelPayload = {
+  queue_id: string;
+  sender_id: string;
+  receiver_id: string;
+  display_name: string;
+  avatar_url: string;
+};
 
 export const useDuel = () => {
   const { openModal } = useModal();
@@ -26,55 +33,48 @@ export const useDuel = () => {
     navigate('/gameMenu');
   };
 
-  const handleDuel = (event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data);
-
-      // Check if this is a duel type message
-      if (data.type === 'duel' && data.state) {
-        const duelEvent = data.state as ChatMessageEvent & { queue_id: string };
-
-        console.log('opening modal for duel', duelEvent);
-        openModal('joinGameModal', {
-          onAccept: () => {
-            console.log('joining game..');
-            allowInternalNavigation();
-            setQueueId(duelEvent.queue_id);
-            setLobby('join');
-            setMode('1v1');
-            setDifficulty('online');
-            navigate('/game');
+  const handleDuel = (event: DuelPayload) => {
+    console.log('opening modal');
+    openModal('joinGameModal', {
+      onAccept: () => {
+        if (!event) return;
+        const { queue_id } = event;
+        console.log('joining game..');
+        allowInternalNavigation();
+        setQueueId(queue_id);
+        setLobby('join');
+        setMode('1v1');
+        setDifficulty('online');
+        navigate('/game');
+      },
+      onDecline: () => {
+        if (!event) return;
+        const { queue_id, sender_id, receiver_id } = event;
+        console.log('Declining game..');
+        const message = {
+          type: 'duel_decline',
+          payload: {
+            queue_id: queue_id,
+            sender_id: receiver_id,
+            receiver_id: sender_id,
+            display_name: user?.display_name,
+            avatar_url: user?.avatar_url,
           },
-          onDecline: () => {
-            console.log('Declining game..');
-            const message = {
-              type: 'duel_decline',
-              payload: {
-                queue_id: duelEvent.queue_id,
-                sender_id: duelEvent.receiver_id,
-                receiver_id: duelEvent.sender_id,
-                display_name: user?.display_name,
-                avatar_url: user?.avatar_url,
-              },
-            };
-            sendMessage('chat', message);
-            cleanup();
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Error parsing duel event:', error);
-    }
+        };
+        sendMessage('chat', message);
+        cleanup();
+      },
+    });
   };
 
   useEffect(() => {
     console.log('useDuel mounted');
-    chatSocket.addEventListener('message', handleDuel);
+    chatSocket.addEventListener('duel', handleDuel);
     chatSocket.addEventListener('duel_decline', handleDecline);
 
     return () => {
       console.log('useDuel unmounted');
-      chatSocket.removeEventListener('message', handleDuel);
+      chatSocket.removeEventListener('duel', handleDuel);
       chatSocket.removeEventListener('duel_decline', handleDecline);
     };
   }, []);

@@ -89,8 +89,7 @@ export const Notifications: React.FC = () => {
     return <p>Loading...</p>;
   }
 
-  const handleAcceptFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
+  const handleAcceptFriendClick = (sender_id: string) => {
     acceptFriendRequest(sender_id)
       .then(() => {
         console.log('Friend request accepted');
@@ -102,8 +101,7 @@ export const Notifications: React.FC = () => {
       });
   };
 
-  const handleRejectFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
+  const handleRejectFriendClick = (sender_id: string) => {
     rejectFriendRequest(sender_id)
       .then(() => {
         console.log('Friend request rejected');
@@ -115,12 +113,11 @@ export const Notifications: React.FC = () => {
       });
   };
 
-  const handleNotificationClick = async (event, request: any) => {
+  const handleNotificationClick = async (request: any) => {
     console.log('notification clicked');
     console.log('request:', request);
     console.log('request type:', request.type);
 
-    event.stopPropagation();
     switch (request.type) {
       case 'friend_request':
         await markNotificationAsSeen(request.notification_id);
@@ -164,7 +161,10 @@ export const Notifications: React.FC = () => {
             <li key={index}>
               <div
                 className="flex items-center justify-start gap-2 text-secondary"
-                onClick={(event) => handleNotificationClick(event, request)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleNotificationClick(request);
+                }}
               >
                 <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-secondary border-1">
                   <img src={request.avatar_url} className="object-contain"></img>
@@ -176,13 +176,19 @@ export const Notifications: React.FC = () => {
                       id={`accept-friend-${request.user_id}`}
                       icon="checkCircle"
                       ariaLabel="accept friend request"
-                      onClick={(event) => handleAcceptFriendClick(event, request.user_id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleAcceptFriendClick(request.user_id);
+                      }}
                     />
                     <NavIconButton
                       id={`reject-friend-${request.user_id}`}
                       icon="xCircle"
                       ariaLabel="reject friend request"
-                      onClick={(event) => handleRejectFriendClick(event, request.user_id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleRejectFriendClick(request.user_id);
+                      }}
                     />
                   </div>
                 )}

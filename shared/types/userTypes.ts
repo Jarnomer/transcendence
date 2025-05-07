@@ -102,6 +102,33 @@ export const UserDataResponseSchema = Type.Object({
   username: Type.String(),
 });
 
+export const SessionStatusSchema = Type.Object({
+  game_session: Type.Optional(Type.Boolean()),
+  queue_session: Type.Optional(Type.Boolean()),
+});
+
+export const UserFriendsSchema = Type.Array(
+  Type.Object({
+    user_id: Type.String(),
+    display_name: Type.String(),
+    status: Type.String(),
+    avatar_url: Type.String(),
+  })
+);
+
+export const BlockedUserSchema = Type.Object({
+  user_id: Type.String(),
+  display_name: Type.String(),
+  avatar_url: Type.String(),
+  username: Type.String(),
+});
+
+export const BlockedUserSchemaArray = Type.Array(BlockedUserSchema);
+
+export type BlockedUserType = Static<typeof BlockedUserSchema>;
+export type BlockedUserArrayType = Static<typeof BlockedUserSchemaArray>;
+export type UserFriendsType = Static<typeof UserFriendsSchema>;
+export type SessionStatusType = Static<typeof SessionStatusSchema>;
 export type UserDataResponseType = Static<typeof UserDataResponseSchema>;
 export type UserUpdateType = Static<typeof UserUpdateSchema>;
 export type AllResponseRankType = Static<typeof AllResponseRankSchema>;

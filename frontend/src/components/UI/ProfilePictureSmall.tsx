@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { FriendType, UserDataResponseType } from '@shared/types';
+import { BlockedUserType, FriendType } from '@shared/types';
 
 interface ProfilePictureProps {
-  user?: UserDataResponseType;
+  user?: BlockedUserType;
   friend?: FriendType;
   avatarUrl: string;
 }
