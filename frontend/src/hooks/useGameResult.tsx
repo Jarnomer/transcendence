@@ -116,50 +116,50 @@ export const useGameResult = () => {
   //   }, [gameStatus, gameId, gameState, dispatch, navigate]);
 
   // Cleanup
-  useEffect(() => {
-    return () => {
-      console.log('Cleanup');
-      if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
-      if (gameIdRef.current === 'local_game_id') {
-        dispatch({ type: 'GAME_RESET' });
-        // cleanup();
-        // resetGameOptions();
-        if (mode !== 'tournamnet') {
-          // navigate('/gameMenu');
-        }
-        return;
-      }
-      console.log('Submitting game result:', gameIdRef.current);
-      // closeConnection('game');
-      const { players } = gameStateRef.current;
-      const playerArray = [players.player1, players.player2];
-      const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
-      const loserIndex = winnerIndex === 0 ? 1 : 0;
+  // useEffect(() => {
+  //   return () => {
+  //     console.log('Cleanup');
+  //     if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
+  //     if (gameIdRef.current === 'local_game_id') {
+  //       dispatch({ type: 'GAME_RESET' });
+  //       // cleanup();
+  //       // resetGameOptions();
+  //       if (mode !== 'tournamnet') {
+  //         // navigate('/gameMenu');
+  //       }
+  //       return;
+  //     }
+  //     console.log('Submitting game result:', gameIdRef.current);
+  //     // closeConnection('game');
+  //     const { players } = gameStateRef.current;
+  //     const playerArray = [players.player1, players.player2];
+  //     const winnerIndex = playerArray.findIndex((e) => e.id !== userIdRef.current);
+  //     const loserIndex = winnerIndex === 0 ? 1 : 0;
 
-      console.log('Submitting game result:', gameResult);
-      submitResult({
-        game_id: gameIdRef.current,
-        winner_id: playerArray[winnerIndex].id,
-        loser_id: playerArray[loserIndex].id,
-        winner_score: playerArray[winnerIndex].score,
-        loser_score: playerArray[loserIndex].score,
-      })
-        .then(() => {
-          dispatch({ type: 'GAME_RESET' });
-        })
-        .catch((err) => {
-          console.error('Error submitting game result:', err);
-        })
-        .finally(() => {
-          // resetGameOptions();
-          closeConnection('game');
-          setGameId('');
-          // cleanup();
-          if (mode !== 'tournamnet') {
-            // navigate('/gameMenu');
-          }
-        });
-    };
-  }, []);
+  //     console.log('Submitting game result:', gameResult);
+  //     submitResult({
+  //       game_id: gameIdRef.current,
+  //       winner_id: playerArray[winnerIndex].id,
+  //       loser_id: playerArray[loserIndex].id,
+  //       winner_score: playerArray[winnerIndex].score,
+  //       loser_score: playerArray[loserIndex].score,p
+  //     })
+  //       .then(() => {
+  //         dispatch({ type: 'GAME_RESET' });
+  //       })
+  //       .catch((err) => {
+  //         console.error('Error submitting game result:', err);
+  //       })
+  //       .finally(() => {
+  //         // resetGameOptions();
+  //         closeConnection('game');
+  //         setGameId('');
+  //         // cleanup();
+  //         if (mode !== 'tournamnet') {
+  //           // navigate('/gameMenu');
+  //         }
+  //       });
+  //   };
+  // }, []);
   return { gameResult };
 };
