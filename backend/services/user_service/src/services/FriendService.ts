@@ -1,6 +1,6 @@
 import { Database } from 'sqlite';
 
-import { BadRequestError } from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError } from '@my-backend/main_server';
 
 import { FriendModel } from '../models/FriendModel';
 
