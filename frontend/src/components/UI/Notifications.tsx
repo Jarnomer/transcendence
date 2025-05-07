@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { useUser } from '@contexts';
+import { useModal, useUser } from '@contexts';
 
 import { NavIconButton } from '@components/UI';
 
@@ -15,6 +15,8 @@ import {
   markNotificationAsSeen,
   rejectFriendRequest,
 } from '@services';
+
+import { useMediaQuery } from '../../hooks';
 
 const animationVariants = {
   initial: {
@@ -39,6 +41,8 @@ export const Notifications: React.FC = () => {
   const { user, refetchUser, refetchRequests } = useUser();
   const [notifications, setNotifications] = useState<any[]>([]);
   const navigate = useNavigate();
+  const { closeModal } = useModal();
+  const isDesktop = useMediaQuery('(min-width: 600px)');
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -116,11 +120,13 @@ export const Notifications: React.FC = () => {
     console.log('request:', request);
     console.log('request type:', request.type);
 
-    
     event.stopPropagation();
     switch (request.type) {
       case 'friend_request':
         await markNotificationAsSeen(request.notification_id);
+        if (!isDesktop) {
+          closeModal('notifications');
+        }
         navigate(`/profile/${request.user_id}`);
         break;
       default:
@@ -133,13 +139,26 @@ export const Notifications: React.FC = () => {
   console.log('notficitations: ', notifications);
   return (
     <motion.div
-      className=" "
+      className="h-full w-full glass-box"
       variants={animationVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <ul className="flex flex-col gap-1">
+      {!isDesktop && (
+        <div className="w-full bg-primary text-black justify-between flex">
+          <h1 className="">Notifications</h1>
+          <NavIconButton
+            icon="close"
+            onClick={() => {
+              closeModal('notifications');
+            }}
+            id="close-notifications-button"
+            ariaLabel="close notifications"
+          ></NavIconButton>
+        </div>
+      )}
+      <ul className="flex flex-col gap-1 p-5">
         {notifications.length > 0 ? (
           notifications.map((request: any, index: number) => (
             <li key={index}>

@@ -25,15 +25,15 @@ type DifficultyKey = 'easy' | 'normal' | 'brutal';
 
 const aiOptions: Record<DifficultyKey, { avatar: string; name: string }> = {
   easy: {
-    avatar: './src/assets/images/ai_easy.png',
+    avatar: '/images/avatars/ai_easy.png',
     name: 'AI_EASY',
   },
   normal: {
-    avatar: './src/assets/images/ai.png',
+    avatar: '/images/avatars/ai.png',
     name: 'AI_NORMAL',
   },
   brutal: {
-    avatar: './src/assets/images/ai_hard.png',
+    avatar: '/images/avatars/ai_hard.png',
     name: 'AI_BRUTAL',
   },
 };
@@ -53,9 +53,7 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   });
 
   useEffect(() => {
-    console.log('playerScoreBoard useEffect playerdata: ', playersData);
     if (!playersData?.player1) {
-      console.log('playerdata null, returning');
       return;
     }
     if (playersData.player1 && player1Ref.current !== playersData.player1) {
@@ -65,13 +63,11 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
       };
 
       if (mode === 'singleplayer') {
-        console.log('singleplayer mode');
         player2Ref.current = {
           display_name: aiOptions[difficulty].name,
           avatar_url: aiOptions[difficulty].avatar,
         };
       } else {
-        console.log('multiplayer mode');
         player2Ref.current = {
           display_name: playersData.player2?.display_name,
           avatar_url: playersData.player2?.avatar_url,
@@ -93,13 +89,13 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
       <PlayerScoreCard
         name={player1Ref.current?.display_name || 'Guest'}
         score={playerScores.current.player1Score}
-        imageSrc={player1Ref.current?.avatar_url || './src/assets/images/default_avatar.png'}
+        imageSrc={player1Ref.current?.avatar_url || '/images/avatars/default_avatar.png'}
         player_num={1}
       />
       <PlayerScoreCard
         name={player2Ref.current?.display_name || 'Mystery Man'}
         score={playerScores.current.player2Score}
-        imageSrc={player2Ref.current?.avatar_url || './src/assets/images/default_avatar.png'}
+        imageSrc={player2Ref.current?.avatar_url || '/images/avatars/default_avatar.png'}
         player_num={2}
       />
     </div>

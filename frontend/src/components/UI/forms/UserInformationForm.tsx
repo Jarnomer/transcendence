@@ -112,8 +112,6 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({ setLoading, lo
     bio: user?.bio ? user.bio : '',
   });
 
-  console.log(user);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

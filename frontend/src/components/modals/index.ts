@@ -5,4 +5,5 @@ export * from './ErrorModal';
 export * from './JoinGameNotification';
 export * from './ModalBackgroundGlitch';
 export * from './ModalWrapper';
+export * from './NotificationsModal';
 export * from './SettingsModal';

@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const avatarList = [
-  './src/assets/images/ai_easy.png',
-  './src/assets/images/ai_hard.png',
-  './src/assets/images/ai.png',
-  './src/assets/images/ai_3.png',
+  '/images/avatars/ai_easy.png',
+  '/images/avatars/ai_hard.png',
+  '/images/avatars/ai.png',
+  '/avatars/images/ai_3.png',
 ];
 
 export const ChangingAvatar: React.FC = () => {
@@ -18,12 +18,10 @@ export const ChangingAvatar: React.FC = () => {
         do {
           newAvatar = avatarList[Math.floor(Math.random() * avatarList.length)];
         } while (newAvatar === prev);
-        console.log('changing avatar');
         return newAvatar;
       });
     }, 300);
     return () => {
-      console.log('clearing interval');
       clearInterval(interval);
     };
   }, []);

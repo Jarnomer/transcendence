@@ -59,6 +59,10 @@ export const Friend: React.FC<FriendProps> = ({ friend }) => {
         <img
           className="object-cover w-full h-full"
           src={friend.avatar_url}
+          onError={(e) => {
+            e.currentTarget.onerror = null; // Prevent infinite loop
+            e.currentTarget.src = '/images/avatars/default_avatar.png';
+          }}
           alt={`${friend.display_name}'s profile picture`}
         />
       </div>
@@ -68,7 +72,6 @@ export const Friend: React.FC<FriendProps> = ({ friend }) => {
 };
 
 export const FriendList: React.FC<FriendListProps> = ({ friends }) => {
-  console.log('FRIENDS FROM FRIENDLIST: ', friends);
   const navigate = useNavigate();
   return friends && friends.length > 0 ? (
     <motion.ul
@@ -102,7 +105,7 @@ export const FriendList: React.FC<FriendListProps> = ({ friends }) => {
         <div className="relative border h-[100px] w-[100px] overflow-hidden">
           <img
             className="object-cover grayscale w-full h-full opacity-50"
-            src={'/uploads/default_avatar.png'}
+            src={'/images/avatars/default_avatar.png'}
           />
         </div>
         <span className="text-xs font-medium">{}</span>

@@ -13,8 +13,8 @@ export const MobileNavBar: React.FC = () => {
   if (isDesktop || location.pathname === '/game' || location.pathname === '/chat') return null;
 
   return (
-    <nav className="fixed bottom-0 w-full z-20 backdrop-blur-md text-primary p-2 border-t border-primary">
+    <div className="fixed bottom-0 w-full z-20 backdrop-blur-md text-primary p-2 border-t border-primary">
       <HeaderNav />
-    </nav>
+    </div>
   );
 };
