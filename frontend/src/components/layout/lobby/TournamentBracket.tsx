@@ -59,13 +59,13 @@ const Round: React.FC<{
   const rightHalf = competitors.slice(mid);
   const round = parseInt(competitors[0].round);
 
-  console.log('------ ROUND: ', round, '--------');
-  console.log('matches from round: ', competitors);
-  console.log('leftHalf: ', leftHalf);
-  console.log('rightHalf: ', rightHalf);
-  console.log('maxRounds: ', maxRounds);
-  console.log('competitors', competitors);
-  console.log('------------------------');
+  // console.log('------ ROUND: ', round, '--------');
+  // console.log('matches from round: ', competitors);
+  // console.log('leftHalf: ', leftHalf);
+  // console.log('rightHalf: ', rightHalf);
+  // console.log('maxRounds: ', maxRounds);
+  // console.log('competitors', competitors);
+  // console.log('------------------------');
 
   if (competitors.length === 1) {
     // console.log('Single match round:', round);
@@ -110,9 +110,6 @@ const Round: React.FC<{
         <ol className="flex h-full flex-col justify-around">
           {leftHalf.map((match, idx) => (
             <div className={` `} key={`left-${idx}`}>
-              {/* <p>
-                round: {round} index: {idx}
-              </p> */}
               <Competitor player={match.players[0]} side="left" />
               <Competitor player={match.players[1]} side="left" />
             </div>
@@ -125,9 +122,6 @@ const Round: React.FC<{
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
-              {/* <p>
-                round: {round} index: {idx}
-              </p> */}
               <Competitor player={match.players[0]} side="right" />
               <Competitor player={match.players[1]} side="right" />
             </div>
@@ -143,31 +137,12 @@ interface tournamentBracketProps {
 }
 
 export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players }) => {
-  // Create rounds based on number of players
-
   if (!players) return;
   const gridCols = players.length * 2;
   console.log('playersLength:', players.length, ' gridCols: ', gridCols);
-  // console.log('players from bracket component:', players);
-  // console.log('players.length: ', players.length, 'grid cols:', gridCols);
-
-  const container = document.getElementById('app-main-container');
-  if (!container) return null;
 
   return (
     <div className=" w-full h-full flex  ">
-      {/* <TransformWrapper
-        initialScale={1}
-        minScale={1}
-        maxScale={4}
-        wheel={{
-          wheelEnabled: true,
-          touchPadEnabled: true, // this is important
-          step: 0.1,
-        }}
-        doubleClick={{ disabled: true }}
-      >
-        <TransformComponent> */}
       <div
         className="grid grid-rows-1 w-full overflow-x-scroll"
         style={{
@@ -184,8 +159,6 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
           />
         ))}
       </div>
-      {/* </TransformComponent>
-      </TransformWrapper> */}
     </div>
   );
 };

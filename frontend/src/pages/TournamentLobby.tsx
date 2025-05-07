@@ -89,7 +89,7 @@ export const TournamentLobby: React.FC = () => {
     }
   }, [matchmakingState.phase, location.pathname]);
 
-  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET
+  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET, DELETE LATER
 
   function generateBracket(playerCount: number): TournamentMatch[][] {
     const totalRounds = Math.log2(playerCount);
@@ -131,13 +131,13 @@ export const TournamentLobby: React.FC = () => {
   };
   bracket[0][0].players = [fakePlayer, fakePlayer2];
 
+  console.log(bracket);
+  /// END OF DUMMY DATA
+
   const onAccept = () => {
     console.log('joining game..');
     navigate('/game');
   };
-
-  console.log(bracket);
-  console.log(matchmakingState.participants);
 
   const onDecline = () => {
     console.log('Declining game..');
@@ -179,7 +179,9 @@ export const TournamentLobby: React.FC = () => {
         <div className="flex flex-col md:flex-col gap-2 justify-center items-center w-full h-full flex-grow">
           <motion.div className="flex flex-col">
             <AnimatePresence mode="wait">
-              {activeTab === 'matches' ? (
+              {activeTab === 'fakeBracket' ? (
+                // BRACKET FILLED WITH FAKE DATA
+
                 <TournamentBracket players={bracket}></TournamentBracket>
               ) : activeTab === 'settings' ? (
                 <motion.div
@@ -192,10 +194,12 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
-              ) : matchmakingState.phase === 'completed' ? (
-                <TournamentBracket players={matchmakingState.matches}></TournamentBracket>
               ) : (
-                <span>waiting for more players to join</span>
+                // BRACKET FILLED WITH REAL DATA
+                <TournamentBracket players={matchmakingState.matches}></TournamentBracket>
+                // ) : (
+                //   <span>waiting for more players to join</span>
+                //
               )}
             </AnimatePresence>
           </motion.div>

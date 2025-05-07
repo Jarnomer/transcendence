@@ -52,8 +52,8 @@ const Round: React.FC<{
   matches: TournamentMatch[];
   competitors: TournamentMatch[];
   roundIndex: number;
-  maxRounds: number;
-}> = ({ competitors, maxRounds }) => {
+  gridCols: number;
+}> = ({ competitors, gridCols }) => {
   const mid = Math.ceil(competitors.length / 2);
   const leftHalf = competitors.slice(0, mid);
   const rightHalf = competitors.slice(mid);
@@ -109,9 +109,6 @@ const Round: React.FC<{
         <ol className="flex h-full flex-col justify-around">
           {leftHalf.map((match, idx) => (
             <div className={` `} key={`left-${idx}`}>
-              {/* <p>
-                round: {round} index: {idx}
-              </p> */}
               <Competitor player={match.players[0]} side="left" />
               <Competitor player={match.players[1]} side="left" />
             </div>
@@ -120,13 +117,10 @@ const Round: React.FC<{
       </div>
 
       {/* Right side */}
-      <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
+      <div style={{ gridColumnStart: gridCols - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
-              {/* <p>
-                round: {round} index: {idx}
-              </p> */}
               <Competitor player={match.players[0]} side="right" />
               <Competitor player={match.players[1]} side="right" />
             </div>
@@ -145,27 +139,10 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
   // Create rounds based on number of players
 
   if (!players) return;
-  const gridCols = players.length * 2;
-  // console.log('players from bracket component:', players);
-  // console.log('players.length: ', players.length, 'grid cols:', gridCols);
-
-  const container = document.getElementById('app-main-container');
-  if (!container) return null;
+  const gridCols = players.length * 2 + 1;
 
   return (
     <div className=" w-full h-full flex  ">
-      {/* <TransformWrapper
-        initialScale={1}
-        minScale={1}
-        maxScale={4}
-        wheel={{
-          wheelEnabled: true,
-          touchPadEnabled: true, // this is important
-          step: 0.1,
-        }}
-        doubleClick={{ disabled: true }}
-      >
-        <TransformComponent> */}
       <div
         className="grid grid-rows-1 w-full overflow-x-scroll"
         style={{
@@ -178,12 +155,10 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
             key={'round_' + index}
             roundIndex={index}
             competitors={round}
-            maxRounds={gridCols + 1}
+            gridCols={gridCols}
           />
         ))}
       </div>
-      {/* </TransformComponent>
-      </TransformWrapper> */}
     </div>
   );
 };
