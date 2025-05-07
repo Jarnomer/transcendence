@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useGameOptionsContext, useNavigationAccess } from '@contexts';
+import { useGameOptionsContext, useModal, useNavigationAccess } from '@contexts';
 
 import { GameMenuCard } from '@components/layout';
 import { NavIconButton } from '@components/UI';
@@ -42,8 +42,9 @@ export const GameMenu: React.FC = () => {
   // const [readyForNextEffect, setReadyForNextEffect] = useState(false);
 
   const navigate = useNavigate(); // Hook to navigate to different routes
-  const { setMode, setDifficulty, setLobby, difficulty, mode } = useGameOptionsContext();
+  const { setMode, setDifficulty, setLobby, difficulty, mode, lobby } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
+  const { isModalOpen } = useModal();
 
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
   const playGoBackSound = useSound('/sounds/effects/button_go_back.wav');
@@ -141,14 +142,22 @@ export const GameMenu: React.FC = () => {
   // Effect that only runs after state is reset
   useEffect(() => {
     if (!isNewGame) return;
+    if (isModalOpen('joinGameModal')) return;
     console.log('game menu useEffect: ', mode, difficulty);
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
     } else if (mode && difficulty) {
       allowInternalNavigation();
-      if (mode === '1v1' && difficulty === 'online') {
+      if (mode === '1v1' && difficulty === 'online' && lobby === 'create') {
+        console.log('1v1 random online');
         setLobby('random');
+        setMode('1v1');
+        setDifficulty('online');
+        navigate('/game');
+      } else if (mode === '1v1' && difficulty === 'online' && lobby === 'join') {
+        console.log('1v1 join online');
+        setLobby('join');
         setMode('1v1');
         setDifficulty('online');
         navigate('/game');

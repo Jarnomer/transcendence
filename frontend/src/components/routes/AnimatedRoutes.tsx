@@ -25,7 +25,7 @@ import { LoadingProvider, useNavigationAccess, useUser } from '@contexts';
 
 import { PageWrapper } from '@components/routes';
 
-import { useSound } from '@hooks';
+import { useDuel, useSound } from '@hooks';
 
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
@@ -42,6 +42,8 @@ export const AnimatedRoutes: React.FC = () => {
       console.log('Cleanup');
     };
   }, [location]);
+
+  useDuel();
 
   return (
     <AnimatePresence mode="wait">

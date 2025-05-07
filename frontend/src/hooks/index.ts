@@ -1,5 +1,6 @@
 export * from './useChatSocket';
 export * from './useConfirm';
+export * from './useDuel';
 export * from './useFetchPlayers';
 export * from './useGameControls';
 export * from './useGameMusic';

@@ -31,6 +31,10 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
     setLoading(true);
     if (isPending) {
       // HANDLE CANCELING FRIEND REQUEST HERE
+      await cancelsentRequest(receiverUserId);
+      refetchRequests();
+      refetchUser();
+      setIsPending(false);
       console.log('cancelling friend request');
     } else {
       try {
@@ -51,8 +55,8 @@ export const AddFriend: React.FC<AddFriendButtonProps> = ({ receiverUserId }) =>
     }
   }, [sentRequests, receiverUserId]);
 
-  console.log(user?.friends);
-  console.log('isPending:', isPending);
+  // console.log(user?.friends);
+  // console.log('isPending:', isPending);
 
   if (user?.friends && user.friends.some((friend) => friend.user_id === receiverUserId))
     return null;

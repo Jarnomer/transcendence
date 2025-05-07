@@ -1,5 +1,5 @@
 // WebSocket context
-export { WebSocketProvider, useWebSocketContext } from './WebSocketContext';
+export { useWebSocketContext, WebSocketProvider } from './WebSocketContext';
 
 // User context
 export { UserProvider, useUser } from './user/UserContext';

@@ -56,9 +56,9 @@ export const CreateTournament: React.FC = () => {
             Player Count: {playerCount}
             <input
               type="range"
-              min={2}
+              min={4}
               max={16}
-              step={2}
+              step={4}
               value={playerCount}
               onChange={(e) => setPlayerCount(Number(e.target.value))}
               className="block  h-2 rounded-lg appearance-none cursor-pointer"

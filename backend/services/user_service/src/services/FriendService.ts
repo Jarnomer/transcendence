@@ -54,6 +54,7 @@ export class FriendService {
   }
 
   async rejectFriendRequest(user_id: string, sender_id: string) {
+    await this.friendModel.deleteNotification(sender_id);
     const res = await this.friendModel.rejectFriendRequest(user_id, sender_id);
     if (!res) {
       throw new BadRequestError('Could not reject friend request');
@@ -62,6 +63,7 @@ export class FriendService {
   }
 
   async cancelFriendRequest(user_id: string, receiver_id: string) {
+    await this.friendModel.deleteNotification(user_id);
     const res = await this.friendModel.cancelFriendRequest(user_id, receiver_id);
     if (res.changes === 0) {
       throw new BadRequestError('Could not cancel friend request');

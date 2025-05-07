@@ -45,6 +45,19 @@ export async function rejectFriendRequest(sender_id: string) {
   }
 }
 
+export async function cancelsentRequest(receiver_id: string) {
+  try {
+    const res = await api.delete<MessageResponseType>(`/friend/request/${receiver_id}`);
+    if (res.status !== 204) {
+      throw new Error(`Error ${res.status}: Failed to cancel friend request`);
+    }
+    return res.data;
+  } catch (err) {
+    console.error('Failed to cancel friend request:', err);
+    throw err;
+  }
+}
+
 export async function getRequestsSent() {
   try {
     const res = await api.get<SentResponseType>(`/friend/requests/sent`);

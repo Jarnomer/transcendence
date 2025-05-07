@@ -22,7 +22,10 @@ export const ChangingAvatar: React.FC = () => {
         return newAvatar;
       });
     }, 300);
-    return () => clearInterval(interval);
+    return () => {
+      console.log('clearing interval');
+      clearInterval(interval);
+    };
   }, []);
 
   return (

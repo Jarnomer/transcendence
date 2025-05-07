@@ -34,6 +34,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const roomIdRef = useRef(roomId);
 
+
   useEffect(() => {
     console.log('ChatProvider mounted');
     return () => {

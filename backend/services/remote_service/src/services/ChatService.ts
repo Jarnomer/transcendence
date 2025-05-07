@@ -127,6 +127,33 @@ export class ChatService {
     };
   }
 
+  createDuelMessage(payload: any) {
+    return {
+      type: 'duel',
+      state: {
+        queue_id: payload.queue_id || '',
+        sender_id: payload.sender_id,
+        receiver_id: payload.receiver_id || '',
+        display_name: payload.display_name || '',
+        avatar_url: payload.avatar_url || '',
+        created_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  createDuelDeclineMessage(payload: any) {
+    return {
+      type: 'duel_decline',
+      state: {
+        queue_id: payload.queue_id || '',
+        sender_id: payload.sender_id,
+        receiver_id: payload.receiver_id || '',
+        display_name: payload.display_name || '',
+        avatar_url: payload.avatar_url || '',
+      },
+    };
+  }
+
   async handleRoomMessage(payload: any) {
     await this.chatModel.saveToDatabase(payload.room_id, payload.sender_id, payload.message);
     const sender = this.clients.get(payload.sender_id)!;
@@ -152,6 +179,24 @@ export class ChatService {
     }
   }
 
+  handleDuelMessage(payload: any) {
+    const sender = this.clients.get(payload.sender_id)!;
+    const receiver = this.clients.get(payload.receiver_id)!;
+    if (receiver) {
+      console.log('Sending duel message to:', payload.receiver_id);
+      this.sendDm(payload.receiver_id, this.createDuelMessage(payload));
+    }
+  }
+
+  handleDuelDeclineMessage(payload: any) {
+    const sender = this.clients.get(payload.sender_id)!;
+    const receiver = this.clients.get(payload.receiver_id)!;
+    if (receiver) {
+      console.log('Sending duel decline message to:', payload.receiver_id);
+      this.sendDm(payload.receiver_id, this.createDuelDeclineMessage(payload));
+    }
+  }
+
   async handleMessage(message: string) {
     const data = JSON.parse(message);
     // console.log('Received message:', data);
@@ -166,6 +211,14 @@ export class ChatService {
     if (data.type === 'dm') {
       console.log('Handling DM message:', data.payload);
       await this.handleDmMessage(data.payload);
+    }
+    if (data.type === 'duel') {
+      console.log('Handling duel message:', data.payload);
+      await this.handleDuelMessage(data.payload);
+    }
+    if (data.type === 'duel_decline') {
+      console.log('Handling duel decline message:', data.payload);
+      this.handleDuelDeclineMessage(data.payload);
     }
   }
 
