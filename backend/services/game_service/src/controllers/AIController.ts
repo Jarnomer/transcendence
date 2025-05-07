@@ -1,4 +1,4 @@
-import { Ball, Player, GameParams, defaultGameParams, PowerUp, GameSettings } from '@shared/types';
+import { Ball, GameParams, GameSettings, Player, PowerUp, defaultGameParams } from '@shared/types';
 
 export class AIController {
   private plannedMoves: ('up' | 'down' | null)[] = [];
@@ -12,7 +12,7 @@ export class AIController {
   // difficulty levels: easy, normal, brutal
   constructor(settings: GameSettings, isPlayer1: boolean) {
     this.settings = settings;
-    this.difficulty = this.settings.difficulty;
+    this.difficulty = this.settings.difficulty || 'normal';
     this.isPlayer1 = isPlayer1;
   }
 

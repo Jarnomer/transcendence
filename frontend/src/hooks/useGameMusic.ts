@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 
-import { getGameMusicManager } from '@game/utils';
+import { useAudioSettings } from '@contexts';
+
+import { getGameMusicManager } from '@components/game';
 
 import { GameMode, GameStatus, MusicTrack } from '@shared/types';
-
-import { useAudioSettings } from '../contexts/audioContext/AudioSettingsContext';
 
 export const useGameMusic = (gameMode: GameMode, gameStatus?: GameStatus) => {
   const musicManagerRef = useRef(getGameMusicManager());
@@ -128,5 +128,3 @@ export const useGameMusic = (gameMode: GameMode, gameStatus?: GameStatus) => {
     },
   };
 };
-
-export default useGameMusic;

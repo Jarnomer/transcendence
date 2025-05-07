@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { UserDataResponseType } from '../../../../shared/types';
+import { UserDataResponseType } from '@shared/types';
 
 interface ProfilePictureProps {
   user: UserDataResponseType;

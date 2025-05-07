@@ -2,13 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
-import { submitResult } from '@/services/gameService';
+import { useGameOptionsContext, useLoading, useUser, useWebSocketContext } from '@contexts';
 
-import { GameState } from '@types';
+import { submitResult } from '@services';
 
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { GameState } from '@shared/types';
 
 export const useGameResult = () => {
   const navigate = useNavigate();
@@ -22,6 +20,7 @@ export const useGameResult = () => {
     setGameId,
     cleanup,
   } = useWebSocketContext();
+  const { setLoadingState } = useLoading();
   const { userId } = useUser();
   const gameIdRef = useRef<string | null>(null);
   const gameStateRef = useRef<GameState>(gameState);
@@ -29,7 +28,7 @@ export const useGameResult = () => {
   const gameStatusRef = useRef(gameStatus);
   const hasSubmittedResult = useRef(false);
 
-  const [gameResult, setGameResult] = useState(null);
+  const [gameResult, setGameResult] = useState<any | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -72,9 +71,11 @@ export const useGameResult = () => {
       };
       setGameResult(result);
       dispatch({ type: 'GAME_RESET' });
+      setLoadingState('matchMakingAnimationLoading', true);
+      setLoadingState(' scoreBoardLoading', true);
       // cleanup();
       // resetGameOptions();
-      // closeConnection('game');
+      closeConnection('game');
       if (mode !== 'tournamnet') {
         // navigate('/gameMenu');
       }
@@ -151,7 +152,7 @@ export const useGameResult = () => {
         })
         .finally(() => {
           // resetGameOptions();
-          // closeConnection('game');
+          closeConnection('game');
           setGameId('');
           // cleanup();
           if (mode !== 'tournamnet') {
@@ -162,5 +163,3 @@ export const useGameResult = () => {
   }, []);
   return { gameResult };
 };
-
-export default useGameResult;

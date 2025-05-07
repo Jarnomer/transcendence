@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     status TEXT CHECK(status IN ('online', 'offline', 'away', 'busy')) DEFAULT 'offline',
     game_settings TEXT DEFAULT '{}', -- JSON or TEXT for game settings
     audio_settings TEXT DEFAULT '{}', -- JSON or TEXT for audio settings
+    graphics_settings TEXT DEFAULT '{}', -- JSON or TEXT for graphics settings
     last_active DATETIME DEFAULT (CURRENT_TIMESTAMP),
     updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
 );
@@ -59,6 +60,14 @@ CREATE TABLE  IF NOT EXISTS friends (
   friend_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
   created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
   PRIMARY KEY (user_id, friend_id)
+);
+
+--blocked users
+CREATE TABLE IF NOT EXISTS blocked_users (
+  user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  blocked_user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+  created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+  PRIMARY KEY (user_id, blocked_user_id)
 );
 
 -- Chat Rooms Table (public, private, global)

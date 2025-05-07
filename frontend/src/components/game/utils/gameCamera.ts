@@ -1,4 +1,12 @@
-import { Animation, ArcRotateCamera, CubicEase, EasingFunction, Scene, Vector3 } from 'babylonjs';
+import {
+  Animation,
+  ArcRotateCamera,
+  CubicEase,
+  EasingFunction,
+  KeyboardEventTypes,
+  Scene,
+  Vector3,
+} from 'babylonjs';
 
 import { defaultGameAnimationTimings } from '@shared/types';
 
@@ -13,24 +21,48 @@ export interface ArcCameraAngle {
 }
 
 export const cinematicCameraAngles: ArcCameraAngle[] = [
+  // {
+  //   alpha: 0.8,
+  //   beta: Math.PI / 4,
+  //   radius: 45,
+  //   target: new Vector3(5, -5, 5),
+  // },
+  // {
+  //   alpha: Math.PI / 12,
+  //   beta: Math.PI / 2.8,
+  //   radius: 25,
+  //   target: new Vector3(2, -3, 0),
+  // },
+  // {
+  //   alpha: 0,
+  //   beta: Math.PI / 2.5,
+  //   radius: 15,
+  //   target: new Vector3(5, 0, 0),
+  // },
+  // {
+  //   alpha: -Math.PI / 3,
+  //   beta: Math.PI / 4,
+  //   radius: 32,
+  //   target: new Vector3(10, -4, 12),
+  // },
+  // {
+  //   alpha: -Math.PI / 4,
+  //   beta: Math.PI / 6,
+  //   radius: 25,
+  //   target: new Vector3(5, -2, 0),
+  // },
+  // {
+  //   alpha: Math.PI / 6,
+  //   beta: Math.PI / 3,
+  //   radius: 35,
+  //   target: new Vector3(-2, -5, -10),
+  // },
   {
     alpha: -0.5,
     beta: Math.PI / 3,
     radius: 30,
     target: new Vector3(10, 3, 10),
   },
-  // {
-  //   alpha: 1.8,
-  //   beta: 2.2,
-  //   radius: 40,
-  //   target: new Vector3(0, 0, 0),
-  // },
-  // {
-  //   alpha: 0,
-  //   beta: 0,
-  //   radius: 40,
-  //   target: new Vector3(0, 0, 0),
-  // },
 ];
 
 export const gameplayCameraAngles: ArcCameraAngle[] = [
@@ -42,18 +74,18 @@ export const gameplayCameraAngles: ArcCameraAngle[] = [
     target: new Vector3(0, 0, -100),
   },
   {
-    // Player 2 perspective
-    alpha: -Math.PI / 8,
-    beta: Math.PI / 3,
-    radius: 35,
-    target: new Vector3(-2, -7, 10),
-  },
-  {
     // Player 1 perspective
     alpha: Math.PI / 8,
     beta: Math.PI / 3,
     radius: 35,
-    target: new Vector3(-2, -7, -6),
+    target: new Vector3(-2, -9, -6),
+  },
+  {
+    // Player 2 perspective
+    alpha: -Math.PI / 8,
+    beta: Math.PI / 3,
+    radius: 35,
+    target: new Vector3(-2, -9, 10),
   },
 ];
 
@@ -331,4 +363,119 @@ export function animateGameplayCamera(
   });
 
   return animationTables;
+}
+
+/**
+ * Adds debug controls to an ArcRotateCamera
+ *
+ * Controls:
+ * - Arrow keys: Adjust alpha (left/right) and beta (up/down)
+ * - +/-: Adjust radius (distance)
+ * - WASD: Adjust target position (x/y)
+ * - Q/E: Adjust target position (z)
+ * - R: Reset to initial values
+ * - P: Print current values to console
+ */
+export function addCameraDebugControls(
+  camera: ArcRotateCamera,
+  scene: Scene,
+  enabled: boolean = false
+): () => void {
+  if (!enabled) return () => {};
+
+  // Store initial camera values
+  const initialValues = {
+    alpha: camera.alpha,
+    beta: camera.beta,
+    radius: camera.radius,
+    targetX: camera.target.x,
+    targetY: camera.target.y,
+    targetZ: camera.target.z,
+  };
+
+  if (enabled) console.log('Camera Debug Controls Enabled');
+
+  // Set step values for adjustments
+  const alphaStep = 0.05;
+  const betaStep = 0.05;
+  const radiusStep = 1;
+  const targetStep = 1;
+
+  // Create observer for key presses
+  const keyboardObserver = scene.onKeyboardObservable.add((kbInfo) => {
+    if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
+      switch (kbInfo.event.key) {
+        case 'ArrowLeft':
+          camera.alpha -= alphaStep;
+          break;
+        case 'ArrowRight':
+          camera.alpha += alphaStep;
+          break;
+        case 'ArrowUp':
+          camera.beta = Math.max(0.1, camera.beta - betaStep);
+          break;
+        case 'ArrowDown':
+          camera.beta = Math.min(Math.PI - 0.1, camera.beta + betaStep);
+          break;
+        case '+':
+        case '=':
+          camera.radius -= radiusStep;
+          break;
+        case '-':
+        case '_':
+          camera.radius += radiusStep;
+          break;
+        case 'a':
+          camera.target.x -= targetStep;
+          break;
+        case 'd':
+          camera.target.x += targetStep;
+          break;
+        case 'w':
+          camera.target.y += targetStep;
+          break;
+        case 's':
+          camera.target.y -= targetStep;
+          break;
+        case 'q':
+          camera.target.z -= targetStep;
+          break;
+        case 'e':
+          camera.target.z += targetStep;
+          break;
+        case 'r':
+          camera.alpha = initialValues.alpha;
+          camera.beta = initialValues.beta;
+          camera.radius = initialValues.radius;
+          camera.target = new Vector3(
+            initialValues.targetX,
+            initialValues.targetY,
+            initialValues.targetZ
+          );
+          console.log('Camera reset to initial values');
+          break;
+        case 'p':
+          printCameraValues(camera);
+          break;
+      }
+    }
+  });
+
+  // Return a function to disable the controls
+  return () => {
+    if (keyboardObserver) {
+      scene.onKeyboardObservable.remove(keyboardObserver);
+      console.log('Camera Debug Controls Disabled');
+    }
+  };
+}
+
+function printCameraValues(camera: ArcRotateCamera): void {
+  console.log('Current Camera Values:');
+  console.log(`{
+  alpha: ${camera.alpha.toFixed(2)},
+  beta: ${camera.beta.toFixed(2)},
+  radius: ${camera.radius.toFixed(2)},
+  target: new Vector3(${camera.target.x.toFixed(2)}, ${camera.target.y.toFixed(2)}, ${camera.target.z.toFixed(2)}),
+},`);
 }

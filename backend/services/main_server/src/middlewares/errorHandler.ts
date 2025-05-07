@@ -6,6 +6,11 @@ import fp from 'fastify-plugin';
 
 import { ServiceError } from './errors';
 
+enum ErrorCode {
+  UNKNOWN = 'UNKNOWN',
+  // Add other error codes as needed
+}
+
 class ErrorHandler {
   private static instance: ErrorHandler;
   private logFilePath: string;
@@ -27,7 +32,7 @@ class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  public handleError(error: any, reply: any) {
+  public handleError(error: any, _request: any, reply: any) {
     console.error('Caught Error:', error);
     if (error instanceof ServiceError) {
       return reply.status(error.statusCode).send({ error: error.message });

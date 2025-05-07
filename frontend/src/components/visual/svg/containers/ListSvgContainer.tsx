@@ -2,13 +2,12 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../../BackgroundGlow';
+import { BackgroundGlow } from '@components/visual';
 
 // rendered differently on safari , since it does not support foreign object
 
 export const ListSvgContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // const [supportsForeignObject, setSupportsForeignObject] = useState(true);
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   const supportsForeignObject = (() => {
     const ua = navigator.userAgent;

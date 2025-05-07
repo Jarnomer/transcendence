@@ -12,6 +12,7 @@ export default defineConfig({
       // Match exactly with the tsconfig.json path aliases
       '@': path.resolve(__dirname, './src'),
       '@pages': path.resolve(__dirname, './src/pages'),
+      '@contexts': path.resolve(__dirname, './src/contexts'),
       '@components': path.resolve(__dirname, './src/components'),
       '@game': path.resolve(__dirname, './src/components/game'),
       '@services': path.resolve(__dirname, './src/services'),

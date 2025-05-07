@@ -2,30 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { useAudioSettings } from '../../contexts/audioContext/AudioSettingsContext';
-import { useSound } from '../../hooks/useSound';
-import { volumeValueToLevel } from '../../services/audioService';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { CheckBox } from '../UI/forms/CheckBox';
-import { Slider } from '../UI/forms/Slider';
-import { BackgroundGlow } from '../visual/BackgroundGlow';
+import { useAudioSettings } from '@contexts';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 0 100% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+import { CheckBox, ClippedButton, Slider } from '@components/UI';
+
+import { volumeValueToLevel } from '@services';
+
+import { useSound } from '@hooks';
+
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 0 100% 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 interface SoundSettingsProps {
   level: number;
@@ -160,22 +160,9 @@ export const Soundsettings: React.FC = () => {
 
   return (
     <>
-      <motion.div
-        className="h-full min-h-[450px] relative glass-box mt-10 text-xs"
-        variants={animationVariants}
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-      >
-        <span
-          aria-hidden="true"
-          className="absolute top-0 left-0 bg-primary text-black w-full pointer-events-none"
-        >
-          <h1>Sound settings</h1>
-        </span>
-        <div className="w-full h-full relative overflow-hidden">
-          <BackgroundGlow></BackgroundGlow>
-          <div className="w-full h-full p-10">
+      <motion.div className="h-full w-full relative flex flex-col text-xs pb-5">
+        <div className="w-full h-full overflow-y-scroll">
+          <div className="w-full relative p-10">
             <h2 className="font-heading text-2xl">Game Sounds</h2>
             <SoundSettingSection
               isEnabled={gameSoundEnabled}
@@ -213,8 +200,8 @@ export const Soundsettings: React.FC = () => {
             />
           </div>
         </div>
-        <div className="absolute bottom-0 right-0 p-4">
-          <ClippedButton label={'Save'} onClick={handleSaveSettings} />
+        <div className="flex w-full grow-1 justify-end items-end pr-2 pb-2">
+          <ClippedButton label={'Save'} onClick={() => handleSaveSettings()} />
         </div>
       </motion.div>
     </>

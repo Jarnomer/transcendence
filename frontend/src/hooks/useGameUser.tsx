@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
+import { useGameOptionsContext } from '@contexts';
 
-const useGameUser = () => {
+export const useGameUser = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
@@ -23,5 +23,3 @@ const useGameUser = () => {
   }, [difficulty, userId, setLocalPlayerId, setRemotePlayerId]);
   return { localPlayerId, remotePlayerId };
 };
-
-export default useGameUser;

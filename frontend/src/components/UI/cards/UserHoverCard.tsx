@@ -2,9 +2,17 @@ import ReactDOM from 'react-dom';
 
 import { motion } from 'framer-motion';
 
-import { UserActions } from '../buttons/UserActions';
+import { UserActions } from '@components/UI';
 
-export const UserHoverCard: React.FC<{ user: User; x: number; y: number }> = ({ user, x, y }) => {
+import { UserDataResponseType } from '@shared/types';
+
+interface userHoverCardProps {
+  user: UserDataResponseType;
+  x: number;
+  y: number;
+}
+
+export const UserHoverCard: React.FC<userHoverCardProps> = ({ user, x, y }) => {
   return ReactDOM.createPortal(
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}

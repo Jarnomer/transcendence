@@ -20,7 +20,7 @@ export interface Ball {
 }
 
 export enum PowerUpType {
-  // NoType = 'no_type',
+  NoType = 'no_type',
   BiggerPaddle = 'bigger_paddle',
   SmallerPaddle = 'smaller_paddle',
   FasterPaddle = 'faster_paddle',
@@ -133,6 +133,7 @@ export const defaultGameSettings: GameSettings = {
   enableSpin: true,
   enablePowerUps: true,
   powerUpTypes: {
+    [PowerUpType.NoType]: false,
     [PowerUpType.BiggerPaddle]: true,
     [PowerUpType.SmallerPaddle]: true,
     [PowerUpType.FasterPaddle]: true,
@@ -218,6 +219,7 @@ export type MatchmakingOptionsType = {
 
 export type TournamentOptionsType = {
   playerCount: number;
+  numberOfRounds: number;
   tournamentName: string;
   isPrivate: boolean;
   password: string | null;
@@ -244,4 +246,5 @@ export type MatchmakingSnapshot = {
   role: UserRole;
   gameId: string;
   participants: any[]; // or whatever type
+  matches: any[]; // or whatever type
 };

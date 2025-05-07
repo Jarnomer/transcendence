@@ -1,60 +1,57 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { GameSettings } from '../components/settings/GameSettings';
-import { GraphicSettings } from '../components/settings/GraphicSettings';
-import { Soundsettings } from '../components/settings/SoundSettings';
-import { UserSettings } from '../components/settings/UserSettings';
-import { useSound } from '../hooks/useSound';
+import { GraphicsSettings, Soundsettings, UserSettings } from '@components/settings';
+import { BackgroundGlow } from '@components/visual';
 
-export const slideFromLeftVariants = {
-  initial: {
-    x: '-100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '-100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
+// const slideFromLeftVariants = {
+//   initial: {
+//     x: '-100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '-100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
-export const slideFromRightVariants = {
-  initial: {
-    x: '100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
+// const slideFromRightVariants = {
+//   initial: {
+//     x: '100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
 export const SettingsNav: React.FC<{
   activeTab: string;
@@ -63,7 +60,7 @@ export const SettingsNav: React.FC<{
   return (
     <motion.div
       id="settings-nav"
-      className="flex p:m-2 relative w-full h-full overflow-hidden items-center justify-center   gap-3  md:gap-6"
+      className="flex relative w-full h-full overflow-hidden items-center justify-center gap-3  md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
@@ -71,11 +68,8 @@ export const SettingsNav: React.FC<{
         <button onClick={() => setActiveTab('userSettings')}>
           <span className={`${activeTab === 'userSettings' ? 'text-secondary' : ''}`}>User</span>
         </button>
-        <button onClick={() => setActiveTab('gameSettings')}>
-          <span className={`${activeTab === 'gameSettings' ? 'text-secondary' : ''}`}>Game</span>
-        </button>
-        <button onClick={() => setActiveTab('graphicSettings')}>
-          <span className={`${activeTab === 'graphicSettings' ? 'text-secondary' : ''}`}>
+        <button onClick={() => setActiveTab('graphicsSettings')}>
+          <span className={`${activeTab === 'graphicsSettings' ? 'text-secondary' : ''}`}>
             Graphics
           </span>
         </button>
@@ -87,75 +81,63 @@ export const SettingsNav: React.FC<{
   );
 };
 
-export const Settings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('soundSettings');
-
-  const playSelectSound = useSound('/sounds/effects/select.wav');
-
-  useEffect(() => {
-    playSelectSound();
-  }, [activeTab]);
-
+export const Settings: React.FC = ({ activeTab }) => {
   return (
     <>
-      <motion.div className="relative w-full  max-w-screen z-10 gap-5 md:gap-10 p-0 md:p-4">
-        <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab}></SettingsNav>
+      <motion.div
+        id="settings"
+        className="w-full h-full relative border-1 glass-box overflow-hidden justify-start"
+      >
+        <div aria-hidden="true" className="w-full bg-primary text-black  pointer-events-none">
+          <h1>
+            {activeTab === 'userSettings'
+              ? 'User Settings'
+              : activeTab === 'soundSettings'
+                ? 'Sound Settings'
+                : 'Graphic Settings'}
+          </h1>
+        </div>
+        <BackgroundGlow></BackgroundGlow>
+        <AnimatePresence mode="wait">
+          {activeTab === 'userSettings' && (
+            <motion.div
+              key="userSettings"
+              className="w-full h-full"
+              // variants={slideFromRightVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+            >
+              <UserSettings></UserSettings>
+            </motion.div>
+          )}
 
-        <motion.div id="home-page-content" className="w-full h-full lg:px-20  gap-20">
-          <AnimatePresence mode="wait">
-            {activeTab === 'userSettings' && (
-              <motion.div
-                key="userSettings"
-                className="w-full"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <UserSettings></UserSettings>
-              </motion.div>
-            )}
+          {activeTab === 'graphicsSettings' && (
+            <motion.div
+              key="graphicsSettings"
+              className="w-full"
+              // variants={slideFromLeftVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+            >
+              <GraphicsSettings></GraphicsSettings>
+            </motion.div>
+          )}
 
-            {activeTab === 'gameSettings' && (
-              <motion.div
-                key="gameSettings"
-                className="w-full h-full max-h-screen"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <GameSettings></GameSettings>
-              </motion.div>
-            )}
-
-            {activeTab === 'graphicSettings' && (
-              <motion.div
-                key="graphicSettings"
-                className="w-full"
-                // variants={slideFromLeftVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <GraphicSettings></GraphicSettings>
-              </motion.div>
-            )}
-
-            {activeTab === 'soundSettings' && (
-              <motion.div
-                key="soundSettings"
-                className="w-full"
-                // variants={slideFromRightVariants}
-                // initial="initial"
-                // animate="animate"
-                // exit="exit"
-              >
-                <Soundsettings></Soundsettings>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+          {activeTab === 'soundSettings' && (
+            <motion.div
+              key="soundSettings"
+              className="w-full h-full"
+              // variants={slideFromRightVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
+            >
+              <Soundsettings></Soundsettings>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </>
   );

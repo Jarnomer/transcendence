@@ -1,5 +1,4 @@
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
-import { ClippedCornerCardSVG } from '../../visual/svg/containers/ClippedCornerCardSVG';
+import { BackgroundGlow, ClippedCornerCardSVG } from '@components/visual';
 
 export const ClippedCornerCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);

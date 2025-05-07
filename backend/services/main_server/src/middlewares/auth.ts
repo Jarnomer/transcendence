@@ -1,3 +1,4 @@
+// auth.ts
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
@@ -40,6 +41,6 @@ async function authWebsocket(fastify: FastifyInstance, request: FastifyRequest) 
   if (!token) {
     throw new NotAuthorizedError('No token provided for websocket');
   }
-  await fastify.jwt.verify(token); // Fastify JWT verification
+  fastify.jwt.verify(token); // Fastify JWT verification
 }
 export default fp(authPlugin);

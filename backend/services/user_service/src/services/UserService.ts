@@ -1,8 +1,8 @@
 import { Database } from 'sqlite';
 
-import { GameAudioOptions, GameSettings } from '@shared/types';
+import { GameAudioOptions, GameSettings, GraphicsSettings } from '@shared/types';
 
-import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError, NotFoundError } from '@my-backend/main_server';
 
 import { UserModel } from '../models/UserModel';
 
@@ -37,8 +37,8 @@ export class UserService {
     return res;
   }
 
-  async getAllUsers() {
-    const res = await this.userModel.getAllUsers();
+  async getAllUsers(user_id: string) {
+    const res = await this.userModel.getAllUsers(user_id);
     if (res.length === 0) {
       throw new NotFoundError('No users found');
     }
@@ -116,11 +116,31 @@ export class UserService {
     return res;
   }
 
+  async getUserStats(user_id: string) {
+    const res = await this.userModel.getUserStats(user_id);
+    if (!res) {
+      throw new NotFoundError('User stats not found');
+    }
+    return res;
+  }
   async saveAudioSettings(user_id: string, audioSettings: GameAudioOptions) {
     const res = await this.userModel.saveAudioSettings(user_id, audioSettings);
     if (!res) {
       throw new BadRequestError('Could not save audio settings');
     }
+    return res;
+  }
+
+  async saveGraphicsSettings(user_id: string, graphicsSettings: GraphicsSettings) {
+    const res = await this.userModel.saveGraphicsSettings(user_id, graphicsSettings);
+    if (!res) {
+      throw new BadRequestError('Could not save graphics settings');
+    }
+    return res;
+  }
+
+  async getGraphicsSettings(user_id: string) {
+    const res = await this.userModel.getGraphicsSettings(user_id);
     return res;
   }
 }

@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import '@fastify/jwt';
 
-import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { NotFoundError } from '@my-backend/main_server';
 
 import { FriendService } from '../services/FriendService';
 
@@ -119,5 +119,41 @@ export class FriendController {
     reply.code(204).send({ message: 'Friend request cancelled' });
   }
 
+  async getFriends(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting friends for ${user_id}`);
+    const friends = await this.friendService.getFriends(user_id);
+    reply.code(200).send(friends);
+  }
 
+  async getBlockedUsers(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting blocked users for ${user_id}`);
+    const blockedUsers = await this.friendService.getBlockedUsers(user_id);
+    reply.code(200).send(blockedUsers);
+  }
+
+  async blockUser(request: FastifyRequest, reply: FastifyReply) {
+    const { blocked_user_id } = request.params as { blocked_user_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Blocking user ${blocked_user_id}`);
+    const blockedUser = await this.friendService.blockUser(user_id, blocked_user_id);
+    reply.code(200).send(blockedUser);
+  }
+
+  async unblockUser(request: FastifyRequest, reply: FastifyReply) {
+    const { blocked_user_id } = request.params as { blocked_user_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Unblocking user ${blocked_user_id}`);
+    const unblockedUser = await this.friendService.unblockUser(user_id, blocked_user_id);
+    reply.code(200).send(unblockedUser);
+  }
+
+  async getBlockedUser(request: FastifyRequest, reply: FastifyReply) {
+    const { blocked_user_id } = request.params as { blocked_user_id: string };
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting blocked user ${blocked_user_id}`);
+    const blockedUser = await this.friendService.getBlockedUser(user_id, blocked_user_id);
+    reply.code(200).send(blockedUser);
+  }
 }

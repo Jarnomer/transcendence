@@ -34,5 +34,11 @@ export class MatchmakingController {
       this.matchmakingService.deleteClient(user_id);
     });
     ws.on('message', this.matchmakingService.handleMessage.bind(this.matchmakingService));
+    ws.on('message', (message: string) => {
+      const parsedMessage = JSON.parse(message);
+      if (parsedMessage.type === 'ping') {
+        ws.send(JSON.stringify({ type: 'pong', state: {} }));
+      }
+    });
   }
 }

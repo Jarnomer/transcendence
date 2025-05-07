@@ -59,4 +59,5 @@ export async function gameRoutes(fastify: FastifyInstance) {
   fastify.delete('/delete/:game_id', gameController.deleteGame.bind(gameController));
   fastify.get('/status', gameController.status.bind(gameController));
   fastify.get('/sessionStatus', gameController.sessionStatus.bind(gameController));
+  fastify.get('/myGames', gameController.getMyGames.bind(gameController));
 }

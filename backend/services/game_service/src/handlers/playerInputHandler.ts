@@ -22,11 +22,11 @@ export const handlePlayerInputMessage = (
       break;
 
     case 'pause':
-      handlePlayerPause(gameSession, message.payload.playerId);
+      handlePlayerPause(gameSession);
       break;
 
     case 'resume':
-      handlePlayerResume(gameSession, message.payload.playerId);
+      handlePlayerResume(gameSession);
       break;
 
     default:
@@ -47,10 +47,10 @@ const handlePlayerReady = (gameSession: PongGameSession, playerId: string, state
   gameSession.readyGame(playerId, state);
 };
 
-const handlePlayerPause = (gameSession: PongGameSession, playerId: string) => {
+const handlePlayerPause = (gameSession: PongGameSession) => {
   gameSession.pauseGame();
 };
 
-const handlePlayerResume = (gameSession: PongGameSession, playerId: string) => {
+const handlePlayerResume = (gameSession: PongGameSession) => {
   gameSession.resumeGame();
 };

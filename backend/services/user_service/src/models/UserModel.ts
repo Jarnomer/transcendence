@@ -1,6 +1,6 @@
 import { Database } from 'sqlite';
 
-import { GameAudioOptions, GameSettings } from '@shared/types';
+import { GameAudioOptions, GameSettings, GraphicsSettings } from '@shared/types';
 
 import { queryWithJsonParsingObject } from '../../../utils/utils';
 
@@ -19,20 +19,7 @@ export class UserModel {
     return UserModel.instance;
   }
 
-  // async runTransaction(callback: (db: Database) => Promise<any>) {
-  //   try {
-  //     await this.db.run('BEGIN TRANSACTION'); // Start transaction
-  //     const result = await callback(this.db); // Run the transaction logic
-  //     await this.db.run('COMMIT'); // Commit transaction if successful
-  //     return result;
-  //   } catch (error) {
-  //     await this.db.run('ROLLBACK'); // Rollback transaction on error
-  //     throw error; // Rethrow error for handling
-  //   }
-  // }
-
   async createUser(user_id: string) {
-    // const profile_id = uuidv4();
     return await this.db.get(`INSERT INTO user_profiles (user_id) VALUES (?) RETURNING *`, [
       user_id,
     ]);
@@ -58,12 +45,23 @@ export class UserModel {
                 WHERE is_winner = 1
                 GROUP BY player_id
             ) gp ON u.user_id = gp.player_id
-      ORDER BY rank;`
+      ORDER BY rank
+      ;`
     );
   }
 
-  async getAllUsers() {
-    return await this.db.all(`SELECT * FROM user_profiles`);
+  async getAllUsers(user_id: string) {
+    return await this.db.all(
+      `
+      SELECT * FROM user_profiles
+      WHERE user_id != ?
+      AND user_id NOT IN (
+        SELECT blocked_user_id FROM blocked_users WHERE user_id = ?
+        UNION
+        SELECT user_id FROM blocked_users WHERE blocked_user_id = ?
+      )`,
+      [user_id, user_id, user_id]
+    );
   }
 
   async updateUserByID(
@@ -87,7 +85,7 @@ export class UserModel {
   }
 
   async deleteUserByID(user_id: string) {
-    return await this.db.run(`DELETE FROM user_profiles WHERE user_id = ?`, [user_id]);
+    return await this.db.run(`DELETE FROM users WHERE user_id = ?`, [user_id]);
   }
 
   async createUserStats(user_id: string) {
@@ -100,7 +98,7 @@ export class UserModel {
     SELECT
       up.*,
       u.username,
-      json_object('wins', us.wins, 'losses', us.losses) AS stats,
+      json_object('wins', us.wins, 'losses', us.losses, 'rating', us.elo, 'rank', us.rank) AS stats,
       (
         SELECT
         json_group_array
@@ -219,6 +217,10 @@ export class UserModel {
     );
   }
 
+  async getUserStats(user_id: string) {
+    return await this.db.get(`SELECT * FROM user_stats WHERE user_id = ?`, [user_id]);
+  }
+
   async saveAudioSettings(user_id: string, settings: GameAudioOptions) {
     const settingsString = JSON.stringify(settings);
     return await this.db.get(
@@ -237,6 +239,32 @@ export class UserModel {
         return JSON.parse(result.audio_settings);
       } catch (error) {
         console.error('Error parsing audio settings:', error);
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  async saveGraphicsSettings(user_id: string, settings: GraphicsSettings) {
+    const settingsString = JSON.stringify(settings);
+    return await this.db.get(
+      `UPDATE user_profiles SET graphics_settings = ? WHERE user_id = ? RETURNING *`,
+      [settingsString, user_id]
+    );
+  }
+
+  async getGraphicsSettings(user_id: string) {
+    const result = await this.db.get(
+      `SELECT graphics_settings FROM user_profiles WHERE user_id = ?`,
+      [user_id]
+    );
+
+    if (result && result.graphics_settings) {
+      try {
+        return JSON.parse(result.graphics_settings);
+      } catch (error) {
+        console.error('Error parsing graphics settings:', error);
         return null;
       }
     }

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../../BackgroundGlow';
+import { BackgroundGlow } from '@components/visual';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -13,8 +13,6 @@ export const BoxDiv: React.FC<{ index: number; children: React.ReactNode }> = ({
   index,
   children,
 }) => {
-  const [showGlitch, setShowGlitch] = useState(true);
-
   return (
     <motion.div
       className="aspect-square overflow-hidden w-full h-full relative "

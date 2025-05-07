@@ -1,9 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { NotFoundError } from '@my-backend/main_server';
 
 import { GameService } from '../services/GameService';
 import { QueueService } from '../services/QueueService';
+
 export class GameController {
   private gameService: GameService;
   private queueService: QueueService;
@@ -130,5 +131,12 @@ export class GameController {
     }
     request.log.trace(`Getting game session status for user ${user_id}`);
     reply.code(200).send({ game_session: isGameValid, queue_session: isQueueValid });
+  }
+
+  async getMyGames(request: FastifyRequest, reply: FastifyReply) {
+    const { user_id } = request.user as { user_id: string };
+    request.log.trace(`Getting games for user ${user_id}`);
+    const games = await this.gameService.getMyGames(user_id);
+    reply.code(200).send(games);
   }
 }

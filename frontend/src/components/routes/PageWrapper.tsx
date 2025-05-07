@@ -2,7 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-export const pageVariants = {
+const pageVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,
@@ -24,17 +24,13 @@ export const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <motion.div
       id="page-wrapper"
-      className=" flex grow w-full h-full pt-5 items-center justify-center"
+      className="flex grow w-full h-full p-5 items-center justify-center"
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <div className="flex grow items-center justify-center w-full h-full  max-w-screen-xl pb-4">
-        {children}
-      </div>
+      {children}
     </motion.div>
   );
 };
-
-export default PageWrapper;

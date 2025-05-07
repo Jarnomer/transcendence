@@ -21,7 +21,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import { useSound } from '../../../hooks/useSound';
+import { useSound } from '@hooks';
 
 interface NavIconButtonProps {
   id: string;
@@ -47,7 +47,7 @@ interface NavIconButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export const iconSizeResponsive = 'size-4 sm:size-6 ';
+export const iconSizeResponsive = 'size-6 sm:size-6 ';
 
 export const NavIconButton: React.FC<NavIconButtonProps> = ({ id, icon, onClick, ariaLabel }) => {
   const icons = {

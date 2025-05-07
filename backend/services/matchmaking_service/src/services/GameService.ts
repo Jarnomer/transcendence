@@ -1,10 +1,6 @@
 import { Database } from 'sqlite';
 
-import {
-  BadRequestError,
-  DatabaseError,
-  NotFoundError,
-} from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError, DatabaseError, NotFoundError } from '@my-backend/main_server';
 
 import { GameModel } from '../models/GameModel';
 
@@ -146,5 +142,13 @@ export class GameService {
       throw new DatabaseError('Game not found');
     }
     return res;
+  }
+
+  async getMyGames(user_id: string) {
+    const games = await this.gameModel.getMyGames(user_id);
+    if (!games) {
+      throw new NotFoundError('Games not found');
+    }
+    return games;
   }
 }

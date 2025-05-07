@@ -1,30 +1,38 @@
 import React from 'react';
 
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { ChatWindow } from '../chat/chatPage/ChatWindow';
-import { ModalWrapper } from './ModalWrapper';
+import { useChatContext, useModal } from '@contexts';
+
+import { ChatWindow } from '@components/chat';
+import { ModalWrapper } from '@components/modals';
 
 export const ChatModal: React.FC = () => {
   const { isModalOpen, getModalProps, closeModal } = useModal();
-  const { setSelectedFriend, setRoomId, sendChatMessage, user } = useChatContext();
+  const { setOpenChatWindows } = useChatContext();
 
   if (!isModalOpen('chatModal')) return null;
 
   const props = getModalProps('chatModal');
+  console.log(props);
   if (!props) return null;
+  const { friends, chatId } = props;
 
-  const { friends, selectedFriendId, onBack } = props;
-  console.log(user, friends, selectedFriendId);
+  const handleCloseChat = async (chatId: string) => {
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
+      ...prev,
+      [chatId]: false,
+    }));
+
+    closeModal('chatModal');
+  };
 
   return (
     <ModalWrapper modalName="chatModal">
       <div className="glass-box grow text-primary w-full h-full overflow-hidden">
         <ChatWindow
-          key={selectedFriendId}
+          key={chatId}
+          chatId={chatId}
           friends={friends}
-          selectedFriendId={selectedFriendId}
-          onBack={() => closeModal('chatModal')}
+          onBack={() => handleCloseChat(chatId)}
         />
       </div>
     </ModalWrapper>

@@ -43,7 +43,7 @@ type WebSocketAction =
       payload: GameEvent;
     };
 
-function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSocketState {
+export function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSocketState {
   switch (action.type) {
     case 'CONNECTED':
       return { ...state, connections: { ...state.connections, [action.socket]: 'connected' } };
@@ -78,10 +78,14 @@ function webSocketReducer(state: WebSocketState, action: WebSocketAction): WebSo
       return {
         ...state,
         ...initialState,
+        connections: {
+          ...initialState.connections,
+          chat: state.connections.chat,
+          matchmaking: state.connections.matchmaking,
+        },
       };
+
     default:
       return state;
   }
 }
-
-export default webSocketReducer;

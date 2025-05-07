@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import WebSocketManager from '../services/webSocket/WebSocketManager';
+import { WebSocketManager } from '@services';
 
 export const useChatSocket = (
   chatSocket: WebSocketManager | null,
@@ -26,7 +26,7 @@ export const useChatSocket = (
       dispatch({ type: 'DISCONNECTED', socket: 'chat' });
     };
     const handlePong = () => {
-      console.log('ping');
+      // console.log('chat ping');w
     };
 
     chatSocket.addEventListener('open', handleOpen);

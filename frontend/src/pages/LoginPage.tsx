@@ -1,31 +1,17 @@
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { ClippedCornerCard } from '@/components/UI/cards/ClippedCornerCard';
+import { useModal, useWebSocketContext } from '@contexts';
 
-import { ClippedButton } from '@components/UI/buttons/ClippedButton.tsx';
+import { ClippedButton, ClippedCornerCard } from '@components/UI';
 
-import { login, register } from '@services/authService.ts';
-import { updateUser } from '@services/userService.ts';
+import { login, register, updateUser } from '@services';
 
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { useSound } from '../hooks/useSound';
-
-interface inputWrapperProps {
-  children: ReactNode;
-  error: string;
-}
-
-export const InputWrapper: React.FC<inputWrapperProps> = ({ children }) => {
-  return <></>;
-};
+import { useSound } from '@hooks';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, setUser, refetchUser, checkAuth, logout, setToken } = useUser();
   const { chatSocket, gameSocket, matchmakingSocket } = useWebSocketContext();
 
   const [isRegistering, setIsRegistering] = useState(false);
@@ -34,6 +20,7 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const playErrorSound = useSound('/sounds/effects/error.wav');
+  const { openModal } = useModal();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +56,8 @@ export const LoginPage: React.FC = () => {
         chatSocket.connect();
         // setToken(token.token); // Update the token in the context
         if (isRegistering) {
-          navigate(`/signUp`);
+          openModal('editProfile');
+          navigate(`/gameMenu`);
         } else {
           await updateUser({ status: 'online' });
           navigate(`/gameMenu`);

@@ -1,27 +1,26 @@
 import { useState } from 'react';
 
-import { useLocation } from 'react-router-dom';
+import { useChatContext } from '@contexts';
 
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useSound } from '../../../hooks/useSound';
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
-import { ChatSidebar } from '../ChatSideBar';
-import { CreateNewGroupChat } from '../CreateNewGroupChat';
-import { FloatingChatWindow } from './FloatingChatWindow';
+import { ChatSidebar, CreateNewGroupChat, FloatingChatWindow } from '@components/chat';
+import { BackgroundGlow } from '@components/visual';
+
+import { useSound } from '@hooks';
 
 export const FloatingChat = () => {
   const [minimized, setMinimized] = useState(true);
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
-  const location = useLocation();
 
   const {
     friends,
     user,
-    sendChatMessage,
     openChatWindows,
     setOpenChatWindows,
     messages,
     fetchDmHistory,
+    rooms,
+    myRooms,
+    fetchChatHistory,
   } = useChatContext();
   const playZoomSound = useSound('/sounds/effects/zoom.wav');
 
@@ -35,8 +34,7 @@ export const FloatingChat = () => {
   };
 
   const handleOpenChat = async (friendId: string) => {
-    console.log('opening chat', friendId);
-    setOpenChatWindows((prev) => ({
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [friendId]: true,
     }));
@@ -46,8 +44,19 @@ export const FloatingChat = () => {
     }
   };
 
+  const handleOpenRoom = async (roomId: string) => {
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
+      ...prev,
+      [roomId]: true,
+    }));
+
+    if (!messages[roomId]) {
+      await fetchChatHistory(roomId); // Optional: make sure messages are loaded
+    }
+  };
+
   const handleCloseChat = (friendId: string) => {
-    setOpenChatWindows((prev) => ({
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
       ...prev,
       [friendId]: false,
     }));
@@ -65,11 +74,9 @@ export const FloatingChat = () => {
           .map(([friendId]) => (
             <FloatingChatWindow
               key={friendId}
-              user={user}
               friends={friends}
-              selectedFriendId={friendId}
+              chatId={friendId}
               onBack={() => handleCloseChat(friendId)}
-              onSend={sendChatMessage}
             />
           ))}
 
@@ -100,6 +107,7 @@ export const FloatingChat = () => {
                 ) : (
                   <ChatSidebar
                     onOpenChat={handleOpenChat}
+                    onOpenRoom={handleOpenRoom}
                     handleClickNewChat={handleClickNewChat}
                   />
                 )}

@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 
-import { UserDataResponseType } from '../../../../shared/types';
-import { useUser } from '../../contexts/user/UserContext';
-import { api } from '../../services/api';
+import { useModal, useUser } from '@contexts';
+
+import { api } from '@services';
+
+import { UserDataResponseType } from '@shared/types';
 
 interface ProfilePictureProps {
   user: UserDataResponseType;
@@ -15,7 +17,8 @@ interface uploadAvatarButtonProps {
 
 export const UploadAvatarButton: React.FC<uploadAvatarButtonProps> = ({ setLoading }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { setUser } = useUser();
+  const { refetchUser } = useUser();
+  const { openModal } = useModal();
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -38,9 +41,12 @@ export const UploadAvatarButton: React.FC<uploadAvatarButtonProps> = ({ setLoadi
       if (res.status != 200) {
         throw new Error('Failed to upload avatar');
       }
-      setUser(res.data);
-    } catch (error) {
+      refetchUser();
+    } catch (error: any) {
       console.error(error);
+      openModal('errorModal', {
+        statusCode: error?.response?.status,
+      });
     }
     setLoading(false);
   };
@@ -81,21 +87,18 @@ export const UploadAvatarButton: React.FC<uploadAvatarButtonProps> = ({ setLoadi
 };
 
 export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfile }) => {
-  const { setUser } = useUser();
   const [loading, setLoading] = useState<boolean>(false);
 
   return (
-    <div>
-      <div className=" overflow-hidden relative w-[100px] h-[100px] aspect-square md:w-[150px] md:h-[150px] border-1 border-primary">
-        <img
-          className="object-cover w-full h-full z-10"
-          src={`https://localhost:8443/${user.avatar_url}`}
-          alt="user profile picture"
-        />
+    <div className="overflow-hidden relative aspect-square w-full h-full  border-1 border-primary">
+      <img
+        className="object-cover w-full h-full z-10"
+        src={user.avatar_url}
+        alt="user profile picture"
+      />
 
-        {/* Upload Button */}
-        {isOwnProfile && <UploadAvatarButton setLoading={setLoading}></UploadAvatarButton>}
-      </div>
+      {/* Upload Button */}
+      {isOwnProfile && <UploadAvatarButton setLoading={setLoading}></UploadAvatarButton>}
     </div>
   );
 };

@@ -1,23 +1,24 @@
-import { MatchMakerState } from '../services/MatchMaker';
+import { MatchMakerState } from '@services';
 
 export type SessionData = {
   gameId?: string;
   queueId?: string;
   mode?: string;
   difficulty?: string;
+  avatarUrl?: string;
+  displayName?: string;
+  userId?: string;
   matchmakingRegistered?: boolean;
   matchmakerState?: MatchMakerState;
 };
 
 const SESSION_KEY = 'game-session';
 
-export default class SessionManager {
+export class SessionManager {
   private static instance: SessionManager;
   private cache: SessionData = {};
 
-  private constructor(private storage: Storage = localStorage) {
-    this.set('matchmakingRegistered', false);
-  }
+  private constructor(private storage: Storage = localStorage) {}
 
   public static getInstance(storage?: Storage): SessionManager {
     if (!SessionManager.instance) {

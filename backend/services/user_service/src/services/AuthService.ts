@@ -1,10 +1,6 @@
 import { Database } from 'sqlite';
 
-import {
-  BadRequestError,
-  DatabaseError,
-  NotFoundError,
-} from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError, DatabaseError, NotFoundError } from '@my-backend/main_server';
 
 import { AuthModel } from '../models/AuthModel';
 

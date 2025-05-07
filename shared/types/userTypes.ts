@@ -91,6 +91,8 @@ export const UserDataResponseSchema = Type.Object({
   stats: Type.Object({
     wins: Type.Number(),
     losses: Type.Number(),
+    rank: Type.Number(),
+    rating: Type.Number(),
   }),
   status: Type.String(),
   user_id: Type.String(),
@@ -104,3 +106,6 @@ export type UserResponseType = Static<typeof UserResponseSchema>;
 export type UserIdType = Static<typeof UserIdSchema>;
 export type AllResponseType = Static<typeof AllResponseSchema>;
 export type UserNotificationType = Static<typeof UserNotificationSchema>;
+
+export type FriendListType = Static<typeof UserDataResponseSchema>['friends'];
+export type FriendType = Static<typeof UserDataResponseSchema>['friends'][number];

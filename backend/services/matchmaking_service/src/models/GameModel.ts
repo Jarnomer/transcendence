@@ -1,7 +1,7 @@
 import { Database } from 'sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
-import { queryWithJsonParsingObject } from '../../../utils/utils';
+import { queryWithJsonParsingArray, queryWithJsonParsingObject } from '../../../utils/utils';
 
 export class GameModel {
   private db: Database;
@@ -176,5 +176,28 @@ export class GameModel {
     }
     await this.db.run('DELETE FROM games WHERE game_id = ?', [game_id]);
     return game;
+  }
+
+  async getMyGames(user_id: string) {
+    const query = `
+     SELECT
+            g.*,
+            gp_me.score AS my_score,
+              json_object
+              (
+                'user_id', gp_opponent.player_id,
+                'display_name', up_opponent.display_name,
+                'avatar_url', up_opponent.avatar_url,
+                'score', gp_opponent.score,
+                'is_winner', gp_opponent.is_winner
+              ) as vsplayer
+          FROM games g
+          LEFT JOIN game_players gp_me ON g.game_id = gp_me.game_id
+          LEFT JOIN game_players gp_opponent ON g.game_id = gp_opponent.game_id AND gp_me.player_id <> gp_opponent.player_id
+          LEFT JOIN user_profiles up_opponent ON gp_opponent.player_id = up_opponent.user_id
+          WHERE gp_me.player_id = ?
+          ORDER BY g.start_time DESC
+          LIMIT 10`;
+    return await queryWithJsonParsingArray(this.db, query, [user_id], ['vsplayer']);
   }
 }

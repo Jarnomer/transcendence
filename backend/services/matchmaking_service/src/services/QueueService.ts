@@ -1,6 +1,6 @@
 import { Database } from 'sqlite';
 
-import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError, NotFoundError } from '@my-backend/main_server';
 
 import { QueueModel } from '../models/QueueModel';
 

@@ -4,14 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx'; // Import the GameOptionsContext
+import { useGameOptionsContext, useNavigationAccess } from '@contexts';
 
-import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
-import { NavIconButton } from '@components/UI/buttons/NavIconButton';
+import { GameMenuCard } from '@components/layout';
+import { NavIconButton } from '@components/UI';
 
-import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import { useSound } from '../hooks/useSound';
-import useValidateSession from '../hooks/useValidateSession'; // Import the useValidateSession hook
+import { useSound, useValidateSession } from '@hooks';
 
 interface GameMenuOption {
   content: string;
@@ -20,12 +18,7 @@ interface GameMenuOption {
   onClick: () => void;
 }
 
-interface SelectedMode {
-  mode: string;
-  difficulty?: string;
-}
-
-export const pageVariants = {
+const pageVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,
@@ -49,8 +42,7 @@ export const GameMenu: React.FC = () => {
   // const [readyForNextEffect, setReadyForNextEffect] = useState(false);
 
   const navigate = useNavigate(); // Hook to navigate to different routes
-  const { setMode, setDifficulty, setLobby, resetGameOptions, difficulty, mode, queueId } =
-    useGameOptionsContext();
+  const { setMode, setDifficulty, setLobby, difficulty, mode } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
 
   const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
@@ -65,7 +57,7 @@ export const GameMenu: React.FC = () => {
     },
     {
       content: '1v1',
-      imageUrl: './src/assets/images/1v1.png',
+      imageUrl: './src/assets/images/1v1_bw.png',
       hoverInfo: 'Play with another player',
       onClick: () => handleModeClick('1v1'),
     },
@@ -137,6 +129,7 @@ export const GameMenu: React.FC = () => {
   const handleDifficultyClick = (difficulty: string | null) => {
     playSubmitSound();
     setDifficulty(difficulty);
+    console.log('set Difficulty');
   };
 
   useEffect(() => {
@@ -148,7 +141,7 @@ export const GameMenu: React.FC = () => {
   // Effect that only runs after state is reset
   useEffect(() => {
     if (!isNewGame) return;
-
+    console.log('game menu useEffect: ', mode, difficulty);
     if (mode === 'tournament') {
       allowInternalNavigation();
       navigate('/tournament');
@@ -171,7 +164,7 @@ export const GameMenu: React.FC = () => {
       <motion.div
         key={mode && !difficulty ? `${mode}-submenu` : 'main-menu'}
         id="game-menu-container"
-        className="flex grow flex-wrap w-full h-full justify-center gap-4 items-center p-0"
+        className="flex relative grow flex-wrap w-full h-full justify-center gap-4 items-center p-0"
         variants={pageVariants}
         initial="initial"
         animate="animate"
@@ -179,7 +172,12 @@ export const GameMenu: React.FC = () => {
       >
         {mode && !difficulty ? (
           <>
-            <NavIconButton id="arrow-left" icon="arrowLeft" onClick={() => handleModeClick(null)} />
+            <NavIconButton
+              ariaLabel="Go back"
+              id="arrow-left"
+              icon="arrowLeft"
+              onClick={() => handleModeClick(null)}
+            />
 
             {subMenus[mode].map((option, index) => (
               <motion.div key={index} style={{ flexBasis: '250px' }}>

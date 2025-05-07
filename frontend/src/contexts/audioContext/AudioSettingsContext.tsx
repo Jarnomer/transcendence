@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { GameAudioOptions, defaultGameAudioOptions } from '@shared/types';
+import { useUser } from '@contexts';
 
 import {
   applyAudioSettings,
-  getAudioSettings,
-  saveAudioSettings,
+  getAudioSystemSettings,
+  saveAudioSystemSettings,
   volumeLevelToValue,
-} from '../../services/audioService';
-import { useUser } from '../user/UserContext';
+} from '@services';
+
+import { GameAudioOptions, defaultGameAudioOptions } from '@shared/types';
 
 type AudioSettingsContextType = {
   audioSettings: GameAudioOptions;
@@ -36,7 +37,7 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!userId) return;
 
     setIsLoading(true);
-    getAudioSettings()
+    getAudioSystemSettings()
       .then((settings) => {
         setAudioSettings(settings);
         applyAudioSettings(settings);
@@ -170,7 +171,7 @@ export const AudioSettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   // Save settings to backend
   const saveSettings = async () => {
     try {
-      await saveAudioSettings(audioSettings);
+      await saveAudioSystemSettings(audioSettings);
     } catch (error) {
       console.error('Failed to save audio settings:', error);
     }

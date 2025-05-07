@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { ListSvgContainer } from '../../visual/svg/containers/ListSvgContainer';
-import { UserHoverCard } from './UserHoverCard';
+import { UserHoverCard } from '@components/UI';
+import { ListSvgContainer } from '@components/visual';
 
 export const UserListCard: React.FC<{ user: User; children: React.ReactNode }> = ({
   user,
@@ -30,7 +30,7 @@ export const UserListCard: React.FC<{ user: User; children: React.ReactNode }> =
     setHoverPos(null);
   };
 
-  console.log('user from competitor component: ', user);
+  // console.log('user from competitor component: ', user);
   return (
     <motion.div
       className={`w-full`}

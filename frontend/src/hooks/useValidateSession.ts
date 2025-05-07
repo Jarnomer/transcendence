@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { getSessionStatus } from '@/services/gameService';
+import { useGameOptionsContext, useNavigationAccess, useWebSocketContext } from '@contexts';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import SessionManager from '../services/SessionManager';
+import { SessionManager, getSessionStatus } from '@services';
+
+import { useConfirm } from '@hooks';
+
 type StepType = 'init' | 'validating' | 'restoring' | 'done';
 
-const useValidateSession = () => {
+export const useValidateSession = () => {
   const { cancelGame, cancelQueue, setGameId, cleanup } = useWebSocketContext();
   const { resetGameOptions, setMode, setDifficulty, setQueueId } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
@@ -19,6 +19,8 @@ const useValidateSession = () => {
   const sessionManager = SessionManager.getInstance();
   const gameId = sessionManager.get('gameId');
   const queueId = sessionManager.get('queueId');
+
+  const { confirm } = useConfirm();
 
   const navigate = useNavigate();
 
@@ -34,6 +36,8 @@ const useValidateSession = () => {
         setGameId(gameId || '');
       } else if (res.queue_session) {
         setStep('validating'); // Restoring session
+        setMode(sessionManager.get('mode') || null);
+        setDifficulty(sessionManager.get('difficulty') || null);
         setQueueId(queueId || '');
       } else {
         sessionManager.clear();
@@ -71,31 +75,37 @@ const useValidateSession = () => {
       }
     };
 
-    if (step === 'validating') {
-      const confirm = window.confirm('You are already in a game or queue. continue?');
-      if (confirm) {
-        allowInternalNavigation();
-        if (gameId) {
-          console.log('Game ID found:', gameId);
-          navigate('/game');
+    const run = async () => {
+      if (step === 'validating') {
+        console.log('confirming');
+        const userConfirmed = await confirm('You are already in a game or queue. Continue?');
+
+        console.log(userConfirmed);
+        if (userConfirmed) {
+          allowInternalNavigation();
+          if (gameId) {
+            console.log('Game ID found:', gameId);
+            navigate('/game');
+          } else {
+            console.log('Queue ID found:', queueId);
+            navigate('/tournamentLobby');
+          }
         } else {
-          console.log('Queue ID found:', queueId);
-          navigate('/tournamentLobby');
+          console.log('User declined to continue.');
+          cancelQueueGame().then(() => {
+            console.log('Queue/game canceled.');
+            sessionManager.clear(); // Clear session
+            setStep('done'); // Set step to done after canceling
+            resetGameOptions(); // Reset game options
+          });
         }
-      } else {
-        console.log('User declined to continue.');
-        cancelQueueGame().then(() => {
-          console.log('Queue/game canceled.');
-          sessionManager.clear(); // Clear session
-          setStep('done'); // Set step to done after canceling
-          resetGameOptions(); // Reset game options
-        });
       }
-    }
+    };
+
+    run();
   }, [step]);
 
   const isNewGame = step === 'done';
+
   return isNewGame;
 };
-
-export default useValidateSession;

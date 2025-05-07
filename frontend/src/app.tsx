@@ -5,16 +5,20 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { FloatingChatWrapper } from './components/chat/floatingChat/FloatingChatWrapper.tsx';
-import { Footer } from './components/footer/Footer.tsx';
-import BackgroundProvider from './components/game/BackgroundProvider';
-import { Header } from './components/header/Header.tsx';
-import { JoinGameNotificationModal } from './components/modals/JoinGameNotification.tsx';
-import { SettingsModal } from './components/modals/SettingsModal.tsx';
-import { AnimatedRoutes } from './components/routes/AnimatedRoutes.tsx';
-import { BackgroundGlitch } from './components/visual/BackgroundGlitch.tsx';
-import { AudioSettingsProvider } from './contexts/audioContext/AudioSettingsContext.tsx';
-import { GameOptionsProvider } from './contexts/gameContext/GameOptionsContext.tsx';
+import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
+
+import { FloatingChatWrapper } from '@components/chat';
+import { BackgroundProvider } from '@components/game';
+import { Footer, Header, MobileNavBar } from '@components/layout';
+import {
+  ConfirmModal,
+  EditProfileModal,
+  ErrorModal,
+  JoinGameNotificationModal,
+  SettingsModal,
+} from '@components/modals';
+import { AnimatedRoutes } from '@components/routes';
+import { BackgroundGlitch } from '@components/visual';
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');
@@ -22,38 +26,50 @@ const App: React.FC = () => {
   return (
     <>
       <AudioSettingsProvider>
-        <GameOptionsProvider>
-          <Router>
-            {/* <div className="fixed"> */}
-            <BackgroundProvider />
-            {/* </div> */}
-            <div
-              id="app-main-container"
-              className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full text-primary md:p-2`}
-            >
-              <div id="app-content" className="relative flex grow flex-col w-full max-w-screen-lg">
-                <Header />
-                <AnimatePresence>
-                  <motion.div
-                    id="backgroundGlitch"
-                    aria-hidden="true"
-                    className="absolute top-12 w-full h-full point pointer-events-none"
-                  >
-                    <BackgroundGlitch duration={1100} />
-                  </motion.div>
-                </AnimatePresence>
+        <GraphicsSettingsProvider>
+          <GameOptionsProvider>
+            <Router>
+              {/* <div className="fixed"> */}
+              <BackgroundProvider />
+              {/* </div> */}
 
-                <AnimatedRoutes />
+              <div
+                id="app-main-container"
+                className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full text-primary md:p-2`}
+              >
+                <Header />
+                <div
+                  id="app-content"
+                  className="relative flex grow flex-col w-full max-w-screen-xl"
+                >
+                  <AnimatePresence>
+                    <motion.div
+                      id="backgroundGlitch"
+                      aria-hidden="true"
+                      className="absolute top-12 w-full h-full point pointer-events-none"
+                    >
+                      <BackgroundGlitch duration={1100} />
+                    </motion.div>
+                  </AnimatePresence>
+                  <AnimatedRoutes />
+                </div>
+                <Footer />
               </div>
+
               <Footer />
-            </div>
-            <FloatingChatWrapper />
-          </Router>
-        </GameOptionsProvider>
-        <SettingsModal></SettingsModal>
-        <JoinGameNotificationModal></JoinGameNotificationModal>
+              <FloatingChatWrapper />
+              <MobileNavBar></MobileNavBar>
+              <EditProfileModal></EditProfileModal>
+              <SettingsModal></SettingsModal>
+              <JoinGameNotificationModal></JoinGameNotificationModal>
+              <ConfirmModal></ConfirmModal>
+              <ErrorModal></ErrorModal>
+            </Router>
+
+            <Toaster position="bottom-right" />
+          </GameOptionsProvider>
+        </GraphicsSettingsProvider>
       </AudioSettingsProvider>
-      <Toaster position="bottom-right" />
     </>
   );
 };

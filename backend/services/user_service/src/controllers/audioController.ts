@@ -9,7 +9,7 @@ export class AudioSettingsController {
 
   async getAudioSettings(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const userId = request.user.user_id;
+      const userId = (request.user as { user_id: string }).user_id;
 
       const settings = await this.userModel.getAudioSettings(userId);
 
@@ -34,7 +34,7 @@ export class AudioSettingsController {
     reply: FastifyReply
   ) {
     try {
-      const userId = request.user.user_id;
+      const userId = (request.user as { user_id: string }).user_id;
       const audioSettings = request.body;
 
       if (audioSettings.gameMusic && typeof audioSettings.gameMusic.volume === 'number') {

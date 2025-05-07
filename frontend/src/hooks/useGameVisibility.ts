@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export const useGameVisibility = () => {
   const [isBackgroundGameActive, setBackgroundGameActive] = useState<boolean>(true);
@@ -60,5 +60,3 @@ export const useGameVisibility = () => {
     hideGameCanvas,
   };
 };
-
-export default useGameVisibility;
