@@ -14,7 +14,7 @@ export const RandomLetters: React.FC = () => {
 
   // Generate initial random letters for the given length
   const generateRandomLetters = () => {
-    const initialLetters = [];
+    const initialLetters: string[] = [];
     for (let i = 0; i < length; i++) {
       initialLetters.push(getRandomLetter());
     }

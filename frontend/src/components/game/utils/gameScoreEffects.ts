@@ -561,10 +561,11 @@ export function applyNeonEdgeFlicker(
   // More flickers with higher intensity
   const numFlickers = Math.floor(20 + effectIntensity * 20);
 
-  const topKeyframes = [];
-  const bottomKeyframes = [];
-  const topColorKeyframes = [];
-  const bottomColorKeyframes = [];
+  const topKeyframes: Array<{ frame: number; value: number }> = [];
+  const bottomKeyframes: Array<{ frame: number; value: number }> = [];
+  const topColorKeyframes: Array<{ frame: number; value: Color3 }> = [];
+  const bottomColorKeyframes: Array<{ frame: number; value: Color3 }> = [];
+  const glowKeyframes: Array<{ frame: number; value: number }> = [];
 
   // Generate all of the flickering patterns
   for (let i = 0; i <= numFlickers; i++) {
@@ -622,7 +623,6 @@ export function applyNeonEdgeFlicker(
   topMaterial.animations = [topEmissiveAnimation, topColorAnimation];
   bottomMaterial.animations = [bottomEmissiveAnimation, bottomColorAnimation];
 
-  const glowKeyframes = [];
   for (let i = 0; i <= numFlickers; i++) {
     const frame = (i / numFlickers) * frameCount;
     const baseIntensity = 0.5 + effectIntensity;
