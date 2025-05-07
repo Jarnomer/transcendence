@@ -26,6 +26,10 @@ export const UserHoverCard: React.FC<userHoverCardProps> = ({ user, x, y }) => {
           <img
             className="object-cover w-full h-full"
             src={user?.avatar_url}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/images/avatars/default_avatar.png';
+            }}
             alt={`${user?.display_name}'s profile picture`}
           />
         </div>

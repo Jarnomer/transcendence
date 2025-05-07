@@ -54,7 +54,7 @@ const slideFromRightVariants = {
 
 export const HomePage: React.FC = () => {
   return (
-    <motion.div className="w-full max-h-full relative flex justify-center flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
+    <motion.div className="w-full relative flex justify-center flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
       <motion.div
         id="home-page-content"
         className=" flex justify-center flex-col md:flex-row h-full gap-2"
@@ -62,7 +62,7 @@ export const HomePage: React.FC = () => {
         <AnimatePresence>
           <motion.div
             key="leaderboard"
-            className="md:min-w-1/2  flex overflow-y-scroll justify-center p-0"
+            className="md:min-w-1/2 flex overflow-y-scroll justify-center p-0"
             variants={slideFromLeftVariants}
             initial="initial"
             animate="animate"

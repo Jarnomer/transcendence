@@ -5,6 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { GraphicsSettings, Soundsettings, UserSettings } from '@components/settings';
 import { BackgroundGlow } from '@components/visual';
 
+import { NavIconButton } from '../components/UI';
+import { useModal } from '../contexts';
+
 // const slideFromLeftVariants = {
 //   initial: {
 //     x: '-100%',
@@ -82,13 +85,14 @@ export const SettingsNav: React.FC<{
 };
 
 export const Settings: React.FC = ({ activeTab }) => {
+  const { closeModal } = useModal();
   return (
     <>
       <motion.div
         id="settings"
         className="w-full h-full relative border-1 glass-box overflow-hidden justify-start"
       >
-        <div aria-hidden="true" className="w-full bg-primary text-black  pointer-events-none">
+        <div aria-hidden="true" className="w-full flex justify-between bg-primary text-black">
           <h1>
             {activeTab === 'userSettings'
               ? 'User Settings'
@@ -96,6 +100,14 @@ export const Settings: React.FC = ({ activeTab }) => {
                 ? 'Sound Settings'
                 : 'Graphic Settings'}
           </h1>
+          <NavIconButton
+            icon="close"
+            onClick={() => {
+              closeModal('settings');
+            }}
+            id="close-settings-button"
+            ariaLabel="close settings"
+          ></NavIconButton>
         </div>
         <BackgroundGlow></BackgroundGlow>
         <AnimatePresence mode="wait">

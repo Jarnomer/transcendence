@@ -20,6 +20,8 @@ import {
 import { AnimatedRoutes } from '@components/routes';
 import { BackgroundGlitch } from '@components/visual';
 
+import { NotificationsModal } from './components/modals/NotificationsModal';
+
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');
 
@@ -35,18 +37,18 @@ const App: React.FC = () => {
 
               <div
                 id="app-main-container"
-                className={`flex flex-col grow relative items-center min-w-screen h-full min-h-screen w-full text-primary md:p-2`}
+                className={`flex flex-col grow relative md:overflow-hidden items-center min-w-screen h-full min-h-screen md:max-h-screen w-full text-primary md:p-2`}
               >
                 <Header />
                 <div
                   id="app-content"
-                  className="relative flex grow flex-col w-full max-w-screen-xl"
+                  className="relative flex-grow flex-col w-full md:overflow-y-hidden  max-w-screen-xl"
                 >
                   <AnimatePresence>
                     <motion.div
                       id="backgroundGlitch"
                       aria-hidden="true"
-                      className="absolute top-12 w-full h-full point pointer-events-none"
+                      className="absolute top-12 w-full point pointer-events-none"
                     >
                       <BackgroundGlitch duration={1100} />
                     </motion.div>
@@ -56,7 +58,6 @@ const App: React.FC = () => {
                 <Footer />
               </div>
 
-              <Footer />
               <FloatingChatWrapper />
               <MobileNavBar></MobileNavBar>
               <EditProfileModal></EditProfileModal>
@@ -64,6 +65,7 @@ const App: React.FC = () => {
               <JoinGameNotificationModal></JoinGameNotificationModal>
               <ConfirmModal></ConfirmModal>
               <ErrorModal></ErrorModal>
+              <NotificationsModal></NotificationsModal>
             </Router>
 
             <Toaster position="bottom-right" />
