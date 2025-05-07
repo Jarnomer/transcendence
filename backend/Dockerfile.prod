@@ -27,14 +27,16 @@ COPY tsconfig.json ./
 
 # Build the application using production-optimized tsconfig
 WORKDIR /app/backend
+
 # Copy the production tsconfig
 COPY backend/tsconfig.prod.json ./
+
 # Run build for each service with the production config
-RUN pnpm --filter @my-backend/main_server exec -- tsc --project tsconfig.prod.json && \
-    pnpm --filter @my-backend/game_service exec -- tsc --project ../tsconfig.prod.json && \
-    pnpm --filter @my-backend/matchmaking_service exec -- tsc --project ../tsconfig.prod.json && \
-    pnpm --filter @my-backend/user_service exec -- tsc --project ../tsconfig.prod.json && \
-    pnpm --filter @my-backend/remote_service exec -- tsc --project ../tsconfig.prod.json
+RUN pnpm --filter @my-backend/main_server exec -- tsc --project ../../tsconfig.prod.json && \
+    pnpm --filter @my-backend/game_service exec -- tsc --project ../../tsconfig.prod.json && \
+    pnpm --filter @my-backend/matchmaking_service exec -- tsc --project ../../tsconfig.prod.json && \
+    pnpm --filter @my-backend/user_service exec -- tsc --project ../../tsconfig.prod.json && \
+    pnpm --filter @my-backend/remote_service exec -- tsc --project ../../tsconfig.prod.json
 
 # Production image
 FROM node:22-slim
