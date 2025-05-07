@@ -92,7 +92,7 @@ abstract class MatchmakingMode {
 class OneVOneMatchmaking extends MatchmakingMode {
   private INITIAL_ELO_RANGE = 50; // expansion range
   private SEARCH_EXPANSION_INTERVAL = 5000; // Expand every 5 sec
-  private MAX_WAIT_TIME = 30000; // Timeout after 30 sec
+  // private MAX_WAIT_TIME = 30000; // Timeout after 30 sec
   private playerIntervals: Map<string, NodeJS.Timeout> = new Map(); // intervals for searching player opponent
   private recentMatches: Set<string> = new Set(); // Set of recently matched players
   private playerCooldowns: Map<string, number> = new Map(); // Dynamic cooldowns for players
@@ -219,7 +219,10 @@ class OneVOneMatchmaking extends MatchmakingMode {
     }
   }
 
-  handleGameResult(gameId: string, winnerId: string) {}
+  handleGameResult(gameId: string, winnerId: string) {
+    void gameId;
+    void winnerId;
+  }
 }
 
 class TournamentMatchmaking extends MatchmakingMode {
@@ -324,7 +327,9 @@ class TournamentMatchmaking extends MatchmakingMode {
     this.queueMatches.delete(tournamentId);
   }
 
-  addPlayer(player: Player) {}
+  addPlayer(player: Player) {
+    void player;
+  }
 
   removePlayer(playerId: string) {
     this.cleanupPlayer(playerId);
@@ -342,7 +347,9 @@ class TournamentMatchmaking extends MatchmakingMode {
     return game.game_id;
   }
 
-  async findRandomMatch(player: Player) {}
+  async findRandomMatch(player: Player) {
+    void player;
+  }
 
   async joinQueue(queueId: string, player: Player) {
     console.log(`Joining tournament queue: ${queueId}`);

@@ -1,10 +1,10 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
 import { NotAuthorizedError } from './errors';
 
 async function authPlugin(fastify: FastifyInstance) {
-  fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.addHook('onRequest', async (request: FastifyRequest) => {
     const publicRoutes = [
       '/api/auth/register',
       '/api/auth/login',
@@ -20,14 +20,14 @@ async function authPlugin(fastify: FastifyInstance) {
       return; // Skip authentication
     }
     if (request.raw.url?.startsWith('/ws')) {
-      await authWebsocket(fastify, request, reply);
+      await authWebsocket(fastify, request);
     } else {
-      await authHttp(fastify, request, reply);
+      await authHttp(request);
     }
   });
 }
 
-async function authHttp(fastify: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+async function authHttp(request: FastifyRequest) {
   const token = request.headers.authorization?.split(' ')[1];
   if (!token) {
     throw new NotAuthorizedError('No token provided for http');
@@ -35,11 +35,7 @@ async function authHttp(fastify: FastifyInstance, request: FastifyRequest, reply
   await request.jwtVerify(); // Fastify JWT verification
 }
 
-async function authWebsocket(
-  fastify: FastifyInstance,
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+async function authWebsocket(fastify: FastifyInstance, request: FastifyRequest) {
   const { token } = request.query as { token: string };
   if (!token) {
     throw new NotAuthorizedError('No token provided for websocket');

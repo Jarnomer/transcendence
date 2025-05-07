@@ -2,17 +2,14 @@ import { Database } from 'sqlite';
 
 import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
 
-import { GameModel } from '../models/GameModel';
 import { QueueModel } from '../models/QueueModel';
 
 export class QueueService {
   private queueModel: QueueModel;
-  private gameModel: GameModel;
   private static instance: QueueService;
 
   constructor(db: Database) {
     this.queueModel = QueueModel.getInstance(db);
-    this.gameModel = GameModel.getInstance(db);
   }
 
   static getInstance(db: Database) {

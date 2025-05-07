@@ -27,7 +27,7 @@ class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  public handleError(error: any, request: any, reply: any) {
+  public handleError(error: any, reply: any) {
     console.error('Caught Error:', error);
     if (error instanceof ServiceError) {
       return reply.status(error.statusCode).send({ error: error.message });
@@ -42,8 +42,7 @@ class ErrorHandler {
   }
 
   public handleWsError(error: any, socket: any) {
-    const code =
-      error instanceof ServiceError ? error.statusCode || ErrorCode.UNKNOWN : ErrorCode.UNKNOWN;
+    const code = error instanceof ServiceError ? error.statusCode : 500;
 
     const payload = JSON.stringify({
       type: 'error',
@@ -66,8 +65,8 @@ export const errorHandler = ErrorHandler.getInstance();
 
 async function errorHandlerPlugin(fastify: FastifyInstance) {
   const errorHandler = ErrorHandler.getInstance();
-  fastify.setErrorHandler((error, request, reply) => {
-    errorHandler.handleError(error, request, reply);
+  fastify.setErrorHandler((error, reply) => {
+    errorHandler.handleError(error, reply);
   });
 }
 
