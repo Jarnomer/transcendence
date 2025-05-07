@@ -29,7 +29,7 @@ const parentVariants = {
   },
 };
 
-export const ModalBackgroundGlitchTextBlock: React.FC<{}> = () => {
+export const ModalBackgroundGlitchTextBlock: React.FC = () => {
   const [lines, setLines] = useState<string[]>([]);
 
   useEffect(() => {

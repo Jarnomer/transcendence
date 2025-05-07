@@ -109,7 +109,6 @@ export const TournamentList: React.FC = () => {
                 <td className="px-4 py-2">
                   <NavIconButton
                     id="join-game-button"
-                    ariaLabel="join game"
                     icon="arrowRight"
                     ariaLabel={`Join ${options.name}`}
                     onClick={(event) => handleJoinGameClick(event, options)}
