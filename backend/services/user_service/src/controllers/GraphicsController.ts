@@ -56,9 +56,9 @@ export class GraphicsController {
       request.log.trace(`Saving graphics settings for user ${user_id}`);
       request.log.trace(`Settings: ${JSON.stringify(settings)}`);
 
-      await this.userService.saveGraphicsSettings(user_id, settings);
+      const savedSettings = await this.userService.saveGraphicsSettings(user_id, settings);
 
-      reply.code(200).send({ status: 'saved' });
+      reply.code(200).send(savedSettings);
     } catch (error) {
       request.log.error(error);
       reply.code(500).send({ error: 'Internal server error' });

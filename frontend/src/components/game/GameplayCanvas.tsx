@@ -10,6 +10,8 @@ import {
   Scene,
 } from 'babylonjs';
 
+import { useGraphicsContext } from '@contexts';
+
 import {
   ActivePowerUpIconManager,
   GameAnimationManager,
@@ -55,15 +57,13 @@ import {
   retroEffectsPresets,
 } from '@shared/types';
 
-import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
-
 interface GameplayCanvasProps {
   gameState: GameState;
   gameStatus: GameStatus;
   theme?: 'light' | 'dark';
 }
 
-const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
+export const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
   gameState,
   gameStatus,
   theme = 'dark',
@@ -421,5 +421,3 @@ const GameplayCanvas: React.FC<GameplayCanvasProps> = ({
 
   return <canvas ref={canvasRef} className="w-full h-full" />;
 };
-
-export default GameplayCanvas;

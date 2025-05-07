@@ -2,30 +2,30 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
+import { useGraphicsContext } from '@contexts';
+
+import { CheckBox, ClippedButton } from '@components/UI';
+
+import { useSound } from '@hooks';
+
 import { GraphicsSettings as GraphicsSettingsType } from '@shared/types';
 
-import { useGraphicsContext } from '../../contexts/user/GraphicsContext';
-import { useSound } from '../../hooks/useSound';
-import { setRetroEffectLevel } from '../game';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { CheckBox } from '../UI/forms/CheckBox';
-
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 0 100% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 0 100% 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 interface RetroEffectSettingsProps {
   isEnabled: boolean;
@@ -40,9 +40,6 @@ const RetroEffectSettings: React.FC<RetroEffectSettingsProps> = ({
   isEnabled,
   setIsEnabled,
 }) => {
-  const baseValue = 5;
-  const effectValue = isEnabled ? setRetroEffectLevel(level, baseValue) : 0;
-
   return (
     <div className="p-2 max-w-md ">
       <div className="flex items-center mb-4">
@@ -144,17 +141,17 @@ export const BackgroundGameSettings: React.FC<BackgroundGameSettingsProps> = ({
 };
 
 export const GraphicsSettings: React.FC = () => {
-  const { state, updateGraphicsSettings, saveGraphicsSettings } = useGraphicsContext();
+  const { state, saveGraphicsSettings } = useGraphicsContext();
 
-  const [retroEffectLevel, setRetroEffectLevel] = useState(state.retroEffect?.level || 2);
+  const [retroEffectLevel, setRetroEffectLevel] = useState(state.retroEffect?.level || 3);
   const [isRetroEffectEnabled, setIsRetroEffectEnabled] = useState(
-    state.retroEffect?.enabled || true
+    state.retroEffect?.enabled !== false
   );
   const [selectedTheme, setSelectedTheme] = useState<string | null>(
     state.colorTheme?.primary || null
   );
   const [backgroundGameEnabled, setBackgroundGameEnabled] = useState(
-    state.backgroundGame?.enabled || true
+    state.backgroundGame?.enabled !== false
   );
 
   const playSelectSound = useSound('/sounds/effects/select.wav');

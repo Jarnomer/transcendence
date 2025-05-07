@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import { getUserByID } from '../services/userService';
+import { useGameOptionsContext, useWebSocketContext } from '@contexts';
+
+import { getUserByID } from '@services';
 
 export const useFetchPlayerData = () => {
   const { mode, difficulty } = useGameOptionsContext();

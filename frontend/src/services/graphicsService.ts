@@ -1,6 +1,6 @@
-import { GraphicsSettings, defaultGraphicsSettings } from '@shared/types';
+import { api } from '@services';
 
-import { api } from './api';
+import { GraphicsSettings, defaultGraphicsSettings } from '@shared/types';
 
 export const getGraphicsSettings = async (): Promise<GraphicsSettings> => {
   try {

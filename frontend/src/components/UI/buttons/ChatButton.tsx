@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { useUser } from '@/contexts/user/UserContext';
+import { useChatContext, useModal, useUser } from '@contexts';
 
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useModal } from '../../../contexts/modalContext/ModalContext';
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
-import { NavIconButton } from './NavIconButton';
+import { NavIconButton } from '@components/UI';
+
+import { useMediaQuery } from '@hooks';
 
 interface ChatButtonProps {
   receiverUserId: string;
@@ -15,8 +14,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
   const { user } = useUser();
   const { setOpenChatWindows, messages, fetchDmHistory, friends } = useChatContext();
   const isDesktop = useMediaQuery('(min-width: 600px)');
-  const { openModal, closeModal } = useModal();
-  const { user: loggedInUser } = useUser();
+  const { openModal } = useModal();
 
   const handleChatClick = async (friendId: string) => {
     console.log('opening chat', friendId);
@@ -32,10 +30,8 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
 
     if (!isDesktop) {
       openModal('chatModal', {
-        loggedInUser,
         friends,
-        selectedFriendId: receiverUserId,
-        onClose: closeModal,
+        chatId: receiverUserId,
       });
     }
   };

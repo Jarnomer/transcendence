@@ -4,15 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx'; // Import the GameOptionsContext
+import { useGameOptionsContext, useModal, useNavigationAccess } from '@contexts';
 
-import GameMenuCard from '@components/menu/cards/GameMenuCard'; // Import the GameMenuCard component
-import { NavIconButton } from '@components/UI/buttons/NavIconButton';
+import { GameMenuCard } from '@components/layout';
+import { NavIconButton } from '@components/UI';
 
-import { useModal } from '../contexts/modalContext/ModalContext';
-import { useNavigationAccess } from '../contexts/navigationAccessContext/NavigationAccessContext';
-import { useSound } from '../hooks/useSound';
-import useValidateSession from '../hooks/useValidateSession'; // Import the useValidateSession hook
+import { useSound, useValidateSession } from '@hooks';
 
 interface GameMenuOption {
   content: string;
@@ -21,7 +18,7 @@ interface GameMenuOption {
   onClick: () => void;
 }
 
-export const pageVariants = {
+const pageVariants = {
   initial: {
     clipPath: 'inset(50% 0 50% 0)',
     opacity: 0,

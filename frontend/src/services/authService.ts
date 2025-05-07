@@ -1,8 +1,8 @@
 import { jwtDecode } from 'jwt-decode';
 
-import { LoginResponseType, RegisterResponseType } from '@types';
+import { api } from '@services';
 
-import { api } from './api';
+import { LoginResponseType, RegisterResponseType } from '@shared/types';
 
 interface TokenDecoded {
   user_id: string;

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
-import { FriendType } from '../../../../shared/types';
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { useSound } from '../../hooks/useSound';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
-import SearchBar from '../UI/SearchBar';
+import { useChatContext } from '@contexts';
+
+import { NavIconButton, SearchBar } from '@components/UI';
+
+import { useSound } from '@hooks';
+
+import { FriendType } from '@shared/types';
 
 interface ChatSidebarProps {
   handleClickNewChat: () => void;
@@ -24,8 +26,6 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value.toLowerCase());
   };
-
-  console.log('FRIENDS: ', friends);
 
   const filteredUsers = friends.filter((friend: FriendType) =>
     friend.display_name?.toLowerCase().startsWith(searchQuery)

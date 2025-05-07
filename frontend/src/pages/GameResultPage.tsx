@@ -1,8 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 
-import { GameResults } from '../components/game/GameResults';
+import { GameResults } from '@components/game';
 
-export default function GameResultPage() {
+export const GameResultPage: React.FC = () => {
   const location = useLocation();
   const { gameResult, playersData } = location.state || {};
 
@@ -11,4 +11,4 @@ export default function GameResultPage() {
   }
 
   return <GameResults result={gameResult} playersData={playersData} />;
-}
+};

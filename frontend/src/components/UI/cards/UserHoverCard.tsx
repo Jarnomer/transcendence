@@ -2,8 +2,9 @@ import ReactDOM from 'react-dom';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '../../../../../shared/types';
-import { UserActions } from '../buttons/UserActions';
+import { UserActions } from '@components/UI';
+
+import { UserDataResponseType } from '@shared/types';
 
 interface userHoverCardProps {
   user: UserDataResponseType;

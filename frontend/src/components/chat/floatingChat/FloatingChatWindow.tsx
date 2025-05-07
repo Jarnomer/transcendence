@@ -2,14 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { FriendType } from '../../../../../shared/types';
-import { ChatRoomType } from '../../../../../shared/types/chatTypes';
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useUser } from '../../../contexts/user/UserContext';
-import { useSound } from '../../../hooks/useSound';
-import { NavIconButton } from '../../UI/buttons/NavIconButton';
-import { MessageInput } from '../MessageInput';
-import { MessageList } from '../MessageList';
+import { useChatContext, useUser } from '@contexts';
+
+import { MessageInput, MessageList } from '@components/chat';
+import { NavIconButton } from '@components/UI';
+
+import { useSound } from '@hooks';
+
+import { ChatRoomType, FriendType } from '@shared/types';
 
 interface ChatWindowProps {
   friends: FriendType[];
@@ -47,8 +47,6 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId,
       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
     }
   }, [chatMessages]);
-
-  console.log('isChatroom:', isGroupChat, 'chatId: ', chatId);
 
   return (
     <div

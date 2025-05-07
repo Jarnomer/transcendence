@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useModal } from '../../contexts/modalContext/ModalContext';
-import { useUser } from '../../contexts/user/UserContext';
-import { UserInformationForm } from '../UI/forms/UserInformationForm';
-import { ModalWrapper } from './ModalWrapper';
+import { useModal, useUser } from '@contexts';
+
+import { ModalWrapper } from '@components/modals';
+import { UserInformationForm } from '@components/UI';
 
 export const EditProfileModal: React.FC = () => {
   const { isModalOpen } = useModal();

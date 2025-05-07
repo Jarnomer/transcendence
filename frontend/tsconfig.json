@@ -19,6 +19,8 @@
       "@/*": ["./src/*"],
       "@pages": ["./src/pages"],
       "@pages/*": ["./src/pages/*"],
+      "@contexts": ["./src/contexts"],
+      "@contexts/*": ["./src/contexts/*"],
       "@components": ["./src/components"],
       "@components/*": ["./src/components/*"],
       "@game": ["./src/components/game"],

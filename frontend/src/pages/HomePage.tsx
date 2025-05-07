@@ -2,11 +2,9 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { LeaderBoard } from '@components';
+import { LeaderBoard, Updates } from '@components/layout';
 
-import { Updates } from '../components/home/Updates';
-
-export const slideFromLeftVariants = {
+const slideFromLeftVariants = {
   initial: {
     x: '-100%',
     scale: 1.05,
@@ -30,7 +28,7 @@ export const slideFromLeftVariants = {
   },
 };
 
-export const slideFromRightVariants = {
+const slideFromRightVariants = {
   initial: {
     x: '100%',
     scale: 1.05,

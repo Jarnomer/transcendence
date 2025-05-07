@@ -8,6 +8,10 @@ import {
   useState,
 } from 'react';
 
+import { initialState, useWebSocketStore, WebSocketManager, webSocketReducer } from '@services';
+
+import { useChatSocket, useGameSocket, useMatchmakingSocket } from '@hooks';
+
 import {
   GameEvent,
   GameOptionsType,
@@ -15,14 +19,6 @@ import {
   GameStatus,
   MatchmakingSnapshot,
 } from '@shared/types';
-
-import { useChatSocket } from '../hooks/useChatSocket';
-import { useDuel } from '../hooks/useDuel';
-import { useGameSocket } from '../hooks/useGameSocket';
-import { useMatchmakingSocket } from '../hooks/useMatchmakingSocket';
-import WebSocketManager from '../services/webSocket/WebSocketManager';
-import webSocketReducer, { initialState } from '../services/webSocket/WebSocketReducer';
-import { useWebSocketStore } from '../services/webSocket/WebSocketStore';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 

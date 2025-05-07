@@ -2,23 +2,23 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 
 import { toast } from 'react-hot-toast';
 
-import { useWebSocketContext } from '@/contexts/WebSocketContext';
-import { useDuel } from '@/hooks/useDuel';
-import {
-  addMember,
-  createChatRoom,
-  getChat,
-  getDm,
-  getMyRooms,
-  getPublicChat,
-} from '@/services/chatService';
+import { useUser, useWebSocketContext } from '@contexts';
 
-import { FriendListType } from '../../../../shared/types';
-import { ChatMessageType, ChatRoomType } from '../../../../shared/types/chatTypes';
-import { MessageNotification } from '../../components/chat/MessageNotification';
-import { useUser } from '../user/UserContext';
+import { MessageNotification } from '@components/chat';
+
+import { addMember, createChatRoom, getChat, getDm, getMyRooms, getPublicChat } from '@services';
+
+import { ChatMessageType, ChatRoomType, FriendListType } from '@shared/types';
 
 const ChatContext = createContext<any>(null);
+
+interface ChatMessagePayload {
+  room_id?: string;
+  sender_id: string;
+  avatar_url?: string;
+  display_name: string;
+  message: string;
+}
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage } = useWebSocketContext();

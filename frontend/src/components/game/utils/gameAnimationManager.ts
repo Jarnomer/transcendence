@@ -1,5 +1,7 @@
 import { Animation, Color3, Material, Mesh, Scene, Vector3 } from 'babylonjs';
 
+import { applyEasing } from '@game/utils';
+
 import {
   AnimationBlendMode,
   AnimationGrouping,
@@ -8,8 +10,6 @@ import {
   AnimationOptions,
   AnimationPriority,
 } from '@shared/types';
-
-import { applyEasing } from './gameAnimations';
 
 export class GameAnimationManager {
   private static instance: GameAnimationManager;

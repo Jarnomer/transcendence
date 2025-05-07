@@ -1,4 +1,4 @@
-import { MatchMakerState } from '../services/MatchMaker';
+import { MatchMakerState } from '@services';
 
 export type SessionData = {
   gameId?: string;
@@ -14,7 +14,7 @@ export type SessionData = {
 
 const SESSION_KEY = 'game-session';
 
-export default class SessionManager {
+export class SessionManager {
   private static instance: SessionManager;
   private cache: SessionData = {};
 

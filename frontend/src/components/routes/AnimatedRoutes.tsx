@@ -2,32 +2,31 @@ import React, { useEffect } from 'react';
 
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
-import { AnimatePresence } from 'framer-motion'; // Ensure AnimatePresence is imported
+import { AnimatePresence } from 'framer-motion';
 
-import { useDuel } from '@/hooks/useDuel';
+import {
+  ChatPage,
+  CreatorsPage,
+  GameMenu,
+  GameOptionsPage,
+  GamePage,
+  GameResultPage,
+  HomePage,
+  LoginPage,
+  NotFoundPage,
+  ProfilePage,
+  Settings,
+  SignUpPage,
+  TournamentLobby,
+  TournamentMenu,
+} from '@pages';
 
-import { LoadingProvider } from '../../contexts/gameContext/LoadingContextProvider.tsx';
-import { useNavigationAccess } from '../../contexts/navigationAccessContext/NavigationAccessContext.tsx';
-import { useUser } from '../../contexts/user/UserContext.tsx';
-import { useSound } from '../../hooks/useSound.tsx';
-import { ChatPage } from '../../pages/ChatPage.tsx';
-import { CreatorsPage } from '../../pages/CreatorsPage.tsx';
-import { GameMenu } from '../../pages/GameMenu.tsx';
-import { GameOptionsPage } from '../../pages/GameOptionsPage.tsx';
-import { GamePage } from '../../pages/GamePage.tsx';
-import GameResultPage from '../../pages/GameResultPage.tsx';
-import { HomePage } from '../../pages/HomePage.tsx';
-import { LoginPage } from '../../pages/LoginPage.tsx';
-import { NotFoundPage } from '../../pages/NotFoundPage.tsx';
-import { ProfilePage } from '../../pages/ProfilePage.tsx';
-import { Settings } from '../../pages/Settings.tsx';
-import { SignUpPage } from '../../pages/SignUpPage.tsx';
-import { BracketTest } from '../../pages/testing_pages/BracketTest.tsx';
-import { CarouselTest } from '../../pages/testing_pages/CarouselTest.tsx';
-import { TestGameResult } from '../../pages/testing_pages/TestGameResult.tsx';
-import { TournamentLobby } from '../../pages/TournamentLobby.tsx';
-import { TournamentMenu } from '../../pages/TournamentMenu.tsx';
-import { PageWrapper } from './PageWrapper.tsx';
+import { LoadingProvider, useNavigationAccess, useUser } from '@contexts';
+
+import { PageWrapper } from '@components/routes';
+
+import { useDuel, useSound } from '@hooks';
+
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();
@@ -66,37 +65,11 @@ export const AnimatedRoutes: React.FC = () => {
         />
 
         <Route
-          path="/testGameResult"
-          element={
-            user ? (
-              <PageWrapper>
-                <TestGameResult />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        <Route
           path="/home"
           element={
             user ? (
               <PageWrapper>
                 <HomePage />
-              </PageWrapper>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
-        <Route
-          path="/bracketTest"
-          element={
-            user ? (
-              <PageWrapper>
-                <BracketTest></BracketTest>
               </PageWrapper>
             ) : (
               <Navigate to="/login" replace />
@@ -152,17 +125,6 @@ export const AnimatedRoutes: React.FC = () => {
               </PageWrapper>
             ) : (
               <Navigate to="/" replace />
-            )
-          }
-        />
-
-        <Route
-          path="/CarouselTest"
-          element={
-            user && (
-              <PageWrapper>
-                <CarouselTest />
-              </PageWrapper>
             )
           }
         />

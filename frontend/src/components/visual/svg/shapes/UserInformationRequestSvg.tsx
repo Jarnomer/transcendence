@@ -2,22 +2,22 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 100% 0 100% )',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 }, // 👈 delay here
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 100%)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 100% 0 100% )',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 }, // 👈 delay here
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 100%)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 export const InformationRequestSvg: React.FC = () => {
   return (

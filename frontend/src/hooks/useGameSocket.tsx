@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 
-import { GameState, GameStatus } from '@shared/types';
+import { WebSocketManager } from '@services';
 
-import WebSocketManager from '../services/webSocket/WebSocketManager';
+import { GameState, GameStatus } from '@shared/types';
 
 export const useGameSocket = (
   gameSocket: WebSocketManager | null,

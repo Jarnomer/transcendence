@@ -1,13 +1,11 @@
 import { useState } from 'react';
 
-import { BackgroundGlow } from '../components';
-import { ChatWindow } from '../components/chat/chatPage/ChatWindow';
-import { MobileChatPage } from '../components/chat/chatPage/MobileChatPage';
-import { ChatSidebar } from '../components/chat/ChatSideBar';
-import { CreateNewGroupChat } from '../components/chat/CreateNewGroupChat';
-import { useChatContext } from '../contexts/chatContext/ChatContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useChatContext, useUser } from '@contexts';
+
+import { ChatSidebar, ChatWindow, CreateNewGroupChat, MobileChatPage } from '@components/chat';
+import { BackgroundGlow } from '@components/visual';
+
+import { useMediaQuery } from '@hooks';
 
 export const ChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);

@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext';
 import { useNavigationAccess } from '@/contexts/navigationAccessContext/NavigationAccessContext';
-import { useUser } from '@/contexts/user/UserContext';
 import { useWebSocketContext } from '@/contexts/WebSocketContext';
 
-import { ChallengeIcon } from '../../visual/svg/icons/ChallengeIcon';
-import { iconSizeResponsive } from './NavIconButton';
+import { useUser } from '@contexts';
+
+import { iconSizeResponsive } from '@components/UI';
+import { ChallengeIcon } from '@components/visual';
 
 interface ChallengeButtonProps {
   receiverUserId: string;

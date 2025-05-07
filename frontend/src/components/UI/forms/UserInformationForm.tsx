@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '../../../../../shared/types';
-import { useModal } from '../../../contexts/modalContext/ModalContext';
-import { useUser } from '../../../contexts/user/UserContext';
-import { api } from '../../../services/api';
-import { ProfilePicture } from '../../profile/ProfilePicture';
-import { InformationRequestSvg } from '../../visual/svg/shapes/UserInformationRequestSvg';
-import { ClippedButton } from '../buttons/ClippedButton';
-import { NavIconButton } from '../buttons/NavIconButton';
+import { useModal, useUser } from '@contexts';
+
+import { ProfilePicture } from '@components/profile';
+import { ClippedButton, NavIconButton } from '@components/UI';
+import { InformationRequestSvg } from '@components/visual';
+
+import { api } from '@services';
+
+import { UserDataResponseType } from '@shared/types';
 
 interface EditProfileProps {
   user: UserDataResponseType;
@@ -21,7 +22,7 @@ interface FormHeaderProps {
   user: UserDataResponseType;
 }
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(0 100% 0 100% )',
     opacity: 0,

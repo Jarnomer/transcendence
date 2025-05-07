@@ -2,7 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../../BackgroundGlow';
+import { BackgroundGlow } from '@components/visual';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },

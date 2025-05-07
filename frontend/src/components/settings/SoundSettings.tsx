@@ -2,29 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { useAudioSettings } from '../../contexts/audioContext/AudioSettingsContext';
-import { useSound } from '../../hooks/useSound';
-import { volumeValueToLevel } from '../../services/audioService';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { CheckBox } from '../UI/forms/CheckBox';
-import { Slider } from '../UI/forms/Slider';
+import { useAudioSettings } from '@contexts';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 0 100% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+import { CheckBox, ClippedButton, Slider } from '@components/UI';
+
+import { volumeValueToLevel } from '@services';
+
+import { useSound } from '@hooks';
+
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 0 100% 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 interface SoundSettingsProps {
   level: number;

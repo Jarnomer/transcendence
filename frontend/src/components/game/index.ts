@@ -1,7 +1,8 @@
-// Core game components
+export * from './BackgroundCanvas';
+export * from './BackgroundProvider';
+export * from './GameResults';
+export * from './GameplayCanvas';
 
-export * from './MatchmakingCarousel/MatchMakingCarousel';
-export * from './scoreBoard/PlayerScoreBoard';
-export * from './scoreBoard/PlayerScoreCard';
-
+export * from './MatchMakingCarousel';
+export * from './scoreBoard';
 export * from './utils';

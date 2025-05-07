@@ -2,28 +2,28 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { getBlockedUsers, unblockUser } from '@/services/friendService';
+import { useUser } from '@contexts';
 
-import { useUser } from '../../contexts/user/UserContext';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { ProfilePictureSmall } from '../UI/ProfilePictureSmall';
+import { ClippedButton, ProfilePictureSmall } from '@components/UI';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 0 100% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+import { getBlockedUsers, unblockUser } from '@services';
+
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 0 100% 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.5 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 export const UserSettings: React.FC = () => {
   const { userId } = useUser();

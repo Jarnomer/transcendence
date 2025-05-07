@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { useUser } from '@/contexts/user/UserContext';
-import { blockUser } from '@/services/friendService';
+import { useUser } from '@contexts';
 
-import { UserDataResponseType } from '../../../../../shared/types';
-import { AddFriend } from './AddFriend';
-import { ChallengeButton } from './ChallengeUser';
-import { ChatButton } from './ChatButton';
-import { NavIconButton } from './NavIconButton';
+import { AddFriend, ChallengeButton, ChatButton, NavIconButton } from '@components/UI';
+
+import { blockUser } from '@services';
+
+import { UserDataResponseType } from '@shared/types';
 
 interface UserActionsProps {
   user: UserDataResponseType;

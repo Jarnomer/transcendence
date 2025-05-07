@@ -2,30 +2,23 @@ import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useChatContext } from '../../../contexts/chatContext/ChatContext';
-import { useUser } from '../../../contexts/user/UserContext';
-import { NavIconButton } from '../../UI/buttons/NavIconButton';
-import { BackgroundGlow } from '../../visual/BackgroundGlow';
-import { ChatSidebar } from '../ChatSideBar';
-import { CreateNewGroupChat } from '../CreateNewGroupChat';
-import { ChatWindow } from './ChatWindow';
+import { useChatContext, useModal, useUser } from '@contexts';
+
+import { ChatSidebar, ChatWindow, CreateNewGroupChat } from '@components/chat';
+import { NavIconButton } from '@components/UI';
+import { BackgroundGlow } from '@components/visual';
+
 export const MobileChatPage: React.FC = () => {
   const [createNewGroupChat, setCreateNewGroupChat] = useState(false);
   const [chatId, setchatId] = useState<string | null>(null);
   const { user } = useUser();
   const navigate = useNavigate();
-
-  const { friends, messages, fetchDmHistory, fetchChatHistory } = useChatContext();
+  const { openModal } = useModal();
+  const { friends, messages, fetchDmHistory, fetchChatHistory, setOpenChatWindows } =
+    useChatContext();
 
   const handleClickNewChat = () => {
     setCreateNewGroupChat(!createNewGroupChat);
-  };
-
-  const handleOpenChat = async (friendId: string) => {
-    setchatId(friendId);
-    if (!messages[friendId]) {
-      await fetchDmHistory(friendId);
-    }
   };
 
   const handleGoBack = () => {
@@ -37,11 +30,29 @@ export const MobileChatPage: React.FC = () => {
   };
 
   const handleOpenRoom = async (roomId: string) => {
-    console.log('opening chat', roomId);
-    setchatId(roomId);
     if (!messages[roomId]) {
       await fetchChatHistory(roomId); // Optional: make sure messages are loaded
     }
+    openModal('chatModal', {
+      friends,
+      chatId: roomId,
+    });
+  };
+
+  const handleOpenChat = async (friendId: string) => {
+    setOpenChatWindows((prev: Record<string, boolean>) => ({
+      ...prev,
+      [friendId]: true,
+    }));
+
+    if (!messages[friendId]) {
+      await fetchDmHistory(friendId);
+    }
+
+    openModal('chatModal', {
+      friends,
+      chatId: friendId,
+    });
   };
 
   if (!user) return null;

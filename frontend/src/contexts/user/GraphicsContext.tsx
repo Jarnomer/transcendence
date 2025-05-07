@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 
-import { GraphicsSettings, defaultGraphicsSettings } from '@shared/types';
+import { applyGraphicsSettings, getGraphicsSettings, saveGraphicsSettings } from '@services';
 
-import { saveGraphicsSettings, getGraphicsSettings } from '../../services/userService';
+import { GraphicsSettings, defaultGraphicsSettings } from '@shared/types';
 
 // Define context state type
 interface GraphicsContextState {
@@ -43,24 +43,20 @@ export const GraphicsSettingsProvider: React.FC<{ children: React.ReactNode }> =
     const loadSettings = async () => {
       try {
         const settings = await getGraphicsSettings();
-        if (settings) {
-          dispatch({ type: 'SET_SETTINGS', payload: settings });
-
-          // Apply theme immediately if available
-          if (settings.colorTheme?.primary) {
-            document.documentElement.style.setProperty(
-              '--color-primary',
-              settings.colorTheme.primary
-            );
-          }
-        }
+        dispatch({ type: 'SET_SETTINGS', payload: settings });
+        applyGraphicsSettings(settings);
       } catch (error) {
         console.error('Failed to load graphics settings:', error);
+        applyGraphicsSettings(defaultGraphicsSettings);
       }
     };
 
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    applyGraphicsSettings(state);
+  }, [state]);
 
   const updateGraphicsSettings = (settings: Partial<GraphicsSettings>) => {
     dispatch({ type: 'UPDATE_SETTINGS', payload: settings });
@@ -68,8 +64,8 @@ export const GraphicsSettingsProvider: React.FC<{ children: React.ReactNode }> =
 
   const handleSaveGraphicsSettings = async (settings: GraphicsSettings) => {
     try {
-      await saveGraphicsSettings(settings);
-      dispatch({ type: 'SET_SETTINGS', payload: settings });
+      const savedSettings = await saveGraphicsSettings(settings);
+      dispatch({ type: 'SET_SETTINGS', payload: savedSettings });
     } catch (error) {
       console.error('Failed to save graphics settings:', error);
     }

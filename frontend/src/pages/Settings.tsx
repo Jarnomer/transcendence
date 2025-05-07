@@ -2,58 +2,56 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { BackgroundGlow } from '../components';
-import { GraphicsSettings } from '../components/settings/GraphicsSettings';
-import { Soundsettings } from '../components/settings/SoundSettings';
-import { UserSettings } from '../components/settings/UserSettings';
+import { GraphicsSettings, Soundsettings, UserSettings } from '@components/settings';
+import { BackgroundGlow } from '@components/visual';
 
-export const slideFromLeftVariants = {
-  initial: {
-    x: '-100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '-100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
+// const slideFromLeftVariants = {
+//   initial: {
+//     x: '-100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '-100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
-export const slideFromRightVariants = {
-  initial: {
-    x: '100%',
-    scale: 1.05,
-  },
-  animate: {
-    x: 0,
-    scale: 1,
-    transition: {
-      x: { duration: 0.4, ease: 'easeInOut' },
-      scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
-    },
-  },
-  exit: {
-    x: '100%',
-    scale: 1.05,
-    opacity: 1,
-    transition: {
-      scale: { duration: 0.2, ease: 'easeOut' },
-      x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
-    },
-  },
-};
+// const slideFromRightVariants = {
+//   initial: {
+//     x: '100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
 export const SettingsNav: React.FC<{
   activeTab: string;

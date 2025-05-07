@@ -2,25 +2,26 @@ import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { UserInformationForm } from '../components/UI/forms/UserInformationForm';
-import { useUser } from '../contexts/user/UserContext';
+import { useUser } from '@contexts';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+import { UserInformationForm } from '@components/UI';
+
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 export const SignUpPage: React.FC = () => {
   const [loading, setLoading] = useState(false);

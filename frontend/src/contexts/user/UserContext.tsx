@@ -1,12 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-import { getUserData } from '@/services/userService';
+import { SessionManager, api, getRequestsSent, getUserData } from '@services';
 
-import { FriendListType, UserDataResponseType } from '@shared/types/userTypes';
-
-import { api } from '../../services/api';
-import { getRequestsSent } from '../../services/friendService';
-import SessionManager from '../../services/SessionManager';
+import { FriendListType, UserDataResponseType } from '@shared/types';
 
 interface FriendRequest {
   user_id: string;

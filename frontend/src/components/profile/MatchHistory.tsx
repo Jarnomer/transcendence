@@ -2,9 +2,9 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { UserDataResponseType } from '@shared/types';
 
-export const animationVariants = {
+const animationVariants = {
   initial: {
     clipPath: 'inset(0 100% 0 0)',
     opacity: 0,

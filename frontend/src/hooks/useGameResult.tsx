@@ -2,14 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useGameOptionsContext } from '@/contexts/gameContext/GameOptionsContext.tsx';
-import { useLoading } from '@/contexts/gameContext/LoadingContextProvider';
-import { submitResult } from '@/services/gameService';
+import { useGameOptionsContext, useLoading, useUser, useWebSocketContext } from '@contexts';
 
-import { GameState } from '@types';
+import { submitResult } from '@services';
 
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { GameState } from '@shared/types';
 
 export const useGameResult = () => {
   const navigate = useNavigate();
@@ -166,5 +163,3 @@ export const useGameResult = () => {
   }, []);
   return { gameResult };
 };
-
-export default useGameResult;

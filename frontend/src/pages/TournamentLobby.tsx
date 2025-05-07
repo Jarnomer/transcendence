@@ -6,14 +6,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useMatchmaking } from '@/hooks';
 
-import { slideFromRightVariants } from '../components/tournamentLobby/animationVariants';
-import { TournamentLobbyNav } from '../components/tournamentLobby/TournamentLobbyNav';
-import { TournamentPlayerList } from '../components/tournamentLobby/TournamentPlayerList';
-import { TournamentSettings } from '../components/tournamentLobby/TournamentSettings';
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useModal } from '../contexts/modalContext/ModalContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { useGameOptionsContext, useModal, useUser, useWebSocketContext } from '@contexts';
+
+import {
+  TournamentLobbyNav,
+  TournamentPlayerList,
+  TournamentSettings,
+  slideFromRightVariants,
+} from '@components/layout';
 
 interface TournamentMatch {
   gameId: string;

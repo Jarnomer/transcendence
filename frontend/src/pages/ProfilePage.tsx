@@ -4,31 +4,29 @@ import { useParams } from 'react-router-dom';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { getUserData } from '@services/userService';
+import { Friends, MatchHistory, ProfileHeader } from '@components/profile';
+import { Error } from '@components/UI';
 
-import { UserDataResponseType } from '@shared/types/userTypes';
+import { getUserData } from '@services';
 
-import { Friends } from '../components/profile/FriendList';
-import { MatchHistory } from '../components/profile/MatchHistory';
-import { ProfileHeader } from '../components/profile/ProfileHeader';
-import { Error } from '../components/UI/Error';
+import { UserDataResponseType } from '@shared/types';
 
-export const animationVariants = {
-  initial: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0 0% 0 0)',
-    opacity: 1,
-    transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
-  },
-  exit: {
-    clipPath: 'inset(0 100% 0 0)',
-    opacity: 0,
-    transition: { duration: 0.4, ease: 'easeInOut' },
-  },
-};
+// const animationVariants = {
+//   initial: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//   },
+//   animate: {
+//     clipPath: 'inset(0 0% 0 0)',
+//     opacity: 1,
+//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 },
+//   },
+//   exit: {
+//     clipPath: 'inset(0 100% 0 0)',
+//     opacity: 0,
+//     transition: { duration: 0.4, ease: 'easeInOut' },
+//   },
+// };
 
 export const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);

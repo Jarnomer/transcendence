@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-import { FriendType } from '../../../../shared/types';
-import { useChatContext } from '../../contexts/chatContext/ChatContext';
-import { ClippedButton } from '../UI/buttons/ClippedButton';
-import { NavIconButton } from '../UI/buttons/NavIconButton';
-import SearchBar from '../UI/SearchBar';
+import { useChatContext } from '@contexts';
+
+import { ClippedButton, NavIconButton, SearchBar } from '@components/UI';
+
+import { FriendType } from '@shared/types';
 
 type CreateRoomPopupProps = {
   handleClickNewChat: () => void;
@@ -27,7 +27,6 @@ export const CreateNewGroupChat: React.FC<CreateRoomPopupProps> = ({ handleClick
   );
 
   const handleRoomCreation = () => {
-    console.log(roomName.trim());
     if (roomName.trim() === '') return;
 
     createRoom(roomName, isPrivate, selectedMembers);

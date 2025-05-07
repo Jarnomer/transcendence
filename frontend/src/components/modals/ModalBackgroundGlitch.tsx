@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 
-import { CircleSvg } from '../visual/svg/shapes/CircleSvg';
-import { WarningSign } from '../visual/svg/shapes/WarningSign';
+import { CircleSvg, WarningSign } from '@components/visual';
 
 const generateRandomText = (length: number) => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}<>?';
@@ -67,11 +66,9 @@ export const ModalBackgroundGlitchTextBlock: React.FC<{}> = () => {
 };
 
 export const ModalBackgroundGlitch: React.FC<{ duration: number }> = ({ duration }) => {
-  const [showGlitch, setShowGlitch] = useState(false);
+  const [showGlitch, setShowGlitch] = useState(true);
 
   useEffect(() => {
-    setShowGlitch(true);
-
     const glitchTimer = setTimeout(() => {
       setShowGlitch(false);
     }, duration);

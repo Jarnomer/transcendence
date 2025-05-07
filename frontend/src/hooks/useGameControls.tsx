@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { createMoveInputMessage } from '@shared/messages/';
+import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
+import { createMoveInputMessage } from '@shared/messages';
 
-const useGameControls = () => {
+export const useGameControls = () => {
   const [keysPressed, setKeysPressed] = useState<Record<string, boolean>>({});
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
   const [remotePlayerId, setRemotePlayerId] = useState<string | null>(null);
@@ -111,7 +109,4 @@ const useGameControls = () => {
   }, [keysPressed, sendMessage, localPlayerId, remotePlayerId]);
 
   return localPlayerId;
-;
 };
-
-export default useGameControls;

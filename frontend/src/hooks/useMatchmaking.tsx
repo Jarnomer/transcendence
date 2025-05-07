@@ -2,13 +2,11 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useGameOptionsContext } from '../contexts/gameContext/GameOptionsContext';
-import { useUser } from '../contexts/user/UserContext';
-import { useWebSocketContext } from '../contexts/WebSocketContext';
-import MatchMaker, { MatchMakerState } from '../services/MatchMaker';
-import SessionManager from '../services/SessionManager';
+import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
 
-const useMatchmaking = () => {
+import { MatchMaker, MatchMakerState, SessionManager } from '@services';
+
+export const useMatchmaking = () => {
   const navigate = useNavigate();
   const { userId, user } = useUser();
   const {
@@ -201,4 +199,3 @@ const useMatchmaking = () => {
   //   };
   // }, []);
 };
-export default useMatchmaking;

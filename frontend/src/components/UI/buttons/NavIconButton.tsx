@@ -21,7 +21,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import { useSound } from '../../../hooks/useSound';
+import { useSound } from '@hooks';
 
 interface NavIconButtonProps {
   id: string;

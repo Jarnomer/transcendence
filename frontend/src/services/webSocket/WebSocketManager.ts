@@ -1,4 +1,4 @@
-class WebSocketManager {
+export class WebSocketManager {
   private static instances: Record<string, WebSocketManager> = {};
   private queue: any[] = [];
 
@@ -181,5 +181,3 @@ class WebSocketManager {
     }
   }
 }
-
-export default WebSocketManager;
