@@ -52,19 +52,19 @@ export const GameMenu: React.FC = () => {
   const modes = [
     {
       content: 'SinglePlayer',
-      imageUrl: './src/assets/images/ai_3.png',
+      imageUrl: '/images/menu/ai_3.png',
       hoverInfo: 'Play against an AI opponent',
       onClick: () => handleModeClick('singleplayer'),
     },
     {
       content: '1v1',
-      imageUrl: './src/assets/images/1v1_bw.png',
+      imageUrl: '/images/menu/1v1_bw.png',
       hoverInfo: 'Play with another player',
       onClick: () => handleModeClick('1v1'),
     },
     {
       content: 'Tournament',
-      imageUrl: './src/assets/images/trophy_bw.png',
+      imageUrl: '/images/menu/trophy_bw.png',
       hoverInfo: 'Compete in a tournament',
       onClick: () => handleModeClick('tournament'),
     },
@@ -74,19 +74,19 @@ export const GameMenu: React.FC = () => {
     singleplayer: [
       {
         content: 'Easy',
-        imageUrl: './src/assets/images/ai_easy.png',
+        imageUrl: './images/menu/ai_easy.png',
         hoverInfo: 'Easy level',
         onClick: () => handleDifficultyClick('easy'),
       },
       {
         content: 'Normal',
-        imageUrl: './src/assets/images/ai.png',
+        imageUrl: '/images/menu/ai.png',
         hoverInfo: 'Normal level',
         onClick: () => handleDifficultyClick('normal'),
       },
       {
         content: 'Brutal',
-        imageUrl: './src/assets/images/ai_hard.png',
+        imageUrl: '/images/menu/ai_hard.png',
         hoverInfo: 'Brutal level',
         onClick: () => handleDifficultyClick('brutal'),
       },
@@ -94,29 +94,15 @@ export const GameMenu: React.FC = () => {
     '1v1': [
       {
         content: 'Local',
-        imageUrl: './src/assets/images/local_match_5.png',
+        imageUrl: '/images/menu/local_match_5.png',
         hoverInfo: 'Play with a local player',
         onClick: () => handleDifficultyClick('local'),
       },
       {
         content: 'Online',
-        imageUrl: './src/assets/images/online_match_4.png',
+        imageUrl: 'images/menu/online_match_4.png',
         hoverInfo: 'Play with an online player',
         onClick: () => handleDifficultyClick('online'),
-      },
-    ],
-    tournament: [
-      {
-        content: '8',
-        imageUrl: './src/assets/images/leaderboard.png',
-        hoverInfo: 'local tournament',
-        onClick: () => handleDifficultyClick('4'),
-      },
-      {
-        content: '16',
-        imageUrl: './src/assets/images/leaderboard.png',
-        hoverInfo: 'online tournament',
-        onClick: () => handleDifficultyClick('16'),
       },
     ],
   };
@@ -179,7 +165,7 @@ export const GameMenu: React.FC = () => {
         animate="animate"
         exit="exit"
       >
-        {mode && !difficulty ? (
+        {mode && !difficulty && mode !== 'tournament' ? (
           <>
             <NavIconButton
               ariaLabel="Go back"

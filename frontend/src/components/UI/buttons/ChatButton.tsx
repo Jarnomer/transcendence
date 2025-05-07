@@ -36,9 +36,7 @@ export const ChatButton: React.FC<ChatButtonProps> = ({ receiverUserId }) => {
     }
   };
 
-  console.log(user?.friends);
   if (user?.friends && !user.friends.some((friend) => friend.user_id === receiverUserId)) {
-    console.log('returning null');
     return null;
   }
 

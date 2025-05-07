@@ -23,15 +23,15 @@ interface MatchMakingCarouselProps {
 
 const aiOptions = {
   easy: {
-    avatar: './src/assets/images/ai_easy.png',
+    avatar: '/images/avatars/ai_easy.png',
     name: 'AI_EASY',
   },
   normal: {
-    avatar: './src/assets/images/ai.png',
+    avatar: '/avatars/images/ai.png',
     name: 'AI_NORMAL',
   },
   brutal: {
-    avatar: './src/assets/images/ai_hard.png',
+    avatar: '/images/avatars/ai_hard.png',
     name: 'AI_BRUTAL',
   },
 };
@@ -113,7 +113,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
     <>
       {!transitionToScoreboard && <MatchMakingBackgroundGlitch></MatchMakingBackgroundGlitch>}
       <motion.div
-        className={`w-full h-full flex ${!transitionToScoreboard ? 'justify-center' : 'justify-start'} ${!opponentFound && 'flex-col'}`}
+        className={`w-full h-full flex justify-center ${!opponentFound && 'flex-col'}`}
         key="matchmaking-screen"
         initial={{ opacity: 1, scale: 1 }}
         animate={{ opacity: 1, scale: 1 }}

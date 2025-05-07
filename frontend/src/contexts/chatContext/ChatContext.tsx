@@ -34,7 +34,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const roomIdRef = useRef(roomId);
 
-
   useEffect(() => {
     console.log('ChatProvider mounted');
     return () => {
@@ -113,7 +112,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <div className="h-full aspect-square p-2">
             <img
               className="object-contain h-full w-full border-1"
-              src={event.avatar_url || './src/assets/images/default_avatar.png'}
+              src={event.avatar_url}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/images/avatars/default_avatar.png';
+              }}
+              alt={`${event.display_name}'s profile picture`}
             />
           </div>
           <div className="text-xs">

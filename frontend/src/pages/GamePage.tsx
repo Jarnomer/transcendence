@@ -190,8 +190,10 @@ export const GamePage: React.FC = () => {
         }`}
       >
         {isGameCanvasActive && gameState && gameStatus !== 'finished' && !gameResult && (
-          <span>{gameStatus}</span>
-          // <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          <>
+            <span>{gameStatus}</span>
+            <GameplayCanvas gameState={gameState} gameStatus={gameStatus} theme="dark" />
+          </>
         )}
       </div>
 
