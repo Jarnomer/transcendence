@@ -35,15 +35,16 @@ export const TournamentLobby: React.FC = () => {
   const { difficulty, lobby, mode } = useGameOptionsContext();
 
   const {
-    matchmakingSocket,
+    // matchmakingSocket,
     connections,
-    sendMessage,
+    // sendMessage,
     cleanup,
     cancelQueue,
     cancelGame,
     matchmakingState,
   } = useWebSocketContext();
-  const { openModal, closeModal } = useModal();
+
+  const { openModal } = useModal(); // closeModal
 
   useMatchmaking();
 
