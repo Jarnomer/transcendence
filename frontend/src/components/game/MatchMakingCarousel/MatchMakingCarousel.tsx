@@ -130,7 +130,7 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
         )}
 
         <div
-          className={`flex w-full gap-5 ${!transitionToScoreboard ? 'relative justify-center items-center' : 'items-start justify-between gap-2 text-primary mb-2'} ${transitionToScoreboard && userPlayerNumber !== 1 ? 'flex-row-reverse' : ''}`}
+          className={`flex w-full gap-5 ${!transitionToScoreboard ? 'relative justify-center items-center' : 'items-start p-2 grow justify-between gap-2 text-primary mb-2'} ${transitionToScoreboard && userPlayerNumber !== 1 ? 'flex-row-reverse' : ''}`}
         >
           {/* PLAYER CARD */}
           <PlayerCard

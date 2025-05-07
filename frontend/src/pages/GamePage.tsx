@@ -177,7 +177,7 @@ export const GamePage: React.FC = () => {
   return (
     <div
       id="game-page"
-      className="w-full h-full p-2 pt-0 flex flex-col items-center justify-center overflow-hidden"
+      className="w-full h-full p-2 flex flex-col items-center justify-center overflow-hidden"
     >
       {!loadingStates.matchMakingAnimationLoading ? (
         <PlayerScoreBoard playersData={playersData} />

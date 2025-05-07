@@ -37,12 +37,12 @@ const App: React.FC = () => {
 
               <div
                 id="app-main-container"
-                className={`flex flex-col grow relative md:overflow-hidden items-center min-w-screen h-full min-h-screen md:max-h-screen w-full text-primary md:p-2`}
+                className={`flex flex-col grow relative  items-center min-w-screen h-full min-h-screen md:max-h-screen w-full text-primary md:p-2 uppercase`}
               >
                 <Header />
                 <div
                   id="app-content"
-                  className="relative flex-grow flex-col w-full md:overflow-y-hidden  max-w-screen-xl"
+                  className="relative flex grow flex-col w-full h-full py-2 overflow-y-scroll overflow-x-hidden min-h-[500px] max-w-screen-xl"
                 >
                   <AnimatePresence>
                     <motion.div
@@ -56,10 +56,10 @@ const App: React.FC = () => {
                   <AnimatedRoutes />
                 </div>
                 <Footer />
+                <MobileNavBar></MobileNavBar>
               </div>
 
               <FloatingChatWrapper />
-              <MobileNavBar></MobileNavBar>
               <EditProfileModal></EditProfileModal>
               <SettingsModal></SettingsModal>
               <JoinGameNotificationModal></JoinGameNotificationModal>

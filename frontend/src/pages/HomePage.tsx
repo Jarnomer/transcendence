@@ -1,8 +1,10 @@
 import React from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import { LeaderBoard, Updates } from '@components/layout';
+
+import { useMediaQuery } from '@hooks';
 
 const slideFromLeftVariants = {
   initial: {
@@ -53,39 +55,42 @@ const slideFromRightVariants = {
 };
 
 export const HomePage: React.FC = () => {
+  const isDesktop = useMediaQuery('(min-width: 768px)');
   return (
-    <motion.div className="w-full relative flex justify-center flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4">
+    <motion.div
+      className="w-full relative flex justify-center flex-col h-full overflow-hidden  gap-5 md:gap-10 md:p-4"
+      layout
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+    >
       <motion.div
         id="home-page-content"
-        className=" flex justify-center flex-col md:flex-row h-full gap-2"
+        className=" flex  justify-center flex-col md:flex-row h-full gap-2"
       >
-        <AnimatePresence>
+        <motion.div
+          layout
+          key={`leaderboard-${isDesktop}`}
+          className={`${
+            isDesktop ? 'w-1/2' : 'w-full'
+          } flex h-full overflow-hidden justify-center p-0`}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+        >
+          <LeaderBoard />
+        </motion.div>
+
+        {
           <motion.div
-            key="leaderboard"
-            className="md:min-w-1/2 flex overflow-y-scroll justify-center p-0"
-            variants={slideFromLeftVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <section aria-label="leaderboard">
-              <LeaderBoard />
-            </section>
-          </motion.div>
-          <motion.div
-            key="playerQueue"
-            className="md:min-w-1/2 flex justify-center md:justify-start flex-col gap-10"
-            variants={slideFromRightVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
             layout
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            key={`playerQueue-${isDesktop}`}
+            className={`${
+              isDesktop ? 'w-1/2' : 'w-full'
+            } flex h-full overflow-hidden justify-center p-0`}
           >
             <section aria-label="news and updates">
               <Updates></Updates>
             </section>
           </motion.div>
-        </AnimatePresence>
+        }
       </motion.div>
     </motion.div>
   );
