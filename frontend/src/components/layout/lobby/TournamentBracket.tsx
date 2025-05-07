@@ -59,13 +59,14 @@ const Round: React.FC<{
   const rightHalf = competitors.slice(mid);
   const round = parseInt(competitors[0].round);
 
-  // console.log('matches from round: ', competitors);
-  // console.log('leftHalf: ', leftHalf);
-  // console.log('rightHalf: ', rightHalf);
-  // console.log('maxRounds: ', maxRounds);
-  // console.log('competitors', competitors);
+  console.log('------ ROUND: ', round, '--------');
+  console.log('matches from round: ', competitors);
+  console.log('leftHalf: ', leftHalf);
+  console.log('rightHalf: ', rightHalf);
+  console.log('maxRounds: ', maxRounds);
+  console.log('competitors', competitors);
+  console.log('------------------------');
 
-  console.log('round: ', round);
   if (competitors.length === 1) {
     // console.log('Single match round:', round);
 
@@ -146,6 +147,7 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
 
   if (!players) return;
   const gridCols = players.length * 2;
+  console.log('playersLength:', players.length, ' gridCols: ', gridCols);
   // console.log('players from bracket component:', players);
   // console.log('players.length: ', players.length, 'grid cols:', gridCols);
 

@@ -190,8 +190,10 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
+              ) : matchmakingState.phase === 'completed' ? (
+                <TournamentBracket players={matchmakingState.matches}></TournamentBracket>
               ) : (
-                <TournamentBracket players={bracket}></TournamentBracket>
+                <span>waiting for more players to join</span>
               )}
             </AnimatePresence>
           </motion.div>
