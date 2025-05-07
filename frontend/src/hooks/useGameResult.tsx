@@ -10,7 +10,7 @@ import { GameState } from '@shared/types';
 
 export const useGameResult = () => {
   const navigate = useNavigate();
-  const { resetGameOptions, mode } = useGameOptionsContext();
+  const { mode } = useGameOptionsContext(); // resetGameOptions,
   const {
     closeConnection,
     gameStatus,
@@ -18,7 +18,7 @@ export const useGameResult = () => {
     dispatch,
     matchmakingState: { gameId },
     setGameId,
-    cleanup,
+    // cleanup,
   } = useWebSocketContext();
   const { setLoadingState } = useLoading();
   const { userId } = useUser();
@@ -161,5 +161,6 @@ export const useGameResult = () => {
         });
     };
   }, []);
+
   return { gameResult };
 };
