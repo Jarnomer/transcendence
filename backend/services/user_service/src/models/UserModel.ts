@@ -85,11 +85,19 @@ export class UserModel {
       bio: string;
       avatar_url: string;
       status: string;
+      email: string;
     }>
   ) {
-    const values = Object.values(updates);
+    console.log('Updating user with ID:', user_id);
+
+    const { email, ...profileUpdates } = updates;
+    if (email) {
+      const emailQuery = `UPDATE users SET email = ? WHERE user_id = ?`;
+      await this.db.run(emailQuery, [email, user_id]);
+    }
+    const values = Object.values(profileUpdates);
     values.push(user_id);
-    const fields = Object.keys(updates)
+    const fields = Object.keys(profileUpdates)
       .map((column) => `${column} = ?`)
       .join(', ');
     const query = `UPDATE user_profiles SET ${fields}, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? RETURNING *`;
@@ -110,6 +118,7 @@ export class UserModel {
     SELECT
       up.*,
       u.username,
+      u.email,
       json_object('wins', us.wins, 'losses', us.losses, 'rating', us.elo, 'rank', us.rank) AS stats,
       (
         SELECT

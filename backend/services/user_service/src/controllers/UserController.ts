@@ -107,6 +107,7 @@ export class UserController {
       bio: string;
       avatar_url: string;
       status: string;
+      email: string;
     }>;
     request.log.trace(`Updating user ${user_id}`);
     if (!Object.keys(updates).length) {

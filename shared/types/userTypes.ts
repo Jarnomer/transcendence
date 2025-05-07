@@ -50,6 +50,7 @@ export const UserUpdateSchema = Type.Object({
   bio: Type.Optional(Type.String()),
   avatar_url: Type.Optional(Type.String()),
   status: Type.Optional(Type.String()),
+  email: Type.Optional(Type.String()),
 });
 
 export const UserDataResponseSchema = Type.Object({
@@ -57,6 +58,7 @@ export const UserDataResponseSchema = Type.Object({
   bio: Type.String(),
   display_name: Type.String(),
   first_name: Type.String(),
+  email: Type.Optional(Type.String()),
   friend_requests: Type.Array(
     Type.Object({
       user_id: Type.String(),

@@ -62,6 +62,7 @@ export class UserService {
       bio: string;
       avatar_url: string;
       status: string;
+      email: string;
     }>
   ) {
     const res = await this.userModel.updateUserByID(user_id, updates);
