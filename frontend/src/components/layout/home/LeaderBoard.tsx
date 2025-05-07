@@ -18,7 +18,7 @@ const animationVariants = {
   animate: {
     clipPath: 'inset(0 0% 0 0)',
     opacity: 1,
-    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut', delay: 0.5 },
+    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut' },
   },
   exit: {
     clipPath: 'inset(0 100% 0 0)',
