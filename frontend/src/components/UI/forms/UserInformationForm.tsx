@@ -108,7 +108,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({ setLoading, lo
     display_name: user?.display_name ? user.display_name : '',
     first_name: user?.first_name ? user.first_name : '',
     last_name: user?.last_name ? user.last_name : '',
-    // email: user?.email ? user.email : '',
+    email: user?.email ? user.email : '',
     bio: user?.bio ? user.bio : '',
   });
 
