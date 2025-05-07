@@ -1,4 +1,4 @@
-import { Static, TSchema, Type } from '@sinclair/typebox';
+import { Static, Type } from '@sinclair/typebox';
 
 export const LoginSchema = Type.Object({
   username: Type.String(),

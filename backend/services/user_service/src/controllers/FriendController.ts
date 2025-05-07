@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import '@fastify/jwt';
 
-import { NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { NotFoundError } from '@my-backend/main_server';
 
 import { FriendService } from '../services/FriendService';
 

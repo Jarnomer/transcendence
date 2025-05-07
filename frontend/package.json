@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build",
+    "build": "tsc --project tsconfig.prod.json && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test:prod": "tsc --noEmit && vite build --dry-run"
+    "test:prod": "tsc --project tsconfig.prod.json --noEmit && vite build --dry-run"
   },
   "devDependencies": {
     "@types/node": "^22.13.8",

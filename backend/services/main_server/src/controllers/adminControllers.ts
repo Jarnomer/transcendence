@@ -8,7 +8,7 @@ import { NotFoundError } from '../middlewares/errors';
 
 dotenv.config();
 
-export async function getLogs(request: FastifyRequest, reply: FastifyReply) {
+export async function getLogs(_request: FastifyRequest, reply: FastifyReply) {
   const logFile = path.normalize(process.env.LOG_PATH || './logs/server.log');
   if (!fs.existsSync(logFile)) {
     throw new NotFoundError('Log file not found');

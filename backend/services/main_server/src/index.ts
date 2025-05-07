@@ -6,17 +6,20 @@ import SwaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 import fastify from 'fastify';
 
+import 'module-alias/register';
+
 import matchMakingService from '@my-backend/matchmaking_service/';
 import remoteService from '@my-backend/remote_service/';
-import userService from '@my-backend/user_service/'; // Everything from user-service is now available
+import userService from '@my-backend/user_service/';
 
-import 'module-alias/register';
 import databasePlugin from './db';
 import authPlugin from './middlewares/auth';
 import errorHandlerPlugin from './middlewares/errorHandler';
 import loggerPlugin from './middlewares/logger';
 import adminRoutes from './routes/adminRoutes';
+
 export * from './middlewares/errorHandler';
+export * from './middlewares/errors';
 
 dotenv.config();
 

@@ -21,7 +21,9 @@ interface MatchMakingCarouselProps {
   };
 }
 
-const aiOptions = {
+type DifficultyKey = 'easy' | 'normal' | 'brutal';
+
+const aiOptions: Record<DifficultyKey, { avatar: string; name: string }> = {
   easy: {
     avatar: '/images/avatars/ai_easy.png',
     name: 'AI_EASY',
@@ -37,24 +39,17 @@ const aiOptions = {
 };
 
 export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ playersData }) => {
-  const [opponentAvatar, setOpponentAvatar] = useState<string>();
+  const [opponentAvatar, setOpponentAvatar] = useState<string | null>(null);
   const [opponentName, setOpponentName] = useState<string | null>(null);
   const [opponentFound, setOpponentFound] = useState<boolean>(false);
   const [transitionToScoreboard, setTransitionToScoreboard] = useState(false);
   const [userPlayerNumber, setUserPlayerNumber] = useState(1);
   const [opponentPlayerNumber, setOpponentPlayerNumber] = useState(2);
   const { mode, difficulty } = useGameOptionsContext();
+  const { hideBackgroundGame } = useGameVisibility();
   const { setLoadingState } = useLoading();
   const { user } = useUser();
 
-  // console.log(mode, difficulty);
-  // console.log(playersData);
-
-  const { hideBackgroundGame } = useGameVisibility();
-
-  // console.log('playersData from matchmaking carousel: ', playersData);
-
-  // waits for the player cards to transfrom in to scoreboard shape
   useEffect(() => {
     if (transitionToScoreboard) {
       setTimeout(() => {
@@ -72,23 +67,32 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
         setTransitionToScoreboard(true);
       }, 1000);
     }
+
     if (mode === 'singleplayer') {
-      setOpponentAvatar(aiOptions[difficulty].avatar);
-      setOpponentName(aiOptions[difficulty].name);
+      if (
+        difficulty &&
+        (difficulty === 'easy' || difficulty === 'normal' || difficulty === 'brutal')
+      ) {
+        const diff = difficulty as DifficultyKey;
+        setOpponentAvatar(aiOptions[diff].avatar);
+        setOpponentName(aiOptions[diff].name);
+      }
       return;
     }
-  }, [opponentFound, user]);
+  }, [opponentFound, user, mode, difficulty, hideBackgroundGame]);
 
   useEffect(() => {
     if (!playersData?.player1 || !user) return;
+
     const opponent =
       playersData.player1?.user_id !== user?.user_id ? playersData.player1 : playersData.player2;
+
     setOpponentAvatar(opponent?.avatar_url || '/avatars/default.png');
     setOpponentName(opponent?.display_name || 'Opponent');
     setUserPlayerNumber(playersData.player1?.user_id === user?.user_id ? 1 : 2);
     setOpponentPlayerNumber(playersData.player1?.user_id !== user?.user_id ? 1 : 2);
     setOpponentFound(true);
-  }, [playersData]);
+  }, [playersData, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -96,19 +100,21 @@ export const MatchMakingCarousel: React.FC<MatchMakingCarouselProps> = ({ player
       setOpponentFound(true);
       hideBackgroundGame();
     }
-  }, [user]);
+  }, [user, mode, difficulty, hideBackgroundGame]);
 
   useEffect(() => {
-    if (mode === 'singleplayer' && difficulty && aiOptions[difficulty]) {
-      setOpponentAvatar(aiOptions[difficulty].avatar);
-      setOpponentName(aiOptions[difficulty].name);
+    if (mode === 'singleplayer' && difficulty) {
+      if (difficulty === 'easy' || difficulty === 'normal' || difficulty === 'brutal') {
+        const diff = difficulty as DifficultyKey;
+        setOpponentAvatar(aiOptions[diff].avatar);
+        setOpponentName(aiOptions[diff].name);
+      }
       return;
     }
   }, [mode, difficulty, opponentAvatar]);
 
-  if (!user || !playersData || !mode || !difficulty) return;
+  if (!user || !playersData || !mode || !difficulty) return null;
 
-  console.log(playersData);
   return (
     <>
       {!transitionToScoreboard && <MatchMakingBackgroundGlitch></MatchMakingBackgroundGlitch>}

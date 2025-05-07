@@ -44,6 +44,9 @@ importers:
       module-alias:
         specifier: ^2.2.3
         version: 2.2.3
+      sqlite:
+        specifier: ^5.1.1
+        version: 5.1.1
 
   backend/services/game_service:
     dependencies:
@@ -184,6 +187,9 @@ importers:
       '@types/node':
         specifier: ^22.13.8
         version: 22.15.3
+      '@types/ws':
+        specifier: ^8.5.14
+        version: 8.18.1
       ts-node-dev:
         specifier: ^2.0.0
         version: 2.0.0(@types/node@22.15.3)(typescript@5.7.3)
@@ -290,6 +296,9 @@ importers:
       sqlite3:
         specifier: ^5.1.7
         version: 5.1.7
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2

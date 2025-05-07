@@ -2,7 +2,7 @@ import { Database } from 'sqlite';
 
 import { GameAudioOptions, GameSettings, GraphicsSettings } from '@shared/types';
 
-import { BadRequestError, NotFoundError } from '@my-backend/main_server/src/middlewares/errors';
+import { BadRequestError, NotFoundError } from '@my-backend/main_server';
 
 import { UserModel } from '../models/UserModel';
 

@@ -3,11 +3,8 @@ import { FastifyInstance, FastifyReply, FastifyRequest, JwtPayload } from 'fasti
 
 import '@fastify/cookie';
 import '@fastify/jwt';
-import {
-  BadRequestError,
-  NotAuthorizedError,
-  NotFoundError,
-} from '@my-backend/main_server/src/middlewares/errors';
+
+import { BadRequestError, NotAuthorizedError, NotFoundError } from '@my-backend/main_server';
 
 import { AuthService } from '../services/AuthService';
 import { UserService } from '../services/UserService';
