@@ -6,6 +6,11 @@ import fp from 'fastify-plugin';
 
 import { ServiceError } from './errors';
 
+enum ErrorCode {
+  UNKNOWN = 'UNKNOWN',
+  // Add other error codes as needed
+}
+
 class ErrorHandler {
   private static instance: ErrorHandler;
   private logFilePath: string;
