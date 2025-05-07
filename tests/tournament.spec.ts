@@ -2,9 +2,11 @@ import { chromium, Page, test } from '@playwright/test';
 
 import { loginOrRegister } from '../utils/auth';
 
-const totalUsers = 4; // total number of users to simulate
+// Tester will create a tournament with size testUsers + humanUsers
+const testUsers = 15; // total number of users to simulate
+const humanUsers = 1;
 
-test('simulate ${totalUsers} users joining tournament', async () => {
+test('simulate ${testUsers} users joining tournament', async () => {
   const browser = await chromium.launch({
     headless: true,
     args: ['--disable-gpu', '--no-sandbox', '--enable-unsafe-swiftshader'],
@@ -70,9 +72,9 @@ test('simulate ${totalUsers} users joining tournament', async () => {
     // move player count slider to 16
     const playerCountSlider = page.getByRole('slider', { name: 'Player Count' });
     await playerCountSlider.waitFor({ state: 'visible', timeout: 60_000 });
-    // fill the slider with the value of totalUsers
-    await playerCountSlider.fill(totalUsers.toString());
-    console.log(`Filled player count slider: ${totalUsers}`);
+    // fill the slider with the value of testUsers
+    await playerCountSlider.fill((testUsers + humanUsers).toString());
+    console.log(`Filled player count slider: ${testUsers + humanUsers}`);
 
     // input tournament name
     const tournamentNameInput = page.getByLabel('Tournament Name:');
@@ -120,7 +122,7 @@ test('simulate ${totalUsers} users joining tournament', async () => {
       stillInTournament = await playAndMaybeContinue(page, username, roundCounter);
       if (stillInTournament) {
         roundCounter++;
-        if (roundCounter > Math.log2(totalUsers)) {
+        if (roundCounter > Math.log2(testUsers + humanUsers)) {
           console.log(`${username} won the tournament`);
           break;
         }
@@ -132,7 +134,7 @@ test('simulate ${totalUsers} users joining tournament', async () => {
     await context.close();
   };
 
-  await Promise.all(Array.from({ length: totalUsers }, (_, i) => simulateUser(i + 1)));
+  await Promise.all(Array.from({ length: testUsers }, (_, i) => simulateUser(i + 1)));
 
   await browser.close();
 });
