@@ -20,7 +20,7 @@ export interface Ball {
 }
 
 export enum PowerUpType {
-  // NoType = 'no_type',
+  NoType = 'no_type',
   BiggerPaddle = 'bigger_paddle',
   SmallerPaddle = 'smaller_paddle',
   FasterPaddle = 'faster_paddle',
