@@ -29,23 +29,35 @@ export class UserModel {
     return await this.db.get(`SELECT * FROM user_profiles WHERE user_id = ?`, [user_id]);
   }
 
+  // async getAllUsersWithRank() {
+  //   return await this.db.all(
+  //     `SELECT
+  //         u.*,
+  //         COALESCE(win_count, 0) AS wins,
+  //         DENSE_RANK() OVER (ORDER BY win_count DESC) AS rank
+  //         FROM user_profiles u
+  //           LEFT JOIN
+  //           (
+  //               SELECT
+  //               player_id,
+  //               COUNT(*) AS win_count
+  //               FROM game_players
+  //               WHERE is_winner = 1
+  //               GROUP BY player_id
+  //           ) gp ON u.user_id = gp.player_id
+  //     ORDER BY rank
+  //     ;`
+  //   );
+  // }
+
   async getAllUsersWithRank() {
     return await this.db.all(
       `SELECT
-          u.*,
-          COALESCE(win_count, 0) AS wins,
-          DENSE_RANK() OVER (ORDER BY win_count DESC) AS rank
-          FROM user_profiles u
-            LEFT JOIN
-            (
-                SELECT
-                player_id,
-                COUNT(*) AS win_count
-                FROM game_players
-                WHERE is_winner = 1
-                GROUP BY player_id
-            ) gp ON u.user_id = gp.player_id
-      ORDER BY rank
+          us.*,
+          up.*
+          FROM user_stats us
+          LEFT JOIN user_profiles up ON us.user_id = up.user_id
+          ORDER BY us.rank
       ;`
     );
   }

@@ -25,6 +25,8 @@ export const AllResponseRankSchema = Type.Array(
     avatar_url: Type.String(),
     status: Type.String(),
     wins: Type.Number(),
+    losses: Type.Number(),
+    elo: Type.Number(),
     rank: Type.Number(),
   })
 );
