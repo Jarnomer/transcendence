@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { v4 as uuidv4 } from 'uuid';
 import * as WebSocket from 'ws';
 
-import { GameManager } from '../services/GameManager';
+import { GameManager } from '@my-backend/game_service';
 
 export async function backgroundGameRoutes(fastify: FastifyInstance) {
   const gameManager = GameManager.getInstance(fastify.db);

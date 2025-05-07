@@ -63,7 +63,10 @@ export const ChallengeButton: React.FC<ChallengeButtonProps> = ({ receiverUserId
       className={` ${iconSizeResponsive} p-0.5 hover:text-secondary`}
       id="challenge-user"
       aria-label="challenge user"
-      onClick={() => handleChallengeClick(receiverUserId)}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleChallengeClick(receiverUserId);
+      }}
     >
       <ChallengeIcon></ChallengeIcon>
     </button>
