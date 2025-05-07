@@ -62,8 +62,9 @@ export const useDuel = () => {
     chatSocket.addEventListener('duel', handleDuel);
     chatSocket.addEventListener('duel_decline', handleDecline);
     return () => {
-      chatSocket.removeEventListener('duel', handleDuel);
-      chatSocket.removeEventListener('duel_decline', handleDecline);
+      console.log('useDuel unmounted');
+      // chatSocket.removeEventListener('duel', handleDuel);
+      // chatSocket.removeEventListener('duel_decline', handleDecline);
     };
   }, []);
 };

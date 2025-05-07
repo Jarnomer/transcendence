@@ -80,18 +80,13 @@ export const GamePage: React.FC = () => {
     if (mode === '1v1' && difficulty === 'online') {
       startMatchMaking();
     }
-    return () => {
-      if (mode === '1v1' && difficulty === 'online') {
-        console.log('GamePage: cleaning up matchmaking for 1v1 online');
-        cleanup();
-      }
-    };
   }, [lobby, mode, difficulty]);
 
   /**
    * for 1v1 online mode, send find_match message
    */
   useEffect(() => {
+    console.log('GamePage: matchmaking connection', connections.matchmaking);
     if (connections.matchmaking !== 'connected') return;
     if (lobby === 'random' && mode === '1v1' && difficulty === 'online') {
       sendMessage('matchmaking', {
@@ -119,6 +114,14 @@ export const GamePage: React.FC = () => {
     }
   }, [connections.matchmaking]);
 
+  useEffect(() => {
+    return () => {
+      if (mode === '1v1' && difficulty === 'online') {
+        console.log('GamePage: cleaning up matchmaking for 1v1 online');
+        cleanup();
+      }
+    };
+  }, []);
   /**
    * if gameId is set, connect to game socket
    */
