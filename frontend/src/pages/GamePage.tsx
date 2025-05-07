@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,7 @@ import { GameplayCanvas, MatchMakingCarousel, PlayerScoreBoard } from '@componen
 import { useFetchPlayerData, useGameControls, useGameResult, useGameVisibility } from '@hooks';
 
 import { createReadyInputMessage } from '@shared/messages';
+import { GameState } from '@shared/types';
 
 export const GamePage: React.FC = () => {
   const {
@@ -38,6 +39,11 @@ export const GamePage: React.FC = () => {
     showGameCanvas,
     hideGameCanvas,
   } = useGameVisibility();
+
+  const playerScores = useRef({
+    player1Score: gameState?.players?.player1?.score || 0,
+    player2Score: gameState?.players?.player2?.score || 0,
+  });
 
   useEffect(() => {
     console.log('GamePage mounted');
@@ -114,6 +120,7 @@ export const GamePage: React.FC = () => {
       }
     };
   }, []);
+
   /**
    * if gameId is set, connect to game socket
    */
@@ -180,7 +187,11 @@ export const GamePage: React.FC = () => {
       className="w-full h-full p-2 pt-0 flex flex-col items-center justify-center overflow-hidden"
     >
       {!loadingStates.matchMakingAnimationLoading ? (
-        <PlayerScoreBoard playersData={playersData} />
+        <PlayerScoreBoard
+          playersData={playersData}
+          gameState={gameState as GameState}
+          playerScores={playerScores}
+        />
       ) : null}
 
       {/* GameplayCanvas is always rendered but visibility is controlled */}
@@ -199,7 +210,6 @@ export const GamePage: React.FC = () => {
       {/* {gameResult ? <GameResults result={gameResult} playersData={playersData} /> : null} */}
 
       {/* Render MatchMakingCarousel */}
-
       {!isGameCanvasActive && !gameResult && loading ? (
         <MatchMakingCarousel playersData={playersData}></MatchMakingCarousel>
       ) : null}

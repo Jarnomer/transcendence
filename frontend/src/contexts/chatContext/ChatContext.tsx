@@ -8,7 +8,7 @@ import { MessageNotification } from '@components/chat';
 
 import { addMember, createChatRoom, getChat, getDm, getMyRooms, getPublicChat } from '@services';
 
-import { ChatMessageType, ChatRoomType, FriendListType, UserResponseType } from '@shared/types';
+import { ChatMessageType, ChatRoomType, FriendListType, UserDataResponseType } from '@shared/types';
 
 export type ChatMessageEvent = {
   room_id?: string;
@@ -23,7 +23,7 @@ export type ChatMessageEvent = {
 };
 
 interface ChatContextType {
-  user: UserResponseType;
+  user: UserDataResponseType | null;
   friends: FriendListType;
   messages: Record<string, ChatMessageType[]>;
   roomId: string | null;
@@ -67,7 +67,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (user) {
-      setFriends(user.friends);
+      setFriends(user.friends || []);
     }
   }, [user]);
 
@@ -241,12 +241,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userId = localStorage.getItem('userID');
     if (!userId || !(selectedFriend || roomId) || newMessage.trim() === '') return;
 
+    // Create a safer version of the user payload
+    const userPayload = {
+      avatar_url: user?.avatar_url || '',
+      display_name: user?.display_name || '',
+    };
+
     const messageData = {
       type: selectedFriend ? 'dm' : 'room',
       payload: {
         sender_id: userId,
-        avatar_url: user?.avatar_url,
-        display_name: user?.display_name,
+        avatar_url: userPayload.avatar_url,
+        display_name: userPayload.display_name,
         receiver_id: selectedFriend,
         room_id: roomId,
         message: newMessage,

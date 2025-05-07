@@ -16,7 +16,7 @@ import {
   rejectFriendRequest,
 } from '@services';
 
-import { useMediaQuery } from '../../hooks';
+import { useMediaQuery } from '@hooks';
 
 const animationVariants = {
   initial: {
