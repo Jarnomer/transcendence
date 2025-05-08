@@ -38,10 +38,10 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
           side === 'right' ? 'flex-row-reverse' : ''
         }`}
       >
-        <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
+        <div className="opacity relative hidden sm:block sm:h-[20px] sm:w-[20px] md:h-[50px] md:w-[50px] border-1 border-current overflow-hidden">
           <img className="object-cover w-full h-full" src={'/images/avatars/default_avatar.png'} />
         </div>
-        <div className=" h-full flex items-center justify-center">
+        <div className="h-full flex items-center justify-center">
           <p className="text-xs">{player ? player.display_name : '??'}</p>
         </div>
       </div>
@@ -123,7 +123,7 @@ const Round: React.FC<{
       >
         <ol className="flex h-full flex-col justify-around">
           {leftHalf.map((match, idx) => (
-            <div className={` `} key={`left-${idx}`}>
+            <div className={`container`} key={`left-${idx}`}>
               <Competitor player={match.players[0]} side="left" />
               <Competitor player={match.players[1]} side="left" />
             </div>
@@ -135,7 +135,7 @@ const Round: React.FC<{
       <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
-            <div className="" key={`right-${idx}`}>
+            <div className="container" key={`right-${idx}`}>
               <Competitor player={match.players[0]} side="right" />
               <Competitor player={match.players[1]} side="right" />
             </div>
@@ -161,8 +161,8 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
       <div
         className="grid grid-rows-1 w-full overflow-x-scroll"
         style={{
-          gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-          minWidth: isDesktop ? `${gridCols * 150}px` : undefined,
+          display: 'grid',
+          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
         }}
       >
         {players.map((round, index) => (

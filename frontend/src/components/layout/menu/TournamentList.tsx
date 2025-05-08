@@ -55,14 +55,14 @@ export const TournamentList: React.FC = () => {
   // console.log(dataInQueue);
 
   return (
-    <div className="w-full overflow-auto border-1 bg-black/10">
+    <div className="w-full truncate whitespace-nowrap overflow-hidden text-xs sm:text-sm overflow-auto border-1 bg-black/10">
       <table className="w-full table-auto text-left">
-        <thead>
-          <tr className="text-sm text-gray-500 border-b">
-            <th className="px-4 py-2">Tournament Name</th>
-            <th className="px-4 py-2">Visibility</th>
-            <th className="px-4 py-2">Players</th>
-            <th className="px-4 py-2">Join</th>
+        <thead className="w-full">
+          <tr className="w-full text-gray-500 border-b">
+            <th className="px-4 py-2 min-w-2/5">Tournament Name</th>
+            <th className="px-4 py-2 min-w-1/5">Visibility</th>
+            <th className="px-4 py-2 min-w-1/5">Players</th>
+            <th className="px-4 py-2 min-w-1/5">Join</th>
           </tr>
         </thead>
         <tbody className="border-1">
@@ -83,11 +83,10 @@ export const TournamentList: React.FC = () => {
                     'Public'
                   )}
                 </td>
-                <td>??/??</td>
+                <td>??/{options.variant}</td>
                 <td className="px-4 py-2">
                   <NavIconButton
                     id="join-game-button"
-                    ariaLabel="join game"
                     icon="arrowRight"
                     ariaLabel={`Join ${options.name}`}
                     onClick={(event) => handleJoinGameClick(event, options)}
