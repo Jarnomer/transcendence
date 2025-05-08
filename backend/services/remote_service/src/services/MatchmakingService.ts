@@ -8,6 +8,7 @@ type Player = {
   avatar_url?: string;
   display_name?: string;
   elo: number;
+  index: number;
   joinedAt: Date;
 };
 
@@ -259,8 +260,9 @@ class TournamentMatchmaking extends MatchmakingMode {
     const stack = [...session.activePlayers];
 
     while (stack.length >= 2) {
-      const p1 = stack.pop()!;
-      const p2 = stack.pop()!;
+      stack.sort((a, b) => a.index - b.index);
+      const p1 = stack.shift()!;
+      const p2 = stack.shift()!;
       console.log(`Creating match for players: ${p1.user_id} vs ${p2.user_id}`);
       const gameId = await this.createMatch([p1.user_id, p2.user_id]);
       const match: TournamentMatch = {
@@ -357,9 +359,9 @@ class TournamentMatchmaking extends MatchmakingMode {
     console.log(`Queue size: ${size}`);
     console.log(`Players in queue: ${count}`);
     if (count >= size) {
-      this.createTournament(queueId, `Tournament ${queueId}`, size, [
-        ...this.queueMatches.get(queueId)!,
-      ]);
+      const players = this.queueMatches.get(queueId)!;
+      const playersWithIndex = players.map((p, index) => ({ ...p, index }));
+      this.createTournament(queueId, `Tournament ${queueId}`, size, [...playersWithIndex]);
     }
   }
 }
@@ -446,6 +448,7 @@ export class MatchmakingService {
     const player: Player = {
       user_id,
       // socket: this.clients.get(user_id)!,
+      index: 0,
       avatar_url,
       display_name,
       elo: playerElo.elo,

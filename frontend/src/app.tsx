@@ -30,9 +30,9 @@ const App: React.FC = () => {
         <GraphicsSettingsProvider>
           <GameOptionsProvider>
             <Router>
-              {/* <div className="fixed">
+              <div className="fixed">
                 <BackgroundProvider />
-              </div> */}
+              </div>
 
               <div
                 id="app-main-container"
