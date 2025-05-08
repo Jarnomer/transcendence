@@ -9,8 +9,8 @@ import { useMatchmaking } from '@/hooks';
 import { useGameOptionsContext, useModal, useUser, useWebSocketContext } from '@contexts';
 
 import {
+  TournamentBracket,
   TournamentLobbyNav,
-  TournamentPlayerList,
   TournamentSettings,
   slideFromRightVariants,
 } from '@components/layout';
@@ -132,26 +132,6 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
-  // Extract player data for the TournamentPlayerList component
-  const extractPlayers = (bracketData: TournamentMatch[][]): FriendType[] => {
-    const players: FriendType[] = [];
-
-    bracketData.forEach((round) => {
-      round.forEach((match) => {
-        match.players.forEach((player) => {
-          if (player) {
-            players.push(player);
-          }
-        });
-      });
-    });
-
-    return players;
-  };
-
-  // Get a flat array of players from the bracket
-  const tournamentPlayers = extractPlayers(bracket);
-
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
@@ -180,7 +160,7 @@ export const TournamentLobby: React.FC = () => {
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
               ) : activeTab == 'players' ? (
-                <TournamentPlayerList players={tournamentPlayers}></TournamentPlayerList>
+                <TournamentBracket players={bracket}></TournamentBracket>
               ) : (
                 <span>loading</span>
               )}
