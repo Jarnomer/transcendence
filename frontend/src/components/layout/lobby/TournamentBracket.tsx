@@ -2,6 +2,8 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
+import { useMediaQuery } from '../../../hooks';
+
 interface PlayerData {
   user_id: string;
   avatar_url: string;
@@ -25,6 +27,18 @@ interface TournamentBracketProps {
 }
 
 const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
+  const isDesktop = useMediaQuery('(min-width: 600px)');
+
+  console.log('is desktop: ', isDesktop);
+  if (!isDesktop)
+    return (
+      <motion.li className={`flex items-center m-2 hover:secondary`}>
+        <div className=" h-full flex items-center justify-center">
+          <p className="text-xs">{player ? player.display_name : '??'}</p>
+        </div>
+      </motion.li>
+    );
+
   return (
     <motion.li
       className={`flex items-center m-2 hover:text-secondary`}
@@ -35,14 +49,10 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
           side === 'right' ? 'flex-row-reverse' : ''
         }`}
       >
-        <div className="opacity relative h-[50px] w-[50px] border-1 border-current overflow-hidden">
-          <img
-            className="object-cover w-full h-full"
-            src={player?.avatar_url || '/images/avatars/default_avatar.png'}
-            alt={player?.display_name || 'Unknown player'}
-          />
+        <div className="opacity relative hidden sm:block sm:h-[20px] sm:w-[20px] md:h-[50px] md:w-[50px] border-1 border-current overflow-hidden">
+          <img className="object-cover w-full h-full" src={'/images/avatars/default_avatar.png'} />
         </div>
-        <div className=" h-full flex items-center justify-center">
+        <div className="h-full flex items-center justify-center">
           <p className="text-xs">{player ? player.display_name : '??'}</p>
         </div>
       </div>
@@ -53,11 +63,11 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
 interface RoundProps {
   competitors: TournamentMatch[];
   roundIndex: number;
-  maxRounds: number;
+  gridCols: number;
   matches?: TournamentMatch[]; // Optional - not used
 }
 
-const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
+const Round: React.FC<RoundProps> = ({ competitors, gridCols }) => {
   const mid = Math.ceil(competitors.length / 2);
   const leftHalf = competitors.slice(0, mid);
   const rightHalf = competitors.slice(mid);
@@ -120,7 +130,7 @@ const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
       </div>
 
       {/* Right side */}
-      <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
+      <div style={{ gridColumnStart: gridCols - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
@@ -135,9 +145,10 @@ const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
 };
 
 export const TournamentBracket: React.FC<TournamentBracketProps> = ({ players }) => {
+  console.log(players);
   if (!players || players.length === 0) return null;
 
-  const gridCols = players.length * 2;
+  const gridCols = players.length * 2 + 1;
 
   const container = document.getElementById('app-main-container');
   if (!container) return null;
@@ -147,8 +158,8 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({ players })
       <div
         className="grid grid-rows-1 w-full overflow-x-scroll"
         style={{
-          gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-          minWidth: `${gridCols * 150}px`,
+          display: 'grid',
+          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
         }}
       >
         {players.map((round, index) => (
@@ -156,7 +167,7 @@ export const TournamentBracket: React.FC<TournamentBracketProps> = ({ players })
             key={'round_' + index}
             roundIndex={index}
             competitors={round}
-            maxRounds={gridCols + 1}
+            gridCols={gridCols}
           />
         ))}
       </div>

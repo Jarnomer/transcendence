@@ -69,7 +69,7 @@ export const TournamentList: React.FC = () => {
   };
 
   return (
-    <div className="w-full overflow-auto border-1 bg-black/10">
+    <div className="w-full text-xs sm:text-sm overflow-auto border-1 bg-black/10">
       {isLoading ? (
         <div className="flex justify-center items-center p-8">
           <p>Loading tournaments...</p>
@@ -81,14 +81,14 @@ export const TournamentList: React.FC = () => {
       ) : (
         <table className="w-full table-auto text-left">
           <thead>
-            <tr className="text-sm text-gray-500 border-b">
-              <th className="px-4 py-2">Tournament Name</th>
-              <th className="px-4 py-2">Visibility</th>
-              <th className="px-4 py-2">Players</th>
-              <th className="px-4 py-2">Join</th>
+            <tr className="text-sm truncate whitespace-nowrap  text-gray-500 border-b">
+              <th className="px-4 py-2 w-2/5">Tournament Name</th>
+              <th className="px-4 py-2 w-1/5">Visibility</th>
+              <th className="px-4 py-2 w-1/5">Players</th>
+              <th className="px-4 py-2 w-1/5">Join</th>
             </tr>
           </thead>
-          <tbody className="border-1">
+          <tbody className="border-1 w-full">
             {dataInQueue.map((options, index) => (
               <tr key={options.queue_id || index} className="border-b hover:text-secondary">
                 <td className="px-4 py-2">{options.name || 'N/A'}</td>

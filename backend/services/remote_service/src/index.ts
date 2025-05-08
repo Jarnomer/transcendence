@@ -3,7 +3,6 @@ import { FastifyInstance } from 'fastify';
 import 'module-alias/register';
 
 import { backgroundGameRoutes } from './routes/backgroundGameRoutes';
-
 import { chatRoutes } from './routes/chatRoutes';
 import { gameRoutes } from './routes/gameRoute';
 import { matchmakingRoutes } from './routes/matchmakingRoute';

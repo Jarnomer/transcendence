@@ -29,10 +29,20 @@ export const TournamentLobby: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
   const { difficulty, lobby, mode } = useGameOptionsContext();
+  const [bracket, setBracket] = useState<TournamentMatch[][]>(
+    generateBracket(parseInt(difficulty!))
+  );
 
-  const { connections, cleanup, cancelQueue, cancelGame, matchmakingState } = useWebSocketContext();
-
-  const { openModal } = useModal();
+  const {
+    matchmakingSocket,
+    connections,
+    sendMessage,
+    cleanup,
+    cancelQueue,
+    cancelGame,
+    matchmakingState,
+  } = useWebSocketContext();
+  const { openModal, closeModal } = useModal();
 
   useMatchmaking();
 
@@ -87,23 +97,34 @@ export const TournamentLobby: React.FC = () => {
     return bracket;
   }
 
-  const bracket = generateBracket(8);
+  // const bracket = generateBracket(parseInt(difficulty!));
 
-  const fakePlayer: FriendType = {
-    user_id: user?.user_id || 'default-id',
-    avatar_url: user?.avatar_url || 'uploads/default_avatar.png',
-    display_name: user?.display_name || 'Mystery Man',
-    status: 'online',
-  };
+  // const fakePlayer = {
+  //   user_id: user?.user_id,
+  //   avatar_url: user?.avatar_url,
+  //   display_name: user?.display_name,
+  // };
+  // const fakePlayer2 = {
+  //   user_id: 'asdasd',
+  //   avatar_url: 'uploads/default_avatar.png',
+  //   display_name: 'martti',
+  // };
+  // bracket[0][0].players = [fakePlayer, fakePlayer2];
 
-  const fakePlayer2: FriendType = {
-    user_id: 'default-id',
-    avatar_url: 'uploads/default_avatar.png',
-    display_name: 'Mystery Man',
-    status: 'online',
-  };
-
-  bracket[0][0].players = [fakePlayer, fakePlayer2];
+  useEffect(() => {
+    const newBracket = [...bracket];
+    matchmakingState.matches.forEach((roundMatches, roundIndex) => {
+      roundMatches.forEach((match, matchIndex) => {
+        if (newBracket[roundIndex][matchIndex]) {
+          newBracket[roundIndex][matchIndex].gameId = match.gameId;
+          newBracket[roundIndex][matchIndex].players = match.players;
+          newBracket[roundIndex][matchIndex].isComplete = match.isComplete;
+        }
+      });
+    });
+    setBracket(newBracket);
+    console.log('bracket: ', newBracket);
+  }, [matchmakingState.matches]);
 
   const onAccept = () => {
     console.log('joining game..');
@@ -182,16 +203,7 @@ export const TournamentLobby: React.FC = () => {
               ) : activeTab == 'players' ? (
                 <TournamentPlayerList players={tournamentPlayers}></TournamentPlayerList>
               ) : (
-                <motion.div
-                  key="tournamentPlayerList"
-                  className="w-full h-full"
-                  variants={slideFromRightVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                >
-                  {/* <Spectate players={bracket}></Spectate> */}
-                </motion.div>
+                <span>loading</span>
               )}
             </AnimatePresence>
           </motion.div>
