@@ -41,7 +41,7 @@
 | Task                                                                                                                                                                                        | Status |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | Develop server-side logic for the Pong game to handle gameplay, ball movement, scoring, and player interactions.                                                                            | ✅     |
-| Create an API that exposes the necessary resources and endpoints to interact with the Pong game, allowing partial usage of the game via the Command-Line Interface (CLI) and web interface. | ⌛️     |
+| Create an API that exposes the necessary resources and endpoints to interact with the Pong game, allowing partial usage of the game via the Command-Line Interface (CLI) and web interface. | ✅     |
 | Design and implement the API endpoints to support game initialization, player controls, and game state updates.                                                                             | ✅     |
 | Ensure that the server-side Pong game is responsive, providing an engaging and enjoyable gaming experience.                                                                                 | ✅     |
 | Integrate the server-side Pong game with the web application, allowing users to play the game directly on the website.                                                                      | ✅     |
@@ -68,11 +68,11 @@
 
 | Task                                                                                                                     | Status |
 | ------------------------------------------------------------------------------------------------------------------------ | ------ |
-| The user should be able to send direct messages to other users.                                                          | ❌     |
-| The user should be able to block other users, preventing them from seeing any further messages from the blocked account. | ❌     |
-| The user should be able to invite other users to play a Pong game through the chat interface.                            | ❌     |
-| The tournament system should be able to notify users about the next game.                                                | ❌     |
-| The user should be able to access other players’ profiles through the chat interface.                                    | ❌     |
+| The user should be able to send direct messages to other users.                                                          | ✅     |
+| The user should be able to block other users, preventing them from seeing any further messages from the blocked account. | ✅     |
+| The user should be able to invite other users to play a Pong game through the chat interface.                            | ✅     |
+| The tournament system should be able to notify users about the next game.                                                | ✅     |
+| The user should be able to access other players’ profiles through the chat interface.                                    | ✅     |
 
 ## 🏆 Major Module [7/7] : Advanced 3D Graphics
 
@@ -92,7 +92,35 @@
 | Implement user-friendly settings menus or interfaces for adjusting game parameters.                                | ✅     |
 | Maintain consistency in customization features across all games to provide a unified user experience.              | ✅     |
 
-## 🏅 Minor Module [8/7] : User and Game Stats Dashboards
+## 🏅 Minor Module [8/7] : Front-end framework
+
+| Task                                                                                                     | Status |
+| -------------------------------------------------------------------------------------------------------- | ------ |
+| Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. | ✅     |
+
+## 🏅 Minor Module [8.5/7] : Backend database
+
+| Task                                                                                                                                                                                                                                            | Status |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. | ✅     |
+
+## 🏅 Minor Module [9/7] : Browser Compatibility
+
+| Task                                                                                                                                                    | Status |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Extend browser support to include an additional web browser, ensuring that users can access and use the application seamlessly.                         | ✅     |
+| Conduct thorough testing and optimization to ensure that the web application functions correctly and displays correctly in the newly supported browser. | ✅     |
+| Address any compatibility issues or rendering discrepancies that may arise in the added web browser.                                                    | ✅     |
+| Ensure a consistent user experience across all supported browsers, maintaining usability and functionality.                                             | ✅     |
+
+## 🏅 Minor Module [9.5/7] : Device Support
+
+| Task                                                                                                                                                                                  | Status |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Ensure the website is responsive, adapting to different screen sizes and orientations, providing a consistent user experience on desktops, laptops, tablets, and smartphones.         | ✅     |
+| Ensure that users can easily navigate and interact with the website using different input methods, such as touchscreens, keyboards, and mice, depending on the device they are using. | ✅     |
+
+## 🏅 Minor Module [10/7] : User and Game Stats Dashboards
 
 | Task                                                                                                                                | Status |
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
@@ -102,34 +130,6 @@
 | Implement data visualization techniques, such as charts and graphs, to present statistics in a clear and visually appealing manner. | ❌     |
 | Allow users to access and explore their own gaming history and performance metrics conveniently.                                    | ❌     |
 | Feel free to add any metrics you deem useful.                                                                                       | ⚠️     |
-
-## 🏅 Minor Module [8.5/7] : Front-end framework
-
-| Task                                                                                                     | Status |
-| -------------------------------------------------------------------------------------------------------- | ------ |
-| Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. | ✅     |
-
-## 🏅 Minor Module [9/7] : Backend database
-
-| Task                                                                                                                                                                                                                                            | Status |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. | ✅     |
-
-## 🏅 Minor Module [9.5/7] : Device Support
-
-| Task                                                                                                                                                                                  | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Ensure the website is responsive, adapting to different screen sizes and orientations, providing a consistent user experience on desktops, laptops, tablets, and smartphones.         | ❌     |
-| Ensure that users can easily navigate and interact with the website using different input methods, such as touchscreens, keyboards, and mice, depending on the device they are using. | ❌     |
-
-## 🏅 Minor Module [10/7] : Browser Compatibility
-
-| Task                                                                                                                                                    | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Extend browser support to include an additional web browser, ensuring that users can access and use the application seamlessly.                         | ✅     |
-| Conduct thorough testing and optimization to ensure that the web application functions correctly and displays correctly in the newly supported browser. | ✅     |
-| Address any compatibility issues or rendering discrepancies that may arise in the added web browser.                                                    | ✅     |
-| Ensure a consistent user experience across all supported browsers, maintaining usability and functionality.                                             | ✅     |
 
 ## 🏅 Minor Module [10.5/7] : Multiple language support
 

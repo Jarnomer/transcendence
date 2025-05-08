@@ -19,7 +19,6 @@ export const GameOptions: React.FC = () => {
   const [enableSpin, setEnableSpin] = useState<boolean>(true);
   const { setGameSettings, gameSettings, mode, difficulty } = useGameOptionsContext();
   const navigate = useNavigate();
-  // useMatchmaking();
 
   const handleMaxScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -65,6 +64,7 @@ export const GameOptions: React.FC = () => {
       enableSpin: enableSpin,
       enablePowerUps: enablePowerUps,
       powerUpTypes: {
+        [PowerUpType.NoType]: selectedPowerUps.includes(PowerUpType.NoType),
         [PowerUpType.SlowerPaddle]: selectedPowerUps.includes(PowerUpType.SlowerPaddle),
         [PowerUpType.SmallerPaddle]: selectedPowerUps.includes(PowerUpType.SmallerPaddle),
         [PowerUpType.BiggerPaddle]: selectedPowerUps.includes(PowerUpType.BiggerPaddle),
@@ -93,6 +93,7 @@ export const GameOptions: React.FC = () => {
       enableSpin,
       enablePowerUps,
       powerUpTypes: {
+        [PowerUpType.NoType]: selectedPowerUps.includes(PowerUpType.NoType),
         [PowerUpType.SlowerPaddle]: selectedPowerUps.includes(PowerUpType.SlowerPaddle),
         [PowerUpType.SmallerPaddle]: selectedPowerUps.includes(PowerUpType.SmallerPaddle),
         [PowerUpType.BiggerPaddle]: selectedPowerUps.includes(PowerUpType.BiggerPaddle),

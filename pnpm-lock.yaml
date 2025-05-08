@@ -456,6 +456,9 @@ importers:
       '@types/axios':
         specifier: ^0.9.36
         version: 0.9.36
+      '@types/babylonjs':
+        specifier: ^2.4.0
+        version: 2.4.5
       '@types/react-router-dom':
         specifier: ^5.3.3
         version: 5.3.3
@@ -1222,6 +1225,10 @@ packages:
 
   '@types/babel__traverse@7.20.7':
     resolution: {integrity: sha512-dkO5fhS7+/oos4ciWxyEyjWe48zmG6wbCheo/G2ZnHx4fs3EU6YC6UM8rk56gAjNJ9P3MTH2jo5jb92/K6wbng==}
+
+  '@types/babylonjs@2.4.5':
+    resolution: {integrity: sha512-hHImUhEeDk8OAhhwXeEsDo3osfF+zTREhSOQgAoj5E0iJL2/bN2ojavSyYFdm7vXK8WNhf7i4YEF6B3ix/WL+Q==}
+    deprecated: This is a stub types definition. babylonjs provides its own type definitions, so you do not need this installed.
 
   '@types/bcrypt@5.0.2':
     resolution: {integrity: sha512-6atioO8Y75fNcbmj0G7UjI9lXN2pQ/IGJ2FWT4a/btd0Lk9lQalHLKhkgKVZ3r+spnmWUKfbMi1GEe9wyHQfNQ==}
@@ -4498,6 +4505,10 @@ snapshots:
   '@types/babel__traverse@7.20.7':
     dependencies:
       '@babel/types': 7.27.0
+
+  '@types/babylonjs@2.4.5':
+    dependencies:
+      babylonjs: 7.54.3
 
   '@types/bcrypt@5.0.2':
     dependencies:

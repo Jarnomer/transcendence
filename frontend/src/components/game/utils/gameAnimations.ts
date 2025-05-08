@@ -1,25 +1,25 @@
 import {
   Animation,
+  AnimationGroup,
+  ArcRotateCamera,
+  Color3,
+  CubicEase,
+  EasingFunction,
   Mesh,
   Scene,
-  Color3,
-  EasingFunction,
-  AnimationGroup,
-  CubicEase,
   Vector3,
-  ArcRotateCamera,
 } from 'babylonjs';
 
 import { GameAnimationManager, gameToSceneX, gameToSceneY } from '@game/utils';
 
 import {
-  AnimationPriority,
   AnimationGrouping,
   AnimationOptions,
-  GameObjectParams,
+  AnimationPriority,
   Ball,
-  defaultGameParams,
+  GameObjectParams,
   defaultGameObjectParams,
+  defaultGameParams,
 } from '@shared/types';
 
 export class ResourceTracker {
@@ -56,7 +56,7 @@ export function applyHoverAnimation(
     Animation.ANIMATIONLOOPMODE_CYCLE
   );
 
-  const keys = [];
+  const keys: Array<{ frame: number; value: number }> = [];
   keys.push({ frame: 0, value: params.bottomValue });
   keys.push({ frame: frameRate, value: params.topValue });
   keys.push({ frame: frameRate * 2, value: params.bottomValue });
@@ -154,21 +154,21 @@ export function createFloorHoverAnimation(floor: Mesh, scene: Scene): AnimationG
   const offsetZ = phaseOffset();
   const offsetPos = phaseOffset();
 
-  const rotationKeysY = [];
+  const rotationKeysY: Array<{ frame: number; value: number }> = [];
   rotationKeysY.push({ frame: 0 + offsetY, value: 0 });
   rotationKeysY.push({ frame: animationDuration / 2 + offsetY, value: tiltAmountY });
   rotationKeysY.push({ frame: animationDuration + offsetY, value: 0 });
   rotationKeysY.push({ frame: animationDuration * 1.5 + offsetY, value: -tiltAmountY });
   rotationKeysY.push({ frame: animationDuration * 2 + offsetY, value: 0 });
 
-  const rotationKeysZ = [];
+  const rotationKeysZ: Array<{ frame: number; value: number }> = [];
   rotationKeysZ.push({ frame: 0 + offsetZ, value: 0 });
   rotationKeysZ.push({ frame: animationDuration / 3 + offsetZ, value: tiltAmountZ });
   rotationKeysZ.push({ frame: animationDuration + offsetZ, value: 0 });
   rotationKeysZ.push({ frame: (animationDuration * 5) / 3 + offsetZ, value: -tiltAmountZ });
   rotationKeysZ.push({ frame: animationDuration * 2 + offsetZ, value: 0 });
 
-  const positionKeys = [];
+  const positionKeys: Array<{ frame: number; value: number }> = [];
   const initialPositionY = floor.position.y || 0;
   positionKeys.push({ frame: 0 + offsetPos, value: initialPositionY });
   positionKeys.push({

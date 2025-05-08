@@ -13,7 +13,7 @@ export const CircleSvg: React.FC = () => {
       <motion.g
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-        transformOrigin="center"
+        style={{ transformOrigin: 'center' }}
       >
         <path
           d="M26.8401 14.635C26.8401 14.74 26.8401 14.8375 26.8401 14.9275H21.8226C21.8376 14.8375 21.8451 14.74 21.8451 14.635C21.8451 11.125 18.9651 8.24499 15.4551 8.24499V3.25C21.7326 3.25 26.8401 8.35749 26.8401 14.635Z"

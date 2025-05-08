@@ -180,7 +180,7 @@ export class ChatService {
   }
 
   handleDuelMessage(payload: any) {
-    const sender = this.clients.get(payload.sender_id)!;
+    // const sender = this.clients.get(payload.sender_id)!;
     const receiver = this.clients.get(payload.receiver_id)!;
     if (receiver) {
       console.log('Sending duel message to:', payload.receiver_id);
@@ -189,7 +189,7 @@ export class ChatService {
   }
 
   handleDuelDeclineMessage(payload: any) {
-    const sender = this.clients.get(payload.sender_id)!;
+    // const sender = this.clients.get(payload.sender_id)!;
     const receiver = this.clients.get(payload.receiver_id)!;
     if (receiver) {
       console.log('Sending duel decline message to:', payload.receiver_id);

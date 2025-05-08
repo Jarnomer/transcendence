@@ -4,7 +4,7 @@ import { UserMinusIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 
 import { useUser } from '@contexts';
 
-import { sendFriendRequest } from '@services';
+import { cancelsentRequest, sendFriendRequest } from '@services';
 
 interface AddFriendButtonProps {
   receiverUserId: string;

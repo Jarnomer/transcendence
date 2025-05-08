@@ -22,31 +22,31 @@ const colors = {
 const services = [
   {
     name: 'main_server',
-    path: './services/main_server/dist/index.js',
+    path: './backend/dist/backend/services/main_server/src/index.js',
     color: colors.blue,
     dependencies: [],
   },
   {
     name: 'user_service',
-    path: './services/user_service/dist/index.js',
+    path: './backend/dist/backend/services/user_service/src/index.js',
     color: colors.green,
     dependencies: ['main_server'],
   },
   {
     name: 'game_service',
-    path: './services/game_service/dist/index.js',
+    path: './backend/dist/backend/services/game_service/src/index.js',
     color: colors.yellow,
     dependencies: ['main_server'],
   },
   {
     name: 'matchmaking_service',
-    path: './services/matchmaking_service/dist/index.js',
+    path: './backend/dist/backend/services/matchmaking_service/src/index.js',
     color: colors.magenta,
     dependencies: ['main_server', 'game_service'],
   },
   {
     name: 'remote_service',
-    path: './services/remote_service/dist/index.js',
+    path: './backend/dist/backend/services/remote_service/src/index.js',
     color: colors.cyan,
     dependencies: ['main_server', 'matchmaking_service'],
   },

@@ -2,23 +2,6 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
-// const animationVariants = {
-//   initial: {
-//     clipPath: 'inset(0 100% 0 100% )',
-//     opacity: 0,
-//   },
-//   animate: {
-//     clipPath: 'inset(0 0% 0 0)',
-//     opacity: 1,
-//     transition: { duration: 0.4, ease: 'easeInOut', delay: 0.3 }, // 👈 delay here
-//   },
-//   exit: {
-//     clipPath: 'inset(0 100% 0 100%)',
-//     opacity: 0,
-//     transition: { duration: 0.4, ease: 'easeInOut' },
-//   },
-// };
-
 export const InformationRequestSvg: React.FC = () => {
   return (
     <>
@@ -43,21 +26,6 @@ export const InformationRequestSvg: React.FC = () => {
           animate={{ pathLength: 1 }}
           transition={{ delay: 0.4, duration: 0.2, ease: 'easeInOut' }}
         />
-        {/* <motion.path
-          d="M180.76 24.2496H175.775V19.3096H180.76V24.2496Z"
-          stroke="currentColor"
-          strokeWidth={1}
-          fill="currentColor"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ delay: 0.7, duration: 0.2, ease: 'easeInOut' }}
-        /> */}
-        {/* <motion.path
-          d="M94.6296 72.3092H89.6445V67.3242H94.6296V72.3092Z"
-          stroke="currentColor"
-          strokeWidth={1}
-          fill="currentColor"
-        /> */}
         <path
           d="M180.76 53.5895H175.775V48.6045H180.76V53.5895Z"
           fill="currentColor"
@@ -72,22 +40,6 @@ export const InformationRequestSvg: React.FC = () => {
           animate={{ pathLength: 1 }}
           transition={{ delay: 0.45, duration: 0.2, ease: 'easeInOut' }}
         />
-        {/*
-        <path
-          d="M282.639 36.7594H277.654V31.7744H282.639V36.7594Z"
-          fill="currentColor"
-          stroke="currentColor"
-        />
-        <path
-          d="M180.76 5.48499H175.775V0.5H180.76V5.48499Z"
-          fill="currentColor"
-          stroke="currentColor"
-        />
-        <path
-          d="M5.48502 5.48499H0.5V0.5H5.48502V5.48499Z"
-          fill="currentColor"
-          stroke="currentColor"
-        /> */}
         {/* TEXT START */}
         <motion.path
           d="M26.7793 18.0947H27.3993V24.3397H26.7793V18.0947Z"
@@ -244,8 +196,6 @@ export const InformationRequestSvg: React.FC = () => {
         />
         <motion.path
           d="M154.17 18.4897H153.67V18.9897V24.3397H153.05V18.9897V18.4897H152.55H151.025V18.0947H155.74V18.4897H154.17Z"
-          fill="currentColor"
-          stroke="currentColor"
           stroke="currentColor"
           strokeWidth={1}
           fill="none"
