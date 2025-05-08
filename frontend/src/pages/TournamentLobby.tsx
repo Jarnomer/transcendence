@@ -200,6 +200,7 @@ export const TournamentLobby: React.FC = () => {
                 // ) : (
                 //   <span>waiting for more players to join</span>
                 //
+                //
               )}
             </AnimatePresence>
           </motion.div>
