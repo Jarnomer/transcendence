@@ -30,7 +30,9 @@ export const useMatchmaking = () => {
   // const params = useRef<URLSearchParams>(new URLSearchParams());
   console.log('sessionManager:', sessionManager);
   console.log('hasRegistered:', hasRegistered);
-  console.log('queueId:', queueId);
+  console.log('queueId:', sessionManager.get('queueId'));
+  console.log('gameId:', sessionManager.get('gameId'));
+  console.log('mode:', sessionManager.get('mode'));
 
   // useEffect(() => {
   //   if (!mode || !difficulty) return;
@@ -129,6 +131,7 @@ export const useMatchmaking = () => {
       .then(() => {
         if (!matchmaker.current) return;
         sessionManager.set('matchmakerState', matchmaker.current.getMatchMakerState());
+        console.log('Matchmaker state:', matchmaker.current.getMatchMakerState());
         switch (matchmaker.current.getMatchMakerState()) {
           case MatchMakerState.MATCHED:
             console.log('Matched with a game');
@@ -170,7 +173,7 @@ export const useMatchmaking = () => {
 
   // sending a message when the matchmaking connection is established
   useEffect(() => {
-    if (connections.matchmaking !== 'connected' && sessionManager.get('matchmakingRegistered')) {
+    if (connections.matchmaking !== 'connected' || !sessionManager.get('matchmakingRegistered')) {
       console.log('In queue, recovering sessionasdfadf');
       return;
     }

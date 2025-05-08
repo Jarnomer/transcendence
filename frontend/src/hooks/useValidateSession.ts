@@ -32,6 +32,8 @@ export const useValidateSession = () => {
       console.log('Session validation response:', res);
       if (res.game_session) {
         setStep('validating'); // Validating session
+        console.log('mode:', sessionManager.get('mode'));
+        console.log('difficulty:', sessionManager.get('difficulty'));
         setMode(sessionManager.get('mode') || null);
         setDifficulty(sessionManager.get('difficulty') || null);
         setGameId(gameId || '');
