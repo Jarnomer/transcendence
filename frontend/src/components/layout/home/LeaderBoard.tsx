@@ -79,7 +79,9 @@ export const LeaderBoard: React.FC = () => {
 
   return (
     <motion.div
-      className="flex flex-col items-center relative overflow-hidden text-sm"
+      layout
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+      className="flex flex-col max-h-full items-center relative overflow-hidden text-sm"
       variants={animationVariants}
       initial="hidden"
       animate="visible"
@@ -92,16 +94,19 @@ export const LeaderBoard: React.FC = () => {
 
       {!loading ? (
         <motion.ul
-          className="p-2 flex flex-col gap-2 "
+          layout
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="p-2 pr-4 flex flex-col gap-2 max-h-full overflow-y-scroll "
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
-          transition={{ duration: 0.4 }}
         >
           {filteredUsers.map((user) => (
             <motion.li
               key={user.user_id}
+              layout
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
               className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
               onClick={() => {
                 playSelectPowerUpSound();

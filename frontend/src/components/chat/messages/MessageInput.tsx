@@ -23,7 +23,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ chatId, isGroupChat 
   };
 
   return (
-    <div className="flex gap-2 w-full flex-grow">
+    <div className="flex gap-2 w-full flex-grow text-secondary">
       <form
         className="w-full flex items-center gap-2"
         onSubmit={(e) => {
@@ -43,7 +43,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ chatId, isGroupChat 
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 text-xs p-2 border-2 border-primary rounded focus:outline-none"
+          className="flex-1 text-xs p-2 border-2 border-primary  rounded focus:outline-none"
         />
 
         {/* Fixed-size icon button */}

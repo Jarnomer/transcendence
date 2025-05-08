@@ -63,7 +63,14 @@ const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
   const rightHalf = competitors.slice(mid);
   const round = parseInt(competitors[0].round);
 
-  console.log('round: ', round);
+  // console.log('------ ROUND: ', round, '--------');
+  // console.log('matches from round: ', competitors);
+  // console.log('leftHalf: ', leftHalf);
+  // console.log('rightHalf: ', rightHalf);
+  // console.log('maxRounds: ', maxRounds);
+  // console.log('competitors', competitors);
+  // console.log('------------------------');
+
   if (competitors.length === 1) {
     return (
       <>
@@ -105,9 +112,6 @@ const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
         <ol className="flex h-full flex-col justify-around">
           {leftHalf.map((match, idx) => (
             <div className={` `} key={`left-${idx}`}>
-              {/* <p>
-                round: {round} index: {idx}
-              </p> */}
               <Competitor player={match.players[0]} side="left" />
               <Competitor player={match.players[1]} side="left" />
             </div>
@@ -120,9 +124,6 @@ const Round: React.FC<RoundProps> = ({ competitors, maxRounds }) => {
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
-              {/* <p>
-                round: {round} index: {idx}
-              </p> */}
               <Competitor player={match.players[0]} side="right" />
               <Competitor player={match.players[1]} side="right" />
             </div>

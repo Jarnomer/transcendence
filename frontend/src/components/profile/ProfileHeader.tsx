@@ -47,14 +47,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
       animate="animate"
       exit="exit"
     >
-      <div
+      <motion.div
+        layout
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
         className="aspect-square
       max-w-[80px] max-h-[80px] w-[80px] h-[80px]
       sm:max-w-[150px] sm:max-h-[150px] sm:w-[150px] sm:h-[150px]
       lg:max-w-[200px] lg:max-h-[200px] lg:w-[200px] lg:h-[200px]"
       >
         <ProfilePicture user={user} isOwnProfile={isOwnProfile}></ProfilePicture>
-      </div>
+      </motion.div>
       {/* USER INFO */}
       <div className="w-full flex flex-col gap-2">
         {/* USER DISPLAY NAME */}

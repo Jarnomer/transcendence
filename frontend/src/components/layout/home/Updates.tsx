@@ -7,7 +7,7 @@ import { BackgroundGlow } from '@components/visual';
 export const Updates: React.FC = () => {
   return (
     <>
-      <motion.div className="">
+      <motion.div className="max-h-full overflow-y-scroll">
         <div className="flex items-center justify-center text-center w-full h-[20px] bg-primary text-black text-xs">
           <h2 className="">News / Updates</h2>
         </div>
