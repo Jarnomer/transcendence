@@ -20,6 +20,7 @@ export default class PongGame {
   private gameStatus: GameStatus;
   private updateInterval: NodeJS.Timeout | null = null;
   private countdownInterval: NodeJS.Timeout | null = null;
+  private gameStarted: boolean = false;
 
   private settings: GameSettings;
 
@@ -95,6 +96,7 @@ export default class PongGame {
 
   setReadyState(playerId: string, state: boolean): void {
     if (playerId === this.gameState.players.player1.id) {
+      console.log('Setting player1 ready state:', state);
       this.readyState.set(1, state);
     } else if (playerId === this.gameState.players.player2.id) {
       console.log('Setting player2 ready state:', state);
@@ -130,7 +132,9 @@ export default class PongGame {
     }
     return false;
   }
-
+  getGameStarted(): boolean {
+    return this.gameStarted;
+  }
   getGameStatus(): GameStatus {
     return this.gameStatus;
   }
@@ -351,6 +355,7 @@ export default class PongGame {
       console.warn('Cannot start countdown — not all players are ready.');
       return;
     }
+    this.gameStarted = true;
     this.powerUpManager.resetPowerUps();
     this.gameState.players.player1.activePowerUps = [];
     this.gameState.players.player2.activePowerUps = [];
@@ -399,8 +404,13 @@ export default class PongGame {
       return this.getGameState();
     }
 
-    this.updatePaddlePosition(1, playerMoves.player1 ?? null);
-    this.updatePaddlePosition(2, playerMoves.player2 ?? null);
+    if (playerMoves.player1 !== undefined) {
+      this.updatePaddlePosition(1, playerMoves.player1 ?? null);
+    }
+    if (playerMoves.player2 !== undefined) {
+      // console.log('Player 2 moves:', playerMoves.player2);
+      this.updatePaddlePosition(2, playerMoves.player2 ?? null);
+    }
 
     return this.getGameState();
   }
@@ -410,6 +420,10 @@ export default class PongGame {
 
     const paddleState =
       player === 1 ? this.gameState.players.player1 : this.gameState.players.player2;
+
+    if (player === 1) {
+      // console.log('Player 1 moves:', move);
+    }
 
     if (move === 'up') {
       if (paddleState.y - this.params.paddle.speed < 0) {
