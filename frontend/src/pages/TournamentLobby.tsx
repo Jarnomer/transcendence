@@ -9,19 +9,23 @@ import { useMatchmaking } from '@/hooks';
 import { useGameOptionsContext, useModal, useUser, useWebSocketContext } from '@contexts';
 
 import {
+  TournamentBracket,
   TournamentLobbyNav,
-  TournamentPlayerList,
   TournamentSettings,
   slideFromRightVariants,
 } from '@components/layout';
 
-import { FriendType } from '@shared/types';
-
 interface TournamentMatch {
   gameId: string;
-  players: [FriendType | null, FriendType | null];
+  players: [PlayerData | null, PlayerData | null];
   round: number;
   isComplete: boolean;
+}
+
+interface PlayerData {
+  user_id: string;
+  avatar_url: string;
+  display_name: string;
 }
 
 export const TournamentLobby: React.FC = () => {
@@ -29,20 +33,16 @@ export const TournamentLobby: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
   const { difficulty, lobby, mode } = useGameOptionsContext();
-  const [bracket, setBracket] = useState<TournamentMatch[][]>(
-    generateBracket(parseInt(difficulty!))
-  );
 
   const {
-    matchmakingSocket,
     connections,
-    sendMessage,
+
     cleanup,
     cancelQueue,
     cancelGame,
     matchmakingState,
   } = useWebSocketContext();
-  const { openModal, closeModal } = useModal();
+  const { openModal } = useModal();
 
   useMatchmaking();
 
@@ -70,7 +70,8 @@ export const TournamentLobby: React.FC = () => {
     }
   }, [matchmakingState.phase, location.pathname]);
 
-  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET
+  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET, DELETE LATER
+
   function generateBracket(playerCount: number): TournamentMatch[][] {
     const totalRounds = Math.log2(playerCount);
     const matchesPerRound: number[] = [];
@@ -97,34 +98,22 @@ export const TournamentLobby: React.FC = () => {
     return bracket;
   }
 
-  // const bracket = generateBracket(parseInt(difficulty!));
+  const bracket = generateBracket(16);
 
-  // const fakePlayer = {
-  //   user_id: user?.user_id,
-  //   avatar_url: user?.avatar_url,
-  //   display_name: user?.display_name,
-  // };
-  // const fakePlayer2 = {
-  //   user_id: 'asdasd',
-  //   avatar_url: 'uploads/default_avatar.png',
-  //   display_name: 'martti',
-  // };
-  // bracket[0][0].players = [fakePlayer, fakePlayer2];
+  const fakePlayer = {
+    user_id: user?.user_id,
+    avatar_url: user?.avatar_url,
+    display_name: user?.display_name,
+  };
+  const fakePlayer2 = {
+    user_id: 'asdasd',
+    avatar_url: 'uploads/default_avatar.png',
+    display_name: 'martti',
+  };
+  bracket[0][0].players = [fakePlayer, fakePlayer2];
 
-  useEffect(() => {
-    const newBracket = [...bracket];
-    matchmakingState.matches.forEach((roundMatches, roundIndex) => {
-      roundMatches.forEach((match, matchIndex) => {
-        if (newBracket[roundIndex][matchIndex]) {
-          newBracket[roundIndex][matchIndex].gameId = match.gameId;
-          newBracket[roundIndex][matchIndex].players = match.players;
-          newBracket[roundIndex][matchIndex].isComplete = match.isComplete;
-        }
-      });
-    });
-    setBracket(newBracket);
-    console.log('bracket: ', newBracket);
-  }, [matchmakingState.matches]);
+  console.log(bracket);
+  /// END OF DUMMY DATA
 
   const onAccept = () => {
     console.log('joining game..');
@@ -153,25 +142,7 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
-  // Extract player data for the TournamentPlayerList component
-  const extractPlayers = (bracketData: TournamentMatch[][]): FriendType[] => {
-    const players: FriendType[] = [];
-
-    bracketData.forEach((round) => {
-      round.forEach((match) => {
-        match.players.forEach((player) => {
-          if (player) {
-            players.push(player);
-          }
-        });
-      });
-    });
-
-    return players;
-  };
-
-  // Get a flat array of players from the bracket
-  const tournamentPlayers = extractPlayers(bracket);
+  console.log(matchmakingState);
 
   return (
     <>
@@ -189,7 +160,11 @@ export const TournamentLobby: React.FC = () => {
         <div className="flex flex-col md:flex-col gap-2 justify-center items-center w-full h-full flex-grow">
           <motion.div className="flex flex-col">
             <AnimatePresence mode="wait">
-              {activeTab === 'settings' ? (
+              {activeTab === 'fakeBracket' ? (
+                // BRACKET FILLED WITH FAKE DATA
+
+                <TournamentBracket players={bracket}></TournamentBracket>
+              ) : activeTab === 'settings' ? (
                 <motion.div
                   key="tournamentSettings"
                   className="w-full "
@@ -200,10 +175,13 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
-              ) : activeTab == 'players' ? (
-                <TournamentPlayerList players={tournamentPlayers}></TournamentPlayerList>
               ) : (
-                <span>loading</span>
+                // BRACKET FILLED WITH REAL DATA
+                <TournamentBracket players={matchmakingState.matches}></TournamentBracket>
+                // ) : (
+                //   <span>waiting for more players to join</span>
+                //
+                //
               )}
             </AnimatePresence>
           </motion.div>
