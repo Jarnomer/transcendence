@@ -21,7 +21,7 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
   console.log('is desktop: ', isDesktop);
   if (!isDesktop)
     return (
-      <motion.li className={`flex  text-xs sm:text-sm items-center m-2 hover:text-secondary`}>
+      <motion.li className={`flex items-center m-2 hover:text-secondary`}>
         <div className=" h-full flex items-center justify-center">
           <p className="text-xs">{player ? player.display_name : '??'}</p>
         </div>
@@ -30,7 +30,7 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
 
   return (
     <motion.li
-      className={`flex text-xs sm:text-sm items-center m-2 hover:text-secondary`}
+      className={`flex items-center m-2 hover:text-secondary`}
       // onClick={() => navigate(`/profile/${user.user_id}`)}
     >
       <div
@@ -63,7 +63,7 @@ interface PlayerData {
 }
 
 const Round: React.FC<{
-  competitors: PlayerData[];
+  competitors: TournamentMatch[];
   roundIndex: number;
   maxRounds: number;
 }> = ({ competitors, maxRounds }) => {
@@ -131,7 +131,7 @@ const Round: React.FC<{
       </div>
 
       {/* Right side */}
-      <div style={{ gridColumnStart: gridCols - round, gridRowStart: 1 }}>
+      <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="container" key={`right-${idx}`}>
@@ -146,7 +146,7 @@ const Round: React.FC<{
 };
 
 interface tournamentBracketProps {
-  players: PlayerData[][];
+  players: PlayerData[];
 }
 
 export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players }) => {
