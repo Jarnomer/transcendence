@@ -33,6 +33,9 @@ export const TournamentLobby: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('settings');
   const { user } = useUser();
   const { difficulty, lobby, mode } = useGameOptionsContext();
+  const [bracket, setBracket] = useState<TournamentMatch[][]>(
+    generateBracket(parseInt(difficulty!))
+  );
 
   const {
     matchmakingSocket,
@@ -117,19 +120,34 @@ export const TournamentLobby: React.FC = () => {
     return bracket;
   }
 
-  const bracket = generateBracket(8);
+  // const bracket = generateBracket(parseInt(difficulty!));
 
-  const fakePlayer = {
-    user_id: user?.user_id,
-    avatar_url: user?.avatar_url,
-    display_name: user?.display_name,
-  };
-  const fakePlayer2 = {
-    user_id: 'asdasd',
-    avatar_url: 'uploads/default_avatar.png',
-    display_name: 'martti',
-  };
-  bracket[0][0].players = [fakePlayer, fakePlayer2];
+  // const fakePlayer = {
+  //   user_id: user?.user_id,
+  //   avatar_url: user?.avatar_url,
+  //   display_name: user?.display_name,
+  // };
+  // const fakePlayer2 = {
+  //   user_id: 'asdasd',
+  //   avatar_url: 'uploads/default_avatar.png',
+  //   display_name: 'martti',
+  // };
+  // bracket[0][0].players = [fakePlayer, fakePlayer2];
+
+  useEffect(() => {
+    const newBracket = [...bracket];
+    matchmakingState.matches.forEach((roundMatches, roundIndex) => {
+      roundMatches.forEach((match, matchIndex) => {
+        if (newBracket[roundIndex][matchIndex]) {
+          newBracket[roundIndex][matchIndex].gameId = match.gameId;
+          newBracket[roundIndex][matchIndex].players = match.players;
+          newBracket[roundIndex][matchIndex].isComplete = match.isComplete;
+        }
+      });
+    });
+    setBracket(newBracket);
+    console.log('bracket: ', newBracket);
+  }, [matchmakingState.matches]);
 
   const onAccept = () => {
     console.log('joining game..');
