@@ -36,7 +36,7 @@ const App: React.FC = () => {
 
               <div
                 id="app-main-container"
-                className={`flex flex-col grow relative bg-[radial-gradient(circle,_#ff00cc,_black)]  items-center min-w-screen h-full min-h-screen md:max-h-screen w-full text-primary md:p-2 uppercase`}
+                className={`flex flex-col grow relative   items-center min-w-screen h-full min-h-screen md:max-h-screen w-full text-primary md:p-2 uppercase`}
               >
                 <Header />
                 <div

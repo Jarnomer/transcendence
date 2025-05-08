@@ -27,7 +27,11 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
   const { closeModal, isModalOpen } = useModal();
 
   const handleOverlayClick = () => {
-    if (modalName !== 'confirmModal' && modalName !== 'editProfile') {
+    if (
+      modalName !== 'confirmModal' &&
+      modalName !== 'editProfile' &&
+      modalName !== 'joinGameModal'
+    ) {
       closeModal(modalName);
     }
   };
@@ -41,7 +45,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
       <AnimatePresence mode="wait">
         {isModalOpen(modalName) && (
           <motion.div
-            className="fixed  top-0 left-0 w-screen h-screen bg-black/50 backdrop-blur-md flex items-center justify-center z-30"
+            className={`fixed  top-0 left-0 w-screen h-screen ${modalName !== 'joinGameModal' && 'bg-black/50 backdrop-blur-md'}  flex items-center justify-center z-30`}
             variants={backdropVariants}
             initial="initial"
             animate="animate"
