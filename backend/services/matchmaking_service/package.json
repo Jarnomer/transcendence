@@ -18,7 +18,6 @@
   "description": "",
   "dependencies": {
     "@my-backend/game_service": "workspace:*",
-    "@my-backend/matchmaking_service": "workspace:*",
     "@my-backend/remote_service": "workspace:*",
     "@my-backend/user_service": "workspace:*",
     "@sinclair/typebox": "^0.34.28",

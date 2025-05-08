@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN npm install -g pnpm@latest-10
 
-ENV CI=true
+ENV CI=false
 ENV NODE_ENV=production
 
 # Copy package files
@@ -17,8 +17,8 @@ COPY backend/services/user_service/package.json ./backend/services/user_service/
 COPY backend/services/remote_service/package.json ./backend/services/remote_service/
 COPY shared/package.json ./shared/
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Install dependencies with dev dependencies for build
+RUN pnpm install --frozen-lockfile 
 
 # Copy source code
 COPY backend ./backend/
@@ -60,9 +60,8 @@ COPY --from=builder /app/backend/services/user_service/package.json ./backend/se
 COPY --from=builder /app/backend/services/remote_service/package.json ./backend/services/remote_service/
 COPY --from=builder /app/shared/package.json ./shared/
 
-# Install production dependencies
-RUN npm install -g pnpm@latest-10 && \
-    pnpm install --frozen-lockfile --prod
+# Install production dependencies with shamefully-hoist to ensure all dependencies are at top level
+RUN npm install -g pnpm@latest-10 && pnpm install --frozen-lockfile --prod --shamefully-hoist
 
 # Create uploads directory
 RUN mkdir -p /app/backend/database/uploads
