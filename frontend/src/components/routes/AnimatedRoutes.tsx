@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion';
 
@@ -33,15 +33,25 @@ export const AnimatedRoutes: React.FC = () => {
   const user = localStorage.getItem('token');
   const { fromAppNavigation } = useNavigationAccess();
   const playPageChangeSound = useSound('/sounds/effects/page_change_1.wav');
+  const navigate = useNavigate();
+  const prevLocationRef = useRef(location);
 
   useEffect(() => {
     playPageChangeSound();
     checkAuth();
+
+    // Check if navigating from /game to /tournamentLobby -> go to gameMenu instead of gameOptions
+    if (prevLocationRef.current.pathname === '/game' && location.pathname === '/tournamentLobby') {
+      navigate('/gameMenu', { replace: true });
+    }
+
+    prevLocationRef.current = location;
+
     console.log('location change');
     return () => {
       console.log('Cleanup');
     };
-  }, [location]);
+  }, [location, navigate]);
 
   useDuel();
 
@@ -160,7 +170,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route
           path="/tournamentLobby"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <TournamentLobby />
               </PageWrapper>
