@@ -36,12 +36,12 @@ const App: React.FC = () => {
 
               <div
                 id="app-main-container"
-                className={`flex flex-col grow relative  items-center min-w-screen h-full min-h-screen md:max-h-screen w-full text-primary md:p-2 uppercase`}
+                className={`flex flex-col relative  items-center min-w-screen h-screen overflow-hidden w-screen text-primary md:p-2 uppercase`}
               >
                 <Header />
                 <div
                   id="app-content"
-                  className="relative flex grow flex-col w-full h-full py-2 overflow-y-scroll overflow-x-hidden min-h-[500px] max-w-screen-xl"
+                  className="relative flex h-full flex-col w-full  py-2  overflow-hidden min-h-[500px] max-w-screen-xl"
                 >
                   <AnimatePresence>
                     <motion.div

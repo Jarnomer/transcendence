@@ -203,16 +203,7 @@ export const TournamentLobby: React.FC = () => {
               ) : activeTab == 'players' ? (
                 <TournamentPlayerList players={tournamentPlayers}></TournamentPlayerList>
               ) : (
-                <motion.div
-                  key="tournamentPlayerList"
-                  className="w-full h-full"
-                  variants={slideFromRightVariants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                >
-                  {/* <Spectate players={bracket}></Spectate> */}
-                </motion.div>
+                <span>loading</span>
               )}
             </AnimatePresence>
           </motion.div>

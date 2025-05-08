@@ -77,7 +77,7 @@ export const HomePage: React.FC = () => {
           <LeaderBoard />
         </motion.div>
 
-        {
+        {isDesktop && (
           <motion.div
             layout
             transition={{ duration: 0.5, ease: 'easeInOut' }}
@@ -90,7 +90,7 @@ export const HomePage: React.FC = () => {
               <Updates></Updates>
             </section>
           </motion.div>
-        }
+        )}
       </motion.div>
     </motion.div>
   );
