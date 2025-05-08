@@ -17,9 +17,9 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
+    "@my-backend/main_server": "workspace:*",
     "@my-backend/game_service": "workspace:*",
     "@my-backend/matchmaking_service": "workspace:*",
-    "@my-backend/remote_service": "workspace:*",
     "@my-backend/user_service": "workspace:*",
     "@fastify/jwt": "^9.0.4",
     "@fastify/websocket": "^11.0.2",
