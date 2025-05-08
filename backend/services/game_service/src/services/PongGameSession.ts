@@ -141,6 +141,9 @@ export default class PongGameSession {
       return true;
     }
     console.log('Not all players connected');
+    if (this.game.getGameStarted()) {
+      this.endGame();
+    }
     return false;
   }
 
