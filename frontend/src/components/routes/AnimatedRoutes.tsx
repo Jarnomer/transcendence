@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AnimatePresence } from 'framer-motion';
 
@@ -25,25 +25,35 @@ import { LoadingProvider, useNavigationAccess, useUser } from '@contexts';
 
 import { PageWrapper } from '@components/routes';
 
-import { useDuel, useSound } from '@hooks';
+import { useSound } from '@hooks';
 
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
   const location = useLocation();
   const user = localStorage.getItem('token');
   const { fromAppNavigation } = useNavigationAccess();
+
+  const navigate = useNavigate();
+  const prevLocationRef = useRef(location);
+
   const playPageChangeSound = useSound('/sounds/effects/page_change_1.wav');
 
   useEffect(() => {
     playPageChangeSound();
     checkAuth();
+    
+    // Check if navigating from /game to /tournamentLobby -> go to gameMenu instead of gameOptions
+    if (prevLocationRef.current.pathname === '/game' && location.pathname === '/tournamentLobby') {
+      navigate('/gameMenu', { replace: true });
+    }
+    
+    prevLocationRef.current = location;
+    
     console.log('location change');
     return () => {
       console.log('Cleanup');
     };
-  }, [location]);
-
-  useDuel();
+  }, [location, navigate]);
 
   return (
     <AnimatePresence mode="wait">
