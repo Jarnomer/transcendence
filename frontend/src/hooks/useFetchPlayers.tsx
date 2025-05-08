@@ -4,21 +4,40 @@ import { useGameOptionsContext, useWebSocketContext } from '@contexts';
 
 import { getUserByID } from '@services';
 
+import { GameStatus, UserResponseType } from '@shared/types';
+
+interface PlayersDataState {
+  player1: UserResponseType | null;
+  player2: UserResponseType | null;
+  gameStatus: GameStatus | undefined;
+}
+
 export const useFetchPlayerData = () => {
   const { mode, difficulty } = useGameOptionsContext();
   const { gameState, gameStatus } = useWebSocketContext();
-  const [playersData, setPlayersData] = useState({ player1: null, player2: null, gameStatus });
+
+  const [playersData, setPlayersData] = useState<PlayersDataState>({
+    player1: null,
+    player2: null,
+    gameStatus: gameStatus as GameStatus,
+  });
   const [fetched, setFetched] = useState(false);
 
   const fetchPlayerData = async () => {
     if (!gameState) return;
     try {
       const p1 = await getUserByID(gameState.players.player1.id);
-      let p2 = null;
+
+      let p2: UserResponseType | null = null;
       if (mode !== 'singleplayer' && difficulty !== 'local') {
-        p2 = await getUserByID(gameState.players.player2.id);
+        p2 = (await getUserByID(gameState.players.player2.id)) as UserResponseType;
       }
-      setPlayersData({ player1: p1, player2: p2 });
+
+      setPlayersData({
+        player1: p1 as UserResponseType,
+        player2: p2 as UserResponseType,
+        gameStatus: gameStatus as GameStatus,
+      });
       console.log('fetched players: ', p1, p2);
     } catch (error) {
       console.error('Error fetching player data:', error);
@@ -34,7 +53,7 @@ export const useFetchPlayerData = () => {
       console.log('playersData', playersData);
       fetchPlayerData();
     }
-  }, [gameState, gameStatus]);
+  }, [gameState, gameStatus, fetched]);
 
   return playersData;
 };

@@ -253,7 +253,7 @@ export class ActivePowerUpIconManager {
 
   private createTubeRing(position: Vector3, effectColor: Color3, id: string): Mesh {
     const radius = this.circleSize / 2;
-    const path = [];
+    const path: Vector3[] = [];
 
     for (let i = 0; i <= this.numSegments; i++) {
       const angle = (i / this.numSegments) * Math.PI * 2;

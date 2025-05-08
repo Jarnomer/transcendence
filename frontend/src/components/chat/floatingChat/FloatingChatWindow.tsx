@@ -9,7 +9,7 @@ import { NavIconButton } from '@components/UI';
 
 import { useSound } from '@hooks';
 
-import { ChatRoomType, FriendType } from '@shared/types';
+import { ChatMessageType, ChatRoomType, FriendType } from '@shared/types';
 
 interface ChatWindowProps {
   friends: FriendType[];
@@ -20,15 +20,15 @@ interface ChatWindowProps {
 export const FloatingChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, onBack }) => {
   const [minimized, setMinimized] = useState(false);
   const { messages, rooms } = useChatContext();
-  // const chatMessages = messages[chatId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
   const isGroupChat = rooms.some((room: ChatRoomType) => room.chat_room_id === chatId);
 
-  const chatMessages = useMemo(() => {
-    if (chatId) {
-      return messages[chatId] || [];
+  const chatMessages = useMemo((): ChatMessageType[] => {
+    if (chatId && messages[chatId]) {
+      return messages[chatId];
     }
+    return [];
   }, [messages, chatId]);
 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
@@ -66,7 +66,7 @@ export const FloatingChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId,
                 {friends.find((f) => f.user_id === chatId)?.display_name}
               </span>
             ) : chatId && isGroupChat ? (
-              <span>{rooms.find((room: ChatRoomType) => room.chat_room_id === chatId).name}</span>
+              <span>{rooms.find((room: ChatRoomType) => room.chat_room_id === chatId)?.name}</span>
             ) : null}
             <div className="flex items-center gap-2">
               {!minimized && (

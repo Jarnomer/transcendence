@@ -16,7 +16,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   isGroupChat,
 }) => {
   return (
-    <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} gap-1`}>
+    <div className={`flex flex-col text-secondary ${isOwn ? 'items-end' : 'items-start'} gap-1`}>
       {/* Avatar and bubble */}
       <div className={`flex items-center gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
         {!isOwn && isLastOfGroup && (
@@ -27,7 +27,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         <div
           className={`relative ${!isOwn && !isLastOfGroup && 'pl-[22px]'}  ${isOwn ? 'bg-primary/25' : ''}`}
         >
-          <p className="text-xs border-1 p-2 break-all whitespace-pre-wrap">{message.message}</p>
+          <p className="text-xs border-1 border-primary p-2 break-all whitespace-pre-wrap normal-case">
+            {message.message}
+          </p>
           {!isOwn && isGroupChat && isLastOfGroup && (
             <span className="text-[8px] text-gray-500">{message.display_name}</span>
           )}

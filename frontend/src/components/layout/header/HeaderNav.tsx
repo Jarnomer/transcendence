@@ -1,63 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { AnimatePresence, motion } from 'framer-motion';
-
 import { useModal, useUser } from '@contexts';
 
-import { NavIconButton, Notifications } from '@components/UI';
-
-const animationVariants = {
-  initial: {
-    clipPath: 'inset(50% 0 50% 0)',
-    opacity: 0,
-  },
-  animate: {
-    clipPath: 'inset(0% 0 0% 0)',
-    opacity: 1,
-    transition: { duration: 0.1, ease: 'easeInOut' },
-  },
-  exit: {
-    clipPath: 'inset(50% 0 50% 0)',
-    opacity: 0,
-    transition: { duration: 0.1, ease: 'easeInOut' },
-  },
-};
+import { NavIconButton, NotificationsButton } from '@components/UI';
 
 export const HeaderNav: React.FC = () => {
   const { openModal } = useModal();
   const navigate = useNavigate();
   const { user, logout } = useUser();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const toggleDropdown = () => {
-    if (!isDropdownOpen) setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDropdownOpen]);
 
   return (
     <>
       {user ? (
-        <div
+        <nav
           className="flex  gap-3 items-center justify-center w-full"
           aria-label="Navigation menu"
         >
@@ -79,26 +36,9 @@ export const HeaderNav: React.FC = () => {
             icon="user"
             onClick={() => navigate(`/profile/${localStorage.getItem('userID')}`)}
           />
-          <NavIconButton
-            id="nav-bell-button"
-            ariaLabel="Notifications"
-            icon="bell"
-            onClick={() => toggleDropdown()}
-          />
-          <AnimatePresence mode="wait">
-            {isDropdownOpen ? (
-              <motion.div
-                ref={dropdownRef}
-                className="absolute h-[200px] right-0 top-15 glass-box p-2 z-50 shadow-black shadow-lg backdrop-blur-md "
-                variants={animationVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <Notifications></Notifications>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+
+          <NotificationsButton></NotificationsButton>
+
           <NavIconButton
             id="nav-chat-button"
             ariaLabel="Chat"
@@ -121,7 +61,7 @@ export const HeaderNav: React.FC = () => {
               <p className="text-xs md:text-md">Log Out</p>
             </button>
           ) : null}
-        </div>
+        </nav>
       ) : null}
     </>
   );

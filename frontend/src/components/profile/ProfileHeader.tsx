@@ -47,9 +47,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
       animate="animate"
       exit="exit"
     >
-      <div className="aspect-square max-w-sm max-h-sm w-sm h-sm">
+      <motion.div
+        layout
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        className="aspect-square
+      max-w-[80px] max-h-[80px] w-[80px] h-[80px]
+      sm:max-w-[150px] sm:max-h-[150px] sm:w-[150px] sm:h-[150px]
+      lg:max-w-[200px] lg:max-h-[200px] lg:w-[200px] lg:h-[200px]"
+      >
         <ProfilePicture user={user} isOwnProfile={isOwnProfile}></ProfilePicture>
-      </div>
+      </motion.div>
       {/* USER INFO */}
       <div className="w-full flex flex-col gap-2">
         {/* USER DISPLAY NAME */}
@@ -57,7 +64,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user }) => {
           <h2 className="w-full text-lg p-2 font-semibold">{user.display_name}</h2>
         </div>
 
-        <div className="border-1 flex flex-col text-xs border-gray-400 p-5">
+        <div className="border-1 flex flex-col text-xs border-gray-400 p-1 sm:p-5">
           <p className="text-gray-400">@{user.username}</p>
           <p className={`text-xs ${user.status == 'online' ? 'text-secondary' : 'text-primary'}`}>
             {user.status === 'online' ? 'Online' : 'Offline'}

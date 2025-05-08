@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 
-import { useUser } from '@contexts';
+import { useModal, useUser } from '@contexts';
 
 import { NavIconButton } from '@components/UI';
 
@@ -15,6 +15,8 @@ import {
   markNotificationAsSeen,
   rejectFriendRequest,
 } from '@services';
+
+import { useMediaQuery } from '@hooks';
 
 const animationVariants = {
   initial: {
@@ -39,6 +41,8 @@ export const Notifications: React.FC = () => {
   const { user, refetchUser, refetchRequests } = useUser();
   const [notifications, setNotifications] = useState<any[]>([]);
   const navigate = useNavigate();
+  const { closeModal } = useModal();
+  const isDesktop = useMediaQuery('(min-width: 600px)');
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -85,8 +89,7 @@ export const Notifications: React.FC = () => {
     return <p>Loading...</p>;
   }
 
-  const handleAcceptFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
+  const handleAcceptFriendClick = (sender_id: string) => {
     acceptFriendRequest(sender_id)
       .then(() => {
         console.log('Friend request accepted');
@@ -98,8 +101,7 @@ export const Notifications: React.FC = () => {
       });
   };
 
-  const handleRejectFriendClick = (event, sender_id: string) => {
-    event.stopPropagation();
+  const handleRejectFriendClick = (sender_id: string) => {
     rejectFriendRequest(sender_id)
       .then(() => {
         console.log('Friend request rejected');
@@ -111,16 +113,17 @@ export const Notifications: React.FC = () => {
       });
   };
 
-  const handleNotificationClick = async (event, request: any) => {
+  const handleNotificationClick = async (request: any) => {
     console.log('notification clicked');
     console.log('request:', request);
     console.log('request type:', request.type);
 
-    
-    event.stopPropagation();
     switch (request.type) {
       case 'friend_request':
         await markNotificationAsSeen(request.notification_id);
+        if (!isDesktop) {
+          closeModal('notifications');
+        }
         navigate(`/profile/${request.user_id}`);
         break;
       default:
@@ -133,19 +136,35 @@ export const Notifications: React.FC = () => {
   console.log('notficitations: ', notifications);
   return (
     <motion.div
-      className=" "
+      className="h-full w-full glass-box"
       variants={animationVariants}
       initial="initial"
       animate="animate"
       exit="exit"
     >
-      <ul className="flex flex-col gap-1">
+      {!isDesktop && (
+        <div className="w-full bg-primary text-black justify-between flex">
+          <h1 className="">Notifications</h1>
+          <NavIconButton
+            icon="close"
+            onClick={() => {
+              closeModal('notifications');
+            }}
+            id="close-notifications-button"
+            ariaLabel="close notifications"
+          ></NavIconButton>
+        </div>
+      )}
+      <ul className="flex flex-col gap-1 p-5">
         {notifications.length > 0 ? (
           notifications.map((request: any, index: number) => (
             <li key={index}>
               <div
                 className="flex items-center justify-start gap-2 text-secondary"
-                onClick={(event) => handleNotificationClick(event, request)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleNotificationClick(request);
+                }}
               >
                 <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-secondary border-1">
                   <img src={request.avatar_url} className="object-contain"></img>
@@ -157,13 +176,19 @@ export const Notifications: React.FC = () => {
                       id={`accept-friend-${request.user_id}`}
                       icon="checkCircle"
                       ariaLabel="accept friend request"
-                      onClick={(event) => handleAcceptFriendClick(event, request.user_id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleAcceptFriendClick(request.user_id);
+                      }}
                     />
                     <NavIconButton
                       id={`reject-friend-${request.user_id}`}
                       icon="xCircle"
                       ariaLabel="reject friend request"
-                      onClick={(event) => handleRejectFriendClick(event, request.user_id)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleRejectFriendClick(request.user_id);
+                      }}
                     />
                   </div>
                 )}

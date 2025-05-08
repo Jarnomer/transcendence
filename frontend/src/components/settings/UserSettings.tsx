@@ -8,6 +8,8 @@ import { ClippedButton, ProfilePictureSmall } from '@components/UI';
 
 import { getBlockedUsers, unblockUser } from '@services';
 
+import { BlockedUserArrayType } from '@shared/types';
+
 // const animationVariants = {
 //   initial: {
 //     clipPath: 'inset(0 0 100% 0)',
@@ -27,7 +29,7 @@ import { getBlockedUsers, unblockUser } from '@services';
 
 export const UserSettings: React.FC = () => {
   const { userId } = useUser();
-  const [myBlockedUsers, setMyBlockedUsers] = useState<any[]>([]);
+  const [myBlockedUsers, setMyBlockedUsers] = useState<BlockedUserArrayType>([]);
   // const navigate = useNavigate();
 
   const handleSaveSettings = () => {
@@ -60,7 +62,7 @@ export const UserSettings: React.FC = () => {
         <motion.ul className="pl-5 w-full gap-3 overflow-y-scroll">
           {myBlockedUsers.map((user) => (
             <motion.li className="flex gap-2 w-full" key={user.user_id}>
-              <ProfilePictureSmall user={user} avataUrl={user.avatar_url}></ProfilePictureSmall>
+              <ProfilePictureSmall user={user} avatarUrl={user.avatar_url} />
               <p className=" text-sm">{user.display_name}</p>
               <button
                 onClick={() => handleUnblockUser(user.user_id)}

@@ -154,11 +154,6 @@ body,
 html {
   font-family: var(--font-primary);
   font-size: 1rem;
-  text-transform: uppercase;
-}
-
-* {
-  text-transform: uppercase;
 }
 
 body {
@@ -270,16 +265,20 @@ body,
 html {
   font-family: var(--font-primary);
   font-size: 1rem;
-  text-transform: uppercase;
 }
 
-* {
-  text-transform: uppercase;
+input {
+  text-transform: none;
 }
 
 body {
   margin: 0;
   line-height: normal;
+  text-transform: uppercase;
+}
+
+button {
+  text-transform: uppercase;
 }
 
 @keyframes tvCollapse {

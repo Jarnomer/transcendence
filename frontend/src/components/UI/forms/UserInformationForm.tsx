@@ -112,14 +112,13 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({ setLoading, lo
     bio: user?.bio ? user.bio : '',
   });
 
-  console.log(user);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!user?.user_id) {
       console.error('User ID not found');
       return;
@@ -127,6 +126,13 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({ setLoading, lo
 
     if (!formData.display_name) {
       formData.display_name = user.username;
+    }
+
+    // trigger browser form validation
+    const form = e.currentTarget;
+    if (!form.checkValidity()) {
+      form.reportValidity(); // Show native validation error messages
+      return;
     }
 
     setLoading(true);
@@ -242,7 +248,7 @@ export const UserInformationForm: React.FC<EditProfileProps> = ({ setLoading, lo
                   </div>
 
                   <div className="flex w-full justify-end sm:col-span-2 p-2">
-                    <ClippedButton label={'Save'} type={'submit'} onClick={handleSubmit} />
+                    <ClippedButton label={'Save'} type={'submit'} />
                   </div>
                 </form>
               </div>

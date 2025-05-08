@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +14,7 @@ export const useValidateSession = () => {
   const { cancelGame, cancelQueue, setGameId, cleanup } = useWebSocketContext();
   const { resetGameOptions, setMode, setDifficulty, setQueueId } = useGameOptionsContext();
   const { allowInternalNavigation } = useNavigationAccess();
+  const delayRef = useRef<NodeJS.Timeout | null>(null);
 
   const [step, setStep] = useState<StepType>('init');
   const sessionManager = SessionManager.getInstance();
@@ -60,7 +61,18 @@ export const useValidateSession = () => {
 
       return;
     }
-    validateSession();
+    if (delayRef.current) {
+      clearTimeout(delayRef.current);
+    }
+    delayRef.current = setTimeout(() => {
+      console.log('Validating session...');
+      validateSession();
+    }, 1000); // Delay for 1 second before validating session
+    return () => {
+      if (delayRef.current) {
+        clearTimeout(delayRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {

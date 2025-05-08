@@ -1,6 +1,11 @@
 import { api } from '@services';
 
-import { MessageResponseType, RequestResponseType, SentResponseType } from '@shared/types';
+import {
+  BlockedUserArrayType,
+  MessageResponseType,
+  RequestResponseType,
+  SentResponseType,
+} from '@shared/types';
 
 export async function sendFriendRequest(receiver_id: string) {
   try {
@@ -87,7 +92,7 @@ export async function getReceivedFriendRequests() {
 
 export async function getBlockedUsers() {
   try {
-    const res = await api.get(`/friend/blocked`);
+    const res = await api.get<BlockedUserArrayType>(`/friend/blocked`);
     if (res.status !== 200) {
       throw new Error(`Error ${res.status}: Failed to get blocked users`);
     }

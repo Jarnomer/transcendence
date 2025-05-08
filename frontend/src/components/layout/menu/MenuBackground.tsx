@@ -8,7 +8,7 @@ interface MenuBackgroundProps {
   mode: string;
 }
 
-export const MenuBackground: React.FC<MenuBackgroundProps> = (mode) => {
+export const MenuBackground: React.FC<MenuBackgroundProps> = () => {
   const appContainer = document.getElementById('app-main-container');
 
   if (!appContainer) return null;

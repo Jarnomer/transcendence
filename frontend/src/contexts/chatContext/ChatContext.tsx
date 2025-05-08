@@ -8,17 +8,42 @@ import { MessageNotification } from '@components/chat';
 
 import { addMember, createChatRoom, getChat, getDm, getMyRooms, getPublicChat } from '@services';
 
-import { ChatMessageType, ChatRoomType, FriendListType } from '@shared/types';
+import { ChatMessageType, ChatRoomType, FriendListType, UserDataResponseType } from '@shared/types';
 
-const ChatContext = createContext<any>(null);
-
-interface ChatMessagePayload {
+export type ChatMessageEvent = {
   room_id?: string;
   sender_id: string;
   avatar_url?: string;
-  display_name: string;
+  display_name?: string;
   message: string;
+  receiver_id?: string;
+  created_at?: string;
+  direct_messages_id?: string;
+  queue_id?: string; // For duels
+};
+
+interface ChatContextType {
+  user: UserDataResponseType | null;
+  friends: FriendListType;
+  messages: Record<string, ChatMessageType[]>;
+  roomId: string | null;
+  rooms: ChatRoomType[];
+  myRooms: ChatRoomType[];
+  setRoomId: React.Dispatch<React.SetStateAction<string | null>>;
+  sendChatMessage: (
+    selectedFriend: string | null,
+    roomId: string | null,
+    newMessage: string
+  ) => void;
+  joinRoom: (id: string) => void;
+  createRoom: (roomName: string, isPrivate: boolean, memberList: string[]) => Promise<string>;
+  openChatWindows: Record<string, boolean>;
+  setOpenChatWindows: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  fetchDmHistory: (friendId: string) => Promise<ChatMessageType[] | undefined>;
+  fetchChatHistory: (roomId: string) => Promise<ChatMessageType[] | undefined>;
 }
+
+const ChatContext = createContext<ChatContextType | null>(null);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { chatSocket, sendMessage } = useWebSocketContext();
@@ -30,10 +55,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [rooms, setRooms] = useState<ChatRoomType[]>([]);
   const [myRooms, setMyRooms] = useState<ChatRoomType[]>([]);
   const [openChatWindows, setOpenChatWindows] = useState<Record<string, boolean>>({});
-  // const playMessageSound = useSound('/sounds/effects/message.wav');
 
   const roomIdRef = useRef(roomId);
-
 
   useEffect(() => {
     console.log('ChatProvider mounted');
@@ -44,7 +67,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (user) {
-      setFriends(user.friends);
+      setFriends(user.friends || []);
     }
   }, [user]);
 
@@ -54,7 +77,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchDmHistory = async (friendId: string) => {
     try {
-      const data = (await getDm(friendId)) as any;
+      const response = await getDm(friendId);
+      const data = response as ChatMessageType[];
       console.log('Fetched DM history:', data);
       setMessages((prev) => ({
         ...prev,
@@ -63,12 +87,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return data;
     } catch (error) {
       console.error('Failed to fetch DM history:', error);
+      return undefined;
     }
   };
 
   const fetchChatHistory = async (roomId: string) => {
     try {
-      const data = (await getChat(roomId)) as any;
+      const response = await getChat(roomId);
+      const data = response as ChatMessageType[];
       console.log('Fetched chat history:', data);
       setMessages((prev) => ({
         ...prev,
@@ -77,34 +103,34 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return data;
     } catch (error) {
       console.error('Failed to fetch chat history:', error);
+      return undefined;
     }
   };
 
   const handleNotificationClick = (senderId: string) => {
     setOpenChatWindows((prev) => ({ ...prev, [senderId]: true }));
-    // openModal('chatModal', {
-    //   user,
-    //   friends,
-    //   selectedFriendId: senderId,
-    //   onsend: sendChatMessage,
-    //   messages,
-    // });
   };
 
-  const notifyMessage = (event: MessageEvent) => {
-    console.log(event);
-    const isCurrentRoom = roomIdRef.current && event.room_id === roomIdRef.current;
-    if (isCurrentRoom || openChatWindows[event.sender_id] || openChatWindows[event.room_id]) return;
-    const chatId = event.room_id ? event.room_id : event.sender_id;
-    const isGroupChat = event.room_id ? true : false;
-    const foundRoom = rooms.find((room) => room.chat_room_id === event.room_id);
-    const groupChatName = isGroupChat && foundRoom ? foundRoom.name : null;
+  const notifyMessage = (event: ChatMessageEvent) => {
+    console.log('Notification event:', event);
 
-    console.log('rooms: ', rooms, 'myRooms: ', myRooms);
-    console.log('event room id: ', event.room_id);
-    console.log(isGroupChat, groupChatName);
-    // playMessageSound();
-    toast.custom((t) => (
+    const isCurrentRoom = roomIdRef.current && event.room_id === roomIdRef.current;
+    if (
+      isCurrentRoom ||
+      openChatWindows[event.sender_id] ||
+      (event.room_id && openChatWindows[event.room_id])
+    ) {
+      console.log('Skipping notification for open chat');
+      return;
+    }
+
+    const chatId = event.room_id ? event.room_id : event.sender_id;
+
+    // const isGroupChat = event.room_id ? true : false;
+    // const foundRoom = rooms.find((room) => room.chat_room_id === event.room_id);
+    // const groupChatName = isGroupChat && foundRoom ? foundRoom.name : null;
+
+    toast.custom(() => (
       <MessageNotification>
         <div
           className="h-full w-full flex items-center glass-box"
@@ -113,14 +139,19 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           <div className="h-full aspect-square p-2">
             <img
               className="object-contain h-full w-full border-1"
-              src={event.avatar_url || './src/assets/images/default_avatar.png'}
+              src={event.avatar_url}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/images/avatars/default_avatar.png';
+              }}
+              alt={`${event.display_name}'s profile picture`}
             />
           </div>
           <div className="text-xs">
             {event.room_id &&
               rooms &&
               rooms.find((room) => room.chat_room_id === event.room_id) && (
-                <span>{rooms.find((room) => room.chat_room_id === event.room_id).name}</span>
+                <span>{rooms.find((room) => room.chat_room_id === event.room_id)?.name}</span>
               )}
             <p className="text-xs">{event.display_name}</p>
             <p className="text-xs">{event.message}</p>
@@ -130,23 +161,33 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ));
   };
 
-  const handleChatMessage = (event: MessageEvent) => {
-    console.log('handling chat message');
+  const handleChatMessage = (event: ChatMessageEvent) => {
+    console.log('handling chat message', event);
+
     if (event.room_id) {
-      setMessages((prev) => ({
-        ...prev,
-        [event.room_id]: [...(prev[event.room_id] || []), event],
-      }));
+      setMessages((prev) => {
+        const updatedMessages = { ...prev };
+        updatedMessages[event.room_id!] = [
+          ...(prev[event.room_id!] || []),
+          event as unknown as ChatMessageType,
+        ];
+        return updatedMessages;
+      });
+
       if (!messages[event.room_id]) {
         fetchChatHistory(event.room_id);
       }
     }
 
     if (event.sender_id) {
-      setMessages((prev) => ({
-        ...prev,
-        [event.sender_id]: [...(prev[event.sender_id] || []), event],
-      }));
+      setMessages((prev) => {
+        const updatedMessages = { ...prev };
+        updatedMessages[event.sender_id] = [
+          ...(prev[event.sender_id] || []),
+          event as unknown as ChatMessageType,
+        ];
+        return updatedMessages;
+      });
 
       // Lazy load DM history if not already fetched
       if (!messages[event.sender_id]) {
@@ -158,22 +199,33 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    chatSocket.addEventListener('message', handleChatMessage);
-    return () => chatSocket.removeEventListener('message', handleChatMessage);
+    const messageHandler = (messageData: ChatMessageEvent) => {
+      console.log('Message received:', messageData);
+      handleChatMessage(messageData);
+    };
+
+    chatSocket.addEventListener('message', messageHandler);
+    return () => chatSocket.removeEventListener('message', messageHandler);
   }, []);
 
   useEffect(() => {
     if (!user) return;
+
     getPublicChat()
-      .then(setRooms)
+      .then((data) => {
+        setRooms(data as ChatRoomType[]);
+      })
       .catch((err) => console.error('Failed to fetch public chat rooms:', err));
   }, [user]);
 
   useEffect(() => {
     const userId = localStorage.getItem('userID');
     if (!userId) return;
+
     getMyRooms()
-      .then(setMyRooms)
+      .then((data) => {
+        setMyRooms(data as ChatRoomType[]);
+      })
       .catch((err) => console.error('Failed to fetch my chat rooms:', err));
   }, []);
 
@@ -191,12 +243,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userId = localStorage.getItem('userID');
     if (!userId || !(selectedFriend || roomId) || newMessage.trim() === '') return;
 
+    // Create a safer version of the user payload
+    const userPayload = {
+      avatar_url: user?.avatar_url || '',
+      display_name: user?.display_name || '',
+    };
+
     const messageData = {
       type: selectedFriend ? 'dm' : 'room',
       payload: {
         sender_id: userId,
-        avatar_url: user?.avatar_url,
-        display_name: user?.display_name,
+        avatar_url: userPayload.avatar_url,
+        display_name: userPayload.display_name,
         receiver_id: selectedFriend,
         room_id: roomId,
         message: newMessage,
@@ -205,11 +263,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     sendMessage('chat', messageData);
     console.log('sending message: ', messageData);
+
     const key = selectedFriend || roomId;
-    setMessages((prev) => ({
-      ...prev,
-      [key!]: [...(prev[key!] || []), messageData.payload],
-    }));
+    if (key) {
+      const localMessage = {
+        ...messageData.payload,
+        created_at: new Date().toISOString(),
+      };
+
+      setMessages((prev) => {
+        const updatedMessages = { ...prev };
+        updatedMessages[key] = [...(prev[key] || []), localMessage as unknown as ChatMessageType];
+        return updatedMessages;
+      });
+    }
   };
 
   const joinRoom = (id: string) => {
@@ -223,13 +290,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const createRoom = async (roomName: string, isPrivate: boolean, memberList: string[]) => {
-    const data = await createChatRoom(roomName, isPrivate ? 'private' : 'public');
-    if (data) {
+    const response = await createChatRoom(roomName, isPrivate ? 'private' : 'public');
+    const data = response as ChatRoomType;
+
+    if (data && data.chat_room_id) {
       await addMember(data.chat_room_id, memberList);
       setRooms((prev) => [...prev, data]);
       setRoomId(data.chat_room_id);
+      return data.chat_room_id;
     }
-    return data.chat_room_id;
+
+    return '';
   };
 
   return (
@@ -256,4 +327,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useChatContext = () => useContext(ChatContext);
+export const useChatContext = () => {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error('useChatContext must be used within a ChatProvider');
+  }
+  return context;
+};

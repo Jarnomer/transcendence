@@ -18,7 +18,7 @@ const animationVariants = {
   animate: {
     clipPath: 'inset(0 0% 0 0)',
     opacity: 1,
-    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut', delay: 0.5 },
+    transition: { delay: 0.4, duration: 1.0, ease: 'easeInOut' },
   },
   exit: {
     clipPath: 'inset(0 100% 0 0)',
@@ -64,10 +64,7 @@ export const LeaderBoard: React.FC = () => {
   async function fetchData() {
     setLoading(true);
     const res = await getUsersWithRank();
-    if (res) {
-      // console.log(res);
-      setUsers(res);
-    }
+    if (res) setUsers(res);
     setLoading(false);
   }
 
@@ -82,7 +79,9 @@ export const LeaderBoard: React.FC = () => {
 
   return (
     <motion.div
-      className="flex flex-col items-center relative overflow-hidden text-sm"
+      layout
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+      className="flex flex-col max-h-full items-center relative overflow-hidden text-sm"
       variants={animationVariants}
       initial="hidden"
       animate="visible"
@@ -95,21 +94,23 @@ export const LeaderBoard: React.FC = () => {
 
       {!loading ? (
         <motion.ul
-          className="p-2 flex flex-col gap-2 "
+          layout
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="p-2 pr-4 flex flex-col gap-2 max-h-full overflow-y-scroll "
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
-          transition={{ duration: 0.4 }}
         >
           {filteredUsers.map((user) => (
             <motion.li
               key={user.user_id}
+              layout
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
               className="h-[57px] min-w-[282px] flex gap-3 hover:scale-[1.05] hover:text-secondary"
               onClick={() => {
                 playSelectPowerUpSound();
                 handleNavigate(user.user_id);
-                // navigate(`/profile/${user.user_id}`);
               }}
               variants={itemVariants}
             >

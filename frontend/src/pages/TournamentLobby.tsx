@@ -15,17 +15,13 @@ import {
   slideFromRightVariants,
 } from '@components/layout';
 
+import { FriendType } from '@shared/types';
+
 interface TournamentMatch {
   gameId: string;
-  players: [PlayerData | null, PlayerData | null];
+  players: [FriendType | null, FriendType | null];
   round: number;
   isComplete: boolean;
-}
-
-interface PlayerData {
-  user_id: string;
-  avatar_url: string;
-  display_name: string;
 }
 
 export const TournamentLobby: React.FC = () => {
@@ -49,24 +45,6 @@ export const TournamentLobby: React.FC = () => {
   const { openModal, closeModal } = useModal();
 
   useMatchmaking();
-
-  // useEffect(() => {
-  //   if (!user) return;
-
-  //   const setupChat = async () => {
-  //     console.log('TOURNAMENT LOBBY SET UP CHAT: Players: ', null);
-  //     const chatId = await createRoom(
-  //       'tournamentChat_' + Math.floor(Math.random() * 50),
-  //       true,
-  //       null
-  //     );
-  //     if (chatId) {
-  //       setTournamentChatId(chatId);
-  //     }
-  //   };
-
-  //   setupChat();
-  // }, [user]);
 
   useEffect(() => {
     if (mode === 'tournament') {
@@ -93,7 +71,6 @@ export const TournamentLobby: React.FC = () => {
   }, [matchmakingState.phase, location.pathname]);
 
   // CREATE DUMMY DATA FOR TOURNAMENT BRACKET
-
   function generateBracket(playerCount: number): TournamentMatch[][] {
     const totalRounds = Math.log2(playerCount);
     const matchesPerRound: number[] = [];
@@ -176,6 +153,26 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
+  // Extract player data for the TournamentPlayerList component
+  const extractPlayers = (bracketData: TournamentMatch[][]): FriendType[] => {
+    const players: FriendType[] = [];
+
+    bracketData.forEach((round) => {
+      round.forEach((match) => {
+        match.players.forEach((player) => {
+          if (player) {
+            players.push(player);
+          }
+        });
+      });
+    });
+
+    return players;
+  };
+
+  // Get a flat array of players from the bracket
+  const tournamentPlayers = extractPlayers(bracket);
+
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
@@ -204,7 +201,7 @@ export const TournamentLobby: React.FC = () => {
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
               ) : activeTab == 'players' ? (
-                <TournamentPlayerList players={bracket}></TournamentPlayerList>
+                <TournamentPlayerList players={tournamentPlayers}></TournamentPlayerList>
               ) : (
                 <motion.div
                   key="tournamentPlayerList"

@@ -29,15 +29,15 @@ interface GameResultsProps {
 
 const aiOptions: Record<string, { avatar: string; name: string }> = {
   easy: {
-    avatar: './src/assets/images/ai_easy.png',
+    avatar: '/images/avatars/ai_easy.png',
     name: 'AI_EASY',
   },
   normal: {
-    avatar: './src/assets/images/ai.png',
+    avatar: '/images/avatars/ai.png',
     name: 'AI_NORMAL',
   },
   brutal: {
-    avatar: './src/assets/images/ai_hard.png',
+    avatar: '/images/avatars/ai_hard.png',
     name: 'AI_BRUTAL',
   },
 };

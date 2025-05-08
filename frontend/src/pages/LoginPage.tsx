@@ -102,6 +102,7 @@ export const LoginPage: React.FC = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                disabled={loading}
               />
               {error && error === 'invalidUser' && (
                 <p className="text-xs text-left text-error">User not found</p>
@@ -116,19 +117,25 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
               {error && error === 'invalidPassword' && (
                 <p className="text-xs text-left text-error">invalid password</p>
               )}
-              <ClippedButton label={isRegistering ? 'Register' : 'Login'} type="submit" />
+              <ClippedButton
+                label={loading ? 'Processing...' : isRegistering ? 'Register' : 'Login'}
+                type="submit"
+                disabled={loading}
+              />
             </form>
             <div className="text-center flex flex-col gap-2 mt-4">
               <p>{isRegistering ? 'Already have an account?' : "Don't have an account?"}</p>
               <ClippedButton
                 label={isRegistering ? 'Go to Login' : 'Register'}
                 onClick={() => setIsRegistering(!isRegistering)}
+                disabled={loading}
               />
-              {!isRegistering && <ClippedButton label="Play as a guest" />}
+              {!isRegistering && <ClippedButton label="Play as a guest" disabled={loading} />}
             </div>
           </div>
         </ClippedCornerCard>

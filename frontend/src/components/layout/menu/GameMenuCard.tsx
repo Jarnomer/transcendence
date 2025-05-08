@@ -18,14 +18,13 @@ export const GameMenuCard: React.FC<GameMenuCardProps> = ({
   onClick,
 }) => {
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  console.log('is safari:', isSafari);
-  const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
+  // const playSubmitSound = useSound('/sounds/effects/button_submit.wav');
   const playHoverSound = useSound('/sounds/effects/button_hover.wav');
 
-  const handleOnClick = () => {
-    playSubmitSound();
-    onClick();
-  };
+  // const handleOnClick = () => {
+  //   playSubmitSound();
+  //   onClick();
+  // };
 
   return !isSafari ? (
     <div
