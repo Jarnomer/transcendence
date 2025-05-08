@@ -26,8 +26,11 @@ export const useMatchmaking = () => {
 
   const matchmaker = useRef<MatchMaker>(null);
   const sessionManager = SessionManager.getInstance();
-  const hasRegistered = SessionManager.getInstance().get('matchmakingRegistered');
+  const hasRegistered = sessionManager.get('matchmakingRegistered');
   // const params = useRef<URLSearchParams>(new URLSearchParams());
+  console.log('sessionManager:', sessionManager);
+  console.log('hasRegistered:', hasRegistered);
+  console.log('queueId:', queueId);
 
   // useEffect(() => {
   //   if (!mode || !difficulty) return;
@@ -64,6 +67,7 @@ export const useMatchmaking = () => {
   };
 
   const handleJoinMatch = () => {
+    console.log('Joining match');
     if (!matchmaker.current) return;
     sendMessage('matchmaking', {
       type: 'join_match',
@@ -167,10 +171,14 @@ export const useMatchmaking = () => {
   // sending a message when the matchmaking connection is established
   useEffect(() => {
     if (connections.matchmaking !== 'connected' && sessionManager.get('matchmakingRegistered')) {
+      console.log('In queue, recovering sessionasdfadf');
       return;
     }
-    console.log('Matchmaking connected');
+    console.log('sessionManager:', sessionManager);
+    console.log('Matchmaking connected', connections.matchmaking);
     console.log('matchmakerState:', sessionManager.get('matchmakerState'));
+    console.log('has registered:', hasRegistered);  
+    console.log('session hasRegistered:', sessionManager.get('matchmakingRegistered'));
     switch (sessionManager.get('matchmakerState')) {
       case MatchMakerState.WAITING_FOR_PLAYERS:
         handleJoinMatch();
