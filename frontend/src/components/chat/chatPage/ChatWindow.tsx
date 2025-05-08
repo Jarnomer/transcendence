@@ -41,7 +41,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, onBack 
   const playUnSelectSound = useSound('/sounds/effects/unselect.wav');
 
   return (
-    <div className={`p-0 w-full h-full text-primary backdrop-blur-sm overflow-hidden`}>
+    <div className={`p-0 w-full h-full  text-primary backdrop-blur-sm overflow-hidden`}>
       <div className="p-0 h-full w-full flex flex-col flex-1">
         <div className="p-0 flex justify-between items-center ">
           <div className="w-full text-sm bg-primary text-black p-2 gap-2 flex items-center cursor-pointer">

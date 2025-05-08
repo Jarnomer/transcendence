@@ -55,7 +55,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({ modalName, children 
             <ModalBackgroundGlitch duration={1000}></ModalBackgroundGlitch>
 
             <motion.div
-              className="text-primary w-full h-full md:w-2xl relative  flex flex-col justify-center items-center overflow-hidden"
+              className="text-primary w-full h-full md:w-2xl relative flex flex-col justify-center items-center overflow-hidden"
               variants={modalVariants}
               initial="initial"
               animate="animate"

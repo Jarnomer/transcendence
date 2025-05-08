@@ -160,7 +160,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route
           path="/tournamentLobby"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <TournamentLobby />
               </PageWrapper>

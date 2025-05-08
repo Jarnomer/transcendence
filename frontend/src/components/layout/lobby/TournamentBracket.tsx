@@ -2,6 +2,8 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 
+import { useMediaQuery } from '../../../hooks';
+
 interface PlayerData {
   user_id: string;
   avatar_url: string;
@@ -14,6 +16,18 @@ interface CompetitorProps {
 }
 
 const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
+  const isDesktop = useMediaQuery('(min-width: 600px)');
+
+  console.log('is desktop: ', isDesktop);
+  if (!isDesktop)
+    return (
+      <motion.li className={`flex items-center m-2 hover:text-secondary`}>
+        <div className=" h-full flex items-center justify-center">
+          <p className="text-xs">{player ? player.display_name : '??'}</p>
+        </div>
+      </motion.li>
+    );
+
   return (
     <motion.li
       className={`flex items-center m-2 hover:text-secondary`}
@@ -137,6 +151,7 @@ interface tournamentBracketProps {
 }
 
 export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players }) => {
+  const isDesktop = useMediaQuery('(min-width: 600px)');
   if (!players) return;
   const gridCols = players.length * 2;
   console.log('playersLength:', players.length, ' gridCols: ', gridCols);
@@ -147,7 +162,7 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
         className="grid grid-rows-1 w-full overflow-x-scroll"
         style={{
           gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-          minWidth: `${gridCols * 150}px`,
+          minWidth: isDesktop ? `${gridCols * 150}px` : undefined,
         }}
       >
         {players.map((round, index) => (

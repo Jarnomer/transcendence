@@ -27,7 +27,7 @@ export const ChatModal: React.FC = () => {
 
   return (
     <ModalWrapper modalName="chatModal">
-      <div className="glass-box grow text-primary w-full h-full overflow-hidden">
+      <div className="glass-box  text-primary w-full h-full max-h-screen overflow-hidden">
         <ChatWindow
           key={chatId}
           chatId={chatId}
