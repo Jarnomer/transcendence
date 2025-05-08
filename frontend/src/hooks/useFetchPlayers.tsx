@@ -27,14 +27,15 @@ export const useFetchPlayerData = () => {
     if (!gameState) return;
     try {
       const p1 = await getUserByID(gameState.players.player1.id);
-      let p2 = null;
+
+      let p2: UserResponseType | null = null;
       if (mode !== 'singleplayer' && difficulty !== 'local') {
-        p2 = await getUserByID(gameState.players.player2.id);
+        p2 = (await getUserByID(gameState.players.player2.id)) as UserResponseType;
       }
 
       setPlayersData({
         player1: p1 as UserResponseType,
-        player2: p2 as UserResponseType | null,
+        player2: p2 as UserResponseType,
         gameStatus: gameStatus as GameStatus,
       });
       console.log('fetched players: ', p1, p2);
