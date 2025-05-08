@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } from '@contexts';
 
 import { FloatingChatWrapper } from '@components/chat';
-// import { BackgroundProvider } from '@components/game';
+import { BackgroundProvider } from '@components/game';
 import { Footer, Header, MobileNavBar } from '@components/layout';
 import {
   ConfirmModal,

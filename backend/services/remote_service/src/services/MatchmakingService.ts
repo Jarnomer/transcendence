@@ -432,6 +432,7 @@ export class MatchmakingService {
       // socket: this.clients.get(user_id)!,
       elo: playerElo.elo,
       joinedAt: new Date(),
+      index:0
     };
     this.addPlayerToQueue(mode, player);
     await this.matchmakers[mode].findRandomMatch(player);

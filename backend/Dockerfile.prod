@@ -60,8 +60,8 @@ COPY --from=builder /app/backend/services/user_service/package.json ./backend/se
 COPY --from=builder /app/backend/services/remote_service/package.json ./backend/services/remote_service/
 COPY --from=builder /app/shared/package.json ./shared/
 
-# Install production dependencies with shamefully-hoist to ensure all dependencies are at top level
-RUN npm install -g pnpm@latest-10 && pnpm install --frozen-lockfile --prod --shamefully-hoist
+# Install production dependencies
+RUN npm install -g pnpm@latest-10 && pnpm install --frozen-lockfile --prod
 
 # Create uploads directory
 RUN mkdir -p /app/backend/database/uploads
