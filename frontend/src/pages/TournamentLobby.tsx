@@ -15,13 +15,17 @@ import {
   slideFromRightVariants,
 } from '@components/layout';
 
-import { FriendType } from '@shared/types';
-
 interface TournamentMatch {
   gameId: string;
-  players: [FriendType | null, FriendType | null];
+  players: [PlayerData | null, PlayerData | null];
   round: number;
   isComplete: boolean;
+}
+
+interface PlayerData {
+  user_id: string;
+  avatar_url: string;
+  display_name: string;
 }
 
 export const TournamentLobby: React.FC = () => {
@@ -30,8 +34,14 @@ export const TournamentLobby: React.FC = () => {
   const { user } = useUser();
   const { difficulty, lobby, mode } = useGameOptionsContext();
 
-  const { connections, cleanup, cancelQueue, cancelGame, matchmakingState } = useWebSocketContext();
+  const {
+    connections,
 
+    cleanup,
+    cancelQueue,
+    cancelGame,
+    matchmakingState,
+  } = useWebSocketContext();
   const { openModal } = useModal();
 
   useMatchmaking();
@@ -60,7 +70,8 @@ export const TournamentLobby: React.FC = () => {
     }
   }, [matchmakingState.phase, location.pathname]);
 
-  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET
+  // CREATE DUMMY DATA FOR TOURNAMENT BRACKET, DELETE LATER
+
   function generateBracket(playerCount: number): TournamentMatch[][] {
     const totalRounds = Math.log2(playerCount);
     const matchesPerRound: number[] = [];
@@ -87,23 +98,22 @@ export const TournamentLobby: React.FC = () => {
     return bracket;
   }
 
-  const bracket = generateBracket(8);
+  const bracket = generateBracket(16);
 
-  const fakePlayer: FriendType = {
-    user_id: user?.user_id || 'default-id',
-    avatar_url: user?.avatar_url || 'uploads/default_avatar.png',
-    display_name: user?.display_name || 'Mystery Man',
-    status: 'online',
+  const fakePlayer = {
+    user_id: user?.user_id,
+    avatar_url: user?.avatar_url,
+    display_name: user?.display_name,
   };
-
-  const fakePlayer2: FriendType = {
-    user_id: 'default-id',
+  const fakePlayer2 = {
+    user_id: 'asdasd',
     avatar_url: 'uploads/default_avatar.png',
-    display_name: 'Mystery Man',
-    status: 'online',
+    display_name: 'martti',
   };
-
   bracket[0][0].players = [fakePlayer, fakePlayer2];
+
+  console.log(bracket);
+  /// END OF DUMMY DATA
 
   const onAccept = () => {
     console.log('joining game..');
@@ -132,6 +142,8 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
+  console.log(matchmakingState);
+
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
@@ -148,7 +160,11 @@ export const TournamentLobby: React.FC = () => {
         <div className="flex flex-col md:flex-col gap-2 justify-center items-center w-full h-full flex-grow">
           <motion.div className="flex flex-col">
             <AnimatePresence mode="wait">
-              {activeTab === 'settings' ? (
+              {activeTab === 'fakeBracket' ? (
+                // BRACKET FILLED WITH FAKE DATA
+
+                <TournamentBracket players={bracket}></TournamentBracket>
+              ) : activeTab === 'settings' ? (
                 <motion.div
                   key="tournamentSettings"
                   className="w-full "
@@ -159,10 +175,13 @@ export const TournamentLobby: React.FC = () => {
                 >
                   <TournamentSettings></TournamentSettings>
                 </motion.div>
-              ) : activeTab == 'players' ? (
-                <TournamentBracket players={bracket}></TournamentBracket>
               ) : (
-                <span>loading</span>
+                // BRACKET FILLED WITH REAL DATA
+                <TournamentBracket players={matchmakingState.matches}></TournamentBracket>
+                // ) : (
+                //   <span>waiting for more players to join</span>
+                //
+                //
               )}
             </AnimatePresence>
           </motion.div>
