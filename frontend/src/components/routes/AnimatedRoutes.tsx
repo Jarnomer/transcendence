@@ -25,7 +25,7 @@ import { LoadingProvider, useNavigationAccess, useUser } from '@contexts';
 
 import { PageWrapper } from '@components/routes';
 
-import { useSound } from '@hooks';
+import { useDuel, useSound } from '@hooks';
 
 export const AnimatedRoutes: React.FC = () => {
   const { checkAuth } = useUser(); // Retrieve user from context
@@ -54,6 +54,8 @@ export const AnimatedRoutes: React.FC = () => {
       console.log('Cleanup');
     };
   }, [location, navigate]);
+
+  useDuel();
 
   return (
     <AnimatePresence mode="wait">
@@ -170,7 +172,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route
           path="/tournamentLobby"
           element={
-            user ? (
+            user && fromAppNavigation ? (
               <PageWrapper>
                 <TournamentLobby />
               </PageWrapper>
