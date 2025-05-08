@@ -2,12 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 import { SessionManager, api, getRequestsSent, getUserData } from '@services';
 
-import {
-  FriendListType,
-  UserDataResponseType,
-  UserFriendsType,
-  ValidateResponseType,
-} from '@shared/types';
+import { FriendListType, UserDataResponseType } from '@shared/types';
 
 interface FriendRequest {
   user_id: string;
@@ -47,7 +42,7 @@ export const useUser = () => {
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserDataResponseType | null>(null);
   const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
-  const [friends, setFriends] = useState<UserFriendsType>([]);
+  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState<boolean>(true);
   const userId = localStorage.getItem('userID');
 
@@ -141,7 +136,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     try {
-      const res = await api.get<ValidateResponseType>('/auth/validate');
+      const res = await api.get('/auth/validate');
       localStorage.setItem('userID', res.data.user_id);
       localStorage.setItem('username', res.data.username);
       fetchUser();

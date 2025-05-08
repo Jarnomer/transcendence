@@ -14,8 +14,6 @@ import {
   GameSinglePlayerReqType,
   GameSinglePlayerResSchema,
   GameSinglePlayerResType,
-  SessionStatusSchema,
-  SessionStatusType,
   UserIdType,
 } from '@shared/types';
 
@@ -60,10 +58,6 @@ export async function gameRoutes(fastify: FastifyInstance) {
 
   fastify.delete('/delete/:game_id', gameController.deleteGame.bind(gameController));
   fastify.get('/status', gameController.status.bind(gameController));
-  fastify.get<{ Reply: SessionStatusType }>(
-    '/sessionStatus',
-    { schema: { response: { 200: SessionStatusSchema } } },
-    gameController.sessionStatus.bind(gameController)
-  );
+  fastify.get('/sessionStatus', gameController.sessionStatus.bind(gameController));
   fastify.get('/myGames', gameController.getMyGames.bind(gameController));
 }

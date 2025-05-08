@@ -19,7 +19,6 @@ export const UploadAvatarButton: React.FC<uploadAvatarButtonProps> = ({ setLoadi
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { refetchUser } = useUser();
   const { openModal } = useModal();
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -91,13 +90,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
   const [loading, setLoading] = useState<boolean>(false);
 
   return (
-    <div className="overflow-hidden relative aspect-square w-full h-full border-1 border-primary">
-      {loading ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      ) : null}
-
+    <div className="overflow-hidden relative aspect-square w-full h-full  border-1 border-primary">
       <img
         className="object-cover w-full h-full z-10"
         src={user.avatar_url}
@@ -105,7 +98,7 @@ export const ProfilePicture: React.FC<ProfilePictureProps> = ({ user, isOwnProfi
       />
 
       {/* Upload Button */}
-      {isOwnProfile && <UploadAvatarButton setLoading={setLoading} />}
+      {isOwnProfile && <UploadAvatarButton setLoading={setLoading}></UploadAvatarButton>}
     </div>
   );
 };

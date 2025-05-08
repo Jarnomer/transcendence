@@ -36,7 +36,7 @@ function applyPaddleRecoil(paddleMesh: any, speedFactor: number, scene: Scene) {
   );
 
   // Define keyframes for the recoil motion
-  const keys: Array<{ frame: number; value: number }> = [];
+  const keys = [];
   keys.push({ frame: 0, value: originalX });
   keys.push({ frame: 5, value: originalX + recoilDirection * recoilDistance });
   keys.push({ frame: 15, value: originalX - recoilDirection * recoilDistance * 0.2 });
@@ -77,7 +77,7 @@ function applySquishEffect(
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
 
-  const keys: Array<{ frame: number; value: Vector3 }> = [];
+  const keys = [];
   const squishAmount = 0.25 + speedFactor * 0.15;
   if (collisionType === 'dx') {
     // Horizontal collision (paddles) -> Deform vertically
@@ -165,7 +165,7 @@ function applyLightEffect(
     Animation.ANIMATIONLOOPMODE_CONSTANT
   );
 
-  const keys: Array<{ frame: number; value: number }> = [];
+  const keys = [];
   keys.push({ frame: 0, value: lightIntensity });
   keys.push({ frame: 5, value: lightIntensity * 2.0 });
   keys.push({ frame: 10, value: lightIntensity * 1.0 });
@@ -361,7 +361,7 @@ function applyEdgeDeformEffect(
   const affectRadius = combinedFactor * 0.5;
 
   // Create new points array for deformed shape
-  const deformedPoints: Vector3[] = [];
+  const deformedPoints = [];
   for (let i = 0; i < numPoints; i++) {
     const origPoint = originalPoints[i];
     const newPoint = origPoint.clone();
@@ -406,7 +406,7 @@ function applyEdgeDeformEffect(
 
   // Adjust animation to be more springy with higher spin values
   const restoreDuration = Math.max(30, (40 * combinedFactor) / 4);
-  const keys: Array<{ frame: number; value: number }> = [];
+  const keys = [];
   keys.push({ frame: 0, value: 0 });
   keys.push({ frame: 5, value: 0.2 });
   keys.push({ frame: 15, value: 0.7 });
@@ -422,7 +422,7 @@ function applyEdgeDeformEffect(
     if (factor === undefined) return;
 
     // Create interpolated points
-    const points: Vector3[] = [];
+    const points = [];
     for (let i = 0; i < numPoints; i++) {
       const deformedPoint = edgeMesh.metadata.deformedPoints[i];
       const originalPoint = originalPoints[i];

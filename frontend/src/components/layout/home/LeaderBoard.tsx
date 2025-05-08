@@ -64,7 +64,10 @@ export const LeaderBoard: React.FC = () => {
   async function fetchData() {
     setLoading(true);
     const res = await getUsersWithRank();
-    if (res) setUsers(res);
+    if (res) {
+      // console.log(res);
+      setUsers(res);
+    }
     setLoading(false);
   }
 
@@ -111,6 +114,7 @@ export const LeaderBoard: React.FC = () => {
               onClick={() => {
                 playSelectPowerUpSound();
                 handleNavigate(user.user_id);
+                // navigate(`/profile/${user.user_id}`);
               }}
               variants={itemVariants}
             >

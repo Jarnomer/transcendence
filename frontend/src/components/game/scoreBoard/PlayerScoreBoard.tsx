@@ -13,18 +13,15 @@ interface Player {
 }
 
 interface PlayerScoreBoardProps {
-  gameState?: GameState;
-  playerScores?: React.RefObject<{ player1Score: number; player2Score: number }>;
+  gameState: GameState;
+  playerScores: React.RefObject<{ player1Score: number; player2Score: number }>;
   playersData: {
     player1: Player | null;
     player2: Player | null;
-    gameStatus?: string;
   };
 }
 
-type DifficultyKey = 'easy' | 'normal' | 'brutal';
-
-const aiOptions: Record<DifficultyKey, { avatar: string; name: string }> = {
+const aiOptions = {
   easy: {
     avatar: '/images/avatars/ai_easy.png',
     name: 'AI_EASY',
@@ -49,50 +46,37 @@ export const PlayerScoreBoard: React.FC<PlayerScoreBoardProps> = ({ playersData 
   const { setLoadingState } = useLoading();
 
   const playerScores = useRef({
-    player1Score: gameState?.players?.player1?.score || 0,
-    player2Score: gameState?.players?.player2?.score || 0,
+    player1Score: gameState?.players.player1?.score || 0,
+    player2Score: gameState?.players.player2?.score || 0,
   });
 
   useEffect(() => {
     if (!playersData?.player1) {
       return;
     }
-
     if (playersData.player1 && player1Ref.current !== playersData.player1) {
       player1Ref.current = {
         display_name: playersData.player1?.display_name,
         avatar_url: playersData.player1?.avatar_url,
-        user_id: playersData.player1?.user_id,
       };
-
-      const safetyDefaultDifficulty: DifficultyKey = 'normal';
-      const safeDifficulty = (difficulty as DifficultyKey) || safetyDefaultDifficulty;
 
       if (mode === 'singleplayer') {
         player2Ref.current = {
-          display_name: aiOptions[safeDifficulty].name,
-          avatar_url: aiOptions[safeDifficulty].avatar,
-          user_id: 'ai',
+          display_name: aiOptions[difficulty].name,
+          avatar_url: aiOptions[difficulty].avatar,
         };
-      } else if (playersData.player2) {
+      } else {
         player2Ref.current = {
           display_name: playersData.player2?.display_name,
           avatar_url: playersData.player2?.avatar_url,
-          user_id: playersData.player2?.user_id,
         };
       }
-
       setLoadingState('scoreBoardLoading', false);
     }
-  }, [playersData, mode, difficulty]);
+  }, [playersData]);
 
-  if (gameState?.players?.player1) {
-    playerScores.current.player1Score = gameState.players.player1.score || 0;
-  }
-
-  if (gameState?.players?.player2) {
-    playerScores.current.player2Score = gameState.players.player2.score || 0;
-  }
+  playerScores.current.player1Score = gameState?.players.player1?.score || 0;
+  playerScores.current.player2Score = gameState?.players.player2?.score || 0;
 
   if (connections.game !== 'connected') {
     return null;

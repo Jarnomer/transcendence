@@ -9,7 +9,7 @@ import { NavIconButton, ProfilePictureSmall } from '@components/UI';
 
 import { useSound } from '@hooks';
 
-import { ChatMessageType, ChatRoomType, FriendType } from '@shared/types';
+import { ChatRoomType, FriendType } from '@shared/types';
 
 interface ChatWindowProps {
   friends: FriendType[];
@@ -19,15 +19,15 @@ interface ChatWindowProps {
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, onBack }) => {
   const { messages, rooms } = useChatContext();
+  // const chatMessages = messages[chatId] || [];
   const navigate = useNavigate();
   const { user } = useUser();
   const isGroupChat = rooms.some((room: ChatRoomType) => room.chat_room_id === chatId);
 
-  const chatMessages = useMemo((): ChatMessageType[] => {
-    if (chatId && messages[chatId]) {
-      return messages[chatId];
+  const chatMessages = useMemo(() => {
+    if (chatId) {
+      return messages[chatId] || [];
     }
-    return [];
   }, [messages, chatId]);
 
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -65,11 +65,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ friends, chatId, onBack 
                     onClick={() => navigate(`/profile/${chatId}`)}
                     className="flex items-center space-x-2 cursor-pointer"
                   >
-                    <ProfilePictureSmall friend={friendData} avatarUrl={friendData.avatar_url} />
+                    <ProfilePictureSmall user={friendData} avatarUrl={friendData.avatar_url} />
                     <span>{friendData.display_name}</span>
                   </div>
                 );
-              })()
+              })() // ← Notice the immediate invocation here
             ) : chatId && isGroupChat ? (
               <span>{rooms.find((room: ChatRoomType) => room.chat_room_id === chatId)?.name}</span>
             ) : null}

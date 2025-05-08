@@ -10,20 +10,18 @@ export const useMatchmaking = () => {
   const navigate = useNavigate();
   const { userId, user } = useUser();
   const {
-    // matchmakingState,
-    // matchmakingSocket,
+    matchmakingState,
+    matchmakingSocket,
     sendMessage,
-    // closeConnection,
+    closeConnection,
     connections,
     setGameId,
-    // startGame,
+    startGame,
     startMatchMaking,
-    // startSpectating,
+    startSpectating,
   } = useWebSocketContext();
-
-  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId } =
-    useGameOptionsContext(); // resetGameOptions
-
+  const { mode, difficulty, lobby, queueId, tournamentOptions, setQueueId, resetGameOptions } =
+    useGameOptionsContext();
   const matchmaker = useRef<MatchMaker>(null);
   const sessionManager = SessionManager.getInstance();
   const hasRegistered = SessionManager.getInstance().get('matchmakingRegistered');

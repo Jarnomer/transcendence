@@ -14,11 +14,12 @@ import {
   EditProfileModal,
   ErrorModal,
   JoinGameNotificationModal,
-  NotificationsModal,
   SettingsModal,
 } from '@components/modals';
 import { AnimatedRoutes } from '@components/routes';
 import { BackgroundGlitch } from '@components/visual';
+
+import { NotificationsModal } from './components/modals/NotificationsModal';
 
 const App: React.FC = () => {
   console.log('---- APP MOUNTED ----');
@@ -29,9 +30,9 @@ const App: React.FC = () => {
         <GraphicsSettingsProvider>
           <GameOptionsProvider>
             <Router>
-              <div className="fixed">
-                <BackgroundProvider />
-              </div>
+              {/* <div className="fixed"> */}
+              {/* <BackgroundProvider /> */}
+              {/* </div> */}
 
               <div
                 id="app-main-container"

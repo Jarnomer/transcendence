@@ -39,7 +39,7 @@ type PowerUpSelectionProps = {
 
 export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
   isEnabled,
-  // setIsEnabled,
+  setIsEnabled,
   selectedPowerUps,
   setSelectedPowerUps,
   isSpinEnabled,
@@ -70,15 +70,15 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
     }
   }, []);
 
-  // const handleEnableToggle = () => {
-  //   setIsEnabled((prev) => {
-  //     const newEnabled = !prev;
-  //     if (!newEnabled) {
-  //       setSelectedPowerUps([]); // Clear all power-ups if disabling
-  //     }
-  //     return newEnabled;
-  //   });
-  // };
+  const handleEnableToggle = () => {
+    setIsEnabled((prev) => {
+      const newEnabled = !prev;
+      if (!newEnabled) {
+        setSelectedPowerUps([]); // Clear all power-ups if disabling
+      }
+      return newEnabled;
+    });
+  };
 
   return (
     <>

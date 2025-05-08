@@ -52,21 +52,20 @@ const Round: React.FC<{
   matches: TournamentMatch[];
   competitors: TournamentMatch[];
   roundIndex: number;
-  maxRounds: number;
-}> = ({ competitors, maxRounds }) => {
+  gridCols: number;
+}> = ({ competitors, gridCols }) => {
   const mid = Math.ceil(competitors.length / 2);
   const leftHalf = competitors.slice(0, mid);
   const rightHalf = competitors.slice(mid);
   const round = parseInt(competitors[0].round);
 
-  // console.log('------ ROUND: ', round, '--------');
   // console.log('matches from round: ', competitors);
   // console.log('leftHalf: ', leftHalf);
   // console.log('rightHalf: ', rightHalf);
   // console.log('maxRounds: ', maxRounds);
   // console.log('competitors', competitors);
-  // console.log('------------------------');
 
+  console.log('round: ', round);
   if (competitors.length === 1) {
     // console.log('Single match round:', round);
 
@@ -118,7 +117,7 @@ const Round: React.FC<{
       </div>
 
       {/* Right side */}
-      <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
+      <div style={{ gridColumnStart: gridCols - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
@@ -137,9 +136,10 @@ interface tournamentBracketProps {
 }
 
 export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players }) => {
+  // Create rounds based on number of players
+
   if (!players) return;
-  const gridCols = players.length * 2;
-  console.log('playersLength:', players.length, ' gridCols: ', gridCols);
+  const gridCols = players.length * 2 + 1;
 
   return (
     <div className=" w-full h-full flex  ">
@@ -155,10 +155,12 @@ export const TournamentBracket: React.FC<tournamentBracketProps> = ({ players })
             key={'round_' + index}
             roundIndex={index}
             competitors={round}
-            maxRounds={gridCols + 1}
+            gridCols={gridCols}
           />
         ))}
       </div>
     </div>
   );
 };
+
+export default TournamentBracket;

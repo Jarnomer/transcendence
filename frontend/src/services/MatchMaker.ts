@@ -181,10 +181,10 @@ export class MatchMaker {
   private gameMode: GameMode;
   private gameId: string | null = null;
   private queueId: string | null = null;
-  // private options: GameOptionsType;
+  private options: GameOptionsType;
   constructor(options: GameOptionsType) {
     this.gameMode = GameFactory.createMode(this, options);
-    // this.options = options;
+    this.options = options;
   }
 
   getGameId(): string | null {

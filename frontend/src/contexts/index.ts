@@ -1,5 +1,5 @@
 // WebSocket context
-export { WebSocketProvider, useWebSocketContext } from './WebSocketContext';
+export { useWebSocketContext, WebSocketProvider } from './WebSocketContext';
 
 // User context
 export { UserProvider, useUser } from './user/UserContext';
@@ -23,4 +23,3 @@ export { GraphicsSettingsProvider, useGraphicsContext } from './user/GraphicsCon
 
 // Communication context
 export { ChatProvider, useChatContext } from './chatContext/ChatContext';
-export type { ChatMessageEvent } from './chatContext/ChatContext';

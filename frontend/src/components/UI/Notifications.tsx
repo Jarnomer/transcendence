@@ -16,7 +16,7 @@ import {
   rejectFriendRequest,
 } from '@services';
 
-import { useMediaQuery } from '@hooks';
+import { useMediaQuery } from '../../hooks';
 
 const animationVariants = {
   initial: {
@@ -89,7 +89,8 @@ export const Notifications: React.FC = () => {
     return <p>Loading...</p>;
   }
 
-  const handleAcceptFriendClick = (sender_id: string) => {
+  const handleAcceptFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
     acceptFriendRequest(sender_id)
       .then(() => {
         console.log('Friend request accepted');
@@ -101,7 +102,8 @@ export const Notifications: React.FC = () => {
       });
   };
 
-  const handleRejectFriendClick = (sender_id: string) => {
+  const handleRejectFriendClick = (event, sender_id: string) => {
+    event.stopPropagation();
     rejectFriendRequest(sender_id)
       .then(() => {
         console.log('Friend request rejected');
@@ -113,11 +115,12 @@ export const Notifications: React.FC = () => {
       });
   };
 
-  const handleNotificationClick = async (request: any) => {
+  const handleNotificationClick = async (event, request: any) => {
     console.log('notification clicked');
     console.log('request:', request);
     console.log('request type:', request.type);
 
+    event.stopPropagation();
     switch (request.type) {
       case 'friend_request':
         await markNotificationAsSeen(request.notification_id);
@@ -161,10 +164,7 @@ export const Notifications: React.FC = () => {
             <li key={index}>
               <div
                 className="flex items-center justify-start gap-2 text-secondary"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleNotificationClick(request);
-                }}
+                onClick={(event) => handleNotificationClick(event, request)}
               >
                 <div className="h-[30px] w-[30px] rounded-full overflow-hidden border-secondary border-1">
                   <img src={request.avatar_url} className="object-contain"></img>
@@ -176,19 +176,13 @@ export const Notifications: React.FC = () => {
                       id={`accept-friend-${request.user_id}`}
                       icon="checkCircle"
                       ariaLabel="accept friend request"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleAcceptFriendClick(request.user_id);
-                      }}
+                      onClick={(event) => handleAcceptFriendClick(event, request.user_id)}
                     />
                     <NavIconButton
                       id={`reject-friend-${request.user_id}`}
                       icon="xCircle"
                       ariaLabel="reject friend request"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleRejectFriendClick(request.user_id);
-                      }}
+                      onClick={(event) => handleRejectFriendClick(event, request.user_id)}
                     />
                   </div>
                 )}

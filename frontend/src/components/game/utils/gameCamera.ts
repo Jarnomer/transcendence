@@ -167,8 +167,8 @@ export const animateCinematicCamera = (
   targetAngle: ArcCameraAngle,
   duration: number = defaultGameAnimationTimings.camera.cameraTransitionDuration
 ) => {
-  const animations: Array<{ animation: Animation; target: ArcRotateCamera }> = [];
   const scene = camera.getScene();
+  const animations = [];
 
   // Alpha animation
   const alphaAnimation = new Animation(
@@ -273,8 +273,8 @@ export function animateGameplayCamera(
   targetAngle: ArcCameraAngle,
   duration: number = defaultGameAnimationTimings.camera.cameraTransitionDuration
 ) {
-  const animations: Array<{ animation: Animation; target: ArcRotateCamera }> = [];
   const scene = camera.getScene();
+  const animations = [];
 
   // Alpha animation
   const alphaAnimation = new Animation(

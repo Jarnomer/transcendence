@@ -1,16 +1,60 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useModal } from '@contexts';
-
 import { GraphicsSettings, Soundsettings, UserSettings } from '@components/settings';
-import { NavIconButton } from '@components/UI';
 import { BackgroundGlow } from '@components/visual';
 
-interface SettingsProps {
-  initialTab?: string; // Set initial tab
-}
+import { NavIconButton } from '../components/UI';
+import { useModal } from '../contexts';
+
+// const slideFromLeftVariants = {
+//   initial: {
+//     x: '-100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '-100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
+
+// const slideFromRightVariants = {
+//   initial: {
+//     x: '100%',
+//     scale: 1.05,
+//   },
+//   animate: {
+//     x: 0,
+//     scale: 1,
+//     transition: {
+//       x: { duration: 0.4, ease: 'easeInOut' },
+//       scale: { delay: 0.4, duration: 0.2, ease: 'easeInOut' },
+//     },
+//   },
+//   exit: {
+//     x: '100%',
+//     scale: 1.05,
+//     opacity: 1,
+//     transition: {
+//       scale: { duration: 0.2, ease: 'easeOut' },
+//       x: { delay: 0.2, duration: 0.4, ease: 'easeInOut' },
+//     },
+//   },
+// };
 
 export const SettingsNav: React.FC<{
   activeTab: string;
@@ -19,7 +63,7 @@ export const SettingsNav: React.FC<{
   return (
     <motion.div
       id="settings-nav"
-      className="flex relative w-full items-center justify-center gap-3 md:gap-6 py-4"
+      className="flex relative w-full h-full overflow-hidden items-center justify-center gap-3  md:gap-6"
       layout
       transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
@@ -40,61 +84,56 @@ export const SettingsNav: React.FC<{
   );
 };
 
-export const Settings: React.FC<SettingsProps> = ({ initialTab = 'userSettings' }) => {
-  const [activeTab, setActiveTab] = useState(initialTab);
+export const Settings: React.FC = ({ activeTab }) => {
   const { closeModal } = useModal();
-
   return (
-    <motion.div
-      id="settings"
-      className="w-full h-full flex flex-col relative border-1 glass-box overflow-hidden"
-    >
-      <div aria-hidden="true" className="w-full flex justify-between bg-primary text-black p-2">
-        <h1 className="text-lg pl-2">
-          {activeTab === 'userSettings'
-            ? 'User Settings'
-            : activeTab === 'soundSettings'
-              ? 'Sound Settings'
-              : 'Graphic Settings'}
-        </h1>
-        <NavIconButton
-          icon="close"
-          onClick={() => {
-            closeModal('settings');
-          }}
-          id="close-settings-button"
-          ariaLabel="close settings"
-        ></NavIconButton>
-      </div>
-
-      {/* Add the settings nav component */}
-      <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab} />
-
-      <BackgroundGlow />
-
-      <div className="flex-1 overflow-auto">
+    <>
+      <motion.div
+        id="settings"
+        className="w-full h-full relative border-1 glass-box overflow-hidden justify-start"
+      >
+        <div aria-hidden="true" className="w-full flex justify-between bg-primary text-black">
+          <h1>
+            {activeTab === 'userSettings'
+              ? 'User Settings'
+              : activeTab === 'soundSettings'
+                ? 'Sound Settings'
+                : 'Graphic Settings'}
+          </h1>
+          <NavIconButton
+            icon="close"
+            onClick={() => {
+              closeModal('settings');
+            }}
+            id="close-settings-button"
+            ariaLabel="close settings"
+          ></NavIconButton>
+        </div>
+        <BackgroundGlow></BackgroundGlow>
         <AnimatePresence mode="wait">
           {activeTab === 'userSettings' && (
             <motion.div
               key="userSettings"
               className="w-full h-full"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              // variants={slideFromRightVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
             >
-              <UserSettings />
+              <UserSettings></UserSettings>
             </motion.div>
           )}
 
           {activeTab === 'graphicsSettings' && (
             <motion.div
               key="graphicsSettings"
-              className="w-full h-full"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              className="w-full"
+              // variants={slideFromLeftVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
             >
-              <GraphicsSettings />
+              <GraphicsSettings></GraphicsSettings>
             </motion.div>
           )}
 
@@ -102,15 +141,16 @@ export const Settings: React.FC<SettingsProps> = ({ initialTab = 'userSettings' 
             <motion.div
               key="soundSettings"
               className="w-full h-full"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              // variants={slideFromRightVariants}
+              // initial="initial"
+              // animate="animate"
+              // exit="exit"
             >
-              <Soundsettings />
+              <Soundsettings></Soundsettings>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };

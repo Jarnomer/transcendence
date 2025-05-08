@@ -12,7 +12,7 @@ const generateRandomText = (length: number) => {
 };
 
 // Flickering color variants
-// const colors = ['#ea355a', '#f13c7a', '#f24c8c', '#f85b99', '#fc6dbb'];
+const colors = ['#ea355a', '#f13c7a', '#f24c8c', '#f85b99', '#fc6dbb'];
 
 const lineVariants = {
   hidden: { opacity: 0, y: -5 },
@@ -106,7 +106,7 @@ export const SvgCircle: React.FC = () => {
   );
 };
 
-export const BackgroundGlitchTextBlock: React.FC = () => {
+export const BackgroundGlitchTextBlock: React.FC<{}> = () => {
   const [lines, setLines] = useState<string[]>([]);
   const location = useLocation();
   useEffect(() => {
@@ -156,7 +156,7 @@ export const BackgroundGlitch: React.FC<{ duration: number }> = ({ duration }) =
     return () => {
       clearTimeout(glitchTimer);
     };
-  }, [location, duration]);
+  }, [location]);
 
   // if (location.pathname === '/chat') {
   //   return (

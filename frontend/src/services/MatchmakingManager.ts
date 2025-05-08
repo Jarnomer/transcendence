@@ -28,7 +28,7 @@ export class MatchmakingManager {
   // private phase: Phase = 'idle';
   // private role: UserRole = 'player';
   // private gameId: string | null = null;
-  // private queueId: string = '';
+  private queueId: string = '';
   private mode: string | null = null;
   private difficulty: string | null = null;
   private numberOfRounds: number | null = null;
@@ -97,10 +97,10 @@ export class MatchmakingManager {
   }
 
   setGameOptions(options: GameOptionsType) {
-    const { mode, difficulty, tournamentOptions } = options; /*queueId*/
+    const { queueId, mode, difficulty, tournamentOptions } = options;
     this.mode = mode;
     this.difficulty = difficulty;
-    // this.queueId = queueId ? queueId : '';
+    this.queueId = queueId ? queueId : '';
     this.numberOfRounds = tournamentOptions?.numberOfRounds || null;
   }
 
@@ -179,7 +179,7 @@ export class MatchmakingManager {
     this.setState({ gameId: game.game_id, phase: 'in_game', role: 'player' });
   };
 
-  handleGameWinner = () => {
+  handleGameWinner = (game_id: string) => {
     if (this.mode === 'tournament') {
       const currentRound = this.snapshot.matches.length;
       console.info('Current round:', currentRound);
@@ -303,7 +303,7 @@ export class MatchmakingManager {
     this.gameSocket.close();
     this.mode = null;
     this.difficulty = null;
-    // this.queueId = '';
+    this.queueId = '';
     this.numberOfRounds = null;
     this.setState({ phase: 'idle', role: 'player', gameId: '', participants: [], matches: [] });
     // this.notifyListeners();

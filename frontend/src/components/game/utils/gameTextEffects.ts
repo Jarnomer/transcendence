@@ -164,8 +164,8 @@ export class GameTextManager {
   }
 
   private createDropAnimation(): Animation[] {
-    const animations: Animation[] = [];
     const frameRate = 30;
+    const animations = [];
 
     const cameraZ = this.camera.position.z;
 
@@ -184,7 +184,7 @@ export class GameTextManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
 
-    const posKeys: Array<{ frame: number; value: Vector3 }> = [
+    const posKeys = [
       { frame: 0, value: new Vector3(0, startY, startZ) },
       { frame: frameRate * 0.3, value: new Vector3(0, middleY, middleZ) },
       { frame: frameRate * 0.7, value: new Vector3(0, middleY, middleZ) },
@@ -201,7 +201,7 @@ export class GameTextManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
 
-    const scaleKeys: Array<{ frame: number; value: Vector3 }> = [
+    const scaleKeys = [
       { frame: 0, value: new Vector3(0.6, 0.6, 0.6) },
       { frame: frameRate * 0.15, value: new Vector3(1.1, 1.1, 1.1) },
       { frame: frameRate * 0.3, value: new Vector3(1.4, 1.4, 1.4) },
@@ -235,7 +235,7 @@ export class GameTextManager {
       Animation.ANIMATIONLOOPMODE_CONSTANT
     );
 
-    const keyFrames: Array<{ frame: number; value: number }> = [];
+    const keyFrames = [];
     keyFrames.push({ frame: 0, value: 1 });
     keyFrames.push({ frame: 20, value: 0 });
 

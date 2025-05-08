@@ -7,7 +7,6 @@ import {
   GameResultResType,
   GameSinglePlayerResType,
   QueueStatusResType,
-  SessionStatusType,
 } from '@shared/types';
 
 type CreateQueueParams = {
@@ -40,9 +39,7 @@ export async function getSessionStatus({
   queue_id: string;
 }) {
   try {
-    const res = await api.get<SessionStatusType>(
-      `/game/sessionStatus?game_id=${game_id}&queue_id=${queue_id}`
-    );
+    const res = await api.get(`/game/sessionStatus?game_id=${game_id}&queue_id=${queue_id}`);
     console.log(res.data);
     return res.data;
   } catch (err) {
