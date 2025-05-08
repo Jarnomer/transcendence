@@ -25,12 +25,6 @@ export const TournamentLobbyNav: React.FC<{
           <button onClick={() => setActiveTab('players')}>
             <span className={`${activeTab === 'players' ? ' text-secondary' : ''}`}>Players</span>
           </button>
-
-          <button onClick={() => setActiveTab('fakeBracket')}>
-            <span className={`${activeTab === 'fakeBracket' ? ' text-secondary' : ''}`}>
-              fake bracket
-            </span>
-          </button>
         </>
 
         {lobby === 'create' && (
