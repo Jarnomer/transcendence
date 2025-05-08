@@ -130,7 +130,7 @@ const Round: React.FC<RoundProps> = ({ competitors, gridCols }) => {
       </div>
 
       {/* Right side */}
-      <div style={{ gridColumnStart: maxRounds - round, gridRowStart: 1 }}>
+      <div style={{ gridColumnStart: gridCols - round, gridRowStart: 1 }}>
         <ol className="flex h-full flex-col justify-around">
           {rightHalf.map((match, idx: number) => (
             <div className="" key={`right-${idx}`}>
