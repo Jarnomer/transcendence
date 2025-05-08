@@ -63,6 +63,7 @@ export const TournamentLobby: React.FC = () => {
       mode === 'tournament'
     ) {
       console.log('in game... opening accet pamge modal');
+      matchmakingState
       handleClickOpenModal();
     }
   }, [matchmakingState.phase, location.pathname]);
