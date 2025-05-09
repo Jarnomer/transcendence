@@ -268,6 +268,16 @@ export default class PongGame {
     }
   }
 
+  setEndScore(playerId: string | undefined): void {
+    if (playerId === this.gameState.players.player1.id) {
+      this.gameState.players.player1.score = this.settings.maxScore;
+      console.log('Player 1 score set to max:', this.gameState.players.player1.score);
+    } else if (playerId === this.gameState.players.player2.id) {
+      this.gameState.players.player2.score = this.settings.maxScore;
+      console.log('Player 2 score set to max:', this.gameState.players.player2.score);
+    }
+  }
+
   setPaddleHeight(player: number, height: number): void {
     this.repositionPaddleForHeightChange(player, height);
     if (player === 1) {

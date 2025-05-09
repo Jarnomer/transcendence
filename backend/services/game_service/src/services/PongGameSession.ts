@@ -141,9 +141,6 @@ export default class PongGameSession {
       return true;
     }
     console.log('Not all players connected');
-    if (this.game.getGameStarted()) {
-      this.endGame();
-    }
     return false;
   }
 
@@ -268,7 +265,18 @@ export default class PongGameSession {
   }
 
   readyGame(playerId: string, state: boolean): void {
-    this.game.setReadyState(playerId, state);
+    if (this.game.getGameStarted() && !this.areAllPlayersConnected()) {
+      if (this.gameId !== 'background_game' && this.clients.size === 1) {
+        console.log('Setting end score for player:', this.clients.keys().next().value);
+        console.log('Clients size:', this.clients.size);
+        this.game.setEndScore(this.clients.keys().next().value);
+        console.log('Game ended due to player disconnection');
+        this.game.setGameStatus('finished');
+        this.updateGame();
+      }
+    } else {
+      this.game.setReadyState(playerId, state);
+    }
     if (this.areAllPlayersConnected() && this.game.areAllPlayersReady()) {
       this.startGameLoop();
     }
