@@ -82,12 +82,12 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap ">
         {powerUps.map((powerUp, index) => (
           <span
             key={powerUp}
             onClick={() => handlePowerUpToggle(powerUp)}
-            className={`aspect-square w-[100px] h-[100px] text-center cursor-pointer ${selectedPowerUps.includes(powerUp) && isEnabled ? 'text-secondary' : !selectedPowerUps.includes(powerUp) && isEnabled ? 'hover:opacity-100 opacity-60' : !isEnabled ? 'text-gray-400/60' : ''} `}
+            className={`aspect-square w-[100px] h-[100px] m-2 text-center cursor-pointer ${selectedPowerUps.includes(powerUp) && isEnabled ? 'text-secondary' : !selectedPowerUps.includes(powerUp) && isEnabled ? 'hover:opacity-100 opacity-60' : !isEnabled ? 'text-gray-400/60' : ''} `}
           >
             <BoxDiv index={index} key={powerUp}>
               <div

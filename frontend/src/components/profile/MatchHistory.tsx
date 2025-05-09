@@ -51,8 +51,14 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
       animate="animate"
       exit="exit"
     >
-      <div className=" w-full p-1 bg-primary text-black text-lg">
+      <div className=" w-full p-1 bg-primary text-black flex justify-between">
         <h2 className="text-md ">Match History</h2>
+        {user.games && user.games.length > 0 && (
+            <div className="text-center flex items-center gap-2  text-xs">
+              <span className="">Rank: {user.stats?.rank}</span>
+              <span className="">Rating: {user.stats?.rating}</span>
+            </div>
+          )}
       </div>
 
       <motion.div className="p-4 glass-box text-sm">
@@ -62,8 +68,6 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
             <div className="text-center flex items-center justify-center gap-6">
               <span className="">Wins: {user.stats?.wins}</span>
               <span className="">Losses: {user.stats?.losses}</span>
-              <span className="">Rank: {user.stats?.rank}</span>
-              <span className="">Rating: {user.stats?.rating}</span>
             </div>
           )}
           {user.games && user.games.length > 0 ? (

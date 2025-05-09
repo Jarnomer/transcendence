@@ -111,7 +111,7 @@ export const GameOptions: React.FC = () => {
   };
 
   return (
-    <div className="glass-box w-full md:w-2xl md:max-w-2xl md:p-4 flex flex-col items-center gap-2 justify-center">
+    <div className="glass-box w-full md:w-2xl md:max-w-2xl  p-2 md:p-4 flex flex-col items-center gap-2 justify-center">
       <div className="flex w-full flex-col md:flex-row gap-3">
         <div className="flex-col md:flex w-1/2">
           <div className="">
