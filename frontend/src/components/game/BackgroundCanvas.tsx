@@ -17,7 +17,7 @@ import {
   GameAnimationManager,
   GameSoundManager,
   RetroEffectsManager,
-  addCameraDebugControls,
+  // addCameraDebugControls,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
@@ -275,7 +275,7 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     const camera = setupSceneCamera(scene);
     camera.attachControl();
 
-    const cameraDebugControls = addCameraDebugControls(camera, scene, true);
+    // const cameraDebugControls = addCameraDebugControls(camera, scene, true);
 
     setTimeout(() => {
       if (canvas) {
@@ -408,7 +408,7 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         randomGlitchTimerRef.current = null;
       }
 
-      cameraDebugControls();
+      // cameraDebugControls();
       engine.dispose();
       scene.dispose();
     };
