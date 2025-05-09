@@ -32,7 +32,9 @@ export const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
   const user = localStorage.getItem('token');
   const { fromAppNavigation } = useNavigationAccess();
+
   const playPageChangeSound = useSound('/sounds/effects/page_change_1.wav');
+
   const navigate = useNavigate();
   const prevLocationRef = useRef(location);
 

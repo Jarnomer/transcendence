@@ -1,32 +1,20 @@
-import React, { useMemo, useState } from 'react';
+import { TournamentBracket, slideFromRightVariants } from '@components/layout';
+
+import {
+  TournamentBracket as BracketType,
+  TournamentMatch,
+  TournamentPlayerListProps
+} from '@shared/types';
 
 import { motion } from 'framer-motion';
 
-import { TournamentBracket, slideFromRightVariants } from '@components/layout';
-
-interface PlayerData {
-  user_id: string;
-  avatar_url: string;
-  display_name: string;
-}
-
-// Match the TournamentMatch interface from TournamentBracket
-interface TournamentMatch {
-  gameId: string;
-  players: [PlayerData | null, PlayerData | null];
-  round: string;
-  isComplete: boolean;
-}
-
-interface TournamentPlayerListProps {
-  players: PlayerData[];
-}
+import React, { useMemo, useState } from 'react';
 
 export const TournamentPlayerList: React.FC<TournamentPlayerListProps> = ({ players }) => {
   const [activeTab, setActiveTab] = useState('bracket');
 
   // Transform PlayerData[] into TournamentMatch[][] for the bracket component
-  const bracketData = useMemo(() => {
+  const bracketData: BracketType = useMemo(() => {
     if (!players || players.length === 0) return [];
 
     // Calculate the number of rounds needed based on player count
@@ -45,9 +33,9 @@ export const TournamentPlayerList: React.FC<TournamentPlayerListProps> = ({ play
       const player2 = i + 1 < playerCount ? players[i + 1] : null;
 
       firstRound.push({
-        gameId: `game-${i / 2 + 1}`,
+        gameId: `game-${Math.floor(i / 2) + 1}`,
         players: [player1, player2],
-        round: '1', // First round
+        round: 1, // First round (now a number, not a string)
         isComplete: false,
       });
     }
@@ -63,7 +51,7 @@ export const TournamentPlayerList: React.FC<TournamentPlayerListProps> = ({ play
         roundMatches.push({
           gameId: `game-r${round}-${m + 1}`,
           players: [null, null], // Empty slots for now
-          round: round.toString(),
+          round: round, // Using number instead of string
           isComplete: false,
         });
       }

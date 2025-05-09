@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
 
 import { MatchMaker, MatchMakerState, SessionManager } from '@services';
+import { useRouteExitCleanup } from './useRouteExitCleanup';
 
 export const useMatchmaking = () => {
   const navigate = useNavigate();
@@ -27,12 +28,9 @@ export const useMatchmaking = () => {
   const matchmaker = useRef<MatchMaker>(null);
   const sessionManager = SessionManager.getInstance();
   const hasRegistered = sessionManager.get('matchmakingRegistered');
+
+  
   // const params = useRef<URLSearchParams>(new URLSearchParams());
-  console.log('sessionManager:', sessionManager);
-  console.log('hasRegistered:', hasRegistered);
-  console.log('queueId:', sessionManager.get('queueId'));
-  console.log('gameId:', sessionManager.get('gameId'));
-  console.log('mode:', sessionManager.get('mode'));
 
   // useEffect(() => {
   //   if (!mode || !difficulty) return;
@@ -177,11 +175,6 @@ export const useMatchmaking = () => {
       console.log('In queue, recovering sessionasdfadf');
       return;
     }
-    console.log('sessionManager:', sessionManager);
-    console.log('Matchmaking connected', connections.matchmaking);
-    console.log('matchmakerState:', sessionManager.get('matchmakerState'));
-    console.log('has registered:', hasRegistered);
-    console.log('session hasRegistered:', sessionManager.get('matchmakingRegistered'));
     switch (sessionManager.get('matchmakerState')) {
       case MatchMakerState.WAITING_FOR_PLAYERS:
         handleJoinMatch();

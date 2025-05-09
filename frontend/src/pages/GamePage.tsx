@@ -146,7 +146,6 @@ export const GamePage: React.FC = () => {
   const { gameResult } = useGameResult();
 
   const playersData = useFetchPlayerData();
-  console.log('gampage');
 
   // Set loading to false to render the game
   useEffect(() => {

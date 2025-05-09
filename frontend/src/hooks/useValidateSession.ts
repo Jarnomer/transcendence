@@ -69,7 +69,7 @@ export const useValidateSession = () => {
     delayRef.current = setTimeout(() => {
       console.log('Validating session...');
       validateSession();
-    }, 1000); // Delay for 1 second before validating session
+    }, 500); // Delay for 1 second before validating session
     return () => {
       if (delayRef.current) {
         clearTimeout(delayRef.current);

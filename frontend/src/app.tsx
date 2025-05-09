@@ -9,6 +9,7 @@ import { AudioSettingsProvider, GameOptionsProvider, GraphicsSettingsProvider } 
 
 import { FloatingChatWrapper } from '@components/chat';
 import { BackgroundProvider } from '@components/game';
+// import { BackgroundProvider } from '@components/game';
 import { Footer, Header, MobileNavBar } from '@components/layout';
 import {
   ConfirmModal,
@@ -31,7 +32,7 @@ const App: React.FC = () => {
           <GameOptionsProvider>
             <Router>
               <div className="fixed">
-                {/* <BackgroundProvider /> */}
+                <BackgroundProvider />
               </div>
 
               <div

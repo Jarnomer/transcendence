@@ -186,3 +186,15 @@ export async function deleteGame(game_id: string) {
     throw err;
   }
 }
+
+
+export async function getQueuePlayers(queue_id: string) {
+  try {
+    const res = await api.get(`/matchmaking/layers/${queue_id}`);
+    console.log(res.data);
+    return res.data;
+  } catch (err) {
+    console.error('Failed to get queue players:', err);
+    throw err;
+  }
+}

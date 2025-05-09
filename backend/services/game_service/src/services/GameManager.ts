@@ -29,7 +29,7 @@ export class GameManager {
   }
 
   createBackgroundGame(): void {
-    // this.createGame('background_game', 'AIvsAI', 'brutal');
+    this.createGame('background_game', 'AIvsAI', 'brutal');
   }
 
   createGame(gameId: string, mode: string, difficulty: string): void {

@@ -9,8 +9,8 @@ export const LoginSchema = Type.Object({
 
 export const RegisterSchema = Type.Object({
   username: Type.String(),
-  password: Type.String(),
-  email: Type.Optional(Type.String()),
+  password: Type.String({ minLength: 8, maxLength: 32 }),
+  email: Type.Optional(Type.String({ format: 'email' })),
 });
 
 export const RefreshSchema = Type.Object({

@@ -6,7 +6,7 @@ import { useGameOptionsContext } from '@contexts';
 
 import { NavIconButton } from '@components/UI';
 
-import { getTournaments } from '@services';
+import { getTournaments} from '@services';
 
 interface DataInQueue {
   queue_id: string;
@@ -14,6 +14,7 @@ interface DataInQueue {
   mode: string;
   name: string;
   variant: string;
+  player_count: number;
 }
 
 interface TournamentResponse {
@@ -105,7 +106,7 @@ export const TournamentList: React.FC = () => {
                     'Public'
                   )}
                 </td>
-                <td className="px-4 py-2">??/{options.variant || '??'}</td>
+                <td className="px-4 py-2">{options.player_count}/{options.variant || '??'}</td>
                 <td className="px-4 py-2">
                   <NavIconButton
                     id="join-game-button"

@@ -48,4 +48,5 @@ export async function queueRoutes(fastify: FastifyInstance) {
     { schema: { params: QueueJoinParamsSchema, response: { 200: QueueStatusResSchema } } },
     queueController.joinQueue.bind(queueController)
   );
+  fastify.get('/players/:queue_id', queueController.getQueuePlayers.bind(queueController));
 }

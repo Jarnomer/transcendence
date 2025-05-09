@@ -1,12 +1,4 @@
-import React, { useEffect, useState } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-
-import { AnimatePresence, motion } from 'framer-motion';
-
 import { useMatchmaking } from '@/hooks';
-
-import { useGameOptionsContext, useModal, useUser, useWebSocketContext } from '@contexts';
 
 import {
   TournamentBracket,
@@ -15,36 +7,33 @@ import {
   slideFromRightVariants,
 } from '@components/layout';
 
-interface TournamentMatch {
-  gameId: string;
-  players: [PlayerData | null, PlayerData | null];
-  round: number;
-  isComplete: boolean;
-}
+import { useGameOptionsContext, useModal, useWebSocketContext } from '@contexts';
 
-interface PlayerData {
-  user_id: string;
-  avatar_url: string;
-  display_name: string;
-}
+import {
+  TournamentBracket as BracketType,
+  TournamentMatch,
+  generateEmptyBracket,
+} from '@shared/types';
+
+import { AnimatePresence, motion } from 'framer-motion';
+
+import React, { useEffect, useState } from 'react';
+
+import { useNavigate } from 'react-router-dom';
 
 export const TournamentLobby: React.FC = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('settings');
-  const { user } = useUser();
   const { difficulty, lobby, mode } = useGameOptionsContext();
-  const [bracket, setBracket] = useState<TournamentMatch[][]>(
-    generateBracket(parseInt(difficulty!))
-  );
+  const navigate = useNavigate();
 
-  const {
-    connections,
+  // Add a fallback for difficulty (default to 8 players)
+  const playerCount = difficulty ? parseInt(difficulty) : 8;
 
-    cleanup,
-    cancelQueue,
-    cancelGame,
-    matchmakingState,
-  } = useWebSocketContext();
+  const [bracket, setBracket] = useState<BracketType>(generateBracket(playerCount));
+
+  const [players, setPlayers] = useState<any[]>([]);
+  const { connections, cleanup, cancelQueue, cancelGame, matchmakingState } = useWebSocketContext();
+
   const { openModal } = useModal();
 
   useMatchmaking();
@@ -56,66 +45,51 @@ export const TournamentLobby: React.FC = () => {
   }, [lobby]);
 
   useEffect(() => {
-    console.log('matchmaking state: ', matchmakingState);
     if (
       matchmakingState.phase === 'in_game' &&
       location.pathname !== '/game' &&
       mode === 'tournament'
     ) {
-      console.log('in game... opening accet pamge modal');
-      matchmakingState
       handleClickOpenModal();
     }
   }, [matchmakingState.phase, location.pathname]);
 
+
   useEffect(() => {
-    if (matchmakingState.phase === 'in_game') {
-      console.log('in game....accept game');
+    if (matchmakingState.participants) {
+      console.log('participants: ', matchmakingState.participants);
+      setPlayers(matchmakingState.participants);
     }
-  }, [matchmakingState.phase, location.pathname]);
+  }, [matchmakingState.participants]);
 
   // CREATE DUMMY DATA FOR TOURNAMENT BRACKET, DELETE LATER
-
-  function generateBracket(playerCount: number): TournamentMatch[][] {
-    const totalRounds = Math.log2(playerCount);
-    const matchesPerRound: number[] = [];
-
-    for (let r = 0; r < totalRounds; r++) {
-      matchesPerRound.push(playerCount / Math.pow(2, r + 1));
-    }
-    let gameIdCounter = 1;
-    const bracket: TournamentMatch[][] = [];
-
-    for (let round = 0; round < totalRounds; round++) {
-      const roundMatches: TournamentMatch[] = [];
-
-      for (let m = 0; m < matchesPerRound[round]; m++) {
-        roundMatches.push({
-          gameId: `game-${gameIdCounter++}`,
-          players: [null, null],
-          round: round + 1,
-          isComplete: false,
-        });
-      }
-      bracket.push(roundMatches);
-    }
-    return bracket;
+  function generateBracket(playerCount: number): BracketType {
+    return generateEmptyBracket(playerCount);
   }
 
-  console.log(bracket);
+  // console.log(bracket);
   /// END OF DUMMY DATA
 
   useEffect(() => {
-    const newBracket = [...bracket];
-    matchmakingState.matches.forEach((roundMatches, roundIndex) => {
-      roundMatches.forEach((match, matchIndex) => {
-        if (newBracket[roundIndex][matchIndex]) {
+    // Only proceed if matches exist
+    if (!matchmakingState.matches || !matchmakingState.matches.length) return;
+
+    // Create a deep copy of the bracket to avoid mutation issues
+    const newBracket = JSON.parse(JSON.stringify(bracket)) as BracketType;
+
+    // Explicitly typing the iterators in the forEach loops to fix the 'any' type
+    matchmakingState.matches.forEach((roundMatches: TournamentMatch[], roundIndex: number) => {
+      roundMatches.forEach((match: TournamentMatch, matchIndex: number) => {
+        // Add bounds checking to prevent potential runtime errors
+        if (roundIndex < newBracket.length && matchIndex < newBracket[roundIndex].length) {
+          // Update the match data
           newBracket[roundIndex][matchIndex].gameId = match.gameId;
           newBracket[roundIndex][matchIndex].players = match.players;
           newBracket[roundIndex][matchIndex].isComplete = match.isComplete;
         }
       });
     });
+
     setBracket(newBracket);
     console.log('bracket: ', newBracket);
   }, [matchmakingState.matches]);
@@ -147,18 +121,15 @@ export const TournamentLobby: React.FC = () => {
     if (connections.matchmaking !== 'connected') return;
   }, [connections]);
 
-  console.log(matchmakingState);
-
   return (
     <>
       <motion.div className="w-full h-full flex flex-col justify-between relative z-10 gap-5">
         {mode === 'tournament' && (
           <header className="flex w-full justify-between">
-            <TournamentLobbyNav
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            ></TournamentLobbyNav>
-            <span className="text-secondary">X/{difficulty} Players</span>
+            <TournamentLobbyNav activeTab={activeTab} setActiveTab={setActiveTab} />
+            <span className="text-secondary">
+              {players.length}/{difficulty} Players
+            </span>
           </header>
         )}
 
@@ -167,8 +138,7 @@ export const TournamentLobby: React.FC = () => {
             <AnimatePresence mode="wait">
               {activeTab === 'fakeBracket' ? (
                 // BRACKET FILLED WITH FAKE DATA
-
-                <TournamentBracket players={bracket}></TournamentBracket>
+                <TournamentBracket players={bracket} />
               ) : activeTab === 'settings' ? (
                 <motion.div
                   key="tournamentSettings"
@@ -178,15 +148,11 @@ export const TournamentLobby: React.FC = () => {
                   animate="animate"
                   exit="exit"
                 >
-                  <TournamentSettings></TournamentSettings>
+                  <TournamentSettings />
                 </motion.div>
               ) : (
                 // BRACKET FILLED WITH REAL DATA
-                <TournamentBracket players={bracket}></TournamentBracket>
-                // ) : (
-                //   <span>waiting for more players to join</span>
-                //
-                //
+                <TournamentBracket players={bracket} />
               )}
             </AnimatePresence>
           </motion.div>
