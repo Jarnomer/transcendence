@@ -108,7 +108,10 @@ export class QueueModel {
       q.variant,
       q.created_at,
       q.name,
-      q.isPrivate
+      q.isPrivate,
+      (
+        SELECT COUNT(*) FROM queue_players qp WHERE qp.queue_id = q.queue_id
+      ) AS player_count
       FROM queues q WHERE mode = 'tournament'
       ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [pageSize, offset]
@@ -384,6 +387,17 @@ export class QueueModel {
       `
       DELETE FROM queue_players
       WHERE queue_id = ?;
+      `,
+      [queue_id]
+    );
+  }
+
+  async getQueuePlayers(queue_id: string) {
+    return await this.db.all(
+      `
+      SELECT * FROM queue_players
+      LEFT JOIN user_profiles ON queue_players.user_id = user_profiles.user_id
+      WHERE queue_players.queue_id = ?;
       `,
       [queue_id]
     );

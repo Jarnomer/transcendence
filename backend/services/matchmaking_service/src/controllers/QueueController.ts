@@ -146,4 +146,14 @@ export class QueueController {
     const queue = await this.queueService.joinQueue(user_id, queue_id, mode, difficulty);
     reply.code(200).send(queue);
   }
+
+  async getQueuePlayers(request: FastifyRequest, reply: FastifyReply) {
+    const { queue_id } = request.params as { queue_id: string };
+    request.log.trace(`Getting players in queue ${queue_id}`);
+    const players = await this.queueService.getQueuePlayers(queue_id);
+    if (!players) {
+      throw new NotFoundError('Queue not found');
+    }
+    reply.code(200).send(players);
+  }
 }

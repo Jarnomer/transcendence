@@ -112,6 +112,10 @@ export class QueueService {
     if (res.changes === 0) {
       throw new BadRequestError('User not removed from queue');
     }
+    const count = await this.queueModel.getNumberOfPlayersInQueue(user.queue_id);
+    if (count.total === 0) {
+      await this.queueModel.deleteQueueByID(user.queue_id);
+    }
     return res;
   }
 
@@ -143,5 +147,13 @@ export class QueueService {
       }
       return user;
     }
+  }
+
+  async getQueuePlayers(queue_id: string) {
+    const players = await this.queueModel.getQueuePlayers(queue_id);
+    if (!players) {
+      throw new NotFoundError('Queue not found');
+    }
+    return players;
   }
 }

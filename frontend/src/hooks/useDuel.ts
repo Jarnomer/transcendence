@@ -53,6 +53,8 @@ export const useDuel = () => {
         sendMessage('chat', message);
         cleanup();
       },
+      avatarUrl: duelEvent.avatar_url,
+      displayName: duelEvent.display_name,
     });
   };
 

@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMzhhNGU1NDEtOGM1Yy00MGNmLTk2NDItZjk0NTlmMDQ5MjQ3IiwidXNlcm5hbWUiOiJhIiwiaWF0IjoxNzQ2NjA2ODk3LCJleHAiOjE3NDY2MTA0OTd9.ZsxBcWCU7uxF6sCxFrWF-kqCcnnDOZ_8XzPyzS0u6oU
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYjUwYTFkYTktN2M2Ny00NzE5LWFhN2QtZjAyYzczYzgzYTNhIiwidXNlcm5hbWUiOiJhIiwiaWF0IjoxNzQ2Nzc3NTgwLCJleHAiOjE3NDY3ODExODB9.6ETgARoevqd-aPRWphOluI0Y_zA9UwHo9EH3aoqz-e8
 @user = 848d8e15-1f11-420e-9824-8ac04909e967
 @user1 = 0bf9914f-b38e-40f3-b6d5-ccbfc58945ae
 @user2 = 9b4354fa-3753-4cd6-ad63-f207c70deb14
@@ -127,7 +127,9 @@ Authorization: Bearer {{token}}
 ### leave queue
 delete https://localhost:8443/api/matchmaking/cancel/{{user}}
 Authorization: Bearer {{token}}
-
+###
+get https://localhost:8443/api/matchmaking/players/f0f2948a-0076-4fcf-9940-11ca4b6ef443
+Authorization: Bearer {{token}}
 
 ### games
 ### get game id
