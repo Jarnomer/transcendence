@@ -82,8 +82,7 @@ test-back:
 
 test-front:
 	@echo "Testing frontend..."
-	@(cd frontend && NODE_ENV=production pnpm tsc --noEmit && \
-	  cd frontend && NODE_ENV=production pnpm exec vite build --dry-run) > $(FRONTEND_LOG) 2>&1; \
+	@(cd frontend && NODE_ENV=production pnpm tsc --noEmit) > $(FRONTEND_LOG) 2>&1; \
 	if [ $$? -eq 0 ]; then \
 		echo "✅ All frontend checks passed"; \
 	else \

@@ -1,14 +1,14 @@
+import React, { useMemo, useState } from 'react';
+
+import { motion } from 'framer-motion';
+
 import { TournamentBracket, slideFromRightVariants } from '@components/layout';
 
 import {
   TournamentBracket as BracketType,
   TournamentMatch,
-  TournamentPlayerListProps
+  TournamentPlayerListProps,
 } from '@shared/types';
-
-import { motion } from 'framer-motion';
-
-import React, { useMemo, useState } from 'react';
 
 export const TournamentPlayerList: React.FC<TournamentPlayerListProps> = ({ players }) => {
   const [activeTab, setActiveTab] = useState('bracket');

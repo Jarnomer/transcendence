@@ -7,6 +7,7 @@
     "useDefineForClassFields": true,
 
     /* Bundler mode for frontend */
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",

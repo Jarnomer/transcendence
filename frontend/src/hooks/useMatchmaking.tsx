@@ -177,7 +177,7 @@ export const useMatchmaking = () => {
     console.log('sessionManager:', sessionManager);
     console.log('Matchmaking connected', connections.matchmaking);
     console.log('matchmakerState:', sessionManager.get('matchmakerState'));
-    console.log('has registered:', hasRegistered);  
+    console.log('has registered:', hasRegistered);
     console.log('session hasRegistered:', sessionManager.get('matchmakingRegistered'));
     switch (sessionManager.get('matchmakerState')) {
       case MatchMakerState.WAITING_FOR_PLAYERS:

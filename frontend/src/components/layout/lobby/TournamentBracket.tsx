@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-
 import React from 'react';
+
+import { motion } from 'framer-motion';
 
 import { useMediaQuery } from '@hooks';
 
@@ -31,9 +31,9 @@ const Competitor: React.FC<CompetitorProps> = ({ player, side }) => {
         }`}
       >
         <div className="opacity relative hidden sm:block sm:h-[20px] sm:w-[20px] md:h-[50px] md:w-[50px] border-1 border-current overflow-hidden">
-          <img 
-            className="object-cover w-full h-full" 
-            src={player?.avatar_url || '/images/avatars/default_avatar.png'} 
+          <img
+            className="object-cover w-full h-full"
+            src={player?.avatar_url || '/images/avatars/default_avatar.png'}
             alt={player?.display_name || 'Unknown player'}
           />
         </div>
@@ -120,7 +120,7 @@ const Round: React.FC<{
 
 export const TournamentBracket: React.FC<TournamentBracketProps> = ({ players }) => {
   if (!players || players.length === 0) return null;
-  
+
   const gridCols = players.length * 2;
 
   return (
