@@ -51,7 +51,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ user }) => {
       animate="animate"
       exit="exit"
     >
-      <div className=" w-full h-[20px] bg-primary text-black text-sm">
+      <div className=" w-full p-1 bg-primary text-black text-lg">
         <h2 className="text-md ">Match History</h2>
       </div>
 
