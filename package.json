@@ -10,7 +10,8 @@
     "test:create-users": "pnpm --filter backend run test:create-users",
     "test:create-tournaments": "pnpm --filter backend run test:create-tournaments",
     "test:run-all": "pnpm --filter backend run test:run-all",
-    "build": "pnpm -r run build",
+    "build": "pnpm --filter shared run build && pnpm --filter backend run build",
+    "build:backend": "pnpm --filter shared run build && pnpm --filter backend run build",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,html}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,scss,html}\"",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\" --fix",
@@ -32,6 +33,13 @@
     "prettier": "^3.2.5"
   },
   "pnpm": {
+    "overrides": {
+      "@my-backend/main_server": "workspace:*",
+      "@my-backend/game_service": "workspace:*",
+      "@my-backend/matchmaking_service": "workspace:*",
+      "@my-backend/remote_service": "workspace:*",
+      "@my-backend/user_service": "workspace:*"
+    },
     "onlyBuiltDependencies": [
       "bcrypt",
       "sqlite3"
@@ -39,5 +47,11 @@
   },
   "dependencies": {
     "p-limit": "3"
-  }
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared",
+    "backend/services/*"
+  ]
 }

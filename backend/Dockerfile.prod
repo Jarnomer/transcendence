@@ -4,39 +4,24 @@ WORKDIR /app
 
 RUN npm install -g pnpm@latest-10
 
-ENV CI=false
-ENV NODE_ENV=production
-
-# Copy package files
+# Copy package files and workspace config
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY backend/package.json ./backend/
-COPY backend/services/main_server/package.json ./backend/services/main_server/
-COPY backend/services/game_service/package.json ./backend/services/game_service/
-COPY backend/services/matchmaking_service/package.json ./backend/services/matchmaking_service/
-COPY backend/services/user_service/package.json ./backend/services/user_service/
-COPY backend/services/remote_service/package.json ./backend/services/remote_service/
 COPY shared/package.json ./shared/
+COPY backend/services/*/package.json ./backend/services/
 
-# Install dependencies with dev dependencies for build
-RUN pnpm install --frozen-lockfile 
+# Install all dependencies including dev dependencies
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
-COPY backend ./backend/
-COPY shared ./shared/
-COPY tsconfig.json ./
+COPY . .
 
-# Build the application using production-optimized tsconfig
+# Build shared module first
+RUN cd shared && pnpm run build
+
+# Build all backend services
 WORKDIR /app/backend
-
-# Copy the production tsconfig
-COPY backend/tsconfig.prod.json ./
-
-# Run build for each service with the production config
-RUN pnpm --filter @my-backend/main_server exec -- tsc --project ../../tsconfig.prod.json && \
-    pnpm --filter @my-backend/game_service exec -- tsc --project ../../tsconfig.prod.json && \
-    pnpm --filter @my-backend/matchmaking_service exec -- tsc --project ../../tsconfig.prod.json && \
-    pnpm --filter @my-backend/user_service exec -- tsc --project ../../tsconfig.prod.json && \
-    pnpm --filter @my-backend/remote_service exec -- tsc --project ../../tsconfig.prod.json
+RUN pnpm run build
 
 # Production image
 FROM node:22-slim
@@ -45,39 +30,40 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy compiled code
-COPY --from=builder /app/backend/dist ./backend/dist
-
-# Copy all package files for dependency installation
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/pnpm-workspace.yaml ./
-COPY --from=builder /app/backend/package.json ./backend/
-COPY --from=builder /app/backend/services/main_server/package.json ./backend/services/main_server/
-COPY --from=builder /app/backend/services/game_service/package.json ./backend/services/game_service/
-COPY --from=builder /app/backend/services/matchmaking_service/package.json ./backend/services/matchmaking_service/
-COPY --from=builder /app/backend/services/user_service/package.json ./backend/services/user_service/
-COPY --from=builder /app/backend/services/remote_service/package.json ./backend/services/remote_service/
-COPY --from=builder /app/shared/package.json ./shared/
+# Copy package files for production install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json ./backend/
+COPY shared/package.json ./shared/
+COPY backend/services/*/package.json ./backend/services/
 
 # Install production dependencies
-RUN npm install -g pnpm@latest-10 && pnpm install --frozen-lockfile --prod
+RUN npm install -g pnpm@latest-10
+RUN pnpm install --frozen-lockfile --prod
 
-# Create uploads directory
+# Copy built files
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/shared/dist ./shared/dist
+
+# Copy necessary files
+COPY backend/database ./backend/database
+COPY backend/start-prod.js ./backend/
+COPY .env ./.env
+
+# Create directories
 RUN mkdir -p /app/backend/database/uploads
-
-# Set up database directory
-COPY backend/database/init.sql ./backend/database/
-COPY backend/database/uploads/default_avatar.png ./backend/database/uploads/
-
-# Create logs directory
 RUN mkdir -p /app/backend/logs
 
-# Copy startup script
-COPY backend/start-prod.js ./backend/
+# Prepare module resolution
+RUN node -e "const fs=require('fs'); const path=require('path'); const dir='/app/node_modules/@my-backend'; if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true});"
+RUN ln -sf /app/shared/dist /app/node_modules/@shared
+RUN ln -sf /app/backend/dist/backend/services/main_server /app/node_modules/@my-backend/main_server
+RUN ln -sf /app/backend/dist/backend/services/game_service /app/node_modules/@my-backend/game_service
+RUN ln -sf /app/backend/dist/backend/services/matchmaking_service /app/node_modules/@my-backend/matchmaking_service
+RUN ln -sf /app/backend/dist/backend/services/remote_service /app/node_modules/@my-backend/remote_service
+RUN ln -sf /app/backend/dist/backend/services/user_service /app/node_modules/@my-backend/user_service
 
-# Make the startup script executable
+# Set execute permission on start script
 RUN chmod +x ./backend/start-prod.js
 
-# Start all services using the production startup script
+# Start all services
 CMD ["node", "backend/start-prod.js"]

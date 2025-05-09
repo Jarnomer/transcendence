@@ -7,21 +7,15 @@
 
     /* Output options */
     "outDir": "dist",
+    "rootDir": ".",
 
     /* Backend path aliases */
     "baseUrl": "./",
     "paths": {
       "@my-backend/*": ["services/*/src"],
-      "@my-backend": ["services"],
-      "@shared": ["../shared"],
-      "@shared/*": ["../shared/*"],
-      "@utils": ["../shared/utils"],
-      "@utils/*": ["../shared/utils/*"],
-      "@types": ["../shared/types"],
-      "@types/*": ["../shared/types/*"],
-      "@messages": ["../shared/messages"],
-      "@messages/*": ["../shared/messages/*"],
-    }
+      "@shared/*": ["../shared/*"]
+    },
+    "preserveSymlinks": true
   },
   "include": ["services/**/*", "../shared/**/*"]
 }

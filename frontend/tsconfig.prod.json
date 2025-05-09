@@ -6,8 +6,10 @@
     "sourceMap": false,
     "declaration": false,
 
-    /* Ensure maximum compatibility */
+    /* Fix module settings for compatibility with bundler */
     "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
 
     /* More specific frontend production settings */
     "importHelpers": true,

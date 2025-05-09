@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "../../dist/backend/services/game_service",
+    "rootDir": "./src",
+    "composite": true,
+    "tsBuildInfoFile": "../../dist/backend/services/game_service.tsbuildinfo"
   },
   "include": ["src/**/*"]
 }

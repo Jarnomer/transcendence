@@ -2,9 +2,11 @@
 
 /**
  * Production startup script for the backend services
+ * with pre-configured module resolution
  */
 
 const { spawn } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 // Colors for console output
@@ -18,7 +20,79 @@ const colors = {
   cyan: '\x1b[36m',
 };
 
-// Service definitions with their respective colors
+// Verify that all symlinks are correctly set up
+function verifyModuleLinks() {
+  console.log(`${colors.blue}Verifying module symlinks...${colors.reset}`);
+
+  const links = [
+    { source: '@shared', target: '/app/shared/dist' },
+    { source: '@my-backend/main_server', target: '/app/backend/dist/backend/services/main_server' },
+    {
+      source: '@my-backend/game_service',
+      target: '/app/backend/dist/backend/services/game_service',
+    },
+    {
+      source: '@my-backend/matchmaking_service',
+      target: '/app/backend/dist/backend/services/matchmaking_service',
+    },
+    {
+      source: '@my-backend/remote_service',
+      target: '/app/backend/dist/backend/services/remote_service',
+    },
+    {
+      source: '@my-backend/user_service',
+      target: '/app/backend/dist/backend/services/user_service',
+    },
+  ];
+
+  let allValid = true;
+
+  links.forEach((link) => {
+    const modulePath = `/app/node_modules/${link.source}`;
+
+    if (!fs.existsSync(modulePath)) {
+      console.log(`${colors.red}Module link not found: ${link.source}${colors.reset}`);
+      console.log(
+        `${colors.yellow}Creating symlink from ${link.target} to ${modulePath}${colors.reset}`
+      );
+
+      try {
+        // Ensure the parent directory exists
+        const parentDir = path.dirname(modulePath);
+        if (!fs.existsSync(parentDir)) {
+          fs.mkdirSync(parentDir, { recursive: true });
+        }
+
+        fs.symlinkSync(link.target, modulePath, 'dir');
+      } catch (err) {
+        console.error(`${colors.red}Failed to create symlink: ${err.message}${colors.reset}`);
+        allValid = false;
+      }
+    } else {
+      const stats = fs.lstatSync(modulePath);
+      if (!stats.isSymbolicLink()) {
+        console.log(`${colors.red}${modulePath} exists but is not a symlink${colors.reset}`);
+        allValid = false;
+      } else {
+        const target = fs.readlinkSync(modulePath);
+        if (target !== link.target) {
+          console.log(
+            `${colors.yellow}Symlink ${modulePath} points to ${target} instead of ${link.target}${colors.reset}`
+          );
+          allValid = false;
+        } else {
+          console.log(
+            `${colors.green}Verified symlink: ${link.source} -> ${link.target}${colors.reset}`
+          );
+        }
+      }
+    }
+  });
+
+  return allValid;
+}
+
+// Service definitions with their respective colors and dependencies
 const services = [
   {
     name: 'main_server',
@@ -60,7 +134,11 @@ function startService(service) {
   console.log(`${service.color}Starting ${service.name}...${colors.reset}`);
 
   const nodeProcess = spawn('node', [service.path], {
-    env: { ...process.env, NODE_ENV: 'production' },
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      NODE_PATH: '/app/node_modules:/app',
+    },
     stdio: 'pipe',
   });
 
@@ -97,6 +175,13 @@ function startService(service) {
 // Start services in the correct order
 async function startAll() {
   console.log(`${colors.green}Starting all services in production mode...${colors.reset}`);
+
+  // Verify module links before starting services
+  if (!verifyModuleLinks()) {
+    console.error(
+      `${colors.red}Module links verification failed - services may not function correctly${colors.reset}`
+    );
+  }
 
   // Start services with no dependencies first
   const started = new Set();

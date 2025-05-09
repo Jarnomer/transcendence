@@ -1,24 +1,23 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend services for Pong Web App",
+  "main": "start-prod.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pnpm --filter @my-backend/main_server run dev",
-    "build": "pnpm --filter @my-backend/main_server run build && pnpm --filter @my-backend/game_service run build && pnpm --filter @my-backend/matchmaking_service run build && pnpm --filter @my-backend/user_service run build && pnpm --filter @my-backend/remote_service run build",
-    "start": "node services/main_server/dist/index.js",
+    "build": "tsc -p services/main_server/tsconfig.json && tsc -p services/user_service/tsconfig.json && tsc -p services/game_service/tsconfig.json && tsc -p services/matchmaking_service/tsconfig.json && tsc -p services/remote_service/tsconfig.json",
+    "start": "node start-prod.js",
     "test:create-users": "pnpm --filter @my-backend/tests run test:create-users",
     "test:create-tournaments": "pnpm --filter @my-backend/tests run test:create-tournaments",
     "test:run-all": "pnpm --filter @my-backend/tests run test:run-all",
-    "typecheck": "tsc --project tsconfig.prod.json --noEmit",
-    "typecheck:all": "pnpm -r run typecheck",
-    "test:prod": "NODE_ENV=production pnpm typecheck && pnpm -r run typecheck"
+    "typecheck": "tsc --project tsconfig.prod.json --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
+    "typescript": "^5.7.3",
     "module-alias": "^2.2.3",
     "sqlite": "^5.1.1"
   }

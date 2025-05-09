@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "../../dist/backend/services/main_server",
+    "rootDir": "./src",
+    "composite": true,
+    "tsBuildInfoFile": "../../dist/backend/services/main_server.tsbuildinfo"
   },
   "include": ["src/**/*"]
 }

@@ -1,7 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "../../dist/backend/services/remote_service",
+    "rootDir": "src",
+    "composite": true,
+    "tsBuildInfoFile": "../../dist/backend/services/remote_service.tsbuildinfo"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../main_server" },
+    { "path": "../matchmaking_service" }
+  ]
 }

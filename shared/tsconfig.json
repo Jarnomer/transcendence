@@ -4,13 +4,9 @@
     "outDir": "./dist",
     "declaration": true,
 
-    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-
     "lib": ["ES2020", "DOM"],
-
     "rootDir": ".",
-
     "resolveJsonModule": true
   },
   "include": [

@@ -14,7 +14,11 @@
     "noUnusedParameters": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "alwaysStrict": true
+    "alwaysStrict": true,
+
+    /* Preserve output structure for better module resolution */
+    "preserveSymlinks": true,
+    "rootDir": "."
   },
   "exclude": ["**/node_modules", "**/*.test.ts", "**/tests/**/*"]
 }

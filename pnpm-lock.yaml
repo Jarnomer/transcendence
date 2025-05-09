@@ -4,6 +4,13 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@my-backend/main_server': workspace:*
+  '@my-backend/game_service': workspace:*
+  '@my-backend/matchmaking_service': workspace:*
+  '@my-backend/remote_service': workspace:*
+  '@my-backend/user_service': workspace:*
+
 importers:
 
   .:
@@ -50,13 +57,16 @@ importers:
         version: 3.5.3
 
   backend:
-    dependencies:
+    devDependencies:
       module-alias:
         specifier: ^2.2.3
         version: 2.2.3
       sqlite:
         specifier: ^5.1.1
         version: 5.1.1
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
 
   backend/services/game_service:
     dependencies:
@@ -69,15 +79,6 @@ importers:
       '@fastify/websocket':
         specifier: ^11.0.2
         version: 11.0.2
-      '@my-backend/matchmaking_service':
-        specifier: workspace:*
-        version: link:../matchmaking_service
-      '@my-backend/remote_service':
-        specifier: workspace:*
-        version: link:../remote_service
-      '@my-backend/user_service':
-        specifier: workspace:*
-        version: link:../user_service
       '@sinclair/typebox':
         specifier: ^0.34.28
         version: 0.34.30
@@ -142,18 +143,6 @@ importers:
       '@fastify/swagger-ui':
         specifier: ^5.2.2
         version: 5.2.2
-      '@my-backend/game_service':
-        specifier: workspace:*
-        version: link:../game_service
-      '@my-backend/matchmaking_service':
-        specifier: workspace:*
-        version: link:../matchmaking_service
-      '@my-backend/remote_service':
-        specifier: workspace:*
-        version: link:../remote_service
-      '@my-backend/user_service':
-        specifier: workspace:*
-        version: link:../user_service
       '@sinclair/typebox':
         specifier: ^0.34.28
         version: 0.34.30
@@ -206,15 +195,6 @@ importers:
 
   backend/services/matchmaking_service:
     dependencies:
-      '@my-backend/game_service':
-        specifier: workspace:*
-        version: link:../game_service
-      '@my-backend/remote_service':
-        specifier: workspace:*
-        version: link:../remote_service
-      '@my-backend/user_service':
-        specifier: workspace:*
-        version: link:../user_service
       '@sinclair/typebox':
         specifier: ^0.34.28
         version: 0.34.30
@@ -261,15 +241,6 @@ importers:
       '@fastify/websocket':
         specifier: ^11.0.2
         version: 11.0.2
-      '@my-backend/game_service':
-        specifier: workspace:*
-        version: link:../game_service
-      '@my-backend/matchmaking_service':
-        specifier: workspace:*
-        version: link:../matchmaking_service
-      '@my-backend/user_service':
-        specifier: workspace:*
-        version: link:../user_service
       '@sinclair/typebox':
         specifier: ^0.34.28
         version: 0.34.30
@@ -374,15 +345,6 @@ importers:
       '@fastify/static':
         specifier: ^8.1.1
         version: 8.1.1
-      '@my-backend/game_service':
-        specifier: workspace:*
-        version: link:../game_service
-      '@my-backend/matchmaking_service':
-        specifier: workspace:*
-        version: link:../matchmaking_service
-      '@my-backend/remote_service':
-        specifier: workspace:*
-        version: link:../remote_service
       '@sinclair/typebox':
         specifier: ^0.34.28
         version: 0.34.30
@@ -481,8 +443,8 @@ importers:
         specifier: ^2.5.2
         version: 2.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-router-dom:
-        specifier: ^7.2.0
-        version: 7.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: ^6.18.0
+        version: 6.30.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-spinners:
         specifier: ^0.15.0
         version: 0.15.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -509,7 +471,7 @@ importers:
         specifier: ^3.5.3
         version: 3.5.3
       typescript:
-        specifier: ~5.7.2
+        specifier: ^5.7.3
         version: 5.7.3
       vite:
         specifier: ^6.1.0
@@ -523,6 +485,10 @@ importers:
       babylonjs:
         specifier: ^7.50.0
         version: 7.54.3
+    devDependencies:
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
 
 packages:
 
@@ -977,6 +943,10 @@ packages:
     resolution: {integrity: sha512-uh6W7sb55hl7D6vsAeA+V2p5JnlAqzhqFyF0VcJkKZXkgnFcVG9PziERRHQfPLfNGx1C292a4JqbWzhR8L4R1g==}
     engines: {node: '>=18'}
     hasBin: true
+
+  '@remix-run/router@1.23.0':
+    resolution: {integrity: sha512-O3rHJzAQKamUz1fvE0Qaw0xSFqsA/yafi2iqeE0pvdFtCO1viYx8QL6f3Ln/aCCTLxs68SLf0KPM9eSeM8yBnA==}
+    engines: {node: '>=14.0.0'}
 
   '@rollup/rollup-android-arm-eabi@4.40.1':
     resolution: {integrity: sha512-kxz0YeeCrRUHz3zyqvd7n+TVRlNyTifBsmnmNPtk3hQURUyG9eAB+usz6DAwagMusjx/zb3AjvDUvhFGDAexGw==}
@@ -3136,22 +3106,18 @@ packages:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
     engines: {node: '>=0.10.0'}
 
-  react-router-dom@7.5.3:
-    resolution: {integrity: sha512-cK0jSaTyW4jV9SRKAItMIQfWZ/D6WEZafgHuuCb9g+SjhLolY78qc+De4w/Cz9ybjvLzShAmaIMEXt8iF1Cm+A==}
-    engines: {node: '>=20.0.0'}
+  react-router-dom@6.30.0:
+    resolution: {integrity: sha512-x30B78HV5tFk8ex0ITwzC9TTZMua4jGyA9IUlH1JLQYQTFyxr/ZxwOJq7evg1JX1qGVUcvhsmQSKdPncQrjTgA==}
+    engines: {node: '>=14.0.0'}
     peerDependencies:
-      react: '>=18'
-      react-dom: '>=18'
+      react: '>=16.8'
+      react-dom: '>=16.8'
 
-  react-router@7.5.3:
-    resolution: {integrity: sha512-3iUDM4/fZCQ89SXlDa+Ph3MevBrozBAI655OAfWQlTm9nBR0IKlrmNwFow5lPHttbwvITZfkeeeZFP6zt3F7pw==}
-    engines: {node: '>=20.0.0'}
+  react-router@6.30.0:
+    resolution: {integrity: sha512-D3X8FyH9nBcTSHGdEKurK7r8OYE1kKFn3d/CF+CoxbSHkxU7o37+Uh7eAHRXr6k2tSExXYO++07PeXJtA/dEhQ==}
+    engines: {node: '>=14.0.0'}
     peerDependencies:
-      react: '>=18'
-      react-dom: '>=18'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
+      react: '>=16.8'
 
   react-spinners@0.15.0:
     resolution: {integrity: sha512-ZO3/fNB9Qc+kgpG3SfdlMnvTX6LtLmTnOogb3W6sXIaU/kZ1ydEViPfZ06kSOaEsor58C/tzXw2wROGQu3X2pA==}
@@ -3587,9 +3553,6 @@ packages:
 
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
-
-  turbo-stream@2.4.0:
-    resolution: {integrity: sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -4316,6 +4279,8 @@ snapshots:
   '@playwright/test@1.52.0':
     dependencies:
       playwright: 1.52.0
+
+  '@remix-run/router@1.23.0': {}
 
   '@rollup/rollup-android-arm-eabi@4.40.1':
     optional: true
@@ -6679,20 +6644,17 @@ snapshots:
 
   react-refresh@0.17.0: {}
 
-  react-router-dom@7.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  react-router-dom@6.30.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
+      '@remix-run/router': 1.23.0
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
-      react-router: 7.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-router: 6.30.0(react@19.1.0)
 
-  react-router@7.5.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  react-router@6.30.0(react@19.1.0):
     dependencies:
-      cookie: 1.0.2
+      '@remix-run/router': 1.23.0
       react: 19.1.0
-      set-cookie-parser: 2.7.1
-      turbo-stream: 2.4.0
-    optionalDependencies:
-      react-dom: 19.1.0(react@19.1.0)
 
   react-spinners@0.15.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -7214,8 +7176,6 @@ snapshots:
   tunnel-agent@0.6.0:
     dependencies:
       safe-buffer: 5.2.1
-
-  turbo-stream@2.4.0: {}
 
   type-check@0.4.0:
     dependencies:
