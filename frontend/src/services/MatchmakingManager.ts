@@ -177,6 +177,7 @@ export class MatchmakingManager {
   handleMatchFound = (game: any) => {
     console.info('Match found:', game);
     this.setState({ gameId: game.game_id, phase: 'in_game', role: 'player' });
+    this.sessionManager.set('matchmakerState', MatchMakerState.MATCHED);
   };
 
   handleGameWinner = () => {

@@ -430,6 +430,7 @@ export class MatchmakingService {
     const player: Player = {
       user_id,
       // socket: this.clients.get(user_id)!,
+      index: 0,
       elo: playerElo.elo,
       joinedAt: new Date(),
       index:0
