@@ -72,8 +72,8 @@ export const ProfilePage: React.FC = () => {
     <motion.div className="w-full h-full flex flex-col items-center justify-start relative">
       <AnimatePresence>
         <>
-          <div className="p-2 gap-4 grid w-full grid-cols-1 md:grid-cols-2">
-            <div className="row-start-1 my-2 h-[200px] max-h-200px col-start-1 self-start flex-none">
+          <div className="p-2 gap-2 md:gap-4 grid w-full grid-cols-1 md:grid-cols-2">
+            <div className="row-start-1  col-start-1 self-start flex-none">
               <ProfileHeader user={user}></ProfileHeader>
             </div>
 
@@ -82,7 +82,7 @@ export const ProfilePage: React.FC = () => {
             </motion.div>
             <motion.div
               key="match history"
-              className="my-2 justify-start col-start-1 row-start-3 md:row-start-2 md:col-start-1 gap-3  w-full h-full"
+              className="my-2 justify-start col-start-1  row-start-3 md:row-start-2 md:col-start-1 gap-3  w-full h-full"
             >
               <motion.div className="w-full my-2">
                 <MatchHistory user={user} />
