@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useGameOptionsContext, useUser, useWebSocketContext } from '@contexts';
 
 import { MatchMaker, MatchMakerState, SessionManager } from '@services';
-import { useRouteExitCleanup } from './useRouteExitCleanup';
 
 export const useMatchmaking = () => {
   const navigate = useNavigate();
@@ -29,7 +28,6 @@ export const useMatchmaking = () => {
   const sessionManager = SessionManager.getInstance();
   const hasRegistered = sessionManager.get('matchmakingRegistered');
 
-  
   // const params = useRef<URLSearchParams>(new URLSearchParams());
 
   // useEffect(() => {

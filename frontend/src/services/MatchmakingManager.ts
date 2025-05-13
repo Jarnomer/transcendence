@@ -60,21 +60,24 @@ export class MatchmakingManager {
 
   setState(partial: Partial<MatchmakingSnapshot>) {
     let hasChanged = false;
+    const newSnapshot = { ...this.snapshot };
 
     for (const key in partial) {
       if (Object.prototype.hasOwnProperty.call(partial, key)) {
         const newValue = partial[key as keyof MatchmakingSnapshot];
-        const oldValue = this.snapshot[key as keyof MatchmakingSnapshot];
+        const oldValue = newSnapshot[key as keyof MatchmakingSnapshot];
 
         // Shallow comparison
         if (newValue !== oldValue) {
-          (this.snapshot as any)[key] = newValue;
+          (newSnapshot as any)[key] = newValue;
           hasChanged = true;
         }
       }
     }
 
     if (hasChanged) {
+      this.snapshot = newSnapshot; // Update with new reference
+
       this.notifyListeners();
     }
   }

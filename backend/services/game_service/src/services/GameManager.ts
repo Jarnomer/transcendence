@@ -68,7 +68,7 @@ export class GameManager {
     try {
       console.log('Game result:', gameResult);
       const { game_id, players } = gameResult;
-      if (game_id === 'local_game_id') return; // Skip local game result
+      if (game_id.startsWith('local_game_id')) return; // Skip local game result
       const sortedPlayers = [players.player1, players.player2].sort((a, b) => b.score - a.score);
       const winner_id = sortedPlayers[0].id;
       const loser_id = sortedPlayers[1].id;

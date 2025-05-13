@@ -67,7 +67,7 @@ class OneVsOneGame extends GameMode {
     switch (this.difficulty) {
       case 'local': {
         console.log('Creating 1v1 local game...');
-        const game_id = 'local_game_id';
+        const game_id = `local_game_id${Math.random().toString(36).slice(2, 6)}`;
         this.matchMaker.setMatchMakerState(MatchMakerState.MATCHED);
         this.matchMaker.setGameId(game_id);
         break;

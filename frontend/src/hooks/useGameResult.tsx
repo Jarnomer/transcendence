@@ -120,7 +120,7 @@ export const useGameResult = () => {
     return () => {
       console.log('Cleanup');
       if (!gameIdRef.current || hasSubmittedResult.current || !gameStateRef.current) return;
-      if (gameIdRef.current === 'local_game_id') {
+      if (gameIdRef.current.startsWith('local_game_id')) {
         dispatch({ type: 'GAME_RESET' });
         // cleanup();
         // resetGameOptions();
