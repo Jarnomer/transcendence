@@ -43,6 +43,9 @@ class ErrorHandler {
     if (error.code === 'SQLITE_CONSTRAINT') {
       return reply.status(400).send({ error: `Database constraint violation ${error.message}` });
     }
+    if (error.code === 'FST_ERR_VALIDATION') {
+      return reply.status(400).send({ error: 'Validation failed' });
+    }
     return reply.status(500).send({ error: 'An unexpected error occurred' });
   }
 

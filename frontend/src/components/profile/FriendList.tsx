@@ -130,7 +130,7 @@ export const Friends: React.FC<FriendsProps> = ({ user }) => {
       animate="animate"
       exit="exit"
     >
-      <div className="h-[20px] bg-primary text-black text-sm">Friends</div>
+      <div className=" p-1 bg-primary text-black text-lg">Friends</div>
 
       <span className={`text-xs pl-2 mb-2 text-secondary`}>
         {(friends && friends.length) || '0'} Friends

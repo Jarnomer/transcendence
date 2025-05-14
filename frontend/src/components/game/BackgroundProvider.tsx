@@ -251,7 +251,7 @@ export const BackgroundProvider: React.FC<BackgroundProviderProps> = () => {
   return (
     <>
       {isBackgroundEnabled && (
-        <div className="absolute w-screen h-screen">
+        <div className="absolute w-screen h-screen pointer-events-none">
           <BackgroundCanvas
             gameState={currentGameState}
             gameMode={currentMode}

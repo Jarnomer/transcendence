@@ -82,16 +82,16 @@ export const PowerUpSelection: React.FC<PowerUpSelectionProps> = ({
 
   return (
     <>
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+      <div className="flex flex-wrap ">
         {powerUps.map((powerUp, index) => (
           <span
             key={powerUp}
             onClick={() => handlePowerUpToggle(powerUp)}
-            className={`aspect-square text-center cursor-pointer ${selectedPowerUps.includes(powerUp) && isEnabled ? 'text-secondary' : !selectedPowerUps.includes(powerUp) && isEnabled ? 'hover:opacity-100 opacity-60' : !isEnabled ? 'text-gray-400/60' : ''} `}
+            className={`aspect-square w-[100px] h-[100px] m-2 text-center cursor-pointer ${selectedPowerUps.includes(powerUp) && isEnabled ? 'text-secondary' : !selectedPowerUps.includes(powerUp) && isEnabled ? 'hover:opacity-100 opacity-60' : !isEnabled ? 'text-gray-400/60' : ''} `}
           >
             <BoxDiv index={index} key={powerUp}>
               <div
-                className={`aspect-square max-w-full max-h-full p-3 flex flex-col gap-2 text-center cursor-pointer ${selectedPowerUps.includes(powerUp) && isEnabled ? 'text-primary' : 'text-grey-500 opacity-60'}`}
+                className={`aspect-square p-3 flex flex-col gap-2 text-center cursor-pointer ${selectedPowerUps.includes(powerUp) && isEnabled ? 'text-primary' : 'text-grey-500 opacity-60'}`}
               >
                 <div className="">{powerUpIcons[powerUp] || <PaddleSlowerIcon />}</div>
               </div>

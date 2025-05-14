@@ -31,6 +31,7 @@ export const TournamentLobby: React.FC = () => {
 
   const [bracket, setBracket] = useState<BracketType>(generateBracket(playerCount));
 
+  const [players, setPlayers] = useState<any[]>([]);
   const { connections, cleanup, cancelQueue, cancelGame, matchmakingState } = useWebSocketContext();
 
   const { openModal } = useModal();
@@ -44,29 +45,29 @@ export const TournamentLobby: React.FC = () => {
   }, [lobby]);
 
   useEffect(() => {
-    console.log('matchmaking state: ', matchmakingState);
     if (
       matchmakingState.phase === 'in_game' &&
       location.pathname !== '/game' &&
       mode === 'tournament'
     ) {
-      console.log('in game... opening accept page modal');
       handleClickOpenModal();
     }
   }, [matchmakingState.phase, location.pathname]);
 
+
   useEffect(() => {
-    if (matchmakingState.phase === 'in_game') {
-      console.log('in game....accept game');
+    if (matchmakingState.participants) {
+      console.log('participants: ', matchmakingState.participants);
+      setPlayers(matchmakingState.participants);
     }
-  }, [matchmakingState.phase, location.pathname]);
+  }, [matchmakingState.participants]);
 
   // CREATE DUMMY DATA FOR TOURNAMENT BRACKET, DELETE LATER
   function generateBracket(playerCount: number): BracketType {
     return generateEmptyBracket(playerCount);
   }
 
-  console.log(bracket);
+  // console.log(bracket);
   /// END OF DUMMY DATA
 
   useEffect(() => {
@@ -126,7 +127,9 @@ export const TournamentLobby: React.FC = () => {
         {mode === 'tournament' && (
           <header className="flex w-full justify-between">
             <TournamentLobbyNav activeTab={activeTab} setActiveTab={setActiveTab} />
-            <span className="text-secondary">X/{difficulty} Players</span>
+            <span className="text-secondary">
+              {players.length}/{difficulty} Players
+            </span>
           </header>
         )}
 
