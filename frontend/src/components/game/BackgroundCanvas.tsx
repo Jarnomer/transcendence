@@ -95,7 +95,7 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const retroLevelsRef = useRef<RetroEffectsLevels>(cinematicRetroEffectsLevels);
 
   const retroEnabled = graphicsSettings?.retroEffect?.enabled !== false;
-  const retroLevel = retroEnabled ? graphicsSettings?.retroEffect?.level || 3 : 0;
+  const retroLevel = retroEnabled ? graphicsSettings?.retroEffect?.level || 5 : 0;
 
   const cameraMoveTimerRef = useRef<number | null>(null);
   const randomGlitchTimerRef = useRef<number | null>(null);
@@ -247,8 +247,8 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
           defaultRetroEffectTimings.trackingDistortionIntensity * 1.5,
           defaultRetroEffectTimings.trackingDistortionDuration / 2
         );
-      }, 1500);
-    }, 1500);
+      }, 1000);
+    }, 1000);
   };
 
   // Initial render setup
@@ -427,7 +427,7 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
           ballRef.current,
           gameState.ball,
           themeColors.current.primaryColor,
-          5000, // duration in ms
+          3000, // duration in ms
           soundManagerRef.current
         );
       }
