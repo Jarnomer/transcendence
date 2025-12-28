@@ -1,3 +1,5 @@
+<video src="menu_demo.mp4" width="800" autoplay loop muted playsinline></video>
+
 # transcendence
 
 | Person | Task 1              | Task 2            | Task 3           |
