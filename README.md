@@ -79,46 +79,46 @@ The project follows a microservices architecture pattern with the following serv
 
 ### Services Breakdown
 
-**Frontend** (`/frontend`)
+**Frontend** (`/frontend`) ⚛️
 
-- ⚛️ React + TypeScript with Vite
-- 🎮 BabylonJS for 3D game rendering
-- 📦 Context API for state management
-- 🔌 WebSocket integration for real-time features
+- React + TypeScript with Vite
+- BabylonJS for 3D game rendering
+- Context API for state management
+- WebSocket integration for real-time features
 
-**User Service** (`/backend/services/user_service`)
+**User Service** (`/backend/services/user_service`) 👤
 
-- 🔐 Authentication (JWT-based)
-- 👤 User profile management
-- 👥 Friend system
-- 🎫 Session management
+- Authentication (JWT-based)
+- User profile management
+- Friend system
+- Session management
 
-**Game Service** (`/backend/services/game_service`)
+**Game Service** (`/backend/services/game_service`) 🎮
 
-- 🎯 Core Pong game logic
-- ⚙️ Physics simulation
-- ⭐ Power-up management
-- 🤖 AI controller
+- Core Pong game logic
+- Physics simulation
+- Power-up management
+- AI controller
 
-**Matchmaking Service** (`/backend/services/matchmaking_service`)
+**Matchmaking Service** (`/backend/services/matchmaking_service`) 🎯
 
-- 📋 Player queue management
-- 🎲 Game session creation
-- 💬 Chat functionality
-- 📊 Match history tracking
+- Player queue management
+- Game session creation
+- Chat functionality
+- Match history tracking
 
-**Remote Service** (`/backend/services/remote_service`)
+**Remote Service** (`/backend/services/remote_service`) 🔌
 
-- 🔌 WebSocket event handling
-- 🔄 Real-time game state synchronization
-- 📡 Chat message distribution
+- WebSocket event handling
+- Real-time game state synchronization
+- Chat message distribution
 
-**Main Server** (`/backend/services/main_server`)
+**Main Server** (`/backend/services/main_server`) 🖥️
 
-- 🚪 API gateway
-- 👨‍💼 Admin functionality
-- 🛣️ Request routing
-- ⚠️ Error handling
+- API gateway
+- Admin functionality
+- Request routing
+- Error handling
 
 ## 🛠️ Build
 
@@ -226,7 +226,7 @@ Compete in bracket-style tournaments with multiple players.
 
 ## ♻️ Tech Stack
 
-### Frontend
+### Frontend 🎨
 
 - **React 18** - UI framework
 - **TypeScript** - Type safety
@@ -234,7 +234,7 @@ Compete in bracket-style tournaments with multiple players.
 - **BabylonJS** - 3D game engine
 - **TailwindCSS** - Utility-first CSS
 
-### Backend
+### Backend 🔧
 
 - **Node.js** - JavaScript runtime
 - **TypeScript** - Type safety
@@ -243,14 +243,14 @@ Compete in bracket-style tournaments with multiple players.
 - **SQLite** - Embedded database
 - **JWT** - Authentication tokens
 
-### Infrastructure
+### Infrastructure 🏗️
 
 - **Docker** - Containerization
 - **Docker Compose** - Multi-container orchestration
 - **Nginx** - Reverse proxy
 - **pnpm** - Fast package manager
 
-### DevOps & Testing
+### DevOps & Testing 🧪
 
 - **Playwright** - End-to-end testing
 - **ESLint** - Code linting
