@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
   ArcRotateCamera,
@@ -13,11 +13,11 @@ import {
 
 import { useGraphicsContext } from '@contexts';
 
+import { LoadingOverlay } from '@components/game';
+
 import {
-  GameAnimationManager,
   GameSoundManager,
   RetroEffectsManager,
-  // addCameraDebugControls,
   animateCinematicCamera,
   animateGameplayCamera,
   applyBackgroundCollisionEffects,
@@ -70,6 +70,13 @@ interface BackgroundCanvasProps {
   theme?: 'light' | 'dark';
 }
 
+// Loading step type definition
+interface LoadingStep {
+  name: string;
+  weight: number;
+  action: () => Promise<void>;
+}
+
 export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   gameState,
   gameMode,
@@ -81,8 +88,13 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
   const themeColors = useRef<{
     primaryColor: Color3;
     secondaryColor: Color3;
-    backgroundColor: Color3;
+    gameboardColor: Color3;
   } | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentLoadingTask, setCurrentLoadingTask] = useState('Initializing');
+  const [sceneReady, setSceneReady] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<Engine | null>(null);
@@ -251,151 +263,230 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     }, 1000);
   };
 
-  // Initial render setup
-  useEffect(() => {
+  // Progressive loading process
+  const initializeScene = async () => {
     if (!canvasRef.current || !gameState) return;
 
-    const canvas = canvasRef.current;
-    const engine = new Engine(canvas, true);
-    const scene = new Scene(engine);
+    // Define loading steps
+    const loadingSteps: LoadingStep[] = [
+      {
+        name: 'Initializing engine',
+        weight: 10,
+        action: async () => {
+          const canvas = canvasRef.current!;
+          const engine = new Engine(canvas, true);
+          engineRef.current = engine;
 
-    soundManagerRef.current = getGameSoundManager();
-    GameAnimationManager.getInstance(scene);
+          // Add a small delay to simulate loading time
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
+      },
+      {
+        name: 'Creating scene',
+        weight: 15,
+        action: async () => {
+          const scene = new Scene(engineRef.current!);
+          sceneRef.current = scene;
 
-    const colors = getThemeColorsFromDOM(theme);
-    const { primaryColor, gameboardColor, sceneBackgroundColor } = colors;
+          const colors = getThemeColorsFromDOM(theme);
+          const { sceneBackgroundColor } = colors;
 
-    scene.clearColor = new Color4(
-      sceneBackgroundColor.r,
-      sceneBackgroundColor.g,
-      sceneBackgroundColor.b,
-      1.0
-    );
+          scene.clearColor = new Color4(
+            sceneBackgroundColor.r,
+            sceneBackgroundColor.g,
+            sceneBackgroundColor.b,
+            1.0
+          );
 
-    const camera = setupSceneCamera(scene);
-    camera.attachControl();
+          themeColors.current = colors;
 
-    // const cameraDebugControls = addCameraDebugControls(camera, scene, true);
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        },
+      },
+      {
+        name: 'Setting up camera',
+        weight: 10,
+        action: async () => {
+          const camera = setupSceneCamera(sceneRef.current!);
+          camera.attachControl();
+          cameraRef.current = camera;
 
-    setTimeout(() => {
-      if (canvas) {
-        canvas.focus();
-        console.log('Canvas focused for keyboard input');
-      }
-    }, 500);
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
+      },
+      {
+        name: 'Initializing sound system',
+        weight: 10,
+        action: async () => {
+          soundManagerRef.current = getGameSoundManager();
 
-    if (retroEnabled) {
-      retroLevelsRef.current = {
-        ...retroEffectsPresets.cinematic,
-        scanlines: retroLevel,
-        curvature: retroLevel,
-        glitch: retroLevel,
-        colorBleed: retroLevel,
-        flicker: retroLevel,
-        vignette: retroLevel,
-        noise: retroLevel,
-      };
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
+      },
+      {
+        name: 'Creating retro effects',
+        weight: 15,
+        action: async () => {
+          if (retroEnabled) {
+            retroLevelsRef.current = {
+              ...retroEffectsPresets.cinematic,
+              scanlines: retroLevel,
+              curvature: retroLevel,
+              glitch: retroLevel,
+              colorBleed: retroLevel,
+              flicker: retroLevel,
+              vignette: retroLevel,
+              noise: retroLevel,
+            };
 
-      retroEffectsRef.current = createPongRetroEffects(
-        scene,
-        camera,
-        'cinematic',
-        retroLevelsRef.current,
-        defaultRetroCinematicBaseParams
-      );
-    } else {
-      retroLevelsRef.current = {
-        scanlines: 0,
-        curvature: 0,
-        glitch: 0,
-        colorBleed: 0,
-        flicker: 0,
-        vignette: 0,
-        noise: 0,
-      };
+            retroEffectsRef.current = createPongRetroEffects(
+              sceneRef.current!,
+              cameraRef.current!,
+              'cinematic',
+              retroLevelsRef.current,
+              defaultRetroCinematicBaseParams
+            );
+          } else {
+            retroLevelsRef.current = {
+              scanlines: 0,
+              curvature: 0,
+              glitch: 0,
+              colorBleed: 0,
+              flicker: 0,
+              vignette: 0,
+              noise: 0,
+            };
 
-      retroEffectsRef.current = createPongRetroEffects(
-        scene,
-        camera,
-        'cinematic',
-        retroLevelsRef.current,
-        defaultRetroCinematicBaseParams
-      );
-    }
+            retroEffectsRef.current = createPongRetroEffects(
+              sceneRef.current!,
+              cameraRef.current!,
+              'cinematic',
+              retroLevelsRef.current,
+              defaultRetroCinematicBaseParams
+            );
+          }
 
-    const pipeline = setupPostProcessing(scene, camera, false);
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        },
+      },
+      {
+        name: 'Setting up post-processing',
+        weight: 10,
+        action: async () => {
+          const pipeline = setupPostProcessing(sceneRef.current!, cameraRef.current!, false);
+          postProcessingRef.current = pipeline;
 
-    const { shadowGenerators } = setupScenelights(scene, primaryColor);
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
+      },
+      {
+        name: 'Creating scene lighting',
+        weight: 10,
+        action: async () => {
+          const { shadowGenerators } = setupScenelights(
+            sceneRef.current!,
+            themeColors.current!.primaryColor
+          );
+          applyLowQualitySettings(
+            sceneRef.current!,
+            2.0,
+            postProcessingRef.current,
+            shadowGenerators
+          );
+          enableRequiredExtensions(engineRef.current!);
 
-    applyLowQualitySettings(scene, 2.0, pipeline, shadowGenerators);
-    enableRequiredExtensions(engine);
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
+      },
+      {
+        name: 'Creating game objects',
+        weight: 20,
+        action: async () => {
+          const { primaryColor, gameboardColor } = themeColors.current!;
 
-    engineRef.current = engine;
-    sceneRef.current = scene;
-    cameraRef.current = camera;
-    themeColors.current = colors;
+          floorRef.current = createFloor(sceneRef.current!, gameboardColor);
+          topEdgeRef.current = createEdge(sceneRef.current!, primaryColor);
+          bottomEdgeRef.current = createEdge(sceneRef.current!, primaryColor);
+          player1Ref.current = createPaddle(sceneRef.current!, primaryColor);
+          player2Ref.current = createPaddle(sceneRef.current!, primaryColor);
+          ballRef.current = createBall(sceneRef.current!, primaryColor);
 
-    postProcessingRef.current = pipeline;
-    lastGameModeRef.current = gameMode;
+          await new Promise((resolve) => setTimeout(resolve, 600));
+        },
+      },
+      {
+        name: 'Finalizing setup',
+        weight: 10,
+        action: async () => {
+          const gameObjects = [
+            player1Ref.current!,
+            player2Ref.current!,
+            ballRef.current!,
+            topEdgeRef.current!,
+            bottomEdgeRef.current!,
+          ];
 
-    floorRef.current = createFloor(scene, gameboardColor);
-    topEdgeRef.current = createEdge(scene, primaryColor);
-    bottomEdgeRef.current = createEdge(scene, primaryColor);
-    player1Ref.current = createPaddle(scene, primaryColor);
-    player2Ref.current = createPaddle(scene, primaryColor);
-    ballRef.current = createBall(scene, primaryColor);
+          setupReflections(sceneRef.current!, floorRef.current!, gameObjects);
 
-    const gameObjects = [
-      player1Ref.current,
-      player2Ref.current,
-      ballRef.current,
-      topEdgeRef.current,
-      bottomEdgeRef.current,
+          topEdgeRef.current!.position.x = gameToSceneX(0, topEdgeRef.current!);
+          topEdgeRef.current!.position.y = gameToSceneY(-10, topEdgeRef.current!);
+          bottomEdgeRef.current!.position.x = gameToSceneX(0, bottomEdgeRef.current!);
+          bottomEdgeRef.current!.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current!);
+
+          lastGameModeRef.current = gameMode;
+
+          setupRenderLoop(engineRef.current!, sceneRef.current!);
+          setupRandomGlitchEffects();
+          setupCamera();
+
+          // Attach resize event listener
+          const handleResize = () => {
+            if (engineRef.current) {
+              engineRef.current.resize();
+              if (sceneRef.current) {
+                setupRenderLoop(engineRef.current, sceneRef.current);
+              }
+            }
+          };
+
+          window.addEventListener('resize', handleResize);
+
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        },
+      },
     ];
 
-    setupReflections(scene, floorRef.current, gameObjects);
-    shadowGenerators.forEach((generator) => {
-      gameObjects.forEach((obj) => {
-        generator.addShadowCaster(obj);
-      });
-    });
+    const totalWeight = loadingSteps.reduce((sum, step) => sum + step.weight, 0);
+    let completedWeight = 0;
 
-    topEdgeRef.current.position.x = gameToSceneX(0, topEdgeRef.current);
-    topEdgeRef.current.position.y = gameToSceneY(-10, topEdgeRef.current);
-    bottomEdgeRef.current.position.x = gameToSceneX(0, bottomEdgeRef.current);
-    bottomEdgeRef.current.position.y = gameToSceneY(gameHeight + 2, bottomEdgeRef.current);
+    // Execute each loading step
+    for (const step of loadingSteps) {
+      setCurrentLoadingTask(step.name);
 
-    setupRenderLoop(engine, scene);
-    setupRandomGlitchEffects();
-    setupCamera();
-
-    const handleResize = () => {
-      if (engineRef.current) {
-        engineRef.current.resize();
-        if (sceneRef.current) {
-          setupRenderLoop(engineRef.current, sceneRef.current);
-        }
+      try {
+        await step.action();
+      } catch (error) {
+        console.error(`Error during step "${step.name}":`, error);
       }
-    };
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        if (engineRef.current) engineRef.current.renderEvenInBackground = false;
-      } else {
-        if (engineRef.current && sceneRef.current) {
-          engineRef.current.renderEvenInBackground = true;
-          setupRenderLoop(engineRef.current, sceneRef.current);
-        }
-      }
-    };
+      completedWeight += step.weight;
+      setLoadingProgress(Math.round((completedWeight / totalWeight) * 100));
+    }
 
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Loading complete
+    setTimeout(() => {
+      setIsLoading(false);
+      setSceneReady(true);
+    }, 300);
+  };
+
+  // Initial render setup
+  useEffect(() => {
+    if (canvasRef.current) canvasRef.current.style.opacity = '0';
+
+    initializeScene();
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-
       if (retroEffectsRef.current) retroEffectsRef.current.dispose();
 
       if (cameraMoveTimerRef.current) {
@@ -408,11 +499,23 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
         randomGlitchTimerRef.current = null;
       }
 
-      // cameraDebugControls();
-      engine.dispose();
-      scene.dispose();
+      window.removeEventListener('resize', () => {});
+      document.removeEventListener('visibilitychange', () => {});
+
+      if (engineRef.current && sceneRef.current) {
+        engineRef.current.dispose();
+        sceneRef.current.dispose();
+      }
     };
   }, []);
+
+  // Show canvas when ready
+  useEffect(() => {
+    if (sceneReady && canvasRef.current) {
+      canvasRef.current.style.transition = 'opacity 0.8s ease-in-out';
+      canvasRef.current.style.opacity = '1';
+    }
+  }, [sceneReady]);
 
   // Handle game over
   useEffect(() => {
@@ -597,5 +700,14 @@ export const BackgroundCanvas: React.FC<BackgroundCanvasProps> = ({
     };
   }, [gameState]);
 
-  return <canvas ref={canvasRef} className="w-full h-full" />;
+  return (
+    <>
+      <LoadingOverlay
+        isLoading={isLoading}
+        progress={loadingProgress}
+        currentTask={currentLoadingTask}
+      />
+      <canvas ref={canvasRef} className="w-full h-full" style={{ opacity: 0 }} />
+    </>
+  );
 };

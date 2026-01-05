@@ -4,5 +4,6 @@ export * from './GameResults';
 export * from './GameplayCanvas';
 
 export * from './MatchMakingCarousel';
+export * from './LoadingOverlay';
 export * from './scoreBoard';
 export * from './utils';
