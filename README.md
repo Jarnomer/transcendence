@@ -7,13 +7,13 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Score-TBD%2F125/100-lightgreen?style=for-the-badge" alt="score">
+  <img src="https://img.shields.io/badge/Score-%2F125/100-lightgreen?style=for-the-badge" alt="score">
   <img src="https://img.shields.io/badge/Stack-TypeScript%20%7C%20React%20%7C%20Node.js-blue?style=for-the-badge" alt="tech stack">
   <img src="https://img.shields.io/badge/Engine-BabylonJS-orange?style=for-the-badge" alt="graphics engine">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Type-Team-violet?style=for-the-badge" alt="type">
+  <img src="https://img.shields.io/badge/Type-Group%20%7C%20Project-violet?style=for-the-badge" alt="type">
   <img src="https://img.shields.io/badge/Architecture-Microservices-teal?style=for-the-badge" alt="architecture">
 </p>
 
@@ -38,7 +38,9 @@
 This implementation features a microservices architecture with separate services for game logic, matchmaking, user management, and real-time communication. The game is rendered in 3D using BabylonJS and supports multiple game modes including 1v1 matches, AI opponents, and tournament brackets as well as social features.
 
 <p align="center">
-  <video src="assets/demonstration.mp4" width="900">
+  <video src="assets/demonstration.mp4" width="800" controls autoplay muted loop>
+    Your browser does not support the video tag.
+  </video>
 </p>
 
 ## ✨ Features
@@ -79,44 +81,44 @@ The project follows a microservices architecture pattern with the following serv
 
 **Frontend** (`/frontend`)
 
-- React + TypeScript with Vite
-- BabylonJS for 3D game rendering
-- Context API for state management
-- WebSocket integration for real-time features
+- ⚛️ React + TypeScript with Vite
+- 🎮 BabylonJS for 3D game rendering
+- 📦 Context API for state management
+- 🔌 WebSocket integration for real-time features
 
 **User Service** (`/backend/services/user_service`)
 
-- Authentication (JWT-based)
-- User profile management
-- Friend system
-- Session management
+- 🔐 Authentication (JWT-based)
+- 👤 User profile management
+- 👥 Friend system
+- 🎫 Session management
 
 **Game Service** (`/backend/services/game_service`)
 
-- Core Pong game logic
-- Physics simulation
-- Power-up management
-- AI controller
+- 🎯 Core Pong game logic
+- ⚙️ Physics simulation
+- ⭐ Power-up management
+- 🤖 AI controller
 
 **Matchmaking Service** (`/backend/services/matchmaking_service`)
 
-- Player queue management
-- Game session creation
-- Chat functionality
-- Match history tracking
+- 📋 Player queue management
+- 🎲 Game session creation
+- 💬 Chat functionality
+- 📊 Match history tracking
 
 **Remote Service** (`/backend/services/remote_service`)
 
-- WebSocket event handling
-- Game state synchronization
-- Chat message distribution
+- 🔌 WebSocket event handling
+- 🔄 Real-time game state synchronization
+- 📡 Chat message distribution
 
 **Main Server** (`/backend/services/main_server`)
 
-- API gateway
-- Admin functionality
-- Request routing
-- Error handling
+- 🚪 API gateway
+- 👨‍💼 Admin functionality
+- 🛣️ Request routing
+- ⚠️ Error handling
 
 ## 🛠️ Build
 
