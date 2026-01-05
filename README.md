@@ -38,9 +38,7 @@
 This implementation features a microservices architecture with separate services for game logic, matchmaking, user management, and real-time communication. The game is rendered in 3D using BabylonJS and supports multiple game modes including 1v1 matches, AI opponents, and tournament brackets as well as social features.
 
 <p align="center">
-  <video src="assets/demonstration.mp4" width="800" controls autoplay muted loop>
-    Your browser does not support the video tag.
-  </video>
+  <video src="assets/demonstration.mp4" width="900" controls autoplay muted loop>
 </p>
 
 ## ✨ Features
@@ -280,7 +278,7 @@ This project implements the following 42 modules:
 
 ## 👨‍💻 Team
 
-This project was developed by: [Janrau](https://github.com/janrau9) ♠️ [Lassi](https://github.com/lassikon) ♥️ [Olli](https://github.com/koodikommando) ♣️ [Jarno](https://github.com/Jarnomer) ♦️
+This project was developed by: [Janrau](https://github.com/janrau9) • [Lassi](https://github.com/lassikon) • [Olli](https://github.com/koodikommando) • [Jarno](https://github.com/Jarnomer)
 
 ## 📝 License
 
