@@ -38,9 +38,7 @@
 This implementation features a microservices architecture with separate services for game logic, matchmaking, user management, and real-time communication. The game is rendered in 3D using BabylonJS and supports multiple game modes including 1v1 matches, AI opponents, and tournament brackets as well as social features.
 
 <p align="center">
-  <video src="assets/demonstration.mp4" width="800" controls autoplay muted loop>
-    Your browser does not support the video tag.
-  </video>
+  <video src="assets/demonstration.mp4" width="900">
 </p>
 
 ## ✨ Features
