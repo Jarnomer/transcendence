@@ -38,7 +38,7 @@
 This implementation features a microservices architecture with separate services for game logic, matchmaking, user management, and real-time communication. The game is rendered in 3D using BabylonJS and supports multiple game modes including 1v1 matches, AI opponents, and tournament brackets as well as social features.
 
 <p align="center">
-  <video src="assets/demonstration.mp4" width="600" controls></video>
+  <img src="assets/demonstration.mp4" alt="Demonstration" width="600">
 </p>
 
 ## ✨ Features
@@ -126,10 +126,6 @@ The project uses Docker for deployment. Make sure you have `docker` and `docker-
 # Clone the repository
 git clone https://github.com/Jarnomer/transcendence.git
 cd ft_transcendence
-```
-
-```bash
-# Start all services
 make all
 ```
 
@@ -164,7 +160,7 @@ cd frontend && pnpm dev
 
 ### Playing Games
 
-**Quick Match**
+**Quick Match** ⚡
 
 ```
 Home → Play → Quick Match
@@ -172,15 +168,15 @@ Home → Play → Quick Match
 
 Join the matchmaking queue and get paired with an opponent.
 
-**Play vs AI**
+**Play vs AI** 🤖
 
 ```
 Home → Play → vs AI
 ```
 
-Play against computer-controlled opponents.
+Practice against computer-controlled opponents.
 
-**Challenge Friend**
+**Challenge Friend** 🎯
 
 ```
 Home → Friends → Select Friend → Challenge
@@ -188,7 +184,7 @@ Home → Friends → Select Friend → Challenge
 
 Send a direct challenge to online friends.
 
-**Tournament**
+**Tournament** 🏆
 
 ```
 Home → Tournament → Create/Join Tournament
@@ -282,16 +278,7 @@ This project implements the following 42 modules:
 
 ## 👨‍💻 Team
 
-This project was developed by:
-
-<div align="center">
-
-[Janrau](https://github.com/janrau9) •
-[Lassi](https://github.com/lassikon) •
-[Olli](https://github.com/koodikommando) •
-[Jarno](https://github.com/Jarnomer)
-
-</div>
+This project was developed by: [Janrau](https://github.com/janrau9) • [Lassi](https://github.com/lassikon) • [Olli](https://github.com/koodikommando) • [Jarno](https://github.com/Jarnomer)
 
 ## 📝 License
 
@@ -299,6 +286,6 @@ This project is part of the 42 school curriculum.
 
 ## 4️⃣2️⃣ Footer
 
-Wanna join 42 and start coding? Visit their [homepage](https://www.hive.fi/).
+Wanna join Hive 🐝 and start coding? Visit their [homepage](https://www.hive.fi/).
 
 ### Good luck and have fun! 🎉
