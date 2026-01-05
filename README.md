@@ -280,7 +280,7 @@ This project implements the following 42 modules:
 
 ## 👨‍💻 Team
 
-This project was developed by: [Janrau](https://github.com/janrau9) • [Lassi](https://github.com/lassikon) • [Olli](https://github.com/koodikommando) • [Jarno](https://github.com/Jarnomer)
+This project was developed by: [Janrau](https://github.com/janrau9) ♠️ [Lassi](https://github.com/lassikon) ♥️ [Olli](https://github.com/koodikommando) ♣️ [Jarno](https://github.com/Jarnomer) ♦️
 
 ## 📝 License
 
