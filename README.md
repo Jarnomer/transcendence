@@ -64,7 +64,7 @@ This implementation features a microservices architecture with separate services
 
 - **Responsive Design** - Works seamlessly on desktop and mobile
 - **Audio System** - Immersive sound effects and background music
-- **Graphics Settings** - Adjust visual quality for performance
+- **Graphics Settings** - Adjust visual quality and colors
 - **Retro Style** - Classic original and aesthetic 2D feel
 
 ## 🏗️ Architecture

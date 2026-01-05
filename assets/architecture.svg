@@ -64,17 +64,17 @@
   <!-- Data Layer -->
   <!-- ============================================ -->
   
-  <!-- SQLite Database -->
-  <rect x="130" y="600" width="180" height="80" rx="8" ry="8" fill="#404040" stroke="#E5D17E" stroke-width="2.5" />
-  <text x="220" y="630" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">SQLite Database</text>
-  <text x="220" y="653" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">User Data</text>
-  <text x="220" y="669" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Game Statistics</text>
+  <!-- SQLite Database - aligned with User Service at x=185 -->
+  <rect x="95" y="600" width="180" height="80" rx="8" ry="8" fill="#404040" stroke="#E5D17E" stroke-width="2.5" />
+  <text x="185" y="630" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">SQLite Database</text>
+  <text x="185" y="653" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">User Data</text>
+  <text x="185" y="669" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Game Statistics</text>
   
-  <!-- WebSocket Manager -->
-  <rect x="510" y="600" width="180" height="80" rx="8" ry="8" fill="#404040" stroke="#7ED1A4" stroke-width="2.5" />
-  <text x="600" y="630" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">WebSocket Manager</text>
-  <text x="600" y="653" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Connection Pool</text>
-  <text x="600" y="669" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Event Distribution</text>
+  <!-- WebSocket Manager - aligned with Matchmaking at x=575 -->
+  <rect x="485" y="600" width="180" height="80" rx="8" ry="8" fill="#404040" stroke="#7ED1A4" stroke-width="2.5" />
+  <text x="575" y="630" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">WebSocket Manager</text>
+  <text x="575" y="653" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Connection Pool</text>
+  <text x="575" y="669" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Event Distribution</text>
   
   <!-- ============================================ -->
   <!-- Connection Arrows -->
@@ -88,26 +88,30 @@
   <path d="M510 150 L510 190 L590 190 L590 220" fill="none" stroke="#E57E9D" stroke-width="2.5" />
   <polygon points="585,210 590,220 595,210" fill="#E57E9D" />
   
-  <!-- Backend to Services -->
-  <path d="M450 310 L450 360 L185 360 L185 410" fill="none" stroke="#A4E57E" stroke-width="2" />
+  <!-- Backend to Services - FIXED: separated horizontal lines with spacing -->
+  <!-- User Service - uses y=345 for horizontal -->
+  <path d="M430 310 L430 345 L185 345 L185 410" fill="none" stroke="#A4E57E" stroke-width="2" />
   <polygon points="180,400 185,410 190,400" fill="#A4E57E" />
   
-  <path d="M530 310 L530 360 L380 360 L380 410" fill="none" stroke="#E5A07E" stroke-width="2" />
+  <!-- Game Service - uses y=370 for horizontal (25px lower, no overlap) -->
+  <path d="M480 310 L480 370 L380 370 L380 410" fill="none" stroke="#E5A07E" stroke-width="2" />
   <polygon points="375,400 380,410 385,400" fill="#E5A07E" />
   
-  <path d="M590 310 L590 360 L575 360 L575 410" fill="none" stroke="#C77ED1" stroke-width="2" />
+  <!-- Matchmaking - FIXED: straight vertical line -->
+  <path d="M575 310 L575 410" fill="none" stroke="#C77ED1" stroke-width="2" />
   <polygon points="570,400 575,410 580,400" fill="#C77ED1" />
   
-  <path d="M650 310 L650 360 L770 360 L770 410" fill="none" stroke="#7EB5E5" stroke-width="2" />
+  <!-- Remote Service -->
+  <path d="M700 310 L700 360 L770 360 L770 410" fill="none" stroke="#7EB5E5" stroke-width="2" />
   <polygon points="765,400 770,410 775,400" fill="#7EB5E5" />
   
-  <!-- User Service to Database -->
-  <path d="M185 510 L185 560 L220 560 L220 600" fill="none" stroke="#E5D17E" stroke-width="2" />
-  <polygon points="215,590 220,600 225,590" fill="#E5D17E" />
+  <!-- User Service to Database - straight vertical line -->
+  <path d="M185 510 L185 600" fill="none" stroke="#E5D17E" stroke-width="2" />
+  <polygon points="180,590 185,600 190,590" fill="#E5D17E" />
   
-  <!-- Matchmaking to WebSocket -->
-  <path d="M575 510 L575 560 L600 560 L600 600" fill="none" stroke="#7ED1A4" stroke-width="2" />
-  <polygon points="595,590 600,600 605,590" fill="#7ED1A4" />
+  <!-- Matchmaking to WebSocket - straight vertical line -->
+  <path d="M575 510 L575 600" fill="none" stroke="#7ED1A4" stroke-width="2" />
+  <polygon points="570,590 575,600 580,590" fill="#7ED1A4" />
   
   <!-- ============================================ -->
   <!-- Legend -->
