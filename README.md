@@ -1,145 +1,304 @@
-https://github.com/user-attachments/assets/bb1dabe2-0911-46d7-9c65-6aab3015c896
+<h1 align="center">
+  <img src="assets/transcendence.png" alt="transcendence" width="400">
+</h1>
 
-# transcendence
+<p align="center">
+  <b><i>Fullstack multiplayer Pong game with 3D graphics and social features 🏓</i></b><br>
+</p>
 
-| Person | Task 1              | Task 2            | Task 3           |
-| ------ | ------------------- | ----------------- | ---------------- |
-| Janrau | Remote Players      | Backend Database  | User Management  |
-| Lassi  | AI opponent         | Backend Framework | Server-Side Pong |
-| Olli   | Front-end Framework | Live Chat         | ------           |
-| Jarno  | 3D Graphics         | Microservices     | ------           |
+<p align="center">
+  <img src="https://img.shields.io/badge/Score-TBD%2F125/100-lightgreen?style=for-the-badge" alt="score">
+  <img src="https://img.shields.io/badge/Stack-TypeScript%20%7C%20React%20%7C%20Node.js-blue?style=for-the-badge" alt="tech stack">
+  <img src="https://img.shields.io/badge/Engine-BabylonJS-orange?style=for-the-badge" alt="graphics engine">
+</p>
 
-#### Current score: 7.5/7 ✅
+<p align="center">
+  <img src="https://img.shields.io/badge/Type-Team-violet?style=for-the-badge" alt="type">
+  <img src="https://img.shields.io/badge/Architecture-Microservices-teal?style=for-the-badge" alt="architecture">
+</p>
 
-### Legend
+<div align="center">
 
-| Icon | Description |
-| ---- | ----------- |
-| ✅   | Done        |
-| ❌   | Undone      |
-| ⌛️   | In Progress |
+## 📋 Table of Contents
 
-## 🏆 Major module [1/7] : Backend framework
+[📖 Overview](#-overview) |
+[✨ Features](#-features) |
+[🏗️ Architecture](#️-architecture) |
+[🛠️ Build](#️-build) |
+[⚡ Usage](#-usage) |
+[🎮 Gameplay](#-gameplay) |
+[♻️ Tech Stack](#️-tech-stack)
 
-| Task                                                                                                                      | Status |
-| ------------------------------------------------------------------------------------------------------------------------- | ------ |
-| In this major module, you are required to use a specific web framework for backend development: `Fastify` with `Node.js`. | ✅     |
+</div>
 
-## 🏆 Major Module [2/7] : User Management
+## 📖 Overview
 
-| Task                                                                                                           | Status |
-| -------------------------------------------------------------------------------------------------------------- | ------ |
-| Users can securely subscribe to the website.                                                                   | ✅     |
-| Registered users can securely log in.                                                                          | ✅     |
-| Users can select a unique display name to participate in tournaments.                                          | ✅     |
-| Users can update their information.                                                                            | ✅     |
-| Users can upload an avatar, with a default option if none is provided.                                         | ✅     |
-| Users can add others as friends and view their online status.                                                  | ✅     |
-| User profiles display stats, such as wins and losses.                                                          | ✅     |
-| Each user has a Match History including 1v1 games, dates, and relevant details, accessible to logged-in users. | ✅     |
+**ft_transcendence** is the final project of the 42 common core curriculum. The goal is to create a web application Pong game with modern web technologies.
 
-## 🏆 Major Module [3/7] : Server-Side Pong
+This implementation features a microservices architecture with separate services for game logic, matchmaking, user management, and real-time communication. The game is rendered in 3D using BabylonJS and supports multiple game modes including 1v1 matches, AI opponents, and tournament brackets as well as social features.
 
-| Task                                                                                                                                                                                        | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Develop server-side logic for the Pong game to handle gameplay, ball movement, scoring, and player interactions.                                                                            | ✅     |
-| Create an API that exposes the necessary resources and endpoints to interact with the Pong game, allowing partial usage of the game via the Command-Line Interface (CLI) and web interface. | ✅     |
-| Design and implement the API endpoints to support game initialization, player controls, and game state updates.                                                                             | ✅     |
-| Ensure that the server-side Pong game is responsive, providing an engaging and enjoyable gaming experience.                                                                                 | ✅     |
-| Integrate the server-side Pong game with the web application, allowing users to play the game directly on the website.                                                                      | ✅     |
+<p align="center">
+  <video src="assets/demonstration.mp4" width="600" controls></video>
+</p>
 
-## 🏆 Major Module [4/7] : Remote players
+## ✨ Features
 
-| Task                                                                                                                                                               | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| It should be possible for two players to play remotely. Each player is located on a separated computer, accessing the same website and playing the same Pong game. | ✅     |
-| Consider network issues, such as unexpected disconnections or lag. You must offer the best user experience possible.                                               | ⚠️     |
+### 🎮 Game Features
 
-## 🏆 Major Module [5/7] : AI opponent
+- **Real-time Multiplayer** - Play against other players with WebSocket-based networking
+- **3D Graphics** - 3D rendered gameplay using BabylonJS engine
+- **Power-ups System** - Dynamic power-ups that affect gameplay
+- **AI Opponent** - Play against computer-controlled opponent
+- **Tournament Mode** - Compete in bracket-style tournaments
+- **Matchmaking** - Automated queue based matchmaking
 
-| Task                                                                                                                                                                                                                                                                  | Status |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Develop an AI opponent that provides a challenging and engaging gameplay experience for users.                                                                                                                                                                        | ✅     |
-| The AI must replicate human behavior, which means that in your AI imple- mentation, you must simulate keyboard input. The constraint here is that the AI can only refresh its view of the game once per second, requiring it to anticipate bounces and other actions. | ✅     |
-| Implement AI logic and decision-making processes that enable the AI player to make intelligent and strategic moves.                                                                                                                                                   | ✅     |
-| Explore alternative algorithms and techniques to create an effective AI player without relying on A\*.                                                                                                                                                                | ✅     |
-| Ensure that the AI adapts to different gameplay scenarios and user interactions.                                                                                                                                                                                      | ✅     |
-| The AI must utilize power-ups if you have chosen to implement the Game customization options module.                                                                                                                                                                  | ⚠️     |
+### 👥 Social Features
 
-## 🏆 Major Module [6/7] : Live Chat
+- **User Authentication** - Secure login and registration system
+- **Friend System** - Add friends and track their status
+- **Real-time Chat** - Chat with other players using livechat
+- **User Profiles** - Customizable profiles with avatars and statistics
+- **Match History** - Track your wins, losses, and game statistics
 
-| Task                                                                                                                     | Status |
-| ------------------------------------------------------------------------------------------------------------------------ | ------ |
-| The user should be able to send direct messages to other users.                                                          | ✅     |
-| The user should be able to block other users, preventing them from seeing any further messages from the blocked account. | ✅     |
-| The user should be able to invite other users to play a Pong game through the chat interface.                            | ✅     |
-| The tournament system should be able to notify users about the next game.                                                | ✅     |
-| The user should be able to access other players’ profiles through the chat interface.                                    | ✅     |
+### 🎨 UI/UX Features
 
-## 🏆 Major Module [7/7] : Advanced 3D Graphics
+- **Responsive Design** - Works seamlessly on desktop and mobile
+- **Audio System** - Immersive sound effects and background music
+- **Graphics Settings** - Adjust visual quality for performance
+- **Retro Style** - Classic original and aesthetic 2D feel
 
-| Task                                                                                                                                                                                                                                                                          | Status |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Advanced 3D Graphics: The primary goal of this module is to implement advanced 3D graphics techniques to elevate the visual quality of the Pong game. By utilizing Babylon.js , the goal is to create stunning visual effects that immerse players in the gaming environment. | ✅     |
-| Immersive Gameplay: The incorporation of advanced 3D techniques enhances the overall gameplay experience by providing users with a visually engaging and captivating Pong game.                                                                                               | ✅     |
-| Technology Integration: The chosen technology for this module is Babylon.js. These tools will be used to create the 3D graphics, ensuring compatibility and optimal performance.                                                                                              | ✅     |
+## 🏗️ Architecture
 
-## 🏅 Minor Module [7.5/7] : Game customization options
+The project follows a microservices architecture pattern with the following services:
 
-| Task                                                                                                               | Status |
-| ------------------------------------------------------------------------------------------------------------------ | ------ |
-| Offer customization features, such as power-ups, attacks, or different maps, that enhance the gameplay experience. | ✅     |
-| Allow users to choose a default version of the game with basic features if they prefer a simpler experience.       | ✅     |
-| Ensure that customization options are available and applicable to all games offered on the platform.               | ✅     |
-| Implement user-friendly settings menus or interfaces for adjusting game parameters.                                | ✅     |
-| Maintain consistency in customization features across all games to provide a unified user experience.              | ✅     |
+<p align="center">
+  <img src="assets/architecture.svg" alt="Architecture Diagram" width="900">
+</p>
 
-## 🏅 Minor Module [8/7] : Front-end framework
+### Services Breakdown
 
-| Task                                                                                                     | Status |
-| -------------------------------------------------------------------------------------------------------- | ------ |
-| Your frontend development must use the `Tailwind CSS` in addition of the `Typescript`, and nothing else. | ✅     |
+**Frontend** (`/frontend`)
 
-## 🏅 Minor Module [8.5/7] : Backend database
+- React + TypeScript with Vite
+- BabylonJS for 3D game rendering
+- Context API for state management
+- WebSocket integration for real-time features
 
-| Task                                                                                                                                                                                                                                            | Status |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| The designated database for all DB instances in your project is `SQLite` This choice ensure data consistency and compatibility across all project components and may be a prerequisite for other modules, such as the backend Framework module. | ✅     |
+**User Service** (`/backend/services/user_service`)
 
-## 🏅 Minor Module [9/7] : Browser Compatibility
+- Authentication (JWT-based)
+- User profile management
+- Friend system
+- Session management
 
-| Task                                                                                                                                                    | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Extend browser support to include an additional web browser, ensuring that users can access and use the application seamlessly.                         | ✅     |
-| Conduct thorough testing and optimization to ensure that the web application functions correctly and displays correctly in the newly supported browser. | ✅     |
-| Address any compatibility issues or rendering discrepancies that may arise in the added web browser.                                                    | ✅     |
-| Ensure a consistent user experience across all supported browsers, maintaining usability and functionality.                                             | ✅     |
+**Game Service** (`/backend/services/game_service`)
 
-## 🏅 Minor Module [9.5/7] : Device Support
+- Core Pong game logic
+- Physics simulation
+- Power-up management
+- AI controller
 
-| Task                                                                                                                                                                                  | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Ensure the website is responsive, adapting to different screen sizes and orientations, providing a consistent user experience on desktops, laptops, tablets, and smartphones.         | ✅     |
-| Ensure that users can easily navigate and interact with the website using different input methods, such as touchscreens, keyboards, and mice, depending on the device they are using. | ✅     |
+**Matchmaking Service** (`/backend/services/matchmaking_service`)
 
-## 🏅 Minor Module [10/7] : User and Game Stats Dashboards
+- Player queue management
+- Game session creation
+- Chat functionality
+- Match history tracking
 
-| Task                                                                                                                                | Status |
-| ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| Create user-friendly dashboards that provide users with insights into their gaming statistics.                                      | ❌     |
-| Develop a separate dashboard for game sessions, showing detailed statistics, outcomes, and historical data for each match.          | ❌     |
-| Ensure that the dashboards offer an intuitive and informative user interface for tracking and analyzing data.                       | ❌     |
-| Implement data visualization techniques, such as charts and graphs, to present statistics in a clear and visually appealing manner. | ❌     |
-| Allow users to access and explore their own gaming history and performance metrics conveniently.                                    | ❌     |
-| Feel free to add any metrics you deem useful.                                                                                       | ⚠️     |
+**Remote Service** (`/backend/services/remote_service`)
 
-## 🏅 Minor Module [10.5/7] : Multiple language support
+- WebSocket event handling
+- Game state synchronization
+- Chat message distribution
 
-| Task                                                                                                                                             | Status |
-| ------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
-| Implement support for a minimum of three languages on the website to accommodate a broad audience.                                               | ❌     |
-| Provide a language switcher or selector that allows users to easily change the website’s language based on their preferences.                    | ❌     |
-| Translate essential website content, such as navigation menus, headings, and key information, into the supported languages.                      | ❌     |
-| Ensure that users can navigate and interact with the website seamlessly, regardless of the selected language.                                    | ❌     |
-| Consider using language packs or localization libraries to simplify the translation process and maintain consistency across different languages. | ❌     |
-| Allow users to set their preferred language as the default for subsequent visits.                                                                | ❌     |
+**Main Server** (`/backend/services/main_server`)
+
+- API gateway
+- Admin functionality
+- Request routing
+- Error handling
+
+## 🛠️ Build
+
+The project uses Docker for deployment. Make sure you have `docker` and `docker-compose` installed.
+
+```bash
+# Clone the repository
+git clone https://github.com/Jarnomer/transcendence.git
+cd ft_transcendence
+```
+
+```bash
+# Start all services
+make all
+```
+
+The application will be available at:
+
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:4000`
+
+### Development Build
+
+For development with hot-reload:
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start backend services
+cd backend && pnpm dev
+
+# Start frontend (in another terminal)
+cd frontend && pnpm dev
+```
+
+## ⚡ Usage
+
+### Creating an Account
+
+1. Navigate to `http://localhost:3000`.
+2. Click "Sign Up" and create an account.
+3. Customize your profile and upload an avatar.
+4. Begin to Pong!
+
+### Playing Games
+
+**Quick Match**
+
+```
+Home → Play → Quick Match
+```
+
+Join the matchmaking queue and get paired with an opponent.
+
+**Play vs AI**
+
+```
+Home → Play → vs AI
+```
+
+Play against computer-controlled opponents.
+
+**Challenge Friend**
+
+```
+Home → Friends → Select Friend → Challenge
+```
+
+Send a direct challenge to online friends.
+
+**Tournament**
+
+```
+Home → Tournament → Create/Join Tournament
+```
+
+Compete in bracket-style tournaments with multiple players.
+
+### Game Controls
+
+- **Move Paddle**: Arrow Keys (↑/↓) or W/S
+
+## 🎮 Gameplay
+
+### Pong Rules
+
+- First player to reach full points wins
+- Ball speed increases after each paddle hit
+- Ball spin is influenced by paddle movement
+- Power-ups spawn randomly during gameplay
+
+### Power-ups
+
+| Icon | Name           | Effect                      | Duration   |
+| ---- | -------------- | --------------------------- | ---------- |
+| 🏓+  | Bigger Paddle  | Increases paddle size       | 10 seconds |
+| 🏓-  | Smaller Paddle | Decreases opponent's paddle | 10 seconds |
+| ⚡+  | Faster Paddle  | Increases paddle speed      | 10 seconds |
+| ⚡-  | Slower Paddle  | Decreases opponent's speed  | 10 seconds |
+| 🌀   | More Spin      | Enhanced ball control       | 10 seconds |
+
+### Tournament Format
+
+- Single elimination bracket
+- 4, 8, or 16 player tournaments
+- Best of 1 matches
+- Champion crowned at the end
+
+## ♻️ Tech Stack
+
+### Frontend
+
+- **React 18** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **BabylonJS** - 3D game engine
+- **TailwindCSS** - Utility-first CSS
+
+### Backend
+
+- **Node.js** - JavaScript runtime
+- **TypeScript** - Type safety
+- **Fastify** - Fast web framework
+- **WebSocket** - Real-time communication
+- **SQLite** - Embedded database
+- **JWT** - Authentication tokens
+
+### Infrastructure
+
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+- **Nginx** - Reverse proxy
+- **pnpm** - Fast package manager
+
+### DevOps & Testing
+
+- **Playwright** - End-to-end testing
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+
+## 🎯 Project Modules
+
+This project implements the following 42 modules:
+
+### Major Modules
+
+- ✅ **Backend Framework** - Node.js with Fastify
+- ✅ **Standard User Management** - Authentication, profiles
+- ✅ **Server-Side Pong** - Game logic on backend
+- ✅ **Remote Players** - WebSocket multiplayer
+- ✅ **AI Opponent** - Computer-controlled player
+- ✅ **Live Chat** - Real-time messaging system
+- ✅ **Advanced 3D Graphics** - Custom shaders and effects
+
+### Minor Modules
+
+- ✅ **Front-end framework** - React
+- ✅ **Backend database** - SQLite
+- ✅ **Game Customization Options** - Settings and preferences
+- ✅ **Browser Compatibility** - Pong with statistics
+- ✅ **Device Support** - Statistics tracking
+
+## 👨‍💻 Team
+
+This project was developed by:
+
+<div align="center">
+
+[Janrau](https://github.com/janrau9) •
+[Lassi](https://github.com/lassikon) •
+[Olli](https://github.com/koodikommando) •
+[Jarno](https://github.com/Jarnomer)
+
+</div>
+
+## 📝 License
+
+This project is part of the 42 school curriculum.
+
+## 4️⃣2️⃣ Footer
+
+Wanna join 42 and start coding? Visit their [homepage](https://www.hive.fi/).
+
+### Good luck and have fun! 🎉

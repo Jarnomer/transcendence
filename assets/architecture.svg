@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720">
+  <!-- Background -->
+  <rect width="900" height="720" fill="#131620" rx="10" ry="10" />
+  
+  <!-- Title -->
+  <text x="450" y="40" font-family="Arial, sans-serif" font-size="28" text-anchor="middle" font-weight="bold" fill="#E9BD65">Transcendence Architecture</text>
+  
+  <!-- ============================================ -->
+  <!-- NGINX Proxy Layer -->
+  <!-- ============================================ -->
+  <rect x="330" y="80" width="240" height="70" rx="8" ry="8" fill="#404040" stroke="#A4E57E" stroke-width="3" />
+  <text x="450" y="110" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" font-weight="bold" fill="#E9BD65">NGINX Proxy</text>
+  <text x="450" y="133" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#A5D4E5">Reverse Proxy</text>
+  
+  <!-- ============================================ -->
+  <!-- Frontend & Backend Container Layer -->
+  <!-- ============================================ -->
+  
+  <!-- Frontend Box -->
+  <rect x="80" y="220" width="220" height="90" rx="8" ry="8" fill="#404040" stroke="#7ED1E5" stroke-width="3" />
+  <text x="190" y="253" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" font-weight="bold" fill="#E9BD65">Frontend</text>
+  <text x="190" y="276" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#A5D4E5">React + TypeScript</text>
+  <text x="190" y="295" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#7ED1E5">BabylonJS + Vite</text>
+  
+  <!-- Backend Services Box -->
+  <rect x="380" y="220" width="420" height="90" rx="8" ry="8" fill="#404040" stroke="#E57E9D" stroke-width="3" />
+  <text x="590" y="253" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" font-weight="bold" fill="#E9BD65">Backend Services</text>
+  <text x="590" y="276" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#A5D4E5">Node.js + TypeScript</text>
+  <text x="590" y="295" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#E57E9D">Fastify Framework</text>
+  
+  <!-- ============================================ -->
+  <!-- Microservices Layer -->
+  <!-- ============================================ -->
+  
+  <!-- User Service -->
+  <rect x="100" y="410" width="170" height="100" rx="8" ry="8" fill="#404040" stroke="#A4E57E" stroke-width="2.5" />
+  <text x="185" y="438" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">User Service</text>
+  <text x="185" y="460" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Authentication</text>
+  <text x="185" y="478" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Profiles</text>
+  <text x="185" y="496" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Friend System</text>
+  
+  <!-- Game Service -->
+  <rect x="295" y="410" width="170" height="100" rx="8" ry="8" fill="#404040" stroke="#E5A07E" stroke-width="2.5" />
+  <text x="380" y="438" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">Game Service</text>
+  <text x="380" y="460" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Game Logic</text>
+  <text x="380" y="478" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Physics</text>
+  <text x="380" y="496" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• AI Controller</text>
+  
+  <!-- Matchmaking Service -->
+  <rect x="490" y="410" width="170" height="100" rx="8" ry="8" fill="#404040" stroke="#C77ED1" stroke-width="2.5" />
+  <text x="575" y="438" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">Matchmaking</text>
+  <text x="575" y="460" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Queue System</text>
+  <text x="575" y="478" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Chat</text>
+  <text x="575" y="496" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Match History</text>
+  
+  <!-- Remote Service -->
+  <rect x="685" y="410" width="170" height="100" rx="8" ry="8" fill="#404040" stroke="#7EB5E5" stroke-width="2.5" />
+  <text x="770" y="438" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">Remote Service</text>
+  <text x="770" y="460" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• WebSocket</text>
+  <text x="770" y="478" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Real-time Sync</text>
+  <text x="770" y="496" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">• Event Handling</text>
+  
+  <!-- ============================================ -->
+  <!-- Data Layer -->
+  <!-- ============================================ -->
+  
+  <!-- SQLite Database -->
+  <rect x="130" y="600" width="180" height="80" rx="8" ry="8" fill="#404040" stroke="#E5D17E" stroke-width="2.5" />
+  <text x="220" y="630" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">SQLite Database</text>
+  <text x="220" y="653" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">User Data</text>
+  <text x="220" y="669" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Game Statistics</text>
+  
+  <!-- WebSocket Manager -->
+  <rect x="510" y="600" width="180" height="80" rx="8" ry="8" fill="#404040" stroke="#7ED1A4" stroke-width="2.5" />
+  <text x="600" y="630" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" font-weight="bold" fill="#E9BD65">WebSocket Manager</text>
+  <text x="600" y="653" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Connection Pool</text>
+  <text x="600" y="669" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#A5D4E5">Event Distribution</text>
+  
+  <!-- ============================================ -->
+  <!-- Connection Arrows -->
+  <!-- ============================================ -->
+  
+  <!-- NGINX to Frontend -->
+  <path d="M390 150 L390 190 L190 190 L190 220" fill="none" stroke="#7ED1E5" stroke-width="2.5" />
+  <polygon points="185,210 190,220 195,210" fill="#7ED1E5" />
+  
+  <!-- NGINX to Backend -->
+  <path d="M510 150 L510 190 L590 190 L590 220" fill="none" stroke="#E57E9D" stroke-width="2.5" />
+  <polygon points="585,210 590,220 595,210" fill="#E57E9D" />
+  
+  <!-- Backend to Services -->
+  <path d="M450 310 L450 360 L185 360 L185 410" fill="none" stroke="#A4E57E" stroke-width="2" />
+  <polygon points="180,400 185,410 190,400" fill="#A4E57E" />
+  
+  <path d="M530 310 L530 360 L380 360 L380 410" fill="none" stroke="#E5A07E" stroke-width="2" />
+  <polygon points="375,400 380,410 385,400" fill="#E5A07E" />
+  
+  <path d="M590 310 L590 360 L575 360 L575 410" fill="none" stroke="#C77ED1" stroke-width="2" />
+  <polygon points="570,400 575,410 580,400" fill="#C77ED1" />
+  
+  <path d="M650 310 L650 360 L770 360 L770 410" fill="none" stroke="#7EB5E5" stroke-width="2" />
+  <polygon points="765,400 770,410 775,400" fill="#7EB5E5" />
+  
+  <!-- User Service to Database -->
+  <path d="M185 510 L185 560 L220 560 L220 600" fill="none" stroke="#E5D17E" stroke-width="2" />
+  <polygon points="215,590 220,600 225,590" fill="#E5D17E" />
+  
+  <!-- Matchmaking to WebSocket -->
+  <path d="M575 510 L575 560 L600 560 L600 600" fill="none" stroke="#7ED1A4" stroke-width="2" />
+  <polygon points="595,590 600,600 605,590" fill="#7ED1A4" />
+  
+  <!-- ============================================ -->
+  <!-- Legend -->
+  <!-- ============================================ -->
+  <rect x="20" y="20" width="200" height="60" rx="5" ry="5" fill="#303030" stroke="#555" stroke-width="1" />
+  <text x="30" y="40" font-family="Arial, sans-serif" font-size="11" fill="#A5D4E5">🔹 Microservices Architecture</text>
+  <text x="30" y="56" font-family="Arial, sans-serif" font-size="11" fill="#A5D4E5">🔹 Real-time Communication</text>
+  <text x="30" y="72" font-family="Arial, sans-serif" font-size="11" fill="#A5D4E5">🔹 RESTful API + WebSocket</text>
+</svg>
